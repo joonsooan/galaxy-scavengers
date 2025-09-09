@@ -2,42 +2,61 @@ using UnityEngine;
 
 public class Turret_Bullet : MonoBehaviour
 {
-    [SerializeField] private float bulletSpeed = 20f;
-    
+    public float speed = 10f;
+    public float lifeTime = 3f;
+
     private int _damage;
     private Transform _target;
+    private Rigidbody2D _rb;
 
+    private void Awake()
+    {
+        _rb = GetComponent<Rigidbody2D>();
+    }
+    
     public void Initialize(int damage, Transform target)
     {
         _damage = damage;
         _target = target;
-        
-        Destroy(gameObject, 5f);
     }
 
-    private void Update()
+    void OnEnable()
     {
-        if (_target == null || !_target.gameObject.activeInHierarchy)
+        Invoke(nameof(Deactivate), lifeTime);
+    }
+    
+    void FixedUpdate()
+    {
+        if (_target == null || !_target.gameObject.activeSelf)
         {
-            Destroy(gameObject);
+            Deactivate();
             return;
         }
 
-        Vector3 direction = (_target.position - transform.position).normalized;
-        transform.position += direction * (bulletSpeed * Time.deltaTime);
-        
-        transform.right = direction;
+        Vector2 direction = (_target.position - transform.position).normalized;
+        _rb.linearVelocity = direction * speed;
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.transform == _target)
         {
-            if (_target.TryGetComponent<UnitBase>(out var unitBase))
+            var enemyHealth = other.GetComponent<UnitBase>();
+            if (enemyHealth != null)
             {
-                unitBase.TakeDamage(_damage);
+                enemyHealth.TakeDamage(_damage);
             }
-            Destroy(gameObject);
+            
+            Deactivate();
         }
+    }
+
+    private void Deactivate()
+    {
+        CancelInvoke();
+        
+        _target = null;
+        _rb.linearVelocity = Vector2.zero;
+        gameObject.SetActive(false);
     }
 }

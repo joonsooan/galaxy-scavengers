@@ -1,36 +1,37 @@
-using TMPro;
 using UnityEngine;
+using TMPro;
+using DG.Tweening;
 
 public class FloatingNumText : MonoBehaviour
 {
-    public float moveSpeed = 1f;
-    public float lifeTime = 1f;
-
-    private Color _startColor;
-    private float _timer;
-    private TextMeshProUGUI _tmp;
-
+    [SerializeField] private float moveDistance = 1f;
+    [SerializeField] private float duration = 1f;
+    
+    private TMP_Text _text;
+    private RectTransform _rectTransform;
+    
     private void Awake()
     {
-        _tmp = GetComponent<TextMeshProUGUI>();
-        _startColor = _tmp.color;
+        _text = GetComponent<TMP_Text>();
+        _rectTransform = GetComponent<RectTransform>();
     }
 
-    private void Update()
+    public void Play(string message, Color color)
     {
-        transform.position += new Vector3(0, moveSpeed * Time.deltaTime, 0);
+        if (_text == null || _rectTransform == null) return;
 
-        _timer += Time.deltaTime;
-        float alpha = Mathf.Lerp(1, 0, _timer / lifeTime);
-        _tmp.color = new Color(_startColor.r, _startColor.g, _startColor.b, alpha);
+        _text.text = message;
+        _text.color = color;
+        _text.alpha = 1f;
 
-        if (_timer >= lifeTime) {
-            Destroy(gameObject);
-        }
-    }
+        Vector2 startPos = _rectTransform.anchoredPosition;
 
-    public void SetText(string text)
-    {
-        _tmp.text = text;
+        _rectTransform.DOAnchorPosY(startPos.y + moveDistance, duration).SetEase(Ease.OutQuad)
+            .OnComplete(() =>
+            {
+                gameObject.SetActive(false);
+            });
+
+        _text.DOFade(0, duration);
     }
 }

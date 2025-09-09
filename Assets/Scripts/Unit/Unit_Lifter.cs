@@ -18,7 +18,6 @@ public class Unit_Lifter : UnitBase
 
     [Header("VFX")]
     [SerializeField] private string canvasName = "ObejectUI Canvas";
-    [SerializeField] private GameObject floatingNumTextPrefab;
     [SerializeField] private bool showFloatingText;
 
     private readonly Dictionary<ResourceType, int> _currentCarryAmounts = new Dictionary<ResourceType, int>();
@@ -362,7 +361,7 @@ public class Unit_Lifter : UnitBase
         if (currentState != UnitState.Mining) return;
 
         _currentCarryAmounts[type] += amount;
-        ShowFloatingText(amount);
+        ShowResourceText(amount);
 
         if (_currentCarryAmounts.Values.Sum() >= maxCarryAmount) {
             unitMining.StopMining();
@@ -416,13 +415,20 @@ public class Unit_Lifter : UnitBase
         }
     }
 
-    private void ShowFloatingText(int amount)
+    private void ShowResourceText(int amount)
     {
-        if (!showFloatingText || floatingNumTextPrefab == null || _canvas == null) return;
+        if (_canvas == null || !showFloatingText) return;
+        
+        GameObject textObj = ObjectPooler.Instance.SpawnFromPool(
+            "ResourceText", transform.position, Quaternion.identity);
 
-        GameObject textInstance = Instantiate(floatingNumTextPrefab, transform.position, Quaternion.identity, _canvas.transform);
-        if (textInstance.TryGetComponent<FloatingNumText>(out FloatingNumText floatingText)) {
-            floatingText.SetText($"+{amount}");
+        if (textObj != null)
+        {
+            FloatingNumText floatingText = textObj.GetComponent<FloatingNumText>();
+            if (floatingText != null)
+            {
+                floatingText.Play($"+{amount}", Color.white);
+            }
         }
     }
 
