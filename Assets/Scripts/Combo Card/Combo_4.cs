@@ -117,18 +117,17 @@ public class Combo_4 : Damageable
 
     private void Shoot()
     {
-        if (bulletPrefab == null || _target == null)
+        if (_target == null)
         {
-            Debug.Log("Target is null or Bullet is null");
+            Debug.Log("Target is null");
             return;
         }
-        
-        GameObject bullet = Instantiate(bulletPrefab, transform.position, Quaternion.identity);
-        if (bullet.TryGetComponent<Turret_Bullet>(out var bulletScript))
+    
+        GameObject bulletObj = ObjectPooler.Instance.SpawnFromPool("TurretBullet", transform.position, Quaternion.identity);
+
+        if (bulletObj != null && bulletObj.TryGetComponent<Turret_Bullet>(out var bulletScript))
         {
             bulletScript.Initialize(attackDamage, _target);
-            Debug.Log("Bullet shoot");
         }
-
     }
 }

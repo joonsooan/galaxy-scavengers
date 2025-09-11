@@ -10,7 +10,6 @@ public class Combo_1 : Damageable
     
     [Header("VFX")]
     [SerializeField] private string canvasName = "FloatingText Canvas";
-    [SerializeField] private GameObject floatingNumTextPrefab;
     
     private Canvas _canvas;
     private Coroutine _productionCoroutine;
@@ -51,18 +50,21 @@ public class Combo_1 : Damageable
     private void GenerateResource()
     {
         ResourceManager.Instance.AddResource(resourceType, resourceAmount);
-        ShowFloatingText(resourceAmount);
+        ShowResourceText(resourceAmount);
     }
     
-    private void ShowFloatingText(int amount)
+    private void ShowResourceText(int amount)
     {
-        if (floatingNumTextPrefab == null || _canvas == null) return;
+        GameObject textObj = ObjectPooler.Instance.SpawnFromPool(
+            "ResourceText", transform.position, Quaternion.identity);
 
-        GameObject textInstance = Instantiate(floatingNumTextPrefab, transform.position, Quaternion.identity, _canvas.transform);
-
-        FloatingNumText floatingText = textInstance.GetComponent<FloatingNumText>();
-        if (floatingText != null) {
-            floatingText.SetText($"+{amount}");
+        if (textObj != null)
+        {
+            FloatingNumText floatingText = textObj.GetComponent<FloatingNumText>();
+            if (floatingText != null)
+            {
+                floatingText.Play($"+{amount}", Color.white);
+            }
         }
     }
 }
