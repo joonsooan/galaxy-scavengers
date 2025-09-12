@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class CardDisplay : InfoDisplayTrigger, IPointerClickHandler
+public class CardDisplay : InfoDisplayTrigger, IPointerClickHandler, IPointerExitHandler
 {
     public CardData cardData;
 
@@ -24,12 +24,28 @@ public class CardDisplay : InfoDisplayTrigger, IPointerClickHandler
     }
 
     protected override DisplayableData GetData() => cardData;
-    protected override void ShowInfo() => GameManager.Instance?.uiManager.DisplayCardInfo(cardData);
-    protected override void HideInfo() => GameManager.Instance?.uiManager.HideCardInfo();
+
+    protected override void ShowInfo()
+    {
+        GameManager.Instance?.uiManager.DisplayCardInfo(cardData);
+        GameManager.Instance?.uiManager.DisplayCardBtn();
+    }
+
+    protected override void HideInfo()
+    {
+        GameManager.Instance?.uiManager.HideCardInfo();
+        GameManager.Instance?.uiManager.HideCardBtn();
+    }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        GameManager.Instance.uiManager?.PinCardInfo(cardData);
+        GameManager.Instance?.uiManager.PinCardInfo(cardData);
+    }
+
+    public new void OnPointerExit(PointerEventData eventData)
+    {
+        GameManager.Instance?.uiManager.HideCardInfo();
+        GameManager.Instance?.uiManager.HideCardBtn();
     }
     
     public void OnClick()
