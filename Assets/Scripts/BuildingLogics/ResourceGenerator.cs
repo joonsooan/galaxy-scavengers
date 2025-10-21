@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class Combo_1 : Damageable
+public class ResourceGenerator : Damageable
 {
     [Header("Values")]
     [SerializeField] private float generationInterval = 5f;

@@ -1,4 +1,4 @@
-public class Combo_7 : Damageable
+public class Radar : Damageable
 {
     protected override void OnEnable()
     {

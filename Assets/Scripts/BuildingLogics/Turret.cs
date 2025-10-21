@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class Combo_4 : Damageable
+public class Turret : Damageable
 {
     [Header("Turret Stats")]
     [SerializeField] private float attackRange = 10f;

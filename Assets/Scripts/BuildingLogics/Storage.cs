@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 using System.Collections.Generic;
 
-public class Combo_0 : Damageable, IStorage
+public class Storage : Damageable, IStorage
 {
     public event Action<ResourceType, int, int> OnResourceChanged;
 
