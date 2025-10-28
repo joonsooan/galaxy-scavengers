@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 28bc5b3aa7130d049b30680ca552bafc
+guid: 37eae3c6a5da46a4b8c1d730778832f2
 TextureImporter:
   internalIDToNameTable:
   - first:
@@ -14,18 +14,6 @@ TextureImporter:
   - first:
       213: 8256525898410203829
     second: resource-sheet_3
-  - first:
-      213: 1714728277128761045
-    second: resource-sheet_4
-  - first:
-      213: -257702634476957138
-    second: resource-sheet_5
-  - first:
-      213: -9018736988956156315
-    second: resource-sheet_6
-  - first:
-      213: -6423666247552954350
-    second: resource-sheet_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -96,7 +84,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -138,7 +126,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 17
+        y: 0
         width: 16
         height: 16
       alignment: 0
@@ -160,7 +148,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 17
-        y: 17
+        y: 0
         width: 16
         height: 16
       alignment: 0
@@ -182,7 +170,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 34
-        y: 17
+        y: 0
         width: 16
         height: 16
       alignment: 0
@@ -204,7 +192,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 51
-        y: 17
+        y: 0
         width: 16
         height: 16
       alignment: 0
@@ -221,99 +209,11 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: resource-sheet_4
-      rect:
-        serializedVersion: 2
-        x: 0
-        y: 0
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5dec3947840fbc710800000000000000
-      internalID: 1714728277128761045
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: resource-sheet_5
-      rect:
-        serializedVersion: 2
-        x: 17
-        y: 0
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e22915eb1d47c6cf0800000000000000
-      internalID: -257702634476957138
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: resource-sheet_6
-      rect:
-        serializedVersion: 2
-        x: 34
-        y: 0
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 56e979aed7207d280800000000000000
-      internalID: -9018736988956156315
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: resource-sheet_7
-      rect:
-        serializedVersion: 2
-        x: 51
-        y: 0
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 21090f6f49d8ad6a0800000000000000
-      internalID: -6423666247552954350
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: f42d553e1f8f9ed4e9fded39aca8762b
+    spriteID: 71963220f39a3da419b6badae4af9d9b
     internalID: 0
     vertices: []
     indices: 
@@ -327,10 +227,6 @@ TextureImporter:
       resource-sheet_1: -6245384556211576076
       resource-sheet_2: 8999891839495180843
       resource-sheet_3: 8256525898410203829
-      resource-sheet_4: 1714728277128761045
-      resource-sheet_5: -257702634476957138
-      resource-sheet_6: -9018736988956156315
-      resource-sheet_7: -6423666247552954350
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
