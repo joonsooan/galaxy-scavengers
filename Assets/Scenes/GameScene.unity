@@ -4844,6 +4844,7 @@ GameObject:
   - component: {fileID: 519420029}
   - component: {fileID: 519420030}
   - component: {fileID: 519420034}
+  - component: {fileID: 519420035}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -4986,6 +4987,30 @@ MonoBehaviour:
   edgePanSpeed: 30
   panBorderThickness: 10
   target: {fileID: 0}
+--- !u!114 &519420035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519420028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c88f5cead0c0b2a4eb05b5900433f8d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ComponentVersion: 1
+  m_AssetsPPU: 16
+  m_RefResolutionX: 640
+  m_RefResolutionY: 360
+  m_CropFrame: 0
+  m_GridSnapping: 0
+  m_FilterMode: 0
+  m_UpscaleRT: 0
+  m_PixelSnapping: 0
+  m_CropFrameX: 0
+  m_CropFrameY: 0
+  m_StretchFill: 0
 --- !u!1 &558197186
 GameObject:
   m_ObjectHideFlags: 0
@@ -102585,10 +102610,10 @@ MonoBehaviour:
   cryoCrystalInitialAmount: 0
   solanaInitialAmount: 0
   resourceIcons:
-  - {fileID: 8256525898410203829, guid: 37eae3c6a5da46a4b8c1d730778832f2, type: 3}
-  - {fileID: -6245384556211576076, guid: 37eae3c6a5da46a4b8c1d730778832f2, type: 3}
-  - {fileID: 8999891839495180843, guid: 37eae3c6a5da46a4b8c1d730778832f2, type: 3}
-  - {fileID: -4716559796490163538, guid: 37eae3c6a5da46a4b8c1d730778832f2, type: 3}
+  - {fileID: -4716559796490163538, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
+  - {fileID: -6245384556211576076, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
+  - {fileID: 8999891839495180843, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
+  - {fileID: 8256525898410203829, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
   resourceStatsList:
   - resourceType: 0
     amountToMine: 50

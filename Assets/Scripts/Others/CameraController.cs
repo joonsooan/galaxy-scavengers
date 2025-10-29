@@ -43,23 +43,23 @@ public class CameraController : MonoBehaviour
     {
         Vector3 mousePanDirection = Vector3.zero;
 
-        if (Input.mousePosition.y >= Screen.height - panBorderThickness)
-        {
-            mousePanDirection += Vector3.up;
-        }
-        if (Input.mousePosition.y <= panBorderThickness * 0.01f)
-        {
-            mousePanDirection += Vector3.down;
-        }
-        if (Input.mousePosition.x >= Screen.width - panBorderThickness)
-        {
-            mousePanDirection += Vector3.right;
-        }
-        if (Input.mousePosition.x <= panBorderThickness)
-        {
-            mousePanDirection += Vector3.left;
-        }
-        mousePanDirection.Normalize();
+        // if (Input.mousePosition.y >= Screen.height - panBorderThickness)
+        // {
+        //     mousePanDirection += Vector3.up;
+        // }
+        // if (Input.mousePosition.y <= panBorderThickness * 0.01f)
+        // {
+        //     mousePanDirection += Vector3.down;
+        // }
+        // if (Input.mousePosition.x >= Screen.width - panBorderThickness)
+        // {
+        //     mousePanDirection += Vector3.right;
+        // }
+        // if (Input.mousePosition.x <= panBorderThickness)
+        // {
+        //     mousePanDirection += Vector3.left;
+        // }
+        // mousePanDirection.Normalize();
 
         if (_direction != Vector3.zero || mousePanDirection != Vector3.zero)
         {

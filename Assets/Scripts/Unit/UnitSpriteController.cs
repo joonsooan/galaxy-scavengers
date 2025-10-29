@@ -18,7 +18,7 @@ public class UnitSpriteController : MonoBehaviour
     public void UpdateSpriteDirection(Vector2 direction)
     {
         if (direction != Vector2.zero) {
-            if (Mathf.Abs(direction.x) >= Mathf.Abs(direction.y)) {
+            if (Mathf.Abs(direction.x) + 0.1 > Mathf.Abs(direction.y)) {
                 _sr.flipX = direction.x < 0;
                 _sr.sprite = spriteRight;
             }
