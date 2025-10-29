@@ -10,7 +10,26 @@ public enum ResourceType
     Aether,
     Biomass,
     CryoCrystal,
-    Solana
+    AlloyPlate,
+    CompositeFrame,
+    EChip,
+    BioCable,
+    PowerCube,
+    BioFuel,
+    CryoGel,
+    Solana,
+    Core,
+    Ammunition,
+    HeavyPlating,
+    Actuator,
+    GenomeChip,
+    PatchKit,
+    SensorUnit,
+    PlasmaCube,
+    CryoConduit,
+    SeekerMissile,
+    NexusData,
+    NeuralMatrix
 }
 
 [Serializable]
@@ -27,12 +46,35 @@ public class ResourceManager : MonoBehaviour
     public static event Action OnNewStorageAdded;
     public static event Action<IStorage> OnStorageRemoved;
 
-    [Header("Resource Start Values")]
+    [Header("Base Resource Start Values")]
     [SerializeField] private int ferriteInitialAmount;
     [SerializeField] private int aetherInitialAmount;
     [SerializeField] private int biomassInitialAmount;
     [SerializeField] private int cryoCrystalInitialAmount;
     [SerializeField] private int solanaInitialAmount;
+    
+    [Header("1 Crafted Resource Start Values")]
+    [SerializeField] private int alloyPlateInitialAmount;
+    [SerializeField] private int compositeFrameInitialAmount;
+    [SerializeField] private int eChipInitialAmount;
+    [SerializeField] private int bioCableInitialAmount;
+    [SerializeField] private int powerCubeInitialAmount;
+    [SerializeField] private int bioFuelInitialAmount;
+    [SerializeField] private int cryoGelInitialAmount;
+    [SerializeField] private int coreInitialAmount;
+    [SerializeField] private int ammunitionInitialAmount;
+    
+    [Header("2 Crafted Resource Start Values")]
+    [SerializeField] private int heavyPlatingInitialAmount;
+    [SerializeField] private int actuatorInitialAmount;
+    [SerializeField] private int genomeChipInitialAmount;
+    [SerializeField] private int patchKitInitialAmount;
+    [SerializeField] private int sensorUnitInitialAmount;
+    [SerializeField] private int plasmaCubeInitialAmount;
+    [SerializeField] private int cryoConduitInitialAmount;
+    [SerializeField] private int seekerMissileInitialAmount;
+    [SerializeField] private int nexusDataInitialAmount;
+    [SerializeField] private int neuralMatrixInitialAmount;
 
     [Header("Resource Icons")]
     [SerializeField] private List<Sprite> resourceIcons;
@@ -104,11 +146,37 @@ public class ResourceManager : MonoBehaviour
 
     private void ResetResourceCount()
     {
+        _resourceCounts.Clear();
+        
+        // 기본 자원
         _resourceCounts[ResourceType.Ferrite] = ferriteInitialAmount;
         _resourceCounts[ResourceType.Aether] = aetherInitialAmount;
         _resourceCounts[ResourceType.Biomass] = biomassInitialAmount;
         _resourceCounts[ResourceType.CryoCrystal] = cryoCrystalInitialAmount;
+        
+        // 1차 자원
+        _resourceCounts[ResourceType.AlloyPlate] = alloyPlateInitialAmount;
+        _resourceCounts[ResourceType.CompositeFrame] = compositeFrameInitialAmount;
+        _resourceCounts[ResourceType.EChip] = eChipInitialAmount;
+        _resourceCounts[ResourceType.BioCable] = bioCableInitialAmount;
+        _resourceCounts[ResourceType.PowerCube] = powerCubeInitialAmount;
+        _resourceCounts[ResourceType.BioFuel] = bioFuelInitialAmount;
+        _resourceCounts[ResourceType.CryoGel] = cryoGelInitialAmount;
         _resourceCounts[ResourceType.Solana] = solanaInitialAmount;
+        _resourceCounts[ResourceType.Core] = coreInitialAmount;
+        _resourceCounts[ResourceType.Ammunition] = ammunitionInitialAmount;
+        
+        // 2차 자원
+        _resourceCounts[ResourceType.HeavyPlating] = heavyPlatingInitialAmount;
+        _resourceCounts[ResourceType.Actuator] = actuatorInitialAmount;
+        _resourceCounts[ResourceType.GenomeChip] = genomeChipInitialAmount;
+        _resourceCounts[ResourceType.PatchKit] = patchKitInitialAmount;
+        _resourceCounts[ResourceType.SensorUnit] = sensorUnitInitialAmount;
+        _resourceCounts[ResourceType.PlasmaCube] = plasmaCubeInitialAmount;
+        _resourceCounts[ResourceType.CryoConduit] = cryoConduitInitialAmount;
+        _resourceCounts[ResourceType.SeekerMissile] = seekerMissileInitialAmount;
+        _resourceCounts[ResourceType.NexusData] = nexusDataInitialAmount;
+        _resourceCounts[ResourceType.NeuralMatrix] = neuralMatrixInitialAmount;
     }
     
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -129,8 +197,12 @@ public class ResourceManager : MonoBehaviour
         if (_resourceCounts.ContainsKey(type))
         {
             _resourceCounts[type] += amount;
-            UpdateResourceUI(type);
         }
+        else
+        {
+            _resourceCounts[type] = amount;
+        }
+        UpdateResourceUI(type);
     }
 
     public bool SpendResources(CardCost[] costs)
@@ -253,11 +325,35 @@ public class ResourceManager : MonoBehaviour
     {
         if (_mainStructure == null) return;
         
+        // 기본 자원
         _mainStructure.InitializeStorage(ResourceType.Ferrite, ferriteInitialAmount);
         _mainStructure.InitializeStorage(ResourceType.Aether, aetherInitialAmount);
         _mainStructure.InitializeStorage(ResourceType.Biomass, biomassInitialAmount);
         _mainStructure.InitializeStorage(ResourceType.CryoCrystal, cryoCrystalInitialAmount);
+        
+        // 1차 자원
+        _mainStructure.InitializeStorage(ResourceType.AlloyPlate, alloyPlateInitialAmount);
+        _mainStructure.InitializeStorage(ResourceType.CompositeFrame, compositeFrameInitialAmount);
+        _mainStructure.InitializeStorage(ResourceType.EChip, eChipInitialAmount);
+        _mainStructure.InitializeStorage(ResourceType.BioCable, bioCableInitialAmount);
+        _mainStructure.InitializeStorage(ResourceType.PowerCube, powerCubeInitialAmount);
+        _mainStructure.InitializeStorage(ResourceType.BioFuel, bioFuelInitialAmount);
+        _mainStructure.InitializeStorage(ResourceType.CryoGel, cryoGelInitialAmount);
         _mainStructure.InitializeStorage(ResourceType.Solana, solanaInitialAmount);
+        _mainStructure.InitializeStorage(ResourceType.Core, coreInitialAmount);
+        _mainStructure.InitializeStorage(ResourceType.Ammunition, ammunitionInitialAmount);
+        
+        // 2차 자원
+        _mainStructure.InitializeStorage(ResourceType.HeavyPlating, heavyPlatingInitialAmount);
+        _mainStructure.InitializeStorage(ResourceType.Actuator, actuatorInitialAmount);
+        _mainStructure.InitializeStorage(ResourceType.GenomeChip, genomeChipInitialAmount);
+        _mainStructure.InitializeStorage(ResourceType.PatchKit, patchKitInitialAmount);
+        _mainStructure.InitializeStorage(ResourceType.SensorUnit, sensorUnitInitialAmount);
+        _mainStructure.InitializeStorage(ResourceType.PlasmaCube, plasmaCubeInitialAmount);
+        _mainStructure.InitializeStorage(ResourceType.CryoConduit, cryoConduitInitialAmount);
+        _mainStructure.InitializeStorage(ResourceType.SeekerMissile, seekerMissileInitialAmount);
+        _mainStructure.InitializeStorage(ResourceType.NexusData, nexusDataInitialAmount);
+        _mainStructure.InitializeStorage(ResourceType.NeuralMatrix, neuralMatrixInitialAmount);
 
         _mainStructure.UpdateStorageUI();
     }
@@ -296,7 +392,11 @@ public class ResourceManager : MonoBehaviour
         }
         else
         {
-            GetResourceText(type).text = _resourceCounts[type].ToString();
+            TMP_Text resourceText = GetResourceText(type);
+            if (resourceText != null)
+            {
+                resourceText.text = _resourceCounts[type].ToString();
+            }
         }
     }
 
@@ -304,13 +404,11 @@ public class ResourceManager : MonoBehaviour
     {
         if (!IsUIConnected()) return;
         
-        foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
-        {
-            if (type != ResourceType.Solana)
-            {
-                GetResourceText(type).text = _resourceCounts[type].ToString();
-            }
-        }
+        if (ferriteNumber != null) ferriteNumber.text = _resourceCounts[ResourceType.Ferrite].ToString();
+        if (aetherNumber != null) aetherNumber.text = _resourceCounts[ResourceType.Aether].ToString();
+        if (biomassNumber != null) biomassNumber.text = _resourceCounts[ResourceType.Biomass].ToString();
+        if (cryoCrystalNumber != null) cryoCrystalNumber.text = _resourceCounts[ResourceType.CryoCrystal].ToString();
+        
         UpdateSolanaUI();
     }
     
