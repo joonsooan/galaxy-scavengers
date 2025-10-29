@@ -81,7 +81,7 @@ SpriteRenderer:
   m_SortingLayerID: 580065311
   m_SortingLayer: 2
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7817208229740119860, guid: 2e9dd00a9d898794d9325559858bad30, type: 3}
+  m_Sprite: {fileID: 4992164939788663360, guid: 41d81b85481201c44bb0e26872455946, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -143,7 +143,6 @@ MonoBehaviour:
   resourceSearchInterval: 1
   mineableResourceTypes: 
   canvasName: ObejectUI Canvas
-  floatingNumTextPrefab: {fileID: 176529985360585926, guid: c122ec1d854b9a04994f510c553243e5, type: 3}
   showFloatingText: 1
 --- !u!114 &8882647708804449670
 MonoBehaviour:
@@ -185,6 +184,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d119d16415c69741bcfa340b580f4c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spriteUp: {fileID: 2242831325733393391, guid: 2e9dd00a9d898794d9325559858bad30, type: 3}
-  spriteDown: {fileID: 6159844958210893968, guid: 2e9dd00a9d898794d9325559858bad30, type: 3}
-  spriteRight: {fileID: 7817208229740119860, guid: 2e9dd00a9d898794d9325559858bad30, type: 3}
+  spriteUp: {fileID: 8603391338363840403, guid: 41d81b85481201c44bb0e26872455946, type: 3}
+  spriteDown: {fileID: 3751741419470782174, guid: 41d81b85481201c44bb0e26872455946, type: 3}
+  spriteRight: {fileID: 4992164939788663360, guid: 41d81b85481201c44bb0e26872455946, type: 3}
