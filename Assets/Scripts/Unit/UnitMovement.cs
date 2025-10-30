@@ -104,7 +104,8 @@ public class UnitMovement : MonoBehaviour
                 _currentWaypoint = _path.Dequeue();
             }
             else {
-                _rb.linearVelocity = Vector2.zero;
+                // _rb.linearVelocity = Vector2.zero;
+                StopMovement();
             }
         }
     }

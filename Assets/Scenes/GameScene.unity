@@ -2863,6 +2863,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 335769161}
   m_CullTransparentMesh: 1
+--- !u!4 &397985532 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8588832122909675608, guid: ad58a73b9aa5be94a8091fe8e942c31c, type: 3}
+  m_PrefabInstance: {fileID: 1329132710}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &401860327
 GameObject:
   m_ObjectHideFlags: 0
@@ -94413,7 +94418,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &735268018
 RectTransform:
   m_ObjectHideFlags: 0
@@ -94433,7 +94438,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: -115, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 101.35, y: 21}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &735268019
 MonoBehaviour:
@@ -95407,10 +95412,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 735268018}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 16}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 21, y: -13}
+  m_SizeDelta: {x: 75.35, y: 16}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &909293821
 MonoBehaviour:
@@ -97495,7 +97500,7 @@ GameObject:
   - component: {fileID: 1170139634}
   - component: {fileID: 1170139633}
   m_Layer: 5
-  m_Name: ObejectUI Canvas
+  m_Name: ObjectUI Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -97973,10 +97978,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 735268018}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 16}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 0, y: -13}
+  m_SizeDelta: {x: 16, y: 16}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &1255483235
 MonoBehaviour:
@@ -98349,6 +98354,75 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 15c186d082054834ab3aa1ae73e84220, type: 3}
+--- !u!1001 &1329132710
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 2115591666}
+    m_Modifications:
+    - target: {fileID: 643886797991879172, guid: ad58a73b9aa5be94a8091fe8e942c31c, type: 3}
+      propertyPath: m_Color.b
+      value: 0.8194982
+      objectReference: {fileID: 0}
+    - target: {fileID: 643886797991879172, guid: ad58a73b9aa5be94a8091fe8e942c31c, type: 3}
+      propertyPath: m_Color.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 643886797991879172, guid: ad58a73b9aa5be94a8091fe8e942c31c, type: 3}
+      propertyPath: m_Color.r
+      value: 0.4660377
+      objectReference: {fileID: 0}
+    - target: {fileID: 6649466925040614564, guid: ad58a73b9aa5be94a8091fe8e942c31c, type: 3}
+      propertyPath: m_Name
+      value: Unit_Drone
+      objectReference: {fileID: 0}
+    - target: {fileID: 8588832122909675608, guid: ad58a73b9aa5be94a8091fe8e942c31c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8588832122909675608, guid: ad58a73b9aa5be94a8091fe8e942c31c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8588832122909675608, guid: ad58a73b9aa5be94a8091fe8e942c31c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8588832122909675608, guid: ad58a73b9aa5be94a8091fe8e942c31c, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8588832122909675608, guid: ad58a73b9aa5be94a8091fe8e942c31c, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8588832122909675608, guid: ad58a73b9aa5be94a8091fe8e942c31c, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8588832122909675608, guid: ad58a73b9aa5be94a8091fe8e942c31c, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8588832122909675608, guid: ad58a73b9aa5be94a8091fe8e942c31c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8588832122909675608, guid: ad58a73b9aa5be94a8091fe8e942c31c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8588832122909675608, guid: ad58a73b9aa5be94a8091fe8e942c31c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ad58a73b9aa5be94a8091fe8e942c31c, type: 3}
 --- !u!1 &1355668857
 GameObject:
   m_ObjectHideFlags: 0
@@ -98830,7 +98904,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1425636399
 RectTransform:
   m_ObjectHideFlags: 0
@@ -101032,7 +101106,7 @@ RectTransform:
   m_Father: {fileID: 1128265726}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0.5}
@@ -102609,6 +102683,25 @@ MonoBehaviour:
   biomassInitialAmount: 0
   cryoCrystalInitialAmount: 0
   solanaInitialAmount: 0
+  alloyPlateInitialAmount: 0
+  compositeFrameInitialAmount: 0
+  eChipInitialAmount: 0
+  bioCableInitialAmount: 0
+  powerCubeInitialAmount: 0
+  bioFuelInitialAmount: 0
+  cryoGelInitialAmount: 0
+  coreInitialAmount: 0
+  ammunitionInitialAmount: 0
+  heavyPlatingInitialAmount: 0
+  actuatorInitialAmount: 0
+  genomeChipInitialAmount: 0
+  patchKitInitialAmount: 0
+  sensorUnitInitialAmount: 0
+  plasmaCubeInitialAmount: 0
+  cryoConduitInitialAmount: 0
+  seekerMissileInitialAmount: 0
+  nexusDataInitialAmount: 0
+  neuralMatrixInitialAmount: 0
   resourceIcons:
   - {fileID: -4716559796490163538, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
   - {fileID: -6245384556211576076, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
@@ -103558,6 +103651,7 @@ Transform:
   - {fileID: 955001230}
   - {fileID: 491759635}
   - {fileID: 1639744556}
+  - {fileID: 397985532}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2119450978

@@ -142,7 +142,7 @@ MonoBehaviour:
   maxCarryAmount: 10
   resourceSearchInterval: 1
   mineableResourceTypes: 
-  canvasName: ObejectUI Canvas
+  canvasName: ObjectUI Canvas
   showFloatingText: 1
 --- !u!114 &8882647708804449670
 MonoBehaviour:

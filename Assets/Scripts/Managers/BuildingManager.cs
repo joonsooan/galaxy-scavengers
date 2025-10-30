@@ -10,13 +10,15 @@ public class BuildingManager : MonoBehaviour
     [SerializeField] private Tilemap groundTilemap;
     [SerializeField] private Tilemap resourceTilemap;
     [SerializeField] private Tilemap buildingTilemap;
-    [SerializeField] private TileBase mainStructureTile;
+    [SerializeField] private TileBase mainStructureTile; // BuildingSpawner 등 다른 스크립트에서 사용될 수 있음
     [SerializeField] private Transform parentTransform;
     
     [Header("Combo Buildings")]
     private List<ComboCardData> _comboCardDataList;
     private readonly Dictionary<GadgetType, TileBase> _gadgetTypeToTileCache = new Dictionary<GadgetType, TileBase>();
     private readonly Dictionary<Vector3Int, BuildingPiece> _placedPieces = new Dictionary<Vector3Int, BuildingPiece>();
+    
+    private readonly List<ResourceProcessor> _processors = new List<ResourceProcessor>();
     
     public static event Action<Vector3Int> OnTilemapChanged;
     
@@ -29,6 +31,11 @@ public class BuildingManager : MonoBehaviour
         }
         else {
             Destroy(gameObject);
+        }
+
+        if (parentTransform == null)
+        {
+            parentTransform = transform;
         }
 
         LoadAllComboCards();
@@ -86,10 +93,6 @@ public class BuildingManager : MonoBehaviour
 
     public void PlaceBuilding(CardData cardData, Vector3Int cellPosition)
     {
-        if (parentTransform == null) {
-            parentTransform = transform;
-        }
-        
         if (CanPlaceBuilding(cellPosition)) {
             Vector3 worldPosition = grid.GetCellCenterWorld(cellPosition);
             GameObject newPieceObject = 
@@ -210,6 +213,17 @@ public class BuildingManager : MonoBehaviour
                     ResourceManager.Instance.AddStorage(storage);
                 }
                 break;
+            case ComboType.Generator:
+                // 예: ResourceGenerator generator = comboObject.GetComponent<ResourceGenerator>();
+                // generator?.Activate();
+                break;
+            case ComboType.Turret:
+                // 터렛 로직 (Turret 컴포넌트가 활성화되므로 별도 로직 필요 없을 수 있음)
+                break;
+            case ComboType.Radar:
+                // 레이더 로직 (Radar 컴포넌트가 활성화되므로 별도 로직 필요 없을 수 있음)
+                break;
+            // 다른 콤보 타입 로직 추가
         }
     }
     
@@ -249,5 +263,37 @@ public class BuildingManager : MonoBehaviour
         {
             resourceTilemap.SetTile(cellPosition, null);
         }
+    }
+
+    public void RegisterProcessor(ResourceProcessor processor)
+    {
+        if (!_processors.Contains(processor))
+        {
+            _processors.Add(processor);
+        }
+    }
+
+    public void UnregisterProcessor(ResourceProcessor processor)
+    {
+        _processors.Remove(processor);
+    }
+    
+    public ResourceProcessor FindClosestAvailableProcessor(Vector3 position)
+    {
+        ResourceProcessor closestProcessor = null;
+        float minDistance = float.MaxValue;
+
+        foreach (var processor in _processors)
+        {
+            if (processor.IsFull) continue;
+
+            float dist = Vector3.Distance(position, processor.GetPosition());
+            if (dist < minDistance)
+            {
+                minDistance = dist;
+                closestProcessor = processor;
+            }
+        }
+        return closestProcessor;
     }
 }

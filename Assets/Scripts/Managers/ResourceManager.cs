@@ -415,10 +415,10 @@ public class ResourceManager : MonoBehaviour
     private void UpdateSolanaUI()
     {
         int requiredAmount = GameManager.Instance != null ? GameManager.Instance.GetRequiredAmountForCurrentQuota() : 0;
-        solanaNumber.text = $"{_resourceCounts[ResourceType.Solana]} / {requiredAmount}";
+        // solanaNumber.text = $"{_resourceCounts[ResourceType.Solana]} / {requiredAmount}";
     }
     
-    private bool IsUIConnected() => ferriteNumber != null && aetherNumber != null && biomassNumber != null && cryoCrystalNumber != null && solanaNumber != null;
+    private bool IsUIConnected() => ferriteNumber != null && aetherNumber != null && biomassNumber != null && cryoCrystalNumber != null;
 
     private TMP_Text GetResourceText(ResourceType type)
     {
@@ -451,5 +451,25 @@ public class ResourceManager : MonoBehaviour
         }
 
         UpdateAllResourceUI();
+    }
+    
+    public IStorage FindClosestStorageWithResource(Vector3 position, ResourceType type, int minAmount)
+    {
+        IStorage closestStorage = null;
+        float minDistance = float.MaxValue;
+
+        foreach (var storage in _allStorages)
+        {
+            if (storage.GetCurrentResourceAmount(type) >= minAmount)
+            {
+                float dist = Vector3.Distance(position, storage.GetPosition());
+                if (dist < minDistance)
+                {
+                    minDistance = dist;
+                    closestStorage = storage;
+                }
+            }
+        }
+        return closestStorage;
     }
 }

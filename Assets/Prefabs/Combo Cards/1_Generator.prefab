@@ -106,5 +106,4 @@ MonoBehaviour:
   generationInterval: 5
   resourceAmount: 1
   resourceType: 1
-  canvasName: ObejectUI Canvas
-  floatingNumTextPrefab: {fileID: 176529985360585926, guid: c122ec1d854b9a04994f510c553243e5, type: 3}
+  canvasName: ObjectUI Canvas

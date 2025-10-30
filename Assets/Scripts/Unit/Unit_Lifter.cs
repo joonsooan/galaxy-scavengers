@@ -17,7 +17,7 @@ public class Unit_Lifter : UnitBase
     public ResourceType[] mineableResourceTypes;
 
     [Header("VFX")]
-    [SerializeField] private string canvasName = "ObejectUI Canvas";
+    [SerializeField] private string canvasName = "ObjectUI Canvas";
     [SerializeField] private bool showFloatingText;
 
     private readonly Dictionary<ResourceType, int> _currentCarryAmounts = new Dictionary<ResourceType, int>();
