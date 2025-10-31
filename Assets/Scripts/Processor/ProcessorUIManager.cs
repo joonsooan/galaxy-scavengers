@@ -21,6 +21,8 @@ public class ProcessorUIManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.P))
             OnClick(testData);
+        else if (Input.GetKeyDown(KeyCode.R))
+            ClearAllRecipes();
     }
 
     public void OnClick(ResourceProcessorData data)
@@ -33,6 +35,14 @@ public class ProcessorUIManager : MonoBehaviour
     {
         _allRecipes = data.Recipes;
         InstantiateRecipeCells();
+    }
+    
+    private void ClearAllRecipes()
+    {
+        foreach (Transform child in contentParent)
+        {
+            Destroy(child.gameObject);
+        }
     }
     
     private void InstantiateRecipeCells()
