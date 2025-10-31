@@ -138,6 +138,7 @@ MonoBehaviour:
   currentState: 0
   carryCapacity: 10
   processingSpeed: 1
+  movement: {fileID: 4483249089817793867}
 --- !u!114 &4483249089817793867
 MonoBehaviour:
   m_ObjectHideFlags: 0

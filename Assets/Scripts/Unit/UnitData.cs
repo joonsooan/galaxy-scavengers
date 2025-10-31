@@ -9,5 +9,5 @@ public class UnitData : ScriptableObject
 
     [Header("Production Costs")]
     public float productionTime = 3f;
-    public CardCost[] productionCosts;
+    public ResourceCost[] productionCosts;
 }

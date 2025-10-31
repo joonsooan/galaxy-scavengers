@@ -6,9 +6,9 @@ public interface IStorage
     event Action<ResourceType, int, int> OnResourceChanged; 
     
     bool TryAddResource(ResourceType type, int amount);
-    bool TryUseResources(CardCost[] costs);
+    bool TryUseResources(ResourceCost[] costs);
     bool TryWithdrawResource(ResourceType type, int amountToWithdraw, out int amountWithdrawn);
-    bool HasEnoughResources(CardCost[] costs);
+    bool HasEnoughResources(ResourceCost[] costs);
     
     int GetCurrentResourceAmount(ResourceType type);
     int GetMaxCapacity();

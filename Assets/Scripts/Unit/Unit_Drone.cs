@@ -15,10 +15,10 @@ public class Unit_Drone : UnitBase
     [Header("Drone Settings")]
     [SerializeField] public int carryCapacity = 10;
     [SerializeField] private float processingSpeed = 1f;
+    [SerializeField] private UnitMovement movement;
 
     private DroneState _currentState = DroneState.Idle;
     
-    private UnitMovement _movement;
     private ResourceProcessor _homeProcessor;
     private IStorage _targetStorage;
     private ResourceProcessor.ResourceRequest _currentRequest;
@@ -29,7 +29,7 @@ public class Unit_Drone : UnitBase
     protected override void Awake()
     {
         base.Awake(); 
-        _movement = GetComponent<UnitMovement>();
+        movement = GetComponent<UnitMovement>();
     }
 
     protected override void OnEnable()
@@ -47,6 +47,12 @@ public class Unit_Drone : UnitBase
 
     private void Update()
     {
+        if (_homeProcessor == null) 
+        {
+            FindAndAssignClosestProcessor();
+            if (_homeProcessor == null) return;
+        }
+        
         DecideNextAction();
     }
 
@@ -57,15 +63,19 @@ public class Unit_Drone : UnitBase
             case DroneState.Idle:
                 UpdateIdle();
                 break;
+            
             case DroneState.FetchingResource:
                 UpdateFetching();
                 break;
+            
             case DroneState.DeliveringResource:
                 UpdateDelivering();
                 break;
+            
             case DroneState.Processing:
                 UpdateProcessing();
                 break;
+            
             case DroneState.ReturnHome:
                 UpdateReturnHome();
                 break;
@@ -117,9 +127,9 @@ public class Unit_Drone : UnitBase
         if (_homeProcessor == null)
             return;
         
-        _movement.SetNewTarget(_homeProcessor.GetPosition());
+        movement.SetNewTarget(_homeProcessor.GetPosition());
         
-        if (!_movement.IsMoving)
+        if (!movement.IsMoving)
         {
             _homeProcessor.RequestTask(this);
         }
@@ -133,7 +143,7 @@ public class Unit_Drone : UnitBase
             return;
         }
 
-        if (!_movement.IsMoving)
+        if (!movement.IsMoving)
         {
             if (_targetStorage.TryWithdrawResource(_currentRequest.type, _currentRequest.amount, out int withdrawnAmount))
             {
@@ -141,7 +151,7 @@ public class Unit_Drone : UnitBase
                 {
                     _carriedResourceType = _currentRequest.type;
                     _carriedAmount = withdrawnAmount;
-                    _movement.SetNewTarget(_homeProcessor.GetPosition());
+                    movement.SetNewTarget(_homeProcessor.GetPosition());
                     _currentState = DroneState.DeliveringResource;
                 }
                 else
@@ -158,7 +168,7 @@ public class Unit_Drone : UnitBase
 
     private void UpdateDelivering()
     {
-        if (!_movement.IsMoving)
+        if (!movement.IsMoving)
         {
             _homeProcessor.TryDepositIngredient(_carriedResourceType, _carriedAmount, this);
             
@@ -170,7 +180,7 @@ public class Unit_Drone : UnitBase
 
     private void UpdateProcessing()
     {
-        if (!_movement.IsMoving)
+        if (!movement.IsMoving)
         {
             if (!_homeProcessor.IsProcessing)
             {
@@ -184,9 +194,9 @@ public class Unit_Drone : UnitBase
     
     private void UpdateReturnHome()
     {
-        _movement.SetNewTarget(_homeProcessor.GetPosition());
+        movement.SetNewTarget(_homeProcessor.GetPosition());
         
-        if (!_movement.IsMoving)
+        if (!movement.IsMoving)
         {
             _currentState = DroneState.Idle;
         }
@@ -199,7 +209,7 @@ public class Unit_Drone : UnitBase
         
         if (_targetStorage != null)
         {
-            _movement.SetNewTarget(_targetStorage.GetPosition());
+            movement.SetNewTarget(_targetStorage.GetPosition());
             _currentState = DroneState.FetchingResource;
         }
         else
@@ -210,7 +220,7 @@ public class Unit_Drone : UnitBase
     
     public void SetTask_Process(ResourceProcessor processor)
     {
-        _movement.SetNewTarget(processor.GetPosition());
+        movement.SetNewTarget(processor.GetPosition());
         _currentState = DroneState.Processing;
     }
 
@@ -231,7 +241,7 @@ public class Unit_Drone : UnitBase
         
         if (stopMovement)
         {
-            _movement.StopMovement();
+            movement.StopMovement();
         }
     }
 }

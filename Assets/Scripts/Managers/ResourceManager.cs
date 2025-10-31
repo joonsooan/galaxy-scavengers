@@ -205,7 +205,7 @@ public class ResourceManager : MonoBehaviour
         UpdateResourceUI(type);
     }
 
-    public bool SpendResources(CardCost[] costs)
+    public bool SpendResources(ResourceCost[] costs)
     {
         if (!HasEnoughResources(costs))
         {
@@ -269,10 +269,10 @@ public class ResourceManager : MonoBehaviour
 
     public bool SpendResources(ResourceType type, int amount)
     {
-        return SpendResources(new[] { new CardCost { resourceType = type, amount = amount } });
+        return SpendResources(new[] { new ResourceCost { resourceType = type, amount = amount } });
     }
 
-    public bool HasEnoughResources(CardCost[] costs)
+    public bool HasEnoughResources(ResourceCost[] costs)
     {
         foreach (var cost in costs)
         {

@@ -42,7 +42,7 @@ public class UIManager : MonoBehaviour
         cardDescriptionText.text = data.description;
 
         foreach (Transform child in cardResourcePanel.transform) Destroy(child.gameObject);
-        foreach (CardCost cost in data.costs) {
+        foreach (ResourceCost cost in data.costs) {
             GameObject cell = Instantiate(resourceInfoCellPrefab, cardResourcePanel.transform);
             cell.GetComponent<ResourceInfoCell>().SetInfo(cost.resourceType, cost.amount);
         }
