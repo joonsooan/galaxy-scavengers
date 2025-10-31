@@ -30,10 +30,15 @@ public class ProcessorRecipeCell : MonoBehaviour
 
             if (newCell != null)
             {
-                // newCell.resourceImage = ingredient
+                newCell.resourceImage.sprite = GetResourceImage(ingredient.resourceType);
                 newCell.resourceAmount.text = ingredient.amount.ToString();
             }
         }
+    }
+
+    private Sprite GetResourceImage(ResourceType type)
+    {
+        return ResourceManager.Instance.GetResourceIcon(type);
     }
 
     public void OnClickCell()

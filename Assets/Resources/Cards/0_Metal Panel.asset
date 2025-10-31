@@ -19,5 +19,6 @@ MonoBehaviour:
   gadgetType: 1
   gadgetTile: {fileID: 11400000, guid: 276b58b36d750f44195cd8aea8f6d84e, type: 2}
   costs:
-  - resourceType: 0
+  - resourceImage: {fileID: -4716559796490163538, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
+    resourceType: 0
     amount: 20
