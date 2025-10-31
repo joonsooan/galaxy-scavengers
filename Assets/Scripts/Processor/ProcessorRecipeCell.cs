@@ -4,20 +4,36 @@ using TMPro;
 
 public class ProcessorRecipeCell : MonoBehaviour
 {
+    [Header("UI References")]
+    [SerializeField] private Image recipeIcon;
+    [SerializeField] private TMP_Text recipeName;
+    [SerializeField] private TMP_Text recipeProcessTime;
+    [SerializeField] private GameObject recipeCellPrefab;
+    [SerializeField] private RectTransform contentParent;
+    
     private ProcessorRecipe recipeData;
-    private TMP_Text recipeName;
-    private Image recipeIcon;
     private ResourceCost[] ingredients;
     private ResourceCost product;
-    private float processingTime;
     
     public void Initialize(ProcessorRecipe data)
     {
         recipeData = data;
         recipeName.text = recipeData.recipeName;
         recipeIcon.sprite = recipeData.recipeIcon;
+        // recipeProcessTime.text = recipeData.processingTime.ToString();
         ingredients = recipeData.ingredients;
-        processingTime = recipeData.processingTime;
+
+        foreach (ResourceCost ingredient in ingredients)
+        {
+            GameObject newCellObject = Instantiate(recipeCellPrefab, contentParent);
+            ResourceInfoCell newCell = newCellObject.GetComponent<ResourceInfoCell>();
+
+            if (newCell != null)
+            {
+                // newCell.resourceImage = ingredient
+                newCell.resourceAmount.text = ingredient.amount.ToString();
+            }
+        }
     }
 
     public void OnClickCell()

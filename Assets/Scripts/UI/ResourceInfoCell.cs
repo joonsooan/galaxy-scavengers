@@ -5,8 +5,8 @@ using UnityEngine.UI;
 public class ResourceInfoCell : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private Image resourceImage;
-    [SerializeField] private TMP_Text resourceAmount;
+    public Image resourceImage;
+    public TMP_Text resourceAmount;
     
     public void SetInfo(ResourceType type, int amount)
     {

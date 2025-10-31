@@ -16,6 +16,7 @@ MonoBehaviour:
   maxAssignedDrones: 2
   recipes:
   - recipeName: Alloy Plate
+    recipeIcon: {fileID: 3117166516527289334, guid: 842fd72251a781c4fb336ef443151083, type: 3}
     ingredients:
     - resourceType: 0
       amount: 10
@@ -25,6 +26,7 @@ MonoBehaviour:
     processingTime: 10
     priority: 0
   - recipeName: Composite Frame
+    recipeIcon: {fileID: 4489167911642275471, guid: 842fd72251a781c4fb336ef443151083, type: 3}
     ingredients:
     - resourceType: 0
       amount: 5
@@ -32,6 +34,30 @@ MonoBehaviour:
       amount: 10
     product:
       resourceType: 5
+      amount: 1
+    processingTime: 10
+    priority: 0
+  - recipeName: E-Chip
+    recipeIcon: {fileID: 6762225044037183918, guid: 842fd72251a781c4fb336ef443151083, type: 3}
+    ingredients:
+    - resourceType: 0
+      amount: 5
+    - resourceType: 1
+      amount: 5
+    product:
+      resourceType: 6
+      amount: 1
+    processingTime: 10
+    priority: 0
+  - recipeName: Bio Cable
+    recipeIcon: {fileID: 7836952785060846427, guid: 842fd72251a781c4fb336ef443151083, type: 3}
+    ingredients:
+    - resourceType: 0
+      amount: 5
+    - resourceType: 2
+      amount: 5
+    product:
+      resourceType: 7
       amount: 1
     processingTime: 10
     priority: 0

@@ -11,9 +11,18 @@ public class ProcessorUIManager : MonoBehaviour
     [Header("Display UI")]
     [SerializeField] private TMP_Text processorName;
     [SerializeField] private TMP_Text processorInfo;
+    
+    [Header("Test")]
+    [SerializeField] private ResourceProcessorData testData;
 
     private List<ProcessorRecipe> _allRecipes;
-    
+
+    public void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.P))
+            OnClick(testData);
+    }
+
     public void OnClick(ResourceProcessorData data)
     {
         LoadAllRecipes(data);
