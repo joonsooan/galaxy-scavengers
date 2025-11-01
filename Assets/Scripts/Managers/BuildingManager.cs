@@ -27,11 +27,11 @@ public class BuildingManager : MonoBehaviour
     
     public static BuildingManager Instance { get; private set; }
     
-    private class BuildingStructure
+    public class BuildingStructure
     {
         public Vector3Int anchor;
         public Vector2Int size;
-        public List<Vector3Int> occupiedCells = new List<Vector3Int>();
+        public readonly List<Vector3Int> occupiedCells = new ();
     }
 
     private void Awake()
@@ -196,11 +196,6 @@ public class BuildingManager : MonoBehaviour
             anchor = originPos, // originPos : 좌하단 기준점
             size = size
         };
-        
-        foreach (var piece in comboData.recipe)
-        {
-            recipePositions.Add(originPos + piece.relativePosition);
-        }
 
         foreach (var targetPos in recipePositions)
         {
@@ -210,28 +205,28 @@ public class BuildingManager : MonoBehaviour
         
         RegisterBuildingStructure(comboStructure);
         
+        Vector3 worldPos = grid.GetCellCenterWorld(originPos);
+        GameObject newComboPieceObject = Instantiate(comboData.comboPrefab, worldPos, Quaternion.identity, parentTransform);
+        
+        BuildingPiece mainPiece = newComboPieceObject.GetComponent<BuildingPiece>();
+        if (mainPiece == null)
+        {
+            mainPiece = newComboPieceObject.AddComponent<BuildingPiece>();
+        }
+
+        mainPiece.cellPosition = originPos;
+
         foreach (var targetPos in recipePositions)
         {
-            Vector3 worldPos = grid.GetCellCenterWorld(targetPos);
-
-            GameObject newComboPieceObject = Instantiate(comboData.comboPrefab, worldPos, Quaternion.identity, parentTransform);
-            
-            BuildingPiece markerPiece = newComboPieceObject.GetComponent<BuildingPiece>();
-            if (markerPiece == null)
-            {
-                markerPiece = newComboPieceObject.AddComponent<BuildingPiece>();
-            }
-
-            markerPiece.cellPosition = targetPos;
-            _placedPieces[targetPos] = markerPiece;
+            _placedPieces[targetPos] = mainPiece; 
             
             if (comboData.comboTile != null)
             {
                 buildingTilemap.SetTile(targetPos, comboData.comboTile);
             }
-
-            HandleComboBuildingLogic(newComboPieceObject, comboData);
         }
+        
+        HandleComboBuildingLogic(newComboPieceObject, comboData);
 
         foreach (var targetPos in recipePositions)
         {
@@ -324,17 +319,15 @@ public class BuildingManager : MonoBehaviour
         buildingTilemap.SetTile(cellPos, null);
     }
     
-    public bool GetBuildingAt(Vector3Int cell, out Vector3Int anchor, out Vector2Int size)
+    public bool GetBuildingAt(Vector3Int cell, out List<Vector3Int> occupiedCells)
     {
         if (_cellToStructureMap.TryGetValue(cell, out BuildingStructure structure))
         {
-            anchor = structure.anchor;
-            size = structure.size;
+            occupiedCells = structure.occupiedCells; 
             return true;
         }
 
-        anchor = Vector3Int.zero;
-        size = Vector2Int.zero;
+        occupiedCells = null;
         return false;
     }
     
