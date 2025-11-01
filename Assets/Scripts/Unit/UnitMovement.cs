@@ -11,6 +11,9 @@ public class UnitMovement : MonoBehaviour
         new Vector3Int(1, 0, 0), new Vector3Int(-1, 0, 0), new Vector3Int(0, 1, 0), new Vector3Int(0, -1, 0),
         new Vector3Int(1, 1, 0), new Vector3Int(1, -1, 0), new Vector3Int(-1, 1, 0), new Vector3Int(-1, -1, 0)
     };
+    private static readonly Vector3Int[] CardinalOffsets = {
+        new Vector3Int(1, 0, 0), new Vector3Int(-1, 0, 0), new Vector3Int(0, 1, 0), new Vector3Int(0, -1, 0)
+    };
 
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
@@ -74,6 +77,32 @@ public class UnitMovement : MonoBehaviour
     public bool SetNewTarget(Vector2 targetPosition, float stoppingDistance)
     {
         Vector3Int targetCellPos = _grid.WorldToCell(targetPosition);
+        Vector3Int targetCellForPathfinding;
+        
+        if (BuildingManager.Instance.GetBuildingAt(targetCellPos, out Vector3Int anchorCell, out Vector2Int size))
+        {
+            // 다양한 크기의 건물
+            targetCellForPathfinding = FindBestInteractionCell(anchorCell, size, transform.position);
+            
+            if (targetCellForPathfinding == new Vector3Int(int.MinValue, int.MinValue, int.MinValue))
+            {
+                Debug.LogWarning($"[{name}] No valid interaction cell found for building at {anchorCell}");
+                return false;
+            }
+        }
+        else if (!IsCellWalkable(targetCellPos))
+        {
+            // 건물이 아니지만 걸을 수 없는 타일 (예: 1x1 자원)
+            // 1x1 건물처럼 취급하여 상호작용 위치 탐색
+            targetCellForPathfinding = FindBestInteractionCell(targetCellPos, new Vector2Int(1, 1), transform.position);
+            
+            if (targetCellForPathfinding == new Vector3Int(int.MinValue, int.MinValue, int.MinValue)) // 유효한 셀 없음
+            {
+                Debug.LogWarning($"[{name}] No valid interaction cell found for resource at {targetCellPos}");
+                return false;
+            }
+        }
+        
         _finalTargetPosition = _grid.GetCellCenterWorld(targetCellPos);
         _finalStoppingDistance = stoppingDistance;
 
@@ -171,8 +200,7 @@ public class UnitMovement : MonoBehaviour
                 Vector3Int neighborPos = currentNode.position + offset;
                 if (closedList.Contains(neighborPos)) continue;
 
-                if (neighborPos != endCell &&
-                    (BuildingManager.Instance.IsResourceTile(neighborPos) || BuildingManager.Instance.IsBuildingTile(neighborPos))) {
+                if (neighborPos != endCell && !IsCellWalkable(neighborPos)) {
                     continue;
                 }
 
@@ -192,6 +220,60 @@ public class UnitMovement : MonoBehaviour
 
         Debug.LogWarning("Path not found or search limit exceeded.");
         return new Queue<Vector3>();
+    }
+    
+    private bool IsCellWalkable(Vector3Int cell)
+    {
+        return !BuildingManager.Instance.IsResourceTile(cell) && !BuildingManager.Instance.IsBuildingTile(cell);
+    }
+    
+    private List<Vector3Int> GetInteractionCells(Vector3Int anchorCell, Vector2Int size)
+    {
+        HashSet<Vector3Int> interactionCells = new HashSet<Vector3Int>();
+        HashSet<Vector3Int> occupiedSet = new HashSet<Vector3Int>();
+
+        // 건물이 차지하는 모든 셀 추가
+        for (int x = 0; x < size.x; x++) {
+            for (int y = 0; y < size.y; y++) {
+                occupiedSet.Add(anchorCell + new Vector3Int(x, y, 0));
+            }
+        }
+
+        // 차지하는 모든 셀의 '상하좌우' 이웃 탐색
+        foreach (Vector3Int occupiedCell in occupiedSet) {
+            foreach (Vector3Int offset in CardinalOffsets) {
+                Vector3Int neighbor = occupiedCell + offset;
+                
+                // 이웃이 건물 자신의 일부가 아닌 경우에만 상호작용 셀로 추가
+                if (!occupiedSet.Contains(neighbor) && IsCellWalkable(neighbor)) {
+                    interactionCells.Add(neighbor);
+                }
+            }
+        }
+        return interactionCells.ToList();
+    }
+    
+    private Vector3Int FindBestInteractionCell(Vector3Int anchorCell, Vector2Int size, Vector3 startPos)
+    {
+        List<Vector3Int> potentialCells = GetInteractionCells(anchorCell, size);
+        Vector3Int startCell = _grid.WorldToCell(startPos);
+        
+        Vector3Int bestCell = new Vector3Int(int.MinValue, int.MinValue, int.MinValue); // 유효하지 않은 값으로 초기화
+        float minDistance = float.MaxValue;
+
+        foreach (Vector3Int cell in potentialCells)
+        {
+            if (IsCellWalkable(cell))
+            {
+                float distance = GetDistance(startCell, cell); 
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    bestCell = cell;
+                }
+            }
+        }
+        return bestCell;
     }
 
     private Queue<Vector3> ReconstructPath(Node endNode)
