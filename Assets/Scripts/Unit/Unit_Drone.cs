@@ -1,6 +1,5 @@
 using UnityEngine;
 
-[RequireComponent(typeof(UnitMovement))]
 public class Unit_Drone : UnitBase
 {
     [Header("Drone Settings")]
@@ -12,13 +11,12 @@ public class Unit_Drone : UnitBase
     private int _carriedAmount;
     private ResourceType _carriedResourceType;
     private ResourceProcessor.ResourceRequest _currentRequest;
-
     private DroneState _currentState = DroneState.Idle;
 
-    private bool _isManuallyAssigned;
-
+    // private bool _isManuallyAssigned;
     private IStorage _targetStorage;
     private ResourceProcessor currentProcessor;
+    public ActiveRecipe CurrentRecipeTask { get; private set; }
 
     public bool IsAssigned {
         get {
@@ -40,13 +38,13 @@ public class Unit_Drone : UnitBase
 
     private void Update()
     {
-        if (currentProcessor == null) {
-            // 자동 모드인 경우
-            if (!_isManuallyAssigned) {
-                FindAndAssignClosestProcessor();
-            }
-            if (currentProcessor == null) return;
-        }
+        // if (currentProcessor == null) {
+        //     // 자동 모드인 경우
+        //     if (!_isManuallyAssigned) {
+        //         FindAndAssignClosestProcessor();
+        //     }
+        //     if (currentProcessor == null) return;
+        // }
 
         DecideNextAction();
     }
@@ -94,7 +92,8 @@ public class Unit_Drone : UnitBase
         ReleaseFromProcessor();
 
         currentProcessor = processor;
-        _isManuallyAssigned = isManual;
+
+        // _isManuallyAssigned = isManual;
 
         if (currentProcessor != null) {
             currentProcessor.AssignDrone(this);
@@ -107,6 +106,8 @@ public class Unit_Drone : UnitBase
 
     private void ReleaseFromProcessor()
     {
+        ReleaseFromRecipeTask();
+
         if (currentProcessor != null) {
             currentProcessor.ReleaseDrone(this);
             if (_currentRequest != null) {
@@ -117,13 +118,21 @@ public class Unit_Drone : UnitBase
         currentProcessor = null;
     }
 
-    private void FindAndAssignClosestProcessor()
+    private void ReleaseFromRecipeTask()
     {
-        ResourceProcessor closestProcessor = BuildingManager.Instance.FindClosestAvailableProcessor(transform.position);
-        if (closestProcessor != null) {
-            AssignProcessor(closestProcessor);
+        if (CurrentRecipeTask != null && currentProcessor != null) {
+            currentProcessor.ReleaseDroneFromRecipe(this);
         }
+        CurrentRecipeTask = null;
     }
+
+    // private void FindAndAssignClosestProcessor()
+    // {
+    //     ResourceProcessor closestProcessor = BuildingManager.Instance.FindClosestAvailableProcessor(transform.position);
+    //     if (closestProcessor != null) {
+    //         AssignProcessor(closestProcessor);
+    //     }
+    // }
 
     private void UpdateIdle()
     {
@@ -175,13 +184,18 @@ public class Unit_Drone : UnitBase
 
     private void UpdateProcessing()
     {
+        if (CurrentRecipeTask == null) {
+            SetTask_Idle();
+            return;
+        }
+
         if (!movement.IsMoving) {
-            if (!currentProcessor.IsProcessing) {
-                _currentState = DroneState.Idle;
+            if (!CurrentRecipeTask.isProcessing) {
+                // 작업이 끝났으면 Idle
+                SetTask_Idle();
                 return;
             }
-
-            currentProcessor.ProcessRecipeWork(Time.deltaTime * processingSpeed);
+            currentProcessor.ProcessRecipeWork(CurrentRecipeTask, Time.deltaTime * processingSpeed);
         }
     }
 
@@ -208,19 +222,25 @@ public class Unit_Drone : UnitBase
         }
     }
 
-    public void SetTask_Process(ResourceProcessor processor)
+    public void SetTask_Process(ResourceProcessor processor, ActiveRecipe recipeTask)
     {
+        ReleaseFromRecipeTask();
+
         movement.SetNewTarget(processor.GetPosition());
         _currentState = DroneState.Processing;
+        CurrentRecipeTask = recipeTask;
     }
 
     public void SetTask_Idle()
     {
+        ReleaseFromRecipeTask();
         _currentState = DroneState.Idle;
     }
 
     private void SetTask_ReturnHome(bool stopMovement = false)
     {
+        ReleaseFromRecipeTask();
+
         if (_currentRequest != null) {
             currentProcessor.CancelRequest(_currentRequest);
             _currentRequest = null;

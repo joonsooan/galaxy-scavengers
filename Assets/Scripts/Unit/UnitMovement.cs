@@ -78,32 +78,37 @@ public class UnitMovement : MonoBehaviour
     {
         Vector3Int targetCellPos = _grid.WorldToCell(targetPosition);
         Vector3Int targetCellForPathfinding;
-        
-        if (BuildingManager.Instance.GetBuildingAt(targetCellPos, out List<Vector3Int> occupiedCells))
-        {
+
+        if (BuildingManager.Instance.GetBuildingAt(targetCellPos, out List<Vector3Int> occupiedCells)) {
             // 다양한 크기의 건물
             targetCellForPathfinding = FindBestInteractionCell(occupiedCells, transform.position);
-            
-            if (targetCellForPathfinding == new Vector3Int(int.MinValue, int.MinValue, int.MinValue))
-            {
+
+            if (targetCellForPathfinding == new Vector3Int(int.MinValue, int.MinValue, int.MinValue)) {
                 Debug.LogWarning($"[{name}] No valid interaction cell found for building at {targetCellPos}");
                 return false;
             }
         }
-        else if (!IsCellWalkable(targetCellPos))
-        {
+        else if (!IsCellWalkable(targetCellPos)) {
             // 건물이 아니지만 걸을 수 없는 타일 (예: 1x1 자원)
             // 1x1 건물처럼 취급하여 상호작용 위치 탐색
+            occupiedCells = new List<Vector3Int> { targetCellPos };
+
             targetCellForPathfinding = FindBestInteractionCell(occupiedCells, transform.position);
-            
+
             if (targetCellForPathfinding == new Vector3Int(int.MinValue, int.MinValue, int.MinValue)) // 유효한 셀 없음
             {
                 Debug.LogWarning($"[{name}] No valid interaction cell found for resource at {targetCellPos}");
                 return false;
             }
         }
-        
+
+        // else {
+        //     targetCellForPathfinding = targetCellPos;
+        // }
+
         _finalTargetPosition = _grid.GetCellCenterWorld(targetCellPos);
+
+        // _finalTargetPosition = _grid.GetCellCenterWorld(targetCellForPathfinding);
         _finalStoppingDistance = stoppingDistance;
 
         _path = FindPath(transform.position, _finalTargetPosition);
@@ -221,12 +226,12 @@ public class UnitMovement : MonoBehaviour
         Debug.LogWarning("Path not found or search limit exceeded.");
         return new Queue<Vector3>();
     }
-    
+
     private bool IsCellWalkable(Vector3Int cell)
     {
         return !BuildingManager.Instance.IsResourceTile(cell) && !BuildingManager.Instance.IsBuildingTile(cell);
     }
-    
+
     private List<Vector3Int> GetInteractionCells(List<Vector3Int> occupiedCells)
     {
         HashSet<Vector3Int> interactionCells = new HashSet<Vector3Int>();
@@ -236,7 +241,7 @@ public class UnitMovement : MonoBehaviour
         foreach (Vector3Int occupiedCell in occupiedSet) {
             foreach (Vector3Int offset in CardinalOffsets) {
                 Vector3Int neighbor = occupiedCell + offset;
-                
+
                 if (!occupiedSet.Contains(neighbor) && IsCellWalkable(neighbor)) {
                     interactionCells.Add(neighbor);
                 }
@@ -244,22 +249,19 @@ public class UnitMovement : MonoBehaviour
         }
         return interactionCells.ToList();
     }
-    
+
     private Vector3Int FindBestInteractionCell(List<Vector3Int> occupiedCells, Vector3 startPos)
     {
         List<Vector3Int> potentialCells = GetInteractionCells(occupiedCells);
         Vector3Int startCell = _grid.WorldToCell(startPos);
-        
+
         Vector3Int bestCell = new Vector3Int(int.MinValue, int.MinValue, int.MinValue); // 유효하지 않은 값으로 초기화
         float minDistance = float.MaxValue;
 
-        foreach (Vector3Int cell in potentialCells)
-        {
-            if (IsCellWalkable(cell))
-            {
-                float distance = GetDistance(startCell, cell); 
-                if (distance < minDistance)
-                {
+        foreach (Vector3Int cell in potentialCells) {
+            if (IsCellWalkable(cell)) {
+                float distance = GetDistance(startCell, cell);
+                if (distance < minDistance) {
                     minDistance = distance;
                     bestCell = cell;
                 }

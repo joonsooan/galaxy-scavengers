@@ -42,17 +42,13 @@ public class ResourceStats
 
 public class ResourceManager : MonoBehaviour
 {
-    public static ResourceManager Instance { get; private set; }
-    public static event Action OnNewStorageAdded;
-    public static event Action<IStorage> OnStorageRemoved;
-
     [Header("Base Resource Start Values")]
     [SerializeField] private int ferriteInitialAmount;
     [SerializeField] private int aetherInitialAmount;
     [SerializeField] private int biomassInitialAmount;
     [SerializeField] private int cryoCrystalInitialAmount;
     [SerializeField] private int solanaInitialAmount;
-    
+
     [Header("1 Crafted Resource Start Values")]
     [SerializeField] private int alloyPlateInitialAmount;
     [SerializeField] private int compositeFrameInitialAmount;
@@ -63,7 +59,7 @@ public class ResourceManager : MonoBehaviour
     [SerializeField] private int cryoGelInitialAmount;
     [SerializeField] private int coreInitialAmount;
     [SerializeField] private int ammunitionInitialAmount;
-    
+
     [Header("2 Crafted Resource Start Values")]
     [SerializeField] private int heavyPlatingInitialAmount;
     [SerializeField] private int actuatorInitialAmount;
@@ -89,26 +85,34 @@ public class ResourceManager : MonoBehaviour
     [SerializeField] private TMP_Text cryoCrystalNumber;
     [SerializeField] private TMP_Text solanaNumber;
 
-    private readonly List<ResourceNode> _allResources = new();
-    private readonly List<IStorage> _allStorages = new();
-    private readonly Dictionary<ResourceType, ResourceStats> _resourceStats = new();
-    private readonly Dictionary<ResourceType, int> _resourceCounts = new();
+    private readonly List<ResourceNode> _allResources = new List<ResourceNode>();
+    private readonly List<IStorage> _allStorages = new List<IStorage>();
+    private readonly Dictionary<ResourceType, int> _resourceCounts = new Dictionary<ResourceType, int>();
+    private readonly Dictionary<ResourceType, ResourceStats> _resourceStats = new Dictionary<ResourceType, ResourceStats>();
     private MainStructure _mainStructure;
-    
+    public static ResourceManager Instance { get; private set; }
+
     private void Awake()
     {
-        if (Instance == null)
-        {
+        if (Instance == null) {
             Instance = this;
             DontDestroyOnLoad(gameObject);
             Initialize();
         }
-        else
-        {
+        else {
             Destroy(gameObject);
         }
     }
-    
+
+    private void Update()
+    {
+#if UNITY_EDITOR
+        if (Input.GetKeyDown(KeyCode.C)) {
+            AddCheatResources();
+        }
+#endif
+    }
+
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -119,16 +123,9 @@ public class ResourceManager : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
-    private void Update()
-    {
-#if UNITY_EDITOR
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            AddCheatResources();
-        }
-#endif
-    }
-    
+    public static event Action OnNewStorageAdded;
+    public static event Action<IStorage> OnStorageRemoved;
+
     private void Initialize()
     {
         InitializeResourceStats();
@@ -138,8 +135,7 @@ public class ResourceManager : MonoBehaviour
     private void InitializeResourceStats()
     {
         _resourceStats.Clear();
-        foreach (var stats in resourceStatsList)
-        {
+        foreach (ResourceStats stats in resourceStatsList) {
             _resourceStats[stats.resourceType] = stats;
         }
     }
@@ -147,13 +143,13 @@ public class ResourceManager : MonoBehaviour
     private void ResetResourceCount()
     {
         _resourceCounts.Clear();
-        
+
         // 기본 자원
         _resourceCounts[ResourceType.Ferrite] = ferriteInitialAmount;
         _resourceCounts[ResourceType.Aether] = aetherInitialAmount;
         _resourceCounts[ResourceType.Biomass] = biomassInitialAmount;
         _resourceCounts[ResourceType.CryoCrystal] = cryoCrystalInitialAmount;
-        
+
         // 1차 자원
         _resourceCounts[ResourceType.AlloyPlate] = alloyPlateInitialAmount;
         _resourceCounts[ResourceType.CompositeFrame] = compositeFrameInitialAmount;
@@ -165,7 +161,7 @@ public class ResourceManager : MonoBehaviour
         _resourceCounts[ResourceType.Solana] = solanaInitialAmount;
         _resourceCounts[ResourceType.Core] = coreInitialAmount;
         _resourceCounts[ResourceType.Ammunition] = ammunitionInitialAmount;
-        
+
         // 2차 자원
         _resourceCounts[ResourceType.HeavyPlating] = heavyPlatingInitialAmount;
         _resourceCounts[ResourceType.Actuator] = actuatorInitialAmount;
@@ -178,11 +174,10 @@ public class ResourceManager : MonoBehaviour
         _resourceCounts[ResourceType.NexusData] = nexusDataInitialAmount;
         _resourceCounts[ResourceType.NeuralMatrix] = neuralMatrixInitialAmount;
     }
-    
+
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == "GameScene")
-        {
+        if (scene.name == "GameScene") {
             _mainStructure = null;
             _allStorages.Clear();
             _allResources.Clear();
@@ -191,15 +186,13 @@ public class ResourceManager : MonoBehaviour
             UpdateAllResourceUI();
         }
     }
-    
+
     public void AddResource(ResourceType type, int amount)
     {
-        if (_resourceCounts.ContainsKey(type))
-        {
+        if (_resourceCounts.ContainsKey(type)) {
             _resourceCounts[type] += amount;
         }
-        else
-        {
+        else {
             _resourceCounts[type] = amount;
         }
         UpdateResourceUI(type);
@@ -207,60 +200,49 @@ public class ResourceManager : MonoBehaviour
 
     public bool SpendResources(ResourceCost[] costs)
     {
-        if (!HasEnoughResources(costs))
-        {
+        if (!HasEnoughResources(costs)) {
             Debug.Log("Not Enough Resources");
             return false;
         }
 
-        var requiredResources = new Dictionary<ResourceType, int>();
-        foreach (var cost in costs)
-        {
-            if (requiredResources.ContainsKey(cost.resourceType))
-            {
+        Dictionary<ResourceType, int> requiredResources = new Dictionary<ResourceType, int>();
+        foreach (ResourceCost cost in costs) {
+            if (requiredResources.ContainsKey(cost.resourceType)) {
                 requiredResources[cost.resourceType] += cost.amount;
             }
-            else
-            {
+            else {
                 requiredResources.Add(cost.resourceType, cost.amount);
             }
         }
 
-        var availableInStorages = new Dictionary<ResourceType, int>();
-        var storages = GetAllStorages();
-        foreach (var type in requiredResources.Keys)
-        {
+        Dictionary<ResourceType, int> availableInStorages = new Dictionary<ResourceType, int>();
+        List<IStorage> storages = GetAllStorages();
+        foreach (ResourceType type in requiredResources.Keys) {
             int totalInStorages = 0;
-            foreach (var storage in storages)
-            {
+            foreach (IStorage storage in storages) {
                 totalInStorages += storage.GetCurrentResourceAmount(type);
             }
             availableInStorages[type] = totalInStorages;
         }
 
-        foreach (var req in requiredResources)
-        {
-            if (GetResource(req.Key) < req.Value)
-            {
+        foreach (KeyValuePair<ResourceType, int> req in requiredResources) {
+            if (GetResourceAmount(req.Key) < req.Value) {
                 Debug.Log($"Not Enough Resources for {req.Key} after final check.");
                 return false;
             }
         }
 
-        foreach (var cost in costs)
-        {
+        foreach (ResourceCost cost in costs) {
             _resourceCounts[cost.resourceType] -= cost.amount;
 
             int remainingToWithdraw = cost.amount;
-            foreach (var storage in storages)
-            {
+            foreach (IStorage storage in storages) {
                 if (remainingToWithdraw <= 0) break;
-                if (storage.TryWithdrawResource(cost.resourceType, remainingToWithdraw, out int amountWithdrawn))
-                {
+                if (storage.TryWithdrawResource(cost.resourceType, remainingToWithdraw, out int amountWithdrawn)) {
                     remainingToWithdraw -= amountWithdrawn;
                 }
             }
-            
+
             UpdateResourceUI(cost.resourceType);
         }
 
@@ -274,32 +256,29 @@ public class ResourceManager : MonoBehaviour
 
     public bool HasEnoughResources(ResourceCost[] costs)
     {
-        foreach (var cost in costs)
-        {
-            if (_resourceCounts.GetValueOrDefault(cost.resourceType) < cost.amount)
-            {
+        foreach (ResourceCost cost in costs) {
+            if (_resourceCounts.GetValueOrDefault(cost.resourceType) < cost.amount) {
                 return false;
             }
         }
         return true;
     }
 
-    public int GetResource(ResourceType type)
+    public int GetResourceAmount(ResourceType type)
     {
         _resourceCounts.TryGetValue(type, out int value);
         return value;
     }
-    
+
     public ResourceStats GetResourceStats(ResourceType type)
     {
-        _resourceStats.TryGetValue(type, out var stats);
+        _resourceStats.TryGetValue(type, out ResourceStats stats);
         return stats;
     }
-    
+
     public void AddStorage(IStorage storage)
     {
-        if (!_allStorages.Contains(storage))
-        {
+        if (!_allStorages.Contains(storage)) {
             _allStorages.Add(storage);
             OnNewStorageAdded?.Invoke();
         }
@@ -307,30 +286,32 @@ public class ResourceManager : MonoBehaviour
 
     public void RemoveStorage(IStorage storage)
     {
-        if (_allStorages.Remove(storage))
-        {
+        if (_allStorages.Remove(storage)) {
             OnStorageRemoved?.Invoke(storage);
         }
     }
 
-    public List<IStorage> GetAllStorages() => _allStorages;
+    public List<IStorage> GetAllStorages()
+    {
+        return _allStorages;
+    }
 
     public void RegisterMainStructure(MainStructure mainStructure)
     {
         _mainStructure = mainStructure;
         InitializeMainStructureStorage();
     }
-    
+
     private void InitializeMainStructureStorage()
     {
         if (_mainStructure == null) return;
-        
+
         // 기본 자원
         _mainStructure.InitializeStorage(ResourceType.Ferrite, ferriteInitialAmount);
         _mainStructure.InitializeStorage(ResourceType.Aether, aetherInitialAmount);
         _mainStructure.InitializeStorage(ResourceType.Biomass, biomassInitialAmount);
         _mainStructure.InitializeStorage(ResourceType.CryoCrystal, cryoCrystalInitialAmount);
-        
+
         // 1차 자원
         _mainStructure.InitializeStorage(ResourceType.AlloyPlate, alloyPlateInitialAmount);
         _mainStructure.InitializeStorage(ResourceType.CompositeFrame, compositeFrameInitialAmount);
@@ -342,7 +323,7 @@ public class ResourceManager : MonoBehaviour
         _mainStructure.InitializeStorage(ResourceType.Solana, solanaInitialAmount);
         _mainStructure.InitializeStorage(ResourceType.Core, coreInitialAmount);
         _mainStructure.InitializeStorage(ResourceType.Ammunition, ammunitionInitialAmount);
-        
+
         // 2차 자원
         _mainStructure.InitializeStorage(ResourceType.HeavyPlating, heavyPlatingInitialAmount);
         _mainStructure.InitializeStorage(ResourceType.Actuator, actuatorInitialAmount);
@@ -357,11 +338,10 @@ public class ResourceManager : MonoBehaviour
 
         _mainStructure.UpdateStorageUI();
     }
-    
+
     public void AddResourceNode(ResourceNode node)
     {
-        if (!_allResources.Contains(node))
-        {
+        if (!_allResources.Contains(node)) {
             _allResources.Add(node);
         }
     }
@@ -371,8 +351,11 @@ public class ResourceManager : MonoBehaviour
         _allResources.Remove(node);
     }
 
-    public List<ResourceNode> GetAllResources() => _allResources;
-    
+    public List<ResourceNode> GetAllResources()
+    {
+        return _allResources;
+    }
+
     private void FindAndConnectUI()
     {
         ferriteNumber = GameObject.Find("Resource0_txt")?.GetComponent<TMP_Text>();
@@ -385,16 +368,13 @@ public class ResourceManager : MonoBehaviour
     private void UpdateResourceUI(ResourceType type)
     {
         if (!IsUIConnected()) return;
-        
-        if (type == ResourceType.Solana)
-        {
-            UpdateSolanaUI();
+
+        if (type == ResourceType.Solana) {
+            // UpdateSolanaUI();
         }
-        else
-        {
+        else {
             TMP_Text resourceText = GetResourceText(type);
-            if (resourceText != null)
-            {
+            if (resourceText != null) {
                 resourceText.text = _resourceCounts[type].ToString();
             }
         }
@@ -403,27 +383,30 @@ public class ResourceManager : MonoBehaviour
     public void UpdateAllResourceUI()
     {
         if (!IsUIConnected()) return;
-        
+
         if (ferriteNumber != null) ferriteNumber.text = _resourceCounts[ResourceType.Ferrite].ToString();
         if (aetherNumber != null) aetherNumber.text = _resourceCounts[ResourceType.Aether].ToString();
         if (biomassNumber != null) biomassNumber.text = _resourceCounts[ResourceType.Biomass].ToString();
         if (cryoCrystalNumber != null) cryoCrystalNumber.text = _resourceCounts[ResourceType.CryoCrystal].ToString();
-        
-        UpdateSolanaUI();
+
+        // UpdateSolanaUI();
     }
-    
-    private void UpdateSolanaUI()
+
+    // private void UpdateSolanaUI()
+    // {
+    //     int requiredAmount = GameManager.Instance != null ? GameManager.Instance.GetRequiredAmountForCurrentQuota() : 0;
+    //
+    //     // solanaNumber.text = $"{_resourceCounts[ResourceType.Solana]} / {requiredAmount}";
+    // }
+
+    private bool IsUIConnected()
     {
-        int requiredAmount = GameManager.Instance != null ? GameManager.Instance.GetRequiredAmountForCurrentQuota() : 0;
-        // solanaNumber.text = $"{_resourceCounts[ResourceType.Solana]} / {requiredAmount}";
+        return ferriteNumber != null && aetherNumber != null && biomassNumber != null && cryoCrystalNumber != null;
     }
-    
-    private bool IsUIConnected() => ferriteNumber != null && aetherNumber != null && biomassNumber != null && cryoCrystalNumber != null;
 
     private TMP_Text GetResourceText(ResourceType type)
     {
-        return type switch
-        {
+        return type switch {
             ResourceType.Ferrite => ferriteNumber,
             ResourceType.Aether => aetherNumber,
             ResourceType.Biomass => biomassNumber,
@@ -431,20 +414,19 @@ public class ResourceManager : MonoBehaviour
             _ => null
         };
     }
-    
+
     public Sprite GetResourceIcon(ResourceType type)
     {
         int index = (int)type;
         return index >= 0 && index < resourceIcons.Count ? resourceIcons[index] : null;
     }
-    
+
     private void AddCheatResources()
     {
         const int cheatAmount = 999999;
         Debug.Log($"<color=orange>CHEAT ACTIVATED:</color> All resources set to {cheatAmount}.");
 
-        foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
-        {
+        foreach (ResourceType type in Enum.GetValues(typeof(ResourceType))) {
             _resourceCounts[type] = cheatAmount;
 
             _mainStructure?.InitializeStorage(type, cheatAmount);
@@ -452,19 +434,16 @@ public class ResourceManager : MonoBehaviour
 
         UpdateAllResourceUI();
     }
-    
+
     public IStorage FindClosestStorageWithResource(Vector3 position, ResourceType type, int minAmount)
     {
         IStorage closestStorage = null;
         float minDistance = float.MaxValue;
 
-        foreach (var storage in _allStorages)
-        {
-            if (storage.GetCurrentResourceAmount(type) >= minAmount)
-            {
+        foreach (IStorage storage in _allStorages) {
+            if (storage.GetCurrentResourceAmount(type) >= minAmount) {
                 float dist = Vector3.Distance(position, storage.GetPosition());
-                if (dist < minDistance)
-                {
+                if (dist < minDistance) {
                     minDistance = dist;
                     closestStorage = storage;
                 }
