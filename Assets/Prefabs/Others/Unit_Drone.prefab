@@ -139,6 +139,7 @@ MonoBehaviour:
   carryCapacity: 10
   processingSpeed: 1
   movement: {fileID: 4483249089817793867}
+  droneIcon: {fileID: 4992164939788663360, guid: 41d81b85481201c44bb0e26872455946, type: 3}
 --- !u!114 &4483249089817793867
 MonoBehaviour:
   m_ObjectHideFlags: 0

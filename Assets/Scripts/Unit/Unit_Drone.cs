@@ -3,33 +3,52 @@ using UnityEngine;
 [RequireComponent(typeof(UnitMovement))]
 public class Unit_Drone : UnitBase
 {
-    private enum DroneState
-    {
-        Idle,
-        FetchingResource,
-        DeliveringResource,
-        Processing,
-        ReturnHome
-    }
-
     [Header("Drone Settings")]
     [SerializeField] public int carryCapacity = 10;
     [SerializeField] private float processingSpeed = 1f;
     [SerializeField] private UnitMovement movement;
+    [SerializeField] private Sprite droneIcon;
+
+    private int _carriedAmount;
+    private ResourceType _carriedResourceType;
+    private ResourceProcessor.ResourceRequest _currentRequest;
 
     private DroneState _currentState = DroneState.Idle;
-    
-    private ResourceProcessor _homeProcessor;
+
+    private bool _isManuallyAssigned;
+
     private IStorage _targetStorage;
-    private ResourceProcessor.ResourceRequest _currentRequest;
-    
-    private ResourceType _carriedResourceType;
-    private int _carriedAmount;
+    private ResourceProcessor currentProcessor;
+
+    public bool IsAssigned {
+        get {
+            return currentProcessor != null;
+        }
+    }
+
+    public Sprite DroneIcon {
+        get {
+            return droneIcon;
+        }
+    }
 
     protected override void Awake()
     {
-        base.Awake(); 
+        base.Awake();
         movement = GetComponent<UnitMovement>();
+    }
+
+    private void Update()
+    {
+        if (currentProcessor == null) {
+            // 자동 모드인 경우
+            if (!_isManuallyAssigned) {
+                FindAndAssignClosestProcessor();
+            }
+            if (currentProcessor == null) return;
+        }
+
+        DecideNextAction();
     }
 
     protected override void OnEnable()
@@ -45,122 +64,99 @@ public class Unit_Drone : UnitBase
         ReleaseFromProcessor();
     }
 
-    private void Update()
-    {
-        if (_homeProcessor == null) 
-        {
-            FindAndAssignClosestProcessor();
-            if (_homeProcessor == null) return;
-        }
-        
-        DecideNextAction();
-    }
-
     private void DecideNextAction()
     {
-        switch (_currentState)
-        {
-            case DroneState.Idle:
-                UpdateIdle();
-                break;
-            
-            case DroneState.FetchingResource:
-                UpdateFetching();
-                break;
-            
-            case DroneState.DeliveringResource:
-                UpdateDelivering();
-                break;
-            
-            case DroneState.Processing:
-                UpdateProcessing();
-                break;
-            
-            case DroneState.ReturnHome:
-                UpdateReturnHome();
-                break;
+        switch (_currentState) {
+        case DroneState.Idle:
+            UpdateIdle();
+            break;
+
+        case DroneState.FetchingResource:
+            UpdateFetching();
+            break;
+
+        case DroneState.DeliveringResource:
+            UpdateDelivering();
+            break;
+
+        case DroneState.Processing:
+            UpdateProcessing();
+            break;
+
+        case DroneState.ReturnHome:
+            UpdateReturnHome();
+            break;
         }
     }
 
-    public void AssignProcessor(ResourceProcessor processor)
+    public void AssignProcessor(ResourceProcessor processor, bool isManual = false)
     {
         ReleaseFromProcessor();
-        
-        _homeProcessor = processor;
-        
-        if (_homeProcessor != null)
-        {
-            _homeProcessor.AssignDrone(this);
+
+        currentProcessor = processor;
+        _isManuallyAssigned = isManual;
+
+        if (currentProcessor != null) {
+            currentProcessor.AssignDrone(this);
             _currentState = DroneState.Idle;
         }
-        else
-        {
-            _currentState = DroneState.Idle; 
+        else {
+            _currentState = DroneState.Idle;
         }
     }
 
     private void ReleaseFromProcessor()
     {
-        if (_homeProcessor != null)
-        {
-            _homeProcessor.ReleaseDrone(this);
-            if (_currentRequest != null)
-            {
-                _homeProcessor.CancelRequest(_currentRequest);
+        if (currentProcessor != null) {
+            currentProcessor.ReleaseDrone(this);
+            if (_currentRequest != null) {
+                currentProcessor.CancelRequest(_currentRequest);
                 _currentRequest = null;
             }
         }
-        _homeProcessor = null;
+        currentProcessor = null;
     }
 
     private void FindAndAssignClosestProcessor()
     {
         ResourceProcessor closestProcessor = BuildingManager.Instance.FindClosestAvailableProcessor(transform.position);
-        if (closestProcessor != null)
-        {
+        if (closestProcessor != null) {
             AssignProcessor(closestProcessor);
         }
     }
 
     private void UpdateIdle()
     {
-        if (_homeProcessor == null)
+        if (currentProcessor == null)
             return;
-        
-        movement.SetNewTarget(_homeProcessor.GetPosition());
-        
-        if (!movement.IsMoving)
-        {
-            _homeProcessor.RequestTask(this);
+
+        movement.SetNewTarget(currentProcessor.GetPosition());
+
+        if (!movement.IsMoving) {
+            currentProcessor.RequestTask(this);
         }
     }
 
     private void UpdateFetching()
     {
-        if (_targetStorage == null || _currentRequest == null)
-        {
+        if (_targetStorage == null || _currentRequest == null) {
             SetTask_ReturnHome();
             return;
         }
 
-        if (!movement.IsMoving)
-        {
-            if (_targetStorage.TryWithdrawResource(_currentRequest.type, _currentRequest.amount, out int withdrawnAmount))
-            {
-                if (withdrawnAmount > 0)
-                {
+        if (!movement.IsMoving) {
+            if (_targetStorage.TryWithdrawResource(_currentRequest.type, _currentRequest.amount, out int withdrawnAmount)) {
+                if (withdrawnAmount > 0) {
                     _carriedResourceType = _currentRequest.type;
                     _carriedAmount = withdrawnAmount;
-                    movement.SetNewTarget(_homeProcessor.GetPosition());
+                    movement.SetNewTarget(currentProcessor.GetPosition());
                     _currentState = DroneState.DeliveringResource;
                 }
-                else
-                {
+                else {
                     SetTask_ReturnHome();
                 }
             }
-            else
-            {
+            else {
                 SetTask_ReturnHome();
             }
         }
@@ -168,10 +164,9 @@ public class Unit_Drone : UnitBase
 
     private void UpdateDelivering()
     {
-        if (!movement.IsMoving)
-        {
-            _homeProcessor.TryDepositIngredient(_carriedResourceType, _carriedAmount, this);
-            
+        if (!movement.IsMoving) {
+            currentProcessor.TryDepositIngredient(_carriedResourceType, _carriedAmount, this);
+
             _carriedAmount = 0;
             _currentRequest = null;
             _currentState = DroneState.Idle;
@@ -180,44 +175,39 @@ public class Unit_Drone : UnitBase
 
     private void UpdateProcessing()
     {
-        if (!movement.IsMoving)
-        {
-            if (!_homeProcessor.IsProcessing)
-            {
+        if (!movement.IsMoving) {
+            if (!currentProcessor.IsProcessing) {
                 _currentState = DroneState.Idle;
                 return;
             }
-            
-            _homeProcessor.ProcessRecipeWork(Time.deltaTime * processingSpeed);
+
+            currentProcessor.ProcessRecipeWork(Time.deltaTime * processingSpeed);
         }
     }
-    
+
     private void UpdateReturnHome()
     {
-        movement.SetNewTarget(_homeProcessor.GetPosition());
-        
-        if (!movement.IsMoving)
-        {
+        movement.SetNewTarget(currentProcessor.GetPosition());
+
+        if (!movement.IsMoving) {
             _currentState = DroneState.Idle;
         }
     }
-    
+
     public void SetTask_FetchResource(ResourceProcessor.ResourceRequest request, ResourceProcessor processor)
     {
         _currentRequest = request;
         _targetStorage = ResourceManager.Instance.FindClosestStorageWithResource(processor.GetPosition(), request.type, 1);
-        
-        if (_targetStorage != null)
-        {
+
+        if (_targetStorage != null) {
             movement.SetNewTarget(_targetStorage.GetPosition());
             _currentState = DroneState.FetchingResource;
         }
-        else
-        {
+        else {
             SetTask_ReturnHome();
         }
     }
-    
+
     public void SetTask_Process(ResourceProcessor processor)
     {
         movement.SetNewTarget(processor.GetPosition());
@@ -228,20 +218,27 @@ public class Unit_Drone : UnitBase
     {
         _currentState = DroneState.Idle;
     }
-    
+
     private void SetTask_ReturnHome(bool stopMovement = false)
     {
-        if (_currentRequest != null)
-        {
-             _homeProcessor.CancelRequest(_currentRequest);
+        if (_currentRequest != null) {
+            currentProcessor.CancelRequest(_currentRequest);
             _currentRequest = null;
         }
-        
+
         _currentState = DroneState.ReturnHome;
-        
-        if (stopMovement)
-        {
+
+        if (stopMovement) {
             movement.StopMovement();
         }
+    }
+
+    private enum DroneState
+    {
+        Idle,
+        FetchingResource,
+        DeliveringResource,
+        Processing,
+        ReturnHome
     }
 }
