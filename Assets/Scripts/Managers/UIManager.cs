@@ -1,5 +1,7 @@
 ﻿using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using System;
 
 public class UIManager : MonoBehaviour
 {
@@ -13,6 +15,9 @@ public class UIManager : MonoBehaviour
     [Header("Recipe Info Panel")]
     [SerializeField] private GameObject recipeInfoPanel;
     [SerializeField] private RecipeInfo recipeInfoComponent;
+    
+    [Header("Processor Info Panel")]
+    [SerializeField] private GameObject processorInfoPanel;
 
     [Header("Tips Reference")]
     [SerializeField] private GameObject tipPanel;
@@ -27,11 +32,58 @@ public class UIManager : MonoBehaviour
     
     private CardData _pinnedCardData;
     private ComboCardData _pinnedRecipeData;
+    private ResourceProcessorData _pinnedProcessorData;
 
+    private void OnEnable()
+    {
+        ResourceProcessor.OnProcessorClicked += HandleProcessorClicked;
+    }
+
+    private void OnDisable()
+    {
+        ResourceProcessor.OnProcessorClicked -= HandleProcessorClicked;
+    }
+    
     private void Start()
     {
         if (cardInfoPanel != null) cardInfoPanel.SetActive(false);
         if (recipeInfoPanel != null) recipeInfoPanel.SetActive(false);
+        if (processorInfoPanel != null) processorInfoPanel.SetActive(false);
+    }
+
+    private void Update()
+    {
+        if (Input.GetMouseButtonDown(1))
+        {
+            if (EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
+            UnpinAndHideAllPanels();
+        }
+    }
+    
+    private void HandleProcessorClicked(ResourceProcessorData data)
+    {
+        DisplayProcessorInfo(data);
+    }
+
+    private void UnpinAndHideAllPanels()
+    {
+        _pinnedCardData = null;
+        if (cardInfoPanel != null) {
+            cardInfoPanel.SetActive(false);
+        }
+        
+        _pinnedRecipeData = null;
+        if (recipeInfoPanel != null) {
+            recipeInfoPanel.SetActive(false);
+        }
+        
+        _pinnedProcessorData = null;
+        if (processorInfoPanel != null) {
+            processorInfoPanel.SetActive(false);
+        }
     }
 
     public void DisplayCardInfo(CardData data)
@@ -61,10 +113,12 @@ public class UIManager : MonoBehaviour
     public void PinCardInfo(CardData data)
     {
         if (_pinnedCardData == data) {
-            _pinnedCardData = null;
-            cardInfoPanel.SetActive(false);
+            // _pinnedCardData = null;
+            // cardInfoPanel.SetActive(false);
+            UnpinAndHideAllPanels();
         }
         else {
+            // UnpinAndHideAllPanels();
             _pinnedCardData = data;
             DisplayCardInfo(data);
         }
@@ -81,6 +135,7 @@ public class UIManager : MonoBehaviour
     public void DisplayRecipeInfo(ComboCardData data)
     {
         if (data == null || recipeInfoComponent == null) return;
+        recipeInfoPanel.SetActive(true);
         recipeInfoComponent.gameObject.SetActive(true);
         recipeInfoComponent.UpdateRecipeInfo(data);
     }
@@ -105,6 +160,37 @@ public class UIManager : MonoBehaviour
         else {
             _pinnedRecipeData = data;
             DisplayRecipeInfo(data);
+        }
+    }
+    
+    private void DisplayProcessorInfo(ResourceProcessorData data)
+    {
+        if (data == null || processorInfoPanel == null) return;
+        processorInfoPanel.gameObject.SetActive(true);
+        ProcessorUIManager manager = processorInfoPanel.GetComponent<ProcessorUIManager>();
+        manager.OnClick(data);
+    }
+
+    public void HideProcessorInfo()
+    {
+        if (processorInfoPanel == null) return;
+        if (_pinnedRecipeData == null) {
+            processorInfoPanel.gameObject.SetActive(false);
+        }
+        else {
+            // processorInfoPanel.UpdateRecipeInfo(_pinnedRecipeData);
+        }
+    }
+
+    public void PinProcessorInfo(ResourceProcessorData data)
+    {
+        if (_pinnedProcessorData == data) {
+            UnpinAndHideAllPanels();
+        }
+        else {
+            UnpinAndHideAllPanels();
+            _pinnedProcessorData = data;
+            DisplayProcessorInfo(data);
         }
     }
 

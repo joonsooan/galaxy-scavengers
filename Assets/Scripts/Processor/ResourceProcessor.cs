@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 
-public class ResourceProcessor : Damageable
+public class ResourceProcessor : Damageable, IClickable
 {
+    public static event Action<ResourceProcessorData> OnProcessorClicked;
+    
     public class ResourceRequest
     {
         public ResourceType type;
@@ -65,6 +67,11 @@ public class ResourceProcessor : Damageable
         {
             drone.AssignProcessor(null);
         }
+    }
+
+    public void OnClicked()
+    {
+        OnProcessorClicked?.Invoke(processorData);
     }
 
     private void SortRecipes()

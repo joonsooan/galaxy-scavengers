@@ -4787,6 +4787,7 @@ GameObject:
   m_Component:
   - component: {fileID: 508392700}
   - component: {fileID: 508392702}
+  - component: {fileID: 508392703}
   m_Layer: 0
   m_Name: _GameManager
   m_TagString: Untagged
@@ -4836,6 +4837,18 @@ MonoBehaviour:
   onEndDrag:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &508392703
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 508392699}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 834e38c22d499c546ba316459731f197, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -98539,7 +98552,6 @@ MonoBehaviour:
   contentParent: {fileID: 1401807513}
   processorName: {fileID: 1451079629}
   processorInfo: {fileID: 1898005839}
-  testData: {fileID: 11400000, guid: 364a690d8e5d9e54f87d00f2d469f386, type: 2}
 --- !u!1001 &1329132710
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -100547,6 +100559,7 @@ MonoBehaviour:
   resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: 87d776b852749c2428050baaea9b40b1, type: 3}
   recipeInfoPanel: {fileID: 964695054}
   recipeInfoComponent: {fileID: 713129548}
+  processorInfoPanel: {fileID: 1300553939}
   tipPanel: {fileID: 1035959604}
   tipResourcePanel1: {fileID: 275478616}
   tipResourcePanel2: {fileID: 292796514}
@@ -101046,8 +101059,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -17.5}
-  m_SizeDelta: {x: -10, y: -45}
+  m_AnchoredPosition: {x: 0, y: -22.5}
+  m_SizeDelta: {x: -10, y: -55}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1658035607
 MonoBehaviour:
@@ -102701,7 +102714,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: -20}
-  m_SizeDelta: {x: -10, y: 15}
+  m_SizeDelta: {x: -10, y: 25}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1898005839
 MonoBehaviour:

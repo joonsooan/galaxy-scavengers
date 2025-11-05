@@ -12,27 +12,36 @@ public class ProcessorUIManager : MonoBehaviour
     [SerializeField] private TMP_Text processorName;
     [SerializeField] private TMP_Text processorInfo;
     
-    [Header("Test")]
-    [SerializeField] private ResourceProcessorData testData;
+    // [Header("Test")]
+    // [SerializeField] private ResourceProcessorData testData;
 
     private List<ProcessorRecipe> _allRecipes;
+    private ResourceProcessorData _currentData;
 
-    public void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.P))
-            OnClick(testData);
-        else if (Input.GetKeyDown(KeyCode.R))
-            ClearAllRecipes();
-    }
+    // public void Update()
+    // {
+    //     if (Input.GetKeyDown(KeyCode.P))
+    //         OnClick(testData);
+    //     else if (Input.GetKeyDown(KeyCode.R))
+    //         ClearAllRecipes();
+    // }
 
     public void OnClick(ResourceProcessorData data)
     {
+        SetProcessorInfo(data);
         LoadAllRecipes(data);
-        // DisplayProcessorInfo(data);
+    }
+
+    private void SetProcessorInfo(ResourceProcessorData data)
+    {
+        processorName.text = data.ProcessorName;
+        processorInfo.text = data.ProcessorInfo;
     }
 
     private void LoadAllRecipes(ResourceProcessorData data)
     {
+        if (data == _currentData) return;
+        ClearAllRecipes();
         _allRecipes = data.Recipes;
         InstantiateRecipeCells();
     }
@@ -64,15 +73,5 @@ public class ProcessorUIManager : MonoBehaviour
             }
         }
     }
-
-    // public ComboCardData GetRecipeByName(string comboName)
-    // {
-    //     return _allRecipes.Find(recipe => recipe.displayName == comboName);
-    // }
-    //
-    // public List<ComboCardData> GetAllRecipes()
-    // {
-    //     return _allRecipes;
-    // }
 }
 
