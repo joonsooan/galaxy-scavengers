@@ -104945,10 +104945,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 163725887cf43a3418506d1a895ccbed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ferriteInitialAmount: 200
-  aetherInitialAmount: 100
-  biomassInitialAmount: 0
-  cryoCrystalInitialAmount: 0
+  ferriteInitialAmount: 2000
+  aetherInitialAmount: 1000
+  biomassInitialAmount: 1000
+  cryoCrystalInitialAmount: 1000
   solanaInitialAmount: 0
   alloyPlateInitialAmount: 0
   compositeFrameInitialAmount: 0

@@ -16,19 +16,25 @@ public class ProcessorRecipeCell : MonoBehaviour
     
     private ProcessorRecipe recipeData;
     private ResourceCost[] ingredients;
+    private ActiveRecipe _activeRecipe;
+    
     private ResourceCost product;
     private int currentStorageAmount;
     private int produceMaxAmount;
     
-    public void Initialize(ProcessorRecipe data)
+    public void Initialize(ActiveRecipe activeRecipe)
     {
-        recipeData = data;
+        _activeRecipe = activeRecipe;
+        recipeData = _activeRecipe.recipeData;
+        
         recipeName.text = $"{recipeData.resourceType}";
         recipeIcon.sprite = recipeData.recipeIcon;
         // recipeProcessTime.text = recipeData.processingTime.ToString();
         ingredients = recipeData.ingredients;
         
-        currentStorageAmount = ResourceManager.Instance.GetResourceAmount(recipeData.resourceType);
+        produceMaxAmount = _activeRecipe.maxProductionLimit;
+        
+        UpdateCurrentAmount();
         UpdateUI();
 
         foreach (ResourceCost ingredient in ingredients)
@@ -42,6 +48,33 @@ public class ProcessorRecipeCell : MonoBehaviour
                 newCell.resourceAmount.text = ingredient.amount.ToString();
             }
         }
+    }
+    
+    private void OnEnable()
+    {
+        ResourceManager.OnResourceAmountChanged += HandleResourceChange;
+    }
+
+    private void OnDisable()
+    {
+        ResourceManager.OnResourceAmountChanged -= HandleResourceChange;
+    }
+    
+    private void HandleResourceChange(ResourceType type, int newAmount)
+    {
+        if (recipeData != null && type == recipeData.resourceType)
+        {
+            currentStorageAmount = newAmount;
+            UpdateUI();
+            
+            _activeRecipe.SetProductionLimit(produceMaxAmount);
+        }
+    }
+
+    private void UpdateCurrentAmount()
+    {
+        if (recipeData == null) return;
+        currentStorageAmount = ResourceManager.Instance.GetResourceAmount(recipeData.resourceType);
     }
 
     private void UpdateUI()
@@ -76,6 +109,8 @@ public class ProcessorRecipeCell : MonoBehaviour
         {
             produceMaxAmount = newAmount;
             UpdateUI();
+            
+            _activeRecipe.SetProductionLimit(produceMaxAmount);
         }
     }
 
@@ -88,6 +123,8 @@ public class ProcessorRecipeCell : MonoBehaviour
         {
             produceMaxAmount = newAmount;
             UpdateUI();
+            
+            _activeRecipe.SetProductionLimit(produceMaxAmount);
         }
     }
 }

@@ -73,7 +73,6 @@ public class ProcessorUIManager : MonoBehaviour
 
     private void LoadAllRecipes(ResourceProcessorData data)
     {
-        if (data == _currentData && _allRecipes != null) return;
         ClearAllRecipes();
         _allRecipes = data.Recipes;
         InstantiateRecipeCells();
@@ -93,12 +92,12 @@ public class ProcessorUIManager : MonoBehaviour
             return;
         }
 
-        foreach (ProcessorRecipe recipeData in _allRecipes) {
+        foreach (var activeRecipe in _currentProcessor.ActiveRecipes) {
             GameObject newCellObject = Instantiate(recipeCellPrefab, contentParent);
             ProcessorRecipeCell newCell = newCellObject.GetComponent<ProcessorRecipeCell>();
 
             if (newCell != null) {
-                newCell.Initialize(recipeData);
+                newCell.Initialize(activeRecipe);
             }
         }
     }

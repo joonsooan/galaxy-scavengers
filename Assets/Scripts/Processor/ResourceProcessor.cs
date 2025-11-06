@@ -66,7 +66,7 @@ public class ResourceProcessor : Damageable, IClickable
         SortRecipes();
 
         foreach (ProcessorRecipe recipeData in _recipes) {
-            _activeRecipes.Add(new ActiveRecipe(recipeData));
+            _activeRecipes.Add(new ActiveRecipe(recipeData, this));
         }
     }
 
@@ -171,12 +171,13 @@ public class ResourceProcessor : Damageable, IClickable
 
     private bool PassesProductionCapCheck(ActiveRecipe recipe)
     {
-        if (recipe.Mode == ProductionMode.Infinite) {
-            return true;
+        if (recipe.maxProductionLimit <= 0)
+        {
+            return false;
         }
 
         int currentAmount = ResourceManager.Instance.GetResourceAmount(recipe.recipeData.resourceType);
-        return currentAmount < recipe.MaxProductionLimit;
+        return currentAmount < recipe.maxProductionLimit;
     }
 
     private ResourceRequest FindNextIngredientRequest(int droneCapacity)
@@ -271,8 +272,9 @@ public class ResourceProcessor : Damageable, IClickable
 
             recipe.isProcessing = false;
             recipe.processingProgress = 0;
-
             recipe.assignedDrone = null;
+            
+            CheckProductionLimits(recipe);
         }
     }
 
@@ -303,6 +305,33 @@ public class ResourceProcessor : Damageable, IClickable
     {
         if (_pendingRequests.Contains(request)) {
             _pendingRequests.Remove(request);
+        }
+    }
+    
+    public void CheckProductionLimits(ActiveRecipe recipe)
+    {
+        int currentAmount = ResourceManager.Instance.GetResourceAmount(recipe.recipeData.resourceType);
+
+        // Req #3: 현재 생산 중인데 한도에 도달했는지 확인
+        if (recipe.isProcessing && recipe.assignedDrone != null && currentAmount >= recipe.maxProductionLimit)
+        {
+            Unit_Drone drone = recipe.assignedDrone;
+
+            // 작업 중지
+            recipe.isProcessing = false;
+            recipe.processingProgress = 0;
+            recipe.assignedDrone = null;
+
+            // 드론을 대기 상태로 변경 (프로세서에는 할당된 상태 유지)
+            // (Req #4)
+            drone.SetTask_Idle(); 
+        }
+
+        // Req #4: 유휴 드론이 있는지 확인하고, 새 작업이 생겼는지 확인
+        // 이 프로세서에 할당된 드론 중, 현재 작업이 없는(Idle) 드론을 찾음
+        foreach (var drone in _assignedDrones.Where(d => d.CurrentRecipeTask == null))
+        {
+            RequestTask(drone);
         }
     }
 

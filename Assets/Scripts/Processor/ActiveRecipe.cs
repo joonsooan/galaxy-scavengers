@@ -10,18 +10,21 @@ public class ActiveRecipe
     public bool isProcessing;
     public float processingProgress;
     public ProcessorRecipe recipeData;
+    public int maxProductionLimit;
+    
+    private ResourceProcessor _processor;
 
-    public ActiveRecipe(ProcessorRecipe data)
+    public ActiveRecipe(ProcessorRecipe data, ResourceProcessor processor)
     {
         recipeData = data;
-
-        Mode = ProductionMode.Infinite;
-        MaxProductionLimit = 100;
-        assignedDrone = null;
-        processingProgress = 0f;
+        _processor = processor;
         isProcessing = false;
+        maxProductionLimit = 0;
     }
-
-    public ProductionMode Mode { get; set; } = ProductionMode.Infinite;
-    public int MaxProductionLimit { get; set; } = 100;
+    
+    public void SetProductionLimit(int newLimit)
+    {
+        maxProductionLimit = newLimit;
+        _processor.CheckProductionLimits(this);
+    }
 }

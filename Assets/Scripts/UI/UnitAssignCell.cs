@@ -44,7 +44,6 @@ public class UnitAssignCell : MonoBehaviour
     public void SetAssignedDrone(Unit_Drone drone)
     {
         _assignedDrone = drone;
-        drone.AssignProcessor(_processor);
         UpdateUI();
     }
 }

@@ -46,6 +46,44 @@ public class UnitMovement : MonoBehaviour
     {
         _grid = BuildingManager.Instance.grid;
     }
+    
+    private void FixedUpdate()
+    {
+        // 1. 이동할 웨이포인트가 없으면(경로가 없거나 완료) 즉시 정지하고 종료
+        if (_currentWaypoint == default) 
+        {
+            // StopMovement()를 호출하면 속도가 0이 되므로, 
+            // 이미 0이면 불필요한 호출을 방지합니다.
+            if (_rb.linearVelocity.sqrMagnitude > 0.01f)
+            {
+                StopMovement();
+            }
+            return;
+        }
+
+        // 2. 웨이포인트를 향해 이동
+        Vector3 direction = (_currentWaypoint - transform.position).normalized;
+        _rb.linearVelocity = direction * moveSpeed;
+        _spriteController?.UpdateSpriteDirection(direction);
+
+        // 3. 웨이포인트에 도착했는지 확인
+        float distanceToWaypoint = Vector3.Distance(transform.position, _currentWaypoint);
+        if (distanceToWaypoint < waypointTolerance) 
+        {
+            // 3-1. 아직 경로에 다음 웨이포인트가 남아있다면
+            if (_path.Count > 0) 
+            {
+                // 다음 웨이포인트를 목표로 설정
+                _currentWaypoint = _path.Dequeue();
+            }
+            // 3-2. 마지막 웨이포인트에 도착했다면
+            else 
+            {
+                // 이동 완료 및 정지
+                StopMovement();
+            }
+        }
+    }
 
     private void OnEnable()
     {
@@ -77,7 +115,7 @@ public class UnitMovement : MonoBehaviour
     public bool SetNewTarget(Vector2 targetPosition, float stoppingDistance)
     {
         Vector3Int targetCellPos = _grid.WorldToCell(targetPosition);
-        Vector3Int targetCellForPathfinding;
+        Vector3Int targetCellForPathfinding = targetCellPos;
 
         if (BuildingManager.Instance.GetBuildingAt(targetCellPos, out List<Vector3Int> occupiedCells)) {
             // 다양한 크기의 건물
@@ -102,13 +140,8 @@ public class UnitMovement : MonoBehaviour
             }
         }
 
-        // else {
-        //     targetCellForPathfinding = targetCellPos;
-        // }
-
-        _finalTargetPosition = _grid.GetCellCenterWorld(targetCellPos);
-
-        // _finalTargetPosition = _grid.GetCellCenterWorld(targetCellForPathfinding);
+        // _finalTargetPosition = _grid.GetCellCenterWorld(targetCellPos);
+        _finalTargetPosition = _grid.GetCellCenterWorld(targetCellForPathfinding);
         _finalStoppingDistance = stoppingDistance;
 
         _path = FindPath(transform.position, _finalTargetPosition);
@@ -120,29 +153,29 @@ public class UnitMovement : MonoBehaviour
         return false;
     }
 
-    public void MoveToTarget()
-    {
-        if (_path.Count == 0 && _currentWaypoint == default) {
-            StopMovement();
-            return;
-        }
-
-        Vector3 direction = (_currentWaypoint - transform.position).normalized;
-        _rb.linearVelocity = direction * moveSpeed;
-        _spriteController?.UpdateSpriteDirection(direction);
-
-        float distanceToWaypoint = Vector3.Distance(transform.position, _currentWaypoint);
-
-        if (distanceToWaypoint < waypointTolerance) {
-            if (_path.Count > 0) {
-                _currentWaypoint = _path.Dequeue();
-            }
-            else {
-                // _rb.linearVelocity = Vector2.zero;
-                StopMovement();
-            }
-        }
-    }
+    // public void MoveToTarget()
+    // {
+    //     if (_path.Count == 0 && _currentWaypoint == default) {
+    //         StopMovement();
+    //         return;
+    //     }
+    //
+    //     Vector3 direction = (_currentWaypoint - transform.position).normalized;
+    //     _rb.linearVelocity = direction * moveSpeed;
+    //     _spriteController?.UpdateSpriteDirection(direction);
+    //
+    //     float distanceToWaypoint = Vector3.Distance(transform.position, _currentWaypoint);
+    //
+    //     if (distanceToWaypoint < waypointTolerance) {
+    //         if (_path.Count > 0) {
+    //             _currentWaypoint = _path.Dequeue();
+    //         }
+    //         else {
+    //             // _rb.linearVelocity = Vector2.zero;
+    //             StopMovement();
+    //         }
+    //     }
+    // }
 
     public void StopMovement()
     {

@@ -39,14 +39,6 @@ public class Unit_Enemy_0 : UnitBase
         DecideNextAction();
     }
     
-    private void FixedUpdate()
-    {
-        if (currentState == UnitState.Moving)
-        {
-            unitMovement.MoveToTarget();
-        }
-    }
-
     private void DecideNextAction()
     {
         if (_target == null || _target.CurrentHealth <= 0)

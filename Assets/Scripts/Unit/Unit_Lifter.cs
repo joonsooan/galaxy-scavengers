@@ -50,13 +50,6 @@ public class Unit_Lifter : UnitBase
         DecideNextAction();
     }
 
-    private void FixedUpdate()
-    {
-        if (currentState is UnitState.Moving or UnitState.ReturningToStorage) {
-            unitMovement.MoveToTarget();
-        }
-    }
-
     protected override void OnEnable()
     {
         base.OnEnable();
