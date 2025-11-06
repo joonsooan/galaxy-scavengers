@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayName: Charge Coil
   description: Stores energy for structures to use
-  icon: {fileID: -8938747642573018088, guid: 5fe7a461299a7bc4fa9a95995e44a6a8, type: 3}
+  icon: {fileID: 7204139958296317971, guid: 6047a3701996c444e8238b6a1daa0afa, type: 3}
   buildingPrefab: {fileID: 1574451153020646121, guid: 1543bab97719c1049a5927ad86244cb6, type: 3}
   gadgetType: 2
   gadgetTile: {fileID: 11400000, guid: eb2bee000b463924ebb4173ae8769c3a, type: 2}

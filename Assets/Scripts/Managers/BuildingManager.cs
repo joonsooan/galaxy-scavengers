@@ -15,12 +15,24 @@ public class BuildingManager : MonoBehaviour
     
     [Header("Combo Buildings")]
     private List<ComboCardData> _comboCardDataList;
-    private readonly Dictionary<GadgetType, TileBase> _gadgetTypeToTileCache = new Dictionary<GadgetType, TileBase>();
-    private readonly Dictionary<Vector3Int, BuildingPiece> _placedPieces = new Dictionary<Vector3Int, BuildingPiece>();
+    private readonly Dictionary<GadgetType, TileBase> _gadgetTypeToTileCache = new ();
+    private readonly Dictionary<Vector3Int, BuildingPiece> _placedPieces = new ();
+    
+    private readonly Dictionary<Vector3Int, BuildingStructure> _buildingStructuresByAnchor = new ();
+    private readonly Dictionary<Vector3Int, BuildingStructure> _cellToStructureMap = new ();
+   
+    private readonly List<ResourceProcessor> _processors = new List<ResourceProcessor>();
     
     public static event Action<Vector3Int> OnTilemapChanged;
     
     public static BuildingManager Instance { get; private set; }
+    
+    public class BuildingStructure
+    {
+        public Vector3Int anchor;
+        public Vector2Int size;
+        public readonly List<Vector3Int> occupiedCells = new ();
+    }
 
     private void Awake()
     {
@@ -29,6 +41,11 @@ public class BuildingManager : MonoBehaviour
         }
         else {
             Destroy(gameObject);
+        }
+
+        if (parentTransform == null)
+        {
+            parentTransform = transform;
         }
 
         LoadAllComboCards();
@@ -86,10 +103,6 @@ public class BuildingManager : MonoBehaviour
 
     public void PlaceBuilding(CardData cardData, Vector3Int cellPosition)
     {
-        if (parentTransform == null) {
-            parentTransform = transform;
-        }
-        
         if (CanPlaceBuilding(cellPosition)) {
             Vector3 worldPosition = grid.GetCellCenterWorld(cellPosition);
             GameObject newPieceObject = 
@@ -102,6 +115,14 @@ public class BuildingManager : MonoBehaviour
                 pieceComponent.cellPosition = cellPosition;
                 _placedPieces[cellPosition] = pieceComponent;
             }
+            
+            BuildingStructure structure = new BuildingStructure
+            {
+                anchor = cellPosition,
+                size = Vector2Int.one
+            };
+            structure.occupiedCells.Add(cellPosition);
+            RegisterBuildingStructure(structure);
 
             if (cardData.gadgetTile != null) {
                 buildingTilemap.SetTile(cellPosition, cardData.gadgetTile);
@@ -153,38 +174,59 @@ public class BuildingManager : MonoBehaviour
     private void CreateComboBuilding(Vector3Int originPos, ComboCardData comboData)
     {
         List<Vector3Int> recipePositions = new List<Vector3Int>();
+        
+        int minX = int.MaxValue, minY = int.MaxValue;
+        int maxX = int.MinValue, maxY = int.MinValue;
+        
         foreach (var piece in comboData.recipe)
         {
-            recipePositions.Add(originPos + piece.relativePosition);
+            Vector3Int relativePos = piece.relativePosition;
+            recipePositions.Add(originPos + relativePos);
+            
+            minX = Mathf.Min(minX, relativePos.x);
+            minY = Mathf.Min(minY, relativePos.y);
+            maxX = Mathf.Max(maxX, relativePos.x);
+            maxY = Mathf.Max(maxY, relativePos.y);
         }
+        
+        Vector2Int size = new Vector2Int(maxX - minX + 1, maxY - minY + 1);
+        
+        BuildingStructure comboStructure = new BuildingStructure
+        {
+            anchor = originPos, // originPos : 좌하단 기준점
+            size = size
+        };
 
         foreach (var targetPos in recipePositions)
         {
             RemoveBuildingPieceAtPosition(targetPos);
+            comboStructure.occupiedCells.Add(targetPos);
         }
         
+        RegisterBuildingStructure(comboStructure);
+        
+        Vector3 worldPos = grid.GetCellCenterWorld(originPos);
+        GameObject newComboPieceObject = Instantiate(comboData.comboPrefab, worldPos, Quaternion.identity, parentTransform);
+        
+        BuildingPiece mainPiece = newComboPieceObject.GetComponent<BuildingPiece>();
+        if (mainPiece == null)
+        {
+            mainPiece = newComboPieceObject.AddComponent<BuildingPiece>();
+        }
+
+        mainPiece.cellPosition = originPos;
+
         foreach (var targetPos in recipePositions)
         {
-            Vector3 worldPos = grid.GetCellCenterWorld(targetPos);
-
-            GameObject newComboPieceObject = Instantiate(comboData.comboPrefab, worldPos, Quaternion.identity, parentTransform);
-            
-            BuildingPiece markerPiece = newComboPieceObject.GetComponent<BuildingPiece>();
-            if (markerPiece == null)
-            {
-                markerPiece = newComboPieceObject.AddComponent<BuildingPiece>();
-            }
-
-            markerPiece.cellPosition = targetPos;
-            _placedPieces[targetPos] = markerPiece;
+            _placedPieces[targetPos] = mainPiece; 
             
             if (comboData.comboTile != null)
             {
                 buildingTilemap.SetTile(targetPos, comboData.comboTile);
             }
-
-            HandleComboBuildingLogic(newComboPieceObject, comboData);
         }
+        
+        HandleComboBuildingLogic(newComboPieceObject, comboData);
 
         foreach (var targetPos in recipePositions)
         {
@@ -210,6 +252,17 @@ public class BuildingManager : MonoBehaviour
                     ResourceManager.Instance.AddStorage(storage);
                 }
                 break;
+            case ComboType.Generator:
+                // 예: ResourceGenerator generator = comboObject.GetComponent<ResourceGenerator>();
+                // generator?.Activate();
+                break;
+            case ComboType.Turret:
+                // 터렛 로직 (Turret 컴포넌트가 활성화되므로 별도 로직 필요 없을 수 있음)
+                break;
+            case ComboType.Radar:
+                // 레이더 로직 (Radar 컴포넌트가 활성화되므로 별도 로직 필요 없을 수 있음)
+                break;
+            // 다른 콤보 타입 로직 추가
         }
     }
     
@@ -217,12 +270,33 @@ public class BuildingManager : MonoBehaviour
     {
         if (buildingTilemap == null) return;
         
-        if (buildingTilemap.HasTile(cellPosition))
+        if (_cellToStructureMap.TryGetValue(cellPosition, out BuildingStructure structure))
+        {
+            Vector3Int anchor = structure.anchor;
+            List<Vector3Int> cellsToClear = new List<Vector3Int>(structure.occupiedCells); 
+
+            UnregisterBuildingStructure(anchor);
+
+            foreach (var cell in cellsToClear)
+            {
+                if (_placedPieces.Remove(cell, out BuildingPiece piece))
+                {
+                    if (piece != null) Destroy(piece.gameObject);
+                }
+                
+                if (buildingTilemap.HasTile(cell))
+                {
+                    buildingTilemap.SetTile(cell, null);
+                    OnTilemapChanged?.Invoke(cell);
+                }
+            }
+        }
+        else if (buildingTilemap.HasTile(cellPosition))
         {
             buildingTilemap.SetTile(cellPosition, null);
             OnTilemapChanged?.Invoke(cellPosition);
+            _placedPieces.Remove(cellPosition);
         }
-        _placedPieces.Remove(cellPosition);
     }
     
     public BuildingPiece GetPieceAt(Vector3Int cellPosition)
@@ -233,6 +307,8 @@ public class BuildingManager : MonoBehaviour
 
     private void RemoveBuildingPieceAtPosition(Vector3Int cellPos)
     {
+        UnregisterBuildingStructure(cellPos);
+        
         if (_placedPieces.Remove(cellPos, out BuildingPiece piece))
         {
             if (piece != null)
@@ -243,11 +319,81 @@ public class BuildingManager : MonoBehaviour
         buildingTilemap.SetTile(cellPos, null);
     }
     
+    public bool GetBuildingAt(Vector3Int cell, out List<Vector3Int> occupiedCells)
+    {
+        if (_cellToStructureMap.TryGetValue(cell, out BuildingStructure structure))
+        {
+            occupiedCells = structure.occupiedCells; 
+            return true;
+        }
+
+        occupiedCells = null;
+        return false;
+    }
+    
+    private void RegisterBuildingStructure(BuildingStructure structure)
+    {
+        if (_buildingStructuresByAnchor.ContainsKey(structure.anchor))
+        {
+            Debug.LogWarning($"Building structure already exists at anchor {structure.anchor}. Overwriting.");
+            UnregisterBuildingStructure(structure.anchor);
+        }
+
+        _buildingStructuresByAnchor[structure.anchor] = structure;
+        foreach (Vector3Int cell in structure.occupiedCells)
+        {
+            _cellToStructureMap[cell] = structure;
+        }
+    }
+    
+    private void UnregisterBuildingStructure(Vector3Int anchor)
+    {
+        if (_buildingStructuresByAnchor.Remove(anchor, out BuildingStructure structure))
+        {
+            foreach (Vector3Int cell in structure.occupiedCells)
+            {
+                _cellToStructureMap.Remove(cell);
+            }
+        }
+    }
+    
     public void RemoveResourceTile(Vector3Int cellPosition)
     {
         if (resourceTilemap != null)
         {
             resourceTilemap.SetTile(cellPosition, null);
         }
+    }
+
+    public void RegisterProcessor(ResourceProcessor processor)
+    {
+        if (!_processors.Contains(processor))
+        {
+            _processors.Add(processor);
+        }
+    }
+
+    public void UnregisterProcessor(ResourceProcessor processor)
+    {
+        _processors.Remove(processor);
+    }
+    
+    public ResourceProcessor FindClosestAvailableProcessor(Vector3 position)
+    {
+        ResourceProcessor closestProcessor = null;
+        float minDistance = float.MaxValue;
+
+        foreach (var processor in _processors)
+        {
+            if (processor.IsFull) continue;
+
+            float dist = Vector3.Distance(position, processor.GetPosition());
+            if (dist < minDistance)
+            {
+                minDistance = dist;
+                closestProcessor = processor;
+            }
+        }
+        return closestProcessor;
     }
 }

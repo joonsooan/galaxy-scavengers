@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RecipeManager : MonoBehaviour
+public class BuildingRecipeUIManager : MonoBehaviour
 {
     public RecipeInfo recipeInfo;
     

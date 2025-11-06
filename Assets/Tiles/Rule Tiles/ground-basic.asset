@@ -10,16 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9d1514134bc4fbd41bb739b1b9a49231, type: 3}
-  m_Name: ground-grass
+  m_Name: ground-basic
   m_EditorClassIdentifier: 
-  m_DefaultSprite: {fileID: -2484996235259718414, guid: defa296b08423da41bfefc7d51ea96b0, type: 3}
+  m_DefaultSprite: {fileID: 6507551001747036020, guid: defa296b08423da41bfefc7d51ea96b0, type: 3}
   m_DefaultGameObject: {fileID: 0}
   m_DefaultColliderType: 1
   m_TilingRules:
   - m_Id: 0
     m_Sprites:
-    - {fileID: -2484996235259718414, guid: defa296b08423da41bfefc7d51ea96b0, type: 3}
-    - {fileID: -1763544751302978211, guid: defa296b08423da41bfefc7d51ea96b0, type: 3}
+    - {fileID: 6507551001747036020, guid: defa296b08423da41bfefc7d51ea96b0, type: 3}
     m_GameObject: {fileID: 0}
     m_MinAnimationSpeed: 1
     m_MaxAnimationSpeed: 1

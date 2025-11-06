@@ -18,6 +18,8 @@ public class UnitManager : MonoBehaviour
     private readonly List<UnitBase> _enemyUnits = new();
     private readonly List<UnitBase> _allyUnits = new();
     
+    public static event Action<UnitBase> OnUnitCountChanged;
+    
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -48,6 +50,7 @@ public class UnitManager : MonoBehaviour
         {
             _allyUnits.Add(unit);
         }
+        OnUnitCountChanged?.Invoke(unit);
     }
 
     public void RemoveUnit(UnitBase unit)
@@ -60,5 +63,6 @@ public class UnitManager : MonoBehaviour
         {
             _allyUnits.Remove(unit);
         }
+        OnUnitCountChanged?.Invoke(unit);
     }
 }

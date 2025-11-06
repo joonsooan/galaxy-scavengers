@@ -11,6 +11,9 @@ public class UnitMovement : MonoBehaviour
         new Vector3Int(1, 0, 0), new Vector3Int(-1, 0, 0), new Vector3Int(0, 1, 0), new Vector3Int(0, -1, 0),
         new Vector3Int(1, 1, 0), new Vector3Int(1, -1, 0), new Vector3Int(-1, 1, 0), new Vector3Int(-1, -1, 0)
     };
+    private static readonly Vector3Int[] CardinalOffsets = {
+        new Vector3Int(1, 0, 0), new Vector3Int(-1, 0, 0), new Vector3Int(0, 1, 0), new Vector3Int(0, -1, 0)
+    };
 
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
@@ -43,6 +46,44 @@ public class UnitMovement : MonoBehaviour
     {
         _grid = BuildingManager.Instance.grid;
     }
+    
+    private void FixedUpdate()
+    {
+        // 1. 이동할 웨이포인트가 없으면(경로가 없거나 완료) 즉시 정지하고 종료
+        if (_currentWaypoint == default) 
+        {
+            // StopMovement()를 호출하면 속도가 0이 되므로, 
+            // 이미 0이면 불필요한 호출을 방지합니다.
+            if (_rb.linearVelocity.sqrMagnitude > 0.01f)
+            {
+                StopMovement();
+            }
+            return;
+        }
+
+        // 2. 웨이포인트를 향해 이동
+        Vector3 direction = (_currentWaypoint - transform.position).normalized;
+        _rb.linearVelocity = direction * moveSpeed;
+        _spriteController?.UpdateSpriteDirection(direction);
+
+        // 3. 웨이포인트에 도착했는지 확인
+        float distanceToWaypoint = Vector3.Distance(transform.position, _currentWaypoint);
+        if (distanceToWaypoint < waypointTolerance) 
+        {
+            // 3-1. 아직 경로에 다음 웨이포인트가 남아있다면
+            if (_path.Count > 0) 
+            {
+                // 다음 웨이포인트를 목표로 설정
+                _currentWaypoint = _path.Dequeue();
+            }
+            // 3-2. 마지막 웨이포인트에 도착했다면
+            else 
+            {
+                // 이동 완료 및 정지
+                StopMovement();
+            }
+        }
+    }
 
     private void OnEnable()
     {
@@ -74,7 +115,33 @@ public class UnitMovement : MonoBehaviour
     public bool SetNewTarget(Vector2 targetPosition, float stoppingDistance)
     {
         Vector3Int targetCellPos = _grid.WorldToCell(targetPosition);
-        _finalTargetPosition = _grid.GetCellCenterWorld(targetCellPos);
+        Vector3Int targetCellForPathfinding = targetCellPos;
+
+        if (BuildingManager.Instance.GetBuildingAt(targetCellPos, out List<Vector3Int> occupiedCells)) {
+            // 다양한 크기의 건물
+            targetCellForPathfinding = FindBestInteractionCell(occupiedCells, transform.position);
+
+            if (targetCellForPathfinding == new Vector3Int(int.MinValue, int.MinValue, int.MinValue)) {
+                Debug.LogWarning($"[{name}] No valid interaction cell found for building at {targetCellPos}");
+                return false;
+            }
+        }
+        else if (!IsCellWalkable(targetCellPos)) {
+            // 건물이 아니지만 걸을 수 없는 타일 (예: 1x1 자원)
+            // 1x1 건물처럼 취급하여 상호작용 위치 탐색
+            occupiedCells = new List<Vector3Int> { targetCellPos };
+
+            targetCellForPathfinding = FindBestInteractionCell(occupiedCells, transform.position);
+
+            if (targetCellForPathfinding == new Vector3Int(int.MinValue, int.MinValue, int.MinValue)) // 유효한 셀 없음
+            {
+                Debug.LogWarning($"[{name}] No valid interaction cell found for resource at {targetCellPos}");
+                return false;
+            }
+        }
+
+        // _finalTargetPosition = _grid.GetCellCenterWorld(targetCellPos);
+        _finalTargetPosition = _grid.GetCellCenterWorld(targetCellForPathfinding);
         _finalStoppingDistance = stoppingDistance;
 
         _path = FindPath(transform.position, _finalTargetPosition);
@@ -86,28 +153,29 @@ public class UnitMovement : MonoBehaviour
         return false;
     }
 
-    public void MoveToTarget()
-    {
-        if (_path.Count == 0 && _currentWaypoint == default) {
-            StopMovement();
-            return;
-        }
-
-        Vector3 direction = (_currentWaypoint - transform.position).normalized;
-        _rb.linearVelocity = direction * moveSpeed;
-        _spriteController?.UpdateSpriteDirection(direction);
-
-        float distanceToWaypoint = Vector3.Distance(transform.position, _currentWaypoint);
-
-        if (distanceToWaypoint < waypointTolerance) {
-            if (_path.Count > 0) {
-                _currentWaypoint = _path.Dequeue();
-            }
-            else {
-                _rb.linearVelocity = Vector2.zero;
-            }
-        }
-    }
+    // public void MoveToTarget()
+    // {
+    //     if (_path.Count == 0 && _currentWaypoint == default) {
+    //         StopMovement();
+    //         return;
+    //     }
+    //
+    //     Vector3 direction = (_currentWaypoint - transform.position).normalized;
+    //     _rb.linearVelocity = direction * moveSpeed;
+    //     _spriteController?.UpdateSpriteDirection(direction);
+    //
+    //     float distanceToWaypoint = Vector3.Distance(transform.position, _currentWaypoint);
+    //
+    //     if (distanceToWaypoint < waypointTolerance) {
+    //         if (_path.Count > 0) {
+    //             _currentWaypoint = _path.Dequeue();
+    //         }
+    //         else {
+    //             // _rb.linearVelocity = Vector2.zero;
+    //             StopMovement();
+    //         }
+    //     }
+    // }
 
     public void StopMovement()
     {
@@ -170,8 +238,7 @@ public class UnitMovement : MonoBehaviour
                 Vector3Int neighborPos = currentNode.position + offset;
                 if (closedList.Contains(neighborPos)) continue;
 
-                if (neighborPos != endCell &&
-                    (BuildingManager.Instance.IsResourceTile(neighborPos) || BuildingManager.Instance.IsBuildingTile(neighborPos))) {
+                if (neighborPos != endCell && !IsCellWalkable(neighborPos)) {
                     continue;
                 }
 
@@ -191,6 +258,49 @@ public class UnitMovement : MonoBehaviour
 
         Debug.LogWarning("Path not found or search limit exceeded.");
         return new Queue<Vector3>();
+    }
+
+    private bool IsCellWalkable(Vector3Int cell)
+    {
+        return !BuildingManager.Instance.IsResourceTile(cell) && !BuildingManager.Instance.IsBuildingTile(cell);
+    }
+
+    private List<Vector3Int> GetInteractionCells(List<Vector3Int> occupiedCells)
+    {
+        HashSet<Vector3Int> interactionCells = new HashSet<Vector3Int>();
+        HashSet<Vector3Int> occupiedSet = new HashSet<Vector3Int>(occupiedCells);
+
+        // 건물이 차지하는 모든 셀 추가
+        foreach (Vector3Int occupiedCell in occupiedSet) {
+            foreach (Vector3Int offset in CardinalOffsets) {
+                Vector3Int neighbor = occupiedCell + offset;
+
+                if (!occupiedSet.Contains(neighbor) && IsCellWalkable(neighbor)) {
+                    interactionCells.Add(neighbor);
+                }
+            }
+        }
+        return interactionCells.ToList();
+    }
+
+    private Vector3Int FindBestInteractionCell(List<Vector3Int> occupiedCells, Vector3 startPos)
+    {
+        List<Vector3Int> potentialCells = GetInteractionCells(occupiedCells);
+        Vector3Int startCell = _grid.WorldToCell(startPos);
+
+        Vector3Int bestCell = new Vector3Int(int.MinValue, int.MinValue, int.MinValue); // 유효하지 않은 값으로 초기화
+        float minDistance = float.MaxValue;
+
+        foreach (Vector3Int cell in potentialCells) {
+            if (IsCellWalkable(cell)) {
+                float distance = GetDistance(startCell, cell);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    bestCell = cell;
+                }
+            }
+        }
+        return bestCell;
     }
 
     private Queue<Vector3> ReconstructPath(Node endNode)

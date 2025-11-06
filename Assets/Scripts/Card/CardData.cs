@@ -16,7 +16,7 @@ public enum GadgetType
 }
 
 [System.Serializable]
-public class CardCost
+public class ResourceCost
 {
     public ResourceType resourceType;
     public int amount;
@@ -29,5 +29,5 @@ public class CardData : DisplayableData
     public GameObject buildingPrefab;
     public GadgetType gadgetType;
     public TileBase gadgetTile;
-    public CardCost[] costs;
+    public ResourceCost[] costs;
 }

@@ -81,7 +81,7 @@ public class Storage : Damageable, IStorage
         return canAddAmount > 0;
     }
     
-    public bool TryUseResources(CardCost[] costs)
+    public bool TryUseResources(ResourceCost[] costs)
     {
         if (!HasEnoughResources(costs))
         {
@@ -114,7 +114,7 @@ public class Storage : Damageable, IStorage
         return true;
     }
     
-    public bool HasEnoughResources(CardCost[] costs)
+    public bool HasEnoughResources(ResourceCost[] costs)
     {
         foreach (var cost in costs)
         {

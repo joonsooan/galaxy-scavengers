@@ -87,7 +87,7 @@ GameObject:
   - component: {fileID: 6682769515728763274}
   - component: {fileID: 8091769540580421873}
   m_Layer: 5
-  m_Name: 5_Electro Magnet
+  m_Name: 5_Electro Magnet 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

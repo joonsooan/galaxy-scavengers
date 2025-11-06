@@ -1,5 +1,6 @@
 ﻿using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class UIManager : MonoBehaviour
 {
@@ -14,6 +15,9 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject recipeInfoPanel;
     [SerializeField] private RecipeInfo recipeInfoComponent;
 
+    [Header("Processor Info Panel")]
+    [SerializeField] private GameObject processorInfoPanel;
+
     [Header("Tips Reference")]
     [SerializeField] private GameObject tipPanel;
     [SerializeField] private GameObject tipResourcePanel1;
@@ -24,14 +28,63 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject tipRemainTimePanel;
     [SerializeField] private GameObject tipMineTypePanel;
     [SerializeField] private GameObject tipUnitMakeBtn;
-    
+    private ResourceProcessor _currentProcessor;
+
     private CardData _pinnedCardData;
+    private ResourceProcessorData _pinnedProcessorData;
     private ComboCardData _pinnedRecipeData;
 
     private void Start()
     {
         if (cardInfoPanel != null) cardInfoPanel.SetActive(false);
         if (recipeInfoPanel != null) recipeInfoPanel.SetActive(false);
+        if (processorInfoPanel != null) processorInfoPanel.SetActive(false);
+    }
+
+    private void Update()
+    {
+        if (Input.GetMouseButtonDown(1)) {
+            if (EventSystem.current.IsPointerOverGameObject()) {
+                return;
+            }
+            UnpinAndHideAllPanels();
+        }
+    }
+
+    private void OnEnable()
+    {
+        ResourceProcessor.OnProcessorClicked += HandleProcessorClicked;
+    }
+
+    private void OnDisable()
+    {
+        ResourceProcessor.OnProcessorClicked -= HandleProcessorClicked;
+    }
+
+    private void HandleProcessorClicked(ResourceProcessor processor)
+    {
+        if (processor == null) return;
+
+        _currentProcessor = processor;
+        DisplayProcessorInfo(processor);
+    }
+
+    private void UnpinAndHideAllPanels()
+    {
+        _pinnedCardData = null;
+        if (cardInfoPanel != null) {
+            cardInfoPanel.SetActive(false);
+        }
+
+        _pinnedRecipeData = null;
+        if (recipeInfoPanel != null) {
+            recipeInfoPanel.SetActive(false);
+        }
+
+        _pinnedProcessorData = null;
+        if (processorInfoPanel != null) {
+            processorInfoPanel.SetActive(false);
+        }
     }
 
     public void DisplayCardInfo(CardData data)
@@ -42,7 +95,7 @@ public class UIManager : MonoBehaviour
         cardDescriptionText.text = data.description;
 
         foreach (Transform child in cardResourcePanel.transform) Destroy(child.gameObject);
-        foreach (CardCost cost in data.costs) {
+        foreach (ResourceCost cost in data.costs) {
             GameObject cell = Instantiate(resourceInfoCellPrefab, cardResourcePanel.transform);
             cell.GetComponent<ResourceInfoCell>().SetInfo(cost.resourceType, cost.amount);
         }
@@ -61,10 +114,12 @@ public class UIManager : MonoBehaviour
     public void PinCardInfo(CardData data)
     {
         if (_pinnedCardData == data) {
-            _pinnedCardData = null;
-            cardInfoPanel.SetActive(false);
+            // _pinnedCardData = null;
+            // cardInfoPanel.SetActive(false);
+            UnpinAndHideAllPanels();
         }
         else {
+            // UnpinAndHideAllPanels();
             _pinnedCardData = data;
             DisplayCardInfo(data);
         }
@@ -81,6 +136,7 @@ public class UIManager : MonoBehaviour
     public void DisplayRecipeInfo(ComboCardData data)
     {
         if (data == null || recipeInfoComponent == null) return;
+        recipeInfoPanel.SetActive(true);
         recipeInfoComponent.gameObject.SetActive(true);
         recipeInfoComponent.UpdateRecipeInfo(data);
     }
@@ -108,6 +164,40 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    private void DisplayProcessorInfo(ResourceProcessor processor)
+    {
+        if (processor == null || processorInfoPanel == null) return;
+        processorInfoPanel.gameObject.SetActive(true);
+        ProcessorUIManager.Instance.ShowProcessorUI(processor);
+    }
+
+    public void HideProcessorInfo()
+    {
+        if (processorInfoPanel == null) return;
+
+        if (_pinnedProcessorData == null) {
+            processorInfoPanel.gameObject.SetActive(false);
+            _currentProcessor = null;
+        }
+    }
+
+    public void PinProcessorInfo(ResourceProcessor processor)
+    {
+        if (processor == null) return;
+
+        ResourceProcessorData data = processor.ProcessorData;
+
+        if (_pinnedProcessorData == data) {
+            UnpinAndHideAllPanels();
+        }
+        else {
+            UnpinAndHideAllPanels();
+            _pinnedProcessorData = data;
+            _currentProcessor = processor;
+            DisplayProcessorInfo(processor);
+        }
+    }
+
     public void ToggleRecipePanel()
     {
         if (recipeInfoPanel == null) return;
@@ -129,7 +219,7 @@ public class UIManager : MonoBehaviour
         bool isActive = !tipPanel.activeSelf;
         tipPanel.SetActive(isActive);
     }
-    
+
     // Tips UI : Display
 
     public void DisplayResourcePanel()
@@ -167,15 +257,15 @@ public class UIManager : MonoBehaviour
     {
         tipUnitMakeBtn.SetActive(true);
     }
-    
+
     // Tips UI : Hide
-    
+
     public void HideResourcePanel()
     {
         tipResourcePanel1.SetActive(false);
         tipResourcePanel2.SetActive(false);
     }
-    
+
     public void HideRecipeBtn()
     {
         tipRecipeBtn.SetActive(false);
