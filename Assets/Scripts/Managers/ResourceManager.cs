@@ -125,6 +125,7 @@ public class ResourceManager : MonoBehaviour
 
     public static event Action OnNewStorageAdded;
     public static event Action<IStorage> OnStorageRemoved;
+    public static event Action<ResourceType, int> OnResourceAmountChanged;
 
     private void Initialize()
     {
@@ -139,40 +140,46 @@ public class ResourceManager : MonoBehaviour
             _resourceStats[stats.resourceType] = stats;
         }
     }
+    
+    private void SetResource(ResourceType type, int amount)
+    {
+        _resourceCounts[type] = amount;
+        OnResourceAmountChanged?.Invoke(type, amount);
+    }
 
     private void ResetResourceCount()
     {
         _resourceCounts.Clear();
 
         // 기본 자원
-        _resourceCounts[ResourceType.Ferrite] = ferriteInitialAmount;
-        _resourceCounts[ResourceType.Aether] = aetherInitialAmount;
-        _resourceCounts[ResourceType.Biomass] = biomassInitialAmount;
-        _resourceCounts[ResourceType.CryoCrystal] = cryoCrystalInitialAmount;
+        SetResource(ResourceType.Ferrite, ferriteInitialAmount);
+        SetResource(ResourceType.Aether, aetherInitialAmount);
+        SetResource(ResourceType.Biomass, biomassInitialAmount);
+        SetResource(ResourceType.CryoCrystal, cryoCrystalInitialAmount);
 
         // 1차 자원
-        _resourceCounts[ResourceType.AlloyPlate] = alloyPlateInitialAmount;
-        _resourceCounts[ResourceType.CompositeFrame] = compositeFrameInitialAmount;
-        _resourceCounts[ResourceType.EChip] = eChipInitialAmount;
-        _resourceCounts[ResourceType.BioCable] = bioCableInitialAmount;
-        _resourceCounts[ResourceType.PowerCube] = powerCubeInitialAmount;
-        _resourceCounts[ResourceType.BioFuel] = bioFuelInitialAmount;
-        _resourceCounts[ResourceType.CryoGel] = cryoGelInitialAmount;
-        _resourceCounts[ResourceType.Solana] = solanaInitialAmount;
-        _resourceCounts[ResourceType.Core] = coreInitialAmount;
-        _resourceCounts[ResourceType.Ammunition] = ammunitionInitialAmount;
+        SetResource(ResourceType.AlloyPlate, alloyPlateInitialAmount);
+        SetResource(ResourceType.CompositeFrame, compositeFrameInitialAmount);
+        SetResource(ResourceType.EChip, eChipInitialAmount);
+        SetResource(ResourceType.BioCable, bioCableInitialAmount);
+        SetResource(ResourceType.PowerCube, powerCubeInitialAmount);
+        SetResource(ResourceType.BioFuel, bioFuelInitialAmount);
+        SetResource(ResourceType.CryoGel, cryoGelInitialAmount);
+        SetResource(ResourceType.Solana, solanaInitialAmount);
+        SetResource(ResourceType.Core, coreInitialAmount);
+        SetResource(ResourceType.Ammunition, ammunitionInitialAmount);
 
         // 2차 자원
-        _resourceCounts[ResourceType.HeavyPlating] = heavyPlatingInitialAmount;
-        _resourceCounts[ResourceType.Actuator] = actuatorInitialAmount;
-        _resourceCounts[ResourceType.GenomeChip] = genomeChipInitialAmount;
-        _resourceCounts[ResourceType.PatchKit] = patchKitInitialAmount;
-        _resourceCounts[ResourceType.SensorUnit] = sensorUnitInitialAmount;
-        _resourceCounts[ResourceType.PlasmaCube] = plasmaCubeInitialAmount;
-        _resourceCounts[ResourceType.CryoConduit] = cryoConduitInitialAmount;
-        _resourceCounts[ResourceType.SeekerMissile] = seekerMissileInitialAmount;
-        _resourceCounts[ResourceType.NexusData] = nexusDataInitialAmount;
-        _resourceCounts[ResourceType.NeuralMatrix] = neuralMatrixInitialAmount;
+        SetResource(ResourceType.HeavyPlating, heavyPlatingInitialAmount);
+        SetResource(ResourceType.Actuator, actuatorInitialAmount);
+        SetResource(ResourceType.GenomeChip, genomeChipInitialAmount);
+        SetResource(ResourceType.PatchKit, patchKitInitialAmount);
+        SetResource(ResourceType.SensorUnit, sensorUnitInitialAmount);
+        SetResource(ResourceType.PlasmaCube, plasmaCubeInitialAmount);
+        SetResource(ResourceType.CryoConduit, cryoConduitInitialAmount);
+        SetResource(ResourceType.SeekerMissile, seekerMissileInitialAmount);
+        SetResource(ResourceType.NexusData, nexusDataInitialAmount);
+        SetResource(ResourceType.NeuralMatrix, neuralMatrixInitialAmount);
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -189,12 +196,8 @@ public class ResourceManager : MonoBehaviour
 
     public void AddResource(ResourceType type, int amount)
     {
-        if (_resourceCounts.ContainsKey(type)) {
-            _resourceCounts[type] += amount;
-        }
-        else {
-            _resourceCounts[type] = amount;
-        }
+        int currentAmount = GetResourceAmount(type);
+        SetResource(type, currentAmount + amount);
         UpdateResourceUI(type);
     }
 
@@ -233,7 +236,8 @@ public class ResourceManager : MonoBehaviour
         }
 
         foreach (ResourceCost cost in costs) {
-            _resourceCounts[cost.resourceType] -= cost.amount;
+            int currentAmount = GetResourceAmount(cost.resourceType);
+            SetResource(cost.resourceType, currentAmount - cost.amount);
 
             int remainingToWithdraw = cost.amount;
             foreach (IStorage storage in storages) {
@@ -427,8 +431,7 @@ public class ResourceManager : MonoBehaviour
         Debug.Log($"<color=orange>CHEAT ACTIVATED:</color> All resources set to {cheatAmount}.");
 
         foreach (ResourceType type in Enum.GetValues(typeof(ResourceType))) {
-            _resourceCounts[type] = cheatAmount;
-
+            SetResource(type, cheatAmount);
             _mainStructure?.InitializeStorage(type, cheatAmount);
         }
 

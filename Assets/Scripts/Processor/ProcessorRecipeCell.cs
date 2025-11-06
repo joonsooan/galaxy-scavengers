@@ -53,18 +53,41 @@ public class ProcessorRecipeCell : MonoBehaviour
     {
         return ResourceManager.Instance.GetResourceIcon(type);
     }
+    
+    private int GetAmountChange()
+    {
+        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        {
+            return 100;
+        }
+        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+        {
+            return 10;
+        }
+        return 1;
+    }
 
     public void OnPlusBtnClick()
     {
-        if (produceMaxAmount >= MaxProduceAmount) return;
-        produceMaxAmount++;
-        UpdateUI();
+        int amountToAdd = GetAmountChange();
+        int newAmount = Mathf.Min(produceMaxAmount + amountToAdd, MaxProduceAmount);
+
+        if (produceMaxAmount != newAmount)
+        {
+            produceMaxAmount = newAmount;
+            UpdateUI();
+        }
     }
 
     public void OnMinusBtnClick()
     {
-        if (produceMaxAmount <= 0) return;
-        produceMaxAmount--;
-        UpdateUI();
+        int amountToSubtract = GetAmountChange();
+        int newAmount = Mathf.Max(produceMaxAmount - amountToSubtract, 0);
+
+        if (produceMaxAmount != newAmount)
+        {
+            produceMaxAmount = newAmount;
+            UpdateUI();
+        }
     }
 }

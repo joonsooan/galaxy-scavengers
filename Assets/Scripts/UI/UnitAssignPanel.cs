@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -17,6 +18,21 @@ public class UnitAssignPanel : MonoBehaviour
     private UnitAssignCell _targetCell;
 
     private ResourceProcessor _targetProcessor;
+
+    private void OnEnable()
+    {
+        UnitManager.OnUnitCountChanged += OnUnitCountChangedHandler;
+        
+        if (availableUnitPanel.activeSelf)
+        {
+            UpdatePanelInfo();
+        }
+    }
+
+    private void OnDisable()
+    {
+        UnitManager.OnUnitCountChanged -= OnUnitCountChangedHandler;
+    }
 
     private void Awake()
     {
@@ -40,10 +56,7 @@ public class UnitAssignPanel : MonoBehaviour
 
     private void UpdatePanelInfo()
     {
-        int availableDrones = UnitManager.Instance.AllyUnits
-            .OfType<Unit_Drone>()
-            .Count(d => !d.IsAssigned);
-
+        int availableDrones = GetAvailableDroneCount();
         unassignedDroneCountText.text = $"x {availableDrones}";
 
         if (_currentDrone == null) {
@@ -56,6 +69,23 @@ public class UnitAssignPanel : MonoBehaviour
             assignDroneButton.gameObject.SetActive(false);
             unassignDroneButton.gameObject.SetActive(true);
         }
+    }
+    
+    private void OnUnitCountChangedHandler(UnitBase unit)
+    {
+        if (!availableUnitPanel.activeSelf)
+        {
+            return;
+        }
+
+        UpdatePanelInfo();
+    }
+
+    private int GetAvailableDroneCount()
+    {
+        return UnitManager.Instance.AllyUnits
+            .OfType<Unit_Drone>()
+            .Count(d => !d.IsAssigned);
     }
 
     private void OnAssignDroneClicked()
