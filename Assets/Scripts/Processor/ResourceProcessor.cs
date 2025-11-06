@@ -289,6 +289,7 @@ public class ResourceProcessor : Damageable, IClickable
     private void ProduceOutput(ProcessorRecipe recipeData)
     {
         ResourceManager.Instance.AddResource(recipeData.resourceType, recipeData.produceAmount);
+        Debug.Log($"Resource Produced: {recipeData.resourceType}, [{recipeData.produceAmount}]");
     }
 
     private int GetTotalCurrentIngredients()

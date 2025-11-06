@@ -75,6 +75,7 @@ public class ProcessorRecipeCell : MonoBehaviour
     {
         if (recipeData == null) return;
         currentStorageAmount = ResourceManager.Instance.GetResourceAmount(recipeData.resourceType);
+        Debug.Log(recipeData .resourceType + "Current Storage Amount: " + currentStorageAmount);
     }
 
     private void UpdateUI()
