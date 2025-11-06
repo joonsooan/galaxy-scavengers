@@ -104,6 +104,8 @@ public class ResourceProcessor : Damageable, IClickable
     {
         if (!_assignedDrones.Contains(drone) && !IsFull) {
             _assignedDrones.Add(drone);
+            Debug.Log($"[Processor:{name}] Drone '{drone.name}' assigned. Count={_assignedDrones.Count}/{_maxAssignedDrones}");
+            RequestTask(drone);
         }
     }
 
@@ -117,6 +119,7 @@ public class ResourceProcessor : Damageable, IClickable
         if (request != null) {
             _pendingRequests.Remove(request);
         }
+        Debug.Log($"[Processor:{name}] Drone '{drone.name}' released. Count={_assignedDrones.Count}/{_maxAssignedDrones}");
     }
 
     public void RequestTask(Unit_Drone drone)
@@ -125,6 +128,7 @@ public class ResourceProcessor : Damageable, IClickable
         if (drone.CurrentRecipeTask != null && drone.CurrentRecipeTask.isProcessing) {
             // 이미 작업이 있다면, 계속 그 작업을 하도록 함
             drone.SetTask_Process(this, drone.CurrentRecipeTask);
+            Debug.Log($"[Processor:{name}] RequestTask: Drone '{drone.name}' continues processing {drone.CurrentRecipeTask.recipeData.resourceType}");
             return;
         }
 
@@ -134,6 +138,7 @@ public class ResourceProcessor : Damageable, IClickable
             newRequest.assignedDrone = drone;
             _pendingRequests.Add(newRequest);
             drone.SetTask_FetchResource(newRequest, this);
+            Debug.Log($"[Processor:{name}] RequestTask: Drone '{drone.name}' fetch {newRequest.amount} {newRequest.type}");
             return;
         }
 
@@ -151,6 +156,7 @@ public class ResourceProcessor : Damageable, IClickable
                 recipe.assignedDrone = drone; // 드론 배정
 
                 drone.SetTask_Process(this, recipe); // 드론에게 이 레시피를 처리하라고 명령
+                Debug.Log($"[Processor:{name}] RequestTask: Drone '{drone.name}' starts processing {recipe.recipeData.resourceType}");
                 return;
             }
         }
@@ -161,12 +167,14 @@ public class ResourceProcessor : Damageable, IClickable
             if (recipe.assignedDrone == null && recipe.isProcessing) {
                 recipe.assignedDrone = drone; // 이 드론이 이어받음
                 drone.SetTask_Process(this, recipe);
+                Debug.Log($"[Processor:{name}] RequestTask: Drone '{drone.name}' picks up ongoing {recipe.recipeData.resourceType}");
                 return;
             }
         }
 
         // 4. 할 일이 없음
         drone.SetTask_Idle();
+        Debug.Log($"[Processor:{name}] RequestTask: No work for Drone '{drone.name}', set Idle");
     }
 
     private bool PassesProductionCapCheck(ActiveRecipe recipe)
@@ -186,6 +194,7 @@ public class ResourceProcessor : Damageable, IClickable
         int totalInStorage = GetTotalCurrentIngredients();
 
         if (totalOnTheWay + totalInStorage >= _maxIngredientStorage) {
+            Debug.Log($"[Processor:{name}] Ingredient request blocked: storage full ({totalInStorage}+{totalOnTheWay}/{_maxIngredientStorage})");
             return null;
         }
 
@@ -217,6 +226,7 @@ public class ResourceProcessor : Damageable, IClickable
                     int amountToFetch = Mathf.Min(stillNeeded, droneCapacity, spaceAvailable);
 
                     if (amountToFetch > 0) {
+                        Debug.Log($"[Processor:{name}] Create ingredient request: {ingredient.resourceType} x{amountToFetch} (needed {stillNeeded}, storage {inStorage}, onWay {onTheWay})");
                         return new ResourceRequest { type = ingredient.resourceType, amount = amountToFetch };
                     }
                 }
@@ -230,6 +240,7 @@ public class ResourceProcessor : Damageable, IClickable
         ResourceRequest request = _pendingRequests.FirstOrDefault(r => r.assignedDrone == drone);
 
         if (request == null || request.type != type) {
+            Debug.Log($"[Processor:{name}] Deposit FAILED from '{drone.name}': no matching request for {type}");
             return false;
         }
 
@@ -239,6 +250,7 @@ public class ResourceProcessor : Damageable, IClickable
         _currentIngredients[type] += canAddAmount;
         _pendingRequests.Remove(request);
 
+        Debug.Log($"[Processor:{name}] Deposit from '{drone.name}': {type} +{canAddAmount} (requested {amount}). Total now {GetTotalCurrentIngredients()}/{_maxIngredientStorage}");
         return canAddAmount > 0;
     }
 
@@ -256,6 +268,7 @@ public class ResourceProcessor : Damageable, IClickable
     {
         foreach (ResourceCost ingredient in recipe.ingredients) {
             _currentIngredients[ingredient.resourceType] -= ingredient.amount;
+            Debug.Log($"[Processor:{name}] Consume: {ingredient.resourceType} -{ingredient.amount}. Remaining {_currentIngredients[ingredient.resourceType]}");
         }
     }
 
@@ -274,6 +287,8 @@ public class ResourceProcessor : Damageable, IClickable
             recipe.processingProgress = 0;
             recipe.assignedDrone = null;
             
+            Debug.Log($"[Processor:{name}] Completed: {recipe.recipeData.resourceType}. Output produced {recipe.recipeData.produceAmount}");
+            
             CheckProductionLimits(recipe);
         }
     }
@@ -283,13 +298,14 @@ public class ResourceProcessor : Damageable, IClickable
         ActiveRecipe recipe = _activeRecipes.FirstOrDefault(r => r.assignedDrone == drone);
         if (recipe != null) {
             recipe.assignedDrone = null;
+            Debug.Log($"[Processor:{name}] Recipe '{recipe.recipeData.resourceType}' released from Drone '{drone.name}'");
         }
     }
 
     private void ProduceOutput(ProcessorRecipe recipeData)
     {
         ResourceManager.Instance.AddResource(recipeData.resourceType, recipeData.produceAmount);
-        Debug.Log($"Resource Produced: {recipeData.resourceType}, [{recipeData.produceAmount}]");
+        Debug.Log($"[Processor:{name}] Resource Produced: {recipeData.resourceType}, +{recipeData.produceAmount}");
     }
 
     private int GetTotalCurrentIngredients()

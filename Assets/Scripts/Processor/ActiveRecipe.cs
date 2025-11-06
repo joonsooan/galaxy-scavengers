@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public enum ProductionMode
 {
     Infinite, // 무한 자동 생산
@@ -24,7 +26,14 @@ public class ActiveRecipe
     
     public void SetProductionLimit(int newLimit)
     {
+        int old = maxProductionLimit;
         maxProductionLimit = newLimit;
+        
+        if (old != newLimit)
+        {
+            Debug.Log($"[ActiveRecipe:{recipeData.resourceType}] maxProductionLimit changed {old} -> {newLimit}");
+        }
+        
         _processor.CheckProductionLimits(this);
     }
 }
