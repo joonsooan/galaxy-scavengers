@@ -36,7 +36,7 @@ public class UnitAssignCell : MonoBehaviour
         }
     }
 
-    public void OnCellClicked()
+    private void OnCellClicked()
     {
         ProcessorUIManager.Instance.unitAssignPanel.ShowPanel(_processor, this, _assignedDrone);
     }

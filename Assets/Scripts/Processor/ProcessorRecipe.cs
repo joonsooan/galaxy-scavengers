@@ -3,10 +3,10 @@ using UnityEngine;
 [System.Serializable]
 public class ProcessorRecipe
 {
-    public string recipeName;
+    public ResourceType resourceType;
     public Sprite recipeIcon;
     public ResourceCost[] ingredients;
-    public ResourceCost product;
     public float processingTime;
+    public int produceAmount;
     public int priority;
 }

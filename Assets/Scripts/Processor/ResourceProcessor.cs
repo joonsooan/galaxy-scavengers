@@ -175,7 +175,7 @@ public class ResourceProcessor : Damageable, IClickable
             return true;
         }
 
-        int currentAmount = ResourceManager.Instance.GetResourceAmount(recipe.recipeData.product.resourceType);
+        int currentAmount = ResourceManager.Instance.GetResourceAmount(recipe.recipeData.resourceType);
         return currentAmount < recipe.MaxProductionLimit;
     }
 
@@ -286,7 +286,7 @@ public class ResourceProcessor : Damageable, IClickable
 
     private void ProduceOutput(ProcessorRecipe recipeData)
     {
-        ResourceManager.Instance.AddResource(recipeData.product.resourceType, recipeData.product.amount);
+        ResourceManager.Instance.AddResource(recipeData.resourceType, recipeData.produceAmount);
     }
 
     private int GetTotalCurrentIngredients()

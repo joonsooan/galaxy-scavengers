@@ -8,20 +8,28 @@ public class ProcessorRecipeCell : MonoBehaviour
     [SerializeField] private Image recipeIcon;
     [SerializeField] private TMP_Text recipeName;
     [SerializeField] private TMP_Text recipeProcessTime;
+    [SerializeField] private TMP_Text produceInfoText;
     [SerializeField] private GameObject recipeCellPrefab;
     [SerializeField] private RectTransform contentParent;
+
+    private const int MaxProduceAmount = 999;
     
     private ProcessorRecipe recipeData;
     private ResourceCost[] ingredients;
     private ResourceCost product;
+    private int currentStorageAmount;
+    private int produceMaxAmount;
     
     public void Initialize(ProcessorRecipe data)
     {
         recipeData = data;
-        recipeName.text = recipeData.recipeName;
+        recipeName.text = $"{recipeData.resourceType}";
         recipeIcon.sprite = recipeData.recipeIcon;
         // recipeProcessTime.text = recipeData.processingTime.ToString();
         ingredients = recipeData.ingredients;
+        
+        currentStorageAmount = ResourceManager.Instance.GetResourceAmount(recipeData.resourceType);
+        UpdateUI();
 
         foreach (ResourceCost ingredient in ingredients)
         {
@@ -36,17 +44,27 @@ public class ProcessorRecipeCell : MonoBehaviour
         }
     }
 
+    private void UpdateUI()
+    {
+        produceInfoText.text = $"{currentStorageAmount} / {produceMaxAmount}";
+    }
+
     private Sprite GetResourceImage(ResourceType type)
     {
         return ResourceManager.Instance.GetResourceIcon(type);
     }
 
-    public void OnClickCell()
+    public void OnPlusBtnClick()
     {
-        // TODO : 옆에 각 셀의 정보를 보여주는 UI 띄우기
+        if (produceMaxAmount >= MaxProduceAmount) return;
+        produceMaxAmount++;
+        UpdateUI();
     }
 
-    // TODO : 정보 보여주는 함수 수정
-    // protected override void ShowInfo() => GameManager.Instance?.uiManager.DisplayRecipeInfo(recipeData);
-    // protected override void HideInfo() => GameManager.Instance?.uiManager.HideRecipeInfo();
+    public void OnMinusBtnClick()
+    {
+        if (produceMaxAmount <= 0) return;
+        produceMaxAmount--;
+        UpdateUI();
+    }
 }

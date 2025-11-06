@@ -2660,8 +2660,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyPrefab: {fileID: 7944764008120523387, guid: 15cabd88de00d244b9df4101ebda75ba, type: 3}
-  initialSpawnDelay: 30
-  spawnInterval: 60
+  initialSpawnDelay: 300
+  spawnInterval: 600
   baseSpawnCount: 1
   spawnCountIncreasePerWave: 1
 --- !u!1 &321414382

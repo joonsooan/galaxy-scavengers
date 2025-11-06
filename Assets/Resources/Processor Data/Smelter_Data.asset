@@ -20,115 +20,95 @@ MonoBehaviour:
   maxIngredientStorage: 100
   maxAssignedDrones: 2
   recipes:
-  - recipeName: Alloy Plate
+  - resourceType: 4
     recipeIcon: {fileID: 3117166516527289334, guid: 842fd72251a781c4fb336ef443151083, type: 3}
     ingredients:
     - resourceType: 0
       amount: 10
-    product:
-      resourceType: 4
-      amount: 1
     processingTime: 10
+    produceAmount: 0
     priority: 0
-  - recipeName: Composite Frame
+  - resourceType: 5
     recipeIcon: {fileID: 4489167911642275471, guid: 842fd72251a781c4fb336ef443151083, type: 3}
     ingredients:
     - resourceType: 0
       amount: 5
     - resourceType: 2
       amount: 10
-    product:
-      resourceType: 5
-      amount: 1
     processingTime: 10
+    produceAmount: 0
     priority: 0
-  - recipeName: E-Chip
+  - resourceType: 6
     recipeIcon: {fileID: 6762225044037183918, guid: 842fd72251a781c4fb336ef443151083, type: 3}
     ingredients:
     - resourceType: 0
       amount: 5
     - resourceType: 1
       amount: 5
-    product:
-      resourceType: 6
-      amount: 1
     processingTime: 10
+    produceAmount: 0
     priority: 0
-  - recipeName: Bio Cable
+  - resourceType: 7
     recipeIcon: {fileID: 7836952785060846427, guid: 842fd72251a781c4fb336ef443151083, type: 3}
     ingredients:
     - resourceType: 0
       amount: 5
     - resourceType: 2
       amount: 5
-    product:
-      resourceType: 7
-      amount: 1
     processingTime: 10
+    produceAmount: 0
     priority: 0
-  - recipeName: Power Cube
+  - resourceType: 8
     recipeIcon: {fileID: -5485851156403310201, guid: 5fe7a461299a7bc4fa9a95995e44a6a8, type: 3}
     ingredients:
     - resourceType: 1
       amount: 15
-    product:
-      resourceType: 8
-      amount: 1
     processingTime: 10
+    produceAmount: 0
     priority: 0
-  - recipeName: Bio Fuel
+  - resourceType: 9
     recipeIcon: {fileID: 7836952785060846427, guid: 842fd72251a781c4fb336ef443151083, type: 3}
     ingredients:
     - resourceType: 2
       amount: 10
-    product:
-      resourceType: 9
-      amount: 1
     processingTime: 10
+    produceAmount: 0
     priority: 0
-  - recipeName: Cryo Gel
+  - resourceType: 10
     recipeIcon: {fileID: -5637145595983039836, guid: 5fe7a461299a7bc4fa9a95995e44a6a8, type: 3}
     ingredients:
     - resourceType: 1
       amount: 10
     - resourceType: 3
       amount: 5
-    product:
-      resourceType: 10
-      amount: 1
     processingTime: 10
+    produceAmount: 0
     priority: 0
-  - recipeName: Solana
+  - resourceType: 11
     recipeIcon: {fileID: -5327632014366173234, guid: 5fe7a461299a7bc4fa9a95995e44a6a8, type: 3}
     ingredients:
     - resourceType: 2
       amount: 15
     - resourceType: 3
       amount: 5
-    product:
-      resourceType: 11
-      amount: 1
     processingTime: 10
+    produceAmount: 0
     priority: 0
-  - recipeName: Core
+  - resourceType: 12
     recipeIcon: {fileID: 7490494564413719894, guid: 5fe7a461299a7bc4fa9a95995e44a6a8, type: 3}
     ingredients:
     - resourceType: 0
       amount: 10
     - resourceType: 1
       amount: 5
-    product:
-      resourceType: 12
-      amount: 1
     processingTime: 10
+    produceAmount: 0
     priority: 0
-  - recipeName: Ammunition
+  - resourceType: 13
     recipeIcon: {fileID: 7490494564413719894, guid: 5fe7a461299a7bc4fa9a95995e44a6a8, type: 3}
     ingredients:
     - resourceType: 0
       amount: 5
-    product:
-      resourceType: 13
-      amount: 1
     processingTime: 10
+    produceAmount: 0
     priority: 0
