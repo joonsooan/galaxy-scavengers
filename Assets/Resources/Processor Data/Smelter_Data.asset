@@ -21,7 +21,7 @@ MonoBehaviour:
   maxAssignedDrones: 2
   recipes:
   - resourceType: 4
-    recipeIcon: {fileID: 3117166516527289334, guid: 842fd72251a781c4fb336ef443151083, type: 3}
+    recipeIcon: {fileID: -6291453560396589059, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
     ingredients:
     - resourceType: 0
       amount: 10
@@ -29,7 +29,7 @@ MonoBehaviour:
     produceAmount: 0
     priority: 0
   - resourceType: 5
-    recipeIcon: {fileID: 4489167911642275471, guid: 842fd72251a781c4fb336ef443151083, type: 3}
+    recipeIcon: {fileID: 359855223478723041, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
     ingredients:
     - resourceType: 0
       amount: 5
@@ -39,7 +39,7 @@ MonoBehaviour:
     produceAmount: 0
     priority: 0
   - resourceType: 6
-    recipeIcon: {fileID: 6762225044037183918, guid: 842fd72251a781c4fb336ef443151083, type: 3}
+    recipeIcon: {fileID: 9116947346429250140, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
     ingredients:
     - resourceType: 0
       amount: 5
@@ -49,7 +49,7 @@ MonoBehaviour:
     produceAmount: 0
     priority: 0
   - resourceType: 7
-    recipeIcon: {fileID: 7836952785060846427, guid: 842fd72251a781c4fb336ef443151083, type: 3}
+    recipeIcon: {fileID: -6843591316079228388, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
     ingredients:
     - resourceType: 0
       amount: 5
@@ -59,7 +59,7 @@ MonoBehaviour:
     produceAmount: 0
     priority: 0
   - resourceType: 8
-    recipeIcon: {fileID: -5485851156403310201, guid: 5fe7a461299a7bc4fa9a95995e44a6a8, type: 3}
+    recipeIcon: {fileID: -4396813597575786351, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
     ingredients:
     - resourceType: 1
       amount: 15
@@ -67,7 +67,7 @@ MonoBehaviour:
     produceAmount: 0
     priority: 0
   - resourceType: 9
-    recipeIcon: {fileID: 7836952785060846427, guid: 842fd72251a781c4fb336ef443151083, type: 3}
+    recipeIcon: {fileID: -4905985573008516872, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
     ingredients:
     - resourceType: 2
       amount: 10
@@ -75,7 +75,7 @@ MonoBehaviour:
     produceAmount: 0
     priority: 0
   - resourceType: 10
-    recipeIcon: {fileID: -5637145595983039836, guid: 5fe7a461299a7bc4fa9a95995e44a6a8, type: 3}
+    recipeIcon: {fileID: 6648999241926102489, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
     ingredients:
     - resourceType: 1
       amount: 10
@@ -85,7 +85,7 @@ MonoBehaviour:
     produceAmount: 0
     priority: 0
   - resourceType: 11
-    recipeIcon: {fileID: -5327632014366173234, guid: 5fe7a461299a7bc4fa9a95995e44a6a8, type: 3}
+    recipeIcon: {fileID: -3423204301100993705, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
     ingredients:
     - resourceType: 2
       amount: 15
@@ -95,7 +95,7 @@ MonoBehaviour:
     produceAmount: 0
     priority: 0
   - resourceType: 12
-    recipeIcon: {fileID: 7490494564413719894, guid: 5fe7a461299a7bc4fa9a95995e44a6a8, type: 3}
+    recipeIcon: {fileID: 7710585031511037781, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
     ingredients:
     - resourceType: 0
       amount: 10
@@ -105,7 +105,7 @@ MonoBehaviour:
     produceAmount: 0
     priority: 0
   - resourceType: 13
-    recipeIcon: {fileID: 7490494564413719894, guid: 5fe7a461299a7bc4fa9a95995e44a6a8, type: 3}
+    recipeIcon: {fileID: -5146700307962209370, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
     ingredients:
     - resourceType: 0
       amount: 5
