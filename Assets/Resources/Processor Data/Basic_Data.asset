@@ -1,0 +1,114 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49527cd14b8bc244c8968cf06ce143ca, type: 3}
+  m_Name: Basic_Data
+  m_EditorClassIdentifier: 
+  processorName: Smelter
+  processorInfo: 'A basic processing facility.
+
+    Melts raw ore at high temperatures,
+    refining it into standard ingots or plates.'
+  maxIngredientStorage: 100
+  maxAssignedDrones: 2
+  recipes:
+  - resourceType: 4
+    recipeIcon: {fileID: -6291453560396589059, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
+    ingredients:
+    - resourceType: 0
+      amount: 10
+    processingTime: 10
+    produceAmount: 0
+    priority: 0
+  - resourceType: 5
+    recipeIcon: {fileID: 359855223478723041, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
+    ingredients:
+    - resourceType: 0
+      amount: 5
+    - resourceType: 2
+      amount: 10
+    processingTime: 10
+    produceAmount: 0
+    priority: 0
+  - resourceType: 6
+    recipeIcon: {fileID: 9116947346429250140, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
+    ingredients:
+    - resourceType: 0
+      amount: 5
+    - resourceType: 1
+      amount: 5
+    processingTime: 10
+    produceAmount: 0
+    priority: 0
+  - resourceType: 7
+    recipeIcon: {fileID: -6843591316079228388, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
+    ingredients:
+    - resourceType: 0
+      amount: 5
+    - resourceType: 2
+      amount: 5
+    processingTime: 10
+    produceAmount: 0
+    priority: 0
+  - resourceType: 8
+    recipeIcon: {fileID: -4396813597575786351, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
+    ingredients:
+    - resourceType: 1
+      amount: 15
+    processingTime: 10
+    produceAmount: 0
+    priority: 0
+  - resourceType: 9
+    recipeIcon: {fileID: -4905985573008516872, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
+    ingredients:
+    - resourceType: 2
+      amount: 10
+    processingTime: 10
+    produceAmount: 0
+    priority: 0
+  - resourceType: 10
+    recipeIcon: {fileID: 6648999241926102489, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
+    ingredients:
+    - resourceType: 1
+      amount: 10
+    - resourceType: 3
+      amount: 5
+    processingTime: 10
+    produceAmount: 0
+    priority: 0
+  - resourceType: 11
+    recipeIcon: {fileID: -3423204301100993705, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
+    ingredients:
+    - resourceType: 2
+      amount: 15
+    - resourceType: 3
+      amount: 5
+    processingTime: 10
+    produceAmount: 0
+    priority: 0
+  - resourceType: 12
+    recipeIcon: {fileID: 7710585031511037781, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
+    ingredients:
+    - resourceType: 0
+      amount: 10
+    - resourceType: 1
+      amount: 5
+    processingTime: 10
+    produceAmount: 0
+    priority: 0
+  - resourceType: 13
+    recipeIcon: {fileID: -5146700307962209370, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
+    ingredients:
+    - resourceType: 0
+      amount: 5
+    processingTime: 10
+    produceAmount: 0
+    priority: 0

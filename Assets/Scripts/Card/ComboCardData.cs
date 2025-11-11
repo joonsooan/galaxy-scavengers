@@ -6,12 +6,15 @@ public enum ComboType
 {
     Storage,
     Generator,
-    Harvester,
-    Turret,
-    Radar,
+    DroneHub,
     Smelter,
     Assembler,
-    Converter
+    Reactor,
+    Battery,
+    RepairStation,
+    Turret,
+    Radar,
+    OrbitalLauncher
 }
 
 [CreateAssetMenu(fileName = "New Combo Card Data", menuName = "Card System/Combo Card Data")]
