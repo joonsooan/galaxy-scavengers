@@ -18,6 +18,7 @@ public class Unit_Drone : UnitBase
     private IStorage _targetStorage;
     private ResourceProcessor currentProcessor;
     public ActiveRecipe CurrentRecipeTask { get; private set; }
+    private bool _hasCheckedIn = false;
     
     private float _nextRepathTime;
     private const float RepathInterval = 0.5f;
@@ -25,6 +26,12 @@ public class Unit_Drone : UnitBase
     public bool IsAssigned {
         get {
             return currentProcessor != null;
+        }
+    }
+
+    public bool HasCheckedIn {
+        get {
+            return _hasCheckedIn;
         }
     }
 
@@ -96,13 +103,14 @@ public class Unit_Drone : UnitBase
         ReleaseFromProcessor();
 
         currentProcessor = processor;
+        _hasCheckedIn = false; // Reset check-in status when assigned to a new processor
 
         // _isManuallyAssigned = isManual;
 
         if (currentProcessor != null) {
             currentProcessor.AssignDrone(this);
             _currentState = DroneState.Idle;
-            Debug.Log($"[Drone:{name}] Assigned to processor '{currentProcessor.name}' (manual:{isManual})");
+            Debug.Log($"[Drone:{name}] Assigned to processor '{currentProcessor.name}' (manual:{isManual}). Must check in before receiving tasks.");
         }
         else {
             _currentState = DroneState.Idle;
@@ -147,6 +155,43 @@ public class Unit_Drone : UnitBase
         if (currentProcessor == null)
             return;
 
+        // Check if drone needs to check in (arrive at processor for the first time)
+        if (!_hasCheckedIn) {
+            Vector3 processorPos = currentProcessor.GetPosition();
+            float distanceToProcessor = Vector3.Distance(transform.position, processorPos);
+            float checkInDistance = movement.waypointTolerance + 0.1f;
+            
+            // Check if we're already at the processor (either by reaching target or by physical distance)
+            bool isAtProcessor = movement.HasReachedTarget(checkInDistance) || 
+                                 distanceToProcessor <= checkInDistance;
+            
+            if (isAtProcessor) {
+                // Drone has arrived at processor - check in
+                _hasCheckedIn = true;
+                Debug.Log($"[Drone:{name}] Checked in at processor '{currentProcessor.name}'. Now available for tasks.");
+                
+                // After checking in, request a task
+                if (currentProcessor != null) {
+                    currentProcessor.RequestTask(this);
+                }
+                return;
+            }
+            
+            // Not at processor yet - move towards it
+            if (!movement.IsMoving) {
+                bool hasPath = movement.SetNewTarget(processorPos);
+                if (!hasPath) {
+                    // Can't path to processor, but still need to check in
+                    // Mark as checked in anyway so it doesn't get stuck
+                    _hasCheckedIn = true;
+                    Debug.Log($"[Drone:{name}] Cannot path to processor '{currentProcessor.name}', marking as checked in anyway");
+                    currentProcessor.RequestTask(this);
+                }
+            }
+            return;
+        }
+
+        // Already checked in - normal idle behavior
         if (!movement.IsMoving) {
             bool hasPath = movement.SetNewTarget(currentProcessor.GetPosition());
             if (!hasPath) {

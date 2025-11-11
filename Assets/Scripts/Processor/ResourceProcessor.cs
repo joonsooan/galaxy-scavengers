@@ -104,8 +104,8 @@ public class ResourceProcessor : Damageable, IClickable
     {
         if (!_assignedDrones.Contains(drone) && !IsFull) {
             _assignedDrones.Add(drone);
-            Debug.Log($"[Processor:{name}] Drone '{drone.name}' assigned. Count={_assignedDrones.Count}/{_maxAssignedDrones}");
-            RequestTask(drone);
+            Debug.Log($"[Processor:{name}] Drone '{drone.name}' assigned. Count={_assignedDrones.Count}/{_maxAssignedDrones}. Waiting for check-in before assigning tasks.");
+            // Don't call RequestTask here - wait for drone to check in first
         }
     }
 
@@ -124,6 +124,14 @@ public class ResourceProcessor : Damageable, IClickable
 
     public void RequestTask(Unit_Drone drone)
     {
+        // Check if drone has checked in (arrived at processor for the first time)
+        // We need to access the check-in status through a public property or method
+        // For now, we'll add a method to check this in Unit_Drone
+        if (!drone.HasCheckedIn) {
+            Debug.Log($"[Processor:{name}] RequestTask: Drone '{drone.name}' has not checked in yet, cannot assign tasks");
+            return;
+        }
+
         // 0. 이 드론이 이미 레시피 작업에 할당되어 있는지 확인 (처리 중이거나 처리하러 이동 중)
         if (drone.CurrentRecipeTask != null) {
             // 레시피에 할당되어 있으면 재할당하지 않음 (처리 중이거나 처리하러 이동 중)
