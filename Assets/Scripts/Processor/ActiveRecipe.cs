@@ -29,10 +29,10 @@ public class ActiveRecipe
         int old = maxProductionLimit;
         maxProductionLimit = newLimit;
         
-        if (old != newLimit)
-        {
-            Debug.Log($"[ActiveRecipe:{recipeData.resourceType}] maxProductionLimit changed {old} -> {newLimit}");
-        }
+        // if (old != newLimit)
+        // {
+        //     Debug.Log($"[ActiveRecipe:{recipeData.resourceType}] maxProductionLimit changed {old} -> {newLimit}");
+        // }
         
         _processor.CheckProductionLimits(this);
     }

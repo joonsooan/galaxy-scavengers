@@ -7,6 +7,7 @@ public class Unit_Drone : UnitBase
     [SerializeField] private float processingSpeed = 1f;
     [SerializeField] private UnitMovement movement;
     [SerializeField] private Sprite droneIcon;
+    [SerializeField] private float interactionDistance = 1.1f;
 
     private int _carriedAmount;
     private ResourceType _carriedResourceType;
@@ -190,6 +191,10 @@ public class Unit_Drone : UnitBase
             _currentRequest = null;
             _currentState = DroneState.Idle;
             Debug.Log($"[Drone:{name}] State -> Idle (after delivery)");
+            
+            if (currentProcessor != null) {
+                currentProcessor.RequestTask(this);
+            }
         }
     }
 
@@ -200,27 +205,32 @@ public class Unit_Drone : UnitBase
             return;
         }
 
-        float distanceToProcessor = currentProcessor != null
-            ? Vector2.Distance(transform.position, currentProcessor.GetPosition())
-            : float.MaxValue;
-
-        bool isAtProcessor = distanceToProcessor <= (movement.waypointTolerance + 0.1f);
+        bool isAtProcessor = movement.HasReachedTarget(movement.waypointTolerance + 0.1f);
 
         if (isAtProcessor) {
-            if (!CurrentRecipeTask.isProcessing) {
-                SetTask_Idle();
-                return;
+            if (movement.IsMoving) {
+                movement.StopMovement();
             }
             currentProcessor.ProcessRecipeWork(CurrentRecipeTask, Time.deltaTime * processingSpeed);
-            return;
+            
+            // Check if processing is complete (recipe should be cleared by ProcessRecipeWork)
+            if (CurrentRecipeTask == null || (!CurrentRecipeTask.isProcessing && CurrentRecipeTask.assignedDrone == null)) {
+                // Processing is done, but ProcessRecipeWork already set the drone to Idle
+                // This is just a safety check
+                return;
+            }
         }
 
-        if (!movement.IsMoving && currentProcessor != null) {
+        if (!movement.IsMoving && !isAtProcessor) {
+            // Only attempt to re-path if enough time has passed
             if (Time.time >= _nextRepathTime) {
                 _nextRepathTime = Time.time + RepathInterval;
                 bool hasPath = movement.SetNewTarget(currentProcessor.GetPosition());
                 if (hasPath) {
-                    Debug.Log($"[Drone:{name}] Processing: re-issuing move order to processor '{currentProcessor.name}'");
+                    float distanceToTarget = movement.FinalTargetPosition != default 
+                        ? Vector3.Distance(transform.position, movement.FinalTargetPosition)
+                        : 0f;
+                    Debug.Log($"[Drone:{name}] Processing: moving to processor '{currentProcessor.name}' for recipe {CurrentRecipeTask.recipeData.resourceType} (distance to target: {distanceToTarget:F2})");
                 }
                 else {
                     Debug.Log($"[Drone:{name}] Processing: cannot path to processor '{currentProcessor.name}', going Idle");
