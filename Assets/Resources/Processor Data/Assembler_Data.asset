@@ -28,7 +28,7 @@ MonoBehaviour:
     - resourceType: 1
       amount: 5
     processingTime: 10
-    produceAmount: 0
+    produceAmount: 1
     priority: 0
   - resourceType: 7
     recipeIcon: {fileID: -6843591316079228388, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
@@ -38,7 +38,7 @@ MonoBehaviour:
     - resourceType: 2
       amount: 5
     processingTime: 10
-    produceAmount: 0
+    produceAmount: 1
     priority: 0
   - resourceType: 13
     recipeIcon: {fileID: -5146700307962209370, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
@@ -46,5 +46,5 @@ MonoBehaviour:
     - resourceType: 0
       amount: 5
     processingTime: 10
-    produceAmount: 0
+    produceAmount: 1
     priority: 0

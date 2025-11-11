@@ -7,7 +7,7 @@ public class Unit_Drone : UnitBase
     [SerializeField] private float processingSpeed = 1f;
     [SerializeField] private UnitMovement movement;
     [SerializeField] private Sprite droneIcon;
-    [SerializeField] private float interactionDistance = 1.1f;
+    // [SerializeField] private float interactionDistance = 1.1f;
 
     private int _carriedAmount;
     private ResourceType _carriedResourceType;

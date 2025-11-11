@@ -124,11 +124,18 @@ public class ResourceProcessor : Damageable, IClickable
 
     public void RequestTask(Unit_Drone drone)
     {
-        // 0. 이 드론이 이미 맡은 '진행 중인' 작업이 있는지 확인
-        if (drone.CurrentRecipeTask != null && drone.CurrentRecipeTask.isProcessing) {
-            // 이미 작업 중이면 재할당하지 않음 (이미 Processing 상태이고 목표로 이동 중이거나 작업 중)
-            // 재할당하면 불필요한 pathfinding이 발생하고 무한 루프를 유발할 수 있음
-            Debug.Log($"[Processor:{name}] RequestTask: Drone '{drone.name}' already processing {drone.CurrentRecipeTask.recipeData.resourceType}, skipping reassignment");
+        // 0. 이 드론이 이미 레시피 작업에 할당되어 있는지 확인 (처리 중이거나 처리하러 이동 중)
+        if (drone.CurrentRecipeTask != null) {
+            // 레시피에 할당되어 있으면 재할당하지 않음 (처리 중이거나 처리하러 이동 중)
+            Debug.Log($"[Processor:{name}] RequestTask: Drone '{drone.name}' already assigned to recipe {drone.CurrentRecipeTask.recipeData.resourceType}, skipping reassignment");
+            return;
+        }
+
+        // 0.5. 이 드론이 현재 재료를 운반 중인지 확인 (FetchingResource 또는 DeliveringResource 상태)
+        ResourceRequest existingRequest = _pendingRequests.FirstOrDefault(r => r.assignedDrone == drone);
+        if (existingRequest != null) {
+            // 드론이 이미 재료를 운반 중이면 재할당하지 않음
+            Debug.Log($"[Processor:{name}] RequestTask: Drone '{drone.name}' already fetching/delivering {existingRequest.type} x{existingRequest.amount}, skipping reassignment");
             return;
         }
 
@@ -152,8 +159,7 @@ public class ResourceProcessor : Damageable, IClickable
                 // 레시피에 드론 배정 (아직 처리 시작하지 않음 - 드론이 프로세서에 도착하면 시작)
                 recipe.assignedDrone = drone;
                 recipe.processingProgress = 0f;
-                // isProcessing은 드론이 프로세서에 도착했을 때 true로 설정됨
-                
+
                 Debug.Log($"[Processor:{name}] RequestTask: Assigned recipe {recipe.recipeData.resourceType} to drone '{drone.name}'. Ingredients ready, waiting for drone to arrive.");
                 drone.SetTask_Process(this, recipe);
                 return;
@@ -164,22 +170,21 @@ public class ResourceProcessor : Damageable, IClickable
         // (예: 드론이 파괴되었다가 다른 드론이 할당된 경우)
         foreach (ActiveRecipe recipe in _activeRecipes) {
             if (recipe.assignedDrone == null && recipe.isProcessing) {
-                recipe.assignedDrone = drone; // 이 드론이 이어받음
+                recipe.assignedDrone = drone;
                 drone.SetTask_Process(this, recipe);
                 Debug.Log($"[Processor:{name}] RequestTask: Drone '{drone.name}' picks up ongoing {recipe.recipeData.resourceType}");
                 return;
             }
         }
 
-        // 4. 할 일이 없음
+        // 4. 할 일 없음
         drone.SetTask_Idle();
         Debug.Log($"[Processor:{name}] RequestTask: No work for Drone '{drone.name}', set Idle");
     }
 
     private bool PassesProductionCapCheck(ActiveRecipe recipe)
     {
-        if (recipe.maxProductionLimit <= 0)
-        {
+        if (recipe.maxProductionLimit <= 0) {
             return false;
         }
 
@@ -248,14 +253,14 @@ public class ResourceProcessor : Damageable, IClickable
 
         _currentIngredients[type] += canAddAmount;
         _pendingRequests.Remove(request);
-        
+
         Debug.Log($"[Processor:{name}] Deposit from '{drone.name}': {type} +{canAddAmount} (requested {amount}). Total now {GetTotalCurrentIngredients()}/{_maxIngredientStorage}");
 
         // After depositing ingredients, check if any recipe is now ready to start processing
         if (canAddAmount > 0) {
             CheckAndAssignReadyRecipes();
         }
-        
+
         return canAddAmount > 0;
     }
 
@@ -286,12 +291,11 @@ public class ResourceProcessor : Damageable, IClickable
                 !recipe.isProcessing &&
                 HasIngredientsFor(recipe.recipeData) &&
                 PassesProductionCapCheck(recipe)) {
-                
                 // Try to find an idle drone (one that will request a task soon)
                 // Check all assigned drones and see if any are idle or about to become idle
                 // The RequestTask method will handle assignment when drones request tasks
                 Debug.Log($"[Processor:{name}] CheckAndAssignReadyRecipes: Recipe {recipe.recipeData.resourceType} is ready with all ingredients. Will be assigned when drone requests task.");
-                
+
                 // Try to immediately assign to any drone that requests a task
                 // We trigger this by having drones that just delivered request a task
             }
@@ -326,14 +330,14 @@ public class ResourceProcessor : Damageable, IClickable
         // Process the recipe
         float previousProgress = recipe.processingProgress;
         recipe.processingProgress += workAmount;
-        
+
         // Log progress periodically (every 25% completion milestone)
-        float progressPercent = (recipe.processingProgress / recipe.recipeData.processingTime) * 100f;
-        float previousPercent = (previousProgress / recipe.recipeData.processingTime) * 100f;
-        
+        float progressPercent = recipe.processingProgress / recipe.recipeData.processingTime * 100f;
+        float previousPercent = previousProgress / recipe.recipeData.processingTime * 100f;
+
         int currentQuarter = Mathf.FloorToInt(Mathf.Min(progressPercent, 100f) / 25f);
         int previousQuarter = Mathf.FloorToInt(Mathf.Min(previousPercent, 100f) / 25f);
-        
+
         // Log when we cross a 25% milestone (25%, 50%, 75%, 100%)
         if (currentQuarter > previousQuarter) {
             Debug.Log($"[Processor:{name}] Processing PROGRESS: {recipe.recipeData.resourceType} - {progressPercent:F1}% ({recipe.processingProgress:F2}/{recipe.recipeData.processingTime:F2}s)");
@@ -343,16 +347,14 @@ public class ResourceProcessor : Damageable, IClickable
         if (recipe.processingProgress >= recipe.recipeData.processingTime) {
             ProduceOutput(recipe.recipeData);
 
-            Debug.Log($"[Processor:{name}] Processing COMPLETED: {recipe.recipeData.resourceType} by drone '{recipe.assignedDrone.name}'. Output: {recipe.recipeData.produceAmount} {recipe.recipeData.resourceType}");
-
             Unit_Drone completedDrone = recipe.assignedDrone;
             recipe.isProcessing = false;
             recipe.processingProgress = 0;
             recipe.assignedDrone = null;
-            
+
             // Release the drone and assign a new task
             completedDrone.SetTask_Idle();
-            
+
             CheckProductionLimits(recipe);
         }
     }
@@ -368,8 +370,34 @@ public class ResourceProcessor : Damageable, IClickable
 
     private void ProduceOutput(ProcessorRecipe recipeData)
     {
+        int amountBefore = ResourceManager.Instance.GetResourceAmount(recipeData.resourceType);
         ResourceManager.Instance.AddResource(recipeData.resourceType, recipeData.produceAmount);
-        Debug.Log($"[Processor:{name}] Resource Produced: {recipeData.resourceType}, +{recipeData.produceAmount}");
+        int amountAfter = ResourceManager.Instance.GetResourceAmount(recipeData.resourceType);
+
+        Debug.Log($"[Processor:{name}] Resource Produced: {recipeData.resourceType}, +{recipeData.produceAmount} (ResourceManager: {amountBefore} -> {amountAfter})");
+
+        List<IStorage> storages = ResourceManager.Instance.GetAllStorages();
+        foreach (IStorage storage in storages) {
+            if (storage is MainStructure mainStructure) {
+                // Add to storage without updating ResourceManager (since we already did that)
+                int storedAmount = mainStructure.AddResourceToStorageOnly(recipeData.resourceType, recipeData.produceAmount);
+
+                if (storedAmount > 0) {
+                    if (storedAmount < recipeData.produceAmount) {
+                        Debug.Log($"[Processor:{name}] Stored {storedAmount}/{recipeData.produceAmount} in MainStructure (storage partially full). ResourceManager total: {amountAfter}");
+                    }
+                    else {
+                        Debug.Log($"[Processor:{name}] All {recipeData.produceAmount} stored in MainStructure. ResourceManager total: {amountAfter}");
+                    }
+                }
+                else {
+                    Debug.Log($"[Processor:{name}] MainStructure storage is full. Resource in ResourceManager only. Total: {amountAfter}");
+                }
+                return;
+            }
+        }
+
+        Debug.Log($"[Processor:{name}] No MainStructure storage found. Resource tracked in ResourceManager only. Total: {amountAfter}");
     }
 
     private int GetTotalCurrentIngredients()
@@ -388,31 +416,25 @@ public class ResourceProcessor : Damageable, IClickable
             _pendingRequests.Remove(request);
         }
     }
-    
+
     public void CheckProductionLimits(ActiveRecipe recipe)
     {
-        int currentAmount = ResourceManager.Instance.GetResourceAmount(recipe.recipeData.resourceType);
-
-        // Req #3: 현재 생산 중인데 한도에 도달했는지 확인
-        if (recipe.isProcessing && recipe.assignedDrone != null && currentAmount >= recipe.maxProductionLimit)
-        {
-            Unit_Drone drone = recipe.assignedDrone;
-
-            // 작업 중지
-            recipe.isProcessing = false;
-            recipe.processingProgress = 0;
-            recipe.assignedDrone = null;
-
-            // 드론을 대기 상태로 변경 (프로세서에는 할당된 상태 유지)
-            // (Req #4)
-            drone.SetTask_Idle(); 
-        }
+        // This method only assigns new tasks to idle drones - it doesn't interrupt ongoing work
 
         // Req #4: 유휴 드론이 있는지 확인하고, 새 작업이 생겼는지 확인
         // 이 프로세서에 할당된 드론 중, 현재 작업이 없는(Idle) 드론을 찾음
-        foreach (var drone in _assignedDrones.Where(d => d.CurrentRecipeTask == null))
-        {
-            RequestTask(drone);
+        // 드론이 재료를 운반 중이거나 레시피에 할당되어 있으면 새 작업을 할당하지 않음
+        foreach (Unit_Drone drone in _assignedDrones) {
+            // 재료 운반 중인지 확인 (pending request가 있으면 운반 중)
+            bool hasPendingRequest = _pendingRequests.Any(r => r.assignedDrone == drone);
+
+            // 레시피에 할당되어 있는지 확인 (처리 중이거나 처리하러 이동 중)
+            bool isAssignedToRecipe = drone.CurrentRecipeTask != null;
+
+            // 완전히 유휴한 드론만 새 작업 할당 (재료 운반 중도 아니고 레시피 작업도 없음)
+            if (!hasPendingRequest && !isAssignedToRecipe) {
+                RequestTask(drone);
+            }
         }
     }
 

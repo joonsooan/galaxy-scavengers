@@ -26,7 +26,7 @@ MonoBehaviour:
     - resourceType: 0
       amount: 10
     processingTime: 10
-    produceAmount: 0
+    produceAmount: 1
     priority: 0
   - resourceType: 5
     recipeIcon: {fileID: 359855223478723041, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
@@ -36,7 +36,7 @@ MonoBehaviour:
     - resourceType: 2
       amount: 10
     processingTime: 10
-    produceAmount: 0
+    produceAmount: 1
     priority: 0
   - resourceType: 6
     recipeIcon: {fileID: 9116947346429250140, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
@@ -46,7 +46,7 @@ MonoBehaviour:
     - resourceType: 1
       amount: 5
     processingTime: 10
-    produceAmount: 0
+    produceAmount: 1
     priority: 0
   - resourceType: 7
     recipeIcon: {fileID: -6843591316079228388, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
@@ -56,7 +56,7 @@ MonoBehaviour:
     - resourceType: 2
       amount: 5
     processingTime: 10
-    produceAmount: 0
+    produceAmount: 1
     priority: 0
   - resourceType: 8
     recipeIcon: {fileID: -4396813597575786351, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
@@ -64,7 +64,7 @@ MonoBehaviour:
     - resourceType: 1
       amount: 15
     processingTime: 10
-    produceAmount: 0
+    produceAmount: 1
     priority: 0
   - resourceType: 9
     recipeIcon: {fileID: -4905985573008516872, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
@@ -72,7 +72,7 @@ MonoBehaviour:
     - resourceType: 2
       amount: 10
     processingTime: 10
-    produceAmount: 0
+    produceAmount: 1
     priority: 0
   - resourceType: 10
     recipeIcon: {fileID: 6648999241926102489, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
@@ -82,7 +82,7 @@ MonoBehaviour:
     - resourceType: 3
       amount: 5
     processingTime: 10
-    produceAmount: 0
+    produceAmount: 1
     priority: 0
   - resourceType: 11
     recipeIcon: {fileID: -3423204301100993705, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
@@ -92,7 +92,7 @@ MonoBehaviour:
     - resourceType: 3
       amount: 5
     processingTime: 10
-    produceAmount: 0
+    produceAmount: 1
     priority: 0
   - resourceType: 12
     recipeIcon: {fileID: 7710585031511037781, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
@@ -102,7 +102,7 @@ MonoBehaviour:
     - resourceType: 1
       amount: 5
     processingTime: 10
-    produceAmount: 0
+    produceAmount: 1
     priority: 0
   - resourceType: 13
     recipeIcon: {fileID: -5146700307962209370, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
@@ -110,5 +110,5 @@ MonoBehaviour:
     - resourceType: 0
       amount: 5
     processingTime: 10
-    produceAmount: 0
+    produceAmount: 1
     priority: 0

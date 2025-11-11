@@ -182,6 +182,20 @@ public class MainStructure : Damageable, IStorage
         return GetTotalCurrentAmount() >= maxStorageAmount;
     }
 
+    public int AddResourceToStorageOnly(ResourceType type, int amount)
+    {
+        int totalAmount = GetTotalCurrentAmount();
+        if (totalAmount >= maxStorageAmount) {
+            return 0;
+        }
+
+        int canAddAmount = Mathf.Min(amount, maxStorageAmount - totalAmount);
+        _currentResources[type] += canAddAmount;
+        OnResourceChanged?.Invoke(type, _currentResources[type], maxStorageAmount);
+
+        return canAddAmount;
+    }
+
     private void AddUnitToQueue(int unitIndex)
     {
         if (unitIndex < 0 || unitIndex >= producibleUnits.Count) {
