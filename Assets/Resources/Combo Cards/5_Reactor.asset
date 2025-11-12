@@ -15,7 +15,7 @@ MonoBehaviour:
   displayName: Reactor
   description: This is Reactor
   icon: {fileID: -4619434707404030514, guid: 5fe7a461299a7bc4fa9a95995e44a6a8, type: 3}
-  comboPrefab: {fileID: 1574451153020646121, guid: 5df7df990ec2d1b43a1eea38dba32aa6, type: 3}
+  comboPrefab: {fileID: 1574451153020646121, guid: d0477e22c2f36af48ab43a010b56e5bf, type: 3}
   comboTile: {fileID: 11400000, guid: faa211a4d7b7c2349a7f55cbbbe90ae9, type: 2}
   comboType: 5
   recipe:
