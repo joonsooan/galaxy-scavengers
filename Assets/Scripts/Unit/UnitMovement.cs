@@ -35,6 +35,20 @@ public class UnitMovement : MonoBehaviour
             return _rb.linearVelocity.sqrMagnitude > 0.01f || _path.Count > 0 || _currentWaypoint != default;
         }
     }
+    
+    public Vector3 FinalTargetPosition {
+        get {
+            return _finalTargetPosition;
+        }
+    }
+
+    public bool HasReachedTarget(float tolerance = 0.1f) {
+        if (_finalTargetPosition == default) {
+            return false;
+        }
+        float distanceToTarget = Vector3.Distance(transform.position, _finalTargetPosition);
+        return distanceToTarget <= tolerance;
+    }
 
     private void Awake()
     {

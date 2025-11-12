@@ -36,15 +36,15 @@ public class ProcessorUIManager : MonoBehaviour
         }
     }
 
-    private void OnEnable()
-    {
-        ResourceProcessor.OnProcessorClicked += ShowProcessorUI;
-    }
-
-    private void OnDisable()
-    {
-        ResourceProcessor.OnProcessorClicked -= ShowProcessorUI;
-    }
+    // private void OnEnable()
+    // {
+    //     ResourceProcessor.OnProcessorClicked += ShowProcessorUI;
+    // }
+    //
+    // private void OnDisable()
+    // {
+    //     ResourceProcessor.OnProcessorClicked -= ShowProcessorUI;
+    // }
 
     // public void Update()
     // {
