@@ -55,6 +55,18 @@ public abstract class Damageable : MonoBehaviour, ICombo
         }
     }
     
+    public void Heal(int amount)
+    {
+        if (currentHealth >= maxHealth)
+        {
+            Debug.Log($"{gameObject.name} : Already at max health");
+            return;
+        }
+        
+        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        Debug.Log($"{gameObject.name} Healed : {currentHealth}/{maxHealth}");
+    }
+    
     private IEnumerator FlashEffect()
     {
         if (_sr == null) yield break;
