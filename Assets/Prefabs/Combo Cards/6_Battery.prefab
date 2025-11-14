@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 4183704755259827819}
   - component: {fileID: 6865986198788389803}
-  - component: {fileID: 2862589005175752118}
   - component: {fileID: 5177927966069864011}
+  - component: {fileID: -6061306705261559489}
   m_Layer: 0
   m_Name: 6_Battery
   m_TagString: Untagged
@@ -89,22 +89,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &2862589005175752118
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1574451153020646121}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f25412bae38531643a215e8c3038e0e1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHealth: 100
-  flashColor: {r: 1, g: 0, b: 0, a: 1}
-  flashDuration: 0.3
-  processorData: {fileID: 11400000, guid: 66284246a5192cd448e962a43b62691a, type: 2}
 --- !u!61 &5177927966069864011
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -151,3 +135,22 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 2, y: 2}
   m_EdgeRadius: 0
+--- !u!114 &-6061306705261559489
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1574451153020646121}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c54ef0df938da7b4b8738cfdb92f319b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHealth: 100
+  flashColor: {r: 1, g: 0, b: 0, a: 1}
+  flashDuration: 0.3
+  maxStorageAmount: 200
+  storageSliderPrefab: {fileID: 0}
+  canvasName: ObjectUI_Canvas
+  sliderOffset: {x: 0, y: 1, z: 0}

@@ -252,6 +252,13 @@ public class BuildingManager : MonoBehaviour
                     ResourceManager.Instance.AddStorage(storage);
                 }
                 break;
+            case ComboType.Battery:
+                IStorage battery = comboObject.GetComponent<IStorage>();
+                if (battery != null)
+                {
+                    ResourceManager.Instance.AddStorage(battery);
+                }
+                break;
             case ComboType.Generator:
                 // 예: ResourceGenerator generator = comboObject.GetComponent<ResourceGenerator>();
                 // generator?.Activate();

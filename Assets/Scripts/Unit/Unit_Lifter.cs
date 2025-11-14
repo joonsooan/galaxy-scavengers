@@ -167,8 +167,51 @@ public class Unit_Lifter : UnitBase
         yield return new WaitForSeconds(1f);
 
         if (_targetStorage != null) {
+            // Track resources before unloading to calculate what was actually accepted
+            Dictionary<ResourceType, int> resourcesBefore = new Dictionary<ResourceType, int>();
+            Dictionary<ResourceType, int> resourcesToUnload = new Dictionary<ResourceType, int>();
+            
+            // Record current storage state and what we want to unload
             foreach (KeyValuePair<ResourceType, int> pair in _currentCarryAmounts.Where(p => p.Value > 0)) {
+                resourcesBefore[pair.Key] = _targetStorage.GetCurrentResourceAmount(pair.Key);
+                resourcesToUnload[pair.Key] = pair.Value;
+            }
+            
+            // Try to unload each resource
+            foreach (KeyValuePair<ResourceType, int> pair in resourcesToUnload) {
                 _targetStorage.TryAddResource(pair.Key, pair.Value);
+            }
+            
+            // Calculate how much was actually accepted by comparing before/after
+            Dictionary<ResourceType, int> remainingResources = new Dictionary<ResourceType, int>();
+            foreach (KeyValuePair<ResourceType, int> pair in resourcesToUnload) {
+                int amountBefore = resourcesBefore[pair.Key];
+                int amountAfter = _targetStorage.GetCurrentResourceAmount(pair.Key);
+                int amountAccepted = amountAfter - amountBefore;
+                int amountRemaining = pair.Value - amountAccepted;
+                
+                if (amountRemaining > 0) {
+                    remainingResources[pair.Key] = amountRemaining;
+                }
+            }
+
+            // Update carry amounts - remove only the amount that was actually accepted
+            foreach (KeyValuePair<ResourceType, int> pair in resourcesToUnload) {
+                int amountBefore = resourcesBefore[pair.Key];
+                int amountAfter = _targetStorage.GetCurrentResourceAmount(pair.Key);
+                int amountAccepted = amountAfter - amountBefore;
+                
+                _currentCarryAmounts[pair.Key] -= amountAccepted;
+                if (_currentCarryAmounts[pair.Key] < 0) {
+                    _currentCarryAmounts[pair.Key] = 0;
+                }
+            }
+
+            // If there are remaining resources, find another storage
+            if (remainingResources.Count > 0 && remainingResources.Values.Sum() > 0) {
+                _targetStorage = null;
+                GoToStorage();
+                yield break;
             }
         }
 
@@ -249,21 +292,9 @@ public class Unit_Lifter : UnitBase
 
     private void FindAndSetStorage()
     {
-        IStorage closestStorage = null;
-        float minDistance = float.MaxValue;
-
-        IEnumerable<IStorage> availableStorages = ResourceManager.Instance.GetAllStorages()
-            .Where(s => s != null && s.GetTotalCurrentAmount() < s.GetMaxCapacity());
-
-        foreach (IStorage storage in availableStorages) {
-            float distance = Vector2.Distance(transform.position, storage.GetPosition());
-            if (distance < minDistance) {
-                minDistance = distance;
-                closestStorage = storage;
-            }
-        }
-
-        _targetStorage = closestStorage;
+        // Use the same logic as FindClosestUnloadPosition but get the storage directly
+        UnloadTarget bestTarget = FindClosestUnloadPosition();
+        _targetStorage = bestTarget.storage;
     }
 
     private void GoToStorage()
@@ -288,12 +319,65 @@ public class Unit_Lifter : UnitBase
         UnloadTarget bestTarget = new UnloadTarget { distance = float.MaxValue };
         Grid grid = BuildingManager.Instance.grid;
 
-        IEnumerable<IStorage> availableStorages = ResourceManager.Instance.GetAllStorages()
+        // Check what resources the lifter is carrying
+        bool hasAether = _currentCarryAmounts.ContainsKey(ResourceType.Aether) && 
+                         _currentCarryAmounts[ResourceType.Aether] > 0;
+        bool hasNonAether = _currentCarryAmounts.Any(p => p.Key != ResourceType.Aether && p.Value > 0);
+
+        IEnumerable<IStorage> allStorages = ResourceManager.Instance.GetAllStorages()
             .Where(s => s != null && s.GetTotalCurrentAmount() < s.GetMaxCapacity());
 
+        // If lifter has NO Aether, exclude Battery objects completely
+        if (!hasAether)
+        {
+            // Only search through non-Battery storages
+            allStorages = allStorages.Where(s => !(s is Battery));
+        }
+        else
+        {
+            // Lifter has Aether - prioritize Battery for Aether, but also need regular storage if has other resources
+            if (hasNonAether)
+            {
+                // Has both Aether and other resources
+                // First, try to find Battery to unload Aether
+                List<IStorage> batteryStorages = allStorages.Where(s => s is Battery).ToList();
+                UnloadTarget batteryTarget = FindClosestStorageInList(batteryStorages, grid);
+                
+                if (batteryTarget.storage != null)
+                {
+                    // Found a Battery - use it first (will unload Aether, other resources will remain)
+                    return batteryTarget;
+                }
+                
+                // No Battery available or all full - use regular storage for all resources
+                allStorages = allStorages.Where(s => !(s is Battery));
+            }
+            else
+            {
+                // Only has Aether - prioritize Battery, but can use regular storage if Battery is full
+                List<IStorage> batteryStorages = allStorages.Where(s => s is Battery).ToList();
+                UnloadTarget batteryTarget = FindClosestStorageInList(batteryStorages, grid);
+                
+                if (batteryTarget.storage != null)
+                {
+                    return batteryTarget;
+                }
+                
+                // No Battery available - use regular storage
+                allStorages = allStorages.Where(s => !(s is Battery));
+            }
+        }
+
+        // Search through the filtered storages
+        return FindClosestStorageInList(allStorages, grid);
+    }
+
+    private UnloadTarget FindClosestStorageInList(IEnumerable<IStorage> storages, Grid grid)
+    {
+        UnloadTarget bestTarget = new UnloadTarget { distance = float.MaxValue };
         Vector3Int[] neighborOffsets = { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
 
-        foreach (IStorage storage in availableStorages) {
+        foreach (IStorage storage in storages) {
             Vector3 storagePosition = (storage as Component).transform.position;
             Vector3Int storageCell = grid.WorldToCell(storagePosition);
 
