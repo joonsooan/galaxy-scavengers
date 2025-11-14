@@ -1,0 +1,308 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+public class DroneHub : Damageable, IClickable
+{
+    [SerializeField] private DroneHubData droneHubData;
+
+    private readonly Queue<UnitData> _productionQueue = new Queue<UnitData>();
+    private readonly Dictionary<int, int> _targetUnitCounts = new Dictionary<int, int>();
+    private readonly Dictionary<int, int> _producedUnitCounts = new Dictionary<int, int>();
+    private bool _isProducing;
+
+    public static event Action<DroneHub> OnDroneHubClicked;
+    public static event Action<int, int, int> OnUnitTargetChanged; // unitIndex, currentCount, targetCount
+
+    public DroneHubData DroneHubData {
+        get {
+            return droneHubData;
+        }
+    }
+
+    // Drone count properties for UI
+    public int TotalAllyDrones => GetTotalAllyDroneCount();
+    public int AvailableDrones => GetAvailableDroneCount();
+
+    public void OnClicked()
+    {
+        Debug.Log($"[DroneHub] OnClicked called on {gameObject.name}");
+        OnDroneHubClicked?.Invoke(this);
+    }
+
+    public int GetCurrentUnitCount(int unitIndex)
+    {
+        _producedUnitCounts.TryGetValue(unitIndex, out int count);
+        return count;
+    }
+
+    public int GetTargetUnitCount(int unitIndex)
+    {
+        _targetUnitCounts.TryGetValue(unitIndex, out int count);
+        return count;
+    }
+
+    public void SetTargetUnitCount(int unitIndex, int targetCount)
+    {
+        if (droneHubData == null || droneHubData.ProducibleUnits == null)
+        {
+            return;
+        }
+
+        if (unitIndex < 0 || unitIndex >= droneHubData.ProducibleUnits.Count)
+        {
+            return;
+        }
+
+        int currentTarget = GetTargetUnitCount(unitIndex);
+        int currentProduced = GetCurrentUnitCount(unitIndex);
+        
+        _targetUnitCounts[unitIndex] = Mathf.Max(0, targetCount);
+
+        int neededInTotal = targetCount - currentProduced;
+        int currentlyQueued = CountUnitsInQueue(unitIndex);
+
+        if (neededInTotal > currentlyQueued)
+        {
+            // Need to add more units to queue
+            int unitsToAdd = neededInTotal - currentlyQueued;
+            AddUnitsToQueue(unitIndex, unitsToAdd);
+        }
+        else if (neededInTotal < currentlyQueued)
+        {
+            // Need to remove units from queue
+            int unitsToRemove = currentlyQueued - neededInTotal;
+            RemoveUnitsFromQueue(unitIndex, unitsToRemove);
+        }
+
+        OnUnitTargetChanged?.Invoke(unitIndex, currentProduced, targetCount);
+
+        if (!_isProducing && _productionQueue.Count > 0)
+        {
+            StartCoroutine(ProcessProductionQueue());
+        }
+    }
+
+    private void AddUnitsToQueue(int unitIndex, int count)
+    {
+        if (droneHubData == null || droneHubData.ProducibleUnits == null)
+        {
+            return;
+        }
+
+        if (unitIndex < 0 || unitIndex >= droneHubData.ProducibleUnits.Count)
+        {
+            return;
+        }
+
+        UnitData unitData = droneHubData.ProducibleUnits[unitIndex];
+
+        for (int i = 0; i < count; i++)
+        {
+            if (ResourceManager.Instance.SpendResources(unitData.productionCosts))
+            {
+                _productionQueue.Enqueue(unitData);
+            }
+            else
+            {
+                Debug.Log($"Can't produce unit {unitData.unitName}: insufficient resources");
+                break;
+            }
+        }
+    }
+
+    private void RemoveUnitsFromQueue(int unitIndex, int count)
+    {
+        if (droneHubData == null || droneHubData.ProducibleUnits == null)
+        {
+            return;
+        }
+
+        if (unitIndex < 0 || unitIndex >= droneHubData.ProducibleUnits.Count)
+        {
+            return;
+        }
+
+        UnitData targetUnit = droneHubData.ProducibleUnits[unitIndex];
+        int removed = 0;
+        
+        List<UnitData> queueList = new List<UnitData>(_productionQueue);
+        _productionQueue.Clear();
+
+        for (int i = queueList.Count - 1; i >= 0 && removed < count; i--)
+        {
+            if (queueList[i] == targetUnit)
+            {
+                if (targetUnit.productionCosts != null)
+                {
+                    foreach (ResourceCost cost in targetUnit.productionCosts)
+                    {
+                        ResourceManager.Instance.AddResource(cost.resourceType, cost.amount);
+                    }
+                }
+                queueList.RemoveAt(i);
+                removed++;
+            }
+        }
+
+        // Rebuild queue
+        foreach (UnitData unit in queueList)
+        {
+            _productionQueue.Enqueue(unit);
+        }
+    }
+
+    public void AddUnitToQueue(int unitIndex)
+    {
+        int currentTarget = GetTargetUnitCount(unitIndex);
+        SetTargetUnitCount(unitIndex, currentTarget + 1);
+    }
+
+    private IEnumerator ProcessProductionQueue()
+    {
+        _isProducing = true;
+
+        while (_productionQueue.Count > 0 || HasPendingTargets())
+        {
+            // Check if we need to add more units to the queue
+            UpdateQueueFromTargets();
+
+            if (_productionQueue.Count == 0)
+            {
+                _isProducing = false;
+                yield break;
+            }
+
+            UnitData unitToProduce = _productionQueue.Dequeue();
+
+            yield return new WaitForSeconds(unitToProduce.productionTime);
+
+            // Find which unit index this is
+            int unitIndex = FindUnitIndex(unitToProduce);
+            if (unitIndex >= 0)
+            {
+                _producedUnitCounts.TryGetValue(unitIndex, out int currentCount);
+                _producedUnitCounts[unitIndex] = currentCount + 1;
+
+                int targetCount = GetTargetUnitCount(unitIndex);
+                OnUnitTargetChanged?.Invoke(unitIndex, currentCount + 1, targetCount);
+            }
+
+            Instantiate(unitToProduce.unitPrefab, transform.position, Quaternion.identity, BuildingManager.Instance.grid.transform);
+        }
+
+        _isProducing = false;
+    }
+
+    private bool HasPendingTargets()
+    {
+        if (droneHubData == null || droneHubData.ProducibleUnits == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < droneHubData.ProducibleUnits.Count; i++)
+        {
+            int currentCount = GetCurrentUnitCount(i);
+            int targetCount = GetTargetUnitCount(i);
+            if (currentCount < targetCount)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void UpdateQueueFromTargets()
+    {
+        if (droneHubData == null || droneHubData.ProducibleUnits == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < droneHubData.ProducibleUnits.Count; i++)
+        {
+            int currentCount = GetCurrentUnitCount(i);
+            int targetCount = GetTargetUnitCount(i);
+            
+            if (currentCount < targetCount)
+            {
+                int needed = targetCount - currentCount;
+                int queued = CountUnitsInQueue(i);
+                int toAdd = needed - queued;
+                
+                if (toAdd > 0)
+                {
+                    AddUnitsToQueue(i, toAdd);
+                }
+            }
+        }
+    }
+
+    private int CountUnitsInQueue(int unitIndex)
+    {
+        if (droneHubData == null || droneHubData.ProducibleUnits == null)
+        {
+            return 0;
+        }
+
+        if (unitIndex < 0 || unitIndex >= droneHubData.ProducibleUnits.Count)
+        {
+            return 0;
+        }
+
+        UnitData targetUnit = droneHubData.ProducibleUnits[unitIndex];
+        int count = 0;
+        foreach (UnitData unit in _productionQueue)
+        {
+            if (unit == targetUnit)
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private int FindUnitIndex(UnitData unitData)
+    {
+        if (droneHubData == null || droneHubData.ProducibleUnits == null)
+        {
+            return -1;
+        }
+
+        for (int i = 0; i < droneHubData.ProducibleUnits.Count; i++)
+        {
+            if (droneHubData.ProducibleUnits[i] == unitData)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private int GetTotalAllyDroneCount()
+    {
+        if (UnitManager.Instance == null)
+        {
+            return 0;
+        }
+
+        return UnitManager.Instance.AllyUnits
+            .OfType<Unit_Drone>()
+            .Count();
+    }
+
+    private int GetAvailableDroneCount()
+    {
+        if (UnitManager.Instance == null)
+        {
+            return 0;
+        }
+
+        return UnitManager.Instance.AllyUnits
+            .OfType<Unit_Drone>()
+            .Count(d => !d.IsAssigned);
+    }
+}

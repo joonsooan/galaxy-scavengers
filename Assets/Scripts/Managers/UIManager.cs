@@ -18,6 +18,9 @@ public class UIManager : MonoBehaviour
     [Header("Processor Info Panel")]
     [SerializeField] private GameObject processorInfoPanel;
 
+    [Header("Drone Hub Info Panel")]
+    [SerializeField] private GameObject droneHubInfoPanel;
+
     [Header("Tips Reference")]
     [SerializeField] private GameObject tipPanel;
     [SerializeField] private GameObject tipResourcePanel1;
@@ -29,16 +32,29 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject tipMineTypePanel;
     [SerializeField] private GameObject tipUnitMakeBtn;
     private ResourceProcessor _currentProcessor;
+    private DroneHub _currentDroneHub;
 
     private CardData _pinnedCardData;
     private ResourceProcessorData _pinnedProcessorData;
+    private DroneHubData _pinnedDroneHubData;
     private ComboCardData _pinnedRecipeData;
+
+    // Track which UI panel is currently displayed
+    private enum ActiveUIPanel
+    {
+        None,
+        Processor,
+        DroneHub
+    }
+    
+    private ActiveUIPanel _activeUIPanel = ActiveUIPanel.None;
 
     private void Start()
     {
         if (cardInfoPanel != null) cardInfoPanel.SetActive(false);
         if (recipeInfoPanel != null) recipeInfoPanel.SetActive(false);
         if (processorInfoPanel != null) processorInfoPanel.SetActive(false);
+        if (droneHubInfoPanel != null) droneHubInfoPanel.SetActive(false);
     }
 
     private void Update()
@@ -54,19 +70,60 @@ public class UIManager : MonoBehaviour
     private void OnEnable()
     {
         ResourceProcessor.OnProcessorClicked += HandleProcessorClicked;
+        DroneHub.OnDroneHubClicked += HandleDroneHubClicked;
     }
 
     private void OnDisable()
     {
         ResourceProcessor.OnProcessorClicked -= HandleProcessorClicked;
+        DroneHub.OnDroneHubClicked -= HandleDroneHubClicked;
     }
 
     private void HandleProcessorClicked(ResourceProcessor processor)
     {
         if (processor == null) return;
 
+        // Hide any currently displayed IClickable UI
+        HideCurrentIClickableUI();
+        
         _currentProcessor = processor;
+        _activeUIPanel = ActiveUIPanel.Processor;
         DisplayProcessorInfo(processor);
+    }
+
+    private void HandleDroneHubClicked(DroneHub droneHub)
+    {
+        if (droneHub == null) return;
+
+        // Hide any currently displayed IClickable UI
+        HideCurrentIClickableUI();
+        
+        _currentDroneHub = droneHub;
+        _activeUIPanel = ActiveUIPanel.DroneHub;
+        DisplayDroneHubInfo(droneHub);
+    }
+
+    private void HideCurrentIClickableUI()
+    {
+        // 이전에 보여지던 UI 비활성화
+        switch (_activeUIPanel)
+        {
+            case ActiveUIPanel.Processor:
+                if (processorInfoPanel != null) {
+                    processorInfoPanel.gameObject.SetActive(false);
+                }
+                _currentProcessor = null;
+                break;
+                
+            case ActiveUIPanel.DroneHub:
+                if (droneHubInfoPanel != null) {
+                    droneHubInfoPanel.gameObject.SetActive(false);
+                }
+                _currentDroneHub = null;
+                break;
+        }
+        
+        _activeUIPanel = ActiveUIPanel.None;
     }
 
     private void UnpinAndHideAllPanels()
@@ -85,6 +142,14 @@ public class UIManager : MonoBehaviour
         if (processorInfoPanel != null) {
             processorInfoPanel.SetActive(false);
         }
+
+        _pinnedDroneHubData = null;
+        if (droneHubInfoPanel != null) {
+            droneHubInfoPanel.SetActive(false);
+        }
+
+        // Reset active UI panel tracking
+        HideCurrentIClickableUI();
     }
 
     public void DisplayCardInfo(CardData data)
@@ -178,6 +243,9 @@ public class UIManager : MonoBehaviour
         if (_pinnedProcessorData == null) {
             processorInfoPanel.gameObject.SetActive(false);
             _currentProcessor = null;
+            if (_activeUIPanel == ActiveUIPanel.Processor) {
+                _activeUIPanel = ActiveUIPanel.None;
+            }
         }
     }
 
@@ -195,6 +263,43 @@ public class UIManager : MonoBehaviour
             _pinnedProcessorData = data;
             _currentProcessor = processor;
             DisplayProcessorInfo(processor);
+        }
+    }
+
+    private void DisplayDroneHubInfo(DroneHub droneHub)
+    {
+        if (droneHub == null || droneHubInfoPanel == null) return;
+        droneHubInfoPanel.gameObject.SetActive(true);
+        DroneProduceUIManager.Instance.ShowDroneHubUI(droneHub);
+    }
+
+    public void HideDroneHubInfo()
+    {
+        if (droneHubInfoPanel == null) return;
+
+        if (_pinnedDroneHubData == null) {
+            droneHubInfoPanel.gameObject.SetActive(false);
+            _currentDroneHub = null;
+            if (_activeUIPanel == ActiveUIPanel.DroneHub) {
+                _activeUIPanel = ActiveUIPanel.None;
+            }
+        }
+    }
+
+    public void PinDroneHubInfo(DroneHub droneHub)
+    {
+        if (droneHub == null) return;
+
+        DroneHubData data = droneHub.DroneHubData;
+
+        if (_pinnedDroneHubData == data) {
+            UnpinAndHideAllPanels();
+        }
+        else {
+            UnpinAndHideAllPanels();
+            _pinnedDroneHubData = data;
+            _currentDroneHub = droneHub;
+            DisplayDroneHubInfo(droneHub);
         }
     }
 

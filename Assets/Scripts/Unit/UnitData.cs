@@ -5,6 +5,7 @@ public class UnitData : ScriptableObject
 {
     [Header("Base Information")]
     public string unitName;
+    public Sprite unitIcon;
     public GameObject unitPrefab;
 
     [Header("Production Costs")]

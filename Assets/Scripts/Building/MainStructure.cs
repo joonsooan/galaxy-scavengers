@@ -20,6 +20,7 @@ public class MainStructure : Damageable, IStorage
 
     private readonly Dictionary<ResourceType, int> _currentResources = new Dictionary<ResourceType, int>();
     private readonly Queue<UnitData> _productionQueue = new Queue<UnitData>();
+    private Vector3 unitSpawnPos;
 
     private bool _isProducing;
     private GameObject _sliderInstance;
@@ -32,6 +33,8 @@ public class MainStructure : Damageable, IStorage
         foreach (ResourceType type in Enum.GetValues(typeof(ResourceType))) {
             _currentResources[type] = 0;
         }
+        
+        unitSpawnPos = transform.position - 2 * Vector3.up;
     }
 
     private void Start()
@@ -135,13 +138,15 @@ public class MainStructure : Damageable, IStorage
     private void InitUnitBtns()
     {
         GameObject lifterMakeButtonObj = GameObject.Find("Lifter Make Btn");
-        GameObject droneMakeButtonObj = GameObject.Find("Drone Make Btn");
 
-        Button btn = lifterMakeButtonObj.GetComponent<Button>();
-        btn.onClick.AddListener(() => AddUnitToQueue(0));
-
-        btn = droneMakeButtonObj.GetComponent<Button>();
-        btn.onClick.AddListener(() => AddUnitToQueue(1));
+        if (lifterMakeButtonObj != null)
+        {
+            Button btn = lifterMakeButtonObj.GetComponent<Button>();
+            if (btn != null)
+            {
+                btn.onClick.AddListener(() => AddUnitToQueue(0));
+            }
+        }
     }
 
     private void InitSlider()
@@ -224,8 +229,8 @@ public class MainStructure : Damageable, IStorage
             UnitData unitToProduce = _productionQueue.Dequeue();
 
             yield return new WaitForSeconds(unitToProduce.productionTime);
-
-            Instantiate(unitToProduce.unitPrefab, transform.position, Quaternion.identity, BuildingManager.Instance.grid.transform);
+            
+            Instantiate(unitToProduce.unitPrefab, unitSpawnPos, Quaternion.identity, BuildingManager.Instance.grid.transform);
         }
 
         _isProducing = false;
