@@ -76,6 +76,13 @@ public abstract class UnitBase : MonoBehaviour
         }
     }
     
+    public void Heal(float amount)
+    {
+        if (currentHealth >= maxHealth) return;
+        
+        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+    }
+    
     private IEnumerator FlashEffect()
     {
         if (_sr == null) yield break;
