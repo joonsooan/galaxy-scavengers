@@ -31,11 +31,11 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject tipRemainTimePanel;
     [SerializeField] private GameObject tipMineTypePanel;
     [SerializeField] private GameObject tipUnitMakeBtn;
-    private ResourceProcessor _currentProcessor;
+    private Processor _currentProcessor;
     private DroneHub _currentDroneHub;
 
     private CardData _pinnedCardData;
-    private ResourceProcessorData _pinnedProcessorData;
+    private ProcessorData _pinnedProcessorData;
     private DroneHubData _pinnedDroneHubData;
     private ComboCardData _pinnedRecipeData;
 
@@ -69,17 +69,17 @@ public class UIManager : MonoBehaviour
 
     private void OnEnable()
     {
-        ResourceProcessor.OnProcessorClicked += HandleProcessorClicked;
+        Processor.OnProcessorClicked += HandleProcessorClicked;
         DroneHub.OnDroneHubClicked += HandleDroneHubClicked;
     }
 
     private void OnDisable()
     {
-        ResourceProcessor.OnProcessorClicked -= HandleProcessorClicked;
+        Processor.OnProcessorClicked -= HandleProcessorClicked;
         DroneHub.OnDroneHubClicked -= HandleDroneHubClicked;
     }
 
-    private void HandleProcessorClicked(ResourceProcessor processor)
+    private void HandleProcessorClicked(Processor processor)
     {
         if (processor == null) return;
 
@@ -229,7 +229,7 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    private void DisplayProcessorInfo(ResourceProcessor processor)
+    private void DisplayProcessorInfo(Processor processor)
     {
         if (processor == null || processorInfoPanel == null) return;
         processorInfoPanel.gameObject.SetActive(true);
@@ -249,11 +249,11 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void PinProcessorInfo(ResourceProcessor processor)
+    public void PinProcessorInfo(Processor processor)
     {
         if (processor == null) return;
 
-        ResourceProcessorData data = processor.ProcessorData;
+        ProcessorData data = processor.ProcessorData;
 
         if (_pinnedProcessorData == data) {
             UnpinAndHideAllPanels();

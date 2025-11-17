@@ -11,12 +11,12 @@ public class Unit_Drone : UnitBase
 
     private int _carriedAmount;
     private ResourceType _carriedResourceType;
-    private ResourceProcessor.ResourceRequest _currentRequest;
+    private Processor.ResourceRequest _currentRequest;
     private DroneState _currentState = DroneState.Idle;
 
     // private bool _isManuallyAssigned;
     private IStorage _targetStorage;
-    private ResourceProcessor currentProcessor;
+    private Processor currentProcessor;
     public ActiveRecipe CurrentRecipeTask { get; private set; }
     private bool _hasCheckedIn = false;
     
@@ -98,7 +98,7 @@ public class Unit_Drone : UnitBase
         }
     }
 
-    public void AssignProcessor(ResourceProcessor processor, bool isManual = false)
+    public void AssignProcessor(Processor processor, bool isManual = false)
     {
         ReleaseFromProcessor();
 
@@ -300,7 +300,7 @@ public class Unit_Drone : UnitBase
         }
     }
 
-    public void SetTask_FetchResource(ResourceProcessor.ResourceRequest request, ResourceProcessor processor)
+    public void SetTask_FetchResource(Processor.ResourceRequest request, Processor processor)
     {
         _currentRequest = request;
         _targetStorage = ResourceManager.Instance.FindClosestStorageWithResource(processor.GetPosition(), request.type, 1);
@@ -318,7 +318,7 @@ public class Unit_Drone : UnitBase
         Debug.Log($"[Drone:{name}] Fetch failed: no storage or path blocked. Returning home.");
     }
 
-    public void SetTask_Process(ResourceProcessor processor, ActiveRecipe recipeTask)
+    public void SetTask_Process(Processor processor, ActiveRecipe recipeTask)
     {
         bool hasPath = movement.SetNewTarget(processor.GetPosition());
         

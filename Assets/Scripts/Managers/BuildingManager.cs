@@ -21,7 +21,7 @@ public class BuildingManager : MonoBehaviour
     private readonly Dictionary<Vector3Int, BuildingStructure> _buildingStructuresByAnchor = new ();
     private readonly Dictionary<Vector3Int, BuildingStructure> _cellToStructureMap = new ();
    
-    private readonly List<ResourceProcessor> _processors = new List<ResourceProcessor>();
+    private readonly List<Processor> _processors = new List<Processor>();
     
     public static event Action<Vector3Int> OnTilemapChanged;
     
@@ -372,7 +372,7 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
-    public void RegisterProcessor(ResourceProcessor processor)
+    public void RegisterProcessor(Processor processor)
     {
         if (!_processors.Contains(processor))
         {
@@ -380,14 +380,14 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
-    public void UnregisterProcessor(ResourceProcessor processor)
+    public void UnregisterProcessor(Processor processor)
     {
         _processors.Remove(processor);
     }
     
-    public ResourceProcessor FindClosestAvailableProcessor(Vector3 position)
+    public Processor FindClosestAvailableProcessor(Vector3 position)
     {
-        ResourceProcessor closestProcessor = null;
+        Processor closestProcessor = null;
         float minDistance = float.MaxValue;
 
         foreach (var processor in _processors)

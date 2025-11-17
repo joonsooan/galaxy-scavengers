@@ -9,14 +9,14 @@ public class UnitAssignCell : MonoBehaviour
     [SerializeField] private Button cellButton;
 
     private Unit_Drone _assignedDrone;
-    private ResourceProcessor _processor;
+    private Processor _processor;
 
     private void Awake()
     {
         cellButton.onClick.AddListener(OnCellClicked);
     }
 
-    public void Initialize(ResourceProcessor processor, Unit_Drone drone)
+    public void Initialize(Processor processor, Unit_Drone drone)
     {
         _processor = processor;
         _assignedDrone = drone;

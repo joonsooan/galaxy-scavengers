@@ -21,8 +21,8 @@ public class ProcessorUIManager : MonoBehaviour
     // [SerializeField] private ResourceProcessorData testData;
 
     private List<ProcessorRecipe> _allRecipes;
-    private ResourceProcessorData _currentData;
-    private ResourceProcessor _currentProcessor;
+    private ProcessorData _currentData;
+    private Processor _currentProcessor;
 
     public static ProcessorUIManager Instance { get; private set; }
 
@@ -54,7 +54,7 @@ public class ProcessorUIManager : MonoBehaviour
     //         ClearAllRecipes();
     // }
 
-    public void ShowProcessorUI(ResourceProcessor processor)
+    public void ShowProcessorUI(Processor processor)
     {
         _currentProcessor = processor;
         _currentData = processor.ProcessorData;
@@ -65,13 +65,13 @@ public class ProcessorUIManager : MonoBehaviour
         InstantiateUnitAssignCells();
     }
 
-    private void SetProcessorInfo(ResourceProcessorData data)
+    private void SetProcessorInfo(ProcessorData data)
     {
         processorName.text = data.ProcessorName;
         processorInfo.text = data.ProcessorInfo;
     }
 
-    private void LoadAllRecipes(ResourceProcessorData data)
+    private void LoadAllRecipes(ProcessorData data)
     {
         ClearAllRecipes();
         _allRecipes = data.Recipes;

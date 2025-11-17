@@ -16,7 +16,7 @@ public class UnitAssignPanel : MonoBehaviour
     private Unit_Drone _currentDrone;
     private UnitAssignCell _targetCell;
 
-    private ResourceProcessor _targetProcessor;
+    private Processor _targetProcessor;
 
     private void OnEnable()
     {
@@ -43,7 +43,7 @@ public class UnitAssignPanel : MonoBehaviour
         availableUnitPanel.SetActive(false);
     }
 
-    public void ShowPanel(ResourceProcessor processor, UnitAssignCell cell, Unit_Drone drone)
+    public void ShowPanel(Processor processor, UnitAssignCell cell, Unit_Drone drone)
     {
         _targetProcessor = processor;
         _targetCell = cell;

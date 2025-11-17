@@ -14,9 +14,9 @@ public class ActiveRecipe
     public ProcessorRecipe recipeData;
     public int maxProductionLimit;
     
-    private ResourceProcessor _processor;
+    private Processor _processor;
 
-    public ActiveRecipe(ProcessorRecipe data, ResourceProcessor processor)
+    public ActiveRecipe(ProcessorRecipe data, Processor processor)
     {
         recipeData = data;
         _processor = processor;
