@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Unit_Drone : UnitBase
@@ -170,6 +171,9 @@ public class Unit_Drone : UnitBase
                 _hasCheckedIn = true;
                 Debug.Log($"[Drone:{name}] Checked in at processor '{currentProcessor.name}'. Now available for tasks.");
                 
+                // Face the processor building when checking in
+                AdjustSpriteDirectionToBuilding(currentProcessor.transform);
+                
                 // After checking in, request a task
                 if (currentProcessor != null) {
                     currentProcessor.RequestTask(this);
@@ -232,6 +236,11 @@ public class Unit_Drone : UnitBase
     private void UpdateDelivering()
     {
         if (!movement.IsMoving) {
+            // Face the processor building before depositing
+            if (currentProcessor != null) {
+                AdjustSpriteDirectionToBuilding(currentProcessor.transform);
+            }
+            
             bool deposited = currentProcessor.TryDepositIngredient(_carriedResourceType, _carriedAmount, this);
             Debug.Log($"[Drone:{name}] Delivering: deposit {_carriedAmount} {_carriedResourceType} to '{currentProcessor.name}' -> {(deposited ? "OK" : "FAILED")}" );
 
@@ -244,6 +253,53 @@ public class Unit_Drone : UnitBase
                 currentProcessor.RequestTask(this);
             }
         }
+    }
+    
+    private void AdjustSpriteDirectionToBuilding(Transform buildingTransform)
+    {
+        if (buildingTransform == null || BuildingManager.Instance == null || BuildingManager.Instance.grid == null) return;
+        if (!TryGetComponent<UnitSpriteController>(out var spriteController)) return;
+
+        Vector3Int unitCell = BuildingManager.Instance.grid.WorldToCell(transform.position);
+        Vector3Int buildingCell = BuildingManager.Instance.grid.WorldToCell(buildingTransform.position);
+        
+        // For large buildings, find the nearest occupied cell
+        Vector3Int targetCell = buildingCell;
+        if (BuildingManager.Instance.GetBuildingAt(buildingCell, out List<Vector3Int> occupiedCells))
+        {
+            float minDistance = float.MaxValue;
+            foreach (Vector3Int cell in occupiedCells)
+            {
+                float distance = Vector3.Distance(transform.position, BuildingManager.Instance.grid.GetCellCenterWorld(cell));
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    targetCell = cell;
+                }
+            }
+        }
+
+        Vector3Int relativePosition = targetCell - unitCell;
+        Vector2 targetDirection = Vector2.zero;
+
+        if (relativePosition.x > 0)
+        {
+            targetDirection = Vector2.right;
+        }
+        else if (relativePosition.x < 0)
+        {
+            targetDirection = Vector2.left;
+        }
+        else if (relativePosition.y > 0)
+        {
+            targetDirection = Vector2.up;
+        }
+        else if (relativePosition.y < 0)
+        {
+            targetDirection = Vector2.down;
+        }
+
+        spriteController.UpdateSpriteDirection(targetDirection);
     }
 
     private void UpdateProcessing()
@@ -259,6 +315,10 @@ public class Unit_Drone : UnitBase
             if (movement.IsMoving) {
                 movement.StopMovement();
             }
+            
+            // Face the processor building
+            AdjustSpriteDirectionToBuilding(currentProcessor.transform);
+            
             currentProcessor.ProcessRecipeWork(CurrentRecipeTask, Time.deltaTime * processingSpeed);
             
             // Check if processing is complete (recipe should be cleared by ProcessRecipeWork)

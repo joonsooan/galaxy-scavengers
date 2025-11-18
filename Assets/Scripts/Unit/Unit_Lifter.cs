@@ -568,8 +568,25 @@ public class Unit_Lifter : UnitBase
         Vector3Int unitCell = grid.WorldToCell(transform.position);
         
         Vector3Int storageCell = grid.WorldToCell((_targetStorage as Component).transform.position);
+        
+        // For large buildings (like 3x3 MainStructure), find the nearest occupied cell
+        Vector3Int targetCell = storageCell;
+        if (BuildingManager.Instance != null && BuildingManager.Instance.GetBuildingAt(storageCell, out List<Vector3Int> occupiedCells))
+        {
+            // Find the closest occupied cell to the unit
+            float minDistance = float.MaxValue;
+            foreach (Vector3Int cell in occupiedCells)
+            {
+                float distance = Vector3.Distance(transform.position, grid.GetCellCenterWorld(cell));
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    targetCell = cell;
+                }
+            }
+        }
 
-        Vector3Int relativePosition = storageCell - unitCell;
+        Vector3Int relativePosition = targetCell - unitCell;
 
         Vector2 targetDirection = Vector2.zero;
 

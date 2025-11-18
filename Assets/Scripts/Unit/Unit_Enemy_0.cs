@@ -59,11 +59,22 @@ public class Unit_Enemy_0 : UnitBase
             case UnitState.Moving:
                 if (distanceToTarget <= attackRange)
                 {
+                    // Face the target before starting to attack
+                    if (_target != null)
+                    {
+                        AdjustSpriteDirectionToTarget(_target.transform);
+                    }
                     StartAttacking();
                 }
                 break;
 
             case UnitState.Attacking:
+                // Continue facing the target while attacking
+                if (_target != null)
+                {
+                    AdjustSpriteDirectionToTarget(_target.transform);
+                }
+                
                 if (distanceToTarget > attackRange)
                 {
                     StopAttacking();
@@ -153,10 +164,63 @@ public class Unit_Enemy_0 : UnitBase
     {
         currentState = UnitState.Attacking;
         unitMovement.StopMovement();
+        
+        // Face the target building
+        if (_target != null)
+        {
+            AdjustSpriteDirectionToTarget(_target.transform);
+        }
+        
         if (_attackCoroutine == null)
         {
             _attackCoroutine = StartCoroutine(AttackCoroutine());
         }
+    }
+    
+    private void AdjustSpriteDirectionToTarget(Transform targetTransform)
+    {
+        if (targetTransform == null || BuildingManager.Instance == null || BuildingManager.Instance.grid == null) return;
+        if (!TryGetComponent<UnitSpriteController>(out var spriteController)) return;
+
+        Vector3Int unitCell = BuildingManager.Instance.grid.WorldToCell(transform.position);
+        Vector3Int targetCell = BuildingManager.Instance.grid.WorldToCell(targetTransform.position);
+        
+        // For large buildings, find the nearest occupied cell
+        if (BuildingManager.Instance.GetBuildingAt(targetCell, out List<Vector3Int> occupiedCells))
+        {
+            float minDistance = float.MaxValue;
+            foreach (Vector3Int cell in occupiedCells)
+            {
+                float distance = Vector3.Distance(transform.position, BuildingManager.Instance.grid.GetCellCenterWorld(cell));
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    targetCell = cell;
+                }
+            }
+        }
+
+        Vector3Int relativePosition = targetCell - unitCell;
+        Vector2 targetDirection = Vector2.zero;
+
+        if (relativePosition.x > 0)
+        {
+            targetDirection = Vector2.right;
+        }
+        else if (relativePosition.x < 0)
+        {
+            targetDirection = Vector2.left;
+        }
+        else if (relativePosition.y > 0)
+        {
+            targetDirection = Vector2.up;
+        }
+        else if (relativePosition.y < 0)
+        {
+            targetDirection = Vector2.down;
+        }
+
+        spriteController.UpdateSpriteDirection(targetDirection);
     }
 
     private void StopAttacking()
