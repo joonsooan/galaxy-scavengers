@@ -47,7 +47,6 @@ public class ResourceManager : MonoBehaviour
     [SerializeField] private int aetherInitialAmount;
     [SerializeField] private int biomassInitialAmount;
     [SerializeField] private int cryoCrystalInitialAmount;
-    [SerializeField] private int solanaInitialAmount;
 
     [Header("1 Crafted Resource Start Values")]
     [SerializeField] private int alloyPlateInitialAmount;
@@ -57,6 +56,7 @@ public class ResourceManager : MonoBehaviour
     [SerializeField] private int powerCubeInitialAmount;
     [SerializeField] private int bioFuelInitialAmount;
     [SerializeField] private int cryoGelInitialAmount;
+    [SerializeField] private int solanaInitialAmount;
     [SerializeField] private int coreInitialAmount;
     [SerializeField] private int ammunitionInitialAmount;
 
@@ -78,12 +78,31 @@ public class ResourceManager : MonoBehaviour
     [Header("Resource Stats")]
     [SerializeField] private List<ResourceStats> resourceStatsList;
 
-    [Header("Resource UI")]
+    [Header("Resource Stats UI")]
     [SerializeField] private TMP_Text ferriteNumber;
     [SerializeField] private TMP_Text aetherNumber;
     [SerializeField] private TMP_Text biomassNumber;
     [SerializeField] private TMP_Text cryoCrystalNumber;
+    [SerializeField] private TMP_Text alloyPlateNumber;
+    [SerializeField] private TMP_Text compositeFrameNumber;
+    [SerializeField] private TMP_Text eChipNumber;
+    [SerializeField] private TMP_Text bioCableNumber;
+    [SerializeField] private TMP_Text powerCubeNumber;
+    [SerializeField] private TMP_Text bioFuelNumber;
+    [SerializeField] private TMP_Text cryoGelNumber;
     [SerializeField] private TMP_Text solanaNumber;
+    [SerializeField] private TMP_Text coreNumber;
+    [SerializeField] private TMP_Text ammunitionNumber;
+    [SerializeField] private TMP_Text heavyPlatingNumber;
+    [SerializeField] private TMP_Text actuatorNumber;
+    [SerializeField] private TMP_Text genomeChipNumber;
+    [SerializeField] private TMP_Text patchKitNumber;
+    [SerializeField] private TMP_Text sensorUnitNumber;
+    [SerializeField] private TMP_Text plasmaCubeNumber;
+    [SerializeField] private TMP_Text cryoConduitNumber;
+    [SerializeField] private TMP_Text seekerMissileNumber;
+    [SerializeField] private TMP_Text nexusDataNumber;
+    [SerializeField] private TMP_Text neuralMatrixNumber;
 
     private readonly List<ResourceNode> _allResources = new List<ResourceNode>();
     private readonly List<IStorage> _allStorages = new List<IStorage>();
@@ -362,25 +381,88 @@ public class ResourceManager : MonoBehaviour
 
     private void FindAndConnectUI()
     {
-        ferriteNumber = GameObject.Find("Resource0_txt")?.GetComponent<TMP_Text>();
-        aetherNumber = GameObject.Find("Resource1_txt")?.GetComponent<TMP_Text>();
-        biomassNumber = GameObject.Find("Resource2_txt")?.GetComponent<TMP_Text>();
-        cryoCrystalNumber = GameObject.Find("Resource3_txt")?.GetComponent<TMP_Text>();
-        solanaNumber = GameObject.Find("Resource4_txt")?.GetComponent<TMP_Text>();
+        if (ferriteNumber == null)
+            ferriteNumber = GameObject.Find("Resource0_txt")?.GetComponent<TMP_Text>();
+
+        if (aetherNumber == null)
+            aetherNumber = GameObject.Find("Resource1_txt")?.GetComponent<TMP_Text>();
+
+        if (biomassNumber == null)
+            biomassNumber = GameObject.Find("Resource2_txt")?.GetComponent<TMP_Text>();
+
+        if (cryoCrystalNumber == null)
+            cryoCrystalNumber = GameObject.Find("Resource3_txt")?.GetComponent<TMP_Text>();
+
+        // 1 Crafted Resource UI (Resource4_txt ~ Resource13_txt)
+        if (alloyPlateNumber == null)
+            alloyPlateNumber = GameObject.Find("Resource4_txt")?.GetComponent<TMP_Text>();
+
+        if (compositeFrameNumber == null)
+            compositeFrameNumber = GameObject.Find("Resource5_txt")?.GetComponent<TMP_Text>();
+
+        if (eChipNumber == null)
+            eChipNumber = GameObject.Find("Resource6_txt")?.GetComponent<TMP_Text>();
+
+        if (bioCableNumber == null)
+            bioCableNumber = GameObject.Find("Resource7_txt")?.GetComponent<TMP_Text>();
+
+        if (powerCubeNumber == null)
+            powerCubeNumber = GameObject.Find("Resource8_txt")?.GetComponent<TMP_Text>();
+
+        if (bioFuelNumber == null)
+            bioFuelNumber = GameObject.Find("Resource9_txt")?.GetComponent<TMP_Text>();
+
+        if (cryoGelNumber == null)
+            cryoGelNumber = GameObject.Find("Resource10_txt")?.GetComponent<TMP_Text>();
+
+        if (solanaNumber == null)
+            solanaNumber = GameObject.Find("Resource11_txt")?.GetComponent<TMP_Text>();
+
+        if (coreNumber == null)
+            coreNumber = GameObject.Find("Resource12_txt")?.GetComponent<TMP_Text>();
+
+        if (ammunitionNumber == null)
+            ammunitionNumber = GameObject.Find("Resource13_txt")?.GetComponent<TMP_Text>();
+
+        // 2 Crafted Resource UI (Resource14_txt ~ Resource23_txt)
+        if (heavyPlatingNumber == null)
+            heavyPlatingNumber = GameObject.Find("Resource14_txt")?.GetComponent<TMP_Text>();
+
+        if (actuatorNumber == null)
+            actuatorNumber = GameObject.Find("Resource15_txt")?.GetComponent<TMP_Text>();
+
+        if (genomeChipNumber == null)
+            genomeChipNumber = GameObject.Find("Resource16_txt")?.GetComponent<TMP_Text>();
+
+        if (patchKitNumber == null)
+            patchKitNumber = GameObject.Find("Resource17_txt")?.GetComponent<TMP_Text>();
+
+        if (sensorUnitNumber == null)
+            sensorUnitNumber = GameObject.Find("Resource18_txt")?.GetComponent<TMP_Text>();
+
+        if (plasmaCubeNumber == null)
+            plasmaCubeNumber = GameObject.Find("Resource19_txt")?.GetComponent<TMP_Text>();
+
+        if (cryoConduitNumber == null)
+            cryoConduitNumber = GameObject.Find("Resource20_txt")?.GetComponent<TMP_Text>();
+
+        if (seekerMissileNumber == null)
+            seekerMissileNumber = GameObject.Find("Resource21_txt")?.GetComponent<TMP_Text>();
+
+        if (nexusDataNumber == null)
+            nexusDataNumber = GameObject.Find("Resource22_txt")?.GetComponent<TMP_Text>();
+
+        if (neuralMatrixNumber == null)
+            neuralMatrixNumber = GameObject.Find("Resource23_txt")?.GetComponent<TMP_Text>();
     }
 
     private void UpdateResourceUI(ResourceType type)
     {
         if (!IsUIConnected()) return;
 
-        if (type == ResourceType.Solana) {
-            // UpdateSolanaUI();
-        }
-        else {
-            TMP_Text resourceText = GetResourceText(type);
-            if (resourceText != null) {
-                resourceText.text = _resourceCounts[type].ToString();
-            }
+        TMP_Text resourceText = GetResourceText(type);
+        if (resourceText != null) {
+            resourceText.text = _resourceCounts[type].ToString();
         }
     }
 
@@ -392,8 +474,26 @@ public class ResourceManager : MonoBehaviour
         if (aetherNumber != null) aetherNumber.text = _resourceCounts[ResourceType.Aether].ToString();
         if (biomassNumber != null) biomassNumber.text = _resourceCounts[ResourceType.Biomass].ToString();
         if (cryoCrystalNumber != null) cryoCrystalNumber.text = _resourceCounts[ResourceType.CryoCrystal].ToString();
-
-        // UpdateSolanaUI();
+        if (alloyPlateNumber != null) alloyPlateNumber.text = _resourceCounts[ResourceType.AlloyPlate].ToString();
+        if (compositeFrameNumber != null) compositeFrameNumber.text = _resourceCounts[ResourceType.CompositeFrame].ToString();
+        if (eChipNumber != null) eChipNumber.text = _resourceCounts[ResourceType.EChip].ToString();
+        if (bioCableNumber != null) bioCableNumber.text = _resourceCounts[ResourceType.BioCable].ToString();
+        if (powerCubeNumber != null) powerCubeNumber.text = _resourceCounts[ResourceType.PowerCube].ToString();
+        if (bioFuelNumber != null) bioFuelNumber.text = _resourceCounts[ResourceType.BioFuel].ToString();
+        if (cryoGelNumber != null) cryoGelNumber.text = _resourceCounts[ResourceType.CryoGel].ToString();
+        if (solanaNumber != null) solanaNumber.text = _resourceCounts[ResourceType.Solana].ToString();
+        if (coreNumber != null) coreNumber.text = _resourceCounts[ResourceType.Core].ToString();
+        if (ammunitionNumber != null) ammunitionNumber.text = _resourceCounts[ResourceType.Ammunition].ToString();
+        if (heavyPlatingNumber != null) heavyPlatingNumber.text = _resourceCounts[ResourceType.HeavyPlating].ToString();
+        if (actuatorNumber != null) actuatorNumber.text = _resourceCounts[ResourceType.Actuator].ToString();
+        if (genomeChipNumber != null) genomeChipNumber.text = _resourceCounts[ResourceType.GenomeChip].ToString();
+        if (patchKitNumber != null) patchKitNumber.text = _resourceCounts[ResourceType.PatchKit].ToString();
+        if (sensorUnitNumber != null) sensorUnitNumber.text = _resourceCounts[ResourceType.SensorUnit].ToString();
+        if (plasmaCubeNumber != null) plasmaCubeNumber.text = _resourceCounts[ResourceType.PlasmaCube].ToString();
+        if (cryoConduitNumber != null) cryoConduitNumber.text = _resourceCounts[ResourceType.CryoConduit].ToString();
+        if (seekerMissileNumber != null) seekerMissileNumber.text = _resourceCounts[ResourceType.SeekerMissile].ToString();
+        if (nexusDataNumber != null) nexusDataNumber.text = _resourceCounts[ResourceType.NexusData].ToString();
+        if (neuralMatrixNumber != null) neuralMatrixNumber.text = _resourceCounts[ResourceType.NeuralMatrix].ToString();
     }
 
     // private void UpdateSolanaUI()
@@ -415,6 +515,26 @@ public class ResourceManager : MonoBehaviour
             ResourceType.Aether => aetherNumber,
             ResourceType.Biomass => biomassNumber,
             ResourceType.CryoCrystal => cryoCrystalNumber,
+            ResourceType.AlloyPlate => alloyPlateNumber,
+            ResourceType.CompositeFrame => compositeFrameNumber,
+            ResourceType.EChip => eChipNumber,
+            ResourceType.BioCable => bioCableNumber,
+            ResourceType.PowerCube => powerCubeNumber,
+            ResourceType.BioFuel => bioFuelNumber,
+            ResourceType.CryoGel => cryoGelNumber,
+            ResourceType.Solana => solanaNumber,
+            ResourceType.Core => coreNumber,
+            ResourceType.Ammunition => ammunitionNumber,
+            ResourceType.HeavyPlating => heavyPlatingNumber,
+            ResourceType.Actuator => actuatorNumber,
+            ResourceType.GenomeChip => genomeChipNumber,
+            ResourceType.PatchKit => patchKitNumber,
+            ResourceType.SensorUnit => sensorUnitNumber,
+            ResourceType.PlasmaCube => plasmaCubeNumber,
+            ResourceType.CryoConduit => cryoConduitNumber,
+            ResourceType.SeekerMissile => seekerMissileNumber,
+            ResourceType.NexusData => nexusDataNumber,
+            ResourceType.NeuralMatrix => neuralMatrixNumber,
             _ => null
         };
     }
