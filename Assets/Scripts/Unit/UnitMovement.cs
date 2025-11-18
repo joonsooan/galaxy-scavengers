@@ -125,15 +125,30 @@ public class UnitMovement : MonoBehaviour
     {
         return SetNewTarget(targetPosition, waypointTolerance);
     }
+    
+    public bool SetNewTargetDirect(Vector2 targetPosition, float stoppingDistance)
+    {
+        // Set target directly without finding interaction cells (used for assigned interaction positions)
+        _finalTargetPosition = targetPosition;
+        _finalStoppingDistance = stoppingDistance;
+        
+        _path = FindPath(transform.position, _finalTargetPosition);
+        
+        if (_path.Count > 0) {
+            _currentWaypoint = _path.Dequeue();
+            return true;
+        }
+        return false;
+    }
 
     public bool SetNewTarget(Vector2 targetPosition, float stoppingDistance)
     {
         Vector3Int targetCellPos = _grid.WorldToCell(targetPosition);
         Vector3Int targetCellForPathfinding = targetCellPos;
 
-        if (BuildingManager.Instance.GetBuildingAt(targetCellPos, out List<Vector3Int> occupiedCells)) {
+        if (BuildingManager.Instance != null && BuildingManager.Instance.GetBuildingAt(targetCellPos, out List<Vector3Int> cells)) {
             // 다양한 크기의 건물
-            targetCellForPathfinding = FindBestInteractionCell(occupiedCells, transform.position);
+            targetCellForPathfinding = FindBestInteractionCell(cells, transform.position);
 
             if (targetCellForPathfinding == new Vector3Int(int.MinValue, int.MinValue, int.MinValue)) {
                 Debug.LogWarning($"[{name}] No valid interaction cell found for building at {targetCellPos}");
@@ -143,7 +158,7 @@ public class UnitMovement : MonoBehaviour
         else if (!IsCellWalkable(targetCellPos)) {
             // 건물이 아니지만 걸을 수 없는 타일 (예: 1x1 자원)
             // 1x1 건물처럼 취급하여 상호작용 위치 탐색
-            occupiedCells = new List<Vector3Int> { targetCellPos };
+            List<Vector3Int> occupiedCells = new List<Vector3Int> { targetCellPos };
 
             targetCellForPathfinding = FindBestInteractionCell(occupiedCells, transform.position);
 
@@ -276,6 +291,9 @@ public class UnitMovement : MonoBehaviour
 
     private bool IsCellWalkable(Vector3Int cell)
     {
+        if (BuildingManager.Instance == null) {
+            return true; // If BuildingManager is null, assume cell is walkable
+        }
         return !BuildingManager.Instance.IsResourceTile(cell) && !BuildingManager.Instance.IsBuildingTile(cell);
     }
 

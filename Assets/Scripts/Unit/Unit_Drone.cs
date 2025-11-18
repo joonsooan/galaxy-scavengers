@@ -177,9 +177,10 @@ public class Unit_Drone : UnitBase
                 return;
             }
             
-            // Not at processor yet - move towards it
+            // Not at processor yet - move towards it using assigned interaction cell
             if (!movement.IsMoving) {
-                bool hasPath = movement.SetNewTarget(processorPos);
+                Vector3 interactionPos = currentProcessor.AssignInteractionCell(this);
+                bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
                 if (!hasPath) {
                     // Can't path to processor, but still need to check in
                     // Mark as checked in anyway so it doesn't get stuck
@@ -193,7 +194,8 @@ public class Unit_Drone : UnitBase
 
         // Already checked in - normal idle behavior
         if (!movement.IsMoving) {
-            bool hasPath = movement.SetNewTarget(currentProcessor.GetPosition());
+            Vector3 interactionPos = currentProcessor.AssignInteractionCell(this);
+            bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
             if (!hasPath) {
                 currentProcessor.RequestTask(this);
                 Debug.Log($"[Drone:{name}] Idle: cannot path to processor '{currentProcessor.name}', requesting task");
@@ -213,7 +215,8 @@ public class Unit_Drone : UnitBase
                 if (withdrawnAmount > 0) {
                     _carriedResourceType = _currentRequest.type;
                     _carriedAmount = withdrawnAmount;
-                    movement.SetNewTarget(currentProcessor.GetPosition());
+                    Vector3 interactionPos = currentProcessor.AssignInteractionCell(this);
+                    movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
                     _currentState = DroneState.DeliveringResource;
                 }
                 else {
@@ -270,7 +273,8 @@ public class Unit_Drone : UnitBase
             // Only attempt to re-path if enough time has passed
             if (Time.time >= _nextRepathTime) {
                 _nextRepathTime = Time.time + RepathInterval;
-                bool hasPath = movement.SetNewTarget(currentProcessor.GetPosition());
+                Vector3 interactionPos = currentProcessor.AssignInteractionCell(this);
+                bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
                 if (hasPath) {
                     float distanceToTarget = movement.FinalTargetPosition != default 
                         ? Vector3.Distance(transform.position, movement.FinalTargetPosition)
@@ -293,7 +297,8 @@ public class Unit_Drone : UnitBase
             return;
         }
         
-        movement.SetNewTarget(currentProcessor.GetPosition());
+        Vector3 interactionPos = currentProcessor.AssignInteractionCell(this);
+        movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
 
         if (!movement.IsMoving) {
             _currentState = DroneState.Idle;
@@ -320,7 +325,8 @@ public class Unit_Drone : UnitBase
 
     public void SetTask_Process(Processor processor, ActiveRecipe recipeTask)
     {
-        bool hasPath = movement.SetNewTarget(processor.GetPosition());
+        Vector3 interactionPos = processor.AssignInteractionCell(this);
+        bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
         
         if (!hasPath) {
             SetTask_Idle();

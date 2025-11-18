@@ -353,6 +353,39 @@ public class BuildingManager : MonoBehaviour
         }
     }
     
+    public void RegisterMainStructure(Vector3Int anchorCell, Vector2Int size)
+    {
+        BuildingStructure structure = new BuildingStructure
+        {
+            anchor = anchorCell,
+            size = size
+        };
+        
+        // Calculate all occupied cells for the building
+        for (int x = 0; x < size.x; x++)
+        {
+            for (int y = 0; y < size.y; y++)
+            {
+                Vector3Int cell = anchorCell + new Vector3Int(x, y, 0);
+                structure.occupiedCells.Add(cell);
+                
+                // Mark the cell in the building tilemap if it's the main structure tile
+                if (buildingTilemap != null && mainStructureTile != null)
+                {
+                    buildingTilemap.SetTile(cell, mainStructureTile);
+                }
+            }
+        }
+        
+        RegisterBuildingStructure(structure);
+        
+        // Notify tilemap changes for all cells
+        foreach (Vector3Int cell in structure.occupiedCells)
+        {
+            OnTilemapChanged?.Invoke(cell);
+        }
+    }
+    
     private void UnregisterBuildingStructure(Vector3Int anchor)
     {
         if (_buildingStructuresByAnchor.Remove(anchor, out BuildingStructure structure))

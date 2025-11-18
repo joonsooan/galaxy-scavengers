@@ -11,6 +11,7 @@ public class Processor : Damageable, IClickable
     private readonly List<Unit_Drone> _assignedDrones = new List<Unit_Drone>();
     private readonly Dictionary<ResourceType, int> _currentIngredients = new Dictionary<ResourceType, int>();
     private readonly List<ResourceRequest> _pendingRequests = new List<ResourceRequest>();
+    private readonly Dictionary<Unit_Drone, Vector3Int> _droneInteractionCells = new Dictionary<Unit_Drone, Vector3Int>();
 
     private int _maxAssignedDrones;
     private int _maxIngredientStorage;
@@ -112,6 +113,11 @@ public class Processor : Damageable, IClickable
     public void ReleaseDrone(Unit_Drone drone)
     {
         _assignedDrones.Remove(drone);
+        
+        // Release the interaction cell assigned to this drone
+        if (_droneInteractionCells.ContainsKey(drone)) {
+            _droneInteractionCells.Remove(drone);
+        }
 
         ReleaseDroneFromRecipe(drone);
 
@@ -416,6 +422,115 @@ public class Processor : Damageable, IClickable
     public Vector3 GetPosition()
     {
         return transform.position;
+    }
+    
+    public Vector3? GetAssignedInteractionPosition(Unit_Drone drone)
+    {
+        if (_droneInteractionCells.TryGetValue(drone, out Vector3Int cell)) {
+            if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null) {
+                return BuildingManager.Instance.grid.GetCellCenterWorld(cell);
+            }
+        }
+        return null;
+    }
+    
+    public Vector3 AssignInteractionCell(Unit_Drone drone)
+    {
+        // Safety checks
+        if (drone == null) {
+            return transform.position;
+        }
+        
+        if (BuildingManager.Instance == null || BuildingManager.Instance.grid == null) {
+            Debug.LogWarning($"[Processor:{name}] BuildingManager or Grid is null, falling back to processor position");
+            return transform.position;
+        }
+        
+        // Get the building's occupied cells
+        Vector3Int processorCell = BuildingManager.Instance.grid.WorldToCell(transform.position);
+        if (!BuildingManager.Instance.GetBuildingAt(processorCell, out List<Vector3Int> occupiedCells)) {
+            // If not found as a building, treat as a single cell
+            occupiedCells = new List<Vector3Int> { processorCell };
+        }
+        
+        // Get all available interaction cells
+        List<Vector3Int> availableCells = GetAvailableInteractionCells(occupiedCells);
+        
+        if (availableCells.Count == 0) {
+            // No available cells, fall back to processor position
+            return transform.position;
+        }
+        
+        // If drone already has an assigned cell and it's still available, keep it
+        if (_droneInteractionCells.TryGetValue(drone, out Vector3Int existingCell)) {
+            if (availableCells.Contains(existingCell)) {
+                return BuildingManager.Instance.grid.GetCellCenterWorld(existingCell);
+            }
+        }
+        
+        // Find the best available cell (prefer unassigned cells, then closest to drone)
+        Vector3Int bestCell = availableCells[0];
+        float minDistance = float.MaxValue;
+        Vector3 dronePos = drone.transform.position;
+        
+        HashSet<Vector3Int> assignedCells = new HashSet<Vector3Int>(_droneInteractionCells.Values);
+        
+        foreach (Vector3Int cell in availableCells) {
+            // Prefer cells that aren't assigned to other drones
+            bool isUnassigned = !assignedCells.Contains(cell);
+            float distance = Vector3.Distance(dronePos, BuildingManager.Instance.grid.GetCellCenterWorld(cell));
+            
+            // Prioritize unassigned cells, then by distance
+            if (isUnassigned && assignedCells.Contains(bestCell)) {
+                bestCell = cell;
+                minDistance = distance;
+            }
+            else if (isUnassigned == !assignedCells.Contains(bestCell)) {
+                // Both are same assignment status, pick closer one
+                if (distance < minDistance) {
+                    bestCell = cell;
+                    minDistance = distance;
+                }
+            }
+        }
+        
+        // Assign the cell to this drone
+        _droneInteractionCells[drone] = bestCell;
+        
+        return BuildingManager.Instance.grid.GetCellCenterWorld(bestCell);
+    }
+    
+    private List<Vector3Int> GetAvailableInteractionCells(List<Vector3Int> occupiedCells)
+    {
+        HashSet<Vector3Int> interactionCells = new HashSet<Vector3Int>();
+        HashSet<Vector3Int> occupiedSet = new HashSet<Vector3Int>(occupiedCells);
+        
+        Vector3Int[] cardinalOffsets = {
+            new Vector3Int(1, 0, 0), new Vector3Int(-1, 0, 0),
+            new Vector3Int(0, 1, 0), new Vector3Int(0, -1, 0)
+        };
+        
+        // Find all walkable cells adjacent to the building
+        foreach (Vector3Int occupiedCell in occupiedSet) {
+            foreach (Vector3Int offset in cardinalOffsets) {
+                Vector3Int neighbor = occupiedCell + offset;
+                
+                if (!occupiedSet.Contains(neighbor) && IsCellWalkable(neighbor)) {
+                    interactionCells.Add(neighbor);
+                }
+            }
+        }
+        
+        return interactionCells.ToList();
+    }
+    
+    private bool IsCellWalkable(Vector3Int cell)
+    {
+        if (BuildingManager.Instance == null) {
+            return false;
+        }
+        return !BuildingManager.Instance.IsResourceTile(cell) && 
+               !BuildingManager.Instance.IsBuildingTile(cell);
     }
 
     public void CancelRequest(ResourceRequest request)

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -47,7 +48,8 @@ public class Unit_Enemy_0 : UnitBase
             return;
         }
 
-        float distanceToTarget = Vector2.Distance(transform.position, _target.transform.position);
+        // Calculate distance to the nearest point of the target (for large buildings)
+        float distanceToTarget = GetDistanceToTarget(_target);
 
         switch (currentState)
         {
@@ -69,6 +71,33 @@ public class Unit_Enemy_0 : UnitBase
                 }
                 break;
         }
+    }
+    
+    private float GetDistanceToTarget(Damageable target)
+    {
+        // For buildings, check distance to the nearest occupied cell, not just the center
+        if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null)
+        {
+            Vector3Int targetCell = BuildingManager.Instance.grid.WorldToCell(target.transform.position);
+            if (BuildingManager.Instance.GetBuildingAt(targetCell, out List<Vector3Int> occupiedCells))
+            {
+                // Find the closest occupied cell to the enemy
+                float minDistance = float.MaxValue;
+                foreach (Vector3Int cell in occupiedCells)
+                {
+                    Vector3 cellWorldPos = BuildingManager.Instance.grid.GetCellCenterWorld(cell);
+                    float distance = Vector2.Distance(transform.position, cellWorldPos);
+                    if (distance < minDistance)
+                    {
+                        minDistance = distance;
+                    }
+                }
+                return minDistance;
+            }
+        }
+        
+        // Fallback to center distance for non-buildings or if BuildingManager is unavailable
+        return Vector2.Distance(transform.position, target.transform.position);
     }
     
     private void MoveToTarget()

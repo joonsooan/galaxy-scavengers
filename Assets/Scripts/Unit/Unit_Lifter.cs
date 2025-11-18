@@ -380,16 +380,40 @@ public class Unit_Lifter : UnitBase
         foreach (IStorage storage in storages) {
             Vector3 storagePosition = (storage as Component).transform.position;
             Vector3Int storageCell = grid.WorldToCell(storagePosition);
-
-            foreach (Vector3Int offset in neighborOffsets) {
-                Vector3Int neighborCell = storageCell + offset;
-                if (BuildingManager.Instance.CanPlaceBuilding(neighborCell)) {
-                    float distance = Vector3.Distance(transform.position, grid.GetCellCenterWorld(neighborCell));
-                    if (distance < bestTarget.distance) {
-                        bestTarget.storage = storage;
-                        bestTarget.unloadCell = neighborCell;
-                        bestTarget.distance = distance;
+            
+            // Get all occupied cells if this is a registered building (handles 3x3 MainStructure)
+            List<Vector3Int> occupiedCells = null;
+            if (BuildingManager.Instance != null && BuildingManager.Instance.GetBuildingAt(storageCell, out List<Vector3Int> cells)) {
+                occupiedCells = cells;
+            } else {
+                // Not a registered building, treat as single cell
+                occupiedCells = new List<Vector3Int> { storageCell };
+            }
+            
+            // Find all valid interaction cells around the building
+            HashSet<Vector3Int> interactionCells = new HashSet<Vector3Int>();
+            HashSet<Vector3Int> occupiedSet = new HashSet<Vector3Int>(occupiedCells);
+            
+            foreach (Vector3Int occupiedCell in occupiedSet) {
+                foreach (Vector3Int offset in neighborOffsets) {
+                    Vector3Int neighborCell = occupiedCell + offset;
+                    
+                    // Check if this neighbor is not part of the building and is walkable
+                    if (!occupiedSet.Contains(neighborCell) && 
+                        BuildingManager.Instance != null && 
+                        BuildingManager.Instance.CanPlaceBuilding(neighborCell)) {
+                        interactionCells.Add(neighborCell);
                     }
+                }
+            }
+            
+            // Find the closest interaction cell for this storage
+            foreach (Vector3Int interactionCell in interactionCells) {
+                float distance = Vector3.Distance(transform.position, grid.GetCellCenterWorld(interactionCell));
+                if (distance < bestTarget.distance) {
+                    bestTarget.storage = storage;
+                    bestTarget.unloadCell = interactionCell;
+                    bestTarget.distance = distance;
                 }
             }
         }
