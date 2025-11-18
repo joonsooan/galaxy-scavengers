@@ -48,8 +48,12 @@ public class Unit_Enemy_0 : UnitBase
             return;
         }
 
-        // Calculate distance to the nearest point of the target (for large buildings)
+        // Check if enemy has reached the interaction cell (where it should attack from)
+        bool hasReachedInteractionCell = unitMovement.HasReachedTarget(unitMovement.waypointTolerance + 0.1f);
+        
+        // Also check distance to target as a fallback (for non-building targets or edge cases)
         float distanceToTarget = GetDistanceToTarget(_target);
+        bool isWithinAttackRange = distanceToTarget <= attackRange;
 
         switch (currentState)
         {
@@ -57,7 +61,8 @@ public class Unit_Enemy_0 : UnitBase
                 break;
 
             case UnitState.Moving:
-                if (distanceToTarget <= attackRange)
+                // Start attacking when we've reached the interaction cell AND are within attack range
+                if (hasReachedInteractionCell && isWithinAttackRange)
                 {
                     // Face the target before starting to attack
                     if (_target != null)
@@ -75,7 +80,8 @@ public class Unit_Enemy_0 : UnitBase
                     AdjustSpriteDirectionToTarget(_target.transform);
                 }
                 
-                if (distanceToTarget > attackRange)
+                // Stop attacking if we're no longer at the interaction cell or out of range
+                if (!hasReachedInteractionCell || !isWithinAttackRange)
                 {
                     StopAttacking();
                     MoveToTarget();
@@ -115,7 +121,9 @@ public class Unit_Enemy_0 : UnitBase
     {
         if (_target == null) return;
         
-        if (unitMovement.SetNewTarget(_target.transform.position, attackRange * 0.9f))
+        // Use SetNewTarget which automatically finds interaction cells for buildings
+        // Use a small stopping distance since we want to reach the interaction cell exactly
+        if (unitMovement.SetNewTarget(_target.transform.position, unitMovement.waypointTolerance))
         {
             currentState = UnitState.Moving;
         }
@@ -163,6 +171,9 @@ public class Unit_Enemy_0 : UnitBase
     private void StartAttacking()
     {
         currentState = UnitState.Attacking;
+        
+        // Snap to the interaction cell center before stopping movement
+        unitMovement.SnapToTargetCellCenter();
         unitMovement.StopMovement();
         
         // Face the target building
