@@ -253,6 +253,28 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: temp-buildings_6
+      rect:
+        serializedVersion: 2
+        x: 98
+        y: 50
+        width: 48
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 68478a1445545b9429e8fef02b4723c1
+      internalID: -1208440334
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -273,6 +295,7 @@ TextureImporter:
       temp-buildings_3: -143252898816197684
       temp-buildings_4: 907466949
       temp-buildings_5: 1281307735
+      temp-buildings_6: -1208440334
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

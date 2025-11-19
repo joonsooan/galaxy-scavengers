@@ -31,6 +31,10 @@ public class BuildingSpawner : MonoBehaviour
             if (buildingTilemap.HasTile(cellPosition) && buildingTilemap.GetTile(cellPosition) == mainStructureTile) {
                 Vector3 worldPos = grid.GetCellCenterWorld(cellPosition);
                 
+                // Calculate the anchor position for a 3x3 building (bottom-left corner)
+                // The tile position is the center, so we need to offset to get the bottom-left
+                Vector3Int anchorCell = cellPosition - new Vector3Int(1, 1, 0);
+                
                 GameObject newBuilding = Instantiate(mainStructurePrefab, worldPos, Quaternion.identity, parentTransform);
                 MainStructure mainStructure = newBuilding.GetComponent<MainStructure>();
                 
@@ -38,6 +42,12 @@ public class BuildingSpawner : MonoBehaviour
                 {
                     ResourceManager.Instance.RegisterMainStructure(mainStructure);
                     ResourceManager.Instance.AddStorage(mainStructure);
+                }
+                
+                // Register the Main Structure as a 3x3 building in BuildingManager
+                if (BuildingManager.Instance != null)
+                {
+                    BuildingManager.Instance.RegisterMainStructure(anchorCell, new Vector2Int(3, 3));
                 }
             }
         }

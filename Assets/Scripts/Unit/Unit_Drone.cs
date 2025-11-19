@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Unit_Drone : UnitBase
@@ -5,6 +7,9 @@ public class Unit_Drone : UnitBase
     [Header("Drone Settings")]
     [SerializeField] public int carryCapacity = 10;
     [SerializeField] private float processingSpeed = 1f;
+    [SerializeField] private float loadingTime = 1f;
+    [SerializeField] private float unloadingTime = 1f;
+    [SerializeField] private float assignmentTime = 1f;
     [SerializeField] private UnitMovement movement;
     [SerializeField] private Sprite droneIcon;
     // [SerializeField] private float interactionDistance = 1.1f;
@@ -22,6 +27,10 @@ public class Unit_Drone : UnitBase
     
     private float _nextRepathTime;
     private const float RepathInterval = 0.5f;
+    
+    private Coroutine _loadingCoroutine;
+    private Coroutine _unloadingCoroutine;
+    private Coroutine _assignmentCoroutine;
 
     public bool IsAssigned {
         get {
@@ -121,6 +130,20 @@ public class Unit_Drone : UnitBase
     private void ReleaseFromProcessor()
     {
         ReleaseFromRecipeTask();
+        
+        // Stop any ongoing coroutines
+        if (_loadingCoroutine != null) {
+            StopCoroutine(_loadingCoroutine);
+            _loadingCoroutine = null;
+        }
+        if (_unloadingCoroutine != null) {
+            StopCoroutine(_unloadingCoroutine);
+            _unloadingCoroutine = null;
+        }
+        if (_assignmentCoroutine != null) {
+            StopCoroutine(_assignmentCoroutine);
+            _assignmentCoroutine = null;
+        }
 
         if (currentProcessor != null) {
             currentProcessor.ReleaseDrone(this);
@@ -157,46 +180,61 @@ public class Unit_Drone : UnitBase
 
         // Check if drone needs to check in (arrive at processor for the first time)
         if (!_hasCheckedIn) {
-            Vector3 processorPos = currentProcessor.GetPosition();
-            float distanceToProcessor = Vector3.Distance(transform.position, processorPos);
-            float checkInDistance = movement.waypointTolerance + 0.1f;
+            // If assignment coroutine is running, don't do anything - just wait
+            if (_assignmentCoroutine != null) {
+                return;
+            }
             
-            // Check if we're already at the processor (either by reaching target or by physical distance)
-            bool isAtProcessor = movement.HasReachedTarget(checkInDistance) || 
-                                 distanceToProcessor <= checkInDistance;
+            // Check if we're already at the processor (same distance check as processing)
+            bool isAtProcessorForCheckIn = movement.HasReachedTarget(movement.waypointTolerance + 0.1f);
             
-            if (isAtProcessor) {
-                // Drone has arrived at processor - check in
-                _hasCheckedIn = true;
-                Debug.Log($"[Drone:{name}] Checked in at processor '{currentProcessor.name}'. Now available for tasks.");
-                
-                // After checking in, request a task
-                if (currentProcessor != null) {
-                    currentProcessor.RequestTask(this);
+            if (isAtProcessorForCheckIn) {
+                // Drone has arrived at processor - start assignment/initialization
+                if (_assignmentCoroutine == null) {
+                    _assignmentCoroutine = StartCoroutine(AssignmentCoroutine());
                 }
                 return;
             }
             
-            // Not at processor yet - move towards it
+            // Not at processor yet - move towards it using assigned interaction cell
             if (!movement.IsMoving) {
-                bool hasPath = movement.SetNewTarget(processorPos);
+                Vector3 interactionPos = currentProcessor.AssignInteractionCell(this);
+                bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
                 if (!hasPath) {
                     // Can't path to processor, but still need to check in
-                    // Mark as checked in anyway so it doesn't get stuck
-                    _hasCheckedIn = true;
-                    Debug.Log($"[Drone:{name}] Cannot path to processor '{currentProcessor.name}', marking as checked in anyway");
-                    currentProcessor.RequestTask(this);
+                    // Start assignment coroutine anyway so it goes through the assignment time
+                    if (_assignmentCoroutine == null) {
+                        _assignmentCoroutine = StartCoroutine(AssignmentCoroutine());
+                    }
                 }
             }
             return;
         }
 
         // Already checked in - normal idle behavior
-        if (!movement.IsMoving) {
-            bool hasPath = movement.SetNewTarget(currentProcessor.GetPosition());
-            if (!hasPath) {
+        // Check if we're already at the processor
+        bool isAtProcessor = movement.HasReachedTarget(movement.waypointTolerance + 0.1f);
+        
+        if (isAtProcessor) {
+            // Already at processor - stay still and request task if needed
+            if (!movement.IsMoving) {
+                // Ensure we're completely still
+                movement.ForceStopAllMovement();
+                // Face the processor building
+                AdjustSpriteDirectionToBuilding(currentProcessor.transform);
+                // Request task (will do nothing if already requested)
                 currentProcessor.RequestTask(this);
-                Debug.Log($"[Drone:{name}] Idle: cannot path to processor '{currentProcessor.name}', requesting task");
+            }
+        }
+        else {
+            // Not at processor - move towards it
+            if (!movement.IsMoving) {
+                Vector3 interactionPos = currentProcessor.AssignInteractionCell(this);
+                bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
+                if (!hasPath) {
+                    currentProcessor.RequestTask(this);
+                    Debug.Log($"[Drone:{name}] Idle: cannot path to processor '{currentProcessor.name}', requesting task");
+                }
             }
         }
     }
@@ -209,12 +247,36 @@ public class Unit_Drone : UnitBase
         }
 
         if (!movement.IsMoving) {
+            // Start loading coroutine if not already running
+            if (_loadingCoroutine == null) {
+                _loadingCoroutine = StartCoroutine(LoadingResourceCoroutine());
+            }
+        }
+    }
+    
+    private IEnumerator LoadingResourceCoroutine()
+    {
+        // Force stop all movement including alignment to prevent vibration
+        movement.ForceStopAllMovement();
+        
+        // Face the storage building and keep it stable
+        if (_targetStorage != null) {
+            AdjustSpriteDirectionToBuilding((_targetStorage as Component).transform);
+        }
+        
+        // Wait for loading time - unit should remain completely still
+        yield return new WaitForSeconds(loadingTime);
+        
+        if (_targetStorage != null && _currentRequest != null) {
             if (_targetStorage.TryWithdrawResource(_currentRequest.type, _currentRequest.amount, out int withdrawnAmount)) {
                 if (withdrawnAmount > 0) {
                     _carriedResourceType = _currentRequest.type;
                     _carriedAmount = withdrawnAmount;
-                    movement.SetNewTarget(currentProcessor.GetPosition());
+                    Vector3 interactionPos = currentProcessor.AssignInteractionCell(this);
+                    movement.ResumeMovement(); // Resume movement before setting new target
+                    movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
                     _currentState = DroneState.DeliveringResource;
+                    Debug.Log($"[Drone:{name}] Loaded {withdrawnAmount} {_carriedResourceType} from storage");
                 }
                 else {
                     SetTask_ReturnHome();
@@ -224,11 +286,37 @@ public class Unit_Drone : UnitBase
                 SetTask_ReturnHome();
             }
         }
+        else {
+            SetTask_ReturnHome();
+        }
+        
+        _loadingCoroutine = null;
     }
 
     private void UpdateDelivering()
     {
         if (!movement.IsMoving) {
+            // Start unloading coroutine if not already running
+            if (_unloadingCoroutine == null) {
+                _unloadingCoroutine = StartCoroutine(UnloadingResourceCoroutine());
+            }
+        }
+    }
+    
+    private IEnumerator UnloadingResourceCoroutine()
+    {
+        // Force stop all movement including alignment to prevent vibration
+        movement.ForceStopAllMovement();
+        
+        // Face the processor building before depositing and keep it stable
+        if (currentProcessor != null) {
+            AdjustSpriteDirectionToBuilding(currentProcessor.transform);
+        }
+        
+        // Wait for unloading time - unit should remain completely still
+        yield return new WaitForSeconds(unloadingTime);
+        
+        if (currentProcessor != null) {
             bool deposited = currentProcessor.TryDepositIngredient(_carriedResourceType, _carriedAmount, this);
             Debug.Log($"[Drone:{name}] Delivering: deposit {_carriedAmount} {_carriedResourceType} to '{currentProcessor.name}' -> {(deposited ? "OK" : "FAILED")}" );
 
@@ -237,10 +325,85 @@ public class Unit_Drone : UnitBase
             _currentState = DroneState.Idle;
             Debug.Log($"[Drone:{name}] State -> Idle (after delivery)");
             
-            if (currentProcessor != null) {
-                currentProcessor.RequestTask(this);
+            currentProcessor.RequestTask(this);
+        }
+        else {
+            _currentState = DroneState.Idle;
+        }
+        
+        _unloadingCoroutine = null;
+    }
+    
+    private IEnumerator AssignmentCoroutine()
+    {
+        // Force stop all movement including alignment to prevent vibration
+        movement.ForceStopAllMovement();
+        
+        // Face the processor building during assignment and keep it stable
+        if (currentProcessor != null) {
+            AdjustSpriteDirectionToBuilding(currentProcessor.transform);
+        }
+        
+        // Wait for assignment time - unit should remain completely still
+        yield return new WaitForSeconds(assignmentTime);
+        
+        // Drone has completed assignment/initialization - check in
+        _hasCheckedIn = true;
+        Debug.Log($"[Drone:{name}] Checked in at processor '{currentProcessor.name}'. Now available for tasks.");
+        
+        // After checking in, request a task
+        if (currentProcessor != null) {
+            currentProcessor.RequestTask(this);
+        }
+        
+        _assignmentCoroutine = null;
+    }
+    
+    private void AdjustSpriteDirectionToBuilding(Transform buildingTransform)
+    {
+        if (buildingTransform == null || BuildingManager.Instance == null || BuildingManager.Instance.grid == null) return;
+        if (!TryGetComponent<UnitSpriteController>(out var spriteController)) return;
+
+        Vector3Int unitCell = BuildingManager.Instance.grid.WorldToCell(transform.position);
+        Vector3Int buildingCell = BuildingManager.Instance.grid.WorldToCell(buildingTransform.position);
+        
+        // For large buildings, find the nearest occupied cell
+        Vector3Int targetCell = buildingCell;
+        if (BuildingManager.Instance.GetBuildingAt(buildingCell, out List<Vector3Int> occupiedCells))
+        {
+            float minDistance = float.MaxValue;
+            foreach (Vector3Int cell in occupiedCells)
+            {
+                float distance = Vector3.Distance(transform.position, BuildingManager.Instance.grid.GetCellCenterWorld(cell));
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    targetCell = cell;
+                }
             }
         }
+
+        Vector3Int relativePosition = targetCell - unitCell;
+        Vector2 targetDirection = Vector2.zero;
+
+        if (relativePosition.x > 0)
+        {
+            targetDirection = Vector2.right;
+        }
+        else if (relativePosition.x < 0)
+        {
+            targetDirection = Vector2.left;
+        }
+        else if (relativePosition.y > 0)
+        {
+            targetDirection = Vector2.up;
+        }
+        else if (relativePosition.y < 0)
+        {
+            targetDirection = Vector2.down;
+        }
+
+        spriteController.UpdateSpriteDirection(targetDirection);
     }
 
     private void UpdateProcessing()
@@ -256,6 +419,10 @@ public class Unit_Drone : UnitBase
             if (movement.IsMoving) {
                 movement.StopMovement();
             }
+            
+            // Face the processor building
+            AdjustSpriteDirectionToBuilding(currentProcessor.transform);
+            
             currentProcessor.ProcessRecipeWork(CurrentRecipeTask, Time.deltaTime * processingSpeed);
             
             // Check if processing is complete (recipe should be cleared by ProcessRecipeWork)
@@ -270,7 +437,8 @@ public class Unit_Drone : UnitBase
             // Only attempt to re-path if enough time has passed
             if (Time.time >= _nextRepathTime) {
                 _nextRepathTime = Time.time + RepathInterval;
-                bool hasPath = movement.SetNewTarget(currentProcessor.GetPosition());
+                Vector3 interactionPos = currentProcessor.AssignInteractionCell(this);
+                bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
                 if (hasPath) {
                     float distanceToTarget = movement.FinalTargetPosition != default 
                         ? Vector3.Distance(transform.position, movement.FinalTargetPosition)
@@ -293,7 +461,8 @@ public class Unit_Drone : UnitBase
             return;
         }
         
-        movement.SetNewTarget(currentProcessor.GetPosition());
+        Vector3 interactionPos = currentProcessor.AssignInteractionCell(this);
+        movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
 
         if (!movement.IsMoving) {
             _currentState = DroneState.Idle;
@@ -320,7 +489,8 @@ public class Unit_Drone : UnitBase
 
     public void SetTask_Process(Processor processor, ActiveRecipe recipeTask)
     {
-        bool hasPath = movement.SetNewTarget(processor.GetPosition());
+        Vector3 interactionPos = processor.AssignInteractionCell(this);
+        bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
         
         if (!hasPath) {
             SetTask_Idle();

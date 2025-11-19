@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ButtonManager : MonoBehaviour
+public class BtnManager_Title : MonoBehaviour
 {
     [SerializeField] private Button startButton;
     [SerializeField] private Button quitButton;
@@ -10,7 +10,7 @@ public class ButtonManager : MonoBehaviour
     {
         if (startButton != null)
         {
-            startButton.onClick.AddListener(StartGame);
+            startButton.onClick.AddListener(MapSelectScene);
         }
         
         if (quitButton != null)
@@ -23,7 +23,7 @@ public class ButtonManager : MonoBehaviour
     {
         if (startButton != null)
         {
-            startButton.onClick.RemoveListener(StartGame);
+            startButton.onClick.RemoveListener(MapSelectScene);
         }
         if (quitButton != null)
         {
@@ -31,9 +31,9 @@ public class ButtonManager : MonoBehaviour
         }
     }
 
-    private void StartGame()
+    private void MapSelectScene()
     {
-        SceneLoader.Instance.LoadGameScene();
+        SceneLoader.Instance.LoadMapSelectScene();
     }
 
     private void QuitGame()
