@@ -191,7 +191,7 @@ public class GameManager : MonoBehaviour
             if (spawner.ResourceTilemap != null) spawner.ResourceTilemap.gameObject.SetActive(false);
         }
 
-        foreach (Unit_Lifter unit in FindObjectsByType<Unit_Lifter>(FindObjectsSortMode.None)) {
+        foreach (Unit_Miner unit in FindObjectsByType<Unit_Miner>(FindObjectsSortMode.None)) {
             unit.TryStartActions();
         }
     }

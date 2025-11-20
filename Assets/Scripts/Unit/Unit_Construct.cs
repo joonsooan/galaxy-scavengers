@@ -68,10 +68,10 @@ public class Unit_Construct : UnitBase
         {
             ConstructionManager.Instance.RegisterConstructDrone(this);
         }
-        else
-        {
-            Debug.LogError($"[Unit_Construct] Failed to register {name}: ConstructionManager.Instance is null");
-        }
+        // else
+        // {
+        //     Debug.LogError($"[Unit_Construct] Failed to register {name}: ConstructionManager.Instance is null");
+        // }
     }
     
     protected override void OnDisable()

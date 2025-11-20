@@ -104,11 +104,11 @@ public class ConstructionManager : MonoBehaviour
             return;
         }
         
-        if (_constructionSites.Count == 0)
-        {
-            Debug.Log($"[ConstructionManager] No construction sites available for drone '{drone.name}'");
-            return;
-        }
+        // if (_constructionSites.Count == 0)
+        // {
+        //     Debug.Log($"[ConstructionManager] No construction sites available for drone '{drone.name}'");
+        //     return;
+        // }
         
         // If priority site is provided, check for pieces ready to construct
         if (prioritySite != null && prioritySite.comboCardData != null && !prioritySite.AreAllPiecesConstructed())
@@ -177,7 +177,7 @@ public class ConstructionManager : MonoBehaviour
         }
         
         // No work available
-        Debug.Log($"[ConstructionManager] No tasks available for drone '{drone.name}'. Sites: {_constructionSites.Count}, Drones: {_constructDrones.Count}");
+        // Debug.Log($"[ConstructionManager] No tasks available for drone '{drone.name}'. Sites: {_constructionSites.Count}, Drones: {_constructDrones.Count}");
     }
     
     private void AssignDronesToSites()

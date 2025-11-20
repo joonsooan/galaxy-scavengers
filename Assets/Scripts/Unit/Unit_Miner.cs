@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class Unit_Lifter : UnitBase
+public class Unit_Miner : UnitBase
 {
     [Header("References")]
     [SerializeField] private UnitMovement unitMovement;
@@ -19,11 +19,13 @@ public class Unit_Lifter : UnitBase
     [Header("VFX")]
     [SerializeField] private string canvasName = "ObjectUI Canvas";
     [SerializeField] private bool showFloatingText;
+    [SerializeField] private ParticleSystem miningParticleSystem;
 
     private readonly Dictionary<ResourceType, int> _currentCarryAmounts = new Dictionary<ResourceType, int>();
     private Canvas _canvas;
     private Coroutine _findResourceCoroutine;
     private WaitForSeconds _searchWait;
+    private ParticleSystem miningParticleInstance;
 
     private Vector3Int _targetMiningCell;
     private ResourceNode _targetResourceNode;
@@ -67,6 +69,9 @@ public class Unit_Lifter : UnitBase
         if (_targetResourceNode != null && _targetResourceNode.IsReserved && _targetResourceNode.GetReservedUnit() == this) {
             _targetResourceNode.Unreserve();
         }
+        
+        // Stop mining particle effect if still playing
+        miningParticleInstance = null;
     }
 
     private void DecideNextAction()
@@ -133,6 +138,10 @@ public class Unit_Lifter : UnitBase
 
         AdjustSpriteDirectionForMining();
         unitMining.StartMining(_targetResourceNode);
+        
+        // Start mining particle effect
+        miningParticleInstance =
+            Instantiate(miningParticleSystem, transform.position, Quaternion.identity);
     }
 
     private void StartUnloadingAction()
@@ -427,6 +436,9 @@ public class Unit_Lifter : UnitBase
         _targetResourceNode = null;
         currentState = UnitState.Idle;
         unitMovement.StopMovement();
+        
+        // Stop mining particle effect
+        miningParticleInstance = null;
     }
 
     private void HandleStorageLoss()
@@ -468,6 +480,10 @@ public class Unit_Lifter : UnitBase
             unitMining.StopMining();
             _targetResourceNode?.Unreserve();
             _targetResourceNode = null;
+            
+            // Stop mining particle effect
+            miningParticleInstance = null;
+            
             GoToStorage();
         }
     }

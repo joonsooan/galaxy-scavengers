@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 4483249089817793867}
   - component: {fileID: 7616754858952366261}
   m_Layer: 0
-  m_Name: Unit_Lifter
+  m_Name: Unit_Miner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -144,6 +144,7 @@ MonoBehaviour:
   mineableResourceTypes: 
   canvasName: ObjectUI Canvas
   showFloatingText: 1
+  miningParticleSystem: {fileID: 6912649713083214244, guid: bb0bcb1991dbd2f46b09b7a8c13f00de, type: 3}
 --- !u!114 &8882647708804449670
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -172,6 +173,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 4
   waypointTolerance: 0.1
+  alignmentSpeed: 3
 --- !u!114 &7616754858952366261
 MonoBehaviour:
   m_ObjectHideFlags: 0
