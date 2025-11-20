@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayName: Radar
   description: Expands map
-  icon: {fileID: -3407921122800034881, guid: 5fe7a461299a7bc4fa9a95995e44a6a8, type: 3}
+  icon: {fileID: 6119255969317091227, guid: 4b4d97bc9df3e3244a75d745e708e8e5, type: 3}
   comboPrefab: {fileID: 1574451153020646121, guid: 510ef9ae68ab2f840a1001eb9677dfdf, type: 3}
   comboTile: {fileID: 11400000, guid: d88ca77cc0c54a045878abc204720739, type: 2}
   comboType: 9

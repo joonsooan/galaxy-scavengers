@@ -49,7 +49,27 @@ public class BuildingSpawner : MonoBehaviour
                 {
                     BuildingManager.Instance.RegisterMainStructure(anchorCell, new Vector2Int(3, 3));
                 }
+                
+                // Remove the main structure tile from the tilemap (keep GameObject, remove tile)
+                // Remove all tiles in the 3x3 grid
+                for (int x = 0; x < 3; x++)
+                {
+                    for (int y = 0; y < 3; y++)
+                    {
+                        Vector3Int cellToRemove = anchorCell + new Vector3Int(x, y, 0);
+                        if (buildingTilemap.HasTile(cellToRemove) && buildingTilemap.GetTile(cellToRemove) == mainStructureTile)
+                        {
+                            buildingTilemap.SetTile(cellToRemove, null);
+                        }
+                    }
+                }
             }
+        }
+        
+        // Refresh tilemap after removing tiles
+        if (buildingTilemap != null)
+        {
+            buildingTilemap.RefreshAllTiles();
         }
     }
 }

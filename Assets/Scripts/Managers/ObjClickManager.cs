@@ -33,8 +33,18 @@ public class ObjClickManager : MonoBehaviour
 
     private void HandleClick()
     {
+        // Don't process clicks while dragging a building
+        if (GameManager.Instance != null && GameManager.Instance.IsDragging()) {
+            return;
+        }
+        
         RaycastHit2D hit2D = Physics2D.Raycast(mainCamera.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
         if (hit2D.collider != null) {
+            // Don't trigger clicks on construction sites
+            if (hit2D.collider.GetComponent<ConstructionSite>() != null) {
+                return;
+            }
+            
             IClickable clickableObject = hit2D.collider.GetComponent<IClickable>();
             if (clickableObject != null) {
                 clickableObject.OnClicked();

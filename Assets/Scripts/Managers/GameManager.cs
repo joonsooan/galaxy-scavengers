@@ -121,6 +121,12 @@ public class GameManager : MonoBehaviour
         _activeCardData = null;
         onEndDrag?.Invoke();
         uiManager?.UnpinAndHideCardPanel();
+        
+        // After ending drag, hide UI panels if they should be hidden
+        // This ensures UI disappears after the building hover is disabled
+        if (uiManager != null) {
+            uiManager.UnpinAndHideAllPanels();
+        }
     }
 
     public bool IsDragging()
