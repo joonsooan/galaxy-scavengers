@@ -148,7 +148,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 16
+        y: 17
         width: 16
         height: 48
       alignment: 9
@@ -213,7 +213,7 @@ TextureImporter:
       name: temp-buildings_4
       rect:
         serializedVersion: 2
-        x: 65
+        x: 66
         y: 0
         width: 32
         height: 32
@@ -262,7 +262,7 @@ TextureImporter:
         width: 48
         height: 48
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -271,6 +271,28 @@ TextureImporter:
       bones: []
       spriteID: 68478a1445545b9429e8fef02b4723c1
       internalID: -1208440334
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: temp-buildings_7
+      rect:
+        serializedVersion: 2
+        x: 98
+        y: 33
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f836514002456144d99339c1be2b5bbd
+      internalID: 1866527033
       vertices: []
       indices: 
       edges: []
@@ -296,6 +318,7 @@ TextureImporter:
       temp-buildings_4: 907466949
       temp-buildings_5: 1281307735
       temp-buildings_6: -1208440334
+      temp-buildings_7: 1866527033
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

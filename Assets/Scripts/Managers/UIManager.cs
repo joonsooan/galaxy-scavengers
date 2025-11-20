@@ -63,6 +63,15 @@ public class UIManager : MonoBehaviour
             if (EventSystem.current.IsPointerOverGameObject()) {
                 return;
             }
+            
+            // First, check if we're dragging a building - if so, end the drag first
+            // The UI will be hidden after the drag ends (handled in GameManager.EndDrag)
+            if (GameManager.Instance != null && GameManager.Instance.IsDragging()) {
+                // Don't hide UI yet - let the drag end first
+                return;
+            }
+            
+            // Only hide UI if we're not dragging
             UnpinAndHideAllPanels();
         }
     }
@@ -126,7 +135,7 @@ public class UIManager : MonoBehaviour
         _activeUIPanel = ActiveUIPanel.None;
     }
 
-    private void UnpinAndHideAllPanels()
+    public void UnpinAndHideAllPanels()
     {
         _pinnedCardData = null;
         if (cardInfoPanel != null) {

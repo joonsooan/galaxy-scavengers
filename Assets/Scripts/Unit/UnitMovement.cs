@@ -393,7 +393,23 @@ public class UnitMovement : MonoBehaviour
         if (BuildingManager.Instance == null) {
             return true; // If BuildingManager is null, assume cell is walkable
         }
-        return !BuildingManager.Instance.IsResourceTile(cell) && !BuildingManager.Instance.IsBuildingTile(cell);
+        
+        // Check if cell is a resource tile, building tile, or temporary construction tile
+        if (BuildingManager.Instance.IsResourceTile(cell) || 
+            BuildingManager.Instance.IsBuildingTile(cell) ||
+            BuildingManager.Instance.IsTemporaryTile(cell))
+        {
+            return false;
+        }
+        
+        // Check if there's a building piece GameObject at this cell (even without a tile)
+        BuildingPiece piece = BuildingManager.Instance.GetPieceAt(cell);
+        if (piece != null)
+        {
+            return false;
+        }
+        
+        return true;
     }
 
     private List<Vector3Int> GetInteractionCells(List<Vector3Int> occupiedCells)

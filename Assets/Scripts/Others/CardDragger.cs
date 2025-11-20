@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -11,11 +12,13 @@ public class CardDragger : MonoBehaviour
 
     private GameObject _ghostBuildingInstance;
     private SpriteRenderer _ghostBuildingRenderer;
-    private CardData _activeCardData;
+    private ComboCardData _activeComboCardData;
     private Vector3Int _lastPlacedCell;
     private bool _isDragging;
     private List<Vector3Int> _placedCellsInDrag;
     private PointerEventData _pointerEventData;
+    
+    private List<ResourceCost> _cachedComboCosts;
     
     private void Update()
     {
@@ -29,15 +32,68 @@ public class CardDragger : MonoBehaviour
     {
         if (_isDragging) return;
 
-        CardData cardData = data as CardData;
-        if (cardData == null || cardData.buildingPrefab == null) return;
+        // Only support ComboCardData
+        ComboCardData comboCardData = data as ComboCardData;
+        if (comboCardData != null && comboCardData.comboPrefab != null)
+        {
+            _activeComboCardData = comboCardData;
+            _isDragging = true;
+            _lastPlacedCell = Vector3Int.one * int.MaxValue;
+            _placedCellsInDrag = new List<Vector3Int>();
+            
+            // Calculate and cache costs from recipe
+            _cachedComboCosts = CalculateComboCosts(comboCardData);
 
-        _activeCardData = cardData;
-        _isDragging = true;
-        _lastPlacedCell = Vector3Int.one * int.MaxValue;
-        _placedCellsInDrag = new List<Vector3Int>();
-
-        CreateGhostBuilding();
+            CreateGhostBuilding();
+        }
+    }
+    
+    private List<ResourceCost> CalculateComboCosts(ComboCardData comboData)
+    {
+        List<ResourceCost> totalCosts = new List<ResourceCost>();
+        Dictionary<ResourceType, int> costDict = new Dictionary<ResourceType, int>();
+        
+        // Load all CardData to find costs for each gadget type
+        CardData[] allCards = Resources.LoadAll<CardData>("Cards");
+        Dictionary<GadgetType, CardData> gadgetToCardMap = new Dictionary<GadgetType, CardData>();
+        
+        foreach (var card in allCards)
+        {
+            if (card.gadgetType != GadgetType.None && !gadgetToCardMap.ContainsKey(card.gadgetType))
+            {
+                gadgetToCardMap[card.gadgetType] = card;
+            }
+        }
+        
+        // Sum up costs from all pieces in the recipe
+        if (comboData.recipe != null)
+        {
+            foreach (var piece in comboData.recipe)
+            {
+                if (gadgetToCardMap.TryGetValue(piece.gadgetType, out CardData pieceCard) && pieceCard.costs != null)
+                {
+                    foreach (var cost in pieceCard.costs)
+                    {
+                        if (costDict.ContainsKey(cost.resourceType))
+                        {
+                            costDict[cost.resourceType] += cost.amount;
+                        }
+                        else
+                        {
+                            costDict[cost.resourceType] = cost.amount;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Convert dictionary to list
+        foreach (var kvp in costDict)
+        {
+            totalCosts.Add(new ResourceCost { resourceType = kvp.Key, amount = kvp.Value });
+        }
+        
+        return totalCosts;
     }
 
     public void EndDrag()
@@ -50,13 +106,16 @@ public class CardDragger : MonoBehaviour
         GameManager.Instance.uiManager?.UnpinAndHideCardPanel();
 
         _isDragging = false;
-        _activeCardData = null;
+        _activeComboCardData = null;
+        _cachedComboCosts = null;
         _ghostBuildingRenderer = null;
     }
     
     private void CreateGhostBuilding()
     {
-        _ghostBuildingInstance = Instantiate(_activeCardData.buildingPrefab, Vector3.zero, Quaternion.identity);
+        if (_activeComboCardData == null || _activeComboCardData.comboPrefab == null) return;
+        
+        _ghostBuildingInstance = Instantiate(_activeComboCardData.comboPrefab, Vector3.zero, Quaternion.identity);
         _ghostBuildingRenderer = _ghostBuildingInstance.GetComponent<SpriteRenderer>();
 
         if (_ghostBuildingRenderer != null)
@@ -75,16 +134,63 @@ public class CardDragger : MonoBehaviour
         Vector3Int cellPosition = grid.WorldToCell(mouseWorldPos);
         Vector3 cellCenterWorld = grid.GetCellCenterWorld(cellPosition);
 
+        // Position ghost building at the grid cell center (snap to grid)
         if (_ghostBuildingInstance != null)
         {
             _ghostBuildingInstance.transform.position = cellCenterWorld;
         }
 
-        bool canPlace = BuildingManager.Instance.CanPlaceBuilding(cellPosition) &&
-                        IsRoomUnlockedForPlacement(cellPosition) &&
-                        ResourceManager.Instance.HasEnoughResources(_activeCardData.costs);
+        // Check if the entire combo pattern can be placed
+        bool canPlacePattern = CanPlaceComboPattern(cellPosition);
+        
+        // Check if resources are available
+        bool hasResources = HasEnoughResourcesForCombo();
+        
+        // Can place if pattern is valid AND resources are available
+        bool canPlace = canPlacePattern && hasResources;
 
         UpdateGhostColor(canPlace);
+    }
+    
+    private bool CanPlaceComboPattern(Vector3Int anchorCell)
+    {
+        if (_activeComboCardData == null || _activeComboCardData.recipe == null)
+        {
+            return false;
+        }
+        
+        // Check if room is unlocked for the anchor position
+        if (!IsRoomUnlockedForPlacement(anchorCell))
+        {
+            return false;
+        }
+        
+        // Check if all cells in the recipe pattern can be placed
+        foreach (var piece in _activeComboCardData.recipe)
+        {
+            Vector3Int cellPos = anchorCell + piece.relativePosition;
+            if (!BuildingManager.Instance.CanPlaceBuilding(cellPos))
+            {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    private bool HasEnoughResourcesForCombo()
+    {
+        if (_cachedComboCosts == null || _cachedComboCosts.Count == 0)
+        {
+            return false;
+        }
+        
+        if (ResourceManager.Instance == null)
+        {
+            return false;
+        }
+        
+        return ResourceManager.Instance.HasEnoughResources(_cachedComboCosts.ToArray());
     }
 
     private void UpdateGhostColor(bool canPlace)
@@ -97,9 +203,9 @@ public class CardDragger : MonoBehaviour
     
     private void HandleMousePlacement()
     {
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButtonDown(0))
         {
-            if (_placedCellsInDrag.Count > 0 && IsPointerOverDragEndZone())
+            if (IsPointerOverDragEndZone())
             {
                 EndDrag();
                 return;
@@ -109,7 +215,8 @@ public class CardDragger : MonoBehaviour
 
             if (cellPosition != _lastPlacedCell && !_placedCellsInDrag.Contains(cellPosition))
             {
-                if (BuildingManager.Instance.CanPlaceBuilding(cellPosition) && IsRoomUnlockedForPlacement(cellPosition))
+                // Check if the entire combo pattern can be placed and resources are available
+                if (CanPlaceComboPattern(cellPosition) && HasEnoughResourcesForCombo())
                 {
                     AttemptPlacement(cellPosition);
                     _lastPlacedCell = cellPosition;
@@ -124,15 +231,11 @@ public class CardDragger : MonoBehaviour
 
     private void AttemptPlacement(Vector3Int cellPos)
     {
-        if (ResourceManager.Instance.HasEnoughResources(_activeCardData.costs))
+        if (_activeComboCardData != null)
         {
-            BuildingManager.Instance.PlaceBuilding(_activeCardData, cellPos);
-            ResourceManager.Instance.SpendResources(_activeCardData.costs);
+            // Create construction site for combo building
+            BuildingManager.Instance.CreateComboConstructionSite(_activeComboCardData, cellPos);
             _placedCellsInDrag.Add(cellPos);
-        }
-        else
-        {
-            Debug.Log("Not enough resources.");
         }
     }
 
