@@ -44,10 +44,24 @@ public class ProcessorRecipeCell : MonoBehaviour
 
             if (newCell != null)
             {
-                newCell.resourceImage.sprite = GetResourceImage(ingredient.resourceType);
-                newCell.resourceAmount.text = ingredient.amount.ToString();
+                // Set info without rebuilding immediately - we'll rebuild the parent after all cells are set
+                newCell.SetInfo(ingredient.resourceType, ingredient.amount, false);
             }
         }
+        
+        // Rebuild all resource info cells first, then rebuild the ingredient panel
+        // This ensures the ingredient panel updates its size after all cells have updated
+        foreach (Transform child in contentParent)
+        {
+            ResourceInfoCell cell = child.GetComponent<ResourceInfoCell>();
+            if (cell != null)
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(child.GetComponent<RectTransform>());
+            }
+        }
+        
+        // Now rebuild the ingredient panel after all resource info cells have updated their sizes
+        LayoutRebuilder.ForceRebuildLayoutImmediate(contentParent);
     }
     
     private void OnEnable()

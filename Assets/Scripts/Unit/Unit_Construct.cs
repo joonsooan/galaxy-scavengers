@@ -297,7 +297,8 @@ public class Unit_Construct : UnitBase
                 _nextRepathTime = Time.time + RepathInterval;
                 // Get interaction position for this specific piece
                 Vector3 interactionPos = _currentConstructionSite.AssignInteractionCell(this, _currentPieceCell);
-                bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
+                // Disable alignment to prevent jittering during construction
+                bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance, true);
                 if (!hasPath)
                 {
                     SetTask_Idle();
@@ -446,7 +447,8 @@ public class Unit_Construct : UnitBase
         
         // Get interaction position for this piece
         Vector3 interactionPos = site.AssignInteractionCell(this, pieceCell);
-        bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
+        // Disable alignment to prevent jittering when transitioning from delivery to construction
+        bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance, true);
         
         if (!hasPath)
         {

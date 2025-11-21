@@ -22,6 +22,7 @@ public class BuildingManager : MonoBehaviour
     private readonly Dictionary<Vector3Int, BuildingStructure> _buildingStructuresByAnchor = new ();
     private readonly Dictionary<Vector3Int, BuildingStructure> _cellToStructureMap = new ();
     private readonly HashSet<Vector3Int> _temporaryTiles = new HashSet<Vector3Int>();
+    private readonly HashSet<Vector3Int> _mainStructureCells = new HashSet<Vector3Int>();
    
     private readonly List<Processor> _processors = new List<Processor>();
     
@@ -101,6 +102,7 @@ public class BuildingManager : MonoBehaviour
         if (buildingTilemap.HasTile(cellPosition)) return false;
         if (IsTemporaryTile(cellPosition)) return false; // Can't place on construction site
         if (GetPieceAt(cellPosition) != null) return false; // Can't place where a building piece already exists
+        if (IsMainStructureCell(cellPosition)) return false; // Can't place above the main structure
 
         return true;
     }
@@ -108,6 +110,11 @@ public class BuildingManager : MonoBehaviour
     public bool IsTemporaryTile(Vector3Int cellPosition)
     {
         return _temporaryTiles.Contains(cellPosition);
+    }
+    
+    public bool IsMainStructureCell(Vector3Int cellPosition)
+    {
+        return _mainStructureCells.Contains(cellPosition);
     }
     
     public ConstructionSite CreateComboConstructionSite(ComboCardData comboCardData, Vector3Int anchorCellPosition)
@@ -702,6 +709,7 @@ public class BuildingManager : MonoBehaviour
             {
                 Vector3Int cell = anchorCell + new Vector3Int(x, y, 0);
                 structure.occupiedCells.Add(cell);
+                _mainStructureCells.Add(cell); // Track main structure cells
             }
         }
         

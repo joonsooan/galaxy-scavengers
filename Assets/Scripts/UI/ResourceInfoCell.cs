@@ -10,6 +10,11 @@ public class ResourceInfoCell : MonoBehaviour
     
     public void SetInfo(ResourceType type, int amount)
     {
+        SetInfo(type, amount, true);
+    }
+    
+    public void SetInfo(ResourceType type, int amount, bool rebuildImmediately)
+    {
         resourceAmount.text = amount.ToString();
         
         Sprite resourceIcon = ResourceManager.Instance.GetResourceIcon(type);
@@ -20,6 +25,11 @@ public class ResourceInfoCell : MonoBehaviour
         else
         {
             resourceImage.sprite = null; 
+        }
+        
+        if (rebuildImmediately)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
         }
     }
 }
