@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,6 +8,8 @@ public class QuestInfoPanel : MonoBehaviour
     [SerializeField] private GameObject infoPanel;
     [SerializeField] private TMP_Text questNameText;
     [SerializeField] private TMP_Text questDescriptionText;
+    [SerializeField] private GameObject questResourcePanel;
+    [SerializeField] private GameObject resourceInfoCellPrefab;
     [SerializeField] private Button acceptButton;
     [SerializeField] private Button finishButton;
 
@@ -14,8 +17,6 @@ public class QuestInfoPanel : MonoBehaviour
 
     private void Awake()
     {
-        ChangeInfo();
-        
         if (acceptButton != null)
         {
             acceptButton.onClick.AddListener(OnAcceptButtonClicked);
@@ -31,7 +32,21 @@ public class QuestInfoPanel : MonoBehaviour
     {
         if (questData == null) return;
 
+        if (_currentQuestId == questId && infoPanel != null && infoPanel.activeSelf)
+        {
+            RebuildAllLayouts();
+            infoPanel.SetActive(false);
+            _currentQuestId = -1;
+            return;
+        }
+
+        bool wasInactive = infoPanel != null && !infoPanel.activeSelf;
         _currentQuestId = questId;
+
+        if (infoPanel != null && !infoPanel.activeSelf)
+        {
+            infoPanel.SetActive(true);
+        }
 
         if (questNameText != null)
         {
@@ -43,15 +58,55 @@ public class QuestInfoPanel : MonoBehaviour
             questDescriptionText.text = questData.questInfo;
         }
 
-        if (infoPanel != null)
+        DisplayRequiredResources(questData);
+        UpdateButtonVisibility();
+        
+        // If panel was just reactivated, rebuild layouts in next frame to ensure Unity has initialized layout components
+        if (wasInactive)
         {
-            infoPanel.SetActive(true);
+            StartCoroutine(RebuildLayoutsNextFrame());
+        }
+        else
+        {
+            RebuildAllLayouts();
+        }
+    }
+
+    private void DisplayRequiredResources(QuestData questData)
+    {
+        if (questResourcePanel == null || resourceInfoCellPrefab == null) return;
+
+        foreach (Transform child in questResourcePanel.transform)
+        {
+            Destroy(child.gameObject);
         }
 
-        // Update button visibility based on quest state
-        UpdateButtonVisibility();
+        if (questData.requiredResources != null && questData.requiredResources.Length > 0)
+        {
+            foreach (ResourceCost cost in questData.requiredResources)
+            {
+                GameObject cell = Instantiate(resourceInfoCellPrefab, questResourcePanel.transform);
+                ResourceInfoCell cellComponent = cell.GetComponent<ResourceInfoCell>();
+                if (cellComponent != null)
+                {
+                    cellComponent.SetInfo(cost.resourceType, cost.amount, false);
+                }
+            }
 
-        ChangeInfo();
+            foreach (Transform child in questResourcePanel.transform)
+            {
+                ResourceInfoCell cell = child.GetComponent<ResourceInfoCell>();
+                if (cell != null)
+                {
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(child.GetComponent<RectTransform>());
+                }
+            }
+
+            if (questResourcePanel != null)
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(questResourcePanel.GetComponent<RectTransform>());
+            }
+        }
     }
 
     private void UpdateButtonVisibility()
@@ -67,13 +122,11 @@ public class QuestInfoPanel : MonoBehaviour
         {
             QuestState questState = QuestManager.Instance.GetQuestState(_currentQuestId);
             
-            // Show accept button only for Available quests
             if (acceptButton != null)
             {
                 acceptButton.gameObject.SetActive(questState == QuestState.Available);
             }
             
-            // Show finish button only for Completed quests
             if (finishButton != null)
             {
                 finishButton.gameObject.SetActive(questState == QuestState.Completed);
@@ -96,7 +149,6 @@ public class QuestInfoPanel : MonoBehaviour
             
             if (success)
             {
-                // Update button visibility after quest is activated
                 UpdateButtonVisibility();
             }
         }
@@ -112,7 +164,6 @@ public class QuestInfoPanel : MonoBehaviour
             
             if (success)
             {
-                // Hide the info panel after finishing
                 if (infoPanel != null)
                 {
                     infoPanel.SetActive(false);
@@ -124,19 +175,14 @@ public class QuestInfoPanel : MonoBehaviour
 
     public void RefreshQuestState(int questId)
     {
-        // If the panel is currently showing this quest, update the button visibility
         if (_currentQuestId == questId)
         {
             UpdateButtonVisibility();
         }
     }
 
-    private void ChangeInfo()
+    private void RebuildAllLayouts()
     {
-        if (infoPanel != null)
-        {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(infoPanel.GetComponent<RectTransform>());
-        }
         if (questNameText != null)
         {
             LayoutRebuilder.ForceRebuildLayoutImmediate(questNameText.rectTransform);
@@ -145,5 +191,23 @@ public class QuestInfoPanel : MonoBehaviour
         {
             LayoutRebuilder.ForceRebuildLayoutImmediate(questDescriptionText.rectTransform);
         }
+
+        if (questResourcePanel != null)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(questResourcePanel.GetComponent<RectTransform>());
+        }
+
+        if (infoPanel != null)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(infoPanel.GetComponent<RectTransform>());
+        }
+
+        Canvas.ForceUpdateCanvases();
+    }
+
+    private IEnumerator RebuildLayoutsNextFrame()
+    {
+        yield return null; // Wait one frame for Unity to initialize layout components
+        RebuildAllLayouts();
     }
 }

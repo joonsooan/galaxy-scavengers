@@ -15,6 +15,5 @@ public class QuestData : ScriptableObject
     public string questInfo;
 
     [Header("Quest Requirements")]
-    public ResourceType requiredResourceType;
-    public int requiredResourceAmount;
+    public ResourceCost[] requiredResources;
 }

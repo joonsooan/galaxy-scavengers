@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   questId: 1
   previousQuestId: -1
-  questName: Initial Quest
-  questInfo: 'This is the first quest!
-
-    Let''s start with some Aether.
-
-    Collect
-    50 Aether.'
-  requiredResourceType: 1
-  requiredResourceAmount: 50
+  questName: "\uBA54\uC778 \uBC1C\uC804\uAE30 \uC218\uB9AC"
+  questInfo: "\uBAA8\uC120\uC758 \uBA54\uC778 \uBC1C\uC804\uAE30\uAC00 \uACE0\uC7A5\uB098
+    \uC218\uB9AC\uAC00 \uD544\uC694\uD569\uB2C8\uB2E4!\n\uBC1C\uC804\uAE30 \uC218\uB9AC\uB97C
+    \uC704\uD574 \uD544\uC694\uD55C \uC790\uC6D0\uC744 \uBAA8\uC544\uC8FC\uC138\uC694"
+  requiredResources:
+  - resourceType: 0
+    amount: 100
+  - resourceType: 1
+    amount: 50

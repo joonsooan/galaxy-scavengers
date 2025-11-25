@@ -224,12 +224,6 @@ public class QuestManager : MonoBehaviour
         // Only check Active quests that require this resource type
         foreach (QuestData quest in _questDataDict.Values)
         {
-            // Only check quests that require the resource type that just changed
-            if (quest.requiredResourceType != resourceType)
-            {
-                continue;
-            }
-
             QuestState currentState = _questStates[quest.questId];
             
             // Only check Active quests (not Available/inactive quests)
@@ -238,10 +232,28 @@ public class QuestManager : MonoBehaviour
                 continue;
             }
 
-            // Check if the resource requirement is met
-            int currentAmount = ResourceManager.Instance.GetResourceAmount(quest.requiredResourceType);
-            
-            if (currentAmount >= quest.requiredResourceAmount)
+            // Check if this quest requires the resource type that just changed
+            bool requiresThisResource = false;
+            if (quest.requiredResources != null)
+            {
+                foreach (ResourceCost cost in quest.requiredResources)
+                {
+                    if (cost.resourceType == resourceType)
+                    {
+                        requiresThisResource = true;
+                        break;
+                    }
+                }
+            }
+
+            // Skip if this quest doesn't require the resource that changed
+            if (!requiresThisResource)
+            {
+                continue;
+            }
+
+            // Check if all resource requirements are met
+            if (AreAllQuestRequirementsMet(quest))
             {
                 CompleteQuest(quest.questId);
             }
@@ -269,13 +281,37 @@ public class QuestManager : MonoBehaviour
             return;
         }
 
-        // Check if the resource requirement is met
-        int currentAmount = ResourceManager.Instance.GetResourceAmount(quest.requiredResourceType);
-        
-        if (currentAmount >= quest.requiredResourceAmount)
+        // Check if all resource requirements are met
+        if (AreAllQuestRequirementsMet(quest))
         {
             CompleteQuest(questId);
         }
+    }
+
+    private bool AreAllQuestRequirementsMet(QuestData quest)
+    {
+        if (ResourceManager.Instance == null)
+        {
+            return false;
+        }
+
+        if (quest.requiredResources == null || quest.requiredResources.Length == 0)
+        {
+            // If no resources are required, consider it complete
+            return true;
+        }
+
+        // Check if all required resources meet the required amounts
+        foreach (ResourceCost cost in quest.requiredResources)
+        {
+            int currentAmount = ResourceManager.Instance.GetResourceAmount(cost.resourceType);
+            if (currentAmount < cost.amount)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public bool CompleteQuest(int questId)
