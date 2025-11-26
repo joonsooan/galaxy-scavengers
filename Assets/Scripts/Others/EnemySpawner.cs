@@ -33,118 +33,49 @@ public class EnemySpawner : MonoBehaviour
 
     private void SpawnWave()
     {
-        List<Vector2Int> edgeRooms = FindEdgeRooms();
-        if (edgeRooms.Count == 0)
-        {
-            Debug.LogWarning("스폰할 수 있는 가장자리 방이 없습니다.");
-            return;
-        }
-
         int spawnCount = baseSpawnCount + (_currentWave - 1) * spawnCountIncreasePerWave;
         Debug.Log($"Wave {_currentWave}: {spawnCount}마리의 적을 스폰합니다.");
 
         for (int i = 0; i < spawnCount; i++)
         {
-            Vector2Int randomEdgeRoomCoords = edgeRooms[Random.Range(0, edgeRooms.Count)];
-            Vector3 spawnPosition = GetRandomEdgeTilePosition(randomEdgeRoomCoords);
-            
+            Vector3 spawnPosition = GetRandomEdgeTilePosition();
             Instantiate(enemyPrefab, spawnPosition, Quaternion.identity, BuildingManager.Instance.grid.transform);
         }
     }
 
-    private List<Vector2Int> FindEdgeRooms()
-    {
-        List<Vector2Int> edgeRooms = new List<Vector2Int>();
-        Vector2Int mapGridSize = GameManager.Instance.mapGenerator.MapGridSize;
-
-        // Find rooms at the edges of the map
-        for (int x = 0; x < mapGridSize.x; x++)
-        {
-            for (int y = 0; y < mapGridSize.y; y++)
-            {
-                // Check if room is at map edge
-                if (x == 0 || x == mapGridSize.x - 1 || y == 0 || y == mapGridSize.y - 1)
-                {
-                    edgeRooms.Add(new Vector2Int(x, y));
-                }
-            }
-        }
-        return edgeRooms;
-    }
-
-    // private Vector3 GetRandomPositionInRoom(Vector2Int roomCoords)
-    // {
-    //     Vector2Int roomSize = GameManager.Instance.mapGenerator.roomSize;
-    //     Vector2Int mapGridSize = GameManager.Instance.mapGenerator.mapGridSize;
-    //     
-    //     float totalMapWidth = roomSize.x * mapGridSize.x;
-    //     float totalMapHeight = roomSize.y * mapGridSize.y;
-    //     float mapCenterXOffset = totalMapWidth / 2f;
-    //     float mapCenterYOffset = totalMapHeight / 2f;
-    //
-    //     float roomStartX = roomCoords.x * roomSize.x - mapCenterXOffset;
-    //     float roomStartY = roomCoords.y * roomSize.y - mapCenterYOffset;
-    //     
-    //     float randomX = Random.Range(roomStartX + 1, roomStartX + roomSize.x - 1);
-    //     float randomY = Random.Range(roomStartY + 1, roomStartY + roomSize.y - 1);
-    //     
-    //     return GameManager.Instance.mapGenerator.tilemap.transform.TransformPoint(new Vector3(randomX, randomY, 0));
-    // }
-    
-    private Vector3 GetRandomEdgeTilePosition(Vector2Int roomCoords)
+    private Vector3 GetRandomEdgeTilePosition()
     {
         var mapGenerator = GameManager.Instance.mapGenerator;
-        Vector2Int roomSize = mapGenerator.RoomSize;
-        Vector2Int mapGridSize = mapGenerator.MapGridSize;
+        Vector2Int mapSize = mapGenerator.MapSize;
         
-        // Determine which edge of the map this room is on
-        List<Vector2Int> validDirections = new List<Vector2Int>();
-        if (roomCoords.x == mapGridSize.x - 1) validDirections.Add(Vector2Int.right);
-        if (roomCoords.x == 0) validDirections.Add(Vector2Int.left);
-        if (roomCoords.y == mapGridSize.y - 1) validDirections.Add(Vector2Int.up);
-        if (roomCoords.y == 0) validDirections.Add(Vector2Int.down);
+        // Choose a random edge (left, right, top, bottom)
+        Vector2Int[] directions = { Vector2Int.left, Vector2Int.right, Vector2Int.up, Vector2Int.down };
+        Vector2Int chosenDirection = directions[Random.Range(0, directions.Length)];
 
-        // If room is at corner, prefer outer edges
-        if (validDirections.Count == 0)
-        {
-            // Fallback: use random direction
-            validDirections.Add(Vector2Int.right);
-            validDirections.Add(Vector2Int.left);
-            validDirections.Add(Vector2Int.up);
-            validDirections.Add(Vector2Int.down);
-        }
-
-        Vector2Int chosenDirection = validDirections[Random.Range(0, validDirections.Count)];
-
-        float totalMapWidth = roomSize.x * mapGridSize.x;
-        float totalMapHeight = roomSize.y * mapGridSize.y;
-        float mapCenterXOffset = totalMapWidth / 2f;
-        float mapCenterYOffset = totalMapHeight / 2f;
-        
-        float roomStartX = roomCoords.x * roomSize.x - mapCenterXOffset;
-        float roomStartY = roomCoords.y * roomSize.y - mapCenterYOffset;
+        float mapCenterXOffset = mapSize.x / 2f;
+        float mapCenterYOffset = mapSize.y / 2f;
 
         float spawnX = 0, spawnY = 0;
 
-        if (chosenDirection == Vector2Int.right) // 오른쪽 경계
+        if (chosenDirection == Vector2Int.right) // Right edge
         {
-            spawnX = roomStartX + roomSize.x - 1;
-            spawnY = Random.Range(roomStartY, roomStartY + roomSize.y -1);
+            spawnX = mapSize.x - 1 - mapCenterXOffset;
+            spawnY = Random.Range(-mapCenterYOffset, mapSize.y - 1 - mapCenterYOffset);
         }
-        else if (chosenDirection == Vector2Int.left) // 왼쪽 경계
+        else if (chosenDirection == Vector2Int.left) // Left edge
         {
-            spawnX = roomStartX;
-            spawnY = Random.Range(roomStartY, roomStartY + roomSize.y - 1);
+            spawnX = -mapCenterXOffset;
+            spawnY = Random.Range(-mapCenterYOffset, mapSize.y - 1 - mapCenterYOffset);
         }
-        else if (chosenDirection == Vector2Int.up) // 위쪽 경계
+        else if (chosenDirection == Vector2Int.up) // Top edge
         {
-            spawnX = Random.Range(roomStartX, roomStartX + roomSize.x - 1);
-            spawnY = roomStartY + roomSize.y - 1;
+            spawnX = Random.Range(-mapCenterXOffset, mapSize.x - 1 - mapCenterXOffset);
+            spawnY = mapSize.y - 1 - mapCenterYOffset;
         }
-        else if (chosenDirection == Vector2Int.down) // 아래쪽 경계
+        else if (chosenDirection == Vector2Int.down) // Bottom edge
         {
-            spawnX = Random.Range(roomStartX, roomStartX + roomSize.x - 1);
-            spawnY = roomStartY;
+            spawnX = Random.Range(-mapCenterXOffset, mapSize.x - 1 - mapCenterXOffset);
+            spawnY = -mapCenterYOffset;
         }
         
         return mapGenerator.Tilemap.transform.TransformPoint(new Vector3(spawnX + 0.5f, spawnY + 0.5f, 0));

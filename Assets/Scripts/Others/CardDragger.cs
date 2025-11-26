@@ -174,8 +174,8 @@ public class CardDragger : MonoBehaviour
             return false;
         }
         
-        // Check if room is unlocked for the anchor position
-        if (!IsRoomUnlockedForPlacement(anchorCell))
+        // Check if anchor position is within map bounds
+        if (!IsPositionInBoundsForPlacement(anchorCell))
         {
             return false;
         }
@@ -254,12 +254,12 @@ public class CardDragger : MonoBehaviour
         }
     }
 
-    private bool IsRoomUnlockedForPlacement(Vector3Int cellPos)
+    private bool IsPositionInBoundsForPlacement(Vector3Int cellPos)
     {
         if (GameManager.Instance.mapGenerator == null) return false;
 
-        Vector2Int roomCoordinates = GameManager.Instance.mapGenerator.GetRoomCoordinates(grid.GetCellCenterWorld(cellPos));
-        return GameManager.Instance.mapGenerator.IsRoomUnlocked(roomCoordinates.x, roomCoordinates.y);
+        Vector3 worldPos = grid.GetCellCenterWorld(cellPos);
+        return GameManager.Instance.mapGenerator.IsPositionInBounds(worldPos);
     }
 
     private bool IsPointerOverDragEndZone()

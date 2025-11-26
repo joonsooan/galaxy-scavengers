@@ -12,7 +12,6 @@ public class ResourceNode : MonoBehaviour
     [HideInInspector] public Vector3Int cellPosition;
     
     [HideInInspector] public ResourceSpawner spawner;
-    [HideInInspector] public Vector2Int roomCoords;
 
     private Color _originalColor;
     private SpriteRenderer _sr;
