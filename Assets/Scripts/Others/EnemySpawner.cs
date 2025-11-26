@@ -57,19 +57,15 @@ public class EnemySpawner : MonoBehaviour
         List<Vector2Int> edgeRooms = new List<Vector2Int>();
         Vector2Int mapGridSize = GameManager.Instance.mapGenerator.MapGridSize;
 
+        // Find rooms at the edges of the map
         for (int x = 0; x < mapGridSize.x; x++)
         {
             for (int y = 0; y < mapGridSize.y; y++)
             {
-                if (GameManager.Instance.mapGenerator.IsRoomUnlocked(x, y))
+                // Check if room is at map edge
+                if (x == 0 || x == mapGridSize.x - 1 || y == 0 || y == mapGridSize.y - 1)
                 {
-                    if (!GameManager.Instance.mapGenerator.IsRoomUnlocked(x + 1, y) ||
-                        !GameManager.Instance.mapGenerator.IsRoomUnlocked(x - 1, y) ||
-                        !GameManager.Instance.mapGenerator.IsRoomUnlocked(x, y + 1) ||
-                        !GameManager.Instance.mapGenerator.IsRoomUnlocked(x, y - 1))
-                    {
-                        edgeRooms.Add(new Vector2Int(x, y));
-                    }
+                    edgeRooms.Add(new Vector2Int(x, y));
                 }
             }
         }
@@ -101,11 +97,22 @@ public class EnemySpawner : MonoBehaviour
         Vector2Int roomSize = mapGenerator.RoomSize;
         Vector2Int mapGridSize = mapGenerator.MapGridSize;
         
+        // Determine which edge of the map this room is on
         List<Vector2Int> validDirections = new List<Vector2Int>();
-        if (!mapGenerator.IsRoomUnlocked(roomCoords.x + 1, roomCoords.y)) validDirections.Add(Vector2Int.right);
-        if (!mapGenerator.IsRoomUnlocked(roomCoords.x - 1, roomCoords.y)) validDirections.Add(Vector2Int.left);
-        if (!mapGenerator.IsRoomUnlocked(roomCoords.x, roomCoords.y + 1)) validDirections.Add(Vector2Int.up);
-        if (!mapGenerator.IsRoomUnlocked(roomCoords.x, roomCoords.y - 1)) validDirections.Add(Vector2Int.down);
+        if (roomCoords.x == mapGridSize.x - 1) validDirections.Add(Vector2Int.right);
+        if (roomCoords.x == 0) validDirections.Add(Vector2Int.left);
+        if (roomCoords.y == mapGridSize.y - 1) validDirections.Add(Vector2Int.up);
+        if (roomCoords.y == 0) validDirections.Add(Vector2Int.down);
+
+        // If room is at corner, prefer outer edges
+        if (validDirections.Count == 0)
+        {
+            // Fallback: use random direction
+            validDirections.Add(Vector2Int.right);
+            validDirections.Add(Vector2Int.left);
+            validDirections.Add(Vector2Int.up);
+            validDirections.Add(Vector2Int.down);
+        }
 
         Vector2Int chosenDirection = validDirections[Random.Range(0, validDirections.Count)];
 

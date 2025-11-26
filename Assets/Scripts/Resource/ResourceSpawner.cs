@@ -53,27 +53,11 @@ public class ResourceSpawner : MonoBehaviour
                 }
 
                 _roomResources[roomCoords].Add(resourceNodeObj);
-
-                if (!GameManager.Instance.mapGenerator.IsRoomUnlocked(roomCoords.x, roomCoords.y)) {
-                    resourceNodeObj.SetActive(false);
-                }
-
                 break;
             }
         }
     }
 
-    public void ActivateResourcesInRoom(Vector2Int roomCoords)
-    {
-        if (_roomResources.TryGetValue(roomCoords, out List<GameObject> roomResource)) {
-            roomResource.RemoveAll(go => go == null);
-            foreach (GameObject resource in roomResource) {
-                if (resource != null) {
-                    resource.SetActive(true);
-                }
-            }
-        }
-    }
 
     public void NotifyResourceDestroyed(ResourceNode node)
     {

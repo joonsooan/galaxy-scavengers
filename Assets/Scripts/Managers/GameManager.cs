@@ -13,7 +13,6 @@ public class GameManager : MonoBehaviour
 
     [Header("References")]
     public Slider slider;
-    public ExpansionPanel expansionPanel;
     public MapGenerator mapGenerator;
     public UIManager uiManager;
     public CardDragger cardDragger;
@@ -69,11 +68,7 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha1)) Time.timeScale = 1;
         else if (Input.GetKeyDown(KeyCode.Alpha2)) Time.timeScale = 2;
         else if (Input.GetKeyDown(KeyCode.Alpha3)) Time.timeScale = 3;
-        else if (Input.GetKeyDown(KeyCode.Alpha4)) Time.timeScale = 4;
-
-        if (Input.GetKeyDown(KeyCode.M) && expansionPanel != null) {
-            expansionPanel.TogglePanelVisibility();
-        }
+        else         if (Input.GetKeyDown(KeyCode.Alpha4)) Time.timeScale = 4;
 
         if (Input.GetKeyDown(KeyCode.Escape)) {
             Application.Quit();
@@ -152,7 +147,6 @@ public class GameManager : MonoBehaviour
     {
         slider = FindFirstObjectByType<Slider>();
         mapGenerator = FindFirstObjectByType<MapGenerator>();
-        expansionPanel = FindFirstObjectByType<ExpansionPanel>();
         uiManager = FindFirstObjectByType<UIManager>();
         cardDragger = FindFirstObjectByType<CardDragger>();
 
@@ -163,7 +157,6 @@ public class GameManager : MonoBehaviour
         }
 
         mapGenerator?.GenerateMap();
-        expansionPanel?.InitiateExpansionPanel();
 
         StartCoroutine(DelayedInitialization());
     }

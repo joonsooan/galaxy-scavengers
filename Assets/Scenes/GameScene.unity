@@ -101070,10 +101070,11 @@ MonoBehaviour:
   groundTilemap: {fileID: 558756081}
   fogTilemap: {fileID: 80026093}
   updateInterval: 0.1
-  fogTile: {fileID: 11400000, guid: 10bd3c981c2104842b1ff71688283ee8, type: 2}
+  enableDebugLogs: 0
+  fogTile: {fileID: 0}
   fullyVisibleColor: {r: 1, g: 1, b: 1, a: 0}
-  partlyVisibleColor: {r: 0.7, g: 0.7, b: 0.7, a: 0.4}
-  invisibleColor: {r: 0.2, g: 0.2, b: 0.2, a: 0.8}
+  partlyVisibleColor: {r: 0.2509804, g: 0.2509804, b: 0.2509804, a: 0.54901963}
+  invisibleColor: {r: 0.15471691, g: 0.15471691, b: 0.15471691, a: 0.8627451}
 --- !u!4 &1022667848
 Transform:
   m_ObjectHideFlags: 0

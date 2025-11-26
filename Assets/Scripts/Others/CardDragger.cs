@@ -124,6 +124,21 @@ public class CardDragger : MonoBehaviour
             ghostColor.a = 0.5f;
             _ghostBuildingRenderer.color = ghostColor;
         }
+        
+        // Disable VisionProvider components on ghost building to prevent fog of war updates during drag
+        VisionProvider[] visionProviders = _ghostBuildingInstance.GetComponentsInChildren<VisionProvider>(true);
+        foreach (var visionProvider in visionProviders)
+        {
+            if (visionProvider != null)
+            {
+                visionProvider.SetActive(false);
+                // Unregister immediately in case it already registered during OnEnable
+                if (FogOfWarManager.Instance != null)
+                {
+                    FogOfWarManager.Instance.UnregisterVisionProvider(visionProvider);
+                }
+            }
+        }
     }
 
     private void HandleDragVisuals()
