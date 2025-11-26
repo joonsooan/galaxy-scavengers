@@ -10,6 +10,8 @@ public class BuildingManager : MonoBehaviour
     [SerializeField] private Tilemap groundTilemap;
     [SerializeField] private Tilemap resourceTilemap;
     [SerializeField] private Tilemap buildingTilemap;
+    
+    public Tilemap GroundTilemap => groundTilemap;
     [SerializeField] private TileBase mainStructureTile;
     [SerializeField] private TileBase temporaryTile; // Tile for construction sites
     [SerializeField] private Transform parentTransform;
@@ -103,6 +105,12 @@ public class BuildingManager : MonoBehaviour
         if (IsTemporaryTile(cellPosition)) return false; // Can't place on construction site
         if (GetPieceAt(cellPosition) != null) return false; // Can't place where a building piece already exists
         if (IsMainStructureCell(cellPosition)) return false; // Can't place above the main structure
+        
+        // Check fog of war - can only place buildings on explored/visible tiles
+        if (FogOfWarManager.Instance != null && !FogOfWarManager.Instance.CanPlaceBuilding(cellPosition))
+        {
+            return false;
+        }
 
         return true;
     }

@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4183704755259827819}
   - component: {fileID: 6865986198788389803}
   - component: {fileID: 6139965253639955503}
+  - component: {fileID: -1157859121563449324}
   m_Layer: 0
   m_Name: 8_AutoTurret
   m_TagString: Untagged
@@ -107,3 +108,17 @@ MonoBehaviour:
   fireInterval: 1
   attackDamage: 4
   bulletPrefab: {fileID: 3852804536807886205, guid: c773192e621cee54cb0e65277df6f731, type: 3}
+--- !u!114 &-1157859121563449324
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1574451153020646121}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4df76de1adfb064e95b506d49b881b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  visionRange: 5
+  isActive: 1

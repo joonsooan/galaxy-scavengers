@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 4183704755259827819}
   - component: {fileID: 6865986198788389803}
   - component: {fileID: 4985907423209326797}
+  - component: {fileID: 5004616453792402242}
   m_Layer: 0
   m_Name: 0_Storage
   m_TagString: Untagged
@@ -107,3 +108,17 @@ MonoBehaviour:
   storageSliderPrefab: {fileID: 2354038024701718824, guid: 6bd2b307424729b46bc663a2af90c671, type: 3}
   canvasName: ObejectUI Canvas
   sliderOffset: {x: 0, y: 0.8, z: 0}
+--- !u!114 &5004616453792402242
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1574451153020646121}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4df76de1adfb064e95b506d49b881b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  visionRange: 5
+  isActive: 1

@@ -67,6 +67,8 @@ public class UnitMovement : MonoBehaviour
         _grid = BuildingManager.Instance.grid;
     }
     
+    private Vector3Int _lastExploredCell = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
+    
     private void FixedUpdate()
     {
         // If force stopped, ensure velocity is zero and don't update anything
@@ -74,6 +76,17 @@ public class UnitMovement : MonoBehaviour
         {
             _rb.linearVelocity = Vector2.zero;
             return;
+        }
+        
+        // Explore current cell (for fog of war)
+        if (_grid != null && FogOfWarManager.Instance != null)
+        {
+            Vector3Int currentCell = _grid.WorldToCell(transform.position);
+            if (currentCell != _lastExploredCell)
+            {
+                FogOfWarManager.Instance.ExploreTile(currentCell);
+                _lastExploredCell = currentCell;
+            }
         }
         
         // 0. If we're aligning to center, handle that first

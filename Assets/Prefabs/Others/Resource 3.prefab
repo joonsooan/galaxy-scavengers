@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2419866219278600048}
   - component: {fileID: 3175802879121171361}
   - component: {fileID: 5638090021599522057}
+  - component: {fileID: -313114926271069645}
   m_Layer: 0
   m_Name: Resource 3
   m_TagString: Untagged
@@ -107,3 +108,17 @@ MonoBehaviour:
   cellPosition: {x: 0, y: 0, z: 0}
   spawner: {fileID: 0}
   roomCoords: {x: 0, y: 0}
+--- !u!114 &-313114926271069645
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5453999205571622832}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b6886121ea03594f865ae62420ead7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  visibilityType: 1
+  hideWhenInvisible: 1
