@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 9104813460774295461}
   - component: {fileID: 3132766170232860239}
   - component: {fileID: 9023288875373990353}
+  - component: {fileID: -4051372442946673797}
   m_Layer: 0
   m_Name: Unit_Enemy_0
   m_TagString: Untagged
@@ -202,6 +203,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 4
   waypointTolerance: 0.1
+  alignmentSpeed: 3
 --- !u!114 &9023288875373990353
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -217,3 +219,17 @@ MonoBehaviour:
   spriteUp: {fileID: -3124680713139702455, guid: 2e9dd00a9d898794d9325559858bad30, type: 3}
   spriteDown: {fileID: 6298481942164089023, guid: 2e9dd00a9d898794d9325559858bad30, type: 3}
   spriteRight: {fileID: -8377893650794245212, guid: 2e9dd00a9d898794d9325559858bad30, type: 3}
+--- !u!114 &-4051372442946673797
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7944764008120523387}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b6886121ea03594f865ae62420ead7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  visibilityType: 0
+  hideWhenInvisible: 1

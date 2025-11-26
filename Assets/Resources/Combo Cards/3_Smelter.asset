@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayName: Smelter
   description: This is Smelter
-  icon: {fileID: 907466949, guid: 4b4d97bc9df3e3244a75d745e708e8e5, type: 3}
+  icon: {fileID: 3881324236535122659, guid: 7a155a975e49c6c49af60da0d680e855, type: 3}
   comboPrefab: {fileID: 1574451153020646121, guid: 5df7df990ec2d1b43a1eea38dba32aa6, type: 3}
   comboTile: {fileID: 11400000, guid: f1e94dc46684e6741ac29a6f2556d1f4, type: 2}
   comboType: 3

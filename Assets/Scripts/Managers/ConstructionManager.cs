@@ -104,16 +104,16 @@ public class ConstructionManager : MonoBehaviour
             return;
         }
         
-        if (_constructionSites.Count == 0)
-        {
-            Debug.Log($"[ConstructionManager] No construction sites available for drone '{drone.name}'");
-            return;
-        }
+        // if (_constructionSites.Count == 0)
+        // {
+        //     Debug.Log($"[ConstructionManager] No construction sites available for drone '{drone.name}'");
+        //     return;
+        // }
         
         // If priority site is provided, check for pieces ready to construct
         if (prioritySite != null && prioritySite.comboCardData != null && !prioritySite.AreAllPiecesConstructed())
         {
-            Vector3Int? nextPiece = prioritySite.GetNextPieceToConstruct();
+            Vector3Int? nextPiece = prioritySite.GetAndAssignNextPieceToConstruct(drone);
             if (nextPiece.HasValue)
             {
                 drone.SetTask_ConstructPiece(prioritySite, nextPiece.Value);
@@ -129,31 +129,21 @@ public class ConstructionManager : MonoBehaviour
             if (site == null) continue;
             if (site.comboCardData == null || site.AreAllPiecesConstructed()) continue;
             
-            Vector3Int? nextPiece = site.GetNextPieceToConstruct();
+            Vector3Int? nextPiece = site.GetAndAssignNextPieceToConstruct(drone);
             if (nextPiece.HasValue)
             {
-                // Try to assign this drone to the piece
-                if (site.AssignDroneToPiece(nextPiece.Value, drone))
-                {
-                    drone.SetTask_ConstructPiece(site, nextPiece.Value);
-                    Debug.Log($"[ConstructionManager] Assigned drone '{drone.name}' to construct piece at {nextPiece.Value} for '{site.comboCardData.displayName}'");
-                    return;
-                }
-                else
-                {
-                    // Another drone is already working on this piece, try next piece
-                    continue;
-                }
+                drone.SetTask_ConstructPiece(site, nextPiece.Value);
+                Debug.Log($"[ConstructionManager] Assigned drone '{drone.name}' to construct piece at {nextPiece.Value} for '{site.comboCardData.displayName}'");
+                return;
             }
         }
         
         // Check if priority site still needs resources
         if (prioritySite != null && !prioritySite.IsComplete)
         {
-            ConstructionSite.ConstructionRequest request = prioritySite.GetNextResourceRequest(drone.carryCapacity);
+            ConstructionSite.ConstructionRequest request = prioritySite.GetAndAssignNextResourceRequest(drone, drone.carryCapacity);
             if (request != null)
             {
-                request.assignedDrone = drone;
                 drone.SetTask_FetchResource(request, prioritySite);
                 Debug.Log($"[ConstructionManager] Assigned drone '{drone.name}' to fetch {request.amount} {request.type} for site at {prioritySite.cellPosition} (priority)");
                 return;
@@ -166,10 +156,9 @@ public class ConstructionManager : MonoBehaviour
             if (site == null) continue;
             if (site.IsComplete) continue;
             
-            ConstructionSite.ConstructionRequest request = site.GetNextResourceRequest(drone.carryCapacity);
+            ConstructionSite.ConstructionRequest request = site.GetAndAssignNextResourceRequest(drone, drone.carryCapacity);
             if (request != null)
             {
-                request.assignedDrone = drone;
                 drone.SetTask_FetchResource(request, site);
                 Debug.Log($"[ConstructionManager] Assigned drone '{drone.name}' to fetch {request.amount} {request.type} for site at {site.cellPosition}");
                 return;
@@ -177,7 +166,7 @@ public class ConstructionManager : MonoBehaviour
         }
         
         // No work available
-        Debug.Log($"[ConstructionManager] No tasks available for drone '{drone.name}'. Sites: {_constructionSites.Count}, Drones: {_constructDrones.Count}");
+        // Debug.Log($"[ConstructionManager] No tasks available for drone '{drone.name}'. Sites: {_constructionSites.Count}, Drones: {_constructDrones.Count}");
     }
     
     private void AssignDronesToSites()

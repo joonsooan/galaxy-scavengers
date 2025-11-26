@@ -11,7 +11,7 @@ public class ResourceSpawner : MonoBehaviour
     [SerializeField] private Grid grid;
     [SerializeField] private Transform parentTransform;
 
-    private readonly Dictionary<Vector2Int, List<GameObject>> _roomResources = new Dictionary<Vector2Int, List<GameObject>>();
+    private readonly List<GameObject> _spawnedResources = new List<GameObject>();
 
     public Tilemap ResourceTilemap {
         get {
@@ -25,18 +25,12 @@ public class ResourceSpawner : MonoBehaviour
             parentTransform = transform;
         }
 
-        _roomResources.Clear();
+        _spawnedResources.Clear();
 
         foreach (Vector3Int pos in resourceTilemap.cellBounds.allPositionsWithin) {
             TileBase currentTile = resourceTilemap.GetTile(pos);
 
             if (currentTile == null) continue;
-
-            Vector2Int roomCoords = GetRoomCoordinates(pos);
-
-            if (!_roomResources.ContainsKey(roomCoords)) {
-                _roomResources.Add(roomCoords, new List<GameObject>());
-            }
 
             for (int i = 0; i < resourceTiles.Length; i++) {
                 TileBase t = resourceTiles[i];
@@ -49,45 +43,18 @@ public class ResourceSpawner : MonoBehaviour
                 if (nodeComponent != null) {
                     nodeComponent.cellPosition = pos;
                     nodeComponent.spawner = this;
-                    nodeComponent.roomCoords = roomCoords;
                 }
 
-                _roomResources[roomCoords].Add(resourceNodeObj);
-
-                if (!GameManager.Instance.mapGenerator.IsRoomUnlocked(roomCoords.x, roomCoords.y)) {
-                    resourceNodeObj.SetActive(false);
-                }
-
+                _spawnedResources.Add(resourceNodeObj);
                 break;
             }
         }
     }
 
-    public void ActivateResourcesInRoom(Vector2Int roomCoords)
-    {
-        if (_roomResources.TryGetValue(roomCoords, out List<GameObject> roomResource)) {
-            roomResource.RemoveAll(go => go == null);
-            foreach (GameObject resource in roomResource) {
-                if (resource != null) {
-                    resource.SetActive(true);
-                }
-            }
-        }
-    }
 
     public void NotifyResourceDestroyed(ResourceNode node)
     {
         if (node == null) return;
-        
-        if (_roomResources.TryGetValue(node.roomCoords, out List<GameObject> roomResource))
-        {
-            roomResource.Remove(node.gameObject);
-        }
-    }
-
-    private Vector2Int GetRoomCoordinates(Vector3Int pos)
-    {
-        Vector3 worldPos = grid.GetCellCenterWorld(pos);
-        return GameManager.Instance.mapGenerator.GetRoomCoordinates(worldPos);
+        _spawnedResources.Remove(node.gameObject);
     }
 }

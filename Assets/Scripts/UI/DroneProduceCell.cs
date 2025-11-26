@@ -61,10 +61,24 @@ public class DroneProduceCell : MonoBehaviour
 
                 if (newCell != null)
                 {
-                    newCell.resourceImage.sprite = GetResourceImage(cost.resourceType);
-                    newCell.resourceAmount.text = cost.amount.ToString();
+                    // Set info without rebuilding immediately - we'll rebuild the parent after all cells are set
+                    newCell.SetInfo(cost.resourceType, cost.amount, false);
                 }
             }
+            
+            // Rebuild all resource info cells first, then rebuild the ingredient panel
+            // This ensures the ingredient panel updates its size after all cells have updated
+            foreach (Transform child in contentParent)
+            {
+                ResourceInfoCell cell = child.GetComponent<ResourceInfoCell>();
+                if (cell != null)
+                {
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(child.GetComponent<RectTransform>());
+                }
+            }
+            
+            // Now rebuild the ingredient panel after all resource info cells have updated their sizes
+            LayoutRebuilder.ForceRebuildLayoutImmediate(contentParent);
         }
 
         _currentProducedCount = _droneHub.GetCurrentUnitCount(_unitIndex);

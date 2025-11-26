@@ -12,11 +12,10 @@ public class ResourceNode : MonoBehaviour
     [HideInInspector] public Vector3Int cellPosition;
     
     [HideInInspector] public ResourceSpawner spawner;
-    [HideInInspector] public Vector2Int roomCoords;
 
     private Color _originalColor;
     private SpriteRenderer _sr;
-    private Unit_Lifter _reservedUnit;
+    private Unit_Miner _reservedUnit;
 
     public bool IsReserved { get; private set; }
 
@@ -67,7 +66,7 @@ public class ResourceNode : MonoBehaviour
         }
     }
 
-    public bool Reserve(Unit_Lifter unit)
+    public bool Reserve(Unit_Miner unit)
     {
         if (IsReserved) {
             return false;
@@ -90,7 +89,7 @@ public class ResourceNode : MonoBehaviour
         }
     }
 
-    public Unit_Lifter GetReservedUnit()
+    public Unit_Miner GetReservedUnit()
     {
         return  _reservedUnit;
     }

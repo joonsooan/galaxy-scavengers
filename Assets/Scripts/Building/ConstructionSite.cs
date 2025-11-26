@@ -114,6 +114,51 @@ public class ConstructionSite : MonoBehaviour
         return null;
     }
     
+    // Atomically get and assign the next piece to construct (prevents race conditions)
+    public Vector3Int? GetAndAssignNextPieceToConstruct(Unit_Construct drone)
+    {
+        if (comboCardData == null || comboCardData.recipe == null || drone == null) return null;
+        
+        foreach (var piece in comboCardData.recipe)
+        {
+            Vector3Int pieceCell = cellPosition + piece.relativePosition;
+            
+            // Check if piece is already constructed
+            if (_constructedPieces.ContainsKey(pieceCell) && _constructedPieces[pieceCell])
+            {
+                continue;
+            }
+            
+            // Check if another drone is already working on this piece
+            if (_pieceAssignedDrone.ContainsKey(pieceCell))
+            {
+                Unit_Construct assignedDrone = _pieceAssignedDrone[pieceCell];
+                // If the assigned drone is null or destroyed, clear the assignment
+                if (assignedDrone == null)
+                {
+                    _pieceAssignedDrone.Remove(pieceCell);
+                }
+                else
+                {
+                    // Another drone is working on this piece, skip it
+                    continue;
+                }
+            }
+            
+            // Check if this piece has all its required resources
+            if (HasPieceAllResources(pieceCell))
+            {
+                // Atomically assign the drone to this piece
+                if (AssignDroneToPiece(pieceCell, drone))
+                {
+                    return pieceCell;
+                }
+                // If assignment failed (race condition), continue to next piece
+            }
+        }
+        return null;
+    }
+    
     // Assign a drone to work on a specific piece
     public bool AssignDroneToPiece(Vector3Int pieceCell, Unit_Construct drone)
     {
@@ -519,9 +564,9 @@ public class ConstructionSite : MonoBehaviour
                 foreach (var request in _pendingRequests)
                 {
                     if (request.type == required.Key && 
-                        request.targetPieceCell == pieceCell && 
-                        request.assignedDrone != null)
+                        request.targetPieceCell == pieceCell)
                     {
+                        // Count all pending requests for this resource/piece combination (assigned or not)
                         onTheWay += request.amount;
                     }
                 }
@@ -545,6 +590,71 @@ public class ConstructionSite : MonoBehaviour
         }
         
         Debug.Log($"[ConstructionSite:{name}] GetNextResourceRequest: No resources needed. Required: {_requiredResources.Count} types");
+        return null;
+    }
+    
+    // Atomically get and assign a resource request to a drone (prevents duplicate requests)
+    public ConstructionRequest GetAndAssignNextResourceRequest(Unit_Construct drone, int droneCapacity)
+    {
+        if (_requiredResources.Count == 0 || drone == null)
+        {
+            Debug.LogWarning($"[ConstructionSite:{name}] GetAndAssignNextResourceRequest called but _requiredResources is empty or drone is null!");
+            return null;
+        }
+        
+        // Find a piece that needs resources, and return a request for one of its needed resources
+        // Prioritize pieces that are missing resources
+        foreach (var pieceCell in _pieceRequiredResources.Keys)
+        {
+            // Skip pieces that are already constructed
+            if (_constructedPieces.ContainsKey(pieceCell) && _constructedPieces[pieceCell])
+            {
+                continue;
+            }
+            
+            var pieceRequired = _pieceRequiredResources[pieceCell];
+            var pieceDelivered = _pieceDeliveredResources.ContainsKey(pieceCell) 
+                ? _pieceDeliveredResources[pieceCell] 
+                : new Dictionary<ResourceType, int>();
+            
+            // Find a resource this piece needs
+            foreach (var required in pieceRequired)
+            {
+                int delivered = pieceDelivered.ContainsKey(required.Key) ? pieceDelivered[required.Key] : 0;
+                int stillNeeded = required.Value - delivered;
+                
+                // Check if there's already a pending request for this resource for this piece
+                int onTheWay = 0;
+                foreach (var request in _pendingRequests)
+                {
+                    if (request.type == required.Key && 
+                        request.targetPieceCell == pieceCell)
+                    {
+                        // Count all pending requests for this resource/piece combination (assigned or not)
+                        onTheWay += request.amount;
+                    }
+                }
+                
+                int totalNeeded = stillNeeded - onTheWay;
+                if (totalNeeded > 0)
+                {
+                    int amountToRequest = Mathf.Min(totalNeeded, droneCapacity);
+                    ConstructionRequest newRequest = new ConstructionRequest
+                    {
+                        type = required.Key,
+                        amount = amountToRequest,
+                        site = this,
+                        targetPieceCell = pieceCell,
+                        assignedDrone = drone  // Assign immediately to prevent duplicate requests
+                    };
+                    _pendingRequests.Add(newRequest);
+                    Debug.Log($"[ConstructionSite:{name}] Created and assigned resource request: {amountToRequest} {required.Key} for piece at {pieceCell} to drone {drone.name} (still needed: {stillNeeded}, on the way: {onTheWay})");
+                    return newRequest;
+                }
+            }
+        }
+        
+        Debug.Log($"[ConstructionSite:{name}] GetAndAssignNextResourceRequest: No resources needed. Required: {_requiredResources.Count} types");
         return null;
     }
     

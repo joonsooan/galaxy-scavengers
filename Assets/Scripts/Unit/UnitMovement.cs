@@ -29,6 +29,7 @@ public class UnitMovement : MonoBehaviour
     private bool _isAligningToCenter = false;
     private Vector3 _targetCellCenter;
     private bool _isForceStopped = false; // Flag to prevent any movement updates
+    private bool _disableAlignment = false; // Flag to disable center alignment for specific tasks
 
     private Queue<Vector3> _path = new Queue<Vector3>();
 
@@ -66,6 +67,8 @@ public class UnitMovement : MonoBehaviour
         _grid = BuildingManager.Instance.grid;
     }
     
+    private Vector3Int _lastExploredCell = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
+    
     private void FixedUpdate()
     {
         // If force stopped, ensure velocity is zero and don't update anything
@@ -73,6 +76,17 @@ public class UnitMovement : MonoBehaviour
         {
             _rb.linearVelocity = Vector2.zero;
             return;
+        }
+        
+        // Explore current cell (for fog of war)
+        if (_grid != null && FogOfWarManager.Instance != null)
+        {
+            Vector3Int currentCell = _grid.WorldToCell(transform.position);
+            if (currentCell != _lastExploredCell)
+            {
+                FogOfWarManager.Instance.ExploreTile(currentCell);
+                _lastExploredCell = currentCell;
+            }
         }
         
         // 0. If we're aligning to center, handle that first
@@ -111,9 +125,19 @@ public class UnitMovement : MonoBehaviour
         }
 
         // 2. 웨이포인트를 향해 이동
+        // Calculate direction and set velocity - this ensures clean movement start
         Vector3 direction = (_currentWaypoint - transform.position).normalized;
-        _rb.linearVelocity = direction * moveSpeed;
-        _spriteController?.UpdateSpriteDirection(direction);
+        // Only set velocity if direction is valid (not zero)
+        if (direction.sqrMagnitude > 0.001f)
+        {
+            _rb.linearVelocity = direction * moveSpeed;
+            _spriteController?.UpdateSpriteDirection(direction);
+        }
+        else
+        {
+            // If direction is invalid, zero velocity
+            _rb.linearVelocity = Vector2.zero;
+        }
 
         // 3. 웨이포인트에 도착했는지 확인
         float distanceToWaypoint = Vector3.Distance(transform.position, _currentWaypoint);
@@ -132,7 +156,11 @@ public class UnitMovement : MonoBehaviour
                 if (_finalTargetPosition != default && Vector3.Distance(_currentWaypoint, _finalTargetPosition) < 0.01f)
                 {
                     _isAtFinalTarget = true;
-                    StartAligningToCellCenter();
+                    // Only start aligning if alignment is not disabled
+                    if (!_disableAlignment)
+                    {
+                        StartAligningToCellCenter();
+                    }
                 }
                 
                 // 이동 완료 및 정지
@@ -196,12 +224,20 @@ public class UnitMovement : MonoBehaviour
     
     public bool SetNewTargetDirect(Vector2 targetPosition, float stoppingDistance)
     {
+        return SetNewTargetDirect(targetPosition, stoppingDistance, false);
+    }
+    
+    public bool SetNewTargetDirect(Vector2 targetPosition, float stoppingDistance, bool disableAlignment)
+    {
         // Set target directly without finding interaction cells (used for assigned interaction positions)
+        // Explicitly zero velocity before starting new movement to prevent drift
+        _rb.linearVelocity = Vector2.zero;
         _isForceStopped = false; // Resume movement when setting new target
         _finalTargetPosition = targetPosition;
         _finalStoppingDistance = stoppingDistance;
         _isAtFinalTarget = false;
         _isAligningToCenter = false; // Reset alignment when setting new target
+        _disableAlignment = disableAlignment; // Store flag to prevent alignment
         
         _path = FindPath(transform.position, _finalTargetPosition);
         
@@ -214,6 +250,8 @@ public class UnitMovement : MonoBehaviour
 
     public bool SetNewTarget(Vector2 targetPosition, float stoppingDistance)
     {
+        // Explicitly zero velocity before starting new movement to prevent drift
+        _rb.linearVelocity = Vector2.zero;
         _isForceStopped = false; // Resume movement when setting new target
         Vector3Int targetCellPos = _grid.WorldToCell(targetPosition);
         Vector3Int targetCellForPathfinding = targetCellPos;
@@ -283,7 +321,8 @@ public class UnitMovement : MonoBehaviour
     public void StopMovement()
     {
         // If we're at the final target (interaction cell), start aligning to center
-        if (_isAtFinalTarget && _finalTargetPosition != default && !_isAligningToCenter)
+        // Only if alignment is not disabled
+        if (_isAtFinalTarget && _finalTargetPosition != default && !_isAligningToCenter && !_disableAlignment)
         {
             StartAligningToCellCenter();
         }
@@ -304,11 +343,14 @@ public class UnitMovement : MonoBehaviour
         _isAligningToCenter = false;
         _isAtFinalTarget = false;
         _finalTargetPosition = default;
+        _disableAlignment = false; // Reset alignment flag when force stopping
     }
     
     public void ResumeMovement()
     {
         // Resume movement after force stop
+        // Explicitly zero velocity to prevent any residual movement
+        _rb.linearVelocity = Vector2.zero;
         _isForceStopped = false;
     }
 

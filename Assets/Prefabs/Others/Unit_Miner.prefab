@@ -15,8 +15,9 @@ GameObject:
   - component: {fileID: 8882647708804449670}
   - component: {fileID: 4483249089817793867}
   - component: {fileID: 7616754858952366261}
+  - component: {fileID: 1616897775811544138}
   m_Layer: 0
-  m_Name: Unit_Lifter
+  m_Name: Unit_Miner
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -144,6 +145,7 @@ MonoBehaviour:
   mineableResourceTypes: 
   canvasName: ObjectUI Canvas
   showFloatingText: 1
+  miningParticleSystem: {fileID: 6912649713083214244, guid: bb0bcb1991dbd2f46b09b7a8c13f00de, type: 3}
 --- !u!114 &8882647708804449670
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -172,6 +174,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 4
   waypointTolerance: 0.1
+  alignmentSpeed: 3
 --- !u!114 &7616754858952366261
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -187,3 +190,17 @@ MonoBehaviour:
   spriteUp: {fileID: 8603391338363840403, guid: 41d81b85481201c44bb0e26872455946, type: 3}
   spriteDown: {fileID: 3751741419470782174, guid: 41d81b85481201c44bb0e26872455946, type: 3}
   spriteRight: {fileID: 4992164939788663360, guid: 41d81b85481201c44bb0e26872455946, type: 3}
+--- !u!114 &1616897775811544138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6649466925040614564}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4df76de1adfb064e95b506d49b881b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  visionRange: 5
+  isActive: 1
