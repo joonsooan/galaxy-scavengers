@@ -1422,7 +1422,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &80026091
 Transform:
   m_ObjectHideFlags: 0
@@ -3751,16 +3751,23 @@ MonoBehaviour:
   useProceduralTerrain: 1
   seed: 0
   randomSeed: 1
-  noiseScale: 15
+  noiseScale: 10
   noiseOffset: {x: 0, y: 0}
   useGradientMap: 1
   gradientMode: 1
   gradientTexture: {fileID: 0}
   gradientStrength: 0.6
   gradientCenter: {x: 0.5, y: 0.5}
-  falloffExponent: 2
-  lowWallThreshold: 0.44
-  highWallThreshold: 0.5
+  falloffExponent: 1.5
+  lowWallThreshold: 0.45
+  highWallThreshold: 0.55
+  enableCenterCircle: 1
+  centerCircleRadius: 10
+  fillDisconnectedAreas: 1
+  enableEnemySpawnHoles: 1
+  enemySpawnHoleCount: 3
+  enemySpawnHoleRadius: 10
+  enemySpawnHoleDistanceRatio: 0.7
 --- !u!114 &313771329
 MonoBehaviour:
   m_ObjectHideFlags: 0
