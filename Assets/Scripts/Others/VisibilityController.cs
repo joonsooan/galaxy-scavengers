@@ -1,21 +1,16 @@
 using UnityEngine;
 
-/// <summary>
-/// Component that controls the visibility of game objects based on fog of war state.
-/// Attach this to enemies, resources, or other objects that should be hidden by fog of war.
-/// </summary>
 public class VisibilityController : MonoBehaviour
 {
     [Header("Visibility Settings")]
     [SerializeField] private VisibilityType visibilityType = VisibilityType.Enemy;
-    [SerializeField] private bool hideWhenInvisible = true;
     
     public enum VisibilityType
     {
-        Enemy,      // Only visible when fully visible
-        Resource,   // Visible when partly or fully visible
-        Building,   // Always visible (buildings are player's own)
-        Terrain     // Always visible (terrain is always shown)
+        Enemy,
+        Resource,
+        Building,
+        Terrain   
     }
     
     private SpriteRenderer[] _spriteRenderers;
@@ -35,7 +30,6 @@ public class VisibilityController : MonoBehaviour
             FogOfWarManager.OnVisibilityChanged += OnVisibilityChanged;
         }
         
-        // Initial update
         UpdateVisibility();
     }
     
@@ -46,13 +40,11 @@ public class VisibilityController : MonoBehaviour
     
     private void Update()
     {
-        // Update visibility periodically (in case object moves)
         UpdateVisibility();
     }
     
     private void OnVisibilityChanged(Vector3Int cell, FogOfWarState state)
     {
-        // Check if this change affects us
         if (FogOfWarManager.Instance != null)
         {
             Vector3Int ourCell = GetCurrentCell();
@@ -109,7 +101,6 @@ public class VisibilityController : MonoBehaviour
     
     private void SetVisible(bool visible)
     {
-        // Control sprite renderers
         foreach (var sr in _spriteRenderers)
         {
             if (sr != null)
@@ -118,7 +109,6 @@ public class VisibilityController : MonoBehaviour
             }
         }
         
-        // Control canvases (for UI elements)
         foreach (var canvas in _canvases)
         {
             if (canvas != null)
@@ -126,13 +116,6 @@ public class VisibilityController : MonoBehaviour
                 canvas.enabled = visible;
             }
         }
-        
-        // Also control colliders if needed (optional)
-        // Collider2D[] colliders = GetComponentsInChildren<Collider2D>();
-        // foreach (var col in colliders)
-        // {
-        //     if (col != null) col.enabled = visible;
-        // }
     }
 }
 

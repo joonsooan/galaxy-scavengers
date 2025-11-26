@@ -18,7 +18,7 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private TileBase groundTile;
     [SerializeField] private TileBase lowWallTile;
     [SerializeField] private TileBase highWallTile;
-    [SerializeField] private TileBase wallTile; // Border walls
+    [SerializeField] private TileBase wallTile;
 
     [Header("Map Generation Settings")]
     [SerializeField] private int width = 250;
@@ -98,19 +98,16 @@ public class MapGenerator : MonoBehaviour
     {
         CalculateMapDimensions();
 
-        // Generate seed if random
         if (randomSeed)
         {
-            seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
+            seed = Random.Range(int.MinValue, int.MaxValue);
         }
 
-        // Generate noise map if using procedural terrain
         if (useProceduralTerrain)
         {
             GenerateNoiseMap();
         }
 
-        // Generate gradient map if enabled
         if (useGradientMap)
         {
             GenerateGradientMap();
@@ -131,40 +128,43 @@ public class MapGenerator : MonoBehaviour
         
         tilemap.SetTilesBlock(mapBounds, tiles);
         
-        // Apply polishing steps after initial generation
         PolishMap();
+        
+        // Copy terrain tiles to BuildingManager's groundTilemap so buildings can be placed and fog works correctly
+        // Do this after PolishMap() so all modifications are included
+        CopyTilesToBuildingManagerGroundTilemap(mapBounds);
         
         tilemap.CompressBounds();
         SetupCameraController();
+        
+        if (FogOfWarManager.Instance != null)
+        {
+            FogOfWarManager.Instance.RefreshFogOfWar();
+        }
     }
 
     private void PolishMap()
     {
-        // Step 1: Punch center circle
         if (enableCenterCircle)
         {
             PunchCenterCircle();
         }
 
-        // Step 2: Fill disconnected areas
         if (fillDisconnectedAreas)
         {
             FillDisconnectedAreas();
         }
 
-        // Step 3: Punch enemy spawn holes
         if (enableEnemySpawnHoles)
         {
             PunchEnemySpawnHoles();
         }
         
-        // Step 4: Fill disconnected areas again (after enemy holes might have created isolated areas)
         if (fillDisconnectedAreas)
         {
             FillDisconnectedAreas();
         }
         
-        // Step 5: Connect walls to map borders
         ConnectWallsToBorders();
     }
 
@@ -427,8 +427,6 @@ public class MapGenerator : MonoBehaviour
 
     private void ConnectWallsToBorders()
     {
-        // Check tiles adjacent to borders and connect high walls to border tiles
-        
         // Check left border (x = 0)
         for (int y = 0; y < height; y++)
         {
@@ -715,4 +713,32 @@ public class MapGenerator : MonoBehaviour
         return cellX >= 0 && cellX < width && cellY >= 0 && cellY < height;
     }
     
+    private void CopyTilesToBuildingManagerGroundTilemap(BoundsInt mapBounds)
+    {
+        if (BuildingManager.Instance == null)
+        {
+            Debug.LogWarning("[MapGenerator] BuildingManager.Instance is null. Cannot copy tiles to groundTilemap.");
+            return;
+        }
+        
+        Tilemap groundTilemap = BuildingManager.Instance.GroundTilemap;
+        if (groundTilemap == null)
+        {
+            Debug.LogWarning("[MapGenerator] BuildingManager.GroundTilemap is null. Cannot copy tiles to groundTilemap.");
+            return;
+        }
+        
+        // Copy all tiles from MapGenerator's tilemap to BuildingManager's groundTilemap
+        // This ensures buildings can be placed and fog of war works correctly
+        // Read tiles from tilemap after PolishMap() has modified them
+        TileBase[] tiles = new TileBase[mapBounds.size.x * mapBounds.size.y];
+        int index = 0;
+        foreach (Vector3Int pos in mapBounds.allPositionsWithin)
+        {
+            tiles[index++] = tilemap.GetTile(pos);
+        }
+        
+        groundTilemap.SetTilesBlock(mapBounds, tiles);
+        groundTilemap.CompressBounds();
+    }
 }

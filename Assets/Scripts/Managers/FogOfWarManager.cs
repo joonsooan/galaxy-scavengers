@@ -17,17 +17,17 @@ public class FogOfWarManager : MonoBehaviour
     [Header("References")]
     [SerializeField] private Grid grid;
     [SerializeField] private Tilemap groundTilemap;
-    [SerializeField] private Tilemap fogTilemap; // Overlay tilemap for fog visualization
+    [SerializeField] private Tilemap fogTilemap;
     
     [Header("Settings")]
-    [SerializeField] private float updateInterval = 0.1f; // How often to update visibility
-    [SerializeField] private bool enableDebugLogs = false; // Enable debug logging
+    [SerializeField] private float updateInterval = 0.1f;
+    [SerializeField] private bool enableDebugLogs = false;
     
     [Header("Visual Settings")]
-    [SerializeField] private TileBase fogTile; // Tile to use for fog overlay (use a white tile for best results)
-    [SerializeField] private Color fullyVisibleColor = new Color(1f, 1f, 1f, 0f); // Transparent (no fog)
-    [SerializeField] private Color partlyVisibleColor = new Color(0.7f, 0.7f, 0.7f, 0.4f); // Slightly dark (30% dark overlay)
-    [SerializeField] private Color invisibleColor = new Color(0.2f, 0.2f, 0.2f, 0.8f); // Very dark (80% dark overlay)
+    [SerializeField] private TileBase fogTile;
+    [SerializeField] private Color fullyVisibleColor = new Color(1f, 1f, 1f, 0f);
+    [SerializeField] private Color partlyVisibleColor = new Color(0.7f, 0.7f, 0.7f, 0.4f);
+    [SerializeField] private Color invisibleColor = new Color(0.2f, 0.2f, 0.2f, 0.8f);
     
     // Visibility tracking
     private Dictionary<Vector3Int, FogOfWarState> _tileVisibility = new Dictionary<Vector3Int, FogOfWarState>();
@@ -62,11 +62,9 @@ public class FogOfWarManager : MonoBehaviour
         
         if (groundTilemap == null && BuildingManager.Instance != null)
         {
-            // Try to get ground tilemap from BuildingManager
             groundTilemap = BuildingManager.Instance.GroundTilemap;
         }
         
-        // Create fog tilemap if it doesn't exist
         if (fogTilemap == null)
         {
             CreateFogTilemap();
@@ -81,7 +79,6 @@ public class FogOfWarManager : MonoBehaviour
             return;
         }
         
-        // Find or create fog tilemap GameObject
         GameObject fogTilemapObj = GameObject.Find("FogTilemap");
         if (fogTilemapObj == null)
         {
@@ -188,32 +185,46 @@ public class FogOfWarManager : MonoBehaviour
     
     private void InitializeFogOfWar()
     {
-        if (groundTilemap == null)
+        List<Tilemap> terrainTilemaps = new List<Tilemap>();
+        
+        if (groundTilemap == null && BuildingManager.Instance != null)
         {
-            // Try to get ground tilemap from BuildingManager
-            if (BuildingManager.Instance != null)
+            groundTilemap = BuildingManager.Instance.GroundTilemap;
+        }
+        
+        if (groundTilemap != null)
+        {
+            terrainTilemaps.Add(groundTilemap);
+        }
+        
+        MapGenerator mapGenerator = FindFirstObjectByType<MapGenerator>();
+        if (mapGenerator != null && mapGenerator.Tilemap != null)
+        {
+            Tilemap mapGenTilemap = mapGenerator.Tilemap;
+            if (!terrainTilemaps.Contains(mapGenTilemap))
             {
-                groundTilemap = BuildingManager.Instance.GroundTilemap;
+                terrainTilemaps.Add(mapGenTilemap);
             }
-            
-            // Fallback: Try to find ground tilemap by name
-            if (groundTilemap == null)
+        }
+        
+        if (terrainTilemaps.Count == 0)
+        {
+            Tilemap[] tilemaps = FindObjectsByType<Tilemap>(FindObjectsSortMode.None);
+            foreach (var tilemap in tilemaps)
             {
-                Tilemap[] tilemaps = FindObjectsByType<Tilemap>(FindObjectsSortMode.None);
-                foreach (var tilemap in tilemaps)
+                if (tilemap.name.ToLower().Contains("ground") || tilemap.name.ToLower().Contains("terrain"))
                 {
-                    if (tilemap.name.ToLower().Contains("ground"))
+                    if (!terrainTilemaps.Contains(tilemap))
                     {
-                        groundTilemap = tilemap;
-                        break;
+                        terrainTilemaps.Add(tilemap);
                     }
                 }
             }
         }
         
-        if (groundTilemap == null)
+        if (terrainTilemaps.Count == 0)
         {
-            Debug.LogWarning("[FogOfWarManager] Ground tilemap not found. Fog of war may not work correctly.");
+            Debug.LogWarning("[FogOfWarManager] No terrain tilemaps found. Fog of war may not work correctly.");
             return;
         }
         
@@ -223,15 +234,18 @@ public class FogOfWarManager : MonoBehaviour
             return;
         }
         
-        // Initialize all tiles in the tilemap as invisible
-        BoundsInt bounds = groundTilemap.cellBounds;
-        foreach (Vector3Int pos in bounds.allPositionsWithin)
+        // Initialize all tiles in all terrain tilemaps as invisible
+        foreach (Tilemap terrainTilemap in terrainTilemaps)
         {
-            if (groundTilemap.HasTile(pos))
+            BoundsInt bounds = terrainTilemap.cellBounds;
+            foreach (Vector3Int pos in bounds.allPositionsWithin)
             {
-                _tileVisibility[pos] = FogOfWarState.Invisible;
-                // Initialize fog overlay
-                UpdateFogVisual(pos, FogOfWarState.Invisible);
+                if (terrainTilemap.HasTile(pos))
+                {
+                    _tileVisibility[pos] = FogOfWarState.Invisible;
+                    // Initialize fog overlay
+                    UpdateFogVisual(pos, FogOfWarState.Invisible);
+                }
             }
         }
         
@@ -401,10 +415,40 @@ public class FogOfWarManager : MonoBehaviour
     
     private void UpdateFogVisual(Vector3Int cell, FogOfWarState state)
     {
-        if (fogTilemap == null || groundTilemap == null) return;
+        if (fogTilemap == null) return;
         
-        // Only show fog on tiles that exist in the ground tilemap
-        if (!groundTilemap.HasTile(cell)) return;
+        // Ensure groundTilemap reference is up to date
+        if (groundTilemap == null && BuildingManager.Instance != null)
+        {
+            groundTilemap = BuildingManager.Instance.GroundTilemap;
+        }
+        
+        // Always use groundTilemap as the source for tiles (it contains all terrain after copying)
+        // This ensures fog works correctly for both ground and terrain tiles
+        bool hasTile = false;
+        Tilemap tilemapWithTile = null;
+        
+        if (groundTilemap != null && groundTilemap.HasTile(cell))
+        {
+            hasTile = true;
+            tilemapWithTile = groundTilemap;
+        }
+        // Fallback to MapGenerator's tilemap only if groundTilemap is not available
+        else
+        {
+            MapGenerator mapGenerator = FindFirstObjectByType<MapGenerator>();
+            if (mapGenerator != null && mapGenerator.Tilemap != null)
+            {
+                if (mapGenerator.Tilemap.HasTile(cell))
+                {
+                    hasTile = true;
+                    tilemapWithTile = mapGenerator.Tilemap;
+                }
+            }
+        }
+        
+        // Only show fog on tiles that exist
+        if (!hasTile || tilemapWithTile == null) return;
         
         Color fogColor;
         bool shouldRemoveFog = false;
@@ -438,31 +482,19 @@ public class FogOfWarManager : MonoBehaviour
             return;
         }
         
-        // Ensure we have a tile in the fog tilemap
-        // Use a white tile for the fog overlay - darker colors will darken the view
-        if (!fogTilemap.HasTile(cell))
+        // Get the tile to use for fog overlay
+        TileBase tileToUse = fogTile != null ? fogTile : (tilemapWithTile != null ? tilemapWithTile.GetTile(cell) : null);
+        if (tileToUse == null) return;
+        
+        // Set or update the fog tile
+        if (!fogTilemap.HasTile(cell) || fogTilemap.GetTile(cell) != tileToUse)
         {
-            // Use fog tile if available, otherwise use ground tile as base
-            TileBase tileToUse = fogTile != null ? fogTile : groundTilemap.GetTile(cell);
-            if (tileToUse != null)
-            {
-                fogTilemap.SetTile(cell, tileToUse);
-                // Reset color to white first to ensure proper tinting
-                fogTilemap.SetColor(cell, Color.white);
-            }
-            else
-            {
-                return; // Can't create fog visual without a tile
-            }
+            fogTilemap.SetTile(cell, tileToUse);
         }
         
-        // Apply color tint to create darkness effect
-        // Unity multiplies tile color * set color, so:
-        // White tile (1,1,1) * dark color (0.2,0.2,0.2) = dark result (0.2,0.2,0.2)
-        // IMPORTANT: The fog tile should be white for this to work correctly
+        // Always set the color to ensure it applies correctly to all tile types (ground and terrain)
+        // This is critical for terrain tiles (walls) to receive the fog color tint
         fogTilemap.SetColor(cell, fogColor);
-        
-        // Force refresh to ensure the color is applied
         fogTilemap.RefreshTile(cell);
     }
     
@@ -501,7 +533,6 @@ public class FogOfWarManager : MonoBehaviour
     public bool CanPlaceBuilding(Vector3Int cellPosition)
     {
         FogOfWarState state = GetVisibilityState(cellPosition);
-        // Can place buildings on fully visible or partly visible tiles
         return state == FogOfWarState.FullyVisible || state == FogOfWarState.PartlyVisible;
     }
     
@@ -516,7 +547,11 @@ public class FogOfWarManager : MonoBehaviour
         return state == FogOfWarState.FullyVisible || state == FogOfWarState.PartlyVisible;
     }
     
-    // Manually explore a tile (for testing or special cases)
+    public void RefreshFogOfWar()
+    {
+        InitializeFogOfWar();
+    }
+    
     public void ExploreTile(Vector3Int cellPosition)
     {
         if (!_exploredTiles.Contains(cellPosition))
@@ -524,7 +559,6 @@ public class FogOfWarManager : MonoBehaviour
             _exploredTiles.Add(cellPosition);
             OnTileExplored?.Invoke(cellPosition);
             
-            // If not fully visible, set to partly visible
             if (!_tileVisibility.ContainsKey(cellPosition) || 
                 _tileVisibility[cellPosition] == FogOfWarState.Invisible)
             {
