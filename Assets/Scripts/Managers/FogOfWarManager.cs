@@ -43,6 +43,12 @@ public class FogOfWarManager : MonoBehaviour
     // Optimization: Track which tiles are affected by vision providers
     private Dictionary<IVisionProvider, HashSet<Vector3Int>> _providerAffectedTiles = new Dictionary<IVisionProvider, HashSet<Vector3Int>>();
     
+    // Optimization: Track which VisibilityControllers are at which tiles (for targeted notifications)
+    private Dictionary<Vector3Int, List<VisibilityController>> _tileToControllers = new Dictionary<Vector3Int, List<VisibilityController>>();
+    
+    // Track all tiles that are currently visible (for efficient lookups)
+    private HashSet<Vector3Int> _currentlyVisibleTiles = new HashSet<Vector3Int>();
+    
     // Events
     public static event Action<Vector3Int, FogOfWarState> OnVisibilityChanged;
     public static event Action<Vector3Int> OnTileExplored;
@@ -109,12 +115,10 @@ public class FogOfWarManager : MonoBehaviour
         TilemapRenderer renderer = fogTilemap.GetComponent<TilemapRenderer>();
         if (renderer != null)
         {
-            renderer.sortingOrder = 100; // High sorting order to render on top
-            // Ensure the renderer supports transparency for fog overlay
+            renderer.sortingOrder = 100;
             renderer.mode = TilemapRenderer.Mode.Individual;
         }
         
-        // Set tilemap color to white so individual cell colors work correctly
         fogTilemap.color = Color.white;
         fogTilemap.gameObject.SetActive(true);
     }
@@ -127,9 +131,8 @@ public class FogOfWarManager : MonoBehaviour
         }
         
         InitializeFogOfWar();
-        // ExploreStartingArea();
         RegisterAllExistingVisionProviders();
-        InvokeRepeating(nameof(UpdateVisibility), updateInterval, updateInterval);
+        InvokeRepeating(nameof(CleanupNullProviders), 5f, 5f);
     }
     
     private void RegisterAllExistingVisionProviders()
@@ -241,13 +244,11 @@ public class FogOfWarManager : MonoBehaviour
                 if (terrainTilemap.HasTile(pos))
                 {
                     _tileVisibility[pos] = FogOfWarState.Invisible;
-                    // Initialize fog overlay
                     UpdateFogVisual(pos, FogOfWarState.Invisible);
                 }
             }
         }
         
-        // Refresh the fog tilemap after initialization
         fogTilemap.RefreshAllTiles();
         fogTilemap.CompressBounds();
     }
@@ -257,6 +258,20 @@ public class FogOfWarManager : MonoBehaviour
         if (provider != null && !_visionProviders.Contains(provider))
         {
             _visionProviders.Add(provider);
+            
+            // Initialize affected tiles for this provider
+            if (!_providerAffectedTiles.ContainsKey(provider))
+            {
+                _providerAffectedTiles[provider] = new HashSet<Vector3Int>();
+            }
+            
+            // For VisionProvider components, they will call OnVisionProviderTilesChanged in Start()
+            // For other IVisionProvider implementations, do a full update
+            if (!(provider is VisionProvider))
+            {
+                UpdateVisibility();
+            }
+            
             if (enableDebugLogs)
             {
                 Debug.Log($"[FogOfWarManager] Registered vision provider: {provider.GetType().Name} at {provider.GetPosition()}, range: {provider.GetVisionRange()}");
@@ -268,8 +283,20 @@ public class FogOfWarManager : MonoBehaviour
     {
         if (provider != null && _visionProviders.Remove(provider))
         {
-            // Remove from affected tiles tracking
+            // Get tiles that were affected by this provider
+            HashSet<Vector3Int> affectedTiles = null;
+            if (_providerAffectedTiles.TryGetValue(provider, out HashSet<Vector3Int> tiles))
+            {
+                affectedTiles = new HashSet<Vector3Int>(tiles);
+            }
+            
             _providerAffectedTiles.Remove(provider);
+            
+            // Update tiles that were visible because of this provider
+            if (affectedTiles != null && affectedTiles.Count > 0)
+            {
+                UpdateSpecificTiles(affectedTiles);
+            }
             
             if (enableDebugLogs)
             {
@@ -278,14 +305,131 @@ public class FogOfWarManager : MonoBehaviour
         }
     }
     
-    private void UpdateVisibility()
+    public void OnVisionProviderChanged(IVisionProvider provider)
     {
-        if (grid == null) return;
+        // Legacy method - kept for compatibility but should use OnVisionProviderTilesChanged instead
+        if (provider != null && _visionProviders.Contains(provider))
+        {
+            // Force full update (less efficient, but works)
+            UpdateVisibility();
+        }
+    }
+    
+    public void OnVisionProviderTilesChanged(IVisionProvider provider, HashSet<Vector3Int> enteredTiles, HashSet<Vector3Int> exitedTiles)
+    {
+        if (provider == null || !_visionProviders.Contains(provider)) return;
         
-        // Clean up null providers first
-        _visionProviders.RemoveAll(p => p == null);
+        // Early exit if no tiles changed
+        if ((enteredTiles == null || enteredTiles.Count == 0) && (exitedTiles == null || exitedTiles.Count == 0))
+        {
+            return;
+        }
         
-        // Clean up null providers from affected tiles dictionary
+        // Update the provider's affected tiles cache
+        if (!_providerAffectedTiles.ContainsKey(provider))
+        {
+            _providerAffectedTiles[provider] = new HashSet<Vector3Int>();
+        }
+        
+        // Add entered tiles
+        if (enteredTiles != null && enteredTiles.Count > 0)
+        {
+            _providerAffectedTiles[provider].UnionWith(enteredTiles);
+        }
+        
+        // Remove exited tiles
+        if (exitedTiles != null && exitedTiles.Count > 0)
+        {
+            _providerAffectedTiles[provider].ExceptWith(exitedTiles);
+        }
+        
+        // ONLY check the tiles that actually changed (entered or exited)
+        // Don't check all previously affected tiles - that defeats the purpose of incremental updates!
+        HashSet<Vector3Int> tilesToCheck = new HashSet<Vector3Int>();
+        if (enteredTiles != null) tilesToCheck.UnionWith(enteredTiles);
+        if (exitedTiles != null) tilesToCheck.UnionWith(exitedTiles);
+        
+        // Early exit if no tiles to check
+        if (tilesToCheck.Count == 0) return;
+        
+        // Update only the changed tiles
+        UpdateSpecificTiles(tilesToCheck);
+    }
+    
+    private void UpdateSpecificTiles(HashSet<Vector3Int> tilesToCheck)
+    {
+        if (grid == null || tilesToCheck == null || tilesToCheck.Count == 0) return;
+        
+        // Calculate new visibility states only for tiles that need checking
+        Dictionary<Vector3Int, FogOfWarState> newVisibility = new Dictionary<Vector3Int, FogOfWarState>(tilesToCheck.Count);
+        
+        // Pre-check: Build a set of all visible tiles from all providers for faster lookup
+        HashSet<Vector3Int> allVisibleTiles = new HashSet<Vector3Int>();
+        foreach (var kvp in _providerAffectedTiles)
+        {
+            if (kvp.Key != null && kvp.Value != null)
+            {
+                allVisibleTiles.UnionWith(kvp.Value);
+            }
+        }
+        
+        foreach (var tile in tilesToCheck)
+        {
+            // Start with explored state if explored, otherwise invisible
+            FogOfWarState state = _exploredTiles.Contains(tile) ? FogOfWarState.PartlyVisible : FogOfWarState.Invisible;
+            
+            // Fast check: Is this tile visible by any provider?
+            if (allVisibleTiles.Contains(tile))
+            {
+                state = FogOfWarState.FullyVisible;
+                
+                // Mark as explored
+                if (!_exploredTiles.Contains(tile))
+                {
+                    _exploredTiles.Add(tile);
+                    OnTileExplored?.Invoke(tile);
+                }
+            }
+            
+            newVisibility[tile] = state;
+        }
+        
+        // Update only changed tiles (avoid duplicate notifications)
+        foreach (var tile in tilesToCheck)
+        {
+            FogOfWarState oldState = _tileVisibility.ContainsKey(tile) ? _tileVisibility[tile] : FogOfWarState.Invisible;
+            FogOfWarState newState = newVisibility.ContainsKey(tile) ? newVisibility[tile] : FogOfWarState.Invisible;
+            
+            // Only update if state actually changed
+            if (oldState != newState)
+            {
+                _tileVisibility[tile] = newState;
+                UpdateFogVisual(tile, newState);
+                
+                // Update currently visible tiles tracking
+                if (newState == FogOfWarState.FullyVisible)
+                {
+                    _currentlyVisibleTiles.Add(tile);
+                }
+                else
+                {
+                    _currentlyVisibleTiles.Remove(tile);
+                }
+                
+                // Only invoke event if not suppressed (during resource spawning)
+                // This will notify only the VisibilityControllers registered at this specific tile
+                if (!_suppressVisibilityEvents)
+                {
+                    SafeInvokeVisibilityChanged(tile, newState);
+                }
+            }
+        }
+    }
+    
+    private void CleanupNullProviders()
+    {
+        int removed = _visionProviders.RemoveAll(p => p == null);
+        
         var keysToRemove = new List<IVisionProvider>();
         foreach (var kvp in _providerAffectedTiles)
         {
@@ -299,19 +443,44 @@ public class FogOfWarManager : MonoBehaviour
             _providerAffectedTiles.Remove(key);
         }
         
-        // Collect all tiles that need to be checked (only tiles affected by vision providers)
+        // Clean up null VisibilityControllers from tile-to-controllers mapping
+        var tilesToClean = new List<Vector3Int>();
+        foreach (var kvp in _tileToControllers)
+        {
+            kvp.Value.RemoveAll(c => c == null);
+            if (kvp.Value.Count == 0)
+            {
+                tilesToClean.Add(kvp.Key);
+            }
+        }
+        foreach (var tile in tilesToClean)
+        {
+            _tileToControllers.Remove(tile);
+        }
+        
+        if (removed > 0 || keysToRemove.Count > 0)
+        {
+            UpdateVisibility();
+        }
+    }
+    
+    private void UpdateVisibility()
+    {
+        if (grid == null) return;
+        
+        // HashSet으로 중복 좌표 방지
         HashSet<Vector3Int> tilesToCheck = new HashSet<Vector3Int>();
         
-        // Add all explored tiles (they should be checked for state changes)
+        // 이미 탐험한 타일들을 검사 대상에 추가
+        // FullyVisible 타일이 PartlyVisible로 변했을 수도 있어서
         foreach (var exploredTile in _exploredTiles)
         {
             tilesToCheck.Add(exploredTile);
         }
         
-        // Track new affected tiles for each provider
+        // 모든 visionProvider를 순회하며 현재 보이는 타일을 계산
         Dictionary<IVisionProvider, HashSet<Vector3Int>> newAffectedTiles = new Dictionary<IVisionProvider, HashSet<Vector3Int>>();
         
-        // Apply vision from all providers and collect affected tiles
         foreach (var provider in _visionProviders)
         {
             if (provider == null || !provider.CheckIsActive()) continue;
@@ -324,11 +493,13 @@ public class FogOfWarManager : MonoBehaviour
                 if (visionRange <= 0) continue;
                 
                 Vector3Int centerCell = grid.WorldToCell(worldPos);
+                // 성능 최적화: 원형 거리 계산 전, 사각형(Bounding Box) 범위로 먼저 루프를 제한
                 int rangeInCells = Mathf.CeilToInt(visionRange);
                 
+                // 영향을 받는 타일 목록
                 HashSet<Vector3Int> affectedTiles = new HashSet<Vector3Int>();
                 
-                // Check all cells within vision range
+                // visionProvider 주변의 사각형 범위를 순회
                 for (int x = -rangeInCells; x <= rangeInCells; x++)
                 {
                     for (int y = -rangeInCells; y <= rangeInCells; y++)
@@ -337,23 +508,27 @@ public class FogOfWarManager : MonoBehaviour
                         Vector3 cellWorldPos = grid.GetCellCenterWorld(cell);
                         float distance = Vector3.Distance(worldPos, cellWorldPos);
                         
+                        // 실제 거리(원형 시야) 체크
                         if (distance <= visionRange)
                         {
                             affectedTiles.Add(cell);
+                            
+                            // 현재 시야에 들어온 타일도 검사 대상에 포함
                             tilesToCheck.Add(cell);
                         }
                     }
                 }
                 
+                // visionProvider의 시야에 들어온 타일 목록 저장
                 newAffectedTiles[provider] = affectedTiles;
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 Debug.LogWarning($"[FogOfWarManager] Error processing vision provider {provider.GetType().Name}: {e.Message}");
             }
         }
         
-        // Check tiles that were previously affected but might not be anymore
+        // 이전에 시야를 제공했던 타일들도 검사 대상에 추가
         foreach (var kvp in _providerAffectedTiles)
         {
             if (kvp.Key != null && kvp.Value != null)
@@ -365,30 +540,34 @@ public class FogOfWarManager : MonoBehaviour
             }
         }
         
-        // Update affected tiles tracking
+        // 캐시 업데이트: 현재 계산된 시야 정보를 다음 프레임 비교용으로 저장
         _providerAffectedTiles = newAffectedTiles;
         
-        // Calculate new visibility states only for tiles that need checking
+        // 수집된 타일 목록에 속한 타일들의 최종 상태 판정
         Dictionary<Vector3Int, FogOfWarState> newVisibility = new Dictionary<Vector3Int, FogOfWarState>();
         
         foreach (var tile in tilesToCheck)
         {
-            // Start with explored state if explored
+            // 이미 탐험한 적이 있다 -> PartlyVisible (회색)
+            // 탐험한 적이 없다 -> Invisible (검은색)
             FogOfWarState state = _exploredTiles.Contains(tile) ? FogOfWarState.PartlyVisible : FogOfWarState.Invisible;
             
-            // Check if any provider makes it fully visible
+            // 현재 타일을 어떤 visionProvider가 보고 있는지 확인
             foreach (var kvp in newAffectedTiles)
             {
                 if (kvp.Value.Contains(tile))
                 {
+                    // 보고 있다면 FullyVisible
                     state = FogOfWarState.FullyVisible;
                     
-                    // Mark as explored
+                    // 이번에 처음 본 타일이라면 탐험 목록에 추가
                     if (!_exploredTiles.Contains(tile))
                     {
                         _exploredTiles.Add(tile);
+                        // 탐험 이벤트 발생
                         OnTileExplored?.Invoke(tile);
                     }
+                    // 하나라도 보고 있으면 더 검사할 필요 없음 (FullyVisible 확정)
                     break;
                 }
             }
@@ -396,18 +575,19 @@ public class FogOfWarManager : MonoBehaviour
             newVisibility[tile] = state;
         }
         
-        // Update only changed tiles
+        // 상태가 변한 타일만 실제 타일맵에 반영
         foreach (var tile in tilesToCheck)
         {
             FogOfWarState oldState = _tileVisibility.ContainsKey(tile) ? _tileVisibility[tile] : FogOfWarState.Invisible;
             FogOfWarState newState = newVisibility.ContainsKey(tile) ? newVisibility[tile] : FogOfWarState.Invisible;
             
+            // 상태가 변경되었을 때만 로직 수행
             if (oldState != newState)
             {
                 _tileVisibility[tile] = newState;
                 UpdateFogVisual(tile, newState);
                 
-                // Only invoke event if not suppressed (during resource spawning)
+                // 이벤트 발생
                 if (!_suppressVisibilityEvents)
                 {
                     SafeInvokeVisibilityChanged(tile, newState);
@@ -420,14 +600,11 @@ public class FogOfWarManager : MonoBehaviour
     {
         if (fogTilemap == null) return;
         
-        // Ensure groundTilemap reference is up to date
-        if (groundTilemap == null && BuildingManager.Instance != null)
+            if (groundTilemap == null && BuildingManager.Instance != null)
         {
             groundTilemap = BuildingManager.Instance.GroundTilemap;
         }
         
-        // Always use groundTilemap as the source for tiles (it contains all terrain after copying)
-        // This ensures fog works correctly for both ground and terrain tiles
         bool hasTile = false;
         Tilemap tilemapWithTile = null;
         
@@ -436,7 +613,6 @@ public class FogOfWarManager : MonoBehaviour
             hasTile = true;
             tilemapWithTile = groundTilemap;
         }
-        // Fallback to MapGenerator's tilemap only if groundTilemap is not available
         else
         {
             MapGenerator mapGenerator = FindFirstObjectByType<MapGenerator>();
@@ -450,7 +626,6 @@ public class FogOfWarManager : MonoBehaviour
             }
         }
         
-        // Only show fog on tiles that exist
         if (!hasTile || tilemapWithTile == null) return;
         
         Color fogColor;
@@ -460,7 +635,6 @@ public class FogOfWarManager : MonoBehaviour
         {
             case FogOfWarState.FullyVisible:
                 fogColor = fullyVisibleColor;
-                // For fully visible, remove the fog tile to show normal brightness
                 if (fogColor.a <= 0.01f)
                 {
                     shouldRemoveFog = true;
@@ -475,7 +649,6 @@ public class FogOfWarManager : MonoBehaviour
                 break;
         }
         
-        // Remove fog tile if fully visible
         if (shouldRemoveFog)
         {
             if (fogTilemap.HasTile(cell))
@@ -485,26 +658,18 @@ public class FogOfWarManager : MonoBehaviour
             return;
         }
         
-        // Always use the separate fog tile (never fall back to terrain tile)
         if (fogTile == null)
         {
             Debug.LogWarning("[FogOfWarManager] Fog tile is not set. Please assign a fog tile in the inspector.");
             return;
         }
         
-        // Set or update the fog tile
         bool tileChanged = !fogTilemap.HasTile(cell) || fogTilemap.GetTile(cell) != fogTile;
         if (tileChanged)
         {
             fogTilemap.SetTile(cell, fogTile);
         }
         
-        // Apply opacity/color to the fog tile to cover the terrain below
-        // Unity multiplies the tile's color with the color we set here
-        // Therefore, the fog tile should be WHITE (1,1,1) so the color multiplication works correctly
-        // The alpha channel in fogColor controls the opacity of the fog overlay
-        // Always set the color to ensure it's applied (even if tile already exists)
-        // This ensures the color is updated when visibility state changes
         Color currentColor = fogTilemap.GetColor(cell);
         if (currentColor != fogColor || tileChanged)
         {
@@ -564,14 +729,10 @@ public class FogOfWarManager : MonoBehaviour
     
     public void RefreshFogOfWar()
     {
-        // Only initialize if not already initialized (to avoid expensive re-initialization)
         if (_tileVisibility.Count == 0)
         {
             InitializeFogOfWar();
         }
-        
-        // Force an immediate visibility update to light up tiles based on current buildings/units
-        // This is more efficient than re-initializing everything
         UpdateVisibility();
     }
     
@@ -588,7 +749,6 @@ public class FogOfWarManager : MonoBehaviour
                 _tileVisibility[cellPosition] = FogOfWarState.PartlyVisible;
                 UpdateFogVisual(cellPosition, FogOfWarState.PartlyVisible);
                 
-                // Only invoke event if not suppressed (during resource spawning)
                 if (!_suppressVisibilityEvents)
                 {
                     SafeInvokeVisibilityChanged(cellPosition, FogOfWarState.PartlyVisible);
@@ -605,31 +765,67 @@ public class FogOfWarManager : MonoBehaviour
         }
     }
     
-    /// <summary>
-    /// Safely invokes the OnVisibilityChanged event, catching exceptions from destroyed subscribers
-    /// </summary>
+    public void RegisterVisibilityController(VisibilityController controller, Vector3Int tilePosition)
+    {
+        if (controller == null) return;
+        
+        if (!_tileToControllers.ContainsKey(tilePosition))
+        {
+            _tileToControllers[tilePosition] = new List<VisibilityController>();
+        }
+        
+        if (!_tileToControllers[tilePosition].Contains(controller))
+        {
+            _tileToControllers[tilePosition].Add(controller);
+        }
+    }
+    
+    public void UnregisterVisibilityController(VisibilityController controller, Vector3Int tilePosition)
+    {
+        if (controller == null || !_tileToControllers.ContainsKey(tilePosition)) return;
+        
+        _tileToControllers[tilePosition].Remove(controller);
+        
+        // Clean up empty lists
+        if (_tileToControllers[tilePosition].Count == 0)
+        {
+            _tileToControllers.Remove(tilePosition);
+        }
+    }
+    
     private void SafeInvokeVisibilityChanged(Vector3Int cell, FogOfWarState state)
     {
-        if (OnVisibilityChanged == null) return;
-        
-        // Get all subscribers and invoke them one by one, catching exceptions
-        System.Delegate[] subscribers = OnVisibilityChanged.GetInvocationList();
-        foreach (System.Delegate subscriber in subscribers)
+        // Only notify VisibilityControllers that are actually at this tile position
+        if (_tileToControllers.TryGetValue(cell, out List<VisibilityController> controllers))
         {
-            try
+            // Clean up null controllers while iterating
+            for (int i = controllers.Count - 1; i >= 0; i--)
             {
-                if (subscriber != null)
+                VisibilityController controller = controllers[i];
+                if (controller == null)
                 {
-                    ((System.Action<Vector3Int, FogOfWarState>)subscriber)(cell, state);
+                    controllers.RemoveAt(i);
+                    continue;
+                }
+                
+                try
+                {
+                    // Directly call the method instead of using events for better performance
+                    // This avoids the overhead of the global event system
+                    controller.OnVisibilityChangedDirect(cell, state);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"[FogOfWarManager] Error notifying VisibilityController: {e.Message}");
+                    controllers.RemoveAt(i);
                 }
             }
-            catch (System.Exception e)
+            
+            // Clean up empty lists
+            if (controllers.Count == 0)
             {
-                // Log warning but continue with other subscribers
-                // This handles cases where a subscriber's object was destroyed
-                Debug.LogWarning($"[FogOfWarManager] Error invoking OnVisibilityChanged for destroyed subscriber: {e.Message}");
+                _tileToControllers.Remove(cell);
             }
         }
     }
 }
-

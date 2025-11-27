@@ -17,6 +17,7 @@ public class VisibilityController : MonoBehaviour
     private Canvas[] _canvases;
     private bool _wasVisible = true;
     private bool _isSubscribed = false;
+    private Vector3Int _lastRegisteredCell = new Vector3Int(int.MaxValue, int.MaxValue, int.MaxValue);
     
     private void Awake()
     {
@@ -38,17 +39,20 @@ public class VisibilityController : MonoBehaviour
         
         // For non-resources or when not spawning, subscribe immediately
         SubscribeToEvent();
+        RegisterWithFogOfWar();
         UpdateVisibility();
     }
     
     private void OnDisable()
     {
+        UnregisterFromFogOfWar();
         UnsubscribeFromEvent();
     }
     
     private void OnDestroy()
     {
         // Ensure we unsubscribe when object is destroyed
+        UnregisterFromFogOfWar();
         UnsubscribeFromEvent();
     }
     
@@ -88,21 +92,62 @@ public class VisibilityController : MonoBehaviour
         if (!_isSubscribed)
         {
             SubscribeToEvent();
+            RegisterWithFogOfWar();
             UpdateVisibility();
         }
     }
     
-    private void Update()
+    private void RegisterWithFogOfWar()
     {
+        if (FogOfWarManager.Instance == null) return;
+        
+        Vector3Int currentCell = GetCurrentCell();
+        if (currentCell != _lastRegisteredCell)
+        {
+            // Unregister from old position if we were registered
+            if (_lastRegisteredCell.x != int.MaxValue)
+            {
+                FogOfWarManager.Instance.UnregisterVisibilityController(this, _lastRegisteredCell);
+            }
+            
+            // Register at new position
+            FogOfWarManager.Instance.RegisterVisibilityController(this, currentCell);
+            _lastRegisteredCell = currentCell;
+        }
+    }
+    
+    private void UnregisterFromFogOfWar()
+    {
+        if (FogOfWarManager.Instance == null) return;
+        
+        if (_lastRegisteredCell.x != int.MaxValue)
+        {
+            FogOfWarManager.Instance.UnregisterVisibilityController(this, _lastRegisteredCell);
+            _lastRegisteredCell = new Vector3Int(int.MaxValue, int.MaxValue, int.MaxValue);
+        }
+    }
+    
+    // Called directly by FogOfWarManager when this specific tile's visibility changes
+    // This is much more efficient than the global event system
+    public void OnVisibilityChangedDirect(Vector3Int cell, FogOfWarState state)
+    {
+        // Check if this object is still valid before processing
+        if (this == null || gameObject == null)
+        {
+            return;
+        }
+        
         // Skip visibility updates during resource spawning to prevent performance issues
         if (visibilityType == VisibilityType.Resource && ProceduralResourceSpawner.IsSpawningResources)
         {
             return;
         }
         
+        // Since we're registered at this specific tile, we know this notification is for us
         UpdateVisibility();
     }
     
+    // Legacy event handler for backward compatibility (should rarely be called now)
     private void OnVisibilityChanged(Vector3Int cell, FogOfWarState state)
     {
         // Check if this object is still valid before processing
@@ -173,6 +218,13 @@ public class VisibilityController : MonoBehaviour
         if (this == null || gameObject == null)
         {
             return;
+        }
+        
+        // Update registration if position changed (for moving objects)
+        Vector3Int currentCell = GetCurrentCell();
+        if (currentCell != _lastRegisteredCell)
+        {
+            RegisterWithFogOfWar();
         }
         
         if (FogOfWarManager.Instance == null)
