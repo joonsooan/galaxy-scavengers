@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9e7aa4ffe54aa64cb07513ab38fd7c3, type: 3}
   m_Name: 0_Storage
   m_EditorClassIdentifier: 
-  displayName: Storage
+  displayName: "\uC800\uC7A5\uACE0"
   description: Increases the amount of resources storable
   icon: {fileID: 4218390747337514297, guid: 36441be9ffbcaab4280cf9ed3a66c607, type: 3}
   comboPrefab: {fileID: 1574451153020646121, guid: bb1d61d0bb9212a43a284a4716380a4b, type: 3}

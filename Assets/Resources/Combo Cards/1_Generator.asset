@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9e7aa4ffe54aa64cb07513ab38fd7c3, type: 3}
   m_Name: 1_Generator
   m_EditorClassIdentifier: 
-  displayName: Generator
+  displayName: "\uBC1C\uC804\uAE30"
   description: Produces Aether energy
   icon: {fileID: -4550992031882759542, guid: 357de6c3f6d090946984b9be89ddb355, type: 3}
   comboPrefab: {fileID: 1574451153020646121, guid: bca5fc75e320a7c4882e0538e3e0036b, type: 3}

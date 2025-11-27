@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9e7aa4ffe54aa64cb07513ab38fd7c3, type: 3}
   m_Name: 5_Reactor
   m_EditorClassIdentifier: 
-  displayName: Reactor
+  displayName: "\uBC18\uC751\uB85C"
   description: This is Reactor
   icon: {fileID: -143252898816197684, guid: 4b4d97bc9df3e3244a75d745e708e8e5, type: 3}
   comboPrefab: {fileID: 1574451153020646121, guid: d0477e22c2f36af48ab43a010b56e5bf, type: 3}
