@@ -84,6 +84,10 @@ public class ProceduralResourceSpawner : MonoBehaviour
     [Range(0, 20)]
     [SerializeField] private int startingAreaCircleCount = 3;
     
+    [Tooltip("Minimum distance between starting area resource circles (as multiplier of combined radii, 0-1).")]
+    [Range(0f, 1f)]
+    [SerializeField] private float startingAreaMinDistance = 0.3f;
+    
     [Header("Debug")]
     [Tooltip("Show gizmos in scene view to visualize circles.")]
     [SerializeField] private bool showGizmos = true;
@@ -94,7 +98,12 @@ public class ProceduralResourceSpawner : MonoBehaviour
     [Tooltip("Color for resource spawn circles.")]
     [SerializeField] private Color resourceCircleColor = new Color(0f, 1f, 0f, 0.5f);
     
-    private System.Random _random;
+    [Tooltip("Color for starting area min spawn radius (safe zone).")]
+    [SerializeField] private Color startingAreaMinRadiusColor = new Color(1f, 0f, 0f, 0.5f);
+    
+    [Tooltip("Color for starting area max radius.")]
+    [SerializeField] private Color startingAreaMaxRadiusColor = new Color(0f, 0f, 1f, 0.5f);
+    
     private readonly List<GameObject> _spawnedResources = new List<GameObject>();
     private Vector2Int _mapCenter;
     private int _mapWidth;
@@ -159,9 +168,6 @@ public class ProceduralResourceSpawner : MonoBehaviour
         float halfHeight = (_mapHeight / 2f) - borderPadding;
         _maxMapRadius = Mathf.Min(halfWidth, halfHeight);
         
-        // Initialize random
-        _random = new System.Random(mapGenerator.GetInstanceID() + 12345);
-        
         // Clear existing resources
         _spawnedResources.Clear();
         _divisionRadii.Clear();
@@ -182,11 +188,11 @@ public class ProceduralResourceSpawner : MonoBehaviour
             // Step 1: Divide map into concentric circles
             DivideMapIntoConcentricCircles();
             
-            // Step 2: Spawn starting area circles (between minSpawnRadius and startingAreaRadius)
-            // SpawnStartingAreaCircles();
-            
-            // Step 3: Spawn resource circles (outside starting area)
+            // Step 2: Spawn resource circles (outside starting area)
             SpawnResourceCircles();
+            
+            // Step 3: Spawn starting area circles (between minSpawnRadius and startingAreaRadius)
+            SpawnStartingAreaCircles();
             
             // Step 4: Spawn resources in circles
             SpawnResourcesInCircles();
@@ -241,10 +247,11 @@ public class ProceduralResourceSpawner : MonoBehaviour
         if (startingAreaCircleCount <= 0) return;
         if (startingAreaRadius <= minSpawnRadius) return;
         
+        int startingAreaCirclesSpawned = 0;
         int attempts = 0;
-        int maxAttempts = startingAreaCircleCount * 10;
+        int maxAttempts = startingAreaCircleCount * 50; // Increased attempts for better success rate
         
-        while (_resourceCircles.Count < startingAreaCircleCount && attempts < maxAttempts)
+        while (startingAreaCirclesSpawned < startingAreaCircleCount && attempts < maxAttempts)
         {
             attempts++;
             
@@ -307,7 +314,7 @@ public class ProceduralResourceSpawner : MonoBehaviour
             foreach (var existingCircle in _resourceCircles)
             {
                 float circleDistance = Vector2.Distance(center, existingCircle.center);
-                float minDistance = (radius + existingCircle.radius) * 0.3f;
+                float minDistance = (radius + existingCircle.radius) * startingAreaMinDistance;
                 if (circleDistance < minDistance)
                 {
                     tooClose = true;
@@ -330,9 +337,10 @@ public class ProceduralResourceSpawner : MonoBehaviour
             };
             
             _resourceCircles.Add(circle);
+            startingAreaCirclesSpawned++;
         }
         
-        Debug.Log($"[ProceduralResourceSpawner] Spawned {_resourceCircles.Count} starting area circles (target: {startingAreaCircleCount}).");
+        Debug.Log($"[ProceduralResourceSpawner] Spawned {startingAreaCirclesSpawned} starting area circles (target: {startingAreaCircleCount}).");
     }
     
     private void SpawnResourceCircles()
@@ -593,10 +601,6 @@ public class ProceduralResourceSpawner : MonoBehaviour
                     float distanceFromCircleCenter = Vector2.Distance(new Vector2(x, y), circle.center);
                     if (distanceFromCircleCenter > circle.radius) continue;
                     
-                    // Check if position is within minimum spawn radius (exclude safe zone)
-                    float distanceFromMapCenter = Vector2.Distance(new Vector2(x, y), _mapCenter);
-                    if (distanceFromMapCenter < minSpawnRadius) continue;
-                    
                     Vector3Int cellPos = new Vector3Int(x, y, 0);
                     
                     // Check if valid position (not terrain, not already occupied, etc.)
@@ -787,20 +791,35 @@ public class ProceduralResourceSpawner : MonoBehaviour
         Vector2Int mapSize = mapGenerator.MapSize;
         Vector3 centerWorld = grid != null ? grid.GetCellCenterWorld(Vector3Int.zero) : Vector3.zero;
         
-        // Draw division circles (concentric)
+        // Get cell size for converting tile units to world units
+        float cellSize = grid != null ? grid.cellSize.x : 1f;
+        
+        // Draw starting area radius circles
+        // Draw min spawn radius (safe zone - no resources)
+        Gizmos.color = startingAreaMinRadiusColor;
+        float minRadiusWorld = minSpawnRadius * cellSize;
+        DrawCircleGizmo(centerWorld, minRadiusWorld);
+        
+        // Draw starting area max radius
+        Gizmos.color = startingAreaMaxRadiusColor;
+        float maxRadiusWorld = startingAreaRadius * cellSize;
+        DrawCircleGizmo(centerWorld, maxRadiusWorld);
+        
+        // Draw division circles (concentric) - convert from tile units to world units
         Gizmos.color = divisionCircleColor;
         for (int i = 0; i < _divisionRadii.Count; i++)
         {
-            float radius = _divisionRadii[i];
+            float radius = _divisionRadii[i] * cellSize; // Convert tiles to world units
             DrawCircleGizmo(centerWorld, radius);
         }
         
-        // Draw resource spawn circles
+        // Draw resource spawn circles - convert from tile units to world units
         Gizmos.color = resourceCircleColor;
         foreach (var circle in _resourceCircles)
         {
             Vector3 circleWorldPos = grid != null ? grid.GetCellCenterWorld(new Vector3Int(circle.center.x, circle.center.y, 0)) : new Vector3(circle.center.x, circle.center.y, 0);
-            DrawCircleGizmo(circleWorldPos, circle.radius);
+            float circleRadiusWorld = circle.radius * cellSize; // Convert tiles to world units
+            DrawCircleGizmo(circleWorldPos, circleRadiusWorld);
         }
     }
     

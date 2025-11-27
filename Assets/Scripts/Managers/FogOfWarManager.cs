@@ -410,7 +410,7 @@ public class FogOfWarManager : MonoBehaviour
                 // Only invoke event if not suppressed (during resource spawning)
                 if (!_suppressVisibilityEvents)
                 {
-                    OnVisibilityChanged?.Invoke(tile, newState);
+                    SafeInvokeVisibilityChanged(tile, newState);
                 }
             }
         }
@@ -591,7 +591,7 @@ public class FogOfWarManager : MonoBehaviour
                 // Only invoke event if not suppressed (during resource spawning)
                 if (!_suppressVisibilityEvents)
                 {
-                    OnVisibilityChanged?.Invoke(cellPosition, FogOfWarState.PartlyVisible);
+                    SafeInvokeVisibilityChanged(cellPosition, FogOfWarState.PartlyVisible);
                 }
             }
         }
@@ -602,6 +602,33 @@ public class FogOfWarManager : MonoBehaviour
         if (Instance == this)
         {
             Instance = null;
+        }
+    }
+    
+    /// <summary>
+    /// Safely invokes the OnVisibilityChanged event, catching exceptions from destroyed subscribers
+    /// </summary>
+    private void SafeInvokeVisibilityChanged(Vector3Int cell, FogOfWarState state)
+    {
+        if (OnVisibilityChanged == null) return;
+        
+        // Get all subscribers and invoke them one by one, catching exceptions
+        System.Delegate[] subscribers = OnVisibilityChanged.GetInvocationList();
+        foreach (System.Delegate subscriber in subscribers)
+        {
+            try
+            {
+                if (subscriber != null)
+                {
+                    ((System.Action<Vector3Int, FogOfWarState>)subscriber)(cell, state);
+                }
+            }
+            catch (System.Exception e)
+            {
+                // Log warning but continue with other subscribers
+                // This handles cases where a subscriber's object was destroyed
+                Debug.LogWarning($"[FogOfWarManager] Error invoking OnVisibilityChanged for destroyed subscriber: {e.Message}");
+            }
         }
     }
 }

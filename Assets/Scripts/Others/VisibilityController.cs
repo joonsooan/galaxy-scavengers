@@ -46,6 +46,12 @@ public class VisibilityController : MonoBehaviour
         UnsubscribeFromEvent();
     }
     
+    private void OnDestroy()
+    {
+        // Ensure we unsubscribe when object is destroyed
+        UnsubscribeFromEvent();
+    }
+    
     private void SubscribeToEvent()
     {
         if (!_isSubscribed && FogOfWarManager.Instance != null)
@@ -57,10 +63,23 @@ public class VisibilityController : MonoBehaviour
     
     private void UnsubscribeFromEvent()
     {
-        if (_isSubscribed && FogOfWarManager.Instance != null)
+        if (_isSubscribed)
         {
-            FogOfWarManager.OnVisibilityChanged -= OnVisibilityChanged;
-            _isSubscribed = false;
+            try
+            {
+                if (FogOfWarManager.Instance != null)
+                {
+                    FogOfWarManager.OnVisibilityChanged -= OnVisibilityChanged;
+                }
+            }
+            catch (System.Exception)
+            {
+                // Ignore errors during unsubscribe (object might be destroyed)
+            }
+            finally
+            {
+                _isSubscribed = false;
+            }
         }
     }
     
@@ -86,6 +105,14 @@ public class VisibilityController : MonoBehaviour
     
     private void OnVisibilityChanged(Vector3Int cell, FogOfWarState state)
     {
+        // Check if this object is still valid before processing
+        if (this == null || gameObject == null)
+        {
+            // Object was destroyed, unsubscribe immediately
+            UnsubscribeFromEvent();
+            return;
+        }
+        
         // Skip visibility updates during resource spawning to prevent performance issues
         if (visibilityType == VisibilityType.Resource && ProceduralResourceSpawner.IsSpawningResources)
         {
@@ -104,23 +131,38 @@ public class VisibilityController : MonoBehaviour
     
     private Vector3Int GetCurrentCell()
     {
+        // Check if object is destroyed using Unity's pattern
+        if (this == null || gameObject == null)
+        {
+            return Vector3Int.zero;
+        }
+        
+        // Check transform using Unity's destroyed object pattern
         if (transform == null)
         {
             return Vector3Int.zero;
         }
         
-        if (BuildingManager.Instance == null || BuildingManager.Instance.grid == null)
+        // Check BuildingManager and grid
+        if (BuildingManager.Instance == null)
         {
             return Vector3Int.zero;
         }
         
+        // Check if BuildingManager.Instance is actually destroyed (Unity's pattern)
         try
         {
+            // Access a property to check if object is destroyed
+            if (BuildingManager.Instance.grid == null)
+            {
+                return Vector3Int.zero;
+            }
+            
             return BuildingManager.Instance.grid.WorldToCell(transform.position);
         }
         catch (System.Exception)
         {
-            // Handle missing reference gracefully
+            // Handle missing reference gracefully - object was destroyed
             return Vector3Int.zero;
         }
     }

@@ -28,6 +28,9 @@ public class BuildingManager : MonoBehaviour
    
     private readonly List<Processor> _processors = new List<Processor>();
     
+    // Cached references to avoid expensive FindFirstObjectByType calls
+    private MapGenerator _cachedMapGenerator;
+    
     public static event Action<Vector3Int> OnTilemapChanged;
     
     public static BuildingManager Instance { get; private set; }
@@ -55,6 +58,22 @@ public class BuildingManager : MonoBehaviour
 
         LoadAllComboCards();
         CacheAllGadgetTiles();
+        CacheMapGenerator();
+    }
+    
+    private void CacheMapGenerator()
+    {
+        _cachedMapGenerator = FindFirstObjectByType<MapGenerator>();
+    }
+    
+    private MapGenerator GetMapGenerator()
+    {
+        // Lazy initialization if not cached yet
+        if (_cachedMapGenerator == null)
+        {
+            _cachedMapGenerator = FindFirstObjectByType<MapGenerator>();
+        }
+        return _cachedMapGenerator;
     }
     
     private void LoadAllComboCards()
@@ -102,8 +121,8 @@ public class BuildingManager : MonoBehaviour
         TileBase tile = groundTilemap.GetTile(cellPosition);
         if (tile == null) return false;
         
-        // Check with MapGenerator if this tile is terrain
-        MapGenerator mapGenerator = FindFirstObjectByType<MapGenerator>();
+        // Use cached MapGenerator reference instead of expensive FindFirstObjectByType
+        MapGenerator mapGenerator = GetMapGenerator();
         if (mapGenerator != null)
         {
             return mapGenerator.IsTerrainTile(tile);
