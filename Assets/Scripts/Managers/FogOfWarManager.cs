@@ -79,10 +79,10 @@ public class FogOfWarManager : MonoBehaviour
             return;
         }
         
-        GameObject fogTilemapObj = GameObject.Find("FogTilemap");
+        GameObject fogTilemapObj = GameObject.Find("Fog Tilemap");
         if (fogTilemapObj == null)
         {
-            fogTilemapObj = new GameObject("FogTilemap");
+            fogTilemapObj = new GameObject("Fog Tilemap");
             fogTilemapObj.transform.SetParent(grid.transform);
         }
         
@@ -93,56 +93,41 @@ public class FogOfWarManager : MonoBehaviour
             fogTilemapObj.AddComponent<TilemapRenderer>();
         }
         
-        // Set sorting order to be above other tilemaps
         TilemapRenderer renderer = fogTilemap.GetComponent<TilemapRenderer>();
         if (renderer != null)
         {
             renderer.sortingOrder = 100; // High sorting order to render on top
         }
         
-        // Set the fog tilemap's base color to white for proper tinting
         fogTilemap.color = Color.white;
-        
-        // Ensure the fog tilemap is enabled and visible
         fogTilemap.gameObject.SetActive(true);
     }
     
     private void Start()
     {
-        // Ensure fog tilemap is created before initialization
         if (fogTilemap == null)
         {
             CreateFogTilemap();
         }
         
-        // Initialize all tiles as invisible
         InitializeFogOfWar();
-        
-        // Explore starting area (where main structure is)
-        ExploreStartingArea();
-        
-        // Register all existing vision providers (in case they were created before FogOfWarManager)
+        // ExploreStartingArea();
         RegisterAllExistingVisionProviders();
-        
-        // Start updating visibility
         InvokeRepeating(nameof(UpdateVisibility), updateInterval, updateInterval);
     }
     
     private void RegisterAllExistingVisionProviders()
     {
-        // Find all VisionProvider components in the scene
         VisionProvider[] visionProviders = FindObjectsByType<VisionProvider>(FindObjectsSortMode.None);
         foreach (var provider in visionProviders)
         {
             if (provider != null)
             {
                 RegisterVisionProvider(provider);
-                // Notify the provider that FogOfWarManager is ready
                 provider.OnFogOfWarManagerReady();
             }
         }
         
-        // Also find any components that implement IVisionProvider directly
         MonoBehaviour[] allMonoBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
         foreach (var mb in allMonoBehaviours)
         {
@@ -158,30 +143,27 @@ public class FogOfWarManager : MonoBehaviour
         }
     }
     
-    // Public method to manually trigger registration of all vision providers (useful for debugging)
-    public void RefreshVisionProviders()
-    {
-        RegisterAllExistingVisionProviders();
-    }
-    
-    private void ExploreStartingArea()
-    {
-        // Find MainStructure and explore area around it
-        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
-        if (mainStructure != null && grid != null)
-        {
-            Vector3Int mainCell = grid.WorldToCell(mainStructure.transform.position);
-            // Explore a 5x5 area around the main structure
-            for (int x = -2; x <= 2; x++)
-            {
-                for (int y = -2; y <= 2; y++)
-                {
-                    Vector3Int cell = mainCell + new Vector3Int(x, y, 0);
-                    ExploreTile(cell);
-                }
-            }
-        }
-    }
+    // public void RefreshVisionProviders()
+    // {
+    //     RegisterAllExistingVisionProviders();
+    // }
+    //
+    // private void ExploreStartingArea()
+    // {
+    //     MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
+    //     if (mainStructure != null && grid != null)
+    //     {
+    //         Vector3Int mainCell = grid.WorldToCell(mainStructure.transform.position);
+    //         for (int x = -2; x <= 2; x++)
+    //         {
+    //             for (int y = -2; y <= 2; y++)
+    //             {
+    //                 Vector3Int cell = mainCell + new Vector3Int(x, y, 0);
+    //                 ExploreTile(cell);
+    //             }
+    //         }
+    //     }
+    // }
     
     private void InitializeFogOfWar()
     {

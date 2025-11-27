@@ -1247,7 +1247,7 @@ TilemapRenderer:
   m_MaxChunkCount: 16
   m_MaxFrameAge: 16
   m_SortOrder: 0
-  m_Mode: 0
+  m_Mode: 1
   m_DetectChunkCullingBounds: 0
   m_MaskInteraction: 0
 --- !u!1839735485 &80026093
@@ -11260,10 +11260,10 @@ MonoBehaviour:
   fogTilemap: {fileID: 80026093}
   updateInterval: 0.1
   enableDebugLogs: 0
-  fogTile: {fileID: 0}
+  fogTile: {fileID: 11400000, guid: 10bd3c981c2104842b1ff71688283ee8, type: 2}
   fullyVisibleColor: {r: 1, g: 1, b: 1, a: 0}
-  partlyVisibleColor: {r: 0.2509804, g: 0.2509804, b: 0.2509804, a: 0.627451}
-  invisibleColor: {r: 0.15471691, g: 0.15471691, b: 0.15471691, a: 0.8627451}
+  partlyVisibleColor: {r: 0.2509804, g: 0.2509804, b: 0.2509804, a: 0.5882353}
+  invisibleColor: {r: 0.15471691, g: 0.15471691, b: 0.15471691, a: 0.92156863}
 --- !u!4 &1022667848
 Transform:
   m_ObjectHideFlags: 0
@@ -20627,11 +20627,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4183704755259827819, guid: 5df7df990ec2d1b43a1eea38dba32aa6, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 5.5
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 4183704755259827819, guid: 5df7df990ec2d1b43a1eea38dba32aa6, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 4183704755259827819, guid: 5df7df990ec2d1b43a1eea38dba32aa6, type: 3}
       propertyPath: m_LocalPosition.z
@@ -21661,11 +21661,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4183704755259827819, guid: 94deb2d77a84adf468f541eb13675052, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 8.5
+      value: 4.5
       objectReference: {fileID: 0}
     - target: {fileID: 4183704755259827819, guid: 94deb2d77a84adf468f541eb13675052, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 4183704755259827819, guid: 94deb2d77a84adf468f541eb13675052, type: 3}
       propertyPath: m_LocalPosition.z

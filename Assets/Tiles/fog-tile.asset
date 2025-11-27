@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: fog-tile
   m_EditorClassIdentifier: 
   m_Sprite: {fileID: 137817773, guid: 4b4d97bc9df3e3244a75d745e708e8e5, type: 3}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.64705884}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1
     e01: 0
@@ -32,5 +32,5 @@ MonoBehaviour:
     e32: 0
     e33: 1
   m_InstancedGameObject: {fileID: 0}
-  m_Flags: 1
-  m_ColliderType: 1
+  m_Flags: 0
+  m_ColliderType: 0
