@@ -436,6 +436,12 @@ public class UnitMovement : MonoBehaviour
             return true; // If BuildingManager is null, assume cell is walkable
         }
         
+        // Check if cell is terrain - terrain blocks unit movement
+        if (BuildingManager.Instance.IsTerrainCell(cell))
+        {
+            return false;
+        }
+        
         // Check if cell is a resource tile, building tile, or temporary construction tile
         if (BuildingManager.Instance.IsResourceTile(cell) || 
             BuildingManager.Instance.IsBuildingTile(cell) ||

@@ -90,6 +90,28 @@ public class BuildingManager : MonoBehaviour
         if (buildingTilemap == null) return false;
         return buildingTilemap.HasTile(cellPosition);
     }
+    
+    /// <summary>
+    /// Checks if a cell position contains terrain (wall, low wall, or high wall).
+    /// Terrain blocks building placement and unit movement.
+    /// </summary>
+    public bool IsTerrainCell(Vector3Int cellPosition)
+    {
+        if (groundTilemap == null) return false;
+        
+        TileBase tile = groundTilemap.GetTile(cellPosition);
+        if (tile == null) return false;
+        
+        // Check with MapGenerator if this tile is terrain
+        MapGenerator mapGenerator = FindFirstObjectByType<MapGenerator>();
+        if (mapGenerator != null)
+        {
+            return mapGenerator.IsTerrainTile(tile);
+        }
+        
+        return false;
+    }
+    
 
     public bool CanPlaceBuilding(Vector3Int cellPosition)
     {
@@ -100,6 +122,10 @@ public class BuildingManager : MonoBehaviour
         }
 
         if (!groundTilemap.HasTile(cellPosition)) return false;
+        
+        // Check if cell is terrain - can't place buildings on terrain
+        if (IsTerrainCell(cellPosition)) return false;
+        
         if (resourceTilemap.HasTile(cellPosition)) return false;
         if (buildingTilemap.HasTile(cellPosition)) return false;
         if (IsTemporaryTile(cellPosition)) return false; // Can't place on construction site

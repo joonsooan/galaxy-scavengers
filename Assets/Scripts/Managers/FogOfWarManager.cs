@@ -24,9 +24,13 @@ public class FogOfWarManager : MonoBehaviour
     [SerializeField] private bool enableDebugLogs = false;
     
     [Header("Visual Settings")]
+    [Tooltip("The fog tile to use for fog overlay. IMPORTANT: The tile's sprite should be WHITE (RGB: 1,1,1) for proper color multiplication. The tile's color in the Tile asset should also be white. Opacity is controlled by the alpha channel in the fog colors below.")]
     [SerializeField] private TileBase fogTile;
+    [Tooltip("Color applied to fog tile when fully visible. Alpha controls opacity (0 = transparent, 1 = opaque).")]
     [SerializeField] private Color fullyVisibleColor = new Color(1f, 1f, 1f, 0f);
+    [Tooltip("Color applied to fog tile when partly visible (explored). Alpha controls opacity (0 = transparent, 1 = opaque).")]
     [SerializeField] private Color partlyVisibleColor = new Color(0.7f, 0.7f, 0.7f, 0.4f);
+    [Tooltip("Color applied to fog tile when invisible (unexplored). Alpha controls opacity (0 = transparent, 1 = opaque).")]
     [SerializeField] private Color invisibleColor = new Color(0.2f, 0.2f, 0.2f, 0.8f);
     
     // Visibility tracking
@@ -97,8 +101,11 @@ public class FogOfWarManager : MonoBehaviour
         if (renderer != null)
         {
             renderer.sortingOrder = 100; // High sorting order to render on top
+            // Ensure the renderer supports transparency for fog overlay
+            renderer.mode = TilemapRenderer.Mode.Individual;
         }
         
+        // Set tilemap color to white so individual cell colors work correctly
         fogTilemap.color = Color.white;
         fogTilemap.gameObject.SetActive(true);
     }
@@ -464,20 +471,32 @@ public class FogOfWarManager : MonoBehaviour
             return;
         }
         
-        // Get the tile to use for fog overlay
-        TileBase tileToUse = fogTile != null ? fogTile : (tilemapWithTile != null ? tilemapWithTile.GetTile(cell) : null);
-        if (tileToUse == null) return;
-        
-        // Set or update the fog tile
-        if (!fogTilemap.HasTile(cell) || fogTilemap.GetTile(cell) != tileToUse)
+        // Always use the separate fog tile (never fall back to terrain tile)
+        if (fogTile == null)
         {
-            fogTilemap.SetTile(cell, tileToUse);
+            Debug.LogWarning("[FogOfWarManager] Fog tile is not set. Please assign a fog tile in the inspector.");
+            return;
         }
         
-        // Always set the color to ensure it applies correctly to all tile types (ground and terrain)
-        // This is critical for terrain tiles (walls) to receive the fog color tint
-        fogTilemap.SetColor(cell, fogColor);
-        fogTilemap.RefreshTile(cell);
+        // Set or update the fog tile
+        bool tileChanged = !fogTilemap.HasTile(cell) || fogTilemap.GetTile(cell) != fogTile;
+        if (tileChanged)
+        {
+            fogTilemap.SetTile(cell, fogTile);
+        }
+        
+        // Apply opacity/color to the fog tile to cover the terrain below
+        // Unity multiplies the tile's color with the color we set here
+        // Therefore, the fog tile should be WHITE (1,1,1) so the color multiplication works correctly
+        // The alpha channel in fogColor controls the opacity of the fog overlay
+        // Always set the color to ensure it's applied (even if tile already exists)
+        // This ensures the color is updated when visibility state changes
+        Color currentColor = fogTilemap.GetColor(cell);
+        if (currentColor != fogColor || tileChanged)
+        {
+            fogTilemap.SetColor(cell, fogColor);
+            fogTilemap.RefreshTile(cell);
+        }
     }
     
     public FogOfWarState GetVisibilityState(Vector3Int cellPosition)

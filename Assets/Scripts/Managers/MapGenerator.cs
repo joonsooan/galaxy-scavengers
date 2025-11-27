@@ -713,6 +713,26 @@ public class MapGenerator : MonoBehaviour
         return cellX >= 0 && cellX < width && cellY >= 0 && cellY < height;
     }
     
+    /// <summary>
+    /// Checks if a tile is a terrain tile (wall, low wall, or high wall).
+    /// Terrain tiles block building placement and unit movement.
+    /// </summary>
+    public bool IsTerrainTile(TileBase tile)
+    {
+        if (tile == null) return false;
+        return tile == wallTile || tile == lowWallTile || tile == highWallTile;
+    }
+    
+    /// <summary>
+    /// Checks if a cell position contains terrain (wall, low wall, or high wall).
+    /// </summary>
+    public bool IsTerrainCell(Vector3Int cellPosition)
+    {
+        if (tilemap == null) return false;
+        TileBase tile = tilemap.GetTile(cellPosition);
+        return IsTerrainTile(tile);
+    }
+    
     private void CopyTilesToBuildingManagerGroundTilemap(BoundsInt mapBounds)
     {
         if (BuildingManager.Instance == null)
