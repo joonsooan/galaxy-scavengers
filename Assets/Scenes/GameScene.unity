@@ -2945,6 +2945,7 @@ GameObject:
   - component: {fileID: 313771327}
   - component: {fileID: 313771329}
   - component: {fileID: 313771328}
+  - component: {fileID: 313771330}
   m_Layer: 0
   m_Name: _Spawners
   m_TagString: Untagged
@@ -2959,7 +2960,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 313771324}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f607629021846394abae74100f05a8b1, type: 3}
   m_Name: 
@@ -3065,6 +3066,59 @@ MonoBehaviour:
   spawnInterval: 600
   baseSpawnCount: 1
   spawnCountIncreasePerWave: 1
+--- !u!114 &313771330
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 313771324}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b540b3e99609b94c8c7ea595d7de236, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  resourceTilemap: {fileID: 431047631}
+  grid: {fileID: 2115591665}
+  parentTransform: {fileID: 956259329}
+  mapGenerator: {fileID: 313771328}
+  resourceSettings:
+  - resourceType: 0
+    resourceTile: {fileID: 11400000, guid: 8b998e490965050438e80265806f4b0b, type: 2}
+    resourcePrefab: {fileID: 5453999205571622832, guid: 9e542c61b3b4f0745ab05a9dadeccb8f, type: 3}
+    spawnFrequencyPercent: 60
+    baseRichness: 10
+  - resourceType: 1
+    resourceTile: {fileID: 11400000, guid: 0cbc798588b08f44192fed61ecb872c7, type: 2}
+    resourcePrefab: {fileID: 5453999205571622832, guid: a3a2b3c4676bb844e898ce2cf3dd397b, type: 3}
+    spawnFrequencyPercent: 25
+    baseRichness: 10
+  - resourceType: 2
+    resourceTile: {fileID: 11400000, guid: 005ceb5b04f28824d9b0ce2afa002baa, type: 2}
+    resourcePrefab: {fileID: 5453999205571622832, guid: 1a1e81616dceb074597d502c9527fe82, type: 3}
+    spawnFrequencyPercent: 10
+    baseRichness: 10
+  - resourceType: 3
+    resourceTile: {fileID: 11400000, guid: fa4126488a42d8744baf68f34b093ef0, type: 2}
+    resourcePrefab: {fileID: 5453999205571622832, guid: 787e38d9be4ec414aad7efd4b33c7a60, type: 3}
+    spawnFrequencyPercent: 5
+    baseRichness: 10
+  numberOfCircles: 5
+  borderPadding: 10
+  minCircleRadius: 1
+  maxCircleRadius: 3
+  circleSpawnPercentage: 80
+  maxCircles: 160
+  maxResourcesPerCircle: 25
+  minSpawnRadius: 8
+  startingAreaRadius: 12
+  startingAreaCircleCount: 4
+  startingAreaMinDistance: 1
+  showGizmos: 1
+  divisionCircleColor: {r: 1, g: 1, b: 0, a: 0.3}
+  resourceCircleColor: {r: 0, g: 1, b: 0, a: 0.5}
+  startingAreaMinRadiusColor: {r: 1, g: 0, b: 0, a: 0.5}
+  startingAreaMaxRadiusColor: {r: 0, g: 0, b: 1, a: 0.5}
 --- !u!1 &321414382
 GameObject:
   m_ObjectHideFlags: 0
@@ -8842,7 +8896,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 12, y: 0}
-  m_SizeDelta: {x: 12, y: 1.6}
+  m_SizeDelta: {x: 12, y: 0}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &788684147
 MonoBehaviour:
@@ -14306,7 +14360,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1300553940
 RectTransform:
   m_ObjectHideFlags: 0
@@ -14781,7 +14835,7 @@ RectTransform:
   m_Father: {fileID: 1783936214}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}

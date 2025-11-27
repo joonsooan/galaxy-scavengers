@@ -14,6 +14,7 @@ public class Unit_Miner : UnitBase
     [Header("Cargo")]
     public int maxCarryAmount = 50;
     [SerializeField] private float resourceSearchInterval = 2.0f;
+    [SerializeField] private float maxSearchRadius = 50f; // Maximum distance to search for resources
     public ResourceType[] mineableResourceTypes;
 
     [Header("VFX")]
@@ -265,29 +266,93 @@ public class Unit_Miner : UnitBase
     private MiningTarget FindClosestMineablePosition()
     {
         MiningTarget bestTarget = new MiningTarget { distance = float.MaxValue };
+        
+        if (BuildingManager.Instance == null || BuildingManager.Instance.grid == null)
+        {
+            return bestTarget;
+        }
 
-        IEnumerable<ResourceNode> availableResources = ResourceManager.Instance.GetAllResources().Where(r =>
-            r != null && !r.IsDepleted && r.gameObject.activeInHierarchy &&
-            mineableResourceTypes.Contains(r.resourceType) &&
-            (!r.IsReserved || r.GetReservedUnit() == this)
-        );
+        // Get all available resources and filter by distance first to reduce checks
+        List<ResourceNode> availableResources = ResourceManager.Instance.GetAllResources()
+            .Where(r =>
+                r != null && !r.IsDepleted && r.gameObject.activeInHierarchy &&
+                mineableResourceTypes.Contains(r.resourceType) &&
+                (!r.IsReserved || r.GetReservedUnit() == this)
+            )
+            .ToList();
+
+        // Early exit if no resources available
+        if (availableResources.Count == 0)
+        {
+            return bestTarget;
+        }
+
+        // Pre-calculate distances and sort by distance to prioritize closer resources
+        Vector3 unitPosition = transform.position;
+        List<(ResourceNode node, float distance)> resourcesWithDistance = new List<(ResourceNode, float)>();
+        
+        foreach (ResourceNode resourceNode in availableResources)
+        {
+            Vector3 resourceWorldPos = BuildingManager.Instance.grid.GetCellCenterWorld(resourceNode.cellPosition);
+            float distanceToResource = Vector3.Distance(unitPosition, resourceWorldPos);
+            
+            // Skip resources beyond max search radius
+            if (distanceToResource > maxSearchRadius)
+            {
+                continue;
+            }
+            
+            resourcesWithDistance.Add((resourceNode, distanceToResource));
+        }
+
+        // Sort by distance to check closest resources first
+        resourcesWithDistance.Sort((a, b) => a.distance.CompareTo(b.distance));
 
         Vector3Int[] neighborOffsets = { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
+        Grid grid = BuildingManager.Instance.grid;
 
-        foreach (ResourceNode resourceNode in availableResources) {
-            foreach (Vector3Int offset in neighborOffsets) {
+        // Check neighbors of each resource, starting with closest
+        foreach (var (resourceNode, resourceDistance) in resourcesWithDistance)
+        {
+            // Early exit: if we already found a target and this resource is further than our best target's mining cell, skip
+            if (bestTarget.resourceNode != null && resourceDistance > bestTarget.distance + 2f)
+            {
+                break; // All remaining resources are further away
+            }
+
+            foreach (Vector3Int offset in neighborOffsets)
+            {
                 Vector3Int neighborCell = resourceNode.cellPosition + offset;
 
-                if (BuildingManager.Instance.CanPlaceBuilding(neighborCell)) {
-                    float distance = Vector3.Distance(transform.position, BuildingManager.Instance.grid.GetCellCenterWorld(neighborCell));
-                    if (distance < bestTarget.distance) {
+                // Quick distance check before expensive CanPlaceBuilding call
+                Vector3 neighborWorldPos = grid.GetCellCenterWorld(neighborCell);
+                float distanceToNeighbor = Vector3.Distance(unitPosition, neighborWorldPos);
+                
+                // Skip if this neighbor is further than our current best
+                if (distanceToNeighbor >= bestTarget.distance)
+                {
+                    continue;
+                }
+
+                // Only call expensive CanPlaceBuilding if distance is promising
+                if (BuildingManager.Instance.CanPlaceBuilding(neighborCell))
+                {
+                    if (distanceToNeighbor < bestTarget.distance)
+                    {
                         bestTarget.resourceNode = resourceNode;
                         bestTarget.miningCell = neighborCell;
-                        bestTarget.distance = distance;
+                        bestTarget.distance = distanceToNeighbor;
+                        
+                        // Early exit if we found a very close target (within 2 units)
+                        if (distanceToNeighbor < 2f)
+                        {
+                            return bestTarget;
+                        }
                     }
                 }
             }
         }
+        
         return bestTarget;
     }
 

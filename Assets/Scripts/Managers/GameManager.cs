@@ -179,9 +179,23 @@ public class GameManager : MonoBehaviour
             if (spawner.BuildingTilemap != null) spawner.BuildingTilemap.gameObject.SetActive(false);
         }
 
-        foreach (ResourceSpawner spawner in FindObjectsByType<ResourceSpawner>(FindObjectsSortMode.None)) {
-            spawner.SpawnResources();
-            if (spawner.ResourceTilemap != null) spawner.ResourceTilemap.gameObject.SetActive(false);
+        // Use ProceduralResourceSpawner if available, otherwise fall back to ResourceSpawner
+        ProceduralResourceSpawner proceduralSpawner = FindFirstObjectByType<ProceduralResourceSpawner>();
+        if (proceduralSpawner != null) {
+            proceduralSpawner.SpawnResources();
+            if (proceduralSpawner.GetComponent<ResourceSpawner>() != null) {
+                ResourceSpawner resourceSpawner = proceduralSpawner.GetComponent<ResourceSpawner>();
+                if (resourceSpawner.ResourceTilemap != null) {
+                    resourceSpawner.ResourceTilemap.gameObject.SetActive(false);
+                }
+            }
+        }
+        else {
+            // Fall back to old ResourceSpawner if ProceduralResourceSpawner is not found
+            foreach (ResourceSpawner spawner in FindObjectsByType<ResourceSpawner>(FindObjectsSortMode.None)) {
+                spawner.SpawnResources();
+                if (spawner.ResourceTilemap != null) spawner.ResourceTilemap.gameObject.SetActive(false);
+            }
         }
 
         foreach (Unit_Miner unit in FindObjectsByType<Unit_Miner>(FindObjectsSortMode.None)) {

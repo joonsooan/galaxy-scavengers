@@ -343,87 +343,87 @@ public class MapGenerator : MonoBehaviour
             PunchHoleWithThreshold(holeCenterX, holeCenterY, enemySpawnHoleRadius);
             
             // Create a path from enemy hole to center to ensure connectivity
-            CreatePathToCenter(holeCenterX, holeCenterY, centerX, centerY);
+            // CreatePathToCenter(holeCenterX, holeCenterY, centerX, centerY);
         }
     }
     
-    private void CreatePathToCenter(int startX, int startY, int endX, int endY)
-    {
-        // Create a simple path using Bresenham-like line algorithm
-        int dx = Mathf.Abs(endX - startX);
-        int dy = Mathf.Abs(endY - startY);
-        int sx = startX < endX ? 1 : -1;
-        int sy = startY < endY ? 1 : -1;
-        int err = dx - dy;
-        
-        int currentX = startX;
-        int currentY = startY;
-        int pathWidth = 2; // Width of the path to ensure connectivity
-        
-        // Create path tiles along the line from start to end
-        while (true)
-        {
-            // Create a small area at each point for path width
-            for (int offsetX = -pathWidth; offsetX <= pathWidth; offsetX++)
-            {
-                for (int offsetY = -pathWidth; offsetY <= pathWidth; offsetY++)
-                {
-                    int pathX = currentX + offsetX;
-                    int pathY = currentY + offsetY;
-                    
-                    // Skip if out of bounds
-                    if (pathX < 1 || pathX >= width - 1 || pathY < 1 || pathY >= height - 1)
-                        continue;
-                    
-                    // Only create path if within distance (creates path of width 2-3 tiles)
-                    float dist = Mathf.Sqrt(offsetX * offsetX + offsetY * offsetY);
-                    if (dist <= pathWidth)
-                    {
-                        Vector3Int cellPos = new Vector3Int(pathX - _mapCenterXOffset, pathY - _mapCenterYOffset, 0);
-                        TileBase currentTile = tilemap.GetTile(cellPos);
-                        
-                        // Break through walls to create path, prefer ground for center of path
-                        if (dist <= 1)
-                        {
-                            // Center of path: use ground tiles
-                            tilemap.SetTile(cellPos, groundTile);
-                        }
-                        else if (currentTile == highWallTile)
-                        {
-                            // Convert high walls to low walls on path edges
-                            tilemap.SetTile(cellPos, lowWallTile != null ? lowWallTile : groundTile);
-                        }
-                        else if (currentTile == lowWallTile)
-                        {
-                            // Convert low walls to ground if close to center
-                            tilemap.SetTile(cellPos, groundTile);
-                        }
-                    }
-                }
-            }
-            
-            // Check if we've reached the destination (with some tolerance)
-            if (Mathf.Abs(currentX - endX) <= 1 && Mathf.Abs(currentY - endY) <= 1)
-                break;
-            
-            // Move along the line
-            int e2 = 2 * err;
-            if (e2 > -dy)
-            {
-                err -= dy;
-                currentX += sx;
-            }
-            if (e2 < dx)
-            {
-                err += dx;
-                currentY += sy;
-            }
-            
-            // Safety check to prevent infinite loops
-            if (Mathf.Abs(currentX - startX) > width * 2 || Mathf.Abs(currentY - startY) > height * 2)
-                break;
-        }
-    }
+    // private void CreatePathToCenter(int startX, int startY, int endX, int endY)
+    // {
+    //     // Create a simple path using Bresenham-like line algorithm
+    //     int dx = Mathf.Abs(endX - startX);
+    //     int dy = Mathf.Abs(endY - startY);
+    //     int sx = startX < endX ? 1 : -1;
+    //     int sy = startY < endY ? 1 : -1;
+    //     int err = dx - dy;
+    //     
+    //     int currentX = startX;
+    //     int currentY = startY;
+    //     int pathWidth = 2; // Width of the path to ensure connectivity
+    //     
+    //     // Create path tiles along the line from start to end
+    //     while (true)
+    //     {
+    //         // Create a small area at each point for path width
+    //         for (int offsetX = -pathWidth; offsetX <= pathWidth; offsetX++)
+    //         {
+    //             for (int offsetY = -pathWidth; offsetY <= pathWidth; offsetY++)
+    //             {
+    //                 int pathX = currentX + offsetX;
+    //                 int pathY = currentY + offsetY;
+    //                 
+    //                 // Skip if out of bounds
+    //                 if (pathX < 1 || pathX >= width - 1 || pathY < 1 || pathY >= height - 1)
+    //                     continue;
+    //                 
+    //                 // Only create path if within distance (creates path of width 2-3 tiles)
+    //                 float dist = Mathf.Sqrt(offsetX * offsetX + offsetY * offsetY);
+    //                 if (dist <= pathWidth)
+    //                 {
+    //                     Vector3Int cellPos = new Vector3Int(pathX - _mapCenterXOffset, pathY - _mapCenterYOffset, 0);
+    //                     TileBase currentTile = tilemap.GetTile(cellPos);
+    //                     
+    //                     // Break through walls to create path, prefer ground for center of path
+    //                     if (dist <= 1)
+    //                     {
+    //                         // Center of path: use ground tiles
+    //                         tilemap.SetTile(cellPos, groundTile);
+    //                     }
+    //                     else if (currentTile == highWallTile)
+    //                     {
+    //                         // Convert high walls to low walls on path edges
+    //                         tilemap.SetTile(cellPos, lowWallTile != null ? lowWallTile : groundTile);
+    //                     }
+    //                     else if (currentTile == lowWallTile)
+    //                     {
+    //                         // Convert low walls to ground if close to center
+    //                         tilemap.SetTile(cellPos, groundTile);
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //         
+    //         // Check if we've reached the destination (with some tolerance)
+    //         if (Mathf.Abs(currentX - endX) <= 1 && Mathf.Abs(currentY - endY) <= 1)
+    //             break;
+    //         
+    //         // Move along the line
+    //         int e2 = 2 * err;
+    //         if (e2 > -dy)
+    //         {
+    //             err -= dy;
+    //             currentX += sx;
+    //         }
+    //         if (e2 < dx)
+    //         {
+    //             err += dx;
+    //             currentY += sy;
+    //         }
+    //         
+    //         // Safety check to prevent infinite loops
+    //         if (Mathf.Abs(currentX - startX) > width * 2 || Mathf.Abs(currentY - startY) > height * 2)
+    //             break;
+    //     }
+    // }
 
     private void ConnectWallsToBorders()
     {

@@ -28,9 +28,20 @@ public class ResourceNode : MonoBehaviour
     private void Awake()
     {
         _sr = GetComponent<SpriteRenderer>();
-        _originalColor = _sr.color;
+        if (_sr != null)
+        {
+            _originalColor = _sr.color;
+        }
 
-        if (ResourceManager.Instance != null) {
+        // Defer ResourceManager registration to avoid MissingReferenceException
+        // Will be called from Start() or manually after managers are initialized
+    }
+    
+    private void Start()
+    {
+        // Register with ResourceManager now that managers should be initialized
+        if (ResourceManager.Instance != null)
+        {
             ResourceManager.Instance.AddResourceNode(this);
             ResourceStats stats = ResourceManager.Instance.GetResourceStats(resourceType);
             
@@ -40,15 +51,14 @@ public class ResourceNode : MonoBehaviour
                 timeToMinePerUnit = stats.timeToMinePerUnit;
             }
         }
-    }
-    
-    private void Start()
-    {
+        
+        // Set cell position if BuildingManager is available
         if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null)
         {
             cellPosition = BuildingManager.Instance.grid.WorldToCell(transform.position);
         }
     }
+    
     
     private void OnDestroy()
     {
