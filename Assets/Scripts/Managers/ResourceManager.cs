@@ -104,7 +104,7 @@ public class ResourceManager : MonoBehaviour
     [SerializeField] private TMP_Text nexusDataNumber;
     [SerializeField] private TMP_Text neuralMatrixNumber;
 
-    private readonly List<ResourceNode> _allResources = new List<ResourceNode>();
+    private readonly HashSet<ResourceNode> _allResources = new HashSet<ResourceNode>();
     private readonly List<IStorage> _allStorages = new List<IStorage>();
     private readonly Dictionary<ResourceType, int> _resourceCounts = new Dictionary<ResourceType, int>();
     private readonly Dictionary<ResourceType, ResourceStats> _resourceStats = new Dictionary<ResourceType, ResourceStats>();
@@ -364,9 +364,8 @@ public class ResourceManager : MonoBehaviour
 
     public void AddResourceNode(ResourceNode node)
     {
-        if (!_allResources.Contains(node)) {
-            _allResources.Add(node);
-        }
+        // HashSet automatically prevents duplicates, O(1) operation
+        _allResources.Add(node);
     }
 
     public void RemoveResourceNode(ResourceNode node)
@@ -376,7 +375,8 @@ public class ResourceManager : MonoBehaviour
 
     public List<ResourceNode> GetAllResources()
     {
-        return _allResources;
+        // Convert HashSet to List when needed (rare operation)
+        return new List<ResourceNode>(_allResources);
     }
 
     private void FindAndConnectUI()

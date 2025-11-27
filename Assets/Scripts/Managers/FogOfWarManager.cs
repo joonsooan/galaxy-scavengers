@@ -47,6 +47,15 @@ public class FogOfWarManager : MonoBehaviour
     public static event Action<Vector3Int, FogOfWarState> OnVisibilityChanged;
     public static event Action<Vector3Int> OnTileExplored;
     
+    // Flag to suppress event invocations during resource spawning
+    private static bool _suppressVisibilityEvents = false;
+    public static bool SuppressVisibilityEvents => _suppressVisibilityEvents;
+    
+    public static void SetSuppressVisibilityEvents(bool suppress)
+    {
+        _suppressVisibilityEvents = suppress;
+    }
+    
     private void Awake()
     {
         if (Instance == null)
@@ -397,7 +406,12 @@ public class FogOfWarManager : MonoBehaviour
             {
                 _tileVisibility[tile] = newState;
                 UpdateFogVisual(tile, newState);
-                OnVisibilityChanged?.Invoke(tile, newState);
+                
+                // Only invoke event if not suppressed (during resource spawning)
+                if (!_suppressVisibilityEvents)
+                {
+                    OnVisibilityChanged?.Invoke(tile, newState);
+                }
             }
         }
     }
@@ -550,7 +564,15 @@ public class FogOfWarManager : MonoBehaviour
     
     public void RefreshFogOfWar()
     {
-        InitializeFogOfWar();
+        // Only initialize if not already initialized (to avoid expensive re-initialization)
+        if (_tileVisibility.Count == 0)
+        {
+            InitializeFogOfWar();
+        }
+        
+        // Force an immediate visibility update to light up tiles based on current buildings/units
+        // This is more efficient than re-initializing everything
+        UpdateVisibility();
     }
     
     public void ExploreTile(Vector3Int cellPosition)
@@ -565,7 +587,12 @@ public class FogOfWarManager : MonoBehaviour
             {
                 _tileVisibility[cellPosition] = FogOfWarState.PartlyVisible;
                 UpdateFogVisual(cellPosition, FogOfWarState.PartlyVisible);
-                OnVisibilityChanged?.Invoke(cellPosition, FogOfWarState.PartlyVisible);
+                
+                // Only invoke event if not suppressed (during resource spawning)
+                if (!_suppressVisibilityEvents)
+                {
+                    OnVisibilityChanged?.Invoke(cellPosition, FogOfWarState.PartlyVisible);
+                }
             }
         }
     }
