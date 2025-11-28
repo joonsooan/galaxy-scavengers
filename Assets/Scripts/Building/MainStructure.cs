@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MainStructure : Damageable, IStorage
+public class MainStructure : Damageable, IStorage, IClickable
 {
     [Header("UI Settings")]
     [SerializeField] private GameObject storageSliderPrefab;
@@ -24,6 +24,7 @@ public class MainStructure : Damageable, IStorage
 
     private bool _isProducing;
     private GameObject _sliderInstance;
+    private InventorySystem _inventorySystem;
 
     protected override void Awake()
     {
@@ -42,6 +43,21 @@ public class MainStructure : Damageable, IStorage
         InitUnitBtns();
         InitSlider();
         InitResources();
+        _inventorySystem = GetComponent<InventorySystem>();
+    }
+
+    public void OnClicked()
+    {
+        // Get component if not already cached (in case it's added at runtime)
+        if (_inventorySystem == null)
+        {
+            _inventorySystem = GetComponent<InventorySystem>();
+        }
+
+        if (_inventorySystem != null)
+        {
+            _inventorySystem.ToggleInventory();
+        }
     }
 
     private void OnDestroy()

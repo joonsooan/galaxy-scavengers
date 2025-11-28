@@ -220,6 +220,18 @@ public class ResourceManager : MonoBehaviour
         UpdateResourceUI(type);
     }
 
+    public bool RemoveResource(ResourceType type, int amount)
+    {
+        int currentAmount = GetResourceAmount(type);
+        if (currentAmount < amount)
+        {
+            return false;
+        }
+        SetResource(type, currentAmount - amount);
+        UpdateResourceUI(type);
+        return true;
+    }
+
     public bool SpendResources(ResourceCost[] costs)
     {
         if (!HasEnoughResources(costs)) {
