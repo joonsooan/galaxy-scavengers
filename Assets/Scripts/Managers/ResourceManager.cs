@@ -474,7 +474,12 @@ public class ResourceManager : MonoBehaviour
 
         TMP_Text resourceText = GetResourceText(type);
         if (resourceText != null) {
-            resourceText.text = _resourceCounts[type].ToString();
+            int amount = _resourceCounts.GetValueOrDefault(type, 0);
+            resourceText.text = amount.ToString();
+            
+            // Show/hide the text element based on whether resource amount is greater than 0
+            bool shouldShow = amount > 0;
+            resourceText.gameObject.SetActive(shouldShow);
         }
     }
 
@@ -482,30 +487,30 @@ public class ResourceManager : MonoBehaviour
     {
         if (!IsUIConnected()) return;
 
-        if (ferriteNumber != null) ferriteNumber.text = _resourceCounts[ResourceType.Ferrite].ToString();
-        if (aetherNumber != null) aetherNumber.text = _resourceCounts[ResourceType.Aether].ToString();
-        if (biomassNumber != null) biomassNumber.text = _resourceCounts[ResourceType.Biomass].ToString();
-        if (cryoCrystalNumber != null) cryoCrystalNumber.text = _resourceCounts[ResourceType.CryoCrystal].ToString();
-        if (alloyPlateNumber != null) alloyPlateNumber.text = _resourceCounts[ResourceType.AlloyPlate].ToString();
-        if (compositeFrameNumber != null) compositeFrameNumber.text = _resourceCounts[ResourceType.CompositeFrame].ToString();
-        if (eChipNumber != null) eChipNumber.text = _resourceCounts[ResourceType.EChip].ToString();
-        if (bioCableNumber != null) bioCableNumber.text = _resourceCounts[ResourceType.BioCable].ToString();
-        if (powerCubeNumber != null) powerCubeNumber.text = _resourceCounts[ResourceType.PowerCube].ToString();
-        if (bioFuelNumber != null) bioFuelNumber.text = _resourceCounts[ResourceType.BioFuel].ToString();
-        if (cryoGelNumber != null) cryoGelNumber.text = _resourceCounts[ResourceType.CryoGel].ToString();
-        if (solanaNumber != null) solanaNumber.text = _resourceCounts[ResourceType.Solana].ToString();
-        if (coreNumber != null) coreNumber.text = _resourceCounts[ResourceType.Core].ToString();
-        if (ammunitionNumber != null) ammunitionNumber.text = _resourceCounts[ResourceType.Ammunition].ToString();
-        if (heavyPlatingNumber != null) heavyPlatingNumber.text = _resourceCounts[ResourceType.HeavyPlating].ToString();
-        if (actuatorNumber != null) actuatorNumber.text = _resourceCounts[ResourceType.Actuator].ToString();
-        if (genomeChipNumber != null) genomeChipNumber.text = _resourceCounts[ResourceType.GenomeChip].ToString();
-        if (patchKitNumber != null) patchKitNumber.text = _resourceCounts[ResourceType.PatchKit].ToString();
-        if (sensorUnitNumber != null) sensorUnitNumber.text = _resourceCounts[ResourceType.SensorUnit].ToString();
-        if (plasmaCubeNumber != null) plasmaCubeNumber.text = _resourceCounts[ResourceType.PlasmaCube].ToString();
-        if (cryoConduitNumber != null) cryoConduitNumber.text = _resourceCounts[ResourceType.CryoConduit].ToString();
-        if (seekerMissileNumber != null) seekerMissileNumber.text = _resourceCounts[ResourceType.SeekerMissile].ToString();
-        if (nexusDataNumber != null) nexusDataNumber.text = _resourceCounts[ResourceType.NexusData].ToString();
-        if (neuralMatrixNumber != null) neuralMatrixNumber.text = _resourceCounts[ResourceType.NeuralMatrix].ToString();
+        UpdateResourceUI(ResourceType.Ferrite);
+        UpdateResourceUI(ResourceType.Aether);
+        UpdateResourceUI(ResourceType.Biomass);
+        UpdateResourceUI(ResourceType.CryoCrystal);
+        UpdateResourceUI(ResourceType.AlloyPlate);
+        UpdateResourceUI(ResourceType.CompositeFrame);
+        UpdateResourceUI(ResourceType.EChip);
+        UpdateResourceUI(ResourceType.BioCable);
+        UpdateResourceUI(ResourceType.PowerCube);
+        UpdateResourceUI(ResourceType.BioFuel);
+        UpdateResourceUI(ResourceType.CryoGel);
+        UpdateResourceUI(ResourceType.Solana);
+        UpdateResourceUI(ResourceType.Core);
+        UpdateResourceUI(ResourceType.Ammunition);
+        UpdateResourceUI(ResourceType.HeavyPlating);
+        UpdateResourceUI(ResourceType.Actuator);
+        UpdateResourceUI(ResourceType.GenomeChip);
+        UpdateResourceUI(ResourceType.PatchKit);
+        UpdateResourceUI(ResourceType.SensorUnit);
+        UpdateResourceUI(ResourceType.PlasmaCube);
+        UpdateResourceUI(ResourceType.CryoConduit);
+        UpdateResourceUI(ResourceType.SeekerMissile);
+        UpdateResourceUI(ResourceType.NexusData);
+        UpdateResourceUI(ResourceType.NeuralMatrix);
     }
 
     // private void UpdateSolanaUI()

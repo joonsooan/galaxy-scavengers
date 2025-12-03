@@ -9,7 +9,8 @@ using UnityEngine.UI;
 public class InventorySystem : MonoBehaviour
 {
     [Header("UI References")]
-    [SerializeField] private GameObject inventoryPanel;
+    [SerializeField] private GameObject inventoryPanel; // Controls the active state of the whole UI component
+    [SerializeField] private GameObject inventoryGridContainer; // Contains the GridLayoutGroup for cell placement
     [SerializeField] private GameObject currentResourcePanel;
     [SerializeField] private Button sortButton;
 
@@ -61,9 +62,17 @@ public class InventorySystem : MonoBehaviour
         {
             currentResourcePanel.SetActive(false);
         }
+
+        // Ensure event subscription happens in Start as well
+        SubscribeToResourceEvents();
     }
 
     private void OnEnable()
+    {
+        SubscribeToResourceEvents();
+    }
+
+    private void SubscribeToResourceEvents()
     {
         if (ResourceManager.Instance != null)
         {
@@ -94,23 +103,23 @@ public class InventorySystem : MonoBehaviour
 
     private void InitializeInventory()
     {
-        if (inventoryPanel == null || inventoryCellPrefab == null)
+        if (inventoryGridContainer == null || inventoryCellPrefab == null)
         {
-            Debug.LogError("InventoryPanel or InventoryCellPrefab is not assigned!");
+            Debug.LogError("InventoryGridContainer or InventoryCellPrefab is not assigned!");
             return;
         }
 
-        _inventoryGrid = inventoryPanel.GetComponent<GridLayoutGroup>();
+        _inventoryGrid = inventoryGridContainer.GetComponent<GridLayoutGroup>();
         if (_inventoryGrid == null)
         {
-            Debug.LogError("InventoryPanel must have a GridLayoutGroup component!");
+            Debug.LogError("InventoryGridContainer must have a GridLayoutGroup component!");
             return;
         }
 
         int totalSlots = inventoryWidth * inventoryHeight;
         for (int i = 0; i < totalSlots; i++)
         {
-            GameObject cellObj = Instantiate(inventoryCellPrefab, inventoryPanel.transform);
+            GameObject cellObj = Instantiate(inventoryCellPrefab, inventoryGridContainer.transform);
             InventoryCell cell = cellObj.GetComponent<InventoryCell>();
             if (cell != null)
             {
@@ -273,8 +282,13 @@ public class InventorySystem : MonoBehaviour
             }
         }
 
-        // The ResourceManager.OnResourceAmountChanged event will automatically update
-        // the resource info cells, so we don't need to manually update them here
+        // Manually update the resource info cell to ensure it reflects the current amount
+        // The event should also trigger, but this ensures it updates even if there's a timing issue
+        if (ResourceManager.Instance != null)
+        {
+            int currentAmount = ResourceManager.Instance.GetResourceAmount(type);
+            UpdateResourceInfoCells(type, currentAmount);
+        }
 
         return remainingToMove < amountToMove;
     }

@@ -25,7 +25,34 @@ public class ResourceInfoCellClickable : MonoBehaviour, IPointerClickHandler
             resourceTypeText.text = type.ToString();
         }
 
+        // Update icon immediately when initializing
+        UpdateIcon();
         UpdateAmount(0);
+    }
+
+    private void UpdateIcon()
+    {
+        if (resourceImage == null) return;
+
+        if (ResourceManager.Instance != null)
+        {
+            Sprite resourceIcon = ResourceManager.Instance.GetResourceIcon(_resourceType);
+            if (resourceIcon != null)
+            {
+                resourceImage.sprite = resourceIcon;
+                resourceImage.enabled = true;
+            }
+            else
+            {
+                resourceImage.sprite = null;
+                resourceImage.enabled = false;
+            }
+        }
+        else
+        {
+            resourceImage.sprite = null;
+            resourceImage.enabled = false;
+        }
     }
 
     public void UpdateAmount(int amount)
@@ -35,14 +62,8 @@ public class ResourceInfoCellClickable : MonoBehaviour, IPointerClickHandler
             resourceAmountText.text = amount.ToString();
         }
 
-        if (ResourceManager.Instance != null)
-        {
-            Sprite resourceIcon = ResourceManager.Instance.GetResourceIcon(_resourceType);
-            if (resourceImage != null)
-            {
-                resourceImage.sprite = resourceIcon;
-            }
-        }
+        // Ensure icon is updated when amount changes
+        UpdateIcon();
     }
 
     public void OnPointerClick(PointerEventData eventData)

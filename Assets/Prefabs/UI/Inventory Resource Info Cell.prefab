@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6169334155396907072}
   - component: {fileID: 7325541168744720009}
   - component: {fileID: 714738310086553467}
+  - component: {fileID: 6118653961408698878}
   m_Layer: 5
   m_Name: Inventory Resource Info Cell
   m_TagString: Untagged
@@ -130,13 +131,27 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6155155196410172978}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 81e1e04b667e82b4188d18b40c629c72, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   resourceImage: {fileID: 1442889033423245216}
   resourceAmount: {fileID: 1763350587110950965}
+--- !u!114 &6118653961408698878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6155155196410172978}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 582240d87622e5e4188d438c487f1523, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  resourceImage: {fileID: 1442889033423245216}
+  resourceAmountText: {fileID: 1763350587110950965}
 --- !u!1 &8264350452876696805
 GameObject:
   m_ObjectHideFlags: 0
