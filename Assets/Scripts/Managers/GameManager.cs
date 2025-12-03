@@ -179,6 +179,9 @@ public class GameManager : MonoBehaviour
             if (spawner.BuildingTilemap != null) spawner.BuildingTilemap.gameObject.SetActive(false);
         }
 
+        // Register any Main Structure that was already placed in the scene (before game starts)
+        RegisterPrePlacedMainStructure();
+
         // Use ProceduralResourceSpawner if available, otherwise fall back to ResourceSpawner
         ProceduralResourceSpawner proceduralSpawner = FindFirstObjectByType<ProceduralResourceSpawner>();
         if (proceduralSpawner != null) {
@@ -200,6 +203,50 @@ public class GameManager : MonoBehaviour
 
         foreach (Unit_Miner unit in FindObjectsByType<Unit_Miner>(FindObjectsSortMode.None)) {
             unit.TryStartActions();
+        }
+    }
+
+    private void RegisterPrePlacedMainStructure()
+    {
+        // Find any MainStructure that already exists in the scene
+        MainStructure[] existingMainStructures = FindObjectsByType<MainStructure>(FindObjectsSortMode.None);
+        
+        foreach (MainStructure mainStructure in existingMainStructures)
+        {
+            // Only register if it hasn't been registered yet
+            // Check if ResourceManager already has this structure registered
+            if (ResourceManager.Instance != null)
+            {
+                // Check if this structure is already in the storages list
+                bool alreadyRegistered = false;
+                foreach (var storage in ResourceManager.Instance.GetAllStorages())
+                {
+                    if (storage == mainStructure)
+                    {
+                        alreadyRegistered = true;
+                        break;
+                    }
+                }
+
+                if (!alreadyRegistered)
+                {
+                    ResourceManager.Instance.RegisterMainStructure(mainStructure);
+                    ResourceManager.Instance.AddStorage(mainStructure);
+                    
+                    // Also register with BuildingManager if needed
+                    if (BuildingManager.Instance != null && mainStructure.transform != null)
+                    {
+                        Vector3 worldPos = mainStructure.transform.position;
+                        if (BuildingManager.Instance.grid != null)
+                        {
+                            Vector3Int cellPos = BuildingManager.Instance.grid.WorldToCell(worldPos);
+                            // Register as 3x3 building (adjust anchor if needed)
+                            Vector3Int anchorCell = cellPos - new Vector3Int(1, 1, 0);
+                            BuildingManager.Instance.RegisterMainStructure(anchorCell, new Vector2Int(3, 3));
+                        }
+                    }
+                }
+            }
         }
     }
 

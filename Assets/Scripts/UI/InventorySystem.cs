@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -22,7 +23,7 @@ public class InventorySystem : MonoBehaviour
     [SerializeField] private int defaultMaxStackAmount = 100;
     [SerializeField] private List<ResourceStackData> customMaxStackAmounts = new List<ResourceStackData>();
 
-    [System.Serializable]
+    [Serializable]
     public class ResourceStackData
     {
         public ResourceType resourceType;
@@ -34,7 +35,7 @@ public class InventorySystem : MonoBehaviour
     private List<InventoryCell> _inventoryCells = new List<InventoryCell>();
     private List<ResourceInfoCellClickable> _resourceInfoCells = new List<ResourceInfoCellClickable>();
     private GridLayoutGroup _inventoryGrid;
-    private HorizontalLayoutGroup _resourcePanelLayout;
+    private RectTransform _resourcePanelContent;
 
     private void Awake()
     {
@@ -77,13 +78,11 @@ public class InventorySystem : MonoBehaviour
 
     private void InitializeMaxStackAmounts()
     {
-        // Initialize with default values
         foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
         {
             maxStackAmounts[type] = defaultMaxStackAmount;
         }
 
-        // Apply custom values from inspector
         foreach (ResourceStackData data in customMaxStackAmounts)
         {
             if (maxStackAmounts.ContainsKey(data.resourceType))
@@ -129,22 +128,53 @@ public class InventorySystem : MonoBehaviour
             return;
         }
 
-        _resourcePanelLayout = currentResourcePanel.GetComponent<HorizontalLayoutGroup>();
-        if (_resourcePanelLayout == null)
+        GameObject currentResourcePanelScroll = null;
+        foreach (Transform child in currentResourcePanel.transform)
         {
-            Debug.LogError("CurrentResourcePanel must have a HorizontalLayoutGroup component!");
+            if (child.name.Contains("Scroll") || child.GetComponent<ScrollRect>() != null)
+            {
+                currentResourcePanelScroll = child.gameObject;
+                break;
+            }
+        }
+
+        if (currentResourcePanelScroll == null)
+        {
+            Debug.LogError("Could not find currentResourcePanelScroll as a child of currentResourcePanel!");
             return;
         }
 
+        // Get the ScrollRect and its content
+        ScrollRect scrollRect = currentResourcePanelScroll.GetComponent<ScrollRect>();
+        if (scrollRect == null)
+        {
+            Debug.LogError("CurrentResourcePanelScroll must have a ScrollRect component!");
+            return;
+        }
+
+        _resourcePanelContent = scrollRect.content;
+        if (_resourcePanelContent == null)
+        {
+            Debug.LogError("ScrollRect content is not assigned!");
+            return;
+        }
+
+        // Initialize all resource cells with current data
         foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
         {
-            GameObject cellObj = Instantiate(resourceInfoCellPrefab, currentResourcePanel.transform);
+            GameObject cellObj = Instantiate(resourceInfoCellPrefab, _resourcePanelContent);
             ResourceInfoCellClickable cell = cellObj.GetComponent<ResourceInfoCellClickable>();
             if (cell != null)
             {
                 cell.Initialize(type, this);
                 _resourceInfoCells.Add(cell);
-                UpdateResourceInfoCell(cell, type);
+                
+                // Initialize with current resource amount from ResourceManager
+                if (ResourceManager.Instance != null)
+                {
+                    int currentAmount = ResourceManager.Instance.GetResourceAmount(type);
+                    cell.UpdateAmount(currentAmount);
+                }
             }
         }
     }
@@ -161,6 +191,26 @@ public class InventorySystem : MonoBehaviour
         if (currentResourcePanel != null)
         {
             currentResourcePanel.SetActive(!isActive);
+            
+            // Refresh all resource cells when panel is shown to ensure data is up to date
+            if (!isActive)
+            {
+                RefreshAllResourceCells();
+            }
+        }
+    }
+    
+    private void RefreshAllResourceCells()
+    {
+        if (ResourceManager.Instance == null) return;
+        
+        foreach (ResourceInfoCellClickable cell in _resourceInfoCells)
+        {
+            if (cell != null)
+            {
+                int currentAmount = ResourceManager.Instance.GetResourceAmount(cell.ResourceType);
+                cell.UpdateAmount(currentAmount);
+            }
         }
     }
 
@@ -213,6 +263,7 @@ public class InventorySystem : MonoBehaviour
             int amountForThisCell = Mathf.Min(remainingToMove, maxStack);
             if (ResourceManager.Instance.RemoveResource(type, amountForThisCell))
             {
+                // Set the resource in the inventory cell
                 emptyCell.SetResource(type, amountForThisCell);
                 remainingToMove -= amountForThisCell;
             }
@@ -222,7 +273,10 @@ public class InventorySystem : MonoBehaviour
             }
         }
 
-        return remainingToMove < amountToMove; // Return true if at least some was moved
+        // The ResourceManager.OnResourceAmountChanged event will automatically update
+        // the resource info cells, so we don't need to manually update them here
+
+        return remainingToMove < amountToMove;
     }
 
     public void ReturnResourceToManager(ResourceType type, int amount)
@@ -235,28 +289,18 @@ public class InventorySystem : MonoBehaviour
 
     private void UpdateResourceInfoCells(ResourceType type, int amount)
     {
+        // Update the specific resource cell with the new amount
         ResourceInfoCellClickable cell = _resourceInfoCells.FirstOrDefault(c => c.ResourceType == type);
         if (cell != null)
         {
-            UpdateResourceInfoCell(cell, type);
-        }
-    }
-
-    private void UpdateResourceInfoCell(ResourceInfoCellClickable cell, ResourceType type)
-    {
-        if (ResourceManager.Instance != null)
-        {
-            int amount = ResourceManager.Instance.GetResourceAmount(type);
             cell.UpdateAmount(amount);
         }
     }
 
     public void SortInventory()
     {
-        // Get all non-empty cells
         List<InventoryCell> filledCells = _inventoryCells.Where(cell => !cell.IsEmpty()).ToList();
         
-        // Sort by ResourceType, then by amount (descending)
         filledCells.Sort((a, b) =>
         {
             int typeComparison = a.ResourceType.CompareTo(b.ResourceType);
@@ -264,21 +308,18 @@ public class InventorySystem : MonoBehaviour
             {
                 return typeComparison;
             }
-            return b.Amount.CompareTo(a.Amount); // Descending by amount
+            return b.Amount.CompareTo(a.Amount);
         });
 
-        // Store the data
         List<(ResourceType type, int amount)> cellData = filledCells
             .Select(cell => (cell.ResourceType, cell.Amount))
             .ToList();
 
-        // Clear all cells
         foreach (InventoryCell cell in _inventoryCells)
         {
             cell.Clear();
         }
 
-        // Reassign sorted data to cells in order
         for (int i = 0; i < cellData.Count && i < _inventoryCells.Count; i++)
         {
             _inventoryCells[i].SetResource(cellData[i].type, cellData[i].amount);

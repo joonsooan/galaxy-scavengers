@@ -36,6 +36,47 @@ public class MainStructure : Damageable, IStorage, IClickable
         }
         
         unitSpawnPos = transform.position - 2 * Vector3.up;
+        
+        // Ensure the Main Structure has a collider for click detection
+        EnsureCollider();
+    }
+    
+    private void EnsureCollider()
+    {
+        // Check if there's already a non-trigger collider
+        Collider2D[] allColliders = GetComponents<Collider2D>();
+        foreach (Collider2D col in allColliders)
+        {
+            if (col != null && !col.isTrigger)
+            {
+                return; // Already has a proper non-trigger collider
+            }
+        }
+        
+        // If there's only trigger colliders or no collider, add/update a BoxCollider2D
+        BoxCollider2D boxCollider = GetComponent<BoxCollider2D>();
+        if (boxCollider == null)
+        {
+            boxCollider = gameObject.AddComponent<BoxCollider2D>();
+        }
+        
+        // Try to get size from SpriteRenderer bounds, otherwise use default 3x3 for Main Structure
+        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null && spriteRenderer.sprite != null)
+        {
+            Bounds spriteBounds = spriteRenderer.sprite.bounds;
+            boxCollider.size = spriteBounds.size;
+            boxCollider.offset = spriteBounds.center;
+        }
+        else
+        {
+            // Default size for 3x3 building (Main Structure size)
+            // Assuming 1 unit per grid cell
+            boxCollider.size = new Vector2(3f, 3f);
+            boxCollider.offset = Vector2.zero;
+        }
+        
+        boxCollider.isTrigger = false; // Must be non-trigger for click detection
     }
 
     private void Start()

@@ -239,7 +239,7 @@ public class ProceduralResourceSpawner : MonoBehaviour
             _sectorPowerValues.Add(powerValue);
         }
         
-        Debug.Log($"[ProceduralResourceSpawner] Divided map into {numberOfCircles} concentric circles. Max radius: {_maxMapRadius}");
+        // Debug.Log($"[ProceduralResourceSpawner] Divided map into {numberOfCircles} concentric circles. Max radius: {_maxMapRadius}");
     }
     
     private void SpawnStartingAreaCircles()
@@ -340,7 +340,7 @@ public class ProceduralResourceSpawner : MonoBehaviour
             startingAreaCirclesSpawned++;
         }
         
-        Debug.Log($"[ProceduralResourceSpawner] Spawned {startingAreaCirclesSpawned} starting area circles (target: {startingAreaCircleCount}).");
+        // Debug.Log($"[ProceduralResourceSpawner] Spawned {startingAreaCirclesSpawned} starting area circles (target: {startingAreaCircleCount}).");
     }
     
     private void SpawnResourceCircles()
@@ -468,7 +468,7 @@ public class ProceduralResourceSpawner : MonoBehaviour
             _resourceCircles.Add(circle);
         }
         
-        Debug.Log($"[ProceduralResourceSpawner] Spawned {_resourceCircles.Count} resource circles out of {circlesToSpawn} attempted (max possible: {maxPossibleCircles}).");
+        // Debug.Log($"[ProceduralResourceSpawner] Spawned {_resourceCircles.Count} resource circles out of {circlesToSpawn} attempted (max possible: {maxPossibleCircles}).");
     }
     
     private bool CircleOverlapsTerrain(Vector2Int center, float radius)
