@@ -4047,7 +4047,7 @@ MonoBehaviour:
   m_HorizontalScrollbar: {fileID: 0}
   m_VerticalScrollbar: {fileID: 1634437490}
   m_HorizontalScrollbarVisibility: 2
-  m_VerticalScrollbarVisibility: 0
+  m_VerticalScrollbarVisibility: 2
   m_HorizontalScrollbarSpacing: -3
   m_VerticalScrollbarSpacing: 0
   m_OnValueChanged:
@@ -4986,7 +4986,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Padding:
     m_Left: 0
-    m_Right: 5
+    m_Right: 0
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 0
@@ -18947,7 +18947,7 @@ RectTransform:
   m_Father: {fileID: 402769649}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
@@ -22423,30 +22423,30 @@ MonoBehaviour:
   - resourceType: 3
     amountToMine: 10
     timeToMinePerUnit: 2
-  ferriteNumber: {fileID: 1492051661}
-  aetherNumber: {fileID: 2000182853}
-  biomassNumber: {fileID: 59790005}
-  cryoCrystalNumber: {fileID: 945271804}
-  alloyPlateNumber: {fileID: 2038732852}
-  compositeFrameNumber: {fileID: 1630035891}
-  eChipNumber: {fileID: 940802535}
-  bioCableNumber: {fileID: 905535945}
-  powerCubeNumber: {fileID: 1423583654}
-  bioFuelNumber: {fileID: 556482169}
-  cryoGelNumber: {fileID: 747340461}
-  solanaNumber: {fileID: 369040095}
-  coreNumber: {fileID: 1996184221}
-  ammunitionNumber: {fileID: 1029149295}
-  heavyPlatingNumber: {fileID: 0}
-  actuatorNumber: {fileID: 0}
-  genomeChipNumber: {fileID: 0}
-  patchKitNumber: {fileID: 0}
-  sensorUnitNumber: {fileID: 0}
-  plasmaCubeNumber: {fileID: 0}
-  cryoConduitNumber: {fileID: 0}
-  seekerMissileNumber: {fileID: 0}
-  nexusDataNumber: {fileID: 0}
-  neuralMatrixNumber: {fileID: 0}
+  ferritePanel: {fileID: 2119646177}
+  aetherPanel: {fileID: 524463979}
+  biomassPanel: {fileID: 482755040}
+  cryoCrystalPanel: {fileID: 727194034}
+  alloyPlatePanel: {fileID: 404102868}
+  compositeFramePanel: {fileID: 1381910515}
+  eChipPanel: {fileID: 693126206}
+  bioCablePanel: {fileID: 1325463051}
+  powerCubePanel: {fileID: 1446259204}
+  bioFuelPanel: {fileID: 1792094202}
+  cryoGelPanel: {fileID: 499416618}
+  solanaPanel: {fileID: 1024473205}
+  corePanel: {fileID: 854884315}
+  ammunitionPanel: {fileID: 9762583}
+  heavyPlatingPanel: {fileID: 0}
+  actuatorPanel: {fileID: 0}
+  genomeChipPanel: {fileID: 0}
+  patchKitPanel: {fileID: 0}
+  sensorUnitPanel: {fileID: 0}
+  plasmaCubePanel: {fileID: 0}
+  cryoConduitPanel: {fileID: 0}
+  seekerMissilePanel: {fileID: 0}
+  nexusDataPanel: {fileID: 0}
+  neuralMatrixPanel: {fileID: 0}
 --- !u!4 &1995619767
 Transform:
   m_ObjectHideFlags: 0

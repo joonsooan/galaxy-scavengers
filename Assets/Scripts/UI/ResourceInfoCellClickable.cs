@@ -8,7 +8,7 @@ public class ResourceInfoCellClickable : MonoBehaviour, IPointerClickHandler
     [Header("References")]
     [SerializeField] private Image resourceImage;
     [SerializeField] private TMP_Text resourceAmountText;
-    [SerializeField] private TMP_Text resourceTypeText; // Optional: to display resource type name
+    // [SerializeField] private TMP_Text resourceTypeText; // Optional: to display resource type name
 
     private ResourceType _resourceType;
     private InventorySystem _inventorySystem;
@@ -20,10 +20,10 @@ public class ResourceInfoCellClickable : MonoBehaviour, IPointerClickHandler
         _resourceType = type;
         _inventorySystem = inventorySystem;
 
-        if (resourceTypeText != null)
-        {
-            resourceTypeText.text = type.ToString();
-        }
+        // if (resourceTypeText != null)
+        // {
+        //     resourceTypeText.text = type.ToString();
+        // }
 
         // Update icon immediately when initializing
         UpdateIcon();
@@ -57,13 +57,21 @@ public class ResourceInfoCellClickable : MonoBehaviour, IPointerClickHandler
 
     public void UpdateAmount(int amount)
     {
-        if (resourceAmountText != null)
-        {
-            resourceAmountText.text = amount.ToString();
-        }
+        // Show/hide the entire panel/prefab based on whether resource amount is greater than 0
+        bool shouldShow = amount > 0;
+        gameObject.SetActive(shouldShow);
 
-        // Ensure icon is updated when amount changes
-        UpdateIcon();
+        // Only update UI elements if the panel is active
+        if (shouldShow)
+        {
+            if (resourceAmountText != null)
+            {
+                resourceAmountText.text = amount.ToString();
+            }
+
+            // Ensure icon is updated when amount changes
+            UpdateIcon();
+        }
     }
 
     public void OnPointerClick(PointerEventData eventData)

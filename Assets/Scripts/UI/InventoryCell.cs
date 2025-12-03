@@ -76,9 +76,20 @@ public class InventoryCell : MonoBehaviour, IPointerClickHandler
             return;
         }
 
-        // Return resource to ResourceManager
-        _inventorySystem.ReturnResourceToManager(_resourceType, _amount);
-        Clear();
+        // Check for shift key - use Input.GetKey which works reliably with pointer events
+        bool isShiftClick = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
+        if (isShiftClick)
+        {
+            // Shift + Click: Return ALL resources of the same type from inventory
+            _inventorySystem.ReturnAllResourcesOfType(_resourceType);
+        }
+        else
+        {
+            // Single Click: Return only this cell's resource to ResourceManager
+            _inventorySystem.ReturnResourceToManager(_resourceType, _amount);
+            Clear();
+        }
     }
 }
 

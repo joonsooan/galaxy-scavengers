@@ -301,6 +301,39 @@ public class InventorySystem : MonoBehaviour
         }
     }
 
+    public void ReturnAllResourcesOfType(ResourceType type)
+    {
+        if (ResourceManager.Instance == null)
+        {
+            return;
+        }
+
+        int totalAmount = 0;
+        List<InventoryCell> cellsToClear = new List<InventoryCell>();
+
+        // Find all cells with the same resource type and calculate total amount
+        foreach (InventoryCell cell in _inventoryCells)
+        {
+            if (!cell.IsEmpty() && cell.ResourceType == type)
+            {
+                totalAmount += cell.Amount;
+                cellsToClear.Add(cell);
+            }
+        }
+
+        // Return all resources to ResourceManager
+        if (totalAmount > 0)
+        {
+            ResourceManager.Instance.AddResource(type, totalAmount);
+            
+            // Clear all cells that had this resource type
+            foreach (InventoryCell cell in cellsToClear)
+            {
+                cell.Clear();
+            }
+        }
+    }
+
     private void UpdateResourceInfoCells(ResourceType type, int amount)
     {
         // Update the specific resource cell with the new amount
