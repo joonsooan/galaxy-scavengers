@@ -79,30 +79,30 @@ public class ResourceManager : MonoBehaviour
     [SerializeField] private List<ResourceStats> resourceStatsList;
 
     [Header("Resource Stats UI")]
-    [SerializeField] private TMP_Text ferriteNumber;
-    [SerializeField] private TMP_Text aetherNumber;
-    [SerializeField] private TMP_Text biomassNumber;
-    [SerializeField] private TMP_Text cryoCrystalNumber;
-    [SerializeField] private TMP_Text alloyPlateNumber;
-    [SerializeField] private TMP_Text compositeFrameNumber;
-    [SerializeField] private TMP_Text eChipNumber;
-    [SerializeField] private TMP_Text bioCableNumber;
-    [SerializeField] private TMP_Text powerCubeNumber;
-    [SerializeField] private TMP_Text bioFuelNumber;
-    [SerializeField] private TMP_Text cryoGelNumber;
-    [SerializeField] private TMP_Text solanaNumber;
-    [SerializeField] private TMP_Text coreNumber;
-    [SerializeField] private TMP_Text ammunitionNumber;
-    [SerializeField] private TMP_Text heavyPlatingNumber;
-    [SerializeField] private TMP_Text actuatorNumber;
-    [SerializeField] private TMP_Text genomeChipNumber;
-    [SerializeField] private TMP_Text patchKitNumber;
-    [SerializeField] private TMP_Text sensorUnitNumber;
-    [SerializeField] private TMP_Text plasmaCubeNumber;
-    [SerializeField] private TMP_Text cryoConduitNumber;
-    [SerializeField] private TMP_Text seekerMissileNumber;
-    [SerializeField] private TMP_Text nexusDataNumber;
-    [SerializeField] private TMP_Text neuralMatrixNumber;
+    [SerializeField] private GameObject ferritePanel;
+    [SerializeField] private GameObject aetherPanel;
+    [SerializeField] private GameObject biomassPanel;
+    [SerializeField] private GameObject cryoCrystalPanel;
+    [SerializeField] private GameObject alloyPlatePanel;
+    [SerializeField] private GameObject compositeFramePanel;
+    [SerializeField] private GameObject eChipPanel;
+    [SerializeField] private GameObject bioCablePanel;
+    [SerializeField] private GameObject powerCubePanel;
+    [SerializeField] private GameObject bioFuelPanel;
+    [SerializeField] private GameObject cryoGelPanel;
+    [SerializeField] private GameObject solanaPanel;
+    [SerializeField] private GameObject corePanel;
+    [SerializeField] private GameObject ammunitionPanel;
+    [SerializeField] private GameObject heavyPlatingPanel;
+    [SerializeField] private GameObject actuatorPanel;
+    [SerializeField] private GameObject genomeChipPanel;
+    [SerializeField] private GameObject patchKitPanel;
+    [SerializeField] private GameObject sensorUnitPanel;
+    [SerializeField] private GameObject plasmaCubePanel;
+    [SerializeField] private GameObject cryoConduitPanel;
+    [SerializeField] private GameObject seekerMissilePanel;
+    [SerializeField] private GameObject nexusDataPanel;
+    [SerializeField] private GameObject neuralMatrixPanel;
 
     private readonly HashSet<ResourceNode> _allResources = new HashSet<ResourceNode>();
     private readonly List<IStorage> _allStorages = new List<IStorage>();
@@ -218,6 +218,18 @@ public class ResourceManager : MonoBehaviour
         int currentAmount = GetResourceAmount(type);
         SetResource(type, currentAmount + amount);
         UpdateResourceUI(type);
+    }
+
+    public bool RemoveResource(ResourceType type, int amount)
+    {
+        int currentAmount = GetResourceAmount(type);
+        if (currentAmount < amount)
+        {
+            return false;
+        }
+        SetResource(type, currentAmount - amount);
+        UpdateResourceUI(type);
+        return true;
     }
 
     public bool SpendResources(ResourceCost[] costs)
@@ -381,88 +393,101 @@ public class ResourceManager : MonoBehaviour
 
     private void FindAndConnectUI()
     {
-        if (ferriteNumber == null)
-            ferriteNumber = GameObject.Find("Resource0_txt")?.GetComponent<TMP_Text>();
+        // Try to find panels by name if not assigned in inspector
+        // Assuming panel names follow a pattern like "Resource0_Panel", "Resource1_Panel", etc.
+        // Or they might be named after the resource type
+        if (ferritePanel == null)
+            ferritePanel = GameObject.Find("Resource0_Panel") ?? GameObject.Find("FerritePanel");
 
-        if (aetherNumber == null)
-            aetherNumber = GameObject.Find("Resource1_txt")?.GetComponent<TMP_Text>();
+        if (aetherPanel == null)
+            aetherPanel = GameObject.Find("Resource1_Panel") ?? GameObject.Find("AetherPanel");
 
-        if (biomassNumber == null)
-            biomassNumber = GameObject.Find("Resource2_txt")?.GetComponent<TMP_Text>();
+        if (biomassPanel == null)
+            biomassPanel = GameObject.Find("Resource2_Panel") ?? GameObject.Find("BiomassPanel");
 
-        if (cryoCrystalNumber == null)
-            cryoCrystalNumber = GameObject.Find("Resource3_txt")?.GetComponent<TMP_Text>();
+        if (cryoCrystalPanel == null)
+            cryoCrystalPanel = GameObject.Find("Resource3_Panel") ?? GameObject.Find("CryoCrystalPanel");
 
-        // 1 Crafted Resource UI (Resource4_txt ~ Resource13_txt)
-        if (alloyPlateNumber == null)
-            alloyPlateNumber = GameObject.Find("Resource4_txt")?.GetComponent<TMP_Text>();
+        // 1 Crafted Resource UI
+        if (alloyPlatePanel == null)
+            alloyPlatePanel = GameObject.Find("Resource4_Panel") ?? GameObject.Find("AlloyPlatePanel");
 
-        if (compositeFrameNumber == null)
-            compositeFrameNumber = GameObject.Find("Resource5_txt")?.GetComponent<TMP_Text>();
+        if (compositeFramePanel == null)
+            compositeFramePanel = GameObject.Find("Resource5_Panel") ?? GameObject.Find("CompositeFramePanel");
 
-        if (eChipNumber == null)
-            eChipNumber = GameObject.Find("Resource6_txt")?.GetComponent<TMP_Text>();
+        if (eChipPanel == null)
+            eChipPanel = GameObject.Find("Resource6_Panel") ?? GameObject.Find("EChipPanel");
 
-        if (bioCableNumber == null)
-            bioCableNumber = GameObject.Find("Resource7_txt")?.GetComponent<TMP_Text>();
+        if (bioCablePanel == null)
+            bioCablePanel = GameObject.Find("Resource7_Panel") ?? GameObject.Find("BioCablePanel");
 
-        if (powerCubeNumber == null)
-            powerCubeNumber = GameObject.Find("Resource8_txt")?.GetComponent<TMP_Text>();
+        if (powerCubePanel == null)
+            powerCubePanel = GameObject.Find("Resource8_Panel") ?? GameObject.Find("PowerCubePanel");
 
-        if (bioFuelNumber == null)
-            bioFuelNumber = GameObject.Find("Resource9_txt")?.GetComponent<TMP_Text>();
+        if (bioFuelPanel == null)
+            bioFuelPanel = GameObject.Find("Resource9_Panel") ?? GameObject.Find("BioFuelPanel");
 
-        if (cryoGelNumber == null)
-            cryoGelNumber = GameObject.Find("Resource10_txt")?.GetComponent<TMP_Text>();
+        if (cryoGelPanel == null)
+            cryoGelPanel = GameObject.Find("Resource10_Panel") ?? GameObject.Find("CryoGelPanel");
 
-        if (solanaNumber == null)
-            solanaNumber = GameObject.Find("Resource11_txt")?.GetComponent<TMP_Text>();
+        if (solanaPanel == null)
+            solanaPanel = GameObject.Find("Resource11_Panel") ?? GameObject.Find("SolanaPanel");
 
-        if (coreNumber == null)
-            coreNumber = GameObject.Find("Resource12_txt")?.GetComponent<TMP_Text>();
+        if (corePanel == null)
+            corePanel = GameObject.Find("Resource12_Panel") ?? GameObject.Find("CorePanel");
 
-        if (ammunitionNumber == null)
-            ammunitionNumber = GameObject.Find("Resource13_txt")?.GetComponent<TMP_Text>();
+        if (ammunitionPanel == null)
+            ammunitionPanel = GameObject.Find("Resource13_Panel") ?? GameObject.Find("AmmunitionPanel");
 
-        // 2 Crafted Resource UI (Resource14_txt ~ Resource23_txt)
-        if (heavyPlatingNumber == null)
-            heavyPlatingNumber = GameObject.Find("Resource14_txt")?.GetComponent<TMP_Text>();
+        // 2 Crafted Resource UI
+        if (heavyPlatingPanel == null)
+            heavyPlatingPanel = GameObject.Find("Resource14_Panel") ?? GameObject.Find("HeavyPlatingPanel");
 
-        if (actuatorNumber == null)
-            actuatorNumber = GameObject.Find("Resource15_txt")?.GetComponent<TMP_Text>();
+        if (actuatorPanel == null)
+            actuatorPanel = GameObject.Find("Resource15_Panel") ?? GameObject.Find("ActuatorPanel");
 
-        if (genomeChipNumber == null)
-            genomeChipNumber = GameObject.Find("Resource16_txt")?.GetComponent<TMP_Text>();
+        if (genomeChipPanel == null)
+            genomeChipPanel = GameObject.Find("Resource16_Panel") ?? GameObject.Find("GenomeChipPanel");
 
-        if (patchKitNumber == null)
-            patchKitNumber = GameObject.Find("Resource17_txt")?.GetComponent<TMP_Text>();
+        if (patchKitPanel == null)
+            patchKitPanel = GameObject.Find("Resource17_Panel") ?? GameObject.Find("PatchKitPanel");
 
-        if (sensorUnitNumber == null)
-            sensorUnitNumber = GameObject.Find("Resource18_txt")?.GetComponent<TMP_Text>();
+        if (sensorUnitPanel == null)
+            sensorUnitPanel = GameObject.Find("Resource18_Panel") ?? GameObject.Find("SensorUnitPanel");
 
-        if (plasmaCubeNumber == null)
-            plasmaCubeNumber = GameObject.Find("Resource19_txt")?.GetComponent<TMP_Text>();
+        if (plasmaCubePanel == null)
+            plasmaCubePanel = GameObject.Find("Resource19_Panel") ?? GameObject.Find("PlasmaCubePanel");
 
-        if (cryoConduitNumber == null)
-            cryoConduitNumber = GameObject.Find("Resource20_txt")?.GetComponent<TMP_Text>();
+        if (cryoConduitPanel == null)
+            cryoConduitPanel = GameObject.Find("Resource20_Panel") ?? GameObject.Find("CryoConduitPanel");
 
-        if (seekerMissileNumber == null)
-            seekerMissileNumber = GameObject.Find("Resource21_txt")?.GetComponent<TMP_Text>();
+        if (seekerMissilePanel == null)
+            seekerMissilePanel = GameObject.Find("Resource21_Panel") ?? GameObject.Find("SeekerMissilePanel");
 
-        if (nexusDataNumber == null)
-            nexusDataNumber = GameObject.Find("Resource22_txt")?.GetComponent<TMP_Text>();
+        if (nexusDataPanel == null)
+            nexusDataPanel = GameObject.Find("Resource22_Panel") ?? GameObject.Find("NexusDataPanel");
 
-        if (neuralMatrixNumber == null)
-            neuralMatrixNumber = GameObject.Find("Resource23_txt")?.GetComponent<TMP_Text>();
+        if (neuralMatrixPanel == null)
+            neuralMatrixPanel = GameObject.Find("Resource23_Panel") ?? GameObject.Find("NeuralMatrixPanel");
     }
 
     private void UpdateResourceUI(ResourceType type)
     {
         if (!IsUIConnected()) return;
 
-        TMP_Text resourceText = GetResourceText(type);
-        if (resourceText != null) {
-            resourceText.text = _resourceCounts[type].ToString();
+        GameObject resourcePanel = GetResourcePanel(type);
+        if (resourcePanel != null) {
+            int amount = _resourceCounts.GetValueOrDefault(type, 0);
+            
+            // Find the TMP_Text child component and update its text
+            TMP_Text resourceText = resourcePanel.GetComponentInChildren<TMP_Text>();
+            if (resourceText != null) {
+                resourceText.text = amount.ToString();
+            }
+            
+            // Show/hide the panel itself based on whether resource amount is greater than 0
+            bool shouldShow = amount > 0;
+            resourcePanel.SetActive(shouldShow);
         }
     }
 
@@ -470,30 +495,30 @@ public class ResourceManager : MonoBehaviour
     {
         if (!IsUIConnected()) return;
 
-        if (ferriteNumber != null) ferriteNumber.text = _resourceCounts[ResourceType.Ferrite].ToString();
-        if (aetherNumber != null) aetherNumber.text = _resourceCounts[ResourceType.Aether].ToString();
-        if (biomassNumber != null) biomassNumber.text = _resourceCounts[ResourceType.Biomass].ToString();
-        if (cryoCrystalNumber != null) cryoCrystalNumber.text = _resourceCounts[ResourceType.CryoCrystal].ToString();
-        if (alloyPlateNumber != null) alloyPlateNumber.text = _resourceCounts[ResourceType.AlloyPlate].ToString();
-        if (compositeFrameNumber != null) compositeFrameNumber.text = _resourceCounts[ResourceType.CompositeFrame].ToString();
-        if (eChipNumber != null) eChipNumber.text = _resourceCounts[ResourceType.EChip].ToString();
-        if (bioCableNumber != null) bioCableNumber.text = _resourceCounts[ResourceType.BioCable].ToString();
-        if (powerCubeNumber != null) powerCubeNumber.text = _resourceCounts[ResourceType.PowerCube].ToString();
-        if (bioFuelNumber != null) bioFuelNumber.text = _resourceCounts[ResourceType.BioFuel].ToString();
-        if (cryoGelNumber != null) cryoGelNumber.text = _resourceCounts[ResourceType.CryoGel].ToString();
-        if (solanaNumber != null) solanaNumber.text = _resourceCounts[ResourceType.Solana].ToString();
-        if (coreNumber != null) coreNumber.text = _resourceCounts[ResourceType.Core].ToString();
-        if (ammunitionNumber != null) ammunitionNumber.text = _resourceCounts[ResourceType.Ammunition].ToString();
-        if (heavyPlatingNumber != null) heavyPlatingNumber.text = _resourceCounts[ResourceType.HeavyPlating].ToString();
-        if (actuatorNumber != null) actuatorNumber.text = _resourceCounts[ResourceType.Actuator].ToString();
-        if (genomeChipNumber != null) genomeChipNumber.text = _resourceCounts[ResourceType.GenomeChip].ToString();
-        if (patchKitNumber != null) patchKitNumber.text = _resourceCounts[ResourceType.PatchKit].ToString();
-        if (sensorUnitNumber != null) sensorUnitNumber.text = _resourceCounts[ResourceType.SensorUnit].ToString();
-        if (plasmaCubeNumber != null) plasmaCubeNumber.text = _resourceCounts[ResourceType.PlasmaCube].ToString();
-        if (cryoConduitNumber != null) cryoConduitNumber.text = _resourceCounts[ResourceType.CryoConduit].ToString();
-        if (seekerMissileNumber != null) seekerMissileNumber.text = _resourceCounts[ResourceType.SeekerMissile].ToString();
-        if (nexusDataNumber != null) nexusDataNumber.text = _resourceCounts[ResourceType.NexusData].ToString();
-        if (neuralMatrixNumber != null) neuralMatrixNumber.text = _resourceCounts[ResourceType.NeuralMatrix].ToString();
+        UpdateResourceUI(ResourceType.Ferrite);
+        UpdateResourceUI(ResourceType.Aether);
+        UpdateResourceUI(ResourceType.Biomass);
+        UpdateResourceUI(ResourceType.CryoCrystal);
+        UpdateResourceUI(ResourceType.AlloyPlate);
+        UpdateResourceUI(ResourceType.CompositeFrame);
+        UpdateResourceUI(ResourceType.EChip);
+        UpdateResourceUI(ResourceType.BioCable);
+        UpdateResourceUI(ResourceType.PowerCube);
+        UpdateResourceUI(ResourceType.BioFuel);
+        UpdateResourceUI(ResourceType.CryoGel);
+        UpdateResourceUI(ResourceType.Solana);
+        UpdateResourceUI(ResourceType.Core);
+        UpdateResourceUI(ResourceType.Ammunition);
+        UpdateResourceUI(ResourceType.HeavyPlating);
+        UpdateResourceUI(ResourceType.Actuator);
+        UpdateResourceUI(ResourceType.GenomeChip);
+        UpdateResourceUI(ResourceType.PatchKit);
+        UpdateResourceUI(ResourceType.SensorUnit);
+        UpdateResourceUI(ResourceType.PlasmaCube);
+        UpdateResourceUI(ResourceType.CryoConduit);
+        UpdateResourceUI(ResourceType.SeekerMissile);
+        UpdateResourceUI(ResourceType.NexusData);
+        UpdateResourceUI(ResourceType.NeuralMatrix);
     }
 
     // private void UpdateSolanaUI()
@@ -505,36 +530,36 @@ public class ResourceManager : MonoBehaviour
 
     private bool IsUIConnected()
     {
-        return ferriteNumber != null && aetherNumber != null && biomassNumber != null && cryoCrystalNumber != null;
+        return ferritePanel != null && aetherPanel != null && biomassPanel != null && cryoCrystalPanel != null;
     }
 
-    private TMP_Text GetResourceText(ResourceType type)
+    private GameObject GetResourcePanel(ResourceType type)
     {
         return type switch {
-            ResourceType.Ferrite => ferriteNumber,
-            ResourceType.Aether => aetherNumber,
-            ResourceType.Biomass => biomassNumber,
-            ResourceType.CryoCrystal => cryoCrystalNumber,
-            ResourceType.AlloyPlate => alloyPlateNumber,
-            ResourceType.CompositeFrame => compositeFrameNumber,
-            ResourceType.EChip => eChipNumber,
-            ResourceType.BioCable => bioCableNumber,
-            ResourceType.PowerCube => powerCubeNumber,
-            ResourceType.BioFuel => bioFuelNumber,
-            ResourceType.CryoGel => cryoGelNumber,
-            ResourceType.Solana => solanaNumber,
-            ResourceType.Core => coreNumber,
-            ResourceType.Ammunition => ammunitionNumber,
-            ResourceType.HeavyPlating => heavyPlatingNumber,
-            ResourceType.Actuator => actuatorNumber,
-            ResourceType.GenomeChip => genomeChipNumber,
-            ResourceType.PatchKit => patchKitNumber,
-            ResourceType.SensorUnit => sensorUnitNumber,
-            ResourceType.PlasmaCube => plasmaCubeNumber,
-            ResourceType.CryoConduit => cryoConduitNumber,
-            ResourceType.SeekerMissile => seekerMissileNumber,
-            ResourceType.NexusData => nexusDataNumber,
-            ResourceType.NeuralMatrix => neuralMatrixNumber,
+            ResourceType.Ferrite => ferritePanel,
+            ResourceType.Aether => aetherPanel,
+            ResourceType.Biomass => biomassPanel,
+            ResourceType.CryoCrystal => cryoCrystalPanel,
+            ResourceType.AlloyPlate => alloyPlatePanel,
+            ResourceType.CompositeFrame => compositeFramePanel,
+            ResourceType.EChip => eChipPanel,
+            ResourceType.BioCable => bioCablePanel,
+            ResourceType.PowerCube => powerCubePanel,
+            ResourceType.BioFuel => bioFuelPanel,
+            ResourceType.CryoGel => cryoGelPanel,
+            ResourceType.Solana => solanaPanel,
+            ResourceType.Core => corePanel,
+            ResourceType.Ammunition => ammunitionPanel,
+            ResourceType.HeavyPlating => heavyPlatingPanel,
+            ResourceType.Actuator => actuatorPanel,
+            ResourceType.GenomeChip => genomeChipPanel,
+            ResourceType.PatchKit => patchKitPanel,
+            ResourceType.SensorUnit => sensorUnitPanel,
+            ResourceType.PlasmaCube => plasmaCubePanel,
+            ResourceType.CryoConduit => cryoConduitPanel,
+            ResourceType.SeekerMissile => seekerMissilePanel,
+            ResourceType.NexusData => nexusDataPanel,
+            ResourceType.NeuralMatrix => neuralMatrixPanel,
             _ => null
         };
     }
