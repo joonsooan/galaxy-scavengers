@@ -39,12 +39,12 @@ public class UIManager : MonoBehaviour
     private DroneHubData _pinnedDroneHubData;
     private ComboCardData _pinnedRecipeData;
 
-    // Track which UI panel is currently displayed
     private enum ActiveUIPanel
     {
         None,
         Processor,
-        DroneHub
+        DroneHub,
+        MainStructure
     }
     
     private ActiveUIPanel _activeUIPanel = ActiveUIPanel.None;
@@ -64,14 +64,11 @@ public class UIManager : MonoBehaviour
                 return;
             }
             
-            // First, check if we're dragging a building - if so, end the drag first
-            // The UI will be hidden after the drag ends (handled in GameManager.EndDrag)
+            // 건물 드래그 중인 경우 UI 숨기기 방지
             if (GameManager.Instance != null && GameManager.Instance.IsDragging()) {
-                // Don't hide UI yet - let the drag end first
                 return;
             }
-            
-            // Only hide UI if we're not dragging
+
             UnpinAndHideAllPanels();
         }
     }
@@ -92,7 +89,6 @@ public class UIManager : MonoBehaviour
     {
         if (processor == null) return;
 
-        // Hide any currently displayed IClickable UI
         HideCurrentIClickableUI();
         
         _currentProcessor = processor;
@@ -104,7 +100,6 @@ public class UIManager : MonoBehaviour
     {
         if (droneHub == null) return;
 
-        // Hide any currently displayed IClickable UI
         HideCurrentIClickableUI();
         
         _currentDroneHub = droneHub;
@@ -114,7 +109,6 @@ public class UIManager : MonoBehaviour
 
     private void HideCurrentIClickableUI()
     {
-        // 이전에 보여지던 UI 비활성화
         switch (_activeUIPanel)
         {
             case ActiveUIPanel.Processor:
@@ -130,9 +124,28 @@ public class UIManager : MonoBehaviour
                 }
                 _currentDroneHub = null;
                 break;
+                
+            case ActiveUIPanel.MainStructure:
+                HideMainStructureInventory();
+                break;
         }
         
         _activeUIPanel = ActiveUIPanel.None;
+    }
+
+    private void HideMainStructureInventory()
+    {
+        MainStructure mainStructure = UnityEngine.Object.FindFirstObjectByType<MainStructure>();
+        InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
+        GameObject inventoryPanel = inventorySystem.GetInventoryPanel();
+        inventorySystem.ToggleInventory();
+    }
+
+    public void ShowMainStructureUI()
+    {
+        HideCurrentIClickableUI();
+        
+        _activeUIPanel = ActiveUIPanel.MainStructure;
     }
 
     public void UnpinAndHideAllPanels()
@@ -157,7 +170,6 @@ public class UIManager : MonoBehaviour
             droneHubInfoPanel.SetActive(false);
         }
 
-        // Reset active UI panel tracking
         HideCurrentIClickableUI();
     }
 
@@ -188,12 +200,9 @@ public class UIManager : MonoBehaviour
     public void PinCardInfo(CardData data)
     {
         if (_pinnedCardData == data) {
-            // _pinnedCardData = null;
-            // cardInfoPanel.SetActive(false);
             UnpinAndHideAllPanels();
         }
         else {
-            // UnpinAndHideAllPanels();
             _pinnedCardData = data;
             DisplayCardInfo(data);
         }

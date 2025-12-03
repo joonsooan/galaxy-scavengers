@@ -8,7 +8,6 @@ public class ResourceInfoCellClickable : MonoBehaviour, IPointerClickHandler
     [Header("References")]
     [SerializeField] private Image resourceImage;
     [SerializeField] private TMP_Text resourceAmountText;
-    // [SerializeField] private TMP_Text resourceTypeText; // Optional: to display resource type name
 
     private ResourceType _resourceType;
     private InventorySystem _inventorySystem;
@@ -19,13 +18,6 @@ public class ResourceInfoCellClickable : MonoBehaviour, IPointerClickHandler
     {
         _resourceType = type;
         _inventorySystem = inventorySystem;
-
-        // if (resourceTypeText != null)
-        // {
-        //     resourceTypeText.text = type.ToString();
-        // }
-
-        // Update icon immediately when initializing
         UpdateIcon();
         UpdateAmount(0);
     }
@@ -42,11 +34,6 @@ public class ResourceInfoCellClickable : MonoBehaviour, IPointerClickHandler
                 resourceImage.sprite = resourceIcon;
                 resourceImage.enabled = true;
             }
-            else
-            {
-                resourceImage.sprite = null;
-                resourceImage.enabled = false;
-            }
         }
         else
         {
@@ -57,11 +44,9 @@ public class ResourceInfoCellClickable : MonoBehaviour, IPointerClickHandler
 
     public void UpdateAmount(int amount)
     {
-        // Show/hide the entire panel/prefab based on whether resource amount is greater than 0
         bool shouldShow = amount > 0;
         gameObject.SetActive(shouldShow);
 
-        // Only update UI elements if the panel is active
         if (shouldShow)
         {
             if (resourceAmountText != null)
@@ -69,7 +54,6 @@ public class ResourceInfoCellClickable : MonoBehaviour, IPointerClickHandler
                 resourceAmountText.text = amount.ToString();
             }
 
-            // Ensure icon is updated when amount changes
             UpdateIcon();
         }
     }
@@ -85,13 +69,11 @@ public class ResourceInfoCellClickable : MonoBehaviour, IPointerClickHandler
         
         if (isShiftClick)
         {
-            // Shift + Click: Move ALL available resources
             int maxStack = _inventorySystem.GetMaxStackAmount(_resourceType);
             _inventorySystem.TryAddResourceToInventory(_resourceType, maxStack, moveAll: true);
         }
         else
         {
-            // Single Click: Move maxStackAmount (or remaining if less)
             int maxStack = _inventorySystem.GetMaxStackAmount(_resourceType);
             _inventorySystem.TryAddResourceToInventory(_resourceType, maxStack, moveAll: false);
         }

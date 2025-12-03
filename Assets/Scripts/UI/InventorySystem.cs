@@ -208,6 +208,11 @@ public class InventorySystem : MonoBehaviour
             }
         }
     }
+
+    public GameObject GetInventoryPanel()
+    {
+        return inventoryPanel;
+    }
     
     private void RefreshAllResourceCells()
     {

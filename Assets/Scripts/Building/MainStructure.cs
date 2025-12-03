@@ -89,6 +89,12 @@ public class MainStructure : Damageable, IStorage, IClickable
 
     public void OnClicked()
     {
+        // Notify UIManager that main structure UI is being opened
+        if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
+        {
+            GameManager.Instance.uiManager.ShowMainStructureUI();
+        }
+
         // Get component if not already cached (in case it's added at runtime)
         if (_inventorySystem == null)
         {
