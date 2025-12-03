@@ -92,31 +92,28 @@ public class UnitMovement : MonoBehaviour
         // 0. If we're aligning to center, handle that first
         if (_isAligningToCenter)
         {
-            float distanceToCenter = Vector3.Distance(transform.position, _targetCellCenter);
+            Vector3 toCenter = _targetCellCenter - transform.position;
+            float distanceToCenter = toCenter.magnitude;
+            
             if (distanceToCenter < 0.01f)
             {
-                // Reached center, stop aligning
                 transform.position = new Vector3(_targetCellCenter.x, _targetCellCenter.y, transform.position.z);
                 _rb.linearVelocity = Vector2.zero;
                 _isAligningToCenter = false;
-                _isAtFinalTarget = false; // Reset flag after alignment completes
+                _isAtFinalTarget = false;
                 return;
             }
-            else
-            {
-                // Smoothly move towards center
-                Vector3 alignDirection = (_targetCellCenter - transform.position).normalized;
-                _rb.linearVelocity = alignDirection * alignmentSpeed;
-                _spriteController?.UpdateSpriteDirection(alignDirection);
-                return;
-            }
+            
+            Vector3 alignDirection = toCenter.normalized;
+            float speed = alignmentSpeed * Mathf.Min(1f, distanceToCenter);
+            _rb.linearVelocity = alignDirection * speed;
+            _spriteController?.UpdateSpriteDirection(alignDirection);
+            return;
         }
         
         // 1. 이동할 웨이포인트가 없으면(경로가 없거나 완료) 즉시 정지하고 종료
         if (_currentWaypoint == default) 
         {
-            // StopMovement()를 호출하면 속도가 0이 되므로, 
-            // 이미 0이면 불필요한 호출을 방지합니다.
             if (_rb.linearVelocity.sqrMagnitude > 0.01f)
             {
                 StopMovement();
@@ -447,10 +444,10 @@ public class UnitMovement : MonoBehaviour
             return false;
         }
         
-        // Check if cell is a resource tile, building tile, or temporary construction tile
+        // Check if cell is a resource tile or building tile
+        // Note: Temporary tiles are intentionally passable
         if (BuildingManager.Instance.IsResourceTile(cell) || 
-            BuildingManager.Instance.IsBuildingTile(cell) ||
-            BuildingManager.Instance.IsTemporaryTile(cell))
+            BuildingManager.Instance.IsBuildingTile(cell))
         {
             return false;
         }

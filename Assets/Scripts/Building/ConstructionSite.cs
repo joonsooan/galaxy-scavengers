@@ -353,6 +353,23 @@ public class ConstructionSite : MonoBehaviour
             }
         }
         
+        if (interactionCells.Count == 0)
+        {
+            foreach (Vector3Int offset in cardinalOffsets)
+            {
+                Vector3Int neighbor = pieceCell + offset;
+                if (occupiedCells.Contains(neighbor) && BuildingManager.Instance != null && BuildingManager.Instance.IsTemporaryTile(neighbor))
+                {
+                    interactionCells.Add(neighbor);
+                }
+            }
+            
+            // if (interactionCells.Count == 0 && BuildingManager.Instance != null && BuildingManager.Instance.IsTemporaryTile(pieceCell))
+            // {
+            //     interactionCells.Add(pieceCell);
+            // }
+        }
+        
         return interactionCells.ToList();
     }
     

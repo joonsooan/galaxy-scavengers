@@ -164,6 +164,11 @@ public class MainStructure : Damageable, IStorage, IClickable
         _currentResources[type] -= amountWithdrawn;
 
         OnResourceChanged?.Invoke(type, _currentResources[type], maxStorageAmount);
+        
+        if (ResourceManager.Instance != null)
+        {
+            ResourceManager.Instance.RemoveResource(type, amountWithdrawn);
+        }
 
         return true;
     }
