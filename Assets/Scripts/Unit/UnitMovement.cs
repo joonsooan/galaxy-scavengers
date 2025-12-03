@@ -229,15 +229,17 @@ public class UnitMovement : MonoBehaviour
     
     public bool SetNewTargetDirect(Vector2 targetPosition, float stoppingDistance, bool disableAlignment)
     {
-        // Set target directly without finding interaction cells (used for assigned interaction positions)
-        // Explicitly zero velocity before starting new movement to prevent drift
+        if (_rb == null || _grid == null) {
+            return false;
+        }
+
         _rb.linearVelocity = Vector2.zero;
-        _isForceStopped = false; // Resume movement when setting new target
+        _isForceStopped = false;
         _finalTargetPosition = targetPosition;
         _finalStoppingDistance = stoppingDistance;
         _isAtFinalTarget = false;
-        _isAligningToCenter = false; // Reset alignment when setting new target
-        _disableAlignment = disableAlignment; // Store flag to prevent alignment
+        _isAligningToCenter = false;
+        _disableAlignment = disableAlignment;
         
         _path = FindPath(transform.position, _finalTargetPosition);
         
@@ -250,9 +252,12 @@ public class UnitMovement : MonoBehaviour
 
     public bool SetNewTarget(Vector2 targetPosition, float stoppingDistance)
     {
-        // Explicitly zero velocity before starting new movement to prevent drift
+        if (_rb == null || _grid == null) {
+            return false;
+        }
+
         _rb.linearVelocity = Vector2.zero;
-        _isForceStopped = false; // Resume movement when setting new target
+        _isForceStopped = false;
         Vector3Int targetCellPos = _grid.WorldToCell(targetPosition);
         Vector3Int targetCellForPathfinding = targetCellPos;
 

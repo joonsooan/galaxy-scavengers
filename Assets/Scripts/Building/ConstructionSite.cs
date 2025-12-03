@@ -20,6 +20,7 @@ public class ConstructionSite : MonoBehaviour
     // Per-piece construction tracking
     private readonly Dictionary<Vector3Int, bool> _constructedPieces = new Dictionary<Vector3Int, bool>();
     private readonly Dictionary<Vector3Int, Unit_Construct> _pieceAssignedDrone = new Dictionary<Vector3Int, Unit_Construct>(); // Track which drone is working on which piece
+    private readonly Dictionary<Vector3Int, Unit_Construct> _pieceCommittedDrone = new Dictionary<Vector3Int, Unit_Construct>(); // Track which drone has committed to constructing a piece after delivering resources
     private readonly Dictionary<Unit_Construct, Vector3Int> _droneInteractionCells = new Dictionary<Unit_Construct, Vector3Int>();
     
     public bool IsComplete { get; private set; }
@@ -83,30 +84,7 @@ public class ConstructionSite : MonoBehaviour
         {
             Vector3Int pieceCell = cellPosition + piece.relativePosition;
             
-            // Check if piece is already constructed
-            if (_constructedPieces.ContainsKey(pieceCell) && _constructedPieces[pieceCell])
-            {
-                continue;
-            }
-            
-            // Check if another drone is already working on this piece
-            if (_pieceAssignedDrone.ContainsKey(pieceCell))
-            {
-                Unit_Construct assignedDrone = _pieceAssignedDrone[pieceCell];
-                // If the assigned drone is null or destroyed, clear the assignment
-                if (assignedDrone == null)
-                {
-                    _pieceAssignedDrone.Remove(pieceCell);
-                }
-                else
-                {
-                    // Another drone is working on this piece, skip it
-                    continue;
-                }
-            }
-            
-            // Check if this piece has all its required resources
-            if (HasPieceAllResources(pieceCell))
+            if (CanAssignPieceToDrone(pieceCell, null) && HasPieceAllResources(pieceCell))
             {
                 return pieceCell;
             }
@@ -123,40 +101,45 @@ public class ConstructionSite : MonoBehaviour
         {
             Vector3Int pieceCell = cellPosition + piece.relativePosition;
             
-            // Check if piece is already constructed
-            if (_constructedPieces.ContainsKey(pieceCell) && _constructedPieces[pieceCell])
+            if (!CanAssignPieceToDrone(pieceCell, drone))
             {
                 continue;
             }
             
-            // Check if another drone is already working on this piece
-            if (_pieceAssignedDrone.ContainsKey(pieceCell))
+            if (HasPieceAllResources(pieceCell) && AssignDroneToPiece(pieceCell, drone))
             {
-                Unit_Construct assignedDrone = _pieceAssignedDrone[pieceCell];
-                // If the assigned drone is null or destroyed, clear the assignment
-                if (assignedDrone == null)
-                {
-                    _pieceAssignedDrone.Remove(pieceCell);
-                }
-                else
-                {
-                    // Another drone is working on this piece, skip it
-                    continue;
-                }
-            }
-            
-            // Check if this piece has all its required resources
-            if (HasPieceAllResources(pieceCell))
-            {
-                // Atomically assign the drone to this piece
-                if (AssignDroneToPiece(pieceCell, drone))
-                {
-                    return pieceCell;
-                }
-                // If assignment failed (race condition), continue to next piece
+                return pieceCell;
             }
         }
         return null;
+    }
+    
+    private bool CanAssignPieceToDrone(Vector3Int pieceCell, Unit_Construct drone)
+    {
+        if (IsPieceConstructed(pieceCell))
+        {
+            return false;
+        }
+        
+        if (_pieceAssignedDrone.ContainsKey(pieceCell))
+        {
+            Unit_Construct assignedDrone = _pieceAssignedDrone[pieceCell];
+            if (assignedDrone == null)
+            {
+                _pieceAssignedDrone.Remove(pieceCell);
+            }
+            else if (drone == null || assignedDrone != drone)
+            {
+                return false;
+            }
+        }
+        
+        if (IsPieceCommitted(pieceCell) && (drone == null || !IsPieceCommittedTo(pieceCell, drone)))
+        {
+            return false;
+        }
+        
+        return true;
     }
     
     // Assign a drone to work on a specific piece
@@ -186,6 +169,33 @@ public class ConstructionSite : MonoBehaviour
         }
     }
     
+    // Commit a drone to constructing a piece (after delivering resources)
+    public void CommitDroneToPiece(Vector3Int pieceCell, Unit_Construct drone)
+    {
+        _pieceCommittedDrone[pieceCell] = drone;
+    }
+    
+    // Check if a piece is committed to a specific drone
+    public bool IsPieceCommittedTo(Vector3Int pieceCell, Unit_Construct drone)
+    {
+        return _pieceCommittedDrone.ContainsKey(pieceCell) && _pieceCommittedDrone[pieceCell] == drone;
+    }
+    
+    // Check if a piece is committed to any drone
+    public bool IsPieceCommitted(Vector3Int pieceCell)
+    {
+        return _pieceCommittedDrone.ContainsKey(pieceCell) && _pieceCommittedDrone[pieceCell] != null;
+    }
+    
+    // Release a drone's commitment to a piece (after construction is complete)
+    public void ReleaseCommitmentFromPiece(Vector3Int pieceCell, Unit_Construct drone)
+    {
+        if (_pieceCommittedDrone.ContainsKey(pieceCell) && _pieceCommittedDrone[pieceCell] == drone)
+        {
+            _pieceCommittedDrone.Remove(pieceCell);
+        }
+    }
+    
     // Check if a specific piece has all its required resources
     public bool HasPieceAllResources(Vector3Int pieceCell)
     {
@@ -211,12 +221,31 @@ public class ConstructionSite : MonoBehaviour
         return true;
     }
     
+    // Check if a piece is already constructed
+    public bool IsPieceConstructed(Vector3Int pieceCell)
+    {
+        return _constructedPieces.ContainsKey(pieceCell) && _constructedPieces[pieceCell];
+    }
+    
+    // Check if a piece is assigned to a specific drone
+    public bool IsPieceAssignedToMe(Vector3Int pieceCell, Unit_Construct drone)
+    {
+        if (!_pieceAssignedDrone.ContainsKey(pieceCell))
+        {
+            return false;
+        }
+        return _pieceAssignedDrone[pieceCell] == drone;
+    }
+    
     // Mark a piece as constructed
     public void MarkPieceConstructed(Vector3Int pieceCell, Unit_Construct drone)
     {
         if (_constructedPieces.ContainsKey(pieceCell))
         {
             _constructedPieces[pieceCell] = true;
+            
+            // Cancel any pending requests for this piece since it's now being constructed
+            _pendingRequests.RemoveAll(r => r.targetPieceCell == pieceCell);
             
             // Release the drone assignment
             ReleaseDroneFromPiece(pieceCell, drone);
@@ -243,87 +272,81 @@ public class ConstructionSite : MonoBehaviour
     // Assign interaction cell for a drone at a specific piece position
     public Vector3 AssignInteractionCell(Unit_Construct drone, Vector3Int pieceCell)
     {
+        return AssignInteractionCellInternal(drone, pieceCell);
+    }
+    
+    // Assign delivery interaction cell (for resource delivery)
+    public Vector3 AssignDeliveryInteractionCell(Unit_Construct drone, Vector3Int pieceCell)
+    {
+        return AssignInteractionCellInternal(drone, pieceCell);
+    }
+    
+    private Vector3 AssignInteractionCellInternal(Unit_Construct drone, Vector3Int pieceCell)
+    {
         if (drone == null || BuildingManager.Instance == null || BuildingManager.Instance.grid == null)
         {
             return BuildingManager.Instance.grid.GetCellCenterWorld(pieceCell);
         }
         
-        // Get available interaction cells around this piece
         List<Vector3Int> availableCells = GetAvailableInteractionCells(pieceCell);
         
         if (availableCells.Count == 0)
         {
-            // No available cells, use the piece cell itself
             return BuildingManager.Instance.grid.GetCellCenterWorld(pieceCell);
         }
         
-        // Check if drone already has an assigned cell for this piece
-        if (_droneInteractionCells.TryGetValue(drone, out Vector3Int existingCell))
+        if (_droneInteractionCells.TryGetValue(drone, out Vector3Int existingCell) && availableCells.Contains(existingCell))
         {
-            if (availableCells.Contains(existingCell))
-            {
-                return BuildingManager.Instance.grid.GetCellCenterWorld(existingCell);
-            }
+            return BuildingManager.Instance.grid.GetCellCenterWorld(existingCell);
         }
         
-        // Find best available cell (unassigned, then closest to drone)
-        Vector3Int bestCell = availableCells[0];
-        float minDistance = float.MaxValue;
-        Vector3 dronePos = drone.transform.position;
-        
-        HashSet<Vector3Int> assignedCells = new HashSet<Vector3Int>(_droneInteractionCells.Values);
-        
-        foreach (Vector3Int cell in availableCells)
-        {
-            bool isUnassigned = !assignedCells.Contains(cell);
-            float distance = Vector3.Distance(dronePos, BuildingManager.Instance.grid.GetCellCenterWorld(cell));
-            
-            if (isUnassigned && assignedCells.Contains(bestCell))
-            {
-                bestCell = cell;
-                minDistance = distance;
-            }
-            else if (isUnassigned == !assignedCells.Contains(bestCell))
-            {
-                if (distance < minDistance)
-                {
-                    bestCell = cell;
-                    minDistance = distance;
-                }
-            }
-        }
-        
-        // Assign the cell to this drone
+        Vector3Int bestCell = FindBestInteractionCell(drone, availableCells);
         _droneInteractionCells[drone] = bestCell;
         
         return BuildingManager.Instance.grid.GetCellCenterWorld(bestCell);
     }
     
+    private Vector3Int FindBestInteractionCell(Unit_Construct drone, List<Vector3Int> availableCells)
+    {
+        Vector3Int bestCell = availableCells[0];
+        float minDistance = float.MaxValue;
+        Vector3 dronePos = drone.transform.position;
+        HashSet<Vector3Int> assignedCells = new HashSet<Vector3Int>(_droneInteractionCells.Values);
+        
+        foreach (Vector3Int cell in availableCells)
+        {
+            bool isUnassigned = !assignedCells.Contains(cell);
+            bool bestIsAssigned = assignedCells.Contains(bestCell);
+            float distance = Vector3.Distance(dronePos, BuildingManager.Instance.grid.GetCellCenterWorld(cell));
+            
+            if (isUnassigned && bestIsAssigned)
+            {
+                bestCell = cell;
+                minDistance = distance;
+            }
+            else if (isUnassigned == !bestIsAssigned && distance < minDistance)
+            {
+                bestCell = cell;
+                minDistance = distance;
+            }
+        }
+        
+        return bestCell;
+    }
+    
     private List<Vector3Int> GetAvailableInteractionCells(Vector3Int pieceCell)
     {
         HashSet<Vector3Int> interactionCells = new HashSet<Vector3Int>();
-        HashSet<Vector3Int> occupiedCells = new HashSet<Vector3Int>();
-        
-        // Get all occupied cells in the recipe
-        if (comboCardData != null && comboCardData.recipe != null)
-        {
-            foreach (var piece in comboCardData.recipe)
-            {
-                Vector3Int cell = cellPosition + piece.relativePosition;
-                occupiedCells.Add(cell);
-            }
-        }
+        HashSet<Vector3Int> occupiedCells = GetOccupiedCells();
         
         Vector3Int[] cardinalOffsets = {
             new Vector3Int(1, 0, 0), new Vector3Int(-1, 0, 0),
             new Vector3Int(0, 1, 0), new Vector3Int(0, -1, 0)
         };
         
-        // Find walkable cells adjacent to this piece
         foreach (Vector3Int offset in cardinalOffsets)
         {
             Vector3Int neighbor = pieceCell + offset;
-            
             if (!occupiedCells.Contains(neighbor) && IsCellWalkable(neighbor))
             {
                 interactionCells.Add(neighbor);
@@ -333,80 +356,30 @@ public class ConstructionSite : MonoBehaviour
         return interactionCells.ToList();
     }
     
+    private HashSet<Vector3Int> GetOccupiedCells()
+    {
+        HashSet<Vector3Int> occupiedCells = new HashSet<Vector3Int>();
+        
+        if (comboCardData != null && comboCardData.recipe != null)
+        {
+            foreach (var piece in comboCardData.recipe)
+            {
+                occupiedCells.Add(cellPosition + piece.relativePosition);
+            }
+        }
+        
+        return occupiedCells;
+    }
+    
     private bool IsCellWalkable(Vector3Int cell)
     {
         if (BuildingManager.Instance == null) return false;
-        
-        return BuildingManager.Instance.CanPlaceBuilding(cell) || 
-               BuildingManager.Instance.IsTemporaryTile(cell);
+        return BuildingManager.Instance.CanPlaceBuilding(cell) || BuildingManager.Instance.IsTemporaryTile(cell);
     }
     
     public void ReleaseDrone(Unit_Construct drone)
     {
-        if (_droneInteractionCells.ContainsKey(drone))
-        {
-            _droneInteractionCells.Remove(drone);
-        }
-    }
-    
-    // Assign delivery interaction cell (for resource delivery)
-    // Uses the specific piece cell that needs the resource
-    public Vector3 AssignDeliveryInteractionCell(Unit_Construct drone, Vector3Int pieceCell)
-    {
-        if (drone == null || BuildingManager.Instance == null || BuildingManager.Instance.grid == null)
-        {
-            return BuildingManager.Instance.grid.GetCellCenterWorld(pieceCell);
-        }
-        
-        // Get available interaction cells around the piece cell that needs resources
-        List<Vector3Int> availableCells = GetAvailableInteractionCells(pieceCell);
-        
-        if (availableCells.Count == 0)
-        {
-            // No available cells, use the piece cell itself
-            return BuildingManager.Instance.grid.GetCellCenterWorld(pieceCell);
-        }
-        
-        // Check if drone already has an assigned cell
-        if (_droneInteractionCells.TryGetValue(drone, out Vector3Int existingCell))
-        {
-            if (availableCells.Contains(existingCell))
-            {
-                return BuildingManager.Instance.grid.GetCellCenterWorld(existingCell);
-            }
-        }
-        
-        // Find best available cell (unassigned, then closest to drone)
-        Vector3Int bestCell = availableCells[0];
-        float minDistance = float.MaxValue;
-        Vector3 dronePos = drone.transform.position;
-        
-        HashSet<Vector3Int> assignedCells = new HashSet<Vector3Int>(_droneInteractionCells.Values);
-        
-        foreach (Vector3Int cell in availableCells)
-        {
-            bool isUnassigned = !assignedCells.Contains(cell);
-            float distance = Vector3.Distance(dronePos, BuildingManager.Instance.grid.GetCellCenterWorld(cell));
-            
-            if (isUnassigned && assignedCells.Contains(bestCell))
-            {
-                bestCell = cell;
-                minDistance = distance;
-            }
-            else if (isUnassigned == !assignedCells.Contains(bestCell))
-            {
-                if (distance < minDistance)
-                {
-                    bestCell = cell;
-                    minDistance = distance;
-                }
-            }
-        }
-        
-        // Assign the cell to this drone
-        _droneInteractionCells[drone] = bestCell;
-        
-        return BuildingManager.Instance.grid.GetCellCenterWorld(bestCell);
+        _droneInteractionCells.Remove(drone);
     }
     
     private void Awake()
@@ -559,18 +532,7 @@ public class ConstructionSite : MonoBehaviour
                 int delivered = pieceDelivered.ContainsKey(required.Key) ? pieceDelivered[required.Key] : 0;
                 int stillNeeded = required.Value - delivered;
                 
-                // Check if there's already a pending request for this resource for this piece
-                int onTheWay = 0;
-                foreach (var request in _pendingRequests)
-                {
-                    if (request.type == required.Key && 
-                        request.targetPieceCell == pieceCell)
-                    {
-                        // Count all pending requests for this resource/piece combination (assigned or not)
-                        onTheWay += request.amount;
-                    }
-                }
-                
+                int onTheWay = GetOnTheWayAmount(required.Key, pieceCell);
                 int totalNeeded = stillNeeded - onTheWay;
                 if (totalNeeded > 0)
                 {
@@ -602,6 +564,9 @@ public class ConstructionSite : MonoBehaviour
             return null;
         }
         
+        // Clean up stale requests before creating new ones
+        CleanupStaleRequests();
+        
         // Find a piece that needs resources, and return a request for one of its needed resources
         // Prioritize pieces that are missing resources
         foreach (var pieceCell in _pieceRequiredResources.Keys)
@@ -623,18 +588,7 @@ public class ConstructionSite : MonoBehaviour
                 int delivered = pieceDelivered.ContainsKey(required.Key) ? pieceDelivered[required.Key] : 0;
                 int stillNeeded = required.Value - delivered;
                 
-                // Check if there's already a pending request for this resource for this piece
-                int onTheWay = 0;
-                foreach (var request in _pendingRequests)
-                {
-                    if (request.type == required.Key && 
-                        request.targetPieceCell == pieceCell)
-                    {
-                        // Count all pending requests for this resource/piece combination (assigned or not)
-                        onTheWay += request.amount;
-                    }
-                }
-                
+                int onTheWay = GetOnTheWayAmount(required.Key, pieceCell);
                 int totalNeeded = stillNeeded - onTheWay;
                 if (totalNeeded > 0)
                 {
@@ -727,6 +681,31 @@ public class ConstructionSite : MonoBehaviour
         {
             _pendingRequests.Remove(request);
         }
+    }
+    
+    // Clean up stale requests assigned to units that are idle
+    public void CleanupStaleRequests()
+    {
+        _pendingRequests.RemoveAll(r => {
+            if (r.assignedDrone == null) return true;
+            return r.assignedDrone.IsIdle();
+        });
+    }
+    
+    private int GetOnTheWayAmount(ResourceType resourceType, Vector3Int pieceCell)
+    {
+        int onTheWay = 0;
+        foreach (var request in _pendingRequests)
+        {
+            if (request.type == resourceType && request.targetPieceCell == pieceCell)
+            {
+                if (request.assignedDrone == null || !request.assignedDrone.IsIdle())
+                {
+                    onTheWay += request.amount;
+                }
+            }
+        }
+        return onTheWay;
     }
     
     public class ConstructionRequest

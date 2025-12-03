@@ -28,6 +28,34 @@ public class QuestInfoPanel : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        // Close panel on right-click if it's active
+        if (Input.GetMouseButtonDown(1))
+        {
+            if (infoPanel != null && infoPanel.activeSelf)
+            {
+                // Don't close if dragging a building
+                if (GameManager.Instance != null && GameManager.Instance.IsDragging())
+                {
+                    return;
+                }
+
+                // Close the panel on right-click (whether clicking on UI or not)
+                ClosePanel();
+            }
+        }
+    }
+
+    private void ClosePanel()
+    {
+        if (infoPanel != null)
+        {
+            infoPanel.SetActive(false);
+        }
+        _currentQuestId = -1;
+    }
+
     public void DisplayQuestInfo(QuestData questData, int questId)
     {
         if (questData == null) return;

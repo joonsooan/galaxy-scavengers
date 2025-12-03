@@ -24,8 +24,6 @@ public class ConstructionManager : MonoBehaviour
     
     private void Start()
     {
-        // Ensure all existing construct drones are registered
-        // This handles cases where drones were created before ConstructionManager
         Unit_Construct[] existingDrones = FindObjectsByType<Unit_Construct>(FindObjectsSortMode.None);
         foreach (var drone in existingDrones)
         {
@@ -35,7 +33,6 @@ public class ConstructionManager : MonoBehaviour
             }
         }
         
-        // Try to assign drones to any existing construction sites
         if (_constructionSites.Count > 0)
         {
             AssignDronesToSites();
@@ -55,7 +52,6 @@ public class ConstructionManager : MonoBehaviour
             _constructionSites.Add(site);
             Debug.Log($"[ConstructionManager] Registered construction site at {site.cellPosition}. Total sites: {_constructionSites.Count}, Available drones: {_constructDrones.Count}");
             
-            // Try to assign available construct drones
             AssignDronesToSites();
         }
         else
@@ -82,7 +78,6 @@ public class ConstructionManager : MonoBehaviour
             _constructDrones.Add(drone);
             Debug.Log($"[ConstructionManager] Registered construct drone: {drone.name}. Total drones: {_constructDrones.Count}, Active sites: {_constructionSites.Count}");
             
-            // Try to assign this drone to a site
             AssignDroneToSite(drone);
         }
         else
@@ -104,69 +99,94 @@ public class ConstructionManager : MonoBehaviour
             return;
         }
         
-        // if (_constructionSites.Count == 0)
-        // {
-        //     Debug.Log($"[ConstructionManager] No construction sites available for drone '{drone.name}'");
-        //     return;
-        // }
+        if (TryAssignConstructionTask(drone, prioritySite))
+        {
+            return;
+        }
         
-        // If priority site is provided, check for pieces ready to construct
-        if (prioritySite != null && prioritySite.comboCardData != null && !prioritySite.AreAllPiecesConstructed())
+        if (TryAssignResourceFetchTask(drone, prioritySite))
+        {
+            return;
+        }
+    }
+    
+    private bool TryAssignConstructionTask(Unit_Construct drone, ConstructionSite prioritySite)
+    {
+        if (prioritySite != null && IsSiteValidForConstruction(prioritySite))
         {
             Vector3Int? nextPiece = prioritySite.GetAndAssignNextPieceToConstruct(drone);
             if (nextPiece.HasValue)
             {
                 drone.SetTask_ConstructPiece(prioritySite, nextPiece.Value);
                 Debug.Log($"[ConstructionManager] Assigned drone '{drone.name}' to construct piece at {nextPiece.Value} for '{prioritySite.comboCardData.displayName}' (priority)");
-                return;
+                return true;
             }
         }
         
-        // Find pieces that have all their resources and are ready to construct
-        // Prioritize sites that have pieces ready for construction
         foreach (var site in _constructionSites)
         {
-            if (site == null) continue;
-            if (site.comboCardData == null || site.AreAllPiecesConstructed()) continue;
+            if (!IsSiteValidForConstruction(site)) continue;
             
             Vector3Int? nextPiece = site.GetAndAssignNextPieceToConstruct(drone);
             if (nextPiece.HasValue)
             {
                 drone.SetTask_ConstructPiece(site, nextPiece.Value);
                 Debug.Log($"[ConstructionManager] Assigned drone '{drone.name}' to construct piece at {nextPiece.Value} for '{site.comboCardData.displayName}'");
-                return;
+                return true;
             }
         }
         
-        // Check if priority site still needs resources
+        return false;
+    }
+    
+    private bool TryAssignResourceFetchTask(Unit_Construct drone, ConstructionSite prioritySite)
+    {
         if (prioritySite != null && !prioritySite.IsComplete)
         {
-            ConstructionSite.ConstructionRequest request = prioritySite.GetAndAssignNextResourceRequest(drone, drone.carryCapacity);
-            if (request != null)
+            if (TryAssignResourceRequest(drone, prioritySite, true))
             {
-                drone.SetTask_FetchResource(request, prioritySite);
-                Debug.Log($"[ConstructionManager] Assigned drone '{drone.name}' to fetch {request.amount} {request.type} for site at {prioritySite.cellPosition} (priority)");
-                return;
+                return true;
             }
         }
         
-        // Then find sites that need resources
         foreach (var site in _constructionSites)
         {
-            if (site == null) continue;
-            if (site.IsComplete) continue;
+            if (site == null || site.IsComplete) continue;
             
-            ConstructionSite.ConstructionRequest request = site.GetAndAssignNextResourceRequest(drone, drone.carryCapacity);
-            if (request != null)
+            if (TryAssignResourceRequest(drone, site, false))
             {
-                drone.SetTask_FetchResource(request, site);
-                Debug.Log($"[ConstructionManager] Assigned drone '{drone.name}' to fetch {request.amount} {request.type} for site at {site.cellPosition}");
-                return;
+                return true;
             }
         }
         
-        // No work available
-        // Debug.Log($"[ConstructionManager] No tasks available for drone '{drone.name}'. Sites: {_constructionSites.Count}, Drones: {_constructDrones.Count}");
+        return false;
+    }
+    
+    private bool TryAssignResourceRequest(Unit_Construct drone, ConstructionSite site, bool isPriority)
+    {
+        ConstructionSite.ConstructionRequest request = site.GetAndAssignNextResourceRequest(drone, drone.carryCapacity);
+        if (request == null) return false;
+        
+        if (ResourceManager.Instance != null)
+        {
+            IStorage storage = ResourceManager.Instance.FindClosestStorageWithResource(site.GetPosition(), request.type, 1);
+            if (storage == null)
+            {
+                site.CancelRequest(request);
+                drone.SetTaskRequestCooldown(1.0f);
+                return false;
+            }
+        }
+        
+        drone.SetTask_FetchResource(request, site);
+        string priority = isPriority ? " (priority)" : "";
+        Debug.Log($"[ConstructionManager] Assigned drone '{drone.name}' to fetch {request.amount} {request.type} for site at {site.cellPosition}{priority}");
+        return true;
+    }
+    
+    private bool IsSiteValidForConstruction(ConstructionSite site)
+    {
+        return site != null && site.comboCardData != null && !site.AreAllPiecesConstructed();
     }
     
     private void AssignDronesToSites()
@@ -189,17 +209,13 @@ public class ConstructionManager : MonoBehaviour
     
     public void OnSiteResourceDelivered(ConstructionSite site, Unit_Construct deliveringDrone = null)
     {
-        // When resources are delivered, check if any pieces now have all their resources
-        // If so, prioritize construction tasks for those pieces
         if (site.comboCardData != null && !site.AreAllPiecesConstructed())
         {
-            // If the delivering drone just finished, try to assign it to construct immediately
             if (deliveringDrone != null && deliveringDrone.IsIdle())
             {
                 RequestTask(deliveringDrone, site);
             }
             
-            // Also check other idle drones for pieces ready to construct
             foreach (var drone in _constructDrones)
             {
                 if (drone != deliveringDrone && drone.IsIdle())
@@ -212,20 +228,16 @@ public class ConstructionManager : MonoBehaviour
     
     public void OnPieceConstructed(ConstructionSite site)
     {
-        // When a piece is constructed, check if site is complete or assign next piece
         if (site.AreAllPiecesConstructed())
         {
-            // All pieces done, spawn combo prefab (no tiles)
             if (site.comboCardData != null && BuildingManager.Instance != null)
             {
                 BuildingManager.Instance.CreateComboBuildingFromConstruction(site.cellPosition, site.comboCardData);
                 Debug.Log($"[ConstructionManager] All pieces constructed for '{site.comboCardData.displayName}', spawning combo prefab");
-                // Site will be destroyed after combo building is created
             }
         }
         else
         {
-            // More pieces to construct, assign drones to next pieces
             AssignDronesToSites();
         }
     }

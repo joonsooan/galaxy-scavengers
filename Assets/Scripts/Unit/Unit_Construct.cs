@@ -1,79 +1,71 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Unit_Construct : UnitBase
 {
+    private const float RepathInterval = 0.5f;
+    private const float TaskRequestCooldown = 1.0f;
     [Header("Construct Drone Settings")]
     [SerializeField] public int carryCapacity = 10;
-    [SerializeField] private float constructionSpeed = 1f;
     [SerializeField] private float loadingTime = 1f;
     [SerializeField] private float unloadingTime = 1f;
     [SerializeField] private float constructionTime = 2f;
-    [SerializeField] private UnitMovement movement;
+    [SerializeField] public UnitMovement movement;
     [SerializeField] private Sprite constructIcon;
-    
+
     private int _carriedAmount;
     private ResourceType _carriedResourceType;
-    private ConstructionSite.ConstructionRequest _currentRequest;
-    private ConstructState _currentState = ConstructState.Idle;
-    
-    private IStorage _targetStorage;
+    private Coroutine _constructionCoroutine;
+
     private ConstructionSite _currentConstructionSite;
     private Vector3Int _currentPieceCell;
-    private float _constructionProgress = 0f;
-    
-    private float _nextRepathTime;
-    private const float RepathInterval = 0.5f;
-    
+    private ConstructionSite.ConstructionRequest _currentRequest;
+    private ConstructState _currentState = ConstructState.Idle;
+
     private Coroutine _loadingCoroutine;
-    private Coroutine _unloadingCoroutine;
-    private Coroutine _constructionCoroutine;
-    
+
+    private float _nextRepathTime;
+    private float _nextTaskRequestTime;
+
     private Rigidbody2D _rb;
-    
+
+    private IStorage _targetStorage;
+    private Coroutine _unloadingCoroutine;
+
     protected override void Awake()
     {
         base.Awake();
         movement = GetComponent<UnitMovement>();
         _rb = GetComponent<Rigidbody2D>();
     }
-    
+
     private void Update()
     {
         DecideNextAction();
     }
-    
+
     protected override void OnEnable()
     {
         base.OnEnable();
         UnitManager.Instance?.AddUnit(this);
-        
-        // Ensure ConstructionManager exists before registering
-        if (ConstructionManager.Instance == null)
-        {
-            // Try to find it in the scene
+    }
+
+    private void Start()
+    {
+        if (ConstructionManager.Instance == null) {
             ConstructionManager existingManager = FindFirstObjectByType<ConstructionManager>();
-            if (existingManager == null)
-            {
-                // Auto-create ConstructionManager if it doesn't exist
+            if (existingManager == null) {
                 GameObject managerObj = new GameObject("ConstructionManager");
                 managerObj.AddComponent<ConstructionManager>();
                 Debug.LogWarning($"[Unit_Construct] Auto-created ConstructionManager GameObject for {name}");
             }
         }
-        
-        // Register this drone with ConstructionManager
-        if (ConstructionManager.Instance != null)
-        {
+
+        if (ConstructionManager.Instance != null && movement != null) {
             ConstructionManager.Instance.RegisterConstructDrone(this);
         }
-        // else
-        // {
-        //     Debug.LogError($"[Unit_Construct] Failed to register {name}: ConstructionManager.Instance is null");
-        // }
     }
-    
+
     protected override void OnDisable()
     {
         base.OnDisable();
@@ -81,79 +73,114 @@ public class Unit_Construct : UnitBase
         ConstructionManager.Instance?.UnregisterConstructDrone(this);
         ReleaseFromConstruction();
     }
-    
+
     private void DecideNextAction()
     {
         switch (_currentState) {
         case ConstructState.Idle:
             UpdateIdle();
             break;
-            
+
         case ConstructState.FetchingResource:
             UpdateFetching();
             break;
-            
+
         case ConstructState.DeliveringResource:
             UpdateDelivering();
             break;
-            
+
         case ConstructState.Constructing:
             UpdateConstructing();
             break;
         }
     }
-    
+
     public bool IsIdle()
     {
         return _currentState == ConstructState.Idle;
     }
-    
+
     private void UpdateIdle()
     {
-        // Request task from ConstructionManager
-        if (ConstructionManager.Instance != null)
+        if (TryRetryCommittedPiece())
         {
+            return;
+        }
+        
+        if (Time.time < _nextTaskRequestTime) {
+            return;
+        }
+        
+        if (ConstructionManager.Instance != null) {
             ConstructionManager.Instance.RequestTask(this);
         }
     }
     
+    private bool TryRetryCommittedPiece()
+    {
+        if (_currentConstructionSite == null || _currentPieceCell == default)
+        {
+            return false;
+        }
+        
+        if (!_currentConstructionSite.IsPieceCommittedTo(_currentPieceCell, this))
+        {
+            return false;
+        }
+        
+        if (!_currentConstructionSite.HasPieceAllResources(_currentPieceCell) || _currentConstructionSite.IsPieceConstructed(_currentPieceCell))
+        {
+            return false;
+        }
+        
+        if (!_currentConstructionSite.IsPieceAssignedToMe(_currentPieceCell, this))
+        {
+            if (!_currentConstructionSite.AssignDroneToPiece(_currentPieceCell, this))
+            {
+                return true;
+            }
+        }
+        
+        Vector3 interactionPos = _currentConstructionSite.AssignInteractionCell(this, _currentPieceCell);
+        bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance, true);
+        
+        if (hasPath) {
+            _currentState = ConstructState.Constructing;
+            Debug.Log($"[Construct:{name}] Retrying construction of committed piece at {_currentPieceCell}");
+        }
+        
+        return true;
+    }
+
     private void UpdateFetching()
     {
-        if (_targetStorage == null || _currentRequest == null)
-        {
+        if (_targetStorage == null || _currentRequest == null) {
             SetTask_Idle();
             return;
         }
-        
-        if (!movement.IsMoving)
-        {
-            if (_loadingCoroutine == null)
-            {
+
+        if (!movement.IsMoving) {
+            if (_loadingCoroutine == null) {
                 _loadingCoroutine = StartCoroutine(LoadingResourceCoroutine());
             }
         }
     }
-    
+
     private IEnumerator LoadingResourceCoroutine()
     {
         movement.ForceStopAllMovement();
-        
-        if (_targetStorage != null)
-        {
+
+        if (_targetStorage != null) {
             AdjustSpriteDirectionToBuilding((_targetStorage as Component).transform);
         }
-        
+
         yield return new WaitForSeconds(loadingTime);
-        
-        if (_targetStorage != null && _currentRequest != null)
-        {
-            if (_targetStorage.TryWithdrawResource(_currentRequest.type, _currentRequest.amount, out int withdrawnAmount))
-            {
-                if (withdrawnAmount > 0)
-                {
+
+        if (_targetStorage != null && _currentRequest != null) {
+            if (_targetStorage.TryWithdrawResource(_currentRequest.type, _currentRequest.amount, out int withdrawnAmount)) {
+                if (withdrawnAmount > 0) {
                     _carriedResourceType = _currentRequest.type;
                     _carriedAmount = withdrawnAmount;
-                    // Get interaction cell for delivery (around the piece cell that needs this resource)
                     Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
                     Vector3 interactionPos = _currentRequest.site.AssignDeliveryInteractionCell(this, targetPieceCell);
                     movement.ResumeMovement();
@@ -161,355 +188,381 @@ public class Unit_Construct : UnitBase
                     _currentState = ConstructState.DeliveringResource;
                     Debug.Log($"[Construct:{name}] Loaded {withdrawnAmount} {_carriedResourceType} from storage, moving to delivery interaction cell at piece {targetPieceCell}");
                 }
-                else
-                {
+                else {
                     SetTask_Idle();
                 }
             }
-            else
-            {
+            else {
                 SetTask_Idle();
             }
         }
-        else
-        {
+        else {
             SetTask_Idle();
         }
-        
+
         _loadingCoroutine = null;
     }
-    
+
     private void UpdateDelivering()
     {
-        if (_currentRequest == null || _currentRequest.site == null)
-        {
+        if (_currentRequest == null || _currentRequest.site == null) {
             SetTask_Idle();
             return;
         }
-        
-        // If unloading coroutine is running, don't do anything
-        if (_unloadingCoroutine != null)
-        {
+
+        if (_unloadingCoroutine != null) {
             return;
         }
-        
-        // Check if we've reached the delivery interaction position
-        // Use a tighter tolerance and check that we're not aligning
-        bool isAtDelivery = movement.HasReachedTarget(movement.waypointTolerance + 0.1f) && 
-                           !movement.IsMoving &&
-                           _rb.linearVelocity.sqrMagnitude < 0.01f;
-        
-        if (isAtDelivery)
-        {
+
+        bool isAtDelivery = movement.HasReachedTarget(movement.waypointTolerance + 0.1f) &&
+            !movement.IsMoving &&
+            _rb.linearVelocity.sqrMagnitude < 0.01f;
+
+        if (isAtDelivery) {
             _unloadingCoroutine = StartCoroutine(UnloadingResourceCoroutine());
         }
-        else if (!movement.IsMoving && _rb.linearVelocity.sqrMagnitude < 0.01f)
-        {
-            // Repath to delivery interaction cell if we're not moving and not aligning
-            if (Time.time >= _nextRepathTime)
-            {
+        else if (!movement.IsMoving && _rb.linearVelocity.sqrMagnitude < 0.01f) {
+            if (Time.time >= _nextRepathTime) {
                 _nextRepathTime = Time.time + RepathInterval;
                 Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
                 Vector3 interactionPos = _currentRequest.site.AssignDeliveryInteractionCell(this, targetPieceCell);
                 bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
-                if (!hasPath)
-                {
+                if (!hasPath) {
                     SetTask_Idle();
                 }
             }
         }
     }
-    
+
     private IEnumerator UnloadingResourceCoroutine()
     {
-        // Force stop all movement including alignment to prevent jittering
         movement.ForceStopAllMovement();
-        
-        // Adjust sprite direction to the piece cell that needs this resource (only once)
-        if (_currentRequest.site != null && BuildingManager.Instance != null && BuildingManager.Instance.grid != null)
-        {
+
+        if (_currentRequest.site != null && BuildingManager.Instance != null && BuildingManager.Instance.grid != null) {
             Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
             Vector3 piecePos = BuildingManager.Instance.grid.GetCellCenterWorld(targetPieceCell);
             AdjustSpriteDirectionToPosition(piecePos);
         }
-        
-        // Wait for unloading time - unit should remain completely still
+
         yield return new WaitForSeconds(unloadingTime);
-        
-        if (_currentRequest != null && _currentRequest.site != null)
-        {
+
+        if (_currentRequest != null && _currentRequest.site != null) {
             ConstructionSite site = _currentRequest.site;
             bool deposited = site.TryDepositResource(_carriedResourceType, _carriedAmount, this);
             Debug.Log($"[Construct:{name}] Delivering: deposit {_carriedAmount} {_carriedResourceType} -> {(deposited ? "OK" : "FAILED")}");
-            
+
             _carriedAmount = 0;
-            
-            // Release interaction cell assignment for delivery
+
             site.ReleaseDrone(this);
-            
-            // Notify construction manager before clearing request
-            // Pass this drone so it can be immediately assigned to construct if site has all resources
-            if (ConstructionManager.Instance != null && site != null)
-            {
-                ConstructionManager.Instance.OnSiteResourceDelivered(site, this);
-            }
-            
+
+            Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? site.cellPosition;
+
             _currentRequest = null;
+
+            if (site.HasPieceAllResources(targetPieceCell)) {
+                if (TryStartConstructingPiece(site, targetPieceCell)) {
+                    Debug.Log($"[Construct:{name}] After delivering resources, immediately starting construction of piece at {targetPieceCell}");
+                }
+            }
+            else {
+                _currentState = ConstructState.Idle;
+                if (ConstructionManager.Instance != null && site != null) {
+                    ConstructionManager.Instance.OnSiteResourceDelivered(site);
+                }
+            }
+        }
+        else {
             _currentState = ConstructState.Idle;
         }
-        else
-        {
-            _currentState = ConstructState.Idle;
-        }
-        
+
         _unloadingCoroutine = null;
     }
-    
+
     private void UpdateConstructing()
     {
-        if (_currentConstructionSite == null)
-        {
+        if (_currentConstructionSite == null) {
             SetTask_Idle();
             return;
         }
-        
-        // If construction coroutine is running, don't do anything
-        if (_constructionCoroutine != null)
-        {
+
+        if (_constructionCoroutine != null) {
             return;
         }
-        
-        // Check if we've reached the interaction cell and are fully aligned
-        // Use a tighter check to ensure we're not still aligning
-        bool isAtSite = movement.HasReachedTarget(movement.waypointTolerance + 0.1f) && 
-                       !movement.IsMoving &&
-                       _rb.linearVelocity.sqrMagnitude < 0.01f;
-        
-        if (isAtSite)
-        {
+
+        if (_currentPieceCell != default) {
+            if (_currentConstructionSite.IsPieceConstructed(_currentPieceCell)) {
+                Debug.Log($"[Construct:{name}] Piece at {_currentPieceCell} already constructed by another unit, releasing commitment");
+                ReleaseCurrentPiece();
+                SetTask_Idle();
+                return;
+            }
+
+            if (!_currentConstructionSite.IsPieceAssignedToMe(_currentPieceCell, this) && !_currentConstructionSite.IsPieceCommittedTo(_currentPieceCell, this)) {
+                Debug.Log($"[Construct:{name}] Piece at {_currentPieceCell} assigned to another unit and not committed to us, releasing");
+                ReleaseCurrentPiece();
+                SetTask_Idle();
+                return;
+            }
+        }
+
+        bool isAtSite = movement.HasReachedTarget(movement.waypointTolerance + 0.1f) &&
+            !movement.IsMoving &&
+            _rb.linearVelocity.sqrMagnitude < 0.01f;
+
+        if (isAtSite) {
             _constructionCoroutine = StartCoroutine(ConstructionCoroutine());
         }
-        else if (!movement.IsMoving && _rb.linearVelocity.sqrMagnitude < 0.01f)
-        {
-            // Repath to interaction position if we're not moving and not aligning
-            if (Time.time >= _nextRepathTime)
-            {
+        else if (!movement.IsMoving && _rb.linearVelocity.sqrMagnitude < 0.01f) {
+            if (Time.time >= _nextRepathTime) {
                 _nextRepathTime = Time.time + RepathInterval;
-                // Get interaction position for this specific piece
                 Vector3 interactionPos = _currentConstructionSite.AssignInteractionCell(this, _currentPieceCell);
-                // Disable alignment to prevent jittering during construction
                 bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance, true);
-                if (!hasPath)
-                {
+                if (!hasPath) {
                     SetTask_Idle();
                 }
             }
         }
     }
-    
+
     private IEnumerator ConstructionCoroutine()
     {
-        // Force stop all movement including alignment to prevent jittering
         movement.ForceStopAllMovement();
-        
-        // Adjust sprite direction to the piece being constructed (only once)
-        if (_currentConstructionSite != null && BuildingManager.Instance != null && BuildingManager.Instance.grid != null)
-        {
+
+        if (_currentConstructionSite != null && BuildingManager.Instance != null && BuildingManager.Instance.grid != null) {
             Vector3 pieceWorldPos = BuildingManager.Instance.grid.GetCellCenterWorld(_currentPieceCell);
             AdjustSpriteDirectionToPosition(pieceWorldPos);
         }
-        
-        // Wait for construction time - unit should remain completely still
+
         yield return new WaitForSeconds(constructionTime);
-        
-        if (_currentConstructionSite != null && _currentConstructionSite.comboCardData != null)
-        {
-            // Place this specific building piece
-            BuildingManager.Instance.PlaceBuildingPieceAtCell(_currentConstructionSite.comboCardData, _currentPieceCell, _currentConstructionSite.cellPosition);
-            
-            // Mark piece as constructed and release drone assignment
-            _currentConstructionSite.MarkPieceConstructed(_currentPieceCell, this);
-            
-            Debug.Log($"[Construct:{name}] Constructed piece at {_currentPieceCell} for '{_currentConstructionSite.comboCardData.displayName}'");
-            
-            // Notify construction manager
-            if (ConstructionManager.Instance != null)
-            {
-                ConstructionManager.Instance.OnPieceConstructed(_currentConstructionSite);
+
+        ConstructionSite site = _currentConstructionSite;
+        Vector3Int pieceCell = _currentPieceCell;
+
+        if (site == null || site.comboCardData == null || BuildingManager.Instance == null) {
+            if (site != null) {
+                site.ReleaseDrone(this);
+                if (pieceCell != default) {
+                    site.ReleaseDroneFromPiece(pieceCell, this);
+                }
             }
-            
-            // Release drone from interaction cell
-            _currentConstructionSite.ReleaseDrone(this);
-            
-            // If all pieces are done, destroy the site
-            if (_currentConstructionSite.AreAllPiecesConstructed())
-            {
-                Destroy(_currentConstructionSite.gameObject);
-                _currentConstructionSite = null;
-            }
+            _currentConstructionSite = null;
+            _currentPieceCell = default;
+            _currentState = ConstructState.Idle;
+            _constructionCoroutine = null;
+            yield break;
         }
-        
-        _currentConstructionSite = null;
-        _currentPieceCell = default;
+
+        BuildingManager.Instance.PlaceBuildingPieceAtCell(site.comboCardData, pieceCell, site.cellPosition);
+
+        BuildingPiece placedPiece = BuildingManager.Instance.GetPieceAt(pieceCell);
+        if (placedPiece != null) {
+            HandleConstructionSuccess(site, pieceCell);
+        }
+        else {
+            HandleConstructionFailure(site, pieceCell);
+        }
+
         _currentState = ConstructState.Idle;
         _constructionCoroutine = null;
     }
-    
+
     private void AdjustSpriteDirectionToPosition(Vector3 targetPosition)
     {
         if (BuildingManager.Instance == null || BuildingManager.Instance.grid == null) return;
-        if (!TryGetComponent<UnitSpriteController>(out var spriteController)) return;
-        
+        if (!TryGetComponent(out UnitSpriteController spriteController)) return;
+
         Vector3Int unitCell = BuildingManager.Instance.grid.WorldToCell(transform.position);
         Vector3Int targetCell = BuildingManager.Instance.grid.WorldToCell(targetPosition);
-        
-        Vector3Int relativePosition = targetCell - unitCell;
-        Vector2 targetDirection = Vector2.zero;
-        
-        if (relativePosition.x > 0)
-        {
-            targetDirection = Vector2.right;
-        }
-        else if (relativePosition.x < 0)
-        {
-            targetDirection = Vector2.left;
-        }
-        else if (relativePosition.y > 0)
-        {
-            targetDirection = Vector2.up;
-        }
-        else if (relativePosition.y < 0)
-        {
-            targetDirection = Vector2.down;
-        }
-        
-        spriteController.UpdateSpriteDirection(targetDirection);
+        Vector2 direction = CalculateDirection(unitCell, targetCell);
+        spriteController.UpdateSpriteDirection(direction);
     }
-    
+
     private void AdjustSpriteDirectionToBuilding(Transform buildingTransform)
     {
         if (buildingTransform == null || BuildingManager.Instance == null || BuildingManager.Instance.grid == null) return;
-        if (!TryGetComponent<UnitSpriteController>(out var spriteController)) return;
-        
+        if (!TryGetComponent(out UnitSpriteController spriteController)) return;
+
         Vector3Int unitCell = BuildingManager.Instance.grid.WorldToCell(transform.position);
         Vector3Int buildingCell = BuildingManager.Instance.grid.WorldToCell(buildingTransform.position);
-        
-        Vector3Int relativePosition = buildingCell - unitCell;
-        Vector2 targetDirection = Vector2.zero;
-        
-        if (relativePosition.x > 0)
-        {
-            targetDirection = Vector2.right;
-        }
-        else if (relativePosition.x < 0)
-        {
-            targetDirection = Vector2.left;
-        }
-        else if (relativePosition.y > 0)
-        {
-            targetDirection = Vector2.up;
-        }
-        else if (relativePosition.y < 0)
-        {
-            targetDirection = Vector2.down;
-        }
-        
-        spriteController.UpdateSpriteDirection(targetDirection);
+        Vector2 direction = CalculateDirection(unitCell, buildingCell);
+        spriteController.UpdateSpriteDirection(direction);
     }
-    
+
+    private Vector2 CalculateDirection(Vector3Int from, Vector3Int to)
+    {
+        Vector3Int relativePosition = to - from;
+
+        if (relativePosition.x > 0) return Vector2.right;
+        if (relativePosition.x < 0) return Vector2.left;
+        if (relativePosition.y > 0) return Vector2.up;
+        if (relativePosition.y < 0) return Vector2.down;
+
+        return Vector2.zero;
+    }
+
     public void SetTask_FetchResource(ConstructionSite.ConstructionRequest request, ConstructionSite site)
     {
+        if (movement == null) {
+            Debug.LogWarning($"[Construct:{name}] Cannot set fetch task: movement component not initialized");
+            if (request != null && request.site != null) {
+                request.site.CancelRequest(request);
+            }
+            return;
+        }
+
         _currentRequest = request;
         _targetStorage = ResourceManager.Instance.FindClosestStorageWithResource(site.GetPosition(), request.type, 1);
-        
-        if (_targetStorage != null)
-        {
+
+        if (_targetStorage != null) {
             bool hasPath = movement.SetNewTarget(_targetStorage.GetPosition());
-            if (hasPath)
-            {
+            if (hasPath) {
                 _currentState = ConstructState.FetchingResource;
                 Debug.Log($"[Construct:{name}] State -> FetchingResource: {_currentRequest.amount} {_currentRequest.type} from '{(_targetStorage as Object)?.name}'");
                 return;
             }
         }
-        
+
+        if (_currentRequest != null && _currentRequest.site != null) {
+            _currentRequest.site.CancelRequest(_currentRequest);
+        }
+        _nextTaskRequestTime = Time.time + TaskRequestCooldown;
         SetTask_Idle();
-        Debug.Log($"[Construct:{name}] Fetch failed: no storage or path blocked");
+        Debug.Log($"[Construct:{name}] Fetch failed: no storage or path blocked - request cancelled");
     }
-    
+
     public void SetTask_ConstructPiece(ConstructionSite site, Vector3Int pieceCell)
     {
-        if (site == null)
-        {
+        if (site == null) {
             SetTask_Idle();
             return;
         }
-        
-        // Get interaction position for this piece
+
+        if (movement == null) {
+            Debug.LogWarning($"[Construct:{name}] Cannot set construct task: movement component not initialized");
+            return;
+        }
+
         Vector3 interactionPos = site.AssignInteractionCell(this, pieceCell);
-        // Disable alignment to prevent jittering when transitioning from delivery to construction
         bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance, true);
-        
-        if (!hasPath)
-        {
+
+        if (!hasPath) {
             SetTask_Idle();
             Debug.Log($"[Construct:{name}] Construct piece FAILED: cannot path to piece at {pieceCell}");
             return;
         }
-        
+
         _currentState = ConstructState.Constructing;
         _currentConstructionSite = site;
         _currentPieceCell = pieceCell;
-        _constructionProgress = 0f;
+
         Debug.Log($"[Construct:{name}] State -> Constructing: piece at {pieceCell}");
     }
-    
-    public void SetTask_Idle()
+
+    private void SetTask_Idle()
     {
         ReleaseFromConstruction();
         _currentState = ConstructState.Idle;
         Debug.Log($"[Construct:{name}] State -> Idle");
     }
     
-    private void ReleaseFromConstruction()
+    public void SetTaskRequestCooldown(float duration)
     {
-        if (_currentRequest != null && _currentRequest.site != null)
-        {
-            _currentRequest.site.CancelRequest(_currentRequest);
-            _currentRequest = null;
-        }
+        _nextTaskRequestTime = Time.time + duration;
+    }
+
+    private void ReleaseCurrentPiece()
+    {
+        if (_currentConstructionSite == null || _currentPieceCell == default) return;
         
-        if (_currentConstructionSite != null)
-        {
-            _currentConstructionSite.ReleaseDrone(this);
-            
-            // Release from piece assignment if we were working on a piece
-            if (_currentPieceCell != default)
-            {
-                _currentConstructionSite.ReleaseDroneFromPiece(_currentPieceCell, this);
-            }
+        if (!_currentConstructionSite.IsPieceConstructed(_currentPieceCell)) {
+            _currentConstructionSite.ReleaseCommitmentFromPiece(_currentPieceCell, this);
         }
-        
-        if (_loadingCoroutine != null)
-        {
-            StopCoroutine(_loadingCoroutine);
-            _loadingCoroutine = null;
-        }
-        if (_unloadingCoroutine != null)
-        {
-            StopCoroutine(_unloadingCoroutine);
-            _unloadingCoroutine = null;
-        }
-        if (_constructionCoroutine != null)
-        {
-            StopCoroutine(_constructionCoroutine);
-            _constructionCoroutine = null;
-        }
-        
+        _currentConstructionSite.ReleaseDroneFromPiece(_currentPieceCell, this);
+        _currentConstructionSite.ReleaseDrone(this);
         _currentConstructionSite = null;
         _currentPieceCell = default;
     }
     
+    private void ReleaseFromConstruction()
+    {
+        if (_currentRequest != null && _currentRequest.site != null) {
+            _currentRequest.site.CancelRequest(_currentRequest);
+            _currentRequest = null;
+        }
+
+        if (_currentConstructionSite != null) {
+            if (_currentPieceCell != default) {
+                ReleaseCurrentPiece();
+            } else {
+                _currentConstructionSite.ReleaseDrone(this);
+                _currentConstructionSite = null;
+            }
+        }
+
+        StopAllCoroutines();
+        _loadingCoroutine = null;
+        _unloadingCoroutine = null;
+        _constructionCoroutine = null;
+    }
+
+    private bool TryStartConstructingPiece(ConstructionSite site, Vector3Int pieceCell)
+    {
+        site.CommitDroneToPiece(pieceCell, this);
+        _currentConstructionSite = site;
+        _currentPieceCell = pieceCell;
+        
+        if (!site.AssignDroneToPiece(pieceCell, this)) {
+            _currentState = ConstructState.Idle;
+            Debug.Log($"[Construct:{name}] Committed to piece at {pieceCell}, will retry construction in idle state");
+            return false;
+        }
+        
+        Vector3 interactionPos = site.AssignInteractionCell(this, pieceCell);
+        bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance, true);
+        
+        if (hasPath) {
+            _currentState = ConstructState.Constructing;
+            return true;
+        }
+        
+        _currentState = ConstructState.Idle;
+        Debug.Log($"[Construct:{name}] Committed to piece at {pieceCell}, pathfinding failed - will retry in idle state");
+        return false;
+    }
+    
+    private void HandleConstructionSuccess(ConstructionSite site, Vector3Int pieceCell)
+    {
+        site.MarkPieceConstructed(pieceCell, this);
+        site.ReleaseCommitmentFromPiece(pieceCell, this);
+        Debug.Log($"[Construct:{name}] Constructed piece at {pieceCell} for '{site.comboCardData.displayName}'");
+
+        if (ConstructionManager.Instance != null) {
+            ConstructionManager.Instance.OnPieceConstructed(site);
+        }
+
+        site.ReleaseDrone(this);
+
+        if (site.AreAllPiecesConstructed()) {
+            Destroy(site.gameObject);
+            _currentConstructionSite = null;
+        }
+        else {
+            site.ReleaseDroneFromPiece(pieceCell, this);
+            _currentConstructionSite = null;
+            _currentPieceCell = default;
+        }
+    }
+    
+    private void HandleConstructionFailure(ConstructionSite site, Vector3Int pieceCell)
+    {
+        Debug.LogError($"[Construct:{name}] Failed to construct piece at {pieceCell} - piece was not placed! Site: {site.name}, Combo: {site.comboCardData?.displayName}");
+        site.ReleaseCommitmentFromPiece(pieceCell, this);
+        site.ReleaseDroneFromPiece(pieceCell, this);
+        site.ReleaseDrone(this);
+        _currentConstructionSite = null;
+        _currentPieceCell = default;
+    }
+
     private enum ConstructState
     {
         Idle,
@@ -518,4 +571,3 @@ public class Unit_Construct : UnitBase
         Constructing
     }
 }
-
