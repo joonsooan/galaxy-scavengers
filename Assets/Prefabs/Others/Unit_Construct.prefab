@@ -138,12 +138,9 @@ MonoBehaviour:
   flashDuration: 0.3
   currentState: 0
   carryCapacity: 10000
-  constructionSpeed: 1
   loadingTime: 1
-  unloadingTime: 1
-  constructionTime: 2
+  unloadingTime: 3
   movement: {fileID: 4483249089817793867}
-  constructIcon: {fileID: 0}
 --- !u!114 &4483249089817793867
 MonoBehaviour:
   m_ObjectHideFlags: 0

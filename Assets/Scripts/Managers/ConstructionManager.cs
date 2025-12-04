@@ -99,61 +99,19 @@ public class ConstructionManager : MonoBehaviour
             return;
         }
         
-        if (TryAssignConstructionTask(drone, prioritySite))
-        {
-            return;
-        }
-        
-        if (TryAssignResourceFetchTask(drone, prioritySite))
-        {
-            return;
-        }
-    }
-    
-    private bool TryAssignConstructionTask(Unit_Construct drone, ConstructionSite prioritySite)
-    {
-        if (prioritySite != null && IsSiteValidForConstruction(prioritySite))
-        {
-            Vector3Int? nextPiece = prioritySite.GetAndAssignNextPieceToConstruct(drone);
-            if (nextPiece.HasValue)
-            {
-                drone.SetTask_ConstructPiece(prioritySite, nextPiece.Value);
-                Debug.Log($"[ConstructionManager] Assigned drone '{drone.name}' to construct piece at {nextPiece.Value} for '{prioritySite.comboCardData.displayName}' (priority)");
-                return true;
-            }
-        }
-        
-        foreach (var site in _constructionSites)
-        {
-            if (!IsSiteValidForConstruction(site)) continue;
-            
-            Vector3Int? nextPiece = site.GetAndAssignNextPieceToConstruct(drone);
-            if (nextPiece.HasValue)
-            {
-                drone.SetTask_ConstructPiece(site, nextPiece.Value);
-                Debug.Log($"[ConstructionManager] Assigned drone '{drone.name}' to construct piece at {nextPiece.Value} for '{site.comboCardData.displayName}'");
-                return true;
-            }
-        }
-        
-        return false;
+        TryAssignResourceFetchTask(drone, prioritySite);
     }
     
     private bool TryAssignResourceFetchTask(Unit_Construct drone, ConstructionSite prioritySite)
     {
-        if (prioritySite != null && !prioritySite.IsComplete)
+        if (prioritySite != null && !prioritySite.IsComplete && TryAssignResourceRequest(drone, prioritySite, true))
         {
-            if (TryAssignResourceRequest(drone, prioritySite, true))
-            {
-                return true;
-            }
+            return true;
         }
         
         foreach (var site in _constructionSites)
         {
-            if (site == null || site.IsComplete) continue;
-            
-            if (TryAssignResourceRequest(drone, site, false))
+            if (site != null && !site.IsComplete && TryAssignResourceRequest(drone, site, false))
             {
                 return true;
             }
@@ -167,26 +125,18 @@ public class ConstructionManager : MonoBehaviour
         ConstructionSite.ConstructionRequest request = site.GetAndAssignNextResourceRequest(drone, drone.carryCapacity);
         if (request == null) return false;
         
-        if (ResourceManager.Instance != null)
+        IStorage storage = ResourceManager.Instance?.FindClosestStorageWithResource(site.GetPosition(), request.type, 1);
+        if (storage == null)
         {
-            IStorage storage = ResourceManager.Instance.FindClosestStorageWithResource(site.GetPosition(), request.type, 1);
-            if (storage == null)
-            {
-                site.CancelRequest(request);
-                drone.SetTaskRequestCooldown(1.0f);
-                return false;
-            }
+            site.CancelRequest(request);
+            drone.SetTaskRequestCooldown(1.0f);
+            return false;
         }
         
         drone.SetTask_FetchResource(request, site);
         string priority = isPriority ? " (priority)" : "";
         Debug.Log($"[ConstructionManager] Assigned drone '{drone.name}' to fetch {request.amount} {request.type} for site at {site.cellPosition}{priority}");
         return true;
-    }
-    
-    private bool IsSiteValidForConstruction(ConstructionSite site)
-    {
-        return site != null && site.comboCardData != null && !site.AreAllPiecesConstructed();
     }
     
     private void AssignDronesToSites()
@@ -209,25 +159,29 @@ public class ConstructionManager : MonoBehaviour
     
     public void OnSiteResourceDelivered(ConstructionSite site, Unit_Construct deliveringDrone = null)
     {
-        if (site.comboCardData != null && !site.AreAllPiecesConstructed())
+        if (site == null || site.comboCardData == null || site.AreAllPiecesConstructed())
         {
-            if (deliveringDrone != null && deliveringDrone.IsIdle())
+            return;
+        }
+
+        if (deliveringDrone != null && deliveringDrone.IsIdle())
+        {
+            RequestTask(deliveringDrone, site);
+        }
+        
+        foreach (var drone in _constructDrones)
+        {
+            if (drone != deliveringDrone && drone.IsIdle())
             {
-                RequestTask(deliveringDrone, site);
-            }
-            
-            foreach (var drone in _constructDrones)
-            {
-                if (drone != deliveringDrone && drone.IsIdle())
-                {
-                    RequestTask(drone, site);
-                }
+                RequestTask(drone, site);
             }
         }
     }
     
     public void OnPieceConstructed(ConstructionSite site)
     {
+        if (site == null) return;
+
         if (site.AreAllPiecesConstructed())
         {
             if (site.comboCardData != null && BuildingManager.Instance != null)

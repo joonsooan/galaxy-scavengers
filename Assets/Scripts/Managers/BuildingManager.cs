@@ -551,6 +551,12 @@ public class BuildingManager : MonoBehaviour
             }
             break;
         case ComboType.Generator:
+            ResourceGenerator generator = comboObject.GetComponent<ResourceGenerator>();
+            if (generator != null)
+            {
+                generator.SetConstructed();
+            }
+            break;
         case ComboType.Turret:
         case ComboType.Radar:
             break;
