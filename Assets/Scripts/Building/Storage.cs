@@ -111,6 +111,11 @@ public class Storage : Damageable, IStorage
         
         OnResourceChanged?.Invoke(type, _currentResources[type], maxStorageAmount);
         
+        if (ResourceManager.Instance != null)
+        {
+            ResourceManager.Instance.RemoveResource(type, amountWithdrawn);
+        }
+        
         return true;
     }
     

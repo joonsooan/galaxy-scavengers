@@ -207,9 +207,34 @@ public class ResourceManager : MonoBehaviour
             _mainStructure = null;
             _allStorages.Clear();
             _allResources.Clear();
-            FindAndConnectUI();
-            ResetResourceCount();
-            UpdateAllResourceUI();
+            
+            StartCoroutine(DelayedSceneInitialization());
+        }
+    }
+    
+    private System.Collections.IEnumerator DelayedSceneInitialization()
+    {
+        yield return null;
+        
+        FindAndConnectUI();
+        ResetResourceCount();
+        
+        yield return null;
+        
+        RecalculateResourceCountsFromStorages();
+        UpdateAllResourceUI();
+    }
+    
+    private void RecalculateResourceCountsFromStorages()
+    {
+        foreach (ResourceType type in System.Enum.GetValues(typeof(ResourceType)))
+        {
+            int totalAmount = 0;
+            foreach (IStorage storage in _allStorages)
+            {
+                totalAmount += storage.GetCurrentResourceAmount(type);
+            }
+            SetResource(type, totalAmount);
         }
     }
 
@@ -267,9 +292,6 @@ public class ResourceManager : MonoBehaviour
         }
 
         foreach (ResourceCost cost in costs) {
-            int currentAmount = GetResourceAmount(cost.resourceType);
-            SetResource(cost.resourceType, currentAmount - cost.amount);
-
             int remainingToWithdraw = cost.amount;
             foreach (IStorage storage in storages) {
                 if (remainingToWithdraw <= 0) break;
@@ -277,9 +299,11 @@ public class ResourceManager : MonoBehaviour
                     remainingToWithdraw -= amountWithdrawn;
                 }
             }
-
+            
             UpdateResourceUI(cost.resourceType);
         }
+        
+        RecalculateResourceCountsFromStorages();
 
         return true;
     }

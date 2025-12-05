@@ -13,6 +13,7 @@ public class ResourceGenerator : Damageable
     
     private Canvas _canvas;
     private Coroutine _productionCoroutine;
+    private bool _isConstructed = false;
 
     protected override void OnEnable()
     {
@@ -30,11 +31,22 @@ public class ResourceGenerator : Damageable
 
     private void ActivateComboCard()
     {
+        if (!_isConstructed)
+        {
+            return;
+        }
+        
         if (_productionCoroutine != null)
         {
             StopCoroutine(_productionCoroutine);
         }
         _productionCoroutine = StartCoroutine(ProduceResource());
+    }
+    
+    public void SetConstructed()
+    {
+        _isConstructed = true;
+        ActivateComboCard();
     }
 
     private IEnumerator ProduceResource()

@@ -166,8 +166,12 @@ public class DroneHub : Damageable, IClickable
 
         while (_productionQueue.Count > 0 || HasPendingTargets())
         {
-            // Check if we need to add more units to the queue
-            UpdateQueueFromTargets();
+            // Only update queue from targets when queue is empty (before starting new production)
+            // This prevents adding duplicate units during production
+            if (_productionQueue.Count == 0)
+            {
+                UpdateQueueFromTargets();
+            }
 
             if (_productionQueue.Count == 0)
             {

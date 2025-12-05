@@ -137,13 +137,10 @@ MonoBehaviour:
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
   currentState: 0
-  carryCapacity: 10
-  constructionSpeed: 1
+  carryCapacity: 10000
   loadingTime: 1
-  unloadingTime: 1
-  constructionTime: 2
+  unloadingTime: 3
   movement: {fileID: 4483249089817793867}
-  constructIcon: {fileID: 0}
 --- !u!114 &4483249089817793867
 MonoBehaviour:
   m_ObjectHideFlags: 0
