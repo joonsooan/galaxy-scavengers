@@ -76,8 +76,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1289577761
+  m_SortingLayer: 4
   m_SortingOrder: 0
   m_Sprite: {fileID: 3628030440570103876, guid: 6710518b5a103d14b9a534901be9e79c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -139,11 +139,40 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   inventoryPanel: {fileID: 0}
+  inventoryGridContainer: {fileID: 0}
   currentResourcePanel: {fileID: 0}
   sortButton: {fileID: 0}
-  inventoryCellPrefab: {fileID: 0}
-  resourceInfoCellPrefab: {fileID: 0}
+  inventoryCellPrefab: {fileID: 3842191235755297668, guid: 79b3efe314470124eb00454f0b0f98c4, type: 3}
+  resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: 3bcedb5ddd3f4124da52d7ef7cd2bd2e, type: 3}
   inventoryWidth: 5
   inventoryHeight: 5
   defaultMaxStackAmount: 100
-  customMaxStackAmounts: []
+  customMaxStackAmounts:
+  - resourceType: 0
+    maxStackAmount: 100
+  - resourceType: 1
+    maxStackAmount: 50
+  - resourceType: 2
+    maxStackAmount: 50
+  - resourceType: 3
+    maxStackAmount: 20
+  - resourceType: 4
+    maxStackAmount: 20
+  - resourceType: 5
+    maxStackAmount: 20
+  - resourceType: 6
+    maxStackAmount: 20
+  - resourceType: 7
+    maxStackAmount: 20
+  - resourceType: 8
+    maxStackAmount: 20
+  - resourceType: 9
+    maxStackAmount: 20
+  - resourceType: 10
+    maxStackAmount: 20
+  - resourceType: 11
+    maxStackAmount: 20
+  - resourceType: 12
+    maxStackAmount: 20
+  - resourceType: 13
+    maxStackAmount: 50

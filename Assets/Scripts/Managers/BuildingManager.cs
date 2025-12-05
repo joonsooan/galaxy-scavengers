@@ -103,14 +103,25 @@ public class BuildingManager : MonoBehaviour
 
     public bool IsTerrainCell(Vector3Int cellPosition)
     {
-        if (groundTilemap == null) return false;
-
-        TileBase tile = groundTilemap.GetTile(cellPosition);
-        if (tile == null) return false;
-
         MapGenerator mapGenerator = GetMapGenerator();
-        if (mapGenerator != null) {
-            return mapGenerator.IsTerrainTile(tile);
+        if (mapGenerator != null)
+        {
+            // First check wall tilemap for terrain tiles (walls block movement)
+            if (mapGenerator.IsTerrainCell(cellPosition))
+            {
+                return true;
+            }
+            
+            // Also check groundTilemap for any terrain tiles (for backward compatibility)
+            // In the new system, groundTilemap should only have ground tiles, but check anyway
+            if (groundTilemap != null)
+            {
+                TileBase tile = groundTilemap.GetTile(cellPosition);
+                if (tile != null && mapGenerator.IsTerrainTile(tile))
+                {
+                    return true;
+                }
+            }
         }
 
         return false;

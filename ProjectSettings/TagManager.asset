@@ -42,11 +42,23 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Ground
+    uniqueID: 4030836561
+    locked: 0
+  - name: Terrain
+    uniqueID: 3267852943
+    locked: 0
+  - name: Resource
+    uniqueID: 1211456959
+    locked: 0
   - name: Structure
     uniqueID: 3005389535
     locked: 0
   - name: Unit
     uniqueID: 580065311
+    locked: 0
+  - name: Fog
+    uniqueID: 2127151825
     locked: 0
   - name: UI
     uniqueID: 562081179

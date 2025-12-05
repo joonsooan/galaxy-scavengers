@@ -11,10 +11,15 @@ public enum GradientMode
 public class MapGenerator : MonoBehaviour
 {
     public Vector2Int MapSize => new Vector2Int(width, height);
-    public Tilemap Tilemap => tilemap;
+    public Tilemap Tilemap => groundTilemap;
+    public Tilemap GroundTilemap => groundTilemap;
+    public Tilemap WallTilemap => wallTilemap;
+    
+    [Header("Tilemaps")]
+    [SerializeField] private Tilemap groundTilemap;
+    [SerializeField] private Tilemap wallTilemap;
     
     [Header("Tiles")]
-    [SerializeField] private Tilemap tilemap;
     [SerializeField] private TileBase groundTile;
     [SerializeField] private TileBase lowWallTile;
     [SerializeField] private TileBase highWallTile;
@@ -94,6 +99,43 @@ public class MapGenerator : MonoBehaviour
     private float[,] _noiseMap;
     private float[,] _gradientMap;
 
+    // Helper methods to set tiles on the correct tilemap
+    private void SetGroundTile(Vector3Int cellPosition, TileBase tile)
+    {
+        if (groundTilemap != null)
+        {
+            groundTilemap.SetTile(cellPosition, tile);
+        }
+        // Clear any wall tile at this position
+        if (wallTilemap != null)
+        {
+            wallTilemap.SetTile(cellPosition, null);
+        }
+    }
+
+    private void SetWallTile(Vector3Int cellPosition, TileBase tile)
+    {
+        if (wallTilemap != null)
+        {
+            wallTilemap.SetTile(cellPosition, tile);
+        }
+    }
+
+    private TileBase GetTileAtPosition(Vector3Int cellPosition)
+    {
+        // Check wall tilemap first (walls override ground)
+        if (wallTilemap != null && wallTilemap.HasTile(cellPosition))
+        {
+            return wallTilemap.GetTile(cellPosition);
+        }
+        // Then check ground tilemap
+        if (groundTilemap != null && groundTilemap.HasTile(cellPosition))
+        {
+            return groundTilemap.GetTile(cellPosition);
+        }
+        return null;
+    }
+
     public void GenerateMap()
     {
         CalculateMapDimensions();
@@ -116,25 +158,59 @@ public class MapGenerator : MonoBehaviour
         Vector3Int mapOrigin = new Vector3Int(-_mapCenterXOffset, -_mapCenterYOffset, 0);
         BoundsInt mapBounds = new BoundsInt(mapOrigin, new Vector3Int(width, height, 1));
         
-        TileBase[] tiles = new TileBase[width * height];
+        // Generate and place tiles on appropriate tilemaps
+        TileBase[] groundTiles = new TileBase[width * height];
+        TileBase[] wallTiles = new TileBase[width * height];
 
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                tiles[x + y * width] = GetTileForPosition(x, y);
+                TileBase tile = GetTileForPosition(x, y);
+                int index = x + y * width;
+                
+                // Separate ground tiles and wall tiles
+                if (tile == groundTile)
+                {
+                    groundTiles[index] = tile;
+                    wallTiles[index] = null;
+                }
+                else if (IsTerrainTile(tile))
+                {
+                    wallTiles[index] = tile;
+                }
+                else
+                {
+                    groundTiles[index] = tile;
+                    wallTiles[index] = null;
+                }
             }
         }
         
-        tilemap.SetTilesBlock(mapBounds, tiles);
+        // Place tiles on appropriate tilemaps
+        if (groundTilemap != null)
+        {
+            groundTilemap.SetTilesBlock(mapBounds, groundTiles);
+        }
+        if (wallTilemap != null)
+        {
+            wallTilemap.SetTilesBlock(mapBounds, wallTiles);
+        }
         
         PolishMap();
         
-        // Copy terrain tiles to BuildingManager's groundTilemap so buildings can be placed and fog works correctly
+        // Copy ground tiles to BuildingManager's groundTilemap so buildings can be placed and fog works correctly
         // Do this after PolishMap() so all modifications are included
         CopyTilesToBuildingManagerGroundTilemap(mapBounds);
         
-        tilemap.CompressBounds();
+        if (groundTilemap != null)
+        {
+            groundTilemap.CompressBounds();
+        }
+        if (wallTilemap != null)
+        {
+            wallTilemap.CompressBounds();
+        }
         SetupCameraController();
         
         if (FogOfWarManager.Instance != null)
@@ -215,7 +291,7 @@ public class MapGenerator : MonoBehaviour
                     // Inner area: guaranteed ground
                     if (distance <= transitionStart)
                     {
-                        tilemap.SetTile(cellPos, groundTile);
+                        SetGroundTile(cellPos, groundTile);
                     }
                     // Transition zone: blend between ground and surrounding terrain
                     else
@@ -227,7 +303,16 @@ public class MapGenerator : MonoBehaviour
                         float transitionFactor = (distance - transitionStart) / (transitionEnd - transitionStart);
                         
                         TileBase transitionTile = GetTileForSmoothTransition(x, y, transitionFactor, originalTile);
-                        tilemap.SetTile(cellPos, transitionTile);
+                        
+                        // Place on appropriate tilemap
+                        if (IsTerrainTile(transitionTile))
+                        {
+                            SetWallTile(cellPos, transitionTile);
+                        }
+                        else
+                        {
+                            SetGroundTile(cellPos, transitionTile);
+                        }
                     }
                 }
             }
@@ -248,7 +333,7 @@ public class MapGenerator : MonoBehaviour
         
         // Start from center - only if it's a ground tile
         Vector3Int centerCellPos = new Vector3Int(centerX - _mapCenterXOffset, centerY - _mapCenterYOffset, 0);
-        TileBase centerTile = tilemap.GetTile(centerCellPos);
+        TileBase centerTile = GetTileAtPosition(centerCellPos);
         
         // Only start flood fill if center is actually a ground tile
         if (centerTile == groundTile)
@@ -288,7 +373,7 @@ public class MapGenerator : MonoBehaviour
                 
                 // Check if neighbor tile is a ground tile (can only pass through ground tiles)
                 Vector3Int neighborCellPos = new Vector3Int(nx - _mapCenterXOffset, ny - _mapCenterYOffset, 0);
-                TileBase neighborTile = tilemap.GetTile(neighborCellPos);
+                TileBase neighborTile = GetTileAtPosition(neighborCellPos);
                 
                 // Only flood fill through ground tiles (walls block the path)
                 if (neighborTile == groundTile)
@@ -305,13 +390,13 @@ public class MapGenerator : MonoBehaviour
             for (int y = 1; y < height - 1; y++) // Skip borders
             {
                 Vector3Int cellPos = new Vector3Int(x - _mapCenterXOffset, y - _mapCenterYOffset, 0);
-                TileBase currentTile = tilemap.GetTile(cellPos);
+                TileBase currentTile = GetTileAtPosition(cellPos);
                 
                 // If this is a ground tile that is NOT connected to center, it's isolated
                 if (currentTile == groundTile && !connectedToCenter[x, y])
                 {
                     // Change isolated ground tile to low wall tile
-                    tilemap.SetTile(cellPos, lowWallTile != null ? lowWallTile : groundTile);
+                    SetWallTile(cellPos, lowWallTile != null ? lowWallTile : groundTile);
                 }
             }
         }
@@ -434,12 +519,12 @@ public class MapGenerator : MonoBehaviour
             if (innerX < width)
             {
                 Vector3Int innerCellPos = new Vector3Int(innerX - _mapCenterXOffset, y - _mapCenterYOffset, 0);
-                TileBase innerTile = tilemap.GetTile(innerCellPos);
+                TileBase innerTile = GetTileAtPosition(innerCellPos);
                 
                 if (innerTile == highWallTile)
                 {
                     Vector3Int borderCellPos = new Vector3Int(-_mapCenterXOffset, y - _mapCenterYOffset, 0);
-                    tilemap.SetTile(borderCellPos, highWallTile);
+                    SetWallTile(borderCellPos, highWallTile);
                 }
             }
         }
@@ -451,12 +536,12 @@ public class MapGenerator : MonoBehaviour
             if (innerX >= 0)
             {
                 Vector3Int innerCellPos = new Vector3Int(innerX - _mapCenterXOffset, y - _mapCenterYOffset, 0);
-                TileBase innerTile = tilemap.GetTile(innerCellPos);
+                TileBase innerTile = GetTileAtPosition(innerCellPos);
                 
                 if (innerTile == highWallTile)
                 {
                     Vector3Int borderCellPos = new Vector3Int((width - 1) - _mapCenterXOffset, y - _mapCenterYOffset, 0);
-                    tilemap.SetTile(borderCellPos, highWallTile);
+                    SetWallTile(borderCellPos, highWallTile);
                 }
             }
         }
@@ -468,12 +553,12 @@ public class MapGenerator : MonoBehaviour
             if (innerY < height)
             {
                 Vector3Int innerCellPos = new Vector3Int(x - _mapCenterXOffset, innerY - _mapCenterYOffset, 0);
-                TileBase innerTile = tilemap.GetTile(innerCellPos);
+                TileBase innerTile = GetTileAtPosition(innerCellPos);
                 
                 if (innerTile == highWallTile)
                 {
                     Vector3Int borderCellPos = new Vector3Int(x - _mapCenterXOffset, -_mapCenterYOffset, 0);
-                    tilemap.SetTile(borderCellPos, highWallTile);
+                    SetWallTile(borderCellPos, highWallTile);
                 }
             }
         }
@@ -485,12 +570,12 @@ public class MapGenerator : MonoBehaviour
             if (innerY >= 0)
             {
                 Vector3Int innerCellPos = new Vector3Int(x - _mapCenterXOffset, innerY - _mapCenterYOffset, 0);
-                TileBase innerTile = tilemap.GetTile(innerCellPos);
+                TileBase innerTile = GetTileAtPosition(innerCellPos);
                 
                 if (innerTile == highWallTile)
                 {
                     Vector3Int borderCellPos = new Vector3Int(x - _mapCenterXOffset, (height - 1) - _mapCenterYOffset, 0);
-                    tilemap.SetTile(borderCellPos, highWallTile);
+                    SetWallTile(borderCellPos, highWallTile);
                 }
             }
         }
@@ -520,7 +605,7 @@ public class MapGenerator : MonoBehaviour
                     // Inner area: guaranteed ground
                     if (distance <= transitionStart)
                     {
-                        tilemap.SetTile(cellPos, groundTile);
+                        SetGroundTile(cellPos, groundTile);
                     }
                     // Transition zone: blend between ground and surrounding terrain
                     else
@@ -532,7 +617,16 @@ public class MapGenerator : MonoBehaviour
                         float transitionFactor = (distance - transitionStart) / (transitionEnd - transitionStart);
                         
                         TileBase transitionTile = GetTileForSmoothTransition(x, y, transitionFactor, originalTile);
-                        tilemap.SetTile(cellPos, transitionTile);
+                        
+                        // Place on appropriate tilemap
+                        if (IsTerrainTile(transitionTile))
+                        {
+                            SetWallTile(cellPos, transitionTile);
+                        }
+                        else
+                        {
+                            SetGroundTile(cellPos, transitionTile);
+                        }
                     }
                 }
             }
@@ -639,9 +733,38 @@ public class MapGenerator : MonoBehaviour
     
     private void SetupCameraController()
     {
-        Bounds localBounds = tilemap.localBounds;
-        Vector3 worldCenter = tilemap.transform.TransformPoint(localBounds.center);
-        Vector3 worldSize = Vector3.Scale(localBounds.size, tilemap.transform.lossyScale);
+        // Combine bounds from both tilemaps
+        Bounds combinedBounds = new Bounds();
+        bool boundsInitialized = false;
+        
+        if (groundTilemap != null && groundTilemap.cellBounds.size.x > 0)
+        {
+            Bounds groundBounds = groundTilemap.localBounds;
+            combinedBounds = groundBounds;
+            boundsInitialized = true;
+        }
+        
+        if (wallTilemap != null && wallTilemap.cellBounds.size.x > 0)
+        {
+            Bounds wallBounds = wallTilemap.localBounds;
+            if (boundsInitialized)
+            {
+                combinedBounds.Encapsulate(wallBounds);
+            }
+            else
+            {
+                combinedBounds = wallBounds;
+                boundsInitialized = true;
+            }
+        }
+        
+        if (!boundsInitialized || groundTilemap == null)
+        {
+            return;
+        }
+        
+        Vector3 worldCenter = groundTilemap.transform.TransformPoint(combinedBounds.center);
+        Vector3 worldSize = Vector3.Scale(combinedBounds.size, groundTilemap.transform.lossyScale);
         Bounds mapWorldBounds = new Bounds(worldCenter, worldSize);
 
         if (Camera.main != null && Camera.main.TryGetComponent<CameraController>(out var cameraController))
@@ -705,7 +828,9 @@ public class MapGenerator : MonoBehaviour
 
     public bool IsPositionInBounds(Vector3 worldPosition)
     {
-        Vector3 localPos = tilemap.transform.InverseTransformPoint(worldPosition);
+        if (groundTilemap == null) return false;
+        
+        Vector3 localPos = groundTilemap.transform.InverseTransformPoint(worldPosition);
 
         int cellX = Mathf.FloorToInt(localPos.x + _mapCenterXOffset);
         int cellY = Mathf.FloorToInt(localPos.y + _mapCenterYOffset);
@@ -725,11 +850,12 @@ public class MapGenerator : MonoBehaviour
     
     /// <summary>
     /// Checks if a cell position contains terrain (wall, low wall, or high wall).
+    /// Checks the wall tilemap for terrain tiles.
     /// </summary>
     public bool IsTerrainCell(Vector3Int cellPosition)
     {
-        if (tilemap == null) return false;
-        TileBase tile = tilemap.GetTile(cellPosition);
+        if (wallTilemap == null) return false;
+        TileBase tile = wallTilemap.GetTile(cellPosition);
         return IsTerrainTile(tile);
     }
     
@@ -741,24 +867,30 @@ public class MapGenerator : MonoBehaviour
             return;
         }
         
-        Tilemap groundTilemap = BuildingManager.Instance.GroundTilemap;
-        if (groundTilemap == null)
+        Tilemap buildingManagerGroundTilemap = BuildingManager.Instance.GroundTilemap;
+        if (buildingManagerGroundTilemap == null)
         {
             Debug.LogWarning("[MapGenerator] BuildingManager.GroundTilemap is null. Cannot copy tiles to groundTilemap.");
             return;
         }
         
-        // Copy all tiles from MapGenerator's tilemap to BuildingManager's groundTilemap
+        if (groundTilemap == null)
+        {
+            Debug.LogWarning("[MapGenerator] GroundTilemap is null. Cannot copy tiles to BuildingManager.");
+            return;
+        }
+        
+        // Copy only ground tiles from MapGenerator's groundTilemap to BuildingManager's groundTilemap
         // This ensures buildings can be placed and fog of war works correctly
-        // Read tiles from tilemap after PolishMap() has modified them
+        // Read tiles from groundTilemap after PolishMap() has modified them
         TileBase[] tiles = new TileBase[mapBounds.size.x * mapBounds.size.y];
         int index = 0;
         foreach (Vector3Int pos in mapBounds.allPositionsWithin)
         {
-            tiles[index++] = tilemap.GetTile(pos);
+            tiles[index++] = groundTilemap.GetTile(pos);
         }
         
-        groundTilemap.SetTilesBlock(mapBounds, tiles);
-        groundTilemap.CompressBounds();
+        buildingManagerGroundTilemap.SetTilesBlock(mapBounds, tiles);
+        buildingManagerGroundTilemap.CompressBounds();
     }
 }

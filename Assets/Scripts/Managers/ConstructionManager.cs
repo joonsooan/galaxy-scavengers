@@ -14,7 +14,7 @@ public class ConstructionManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            Debug.Log("[ConstructionManager] Instance initialized");
+            // Debug.Log("[ConstructionManager] Instance initialized");
         }
         else if (Instance != this)
         {
@@ -50,7 +50,7 @@ public class ConstructionManager : MonoBehaviour
         if (!_constructionSites.Contains(site))
         {
             _constructionSites.Add(site);
-            Debug.Log($"[ConstructionManager] Registered construction site at {site.cellPosition}. Total sites: {_constructionSites.Count}, Available drones: {_constructDrones.Count}");
+            // Debug.Log($"[ConstructionManager] Registered construction site at {site.cellPosition}. Total sites: {_constructionSites.Count}, Available drones: {_constructDrones.Count}");
             
             AssignDronesToSites();
         }
@@ -76,7 +76,7 @@ public class ConstructionManager : MonoBehaviour
         if (!_constructDrones.Contains(drone))
         {
             _constructDrones.Add(drone);
-            Debug.Log($"[ConstructionManager] Registered construct drone: {drone.name}. Total drones: {_constructDrones.Count}, Active sites: {_constructionSites.Count}");
+            // Debug.Log($"[ConstructionManager] Registered construct drone: {drone.name}. Total drones: {_constructDrones.Count}, Active sites: {_constructionSites.Count}");
             
             AssignDroneToSite(drone);
         }
@@ -135,7 +135,7 @@ public class ConstructionManager : MonoBehaviour
         
         drone.SetTask_FetchResource(request, site);
         string priority = isPriority ? " (priority)" : "";
-        Debug.Log($"[ConstructionManager] Assigned drone '{drone.name}' to fetch {request.amount} {request.type} for site at {site.cellPosition}{priority}");
+        // Debug.Log($"[ConstructionManager] Assigned drone '{drone.name}' to fetch {request.amount} {request.type} for site at {site.cellPosition}{priority}");
         return true;
     }
     
@@ -187,7 +187,7 @@ public class ConstructionManager : MonoBehaviour
             if (site.comboCardData != null && BuildingManager.Instance != null)
             {
                 BuildingManager.Instance.CreateComboBuildingFromConstruction(site.cellPosition, site.comboCardData);
-                Debug.Log($"[ConstructionManager] All pieces constructed for '{site.comboCardData.displayName}', spawning combo prefab");
+                // Debug.Log($"[ConstructionManager] All pieces constructed for '{site.comboCardData.displayName}', spawning combo prefab");
             }
         }
         else
