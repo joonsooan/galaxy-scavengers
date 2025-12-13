@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayName: "\uCD95\uC804\uAE30"
   description: This is Battery
-  icon: {fileID: -7500263587547555986, guid: 4b4d97bc9df3e3244a75d745e708e8e5, type: 3}
+  icon: {fileID: 5856981904466133357, guid: e279a7b148d84b24a82b2a7e34ab288c, type: 3}
   comboPrefab: {fileID: 1574451153020646121, guid: e87ce886c7e21d34fa9bb3f07b27c4cd, type: 3}
   comboTile: {fileID: 11400000, guid: af606fc7f30fcfb4e9d2706ac1d9c9ef, type: 2}
   comboType: 6

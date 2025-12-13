@@ -1,19 +1,10 @@
 fileFormatVersion: 2
-guid: 37eae3c6a5da46a4b8c1d730778832f2
+guid: 0938c9b934eee9442b999d3233133d0b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4716559796490163538
-    second: resource-sheet_0
-  - first:
-      213: -6245384556211576076
-    second: resource-sheet_1
-  - first:
-      213: 8999891839495180843
-    second: resource-sheet_2
-  - first:
-      213: 8256525898410203829
-    second: resource-sheet_3
+      213: -4543053787955584400
+    second: SIDCORE_2_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -84,7 +75,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -122,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: resource-sheet_0
+      name: SIDCORE_2_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 16
-        height: 16
+        width: 48
+        height: 48
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -137,74 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: eaaa050cad96b8eb0800000000000000
-      internalID: -4716559796490163538
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: resource-sheet_1
-      rect:
-        serializedVersion: 2
-        x: 17
-        y: 0
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4f26c49e5dfe359a0800000000000000
-      internalID: -6245384556211576076
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: resource-sheet_2
-      rect:
-        serializedVersion: 2
-        x: 34
-        y: 0
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b221c0ec1f906ec70800000000000000
-      internalID: 8999891839495180843
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: resource-sheet_3
-      rect:
-        serializedVersion: 2
-        x: 51
-        y: 0
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5ba9d854f82159270800000000000000
-      internalID: 8256525898410203829
+      spriteID: 0722a6566a4d3f0c0800000000000000
+      internalID: -4543053787955584400
       vertices: []
       indices: 
       edges: []
@@ -213,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 71963220f39a3da419b6badae4af9d9b
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -223,10 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      resource-sheet_0: -4716559796490163538
-      resource-sheet_1: -6245384556211576076
-      resource-sheet_2: 8999891839495180843
-      resource-sheet_3: 8256525898410203829
+      SIDCORE_2_0: -4543053787955584400
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

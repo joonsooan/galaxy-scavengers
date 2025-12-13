@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayName: "\uB098\uB178 \uBCF5\uC6D0\uC18C"
   description: This is Repair Station
-  icon: {fileID: 6119255969317091227, guid: 4b4d97bc9df3e3244a75d745e708e8e5, type: 3}
+  icon: {fileID: 6374952365398157950, guid: 6197644f2fcb5d64dab71e3fd028b829, type: 3}
   comboPrefab: {fileID: 1574451153020646121, guid: 867798b41e793e64090f42a7da3035da, type: 3}
   comboTile: {fileID: 11400000, guid: 08e7107dc6dd1174084b57772fdd0b5e, type: 2}
   comboType: 7

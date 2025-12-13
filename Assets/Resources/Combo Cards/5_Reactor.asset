@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayName: "\uBC18\uC751\uB85C"
   description: This is Reactor
-  icon: {fileID: -143252898816197684, guid: 4b4d97bc9df3e3244a75d745e708e8e5, type: 3}
+  icon: {fileID: 5303534084345622160, guid: f6c185f52157ec74e9e1d690c2fcbece, type: 3}
   comboPrefab: {fileID: 1574451153020646121, guid: d0477e22c2f36af48ab43a010b56e5bf, type: 3}
   comboTile: {fileID: 11400000, guid: faa211a4d7b7c2349a7f55cbbbe90ae9, type: 2}
   comboType: 5

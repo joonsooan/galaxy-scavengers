@@ -1,19 +1,10 @@
 fileFormatVersion: 2
-guid: 842fd72251a781c4fb336ef443151083
+guid: 0c7378c4879d65e438625f9a9a18a6f9
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3117166516527289334
-    second: resource-sheet-1_0
-  - first:
-      213: 4489167911642275471
-    second: resource-sheet-1_1
-  - first:
-      213: 6762225044037183918
-    second: resource-sheet-1_2
-  - first:
-      213: 7836952785060846427
-    second: resource-sheet-1_3
+      213: 1688704480188365344
+    second: smelter_modified_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -84,7 +75,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -122,89 +113,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: resource-sheet-1_0
+      name: smelter_modified_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 32
+        height: 32
+      alignment: 9
+      pivot: {x: 0.25, y: 0.25}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6f3d95b6e66624b20800000000000000
-      internalID: 3117166516527289334
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: resource-sheet-1_1
-      rect:
-        serializedVersion: 2
-        x: 17
-        y: 0
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f8e15865e6abc4e30800000000000000
-      internalID: 4489167911642275471
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: resource-sheet-1_2
-      rect:
-        serializedVersion: 2
-        x: 34
-        y: 0
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: ea9261989df38dd50800000000000000
-      internalID: 6762225044037183918
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: resource-sheet-1_3
-      rect:
-        serializedVersion: 2
-        x: 51
-        y: 0
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b5b5f0b390372cc60800000000000000
-      internalID: 7836952785060846427
+      spriteID: 02afc3017cb7f6710800000000000000
+      internalID: 1688704480188365344
       vertices: []
       indices: 
       edges: []
@@ -213,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 371e53bc9500a3f469cbea2f346d3e41
+    spriteID: 2542fdd8c2451124d8a6d10e3c2ef5ea
     internalID: 0
     vertices: []
     indices: 
@@ -223,10 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      resource-sheet-1_0: 3117166516527289334
-      resource-sheet-1_1: 4489167911642275471
-      resource-sheet-1_2: 6762225044037183918
-      resource-sheet-1_3: 7836952785060846427
+      smelter_modified_0: 1688704480188365344
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
