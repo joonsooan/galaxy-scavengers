@@ -5,22 +5,23 @@ using UnityEngine;
 public class ConstructionSite : MonoBehaviour
 {
     [Header("Construction Data")]
-    public ComboCardData comboCardData;
+    public BuildingData buildingData;
     public Vector3Int cellPosition;
     
-    private readonly Dictionary<Vector3Int, Dictionary<ResourceType, int>> _pieceRequiredResources = new Dictionary<Vector3Int, Dictionary<ResourceType, int>>();
-    private readonly Dictionary<Vector3Int, Dictionary<ResourceType, int>> _pieceDeliveredResources = new Dictionary<Vector3Int, Dictionary<ResourceType, int>>();
+    private readonly Dictionary<Vector3Int, Dictionary<ResourceType, int>> _pieceRequiredResources = new ();
+    private readonly Dictionary<Vector3Int, Dictionary<ResourceType, int>> _pieceDeliveredResources = new ();
     
-    private readonly Dictionary<ResourceType, int> _requiredResources = new Dictionary<ResourceType, int>();
-    private readonly Dictionary<ResourceType, int> _deliveredResources = new Dictionary<ResourceType, int>();
-    private readonly List<ConstructionRequest> _pendingRequests = new List<ConstructionRequest>();
+    private readonly Dictionary<ResourceType, int> _requiredResources = new ();
+    private readonly Dictionary<ResourceType, int> _deliveredResources = new ();
+    private readonly List<ConstructionRequest> _pendingRequests = new ();
     
-    private readonly Dictionary<Vector3Int, bool> _constructedPieces = new Dictionary<Vector3Int, bool>();
-    private readonly Dictionary<Vector3Int, Unit_Construct> _pieceAssignedDrone = new Dictionary<Vector3Int, Unit_Construct>();
-    private readonly Dictionary<Vector3Int, Unit_Construct> _pieceCommittedDrone = new Dictionary<Vector3Int, Unit_Construct>();
-    private readonly Dictionary<Unit_Construct, Vector3Int> _droneInteractionCells = new Dictionary<Unit_Construct, Vector3Int>();
-    private readonly HashSet<ConstructionRequest> _requestsBeingDelivered = new HashSet<ConstructionRequest>();
-    private static int _nextRequestId = 1;
+    private readonly Dictionary<Vector3Int, bool> _constructedPieces = new ();
+    private readonly Dictionary<Vector3Int, Unit_Construct> _pieceAssignedDrone = new ();
+    private readonly Dictionary<Vector3Int, Unit_Construct> _pieceCommittedDrone = new ();
+    private readonly Dictionary<Unit_Construct, Vector3Int> _droneInteractionCells = new ();
+    private readonly HashSet<ConstructionRequest> _requestsBeingDelivered = new ();
+    
+    private static int nextRequestId = 1;
     
     public bool IsComplete { get; private set; }
     
@@ -31,32 +32,30 @@ public class ConstructionSite : MonoBehaviour
     
     private void InitializePieceTracking()
     {
-        if (comboCardData == null || comboCardData.recipe == null) return;
+        if (buildingData == null || buildingData.recipe == null) return;
         
         _constructedPieces.Clear();
         _pieceRequiredResources.Clear();
         _pieceDeliveredResources.Clear();
         
-        // Load all CardData to find costs for each gadget type
-        CardData[] allCards = Resources.LoadAll<CardData>("Cards");
-        Dictionary<GadgetType, CardData> gadgetToCardMap = new Dictionary<GadgetType, CardData>();
+        BuildingPieceData[] allCards = Resources.LoadAll<BuildingPieceData>("Building Pieces");
+        Dictionary<BuildingPieceType, BuildingPieceData> buildingPieceAndCardMap = new Dictionary<BuildingPieceType, BuildingPieceData>();
         
         foreach (var card in allCards)
         {
-            if (card.gadgetType != GadgetType.None && !gadgetToCardMap.ContainsKey(card.gadgetType))
+            if (card.buildingPieceType != BuildingPieceType.None)
             {
-                gadgetToCardMap[card.gadgetType] = card;
+                buildingPieceAndCardMap.TryAdd(card.buildingPieceType, card);
             }
         }
         
-        // Initialize per-piece resource tracking
-        foreach (var piece in comboCardData.recipe)
+        foreach (var piece in buildingData.recipe)
         {
             Vector3Int pieceCell = cellPosition + piece.relativePosition;
             _constructedPieces[pieceCell] = false;
             
             // Get resources required for this specific piece
-            if (gadgetToCardMap.TryGetValue(piece.gadgetType, out CardData pieceCard) && pieceCard.costs != null)
+            if (buildingPieceAndCardMap.TryGetValue(piece.buildingPieceType, out BuildingPieceData pieceCard) && pieceCard.costs != null)
             {
                 Dictionary<ResourceType, int> pieceRequired = new Dictionary<ResourceType, int>();
                 Dictionary<ResourceType, int> pieceDelivered = new Dictionary<ResourceType, int>();
@@ -76,9 +75,9 @@ public class ConstructionSite : MonoBehaviour
     // Atomically get and assign the next piece to construct (prevents race conditions)
     public Vector3Int? GetAndAssignNextPieceToConstruct(Unit_Construct drone)
     {
-        if (comboCardData == null || comboCardData.recipe == null || drone == null) return null;
+        if (buildingData == null || buildingData.recipe == null || drone == null) return null;
         
-        foreach (var piece in comboCardData.recipe)
+        foreach (var piece in buildingData.recipe)
         {
             Vector3Int pieceCell = cellPosition + piece.relativePosition;
             
@@ -341,9 +340,9 @@ public class ConstructionSite : MonoBehaviour
     {
         HashSet<Vector3Int> occupiedCells = new HashSet<Vector3Int>();
         
-        if (comboCardData != null && comboCardData.recipe != null)
+        if (buildingData != null && buildingData.recipe != null)
         {
-            foreach (var piece in comboCardData.recipe)
+            foreach (var piece in buildingData.recipe)
             {
                 occupiedCells.Add(cellPosition + piece.relativePosition);
             }
@@ -365,7 +364,7 @@ public class ConstructionSite : MonoBehaviour
     
     private void Start()
     {
-        if (comboCardData != null && comboCardData.recipe != null)
+        if (buildingData != null && buildingData.recipe != null)
         {
             CalculateComboCosts();
         }
@@ -380,35 +379,35 @@ public class ConstructionSite : MonoBehaviour
         _requiredResources.Clear();
         _deliveredResources.Clear();
         
-        if (comboCardData == null)
+        if (buildingData == null)
         {
             Debug.LogError($"[ConstructionSite:{name}] Cannot calculate costs: comboCardData is null");
             return;
         }
         
-        if (comboCardData.recipe == null || comboCardData.recipe.Count == 0)
+        if (buildingData.recipe == null || buildingData.recipe.Count == 0)
         {
             Debug.LogError($"[ConstructionSite:{name}] Cannot calculate costs: recipe is null or empty");
             return;
         }
         
         // Load all CardData to find costs for each gadget type
-        CardData[] allCards = Resources.LoadAll<CardData>("Cards");
-        Dictionary<GadgetType, CardData> gadgetToCardMap = new Dictionary<GadgetType, CardData>();
+        BuildingPieceData[] allCards = Resources.LoadAll<BuildingPieceData>("Building Pieces");
+        Dictionary<BuildingPieceType, BuildingPieceData> gadgetToCardMap = new Dictionary<BuildingPieceType, BuildingPieceData>();
         
         foreach (var card in allCards)
         {
-            if (card.gadgetType != GadgetType.None && !gadgetToCardMap.ContainsKey(card.gadgetType))
+            if (card.buildingPieceType != BuildingPieceType.None && !gadgetToCardMap.ContainsKey(card.buildingPieceType))
             {
-                gadgetToCardMap[card.gadgetType] = card;
+                gadgetToCardMap[card.buildingPieceType] = card;
             }
         }
         
-        foreach (var piece in comboCardData.recipe)
+        foreach (var piece in buildingData.recipe)
         {
-            if (!gadgetToCardMap.TryGetValue(piece.gadgetType, out CardData pieceCard) || pieceCard.costs == null)
+            if (!gadgetToCardMap.TryGetValue(piece.buildingPieceType, out BuildingPieceData pieceCard) || pieceCard.costs == null)
             {
-                Debug.LogWarning($"[ConstructionSite:{name}] Could not find CardData for gadget type {piece.gadgetType}");
+                Debug.LogWarning($"[ConstructionSite:{name}] Could not find CardData for gadget type {piece.buildingPieceType}");
                 continue;
             }
 
@@ -725,19 +724,19 @@ public class ConstructionSite : MonoBehaviour
             return;
         }
         
-        if (comboCardData == null || BuildingManager.Instance == null)
+        if (buildingData == null || BuildingManager.Instance == null)
         {
             Debug.LogError($"[ConstructionSite:{name}] Cannot construct piece: missing comboCardData or BuildingManager");
             return;
         }
         
-        BuildingManager.Instance.PlaceBuildingPieceAtCell(comboCardData, pieceCell, cellPosition);
+        BuildingManager.Instance.PlaceBuildingPieceAtCell(buildingData, pieceCell, cellPosition);
         
         BuildingPiece placedPiece = BuildingManager.Instance.GetPieceAt(pieceCell);
         if (placedPiece != null)
         {
             MarkPieceConstructed(pieceCell, null);
-            Debug.Log($"[ConstructionSite:{name}] Immediately constructed piece at {pieceCell} for '{comboCardData.displayName}'");
+            Debug.Log($"[ConstructionSite:{name}] Immediately constructed piece at {pieceCell} for '{buildingData.displayName}'");
             
             if (ConstructionManager.Instance != null)
             {
@@ -800,7 +799,7 @@ public class ConstructionSite : MonoBehaviour
         
         public ConstructionRequest()
         {
-            requestId = _nextRequestId++;
+            requestId = nextRequestId++;
         }
     }
 }

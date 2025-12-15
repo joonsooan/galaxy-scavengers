@@ -6,7 +6,7 @@ using TMPro;
 public class BuildingButton : MonoBehaviour
 {
     [Header("Building Data")]
-    [SerializeField] private ComboCardData comboCardData;
+    [SerializeField] private BuildingData buildingData;
 
     [Header("Optional Settings")]
     [SerializeField] private Image icon;
@@ -34,13 +34,13 @@ public class BuildingButton : MonoBehaviour
 
     private void InitializeBtn()
     {
-        icon.sprite = comboCardData.icon;
-        btnName.text = comboCardData.displayName;
+        icon.sprite = buildingData.icon;
+        btnName.text = buildingData.displayName;
     }
 
     private void OnButtonClicked()
     {
-        if (comboCardData == null)
+        if (buildingData == null)
         {
             Debug.LogWarning($"[BuildingButton] No ComboCardData assigned to button on {gameObject.name}");
             return;
@@ -53,7 +53,7 @@ public class BuildingButton : MonoBehaviour
         }
         
         // Start the building construction process for combo buildings
-        GameManager.Instance.StartDrag(comboCardData);
+        GameManager.Instance.StartDrag(buildingData);
         
         // Optionally close the panel
         if (closePanelOnClick)
@@ -90,14 +90,14 @@ public class BuildingButton : MonoBehaviour
         }
     }
     
-    public void SetComboCardData(ComboCardData data)
+    public void SetComboCardData(BuildingData data)
     {
-        comboCardData = data;
+        buildingData = data;
     }
     
-    public ComboCardData GetComboCardData()
+    public BuildingData GetComboCardData()
     {
-        return comboCardData;
+        return buildingData;
     }
     
     private void OnDestroy()

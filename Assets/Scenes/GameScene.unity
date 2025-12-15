@@ -3252,7 +3252,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   buildingTilemap: {fileID: 2119450981}
   mainStructurePrefab: {fileID: 1574451153020646121, guid: a62b629273deb2546809fa02708c2b80, type: 3}
-  mainStructureTile: {fileID: 11400000, guid: df31dd0d5b6237b43ae87ecd294eb0ff, type: 2}
+  mainStructureTile: {fileID: 11400000, guid: 557c4e99678d2d54e8fa805b63fce0ce, type: 2}
   grid: {fileID: 2115591665}
   parentTransform: {fileID: 1482201535}
 --- !u!114 &313771328
@@ -3269,7 +3269,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   groundTilemap: {fileID: 558756081}
   wallTilemap: {fileID: 1829347667}
-  grid: {fileID: 0}
+  grid: {fileID: 2115591665}
   groundTile: {fileID: 11400000, guid: 7d463f590028a4e46a4251ccd769d5d4, type: 2}
   lowWallTile: {fileID: 11400000, guid: f6c1325a036363440b78b860bedf0d41, type: 2}
   highWallTile: {fileID: 11400000, guid: 39341a19cd7a6da4597e33ca20f6b1ab, type: 2}
@@ -5736,6 +5736,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1539729020}
     m_Modifications:
+    - target: {fileID: 819041302710811902, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
+      propertyPath: buildingData
+      value: 
+      objectReference: {fileID: 11400000, guid: 5e1cf93942651ed4d8f12d600b58973f, type: 2}
     - target: {fileID: 819041302710811902, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: controlPanel
       value: 
@@ -22044,6 +22048,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 1539729020}
     m_Modifications:
     - target: {fileID: 819041302710811902, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
+      propertyPath: buildingData
+      value: 
+      objectReference: {fileID: 11400000, guid: 105b0eb49997d264ba71f5f4cf6bb34d, type: 2}
+    - target: {fileID: 819041302710811902, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: controlPanel
       value: 
       objectReference: {fileID: 152035980}
@@ -22307,6 +22315,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 327025570}
     m_Modifications:
+    - target: {fileID: 819041302710811902, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
+      propertyPath: buildingData
+      value: 
+      objectReference: {fileID: 11400000, guid: 0d2d400072726114d971ea9e56308971, type: 2}
     - target: {fileID: 819041302710811902, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: controlPanel
       value: 
@@ -25955,6 +25967,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 327025570}
     m_Modifications:
     - target: {fileID: 819041302710811902, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
+      propertyPath: buildingData
+      value: 
+      objectReference: {fileID: 11400000, guid: 7e0cba9babd5ff943a0430a1c03c5e58, type: 2}
+    - target: {fileID: 819041302710811902, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: controlPanel
       value: 
       objectReference: {fileID: 152035980}
@@ -28045,7 +28061,7 @@ MonoBehaviour:
   groundTilemap: {fileID: 558756081}
   resourceTilemap: {fileID: 431047631}
   buildingTilemap: {fileID: 2119450981}
-  mainStructureTile: {fileID: 11400000, guid: 129e3053660309844aeba633a3a24b54, type: 2}
+  mainStructureTile: {fileID: 11400000, guid: 557c4e99678d2d54e8fa805b63fce0ce, type: 2}
   temporaryTile: {fileID: 11400000, guid: 1a272a0c37b7bdf48a1ad47ad0cd0fa7, type: 2}
   parentTransform: {fileID: 1482201535}
 --- !u!4 &1272048963
@@ -28816,6 +28832,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1539729020}
     m_Modifications:
+    - target: {fileID: 819041302710811902, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
+      propertyPath: buildingData
+      value: 
+      objectReference: {fileID: 11400000, guid: 21dd7ed4e169193438e4310a2427b362, type: 2}
     - target: {fileID: 819041302710811902, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: controlPanel
       value: 
@@ -32202,6 +32222,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 327025570}
     m_Modifications:
     - target: {fileID: 819041302710811902, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
+      propertyPath: buildingData
+      value: 
+      objectReference: {fileID: 11400000, guid: b74c14a7d79c2a84992132e249b4f237, type: 2}
+    - target: {fileID: 819041302710811902, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: controlPanel
       value: 
       objectReference: {fileID: 152035980}
@@ -32437,6 +32461,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 327025570}
     m_Modifications:
+    - target: {fileID: 819041302710811902, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
+      propertyPath: buildingData
+      value: 
+      objectReference: {fileID: 11400000, guid: 11e719e49df1f8041a2512a4d0c060ce, type: 2}
     - target: {fileID: 819041302710811902, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: controlPanel
       value: 
@@ -39599,6 +39627,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 327025570}
     m_Modifications:
+    - target: {fileID: 819041302710811902, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
+      propertyPath: buildingData
+      value: 
+      objectReference: {fileID: 11400000, guid: cc2ff3c9faf0e9142800037ebb18e402, type: 2}
     - target: {fileID: 819041302710811902, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: controlPanel
       value: 

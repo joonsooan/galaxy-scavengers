@@ -6,7 +6,6 @@ public interface IStorage
     event Action<ResourceType, int, int> OnResourceChanged; 
     
     bool TryAddResource(ResourceType type, int amount);
-    bool TryUseResources(ResourceCost[] costs);
     bool TryWithdrawResource(ResourceType type, int amountToWithdraw, out int amountWithdrawn);
     bool HasEnoughResources(ResourceCost[] costs);
     

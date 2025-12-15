@@ -159,7 +159,7 @@ public class ConstructionManager : MonoBehaviour
     
     public void OnSiteResourceDelivered(ConstructionSite site, Unit_Construct deliveringDrone = null)
     {
-        if (site == null || site.comboCardData == null || site.AreAllPiecesConstructed())
+        if (site == null || site.buildingData == null || site.AreAllPiecesConstructed())
         {
             return;
         }
@@ -184,9 +184,9 @@ public class ConstructionManager : MonoBehaviour
 
         if (site.AreAllPiecesConstructed())
         {
-            if (site.comboCardData != null && BuildingManager.Instance != null)
+            if (site.buildingData != null && BuildingManager.Instance != null)
             {
-                BuildingManager.Instance.CreateComboBuildingFromConstruction(site.cellPosition, site.comboCardData);
+                BuildingManager.Instance.CreateComboBuildingFromConstruction(site.cellPosition, site.buildingData);
                 // Debug.Log($"[ConstructionManager] All pieces constructed for '{site.comboCardData.displayName}', spawning combo prefab");
             }
         }

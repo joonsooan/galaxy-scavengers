@@ -12,7 +12,7 @@ public class CardDragger : MonoBehaviour
 
     private GameObject _ghostBuildingInstance;
     private SpriteRenderer _ghostBuildingRenderer;
-    private ComboCardData _activeComboCardData;
+    private BuildingData _activeBuildingData;
     private Vector3Int _lastPlacedCell;
     private bool _isDragging;
     private List<Vector3Int> _placedCellsInDrag;
@@ -33,35 +33,35 @@ public class CardDragger : MonoBehaviour
         if (_isDragging) return;
 
         // Only support ComboCardData
-        ComboCardData comboCardData = data as ComboCardData;
-        if (comboCardData != null && comboCardData.comboPrefab != null)
+        BuildingData buildingData = data as BuildingData;
+        if (buildingData != null && buildingData.buildingPrefab != null)
         {
-            _activeComboCardData = comboCardData;
+            _activeBuildingData = buildingData;
             _isDragging = true;
             _lastPlacedCell = Vector3Int.one * int.MaxValue;
             _placedCellsInDrag = new List<Vector3Int>();
             
             // Calculate and cache costs from recipe
-            _cachedComboCosts = CalculateComboCosts(comboCardData);
+            _cachedComboCosts = CalculateComboCosts(buildingData);
 
             CreateGhostBuilding();
         }
     }
     
-    private List<ResourceCost> CalculateComboCosts(ComboCardData comboData)
+    private List<ResourceCost> CalculateComboCosts(BuildingData comboData)
     {
         List<ResourceCost> totalCosts = new List<ResourceCost>();
         Dictionary<ResourceType, int> costDict = new Dictionary<ResourceType, int>();
         
         // Load all CardData to find costs for each gadget type
-        CardData[] allCards = Resources.LoadAll<CardData>("Cards");
-        Dictionary<GadgetType, CardData> gadgetToCardMap = new Dictionary<GadgetType, CardData>();
+        BuildingPieceData[] allCards = Resources.LoadAll<BuildingPieceData>("Cards");
+        Dictionary<BuildingPieceType, BuildingPieceData> gadgetToCardMap = new Dictionary<BuildingPieceType, BuildingPieceData>();
         
         foreach (var card in allCards)
         {
-            if (card.gadgetType != GadgetType.None && !gadgetToCardMap.ContainsKey(card.gadgetType))
+            if (card.buildingPieceType != BuildingPieceType.None && !gadgetToCardMap.ContainsKey(card.buildingPieceType))
             {
-                gadgetToCardMap[card.gadgetType] = card;
+                gadgetToCardMap[card.buildingPieceType] = card;
             }
         }
         
@@ -70,7 +70,7 @@ public class CardDragger : MonoBehaviour
         {
             foreach (var piece in comboData.recipe)
             {
-                if (gadgetToCardMap.TryGetValue(piece.gadgetType, out CardData pieceCard) && pieceCard.costs != null)
+                if (gadgetToCardMap.TryGetValue(piece.buildingPieceType, out BuildingPieceData pieceCard) && pieceCard.costs != null)
                 {
                     foreach (var cost in pieceCard.costs)
                     {
@@ -106,16 +106,16 @@ public class CardDragger : MonoBehaviour
         GameManager.Instance.uiManager?.UnpinAndHideCardPanel();
 
         _isDragging = false;
-        _activeComboCardData = null;
+        _activeBuildingData = null;
         _cachedComboCosts = null;
         _ghostBuildingRenderer = null;
     }
     
     private void CreateGhostBuilding()
     {
-        if (_activeComboCardData == null || _activeComboCardData.comboPrefab == null) return;
+        if (_activeBuildingData == null || _activeBuildingData.buildingPrefab == null) return;
         
-        _ghostBuildingInstance = Instantiate(_activeComboCardData.comboPrefab, Vector3.zero, Quaternion.identity);
+        _ghostBuildingInstance = Instantiate(_activeBuildingData.buildingPrefab, Vector3.zero, Quaternion.identity);
         _ghostBuildingRenderer = _ghostBuildingInstance.GetComponent<SpriteRenderer>();
 
         if (_ghostBuildingRenderer != null)
@@ -169,7 +169,7 @@ public class CardDragger : MonoBehaviour
     
     private bool CanPlaceComboPattern(Vector3Int anchorCell)
     {
-        if (_activeComboCardData == null || _activeComboCardData.recipe == null)
+        if (_activeBuildingData == null || _activeBuildingData.recipe == null)
         {
             return false;
         }
@@ -181,7 +181,7 @@ public class CardDragger : MonoBehaviour
         }
         
         // Check if all cells in the recipe pattern can be placed
-        foreach (var piece in _activeComboCardData.recipe)
+        foreach (var piece in _activeBuildingData.recipe)
         {
             Vector3Int cellPos = anchorCell + piece.relativePosition;
             if (!BuildingManager.Instance.CanPlaceBuilding(cellPos))
@@ -246,10 +246,10 @@ public class CardDragger : MonoBehaviour
 
     private void AttemptPlacement(Vector3Int cellPos)
     {
-        if (_activeComboCardData != null)
+        if (_activeBuildingData != null)
         {
             // Create construction site for combo building
-            BuildingManager.Instance.CreateComboConstructionSite(_activeComboCardData, cellPos);
+            BuildingManager.Instance.CreateComboConstructionSite(_activeBuildingData, cellPos);
             _placedCellsInDrag.Add(cellPos);
         }
     }
