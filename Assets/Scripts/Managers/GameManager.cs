@@ -168,7 +168,7 @@ public class GameManager : MonoBehaviour
         RegisterPrePlacedMainStructure();
         RegisterPrePlacedBuildings();
 
-        ProceduralResourceSpawner proceduralSpawner = FindFirstObjectByType<ProceduralResourceSpawner>();
+        MapObjectSpawner proceduralSpawner = FindFirstObjectByType<MapObjectSpawner>();
         if (proceduralSpawner != null) {
             proceduralSpawner.SpawnResources();
             if (proceduralSpawner.GetComponent<ResourceSpawner>() != null) {

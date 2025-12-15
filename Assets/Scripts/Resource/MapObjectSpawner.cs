@@ -30,7 +30,7 @@ public class ResourceCircle
     public ResourceType resourceType;
 }
 
-public class ProceduralResourceSpawner : MonoBehaviour
+public class MapObjectSpawner : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private Tilemap resourceTilemap;
@@ -123,6 +123,60 @@ public class ProceduralResourceSpawner : MonoBehaviour
     public static bool IsSpawningResources => _isSpawningResources;
     
     public Tilemap ResourceTilemap => resourceTilemap;
+    
+    // Public accessors for concentric circle data (used by MapGenerator for enemy spawn holes)
+    public List<float> GetDivisionRadii()
+    {
+        // Initialize circles if not already done
+        if (_divisionRadii == null || _divisionRadii.Count == 0)
+        {
+            InitializeConcentricCircles();
+        }
+        return _divisionRadii;
+    }
+    
+    public float GetMaxMapRadius()
+    {
+        // Initialize circles if not already done
+        if (_divisionRadii == null || _divisionRadii.Count == 0)
+        {
+            InitializeConcentricCircles();
+        }
+        return _maxMapRadius;
+    }
+    
+    public int GetNumberOfCircles()
+    {
+        return numberOfCircles;
+    }
+    
+    // Initialize concentric circles (can be called early by MapGenerator)
+    private void InitializeConcentricCircles()
+    {
+        if (mapGenerator == null)
+        {
+            mapGenerator = FindFirstObjectByType<MapGenerator>();
+            if (mapGenerator == null)
+            {
+                Debug.LogWarning("[MapObjectSpawner] MapGenerator not found. Cannot initialize concentric circles.");
+                return;
+            }
+        }
+        
+        // Get map dimensions
+        Vector2Int mapSize = mapGenerator.MapSize;
+        _mapWidth = mapSize.x;
+        _mapHeight = mapSize.y;
+        _mapCenter = Vector2Int.zero; // Map center is at (0, 0)
+        
+        // Calculate max radius (with padding)
+        float halfWidth = (_mapWidth / 2f) - borderPadding;
+        float halfHeight = (_mapHeight / 2f) - borderPadding;
+        _maxMapRadius = Mathf.Min(halfWidth, halfHeight);
+        
+        // Divide map into concentric circles
+        DivideMapIntoConcentricCircles();
+    }
     
     public void SpawnResources()
     {

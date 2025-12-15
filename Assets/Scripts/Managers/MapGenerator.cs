@@ -18,6 +18,7 @@ public class MapGenerator : MonoBehaviour
     [Header("Tilemaps")]
     [SerializeField] private Tilemap groundTilemap;
     [SerializeField] private Tilemap wallTilemap;
+    [SerializeField] private Grid grid;
     
     [Header("Tiles")]
     [SerializeField] private TileBase groundTile;
@@ -93,11 +94,33 @@ public class MapGenerator : MonoBehaviour
     [Tooltip("Distance from map center to spawn holes as a ratio (0.0-1.0). Range: 0.3-0.9. Increase: Holes further from center, closer to edges. Decrease: Holes closer to center. Effect: Controls where around the map the spawn holes appear. 0.7-0.8 recommended for edge placement.")]
     [Range(0.3f, 0.9f)]
     [SerializeField] private float enemySpawnHoleDistanceRatio = 0.7f;
+    
+    [Header("Enemy Spawn Hole - Concentric Circle Settings")]
+    [Tooltip("Number of spawn holes per sector (between concentric circles). Uses concentric circles from MapObjectSpawner.")]
+    [Range(1, 10)]
+    [SerializeField] private int enemySpawnHolesPerSector = 1;
+    
+    [Tooltip("Starting circle index for enemy spawn holes (0 = innermost, higher = further from center). Prevents spawning in starting area.")]
+    [Range(0, 20)]
+    [SerializeField] private int enemySpawnHoleStartCircleIndex = 3;
+    
+    [Header("Enemy Spawn Hole - Gizmo Settings")]
+    [Tooltip("Show gizmos for enemy spawn holes in scene view.")]
+    [SerializeField] private bool showEnemySpawnHoleGizmos = true;
+    
+    [Tooltip("Color for enemy spawn hole gizmos.")]
+    [SerializeField] private Color enemySpawnHoleGizmoColor = new Color(1f, 0f, 0f, 0.5f);
+    
+    [Tooltip("Color for concentric circle division gizmos.")]
+    [SerializeField] private Color concentricCircleGizmoColor = new Color(1f, 1f, 0f, 0.3f);
 
     private int _mapCenterXOffset;
     private int _mapCenterYOffset;
     private float[,] _noiseMap;
     private float[,] _gradientMap;
+    
+    // Enemy spawn hole tracking
+    private List<Vector2Int> _enemySpawnHolePositions = new List<Vector2Int>();
 
     // Helper methods to set tiles on the correct tilemap
     private void SetGroundTile(Vector3Int cellPosition, TileBase tile)
@@ -404,31 +427,92 @@ public class MapGenerator : MonoBehaviour
 
     private void PunchEnemySpawnHoles()
     {
+        _enemySpawnHolePositions.Clear();
+        
+        // Get MapObjectSpawner to use its concentric circle data
+        MapObjectSpawner mapObjectSpawner = FindFirstObjectByType<MapObjectSpawner>();
+        if (mapObjectSpawner == null)
+        {
+            Debug.LogWarning("[MapGenerator] MapObjectSpawner not found. Cannot use concentric circle division for enemy spawn holes.");
+            return;
+        }
+        
+        // Get concentric circle data from MapObjectSpawner
+        List<float> divisionRadii = mapObjectSpawner.GetDivisionRadii();
+        if (divisionRadii == null || divisionRadii.Count < 2)
+        {
+            Debug.LogWarning("[MapGenerator] MapObjectSpawner concentric circles not initialized. Enemy spawn holes may not work correctly.");
+            return;
+        }
+        
         int centerX = width / 2;
         int centerY = height / 2;
         
-        // Calculate the distance from center to spawn holes
-        float maxDistance = Mathf.Min(width, height) * 0.5f * enemySpawnHoleDistanceRatio;
+        // Start from the specified circle index to avoid starting area
+        int startIndex = Mathf.Clamp(enemySpawnHoleStartCircleIndex, 0, divisionRadii.Count - 2);
         
-        // Generate spawn hole positions evenly distributed around the map
-        for (int i = 0; i < enemySpawnHoleCount; i++)
+        // Generate spawn holes based on concentric circle division
+        for (int sectorIndex = startIndex; sectorIndex < divisionRadii.Count - 1; sectorIndex++)
         {
-            // Calculate angle for evenly distributed holes
-            float angle = (i / (float)enemySpawnHoleCount) * 360f * Mathf.Deg2Rad;
+            float minRadius = divisionRadii[sectorIndex];
+            float maxRadius = divisionRadii[sectorIndex + 1];
             
-            // Calculate position based on angle and distance
-            int holeCenterX = centerX + Mathf.RoundToInt(Mathf.Cos(angle) * maxDistance);
-            int holeCenterY = centerY + Mathf.RoundToInt(Mathf.Sin(angle) * maxDistance);
+            // Spawn the specified number of holes per sector
+            for (int holeIndex = 0; holeIndex < enemySpawnHolesPerSector; holeIndex++)
+            {
+                // Random angle and distance within this sector
+                float angle = Random.Range(0f, Mathf.PI * 2f);
+                float distance = Random.Range(minRadius, maxRadius);
+                
+                // Calculate position based on angle and distance
+                int holeCenterX = centerX + Mathf.RoundToInt(Mathf.Cos(angle) * distance);
+                int holeCenterY = centerY + Mathf.RoundToInt(Mathf.Sin(angle) * distance);
+                
+                // Clamp to valid map bounds (with margin for radius)
+                holeCenterX = Mathf.Clamp(holeCenterX, enemySpawnHoleRadius + 1, width - enemySpawnHoleRadius - 2);
+                holeCenterY = Mathf.Clamp(holeCenterY, enemySpawnHoleRadius + 1, height - enemySpawnHoleRadius - 2);
+                
+                // Store position for gizmo drawing
+                _enemySpawnHolePositions.Add(new Vector2Int(holeCenterX, holeCenterY));
+                
+                // Punch the hole, following threshold rules
+                PunchHoleWithThreshold(holeCenterX, holeCenterY, enemySpawnHoleRadius);
+            }
+        }
+        
+        // If we still need more holes (to reach enemySpawnHoleCount), add them randomly in outer sectors
+        while (_enemySpawnHolePositions.Count < enemySpawnHoleCount && divisionRadii.Count > 1)
+        {
+            float minRadius = divisionRadii[startIndex];
+            float maxRadius = divisionRadii[divisionRadii.Count - 1];
             
-            // Clamp to valid map bounds (with margin for radius)
+            float angle = Random.Range(0f, Mathf.PI * 2f);
+            float distance = Random.Range(minRadius, maxRadius);
+            
+            int holeCenterX = centerX + Mathf.RoundToInt(Mathf.Cos(angle) * distance);
+            int holeCenterY = centerY + Mathf.RoundToInt(Mathf.Sin(angle) * distance);
+            
             holeCenterX = Mathf.Clamp(holeCenterX, enemySpawnHoleRadius + 1, width - enemySpawnHoleRadius - 2);
             holeCenterY = Mathf.Clamp(holeCenterY, enemySpawnHoleRadius + 1, height - enemySpawnHoleRadius - 2);
             
-            // Punch the hole, following threshold rules
+            _enemySpawnHolePositions.Add(new Vector2Int(holeCenterX, holeCenterY));
             PunchHoleWithThreshold(holeCenterX, holeCenterY, enemySpawnHoleRadius);
-            
-            // Create a path from enemy hole to center to ensure connectivity
-            // CreatePathToCenter(holeCenterX, holeCenterY, centerX, centerY);
+        }
+    }
+    
+    private void DrawCircleGizmo(Vector3 center, float radius)
+    {
+        int segments = 32;
+        float angleStep = (Mathf.PI * 2f) / segments;
+        
+        Vector3 prevPoint = center + new Vector3(radius, 0, 0);
+        
+        for (int i = 1; i <= segments; i++)
+        {
+            float angle = i * angleStep;
+            Vector3 newPoint = center + new Vector3(Mathf.Cos(angle) * radius, Mathf.Sin(angle) * radius, 0);
+            Gizmos.DrawLine(prevPoint, newPoint);
+            prevPoint = newPoint;
         }
     }
     
@@ -892,5 +976,59 @@ public class MapGenerator : MonoBehaviour
         
         buildingManagerGroundTilemap.SetTilesBlock(mapBounds, tiles);
         buildingManagerGroundTilemap.CompressBounds();
+    }
+    
+    private void OnDrawGizmos()
+    {
+        if (!showEnemySpawnHoleGizmos) return;
+        
+        if (grid == null)
+        {
+            grid = FindFirstObjectByType<Grid>();
+        }
+        
+        if (grid == null) return;
+        
+        // Calculate map center offset if not already calculated
+        if (_mapCenterXOffset == 0 && _mapCenterYOffset == 0)
+        {
+            CalculateMapDimensions();
+        }
+        
+        int centerX = width / 2;
+        int centerY = height / 2;
+        Vector3 centerWorld = grid.GetCellCenterWorld(new Vector3Int(centerX - _mapCenterXOffset, centerY - _mapCenterYOffset, 0));
+        
+        // Get cell size for converting tile units to world units
+        float cellSize = grid.cellSize.x;
+        
+        // Get concentric circle data from MapObjectSpawner
+        MapObjectSpawner mapObjectSpawner = FindFirstObjectByType<MapObjectSpawner>();
+        if (mapObjectSpawner != null)
+        {
+            List<float> divisionRadii = mapObjectSpawner.GetDivisionRadii();
+            if (divisionRadii != null && divisionRadii.Count > 0)
+            {
+                // Draw concentric circle divisions
+                Gizmos.color = concentricCircleGizmoColor;
+                foreach (float radius in divisionRadii)
+                {
+                    float radiusWorld = radius * cellSize;
+                    DrawCircleGizmo(centerWorld, radiusWorld);
+                }
+            }
+        }
+        
+        // Draw enemy spawn holes
+        if (_enemySpawnHolePositions.Count > 0)
+        {
+            Gizmos.color = enemySpawnHoleGizmoColor;
+            foreach (var holePos in _enemySpawnHolePositions)
+            {
+                Vector3 holeWorldPos = grid.GetCellCenterWorld(new Vector3Int(holePos.x - _mapCenterXOffset, holePos.y - _mapCenterYOffset, 0));
+                float holeRadiusWorld = enemySpawnHoleRadius * cellSize;
+                DrawCircleGizmo(holeWorldPos, holeRadiusWorld);
+            }
+        }
     }
 }

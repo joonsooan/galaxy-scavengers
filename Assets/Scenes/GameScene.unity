@@ -3269,12 +3269,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   groundTilemap: {fileID: 558756081}
   wallTilemap: {fileID: 1829347667}
+  grid: {fileID: 0}
   groundTile: {fileID: 11400000, guid: 7d463f590028a4e46a4251ccd769d5d4, type: 2}
   lowWallTile: {fileID: 11400000, guid: f6c1325a036363440b78b860bedf0d41, type: 2}
   highWallTile: {fileID: 11400000, guid: 39341a19cd7a6da4597e33ca20f6b1ab, type: 2}
   wallTile: {fileID: 11400000, guid: f6c1325a036363440b78b860bedf0d41, type: 2}
-  width: 256
-  height: 256
+  width: 192
+  height: 192
   useProceduralTerrain: 1
   seed: 0
   randomSeed: 1
@@ -3293,8 +3294,13 @@ MonoBehaviour:
   fillDisconnectedAreas: 1
   enableEnemySpawnHoles: 1
   enemySpawnHoleCount: 3
-  enemySpawnHoleRadius: 10
+  enemySpawnHoleRadius: 4
   enemySpawnHoleDistanceRatio: 0.7
+  enemySpawnHolesPerSector: 3
+  enemySpawnHoleStartCircleIndex: 2
+  showEnemySpawnHoleGizmos: 1
+  enemySpawnHoleGizmoColor: {r: 1, g: 0, b: 0, a: 0.5}
+  concentricCircleGizmoColor: {r: 1, g: 1, b: 0, a: 0.3}
 --- !u!114 &313771329
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3353,12 +3359,12 @@ MonoBehaviour:
   borderPadding: 10
   minCircleRadius: 1
   maxCircleRadius: 2.5
-  circleSpawnPercentage: 80
-  maxCircles: 160
+  circleSpawnPercentage: 40
+  maxCircles: 60
   maxResourcesPerCircle: 25
   minSpawnRadius: 8
   startingAreaRadius: 12
-  startingAreaCircleCount: 4
+  startingAreaCircleCount: 3
   startingAreaMinDistance: 1
   showGizmos: 1
   divisionCircleColor: {r: 1, g: 1, b: 0, a: 0.3}

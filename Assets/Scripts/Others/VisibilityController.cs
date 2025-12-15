@@ -28,7 +28,7 @@ public class VisibilityController : MonoBehaviour
     private void OnEnable()
     {
         // For resources, defer event subscription during spawning to prevent GC allocations
-        if (visibilityType == VisibilityType.Resource && ProceduralResourceSpawner.IsSpawningResources)
+        if (visibilityType == VisibilityType.Resource && MapObjectSpawner.IsSpawningResources)
         {
             // Don't subscribe yet - will be done in batch after spawning
             _isSubscribed = false;
@@ -138,7 +138,7 @@ public class VisibilityController : MonoBehaviour
         }
         
         // Skip visibility updates during resource spawning to prevent performance issues
-        if (visibilityType == VisibilityType.Resource && ProceduralResourceSpawner.IsSpawningResources)
+        if (visibilityType == VisibilityType.Resource && MapObjectSpawner.IsSpawningResources)
         {
             return;
         }
@@ -159,7 +159,7 @@ public class VisibilityController : MonoBehaviour
         }
         
         // Skip visibility updates during resource spawning to prevent performance issues
-        if (visibilityType == VisibilityType.Resource && ProceduralResourceSpawner.IsSpawningResources)
+        if (visibilityType == VisibilityType.Resource && MapObjectSpawner.IsSpawningResources)
         {
             return;
         }
@@ -249,7 +249,7 @@ public class VisibilityController : MonoBehaviour
                     
                 case VisibilityType.Resource:
                     // Check if resources should always be visible (override fog)
-                    if (ProceduralResourceSpawner.ResourcesAlwaysVisible)
+                    if (MapObjectSpawner.ResourcesAlwaysVisible)
                     {
                         shouldBeVisible = true;
                     }
