@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class ConstructionManager : MonoBehaviour
 {
-    private readonly List<ConstructionSite> _constructionSites = new List<ConstructionSite>();
-    private readonly List<Unit_Construct> _constructDrones = new List<Unit_Construct>();
+    private readonly List<ConstructionSite> _constructionSites = new ();
+    private readonly List<Unit_Construct> _constructDrones = new ();
     
     public static ConstructionManager Instance { get; private set; }
     
@@ -14,7 +14,6 @@ public class ConstructionManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            // Debug.Log("[ConstructionManager] Instance initialized");
         }
         else if (Instance != this)
         {
@@ -50,8 +49,6 @@ public class ConstructionManager : MonoBehaviour
         if (!_constructionSites.Contains(site))
         {
             _constructionSites.Add(site);
-            // Debug.Log($"[ConstructionManager] Registered construction site at {site.cellPosition}. Total sites: {_constructionSites.Count}, Available drones: {_constructDrones.Count}");
-            
             AssignDronesToSites();
         }
         else
@@ -69,15 +66,12 @@ public class ConstructionManager : MonoBehaviour
     {
         if (drone == null)
         {
-            Debug.LogWarning("[ConstructionManager] Attempted to register null construct drone");
             return;
         }
         
         if (!_constructDrones.Contains(drone))
         {
             _constructDrones.Add(drone);
-            // Debug.Log($"[ConstructionManager] Registered construct drone: {drone.name}. Total drones: {_constructDrones.Count}, Active sites: {_constructionSites.Count}");
-            
             AssignDroneToSite(drone);
         }
         else
@@ -102,22 +96,20 @@ public class ConstructionManager : MonoBehaviour
         TryAssignResourceFetchTask(drone, prioritySite);
     }
     
-    private bool TryAssignResourceFetchTask(Unit_Construct drone, ConstructionSite prioritySite)
+    private void TryAssignResourceFetchTask(Unit_Construct drone, ConstructionSite prioritySite)
     {
         if (prioritySite != null && !prioritySite.IsComplete && TryAssignResourceRequest(drone, prioritySite, true))
         {
-            return true;
+            return;
         }
         
         foreach (var site in _constructionSites)
         {
             if (site != null && !site.IsComplete && TryAssignResourceRequest(drone, site, false))
             {
-                return true;
+                return;
             }
         }
-        
-        return false;
     }
     
     private bool TryAssignResourceRequest(Unit_Construct drone, ConstructionSite site, bool isPriority)
@@ -134,8 +126,6 @@ public class ConstructionManager : MonoBehaviour
         }
         
         drone.SetTask_FetchResource(request, site);
-        string priority = isPriority ? " (priority)" : "";
-        // Debug.Log($"[ConstructionManager] Assigned drone '{drone.name}' to fetch {request.amount} {request.type} for site at {site.cellPosition}{priority}");
         return true;
     }
     
@@ -186,8 +176,7 @@ public class ConstructionManager : MonoBehaviour
         {
             if (site.buildingData != null && BuildingManager.Instance != null)
             {
-                BuildingManager.Instance.CreateComboBuildingFromConstruction(site.cellPosition, site.buildingData);
-                // Debug.Log($"[ConstructionManager] All pieces constructed for '{site.comboCardData.displayName}', spawning combo prefab");
+                BuildingManager.Instance.CreateBuildingFromConstruction(site.cellPosition, site.buildingData);
             }
         }
         else

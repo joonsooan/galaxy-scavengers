@@ -247,11 +247,11 @@ public class ConstructionSite : MonoBehaviour
     {
         if (buildingData != null && buildingData.recipe != null)
         {
-            CalculateComboCosts();
+            CalculateCosts();
         }
     }
     
-    public void CalculateComboCosts()
+    public void CalculateCosts()
     {
         _requiredResources.Clear();
         _deliveredResources.Clear();

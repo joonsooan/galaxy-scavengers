@@ -249,7 +249,7 @@ public class CardDragger : MonoBehaviour
         if (_activeBuildingData != null)
         {
             // Create construction site for combo building
-            BuildingManager.Instance.CreateComboConstructionSite(_activeBuildingData, cellPos);
+            BuildingManager.Instance.CreateConstructionSite(_activeBuildingData, cellPos);
             _placedCellsInDrag.Add(cellPos);
         }
     }

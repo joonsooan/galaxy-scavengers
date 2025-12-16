@@ -21,16 +21,13 @@ public class QuestManager : MonoBehaviour
     [SerializeField] private Transform questCellContentParent;
 
     [Header("Quest List")]
-    [SerializeField] private List<QuestData> allQuests = new List<QuestData>();
+    [SerializeField] private List<QuestData> allQuests = new ();
 
-    private Dictionary<int, QuestData> _questDataDict = new Dictionary<int, QuestData>();
-    private List<QuestCell> _instantiatedQuestCells = new List<QuestCell>();
-    private Dictionary<int, QuestState> _questStates = new Dictionary<int, QuestState>();
-    private HashSet<int> _completedQuestIds = new HashSet<int>();
-    private HashSet<int> _activeQuestIds = new HashSet<int>();
-
-    public event Action<int, QuestState> OnQuestStateChanged;
-    public event Action<int> OnQuestCompleted;
+    private readonly Dictionary<int, QuestData> _questDataDict = new ();
+    private readonly List<QuestCell> _instantiatedQuestCells = new ();
+    private readonly Dictionary<int, QuestState> _questStates = new ();
+    private readonly HashSet<int> _completedQuestIds = new ();
+    private readonly HashSet<int> _activeQuestIds = new ();
 
     private void Awake()
     {
@@ -59,14 +56,12 @@ public class QuestManager : MonoBehaviour
 
     private void LoadQuestsFromResources()
     {
-        // Load all QuestData assets from Resources/Quest Data folder
         QuestData[] loadedQuests = Resources.LoadAll<QuestData>("Quest Data");
         
         if (loadedQuests != null && loadedQuests.Length > 0)
         {
             allQuests.Clear();
             allQuests.AddRange(loadedQuests);
-            // Debug.Log($"Loaded {loadedQuests.Length} quest(s) from Resources/Quest Data");
         }
         else
         {
@@ -86,7 +81,6 @@ public class QuestManager : MonoBehaviour
 
             _questDataDict[quest.questId] = quest;
             
-            // Initialize quest state based on prerequisites
             if (quest.previousQuestId == -1)
             {
                 _questStates[quest.questId] = QuestState.Available;
@@ -102,17 +96,12 @@ public class QuestManager : MonoBehaviour
     {
         if (questCellPrefab == null || questCellContentParent == null || questInfoPanel == null)
         {
-            Debug.LogWarning("Quest Cell Prefab, Content Parent, or Quest Info Panel not set in QuestManager.");
             return;
         }
 
-        // Clear existing cells
         ClearQuestCells();
-
-        // Get all available quests
         List<QuestData> availableQuests = GetAvailableQuests();
 
-        // Instantiate cells for each available quest
         foreach (QuestData quest in availableQuests)
         {
             GameObject cellObject = Instantiate(questCellPrefab, questCellContentParent);
@@ -142,7 +131,6 @@ public class QuestManager : MonoBehaviour
         }
         _instantiatedQuestCells.Clear();
 
-        // Also clear any remaining children (safety check)
         if (questCellContentParent != null)
         {
             foreach (Transform child in questCellContentParent)
@@ -152,7 +140,7 @@ public class QuestManager : MonoBehaviour
         }
     }
 
-    public bool CanStartQuest(int questId)
+    private bool CanStartQuest(int questId)
     {
         if (!_questDataDict.ContainsKey(questId))
         {
@@ -192,7 +180,6 @@ public class QuestManager : MonoBehaviour
         // Allow multiple active quests at the same time
         _activeQuestIds.Add(questId);
         _questStates[questId] = QuestState.Active;
-        OnQuestStateChanged?.Invoke(questId, QuestState.Active);
 
         // Notify QuestInfoPanel to update UI (hide accept button)
         if (questInfoPanel != null)
@@ -337,9 +324,6 @@ public class QuestManager : MonoBehaviour
         // Remove from active quests
         _activeQuestIds.Remove(questId);
 
-        OnQuestStateChanged?.Invoke(questId, QuestState.Completed);
-        OnQuestCompleted?.Invoke(questId);
-
         // Notify QuestInfoPanel to show finish button
         if (questInfoPanel != null)
         {
@@ -413,7 +397,6 @@ public class QuestManager : MonoBehaviour
                 _questStates[quest.questId] == QuestState.Locked)
             {
                 _questStates[quest.questId] = QuestState.Available;
-                OnQuestStateChanged?.Invoke(quest.questId, QuestState.Available);
                 
                 // Instantiate a new quest cell for the newly unlocked quest
                 if (questCellPrefab != null && questCellContentParent != null && questInfoPanel != null)

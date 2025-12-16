@@ -14,25 +14,21 @@ public class BuildingManager : MonoBehaviour
     [SerializeField] private TileBase temporaryTile;
     [SerializeField] private Transform parentTransform;
 
-    private readonly Dictionary<Vector3Int, BuildingStructure> _buildingStructuresByAnchor = new Dictionary<Vector3Int, BuildingStructure>();
-    private readonly Dictionary<Vector3Int, BuildingStructure> _cellToStructureMap = new Dictionary<Vector3Int, BuildingStructure>();
-    private readonly Dictionary<BuildingPieceType, TileBase> _gadgetTypeToTileCache = new Dictionary<BuildingPieceType, TileBase>();
-    private readonly HashSet<Vector3Int> _mainStructureCells = new HashSet<Vector3Int>();
-    private readonly Dictionary<Vector3Int, BuildingPiece> _placedPieces = new Dictionary<Vector3Int, BuildingPiece>();
+    private readonly Dictionary<Vector3Int, BuildingStructure> _buildingStructuresByAnchor = new ();
+    private readonly Dictionary<Vector3Int, BuildingStructure> _cellToStructureMap = new ();
+    private readonly Dictionary<BuildingPieceType, TileBase> _gadgetTypeToTileCache = new ();
+    private readonly HashSet<Vector3Int> _mainStructureCells = new ();
+    private readonly Dictionary<Vector3Int, BuildingPiece> _placedPieces = new ();
 
-    private readonly List<Processor> _processors = new List<Processor>();
-    private readonly HashSet<Vector3Int> _temporaryTiles = new HashSet<Vector3Int>();
+    private readonly List<Processor> _processors = new ();
+    private readonly HashSet<Vector3Int> _temporaryTiles = new ();
 
     private MapGenerator _cachedMapGenerator;
 
-    [Header("Combo Buildings")]
-    private List<BuildingData> _comboCardDataList;
+    [Header("Buildings")]
+    private List<BuildingData> _buildingDataList;
 
-    public Tilemap GroundTilemap {
-        get {
-            return groundTilemap;
-        }
-    }
+    public Tilemap GroundTilemap => groundTilemap;
 
     public static BuildingManager Instance { get; private set; }
 
@@ -49,7 +45,7 @@ public class BuildingManager : MonoBehaviour
             parentTransform = transform;
         }
 
-        LoadAllComboCards();
+        LoadAllBuildings();
         CacheAllGadgetTiles();
         CacheMapGenerator();
     }
@@ -63,27 +59,26 @@ public class BuildingManager : MonoBehaviour
 
     private MapGenerator GetMapGenerator()
     {
-        // Lazy initialization
         if (_cachedMapGenerator == null) {
             _cachedMapGenerator = FindFirstObjectByType<MapGenerator>();
         }
         return _cachedMapGenerator;
     }
 
-    private void LoadAllComboCards()
+    private void LoadAllBuildings()
     {
-        _comboCardDataList = new List<BuildingData>(
+        _buildingDataList = new List<BuildingData>(
             Resources.LoadAll<BuildingData>("Buildings"));
     }
 
     private void CacheAllGadgetTiles()
     {
-        BuildingPieceData[] allCards = Resources.LoadAll<BuildingPieceData>("Building Pieces");
+        BuildingPieceData[] allData = Resources.LoadAll<BuildingPieceData>("Building Pieces");
 
-        foreach (BuildingPieceData card in allCards) {
-            if (card.buildingPieceType != BuildingPieceType.None && card.buildingPieceTile != null) {
-                if (!_gadgetTypeToTileCache.ContainsKey(card.buildingPieceType)) {
-                    _gadgetTypeToTileCache[card.buildingPieceType] = card.buildingPieceTile;
+        foreach (BuildingPieceData data in allData) {
+            if (data.buildingPieceType != BuildingPieceType.None && data.buildingPieceTile != null) {
+                if (!_gadgetTypeToTileCache.ContainsKey(data.buildingPieceType)) {
+                    _gadgetTypeToTileCache[data.buildingPieceType] = data.buildingPieceTile;
                 }
             }
         }
@@ -106,14 +101,11 @@ public class BuildingManager : MonoBehaviour
         MapGenerator mapGenerator = GetMapGenerator();
         if (mapGenerator != null)
         {
-            // First check wall tilemap for terrain tiles (walls block movement)
             if (mapGenerator.IsTerrainCell(cellPosition))
             {
                 return true;
             }
-            
-            // Also check groundTilemap for any terrain tiles (for backward compatibility)
-            // In the new system, groundTilemap should only have ground tiles, but check anyway
+
             if (groundTilemap != null)
             {
                 TileBase tile = groundTilemap.GetTile(cellPosition);
@@ -132,7 +124,6 @@ public class BuildingManager : MonoBehaviour
     {
         if (grid == null || groundTilemap == null ||
             resourceTilemap == null || buildingTilemap == null) {
-            Debug.LogError("BuildingManager: Missing references.");
             return false;
         }
 
@@ -162,31 +153,28 @@ public class BuildingManager : MonoBehaviour
         return _mainStructureCells.Contains(cellPosition);
     }
 
-    public ConstructionSite CreateComboConstructionSite(BuildingData buildingData, Vector3Int anchorCellPosition)
+    public void CreateConstructionSite(BuildingData buildingData,
+        Vector3Int anchorCellPosition)
     {
-        if (buildingData == null || buildingData.recipe == null || buildingData.recipe.Count == 0) {
-            Debug.LogWarning("[BuildingManager] Invalid ComboCardData for construction site");
-            return null;
+        if (buildingData == null || buildingData.recipe == null || buildingData.recipe.Count == 0)
+        {
+            return;
         }
 
         foreach (BuildingData.BuildingPiece piece in buildingData.recipe) {
             Vector3Int cellPos = anchorCellPosition + piece.relativePosition;
-            if (!CanPlaceBuilding(cellPos)) {
-                Debug.LogWarning($"[BuildingManager] Cannot create combo construction site - cell {cellPos} is not available");
-                return null;
+            if (!CanPlaceBuilding(cellPos))
+            {
+                return;
             }
         }
 
         if (buildingTilemap != null) {
             buildingTilemap.gameObject.SetActive(true);
-
-            if (temporaryTile == null) {
-                Debug.LogWarning("[BuildingManager] Temporary tile is not assigned! Construction tiles will not be visible.");
-            }
         }
-        else {
-            Debug.LogError("[BuildingManager] Building tilemap is null! Cannot place temporary tiles.");
-            return null;
+        else
+        {
+            return;
         }
 
         foreach (BuildingData.BuildingPiece piece in buildingData.recipe) {
@@ -195,18 +183,15 @@ public class BuildingManager : MonoBehaviour
                 buildingTilemap.SetTile(cellPos, temporaryTile);
                 _temporaryTiles.Add(cellPos);
                 OnTilemapChanged?.Invoke(cellPos);
-
-                // Debug.Log($"[BuildingManager] Placed temporary tile at {cellPos}");
             }
         }
 
         if (buildingTilemap != null) {
             buildingTilemap.RefreshAllTiles();
-            Debug.Log($"[BuildingManager] Refreshed tilemap after placing {buildingData.recipe.Count} temporary tiles");
         }
 
         Vector3 worldPosition = grid.GetCellCenterWorld(anchorCellPosition);
-        GameObject siteObject = new GameObject($"ComboConstructionSite_{anchorCellPosition}");
+        GameObject siteObject = new GameObject($"ConstructionSite_{anchorCellPosition}");
         siteObject.transform.position = worldPosition;
         siteObject.transform.SetParent(parentTransform);
 
@@ -214,68 +199,18 @@ public class BuildingManager : MonoBehaviour
         site.buildingData = buildingData;
         site.cellPosition = anchorCellPosition;
 
-        site.CalculateComboCosts();
+        site.CalculateCosts();
 
         if (ConstructionManager.Instance == null) {
             ConstructionManager existingManager = FindFirstObjectByType<ConstructionManager>();
             if (existingManager == null) {
                 GameObject managerObj = new GameObject("ConstructionManager");
                 managerObj.AddComponent<ConstructionManager>();
-                Debug.LogWarning("[BuildingManager] Auto-created ConstructionManager GameObject");
             }
         }
 
         if (ConstructionManager.Instance != null) {
             ConstructionManager.Instance.RegisterConstructionSite(site);
-            Debug.Log($"[BuildingManager] Registered construction site for {buildingData.displayName} at {anchorCellPosition}");
-        }
-        else {
-            Debug.LogError("[BuildingManager] Failed to register construction site: ConstructionManager.Instance is null");
-        }
-        return site;
-    }
-
-    private void PlaceBuildingPiece(BuildingPieceData buildingPieceData, Vector3Int cellPosition)
-    {
-        bool wasTemporaryTile = _temporaryTiles.Contains(cellPosition);
-
-        if (wasTemporaryTile) {
-            _temporaryTiles.Remove(cellPosition);
-            if (buildingTilemap.HasTile(cellPosition) && buildingTilemap.GetTile(cellPosition) == temporaryTile) {
-                buildingTilemap.SetTile(cellPosition, null);
-                OnTilemapChanged?.Invoke(cellPosition);
-            }
-        }
-
-        bool canPlace = (!buildingTilemap.HasTile(cellPosition) || wasTemporaryTile) &&
-            groundTilemap.HasTile(cellPosition) &&
-            !resourceTilemap.HasTile(cellPosition);
-
-        if (canPlace) {
-            Vector3 worldPosition = grid.GetCellCenterWorld(cellPosition);
-            GameObject newPieceObject =
-                Instantiate(buildingPieceData.buildingPiecePrefab, worldPosition, Quaternion.identity, parentTransform);
-
-            BuildingPiece pieceComponent = newPieceObject.GetComponent<BuildingPiece>();
-            if (pieceComponent != null) {
-                pieceComponent.buildingPieceType = buildingPieceData.buildingPieceType;
-                pieceComponent.cellPosition = cellPosition;
-                _placedPieces[cellPosition] = pieceComponent;
-            }
-
-            BuildingStructure structure = new BuildingStructure {
-                anchor = cellPosition,
-                size = Vector2Int.one
-            };
-            structure.occupiedCells.Add(cellPosition);
-            RegisterBuildingStructure(structure);
-
-            if (buildingPieceData.buildingPieceTile != null) {
-                buildingTilemap.SetTile(cellPosition, buildingPieceData.buildingPieceTile);
-                OnTilemapChanged?.Invoke(cellPosition);
-            }
-
-            CheckForComboBuildings(cellPosition);
         }
     }
 
@@ -286,9 +221,9 @@ public class BuildingManager : MonoBehaviour
         foreach (BuildingData.BuildingPiece piece in buildingData.recipe) {
             Vector3Int cellPos = anchorCellPosition + piece.relativePosition;
             if (cellPos == pieceCell) {
-                BuildingPieceData[] allCards = Resources.LoadAll<BuildingPieceData>("Cards");
-                foreach (BuildingPieceData card in allCards) {
-                    if (card.buildingPieceType == piece.buildingPieceType) {
+                BuildingPieceData[] allData = Resources.LoadAll<BuildingPieceData>("Building Pieces");
+                foreach (BuildingPieceData data in allData) {
+                    if (data.buildingPieceType == piece.buildingPieceType) {
                         if (_temporaryTiles.Contains(pieceCell)) {
                             _temporaryTiles.Remove(pieceCell);
                             if (buildingTilemap.HasTile(pieceCell) && buildingTilemap.GetTile(pieceCell) == temporaryTile) {
@@ -297,9 +232,8 @@ public class BuildingManager : MonoBehaviour
                             }
                         }
 
-                        PlaceBuildingPiecePrefabOnly(card, pieceCell);
-
-                        CheckForComboBuildings(pieceCell);
+                        PlaceBuildingPiecePrefabOnly(data, pieceCell);
+                        CheckForBuildings(pieceCell);
                         return;
                     }
                 }
@@ -328,14 +262,14 @@ public class BuildingManager : MonoBehaviour
         RegisterBuildingStructure(structure);
     }
 
-    public void CreateComboBuildingFromConstruction(Vector3Int originPos, BuildingData comboData)
+    public void CreateBuildingFromConstruction(Vector3Int originPos, BuildingData data)
     {
         List<Vector3Int> recipePositions = new List<Vector3Int>();
 
         int minX = int.MaxValue, minY = int.MaxValue;
         int maxX = int.MinValue, maxY = int.MinValue;
 
-        foreach (BuildingData.BuildingPiece piece in comboData.recipe) {
+        foreach (BuildingData.BuildingPiece piece in data.recipe) {
             Vector3Int relativePos = piece.relativePosition;
             recipePositions.Add(originPos + relativePos);
 
@@ -347,24 +281,24 @@ public class BuildingManager : MonoBehaviour
 
         Vector2Int size = new Vector2Int(maxX - minX + 1, maxY - minY + 1);
 
-        BuildingStructure comboStructure = new BuildingStructure {
+        BuildingStructure structure = new BuildingStructure {
             anchor = originPos,
             size = size
         };
 
         foreach (Vector3Int targetPos in recipePositions) {
             RemoveBuildingPieceAtPosition(targetPos);
-            comboStructure.occupiedCells.Add(targetPos);
+            structure.occupiedCells.Add(targetPos);
         }
 
-        RegisterBuildingStructure(comboStructure);
+        RegisterBuildingStructure(structure);
 
         Vector3 worldPos = grid.GetCellCenterWorld(originPos);
-        GameObject newComboPieceObject = Instantiate(comboData.buildingPrefab, worldPos, Quaternion.identity, parentTransform);
+        GameObject newPieceObject = Instantiate(data.buildingPrefab, worldPos, Quaternion.identity, parentTransform);
 
-        BuildingPiece mainPiece = newComboPieceObject.GetComponent<BuildingPiece>();
+        BuildingPiece mainPiece = newPieceObject.GetComponent<BuildingPiece>();
         if (mainPiece == null) {
-            mainPiece = newComboPieceObject.AddComponent<BuildingPiece>();
+            mainPiece = newPieceObject.AddComponent<BuildingPiece>();
         }
 
         mainPiece.cellPosition = originPos;
@@ -373,106 +307,38 @@ public class BuildingManager : MonoBehaviour
             _placedPieces[targetPos] = mainPiece;
         }
 
-        HandleComboBuildingLogic(newComboPieceObject, comboData);
+        HandleBuildingLogic(newPieceObject, data);
 
-        Debug.Log($"Combo Building '{comboData.displayName}' Created (prefab only, no tiles)");
+        Debug.Log($"Building '{data.displayName}' Created (prefab only, no tiles)");
     }
 
-    // public void PlaceComboBuilding(ComboCardData comboCardData, Vector3Int anchorCellPosition)
-    // {
-    //     if (comboCardData == null || comboCardData.recipe == null) return;
-    //
-    //     foreach (ComboCardData.ComboPiece piece in comboCardData.recipe) {
-    //         Vector3Int cellPos = anchorCellPosition + piece.relativePosition;
-    //         if (_temporaryTiles.Contains(cellPos)) {
-    //             _temporaryTiles.Remove(cellPos);
-    //             if (buildingTilemap.HasTile(cellPos) && buildingTilemap.GetTile(cellPos) == temporaryTile) {
-    //                 buildingTilemap.SetTile(cellPos, null);
-    //                 OnTilemapChanged?.Invoke(cellPos);
-    //             }
-    //         }
-    //     }
-    //
-    //     if (buildingTilemap != null) {
-    //         buildingTilemap.RefreshAllTiles();
-    //     }
-    //
-    //     CardData[] allCards = Resources.LoadAll<CardData>("Cards");
-    //     Dictionary<GadgetType, CardData> gadgetToCardMap = new Dictionary<GadgetType, CardData>();
-    //
-    //     foreach (CardData card in allCards) {
-    //         if (card.gadgetType != GadgetType.None && !gadgetToCardMap.ContainsKey(card.gadgetType)) {
-    //             gadgetToCardMap[card.gadgetType] = card;
-    //         }
-    //     }
-    //
-    //     foreach (ComboCardData.ComboPiece piece in comboCardData.recipe) {
-    //         Vector3Int cellPos = anchorCellPosition + piece.relativePosition;
-    //
-    //         if (gadgetToCardMap.TryGetValue(piece.gadgetType, out CardData pieceCard)) {
-    //             // Place the building piece
-    //             PlaceBuildingPiece(pieceCard, cellPos);
-    //         }
-    //     }
-    // }
-
-    // public void PlaceBuilding(CardData cardData, Vector3Int cellPosition)
-    // {
-    //     if (CanPlaceBuilding(cellPosition)) {
-    //         Vector3 worldPosition = grid.GetCellCenterWorld(cellPosition);
-    //         GameObject newPieceObject =
-    //             Instantiate(cardData.buildingPrefab, worldPosition, Quaternion.identity, parentTransform);
-    //
-    //         BuildingPiece pieceComponent = newPieceObject.GetComponent<BuildingPiece>();
-    //         if (pieceComponent != null) {
-    //             pieceComponent.gadgetType = cardData.gadgetType;
-    //             pieceComponent.cellPosition = cellPosition;
-    //             _placedPieces[cellPosition] = pieceComponent;
-    //         }
-    //
-    //         BuildingStructure structure = new BuildingStructure {
-    //             anchor = cellPosition,
-    //             size = Vector2Int.one
-    //         };
-    //         structure.occupiedCells.Add(cellPosition);
-    //         RegisterBuildingStructure(structure);
-    //
-    //         if (cardData.gadgetTile != null) {
-    //             buildingTilemap.SetTile(cellPosition, cardData.gadgetTile);
-    //             OnTilemapChanged?.Invoke(cellPosition);
-    //         }
-    //
-    //         CheckForComboBuildings(cellPosition);
-    //     }
-    // }
-
-    private void CheckForComboBuildings(Vector3Int placedPos)
+    private void CheckForBuildings(Vector3Int placedPos)
     {
-        if (_comboCardDataList == null || _comboCardDataList.Count == 0) return;
+        if (_buildingDataList == null || _buildingDataList.Count == 0) return;
 
-        foreach (BuildingData comboData in _comboCardDataList) {
-            if (CheckPatternAround(placedPos, comboData)) {
+        foreach (BuildingData data in _buildingDataList) {
+            if (CheckPatternAround(placedPos, data)) {
                 return;
             }
         }
     }
 
-    private bool CheckPatternAround(Vector3Int placedPos, BuildingData comboData)
+    private bool CheckPatternAround(Vector3Int placedPos, BuildingData data)
     {
-        foreach (BuildingData.BuildingPiece piece in comboData.recipe) {
+        foreach (BuildingData.BuildingPiece piece in data.recipe) {
             Vector3Int originPosCandidate = placedPos - piece.relativePosition;
 
-            if (CheckPattern(originPosCandidate, comboData)) {
-                CreateComboBuilding(originPosCandidate, comboData);
+            if (CheckPattern(originPosCandidate, data)) {
+                CreateBuilding(originPosCandidate, data);
                 return true;
             }
         }
         return false;
     }
 
-    private bool CheckPattern(Vector3Int originPos, BuildingData comboData)
+    private bool CheckPattern(Vector3Int originPos, BuildingData data)
     {
-        foreach (BuildingData.BuildingPiece piece in comboData.recipe) {
+        foreach (BuildingData.BuildingPiece piece in data.recipe) {
             Vector3Int targetPos = originPos + piece.relativePosition;
             TileBase targetTile = buildingTilemap.GetTile(targetPos);
 
@@ -484,14 +350,14 @@ public class BuildingManager : MonoBehaviour
         return true;
     }
 
-    private void CreateComboBuilding(Vector3Int originPos, BuildingData comboData)
+    private void CreateBuilding(Vector3Int originPos, BuildingData data)
     {
         List<Vector3Int> recipePositions = new List<Vector3Int>();
 
         int minX = int.MaxValue, minY = int.MaxValue;
         int maxX = int.MinValue, maxY = int.MinValue;
 
-        foreach (BuildingData.BuildingPiece piece in comboData.recipe) {
+        foreach (BuildingData.BuildingPiece piece in data.recipe) {
             Vector3Int relativePos = piece.relativePosition;
             recipePositions.Add(originPos + relativePos);
 
@@ -503,24 +369,24 @@ public class BuildingManager : MonoBehaviour
 
         Vector2Int size = new Vector2Int(maxX - minX + 1, maxY - minY + 1);
 
-        BuildingStructure comboStructure = new BuildingStructure {
+        BuildingStructure structure = new BuildingStructure {
             anchor = originPos, // originPos : 좌하단 기준점
             size = size
         };
 
         foreach (Vector3Int targetPos in recipePositions) {
             RemoveBuildingPieceAtPosition(targetPos);
-            comboStructure.occupiedCells.Add(targetPos);
+            structure.occupiedCells.Add(targetPos);
         }
 
-        RegisterBuildingStructure(comboStructure);
+        RegisterBuildingStructure(structure);
 
         Vector3 worldPos = grid.GetCellCenterWorld(originPos);
-        GameObject newComboPieceObject = Instantiate(comboData.buildingPrefab, worldPos, Quaternion.identity, parentTransform);
+        GameObject pieceObject = Instantiate(data.buildingPrefab, worldPos, Quaternion.identity, parentTransform);
 
-        BuildingPiece mainPiece = newComboPieceObject.GetComponent<BuildingPiece>();
+        BuildingPiece mainPiece = pieceObject.GetComponent<BuildingPiece>();
         if (mainPiece == null) {
-            mainPiece = newComboPieceObject.AddComponent<BuildingPiece>();
+            mainPiece = pieceObject.AddComponent<BuildingPiece>();
         }
 
         mainPiece.cellPosition = originPos;
@@ -528,41 +394,41 @@ public class BuildingManager : MonoBehaviour
         foreach (Vector3Int targetPos in recipePositions) {
             _placedPieces[targetPos] = mainPiece;
 
-            if (comboData.buildingTile != null) {
-                buildingTilemap.SetTile(targetPos, comboData.buildingTile);
+            if (data.buildingTile != null) {
+                buildingTilemap.SetTile(targetPos, data.buildingTile);
             }
         }
 
-        HandleComboBuildingLogic(newComboPieceObject, comboData);
+        HandleBuildingLogic(pieceObject, data);
 
         foreach (Vector3Int targetPos in recipePositions) {
             OnTilemapChanged?.Invoke(targetPos);
         }
 
-        Debug.Log($"Combo Building '{comboData.displayName}' Created");
+        Debug.Log($"Building '{data.displayName}' Created");
     }
 
-    private void HandleComboBuildingLogic(GameObject comboObject, BuildingData comboData)
+    private void HandleBuildingLogic(GameObject obj, BuildingData data)
     {
-        if (comboObject == null || ResourceManager.Instance == null) {
+        if (obj == null || ResourceManager.Instance == null) {
             return;
         }
 
-        switch (comboData.buildingType) {
+        switch (data.buildingType) {
         case BuildingType.Storage:
-            IStorage storage = comboObject.GetComponent<IStorage>();
+            IStorage storage = obj.GetComponent<IStorage>();
             if (storage != null) {
                 ResourceManager.Instance.AddStorage(storage);
             }
             break;
         case BuildingType.Battery:
-            IStorage battery = comboObject.GetComponent<IStorage>();
+            IStorage battery = obj.GetComponent<IStorage>();
             if (battery != null) {
                 ResourceManager.Instance.AddStorage(battery);
             }
             break;
         case BuildingType.Generator:
-            ResourceGenerator generator = comboObject.GetComponent<ResourceGenerator>();
+            ResourceGenerator generator = obj.GetComponent<ResourceGenerator>();
             if (generator != null)
             {
                 generator.SetConstructed();

@@ -10,7 +10,7 @@ public enum GradientMode
 
 public class MapGenerator : MonoBehaviour
 {
-    public Vector2Int MapSize => new Vector2Int(width, height);
+    public Vector2Int MapSize => new (width, height);
     public Tilemap Tilemap => groundTilemap;
     public Tilemap GroundTilemap => groundTilemap;
     public Tilemap WallTilemap => wallTilemap;
@@ -36,82 +36,50 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private bool randomSeed = true;
     
     [Header("Perlin Noise Settings")]
-    [Tooltip("Scale of the Perlin noise. Controls the size of terrain features. Range: 1-500+ (typically 10-200). Increase: Larger, smoother terrain features, more gradual transitions. Decrease: Smaller, more detailed features, more chaotic/varied terrain. Lower values create more frequent changes between tile types.")]
     [SerializeField] private float noiseScale = 50f;
-    
-    [Tooltip("Offset applied to the noise sampling coordinates. Shifts the entire terrain pattern. Range: Any Vector2 (typically -1000 to 1000). Increase X: Shifts pattern right. Increase Y: Shifts pattern up. Effect: Allows fine-tuning terrain placement without changing seed.")]
     [SerializeField] private Vector2 noiseOffset = Vector2.zero;
     
     [Header("Gradient Map Settings")]
-    [Tooltip("Enable gradient map to add variation to terrain in specific areas. Range: true/false. Effect: When enabled, gradient values are combined with noise values to create more varied terrain patterns.")]
-    [SerializeField] private bool useGradientMap = false;
-    
-    [Tooltip("Method for generating gradient map. Texture: Uses a gradient texture for precise control. Procedural: Generates gradient procedurally (radial from center/edges). Range: Texture/Procedural. Effect: Choose between texture-based or algorithm-based gradient generation.")]
+    [SerializeField] private bool useGradientMap;
     [SerializeField] private GradientMode gradientMode = GradientMode.Procedural;
-    
-    [Tooltip("Gradient texture used for gradient map generation. The grayscale values from this texture are sampled and combined with noise. Range: Any Texture2D (grayscale recommended). Effect: Black areas reduce terrain height, white areas increase it. Used when gradientMode is set to Texture.")]
     [SerializeField] private Texture2D gradientTexture;
     
-    [Tooltip("Strength of gradient map influence on final terrain. Range: 0.0-1.0. Increase: Stronger gradient influence, more variation. Decrease: Weaker gradient influence, more noise-driven. Effect: Controls how much the gradient map affects terrain vs noise map.")]
     [Range(0f, 1f)]
     [SerializeField] private float gradientStrength = 0.5f;
     
-    [Tooltip("Procedural gradient center point (0-1 coordinates). Range: 0.0-1.0 for X and Y. Effect: Determines where the gradient originates from when using Procedural mode. (0.5, 0.5) = center, (0,0) = corner.")]
-    [SerializeField] private Vector2 gradientCenter = new Vector2(0.5f, 0.5f);
+    [SerializeField] private Vector2 gradientCenter = new (0.5f, 0.5f);
     
-    [Tooltip("Falloff curve exponent for procedural gradient. Range: 1.0-10.0+. Increase: Sharper falloff, more concentrated gradient effect. Decrease: Gentler falloff, smoother gradient transition. Effect: Controls how quickly the gradient effect decreases from center.")]
     [Range(1f, 10f)]
     [SerializeField] private float falloffExponent = 2f;
     
     [Header("Terrain Thresholds")]
-    [Tooltip("Noise value threshold for spawning low wall tiles. Terrain with noise values between this and highWallThreshold becomes low walls. Range: 0.0-1.0 (must be less than highWallThreshold). Increase: More low walls, less ground. Decrease: Less low walls, more ground. Controls distribution between ground and low walls.")]
     [Range(0f, 1f)]
     [SerializeField] private float lowWallThreshold = 0.5f;
     
-    [Tooltip("Noise value threshold for spawning high wall tiles. Terrain with noise values above this becomes high walls. Range: 0.0-1.0 (must be greater than lowWallThreshold). Increase: Less high walls, more low walls/ground. Decrease: More high walls, less low walls/ground. Controls how common high elevation areas are.")]
     [Range(0f, 1f)]
     [SerializeField] private float highWallThreshold = 0.75f;
     
     [Header("Map Polishing Settings")]
-    [Tooltip("Enable center circle that ensures ground tiles at map center. Range: true/false. Effect: Creates a safe starting area in the center of the map.")]
     [SerializeField] private bool enableCenterCircle = true;
-    
-    [Tooltip("Radius of the center circle in tiles. Range: 1-100+. Increase: Larger center area becomes ground. Decrease: Smaller center area. Effect: Controls the size of the guaranteed ground area at map center.")]
     [SerializeField] private int centerCircleRadius = 10;
-    
-    [Tooltip("Fill disconnected areas surrounded by walls with high walls. Range: true/false. Effect: Removes isolated ground/low wall areas that are disconnected from the center.")]
     [SerializeField] private bool fillDisconnectedAreas = true;
-    
-    [Tooltip("Enable enemy spawn holes around the map. Range: true/false. Effect: Creates openings around the map perimeter for enemy spawning.")]
     [SerializeField] private bool enableEnemySpawnHoles = true;
-    
-    [Tooltip("Number of enemy spawn holes to create. Range: 1-10. Effect: Controls how many spawn areas are created around the map.")]
     [SerializeField] private int enemySpawnHoleCount = 3;
-    
-    [Tooltip("Radius of each enemy spawn hole in tiles. Range: 1-50+. Increase: Larger spawn areas. Decrease: Smaller spawn areas. Effect: Controls the size of each enemy spawn opening.")]
     [SerializeField] private int enemySpawnHoleRadius = 5;
-    
-    [Tooltip("Distance from map center to spawn holes as a ratio (0.0-1.0). Range: 0.3-0.9. Increase: Holes further from center, closer to edges. Decrease: Holes closer to center. Effect: Controls where around the map the spawn holes appear. 0.7-0.8 recommended for edge placement.")]
+
     [Range(0.3f, 0.9f)]
     [SerializeField] private float enemySpawnHoleDistanceRatio = 0.7f;
     
     [Header("Enemy Spawn Hole - Concentric Circle Settings")]
-    [Tooltip("Number of spawn holes per sector (between concentric circles). Uses concentric circles from MapObjectSpawner.")]
     [Range(1, 10)]
     [SerializeField] private int enemySpawnHolesPerSector = 1;
     
-    [Tooltip("Starting circle index for enemy spawn holes (0 = innermost, higher = further from center). Prevents spawning in starting area.")]
     [Range(0, 20)]
     [SerializeField] private int enemySpawnHoleStartCircleIndex = 3;
     
     [Header("Enemy Spawn Hole - Gizmo Settings")]
-    [Tooltip("Show gizmos for enemy spawn holes in scene view.")]
     [SerializeField] private bool showEnemySpawnHoleGizmos = true;
-    
-    [Tooltip("Color for enemy spawn hole gizmos.")]
     [SerializeField] private Color enemySpawnHoleGizmoColor = new Color(1f, 0f, 0f, 0.5f);
-    
-    [Tooltip("Color for concentric circle division gizmos.")]
     [SerializeField] private Color concentricCircleGizmoColor = new Color(1f, 1f, 0f, 0.3f);
 
     private int _mapCenterXOffset;
@@ -119,17 +87,14 @@ public class MapGenerator : MonoBehaviour
     private float[,] _noiseMap;
     private float[,] _gradientMap;
     
-    // Enemy spawn hole tracking
-    private List<Vector2Int> _enemySpawnHolePositions = new List<Vector2Int>();
+    private readonly List<Vector2Int> _enemySpawnHolePositions = new ();
 
-    // Helper methods to set tiles on the correct tilemap
     private void SetGroundTile(Vector3Int cellPosition, TileBase tile)
     {
         if (groundTilemap != null)
         {
             groundTilemap.SetTile(cellPosition, tile);
         }
-        // Clear any wall tile at this position
         if (wallTilemap != null)
         {
             wallTilemap.SetTile(cellPosition, null);
@@ -146,12 +111,10 @@ public class MapGenerator : MonoBehaviour
 
     private TileBase GetTileAtPosition(Vector3Int cellPosition)
     {
-        // Check wall tilemap first (walls override ground)
         if (wallTilemap != null && wallTilemap.HasTile(cellPosition))
         {
             return wallTilemap.GetTile(cellPosition);
         }
-        // Then check ground tilemap
         if (groundTilemap != null && groundTilemap.HasTile(cellPosition))
         {
             return groundTilemap.GetTile(cellPosition);
@@ -181,7 +144,6 @@ public class MapGenerator : MonoBehaviour
         Vector3Int mapOrigin = new Vector3Int(-_mapCenterXOffset, -_mapCenterYOffset, 0);
         BoundsInt mapBounds = new BoundsInt(mapOrigin, new Vector3Int(width, height, 1));
         
-        // Generate and place tiles on appropriate tilemaps
         TileBase[] groundTiles = new TileBase[width * height];
         TileBase[] wallTiles = new TileBase[width * height];
 
@@ -192,7 +154,6 @@ public class MapGenerator : MonoBehaviour
                 TileBase tile = GetTileForPosition(x, y);
                 int index = x + y * width;
                 
-                // Separate ground tiles and wall tiles
                 if (tile == groundTile)
                 {
                     groundTiles[index] = tile;
@@ -210,7 +171,6 @@ public class MapGenerator : MonoBehaviour
             }
         }
         
-        // Place tiles on appropriate tilemaps
         if (groundTilemap != null)
         {
             groundTilemap.SetTilesBlock(mapBounds, groundTiles);
@@ -221,9 +181,6 @@ public class MapGenerator : MonoBehaviour
         }
         
         PolishMap();
-        
-        // Copy ground tiles to BuildingManager's groundTilemap so buildings can be placed and fog works correctly
-        // Do this after PolishMap() so all modifications are included
         CopyTilesToBuildingManagerGroundTilemap(mapBounds);
         
         if (groundTilemap != null)
@@ -269,22 +226,15 @@ public class MapGenerator : MonoBehaviour
 
     private TileBase GetTileForSmoothTransition(int x, int y, float transitionFactor, TileBase originalTile)
     {
-        // Create smooth transition - prevent high walls from appearing next to ground
         if (transitionFactor < 0.5f)
         {
-            // Inner half of transition: always ground
             return groundTile;
         }
-        else if (originalTile == highWallTile)
+        if (originalTile == highWallTile)
         {
-            // Original was high wall: use low wall as intermediate for smooth transition
             return lowWallTile != null ? lowWallTile : groundTile;
         }
-        else
-        {
-            // Original was low wall or ground: use ground to maintain smoothness
-            return groundTile;
-        }
+        return groundTile;
     }
 
     private void PunchCenterCircle()
@@ -292,7 +242,6 @@ public class MapGenerator : MonoBehaviour
         int centerX = width / 2;
         int centerY = height / 2;
         
-        // Define transition zone (70% inner = full ground, 30% outer = transition)
         float transitionStartRatio = 0.7f;
         float transitionEnd = centerCircleRadius;
         float transitionStart = centerCircleRadius * transitionStartRatio;
@@ -301,7 +250,6 @@ public class MapGenerator : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                // Skip borders
                 if (x == 0 || x == width - 1 || y == 0 || y == height - 1)
                     continue;
                 
@@ -311,23 +259,16 @@ public class MapGenerator : MonoBehaviour
                 {
                     Vector3Int cellPos = new Vector3Int(x - _mapCenterXOffset, y - _mapCenterYOffset, 0);
                     
-                    // Inner area: guaranteed ground
                     if (distance <= transitionStart)
                     {
                         SetGroundTile(cellPos, groundTile);
                     }
-                    // Transition zone: blend between ground and surrounding terrain
                     else
                     {
-                        // Get original tile type based on noise (before modifications)
                         TileBase originalTile = GetTileForPosition(x, y);
-                        
-                        // Create transition: closer to center = more ground, closer to edge = more original
                         float transitionFactor = (distance - transitionStart) / (transitionEnd - transitionStart);
-                        
                         TileBase transitionTile = GetTileForSmoothTransition(x, y, transitionFactor, originalTile);
                         
-                        // Place on appropriate tilemap
                         if (IsTerrainTile(transitionTile))
                         {
                             SetWallTile(cellPos, transitionTile);
@@ -344,41 +285,33 @@ public class MapGenerator : MonoBehaviour
 
     private void FillDisconnectedAreas()
     {
-        // Create a map to track which ground tiles are connected to center
         bool[,] connectedToCenter = new bool[width, height];
         
-        // Find center ground tile position
         int centerX = width / 2;
         int centerY = height / 2;
         
-        // Flood fill from center to find all connected ground tiles
         Queue<Vector2Int> queue = new Queue<Vector2Int>();
         
-        // Start from center - only if it's a ground tile
         Vector3Int centerCellPos = new Vector3Int(centerX - _mapCenterXOffset, centerY - _mapCenterYOffset, 0);
         TileBase centerTile = GetTileAtPosition(centerCellPos);
         
-        // Only start flood fill if center is actually a ground tile
         if (centerTile == groundTile)
         {
             queue.Enqueue(new Vector2Int(centerX, centerY));
             connectedToCenter[centerX, centerY] = true;
         }
         
-        // Flood fill through ground tiles only (walls act as barriers)
         while (queue.Count > 0)
         {
             Vector2Int current = queue.Dequeue();
             int x = current.x;
             int y = current.y;
             
-            // Check all four neighbors
-            Vector2Int[] neighbors = new Vector2Int[]
-            {
-                new Vector2Int(x + 1, y),
-                new Vector2Int(x - 1, y),
-                new Vector2Int(x, y + 1),
-                new Vector2Int(x, y - 1)
+            Vector2Int[] neighbors = {
+                new (x + 1, y),
+                new (x - 1, y),
+                new (x, y + 1),
+                new (x, y - 1)
             };
             
             foreach (Vector2Int neighbor in neighbors)
@@ -386,19 +319,15 @@ public class MapGenerator : MonoBehaviour
                 int nx = neighbor.x;
                 int ny = neighbor.y;
                 
-                // Skip if out of bounds
                 if (nx < 1 || nx >= width - 1 || ny < 1 || ny >= height - 1)
                     continue;
                 
-                // Skip if already connected
                 if (connectedToCenter[nx, ny])
                     continue;
                 
-                // Check if neighbor tile is a ground tile (can only pass through ground tiles)
                 Vector3Int neighborCellPos = new Vector3Int(nx - _mapCenterXOffset, ny - _mapCenterYOffset, 0);
                 TileBase neighborTile = GetTileAtPosition(neighborCellPos);
                 
-                // Only flood fill through ground tiles (walls block the path)
                 if (neighborTile == groundTile)
                 {
                     connectedToCenter[nx, ny] = true;
@@ -407,18 +336,15 @@ public class MapGenerator : MonoBehaviour
             }
         }
         
-        // Scan every tile and convert isolated ground tiles to low wall tiles
-        for (int x = 1; x < width - 1; x++) // Skip borders
+        for (int x = 1; x < width - 1; x++)
         {
-            for (int y = 1; y < height - 1; y++) // Skip borders
+            for (int y = 1; y < height - 1; y++)
             {
                 Vector3Int cellPos = new Vector3Int(x - _mapCenterXOffset, y - _mapCenterYOffset, 0);
                 TileBase currentTile = GetTileAtPosition(cellPos);
                 
-                // If this is a ground tile that is NOT connected to center, it's isolated
                 if (currentTile == groundTile && !connectedToCenter[x, y])
                 {
-                    // Change isolated ground tile to low wall tile
                     SetWallTile(cellPos, lowWallTile != null ? lowWallTile : groundTile);
                 }
             }
@@ -429,15 +355,12 @@ public class MapGenerator : MonoBehaviour
     {
         _enemySpawnHolePositions.Clear();
         
-        // Get MapObjectSpawner to use its concentric circle data
         MapObjectSpawner mapObjectSpawner = FindFirstObjectByType<MapObjectSpawner>();
         if (mapObjectSpawner == null)
         {
-            Debug.LogWarning("[MapGenerator] MapObjectSpawner not found. Cannot use concentric circle division for enemy spawn holes.");
             return;
         }
         
-        // Get concentric circle data from MapObjectSpawner
         List<float> divisionRadii = mapObjectSpawner.GetDivisionRadii();
         if (divisionRadii == null || divisionRadii.Count < 2)
         {
@@ -448,39 +371,30 @@ public class MapGenerator : MonoBehaviour
         int centerX = width / 2;
         int centerY = height / 2;
         
-        // Start from the specified circle index to avoid starting area
         int startIndex = Mathf.Clamp(enemySpawnHoleStartCircleIndex, 0, divisionRadii.Count - 2);
         
-        // Generate spawn holes based on concentric circle division
         for (int sectorIndex = startIndex; sectorIndex < divisionRadii.Count - 1; sectorIndex++)
         {
             float minRadius = divisionRadii[sectorIndex];
             float maxRadius = divisionRadii[sectorIndex + 1];
             
-            // Spawn the specified number of holes per sector
             for (int holeIndex = 0; holeIndex < enemySpawnHolesPerSector; holeIndex++)
             {
-                // Random angle and distance within this sector
                 float angle = Random.Range(0f, Mathf.PI * 2f);
                 float distance = Random.Range(minRadius, maxRadius);
                 
-                // Calculate position based on angle and distance
                 int holeCenterX = centerX + Mathf.RoundToInt(Mathf.Cos(angle) * distance);
                 int holeCenterY = centerY + Mathf.RoundToInt(Mathf.Sin(angle) * distance);
                 
-                // Clamp to valid map bounds (with margin for radius)
                 holeCenterX = Mathf.Clamp(holeCenterX, enemySpawnHoleRadius + 1, width - enemySpawnHoleRadius - 2);
                 holeCenterY = Mathf.Clamp(holeCenterY, enemySpawnHoleRadius + 1, height - enemySpawnHoleRadius - 2);
                 
-                // Store position for gizmo drawing
                 _enemySpawnHolePositions.Add(new Vector2Int(holeCenterX, holeCenterY));
                 
-                // Punch the hole, following threshold rules
                 PunchHoleWithThreshold(holeCenterX, holeCenterY, enemySpawnHoleRadius);
             }
         }
         
-        // If we still need more holes (to reach enemySpawnHoleCount), add them randomly in outer sectors
         while (_enemySpawnHolePositions.Count < enemySpawnHoleCount && divisionRadii.Count > 1)
         {
             float minRadius = divisionRadii[startIndex];
@@ -516,84 +430,6 @@ public class MapGenerator : MonoBehaviour
         }
     }
     
-    // private void CreatePathToCenter(int startX, int startY, int endX, int endY)
-    // {
-    //     // Create a simple path using Bresenham-like line algorithm
-    //     int dx = Mathf.Abs(endX - startX);
-    //     int dy = Mathf.Abs(endY - startY);
-    //     int sx = startX < endX ? 1 : -1;
-    //     int sy = startY < endY ? 1 : -1;
-    //     int err = dx - dy;
-    //     
-    //     int currentX = startX;
-    //     int currentY = startY;
-    //     int pathWidth = 2; // Width of the path to ensure connectivity
-    //     
-    //     // Create path tiles along the line from start to end
-    //     while (true)
-    //     {
-    //         // Create a small area at each point for path width
-    //         for (int offsetX = -pathWidth; offsetX <= pathWidth; offsetX++)
-    //         {
-    //             for (int offsetY = -pathWidth; offsetY <= pathWidth; offsetY++)
-    //             {
-    //                 int pathX = currentX + offsetX;
-    //                 int pathY = currentY + offsetY;
-    //                 
-    //                 // Skip if out of bounds
-    //                 if (pathX < 1 || pathX >= width - 1 || pathY < 1 || pathY >= height - 1)
-    //                     continue;
-    //                 
-    //                 // Only create path if within distance (creates path of width 2-3 tiles)
-    //                 float dist = Mathf.Sqrt(offsetX * offsetX + offsetY * offsetY);
-    //                 if (dist <= pathWidth)
-    //                 {
-    //                     Vector3Int cellPos = new Vector3Int(pathX - _mapCenterXOffset, pathY - _mapCenterYOffset, 0);
-    //                     TileBase currentTile = tilemap.GetTile(cellPos);
-    //                     
-    //                     // Break through walls to create path, prefer ground for center of path
-    //                     if (dist <= 1)
-    //                     {
-    //                         // Center of path: use ground tiles
-    //                         tilemap.SetTile(cellPos, groundTile);
-    //                     }
-    //                     else if (currentTile == highWallTile)
-    //                     {
-    //                         // Convert high walls to low walls on path edges
-    //                         tilemap.SetTile(cellPos, lowWallTile != null ? lowWallTile : groundTile);
-    //                     }
-    //                     else if (currentTile == lowWallTile)
-    //                     {
-    //                         // Convert low walls to ground if close to center
-    //                         tilemap.SetTile(cellPos, groundTile);
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //         
-    //         // Check if we've reached the destination (with some tolerance)
-    //         if (Mathf.Abs(currentX - endX) <= 1 && Mathf.Abs(currentY - endY) <= 1)
-    //             break;
-    //         
-    //         // Move along the line
-    //         int e2 = 2 * err;
-    //         if (e2 > -dy)
-    //         {
-    //             err -= dy;
-    //             currentX += sx;
-    //         }
-    //         if (e2 < dx)
-    //         {
-    //             err += dx;
-    //             currentY += sy;
-    //         }
-    //         
-    //         // Safety check to prevent infinite loops
-    //         if (Mathf.Abs(currentX - startX) > width * 2 || Mathf.Abs(currentY - startY) > height * 2)
-    //             break;
-    //     }
-    // }
-
     private void ConnectWallsToBorders()
     {
         // Check left border (x = 0)
@@ -667,12 +503,10 @@ public class MapGenerator : MonoBehaviour
 
     private void PunchHoleWithThreshold(int centerX, int centerY, int radius)
     {
-        // Define transition zone (70% inner = full ground, 30% outer = transition)
         float transitionStartRatio = 0.7f;
         float transitionEnd = radius;
         float transitionStart = radius * transitionStartRatio;
         
-        // Punch circle with smooth transitions
         for (int x = centerX - radius; x <= centerX + radius; x++)
         {
             for (int y = centerY - radius; y <= centerY + radius; y++)
@@ -686,23 +520,16 @@ public class MapGenerator : MonoBehaviour
                 {
                     Vector3Int cellPos = new Vector3Int(x - _mapCenterXOffset, y - _mapCenterYOffset, 0);
                     
-                    // Inner area: guaranteed ground
                     if (distance <= transitionStart)
                     {
                         SetGroundTile(cellPos, groundTile);
                     }
-                    // Transition zone: blend between ground and surrounding terrain
                     else
                     {
-                        // Get original tile type based on noise (before modifications)
                         TileBase originalTile = GetTileForPosition(x, y);
-                        
-                        // Create transition: closer to center = more ground, closer to edge = more original
                         float transitionFactor = (distance - transitionStart) / (transitionEnd - transitionStart);
-                        
                         TileBase transitionTile = GetTileForSmoothTransition(x, y, transitionFactor, originalTile);
                         
-                        // Place on appropriate tilemap
                         if (IsTerrainTile(transitionTile))
                         {
                             SetWallTile(cellPos, transitionTile);
@@ -721,7 +548,6 @@ public class MapGenerator : MonoBehaviour
     {
         _noiseMap = new float[width, height];
         
-        // Use seed for consistent generation
         System.Random prng = new System.Random(seed);
         float offsetX = prng.Next(-100000, 100000) + noiseOffset.x;
         float offsetY = prng.Next(-100000, 100000) + noiseOffset.y;
