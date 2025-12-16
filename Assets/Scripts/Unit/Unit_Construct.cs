@@ -49,17 +49,6 @@ public class Unit_Construct : UnitBase
 
     private void Start()
     {
-        if (ConstructionManager.Instance == null)
-        {
-            ConstructionManager existingManager = FindFirstObjectByType<ConstructionManager>();
-            if (existingManager == null)
-            {
-                GameObject managerObj = new GameObject("ConstructionManager");
-                managerObj.AddComponent<ConstructionManager>();
-                Debug.LogWarning($"[Unit_Construct] Auto-created ConstructionManager GameObject for {name}");
-            }
-        }
-
         if (ConstructionManager.Instance != null && movement != null)
         {
             ConstructionManager.Instance.RegisterConstructDrone(this);
@@ -105,7 +94,6 @@ public class Unit_Construct : UnitBase
         
         ConstructionManager.Instance?.RequestTask(this);
     }
-    
 
     private void UpdateFetching()
     {
@@ -146,7 +134,6 @@ public class Unit_Construct : UnitBase
             
             if (!CanDepositResource())
             {
-                Debug.Log($"[Construct:{name}] Cannot deposit resources - request invalid. Returning resources and aborting.");
                 if (_targetStorage != null)
                 {
                     _carriedAmount = 0;
@@ -224,7 +211,7 @@ public class Unit_Construct : UnitBase
             SetTask_Idle();
             yield break;
         }
-        
+
         if (!CanDepositResource())
         {
             _unloadingCoroutine = null;
@@ -333,12 +320,10 @@ public class Unit_Construct : UnitBase
             SetTask_Idle();
         }
     }
-
-
+    
     public void SetTask_FetchResource(ConstructionSite.ConstructionRequest request, ConstructionSite site)
     {
         if (movement == null) {
-            Debug.LogWarning($"[Construct:{name}] Cannot set fetch task: movement component not initialized");
             if (request != null && request.site != null) {
                 request.site.CancelRequest(request);
             }
@@ -354,7 +339,6 @@ public class Unit_Construct : UnitBase
             if (hasPath)
             {
                 _currentState = ConstructState.FetchingResource;
-                Debug.Log($"[Construct:{name}] State -> FetchingResource: {_currentRequest.amount} {_currentRequest.type} from '{(_targetStorage as Object)?.name}'");
                 return;
             }
         }

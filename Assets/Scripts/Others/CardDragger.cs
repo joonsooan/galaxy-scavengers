@@ -15,9 +15,9 @@ public class CardDragger : MonoBehaviour
     private BuildingData _activeBuildingData;
     private Vector3Int _lastPlacedCell;
     private bool _isDragging;
+    
     private List<Vector3Int> _placedCellsInDrag;
     private PointerEventData _pointerEventData;
-    
     private List<ResourceCost> _cachedComboCosts;
     
     private void Update()
@@ -30,9 +30,11 @@ public class CardDragger : MonoBehaviour
     
     public void StartDrag(DisplayableData data)
     {
-        if (_isDragging) return;
+        if (_isDragging)
+        {
+            EndDrag();
+        }
 
-        // Only support ComboCardData
         BuildingData buildingData = data as BuildingData;
         if (buildingData != null && buildingData.buildingPrefab != null)
         {
@@ -41,7 +43,6 @@ public class CardDragger : MonoBehaviour
             _lastPlacedCell = Vector3Int.one * int.MaxValue;
             _placedCellsInDrag = new List<Vector3Int>();
             
-            // Calculate and cache costs from recipe
             _cachedComboCosts = CalculateComboCosts(buildingData);
 
             CreateGhostBuilding();
@@ -53,8 +54,7 @@ public class CardDragger : MonoBehaviour
         List<ResourceCost> totalCosts = new List<ResourceCost>();
         Dictionary<ResourceType, int> costDict = new Dictionary<ResourceType, int>();
         
-        // Load all CardData to find costs for each gadget type
-        BuildingPieceData[] allCards = Resources.LoadAll<BuildingPieceData>("Cards");
+        BuildingPieceData[] allCards = Resources.LoadAll<BuildingPieceData>("Building Pieces");
         Dictionary<BuildingPieceType, BuildingPieceData> gadgetToCardMap = new Dictionary<BuildingPieceType, BuildingPieceData>();
         
         foreach (var card in allCards)
@@ -65,7 +65,6 @@ public class CardDragger : MonoBehaviour
             }
         }
         
-        // Sum up costs from all pieces in the recipe
         if (comboData.recipe != null)
         {
             foreach (var piece in comboData.recipe)
@@ -87,7 +86,6 @@ public class CardDragger : MonoBehaviour
             }
         }
         
-        // Convert dictionary to list
         foreach (var kvp in costDict)
         {
             totalCosts.Add(new ResourceCost { resourceType = kvp.Key, amount = kvp.Value });
@@ -125,14 +123,12 @@ public class CardDragger : MonoBehaviour
             _ghostBuildingRenderer.color = ghostColor;
         }
         
-        // Disable VisionProvider components on ghost building to prevent fog of war updates during drag
         VisionProvider[] visionProviders = _ghostBuildingInstance.GetComponentsInChildren<VisionProvider>(true);
         foreach (var visionProvider in visionProviders)
         {
             if (visionProvider != null)
             {
                 visionProvider.SetActive(false);
-                // Unregister immediately in case it already registered during OnEnable
                 if (FogOfWarManager.Instance != null)
                 {
                     FogOfWarManager.Instance.UnregisterVisionProvider(visionProvider);
@@ -149,19 +145,13 @@ public class CardDragger : MonoBehaviour
         Vector3Int cellPosition = grid.WorldToCell(mouseWorldPos);
         Vector3 cellCenterWorld = grid.GetCellCenterWorld(cellPosition);
 
-        // Position ghost building at the grid cell center (snap to grid)
         if (_ghostBuildingInstance != null)
         {
             _ghostBuildingInstance.transform.position = cellCenterWorld;
         }
 
-        // Check if the entire combo pattern can be placed
         bool canPlacePattern = CanPlaceComboPattern(cellPosition);
-        
-        // Check if resources are available
         bool hasResources = HasEnoughResourcesForCombo();
-        
-        // Can place if pattern is valid AND resources are available
         bool canPlace = canPlacePattern && hasResources;
 
         UpdateGhostColor(canPlace);
@@ -174,13 +164,11 @@ public class CardDragger : MonoBehaviour
             return false;
         }
         
-        // Check if anchor position is within map bounds
         if (!IsPositionInBoundsForPlacement(anchorCell))
         {
             return false;
         }
         
-        // Check if all cells in the recipe pattern can be placed
         foreach (var piece in _activeBuildingData.recipe)
         {
             Vector3Int cellPos = anchorCell + piece.relativePosition;
@@ -197,7 +185,7 @@ public class CardDragger : MonoBehaviour
     {
         if (_cachedComboCosts == null || _cachedComboCosts.Count == 0)
         {
-            return false;
+            return true;
         }
         
         if (ResourceManager.Instance == null)
@@ -220,6 +208,11 @@ public class CardDragger : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
+
             if (IsPointerOverDragEndZone())
             {
                 EndDrag();
@@ -230,7 +223,6 @@ public class CardDragger : MonoBehaviour
 
             if (cellPosition != _lastPlacedCell && !_placedCellsInDrag.Contains(cellPosition))
             {
-                // Check if the entire combo pattern can be placed and resources are available
                 if (CanPlaceComboPattern(cellPosition) && HasEnoughResourcesForCombo())
                 {
                     AttemptPlacement(cellPosition);
@@ -248,7 +240,6 @@ public class CardDragger : MonoBehaviour
     {
         if (_activeBuildingData != null)
         {
-            // Create construction site for combo building
             BuildingManager.Instance.CreateConstructionSite(_activeBuildingData, cellPos);
             _placedCellsInDrag.Add(cellPos);
         }

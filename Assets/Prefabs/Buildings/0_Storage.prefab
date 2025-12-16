@@ -78,7 +78,7 @@ SpriteRenderer:
   m_SortingLayerID: -1289577761
   m_SortingLayer: 4
   m_SortingOrder: 0
-  m_Sprite: {fileID: 4218390747337514297, guid: 36441be9ffbcaab4280cf9ed3a66c607, type: 3}
+  m_Sprite: {fileID: -2447318104963349794, guid: 135e80e3fb0b8044a8dfc67e688cb32f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -105,9 +105,6 @@ MonoBehaviour:
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
   maxStorageAmount: 200
-  storageSliderPrefab: {fileID: 2354038024701718824, guid: 6bd2b307424729b46bc663a2af90c671, type: 3}
-  canvasName: ObejectUI Canvas
-  sliderOffset: {x: 0, y: 0.8, z: 0}
 --- !u!114 &5004616453792402242
 MonoBehaviour:
   m_ObjectHideFlags: 0

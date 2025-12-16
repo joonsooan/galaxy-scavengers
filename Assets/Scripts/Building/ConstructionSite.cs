@@ -53,8 +53,8 @@ public class ConstructionSite : MonoBehaviour
             
             if (buildingPieceAndDataMap.TryGetValue(piece.buildingPieceType, out BuildingPieceData pieceData) && pieceData.costs != null)
             {
-                Dictionary<ResourceType, int> pieceRequired = new Dictionary<ResourceType, int>(); // 요청 중인 남은 자원
-                Dictionary<ResourceType, int> pieceDelivered = new Dictionary<ResourceType, int>(); // 지금까지 배달된 자원
+                Dictionary<ResourceType, int> pieceRequired = new Dictionary<ResourceType, int>();
+                Dictionary<ResourceType, int> pieceDelivered = new Dictionary<ResourceType, int>();
                 
                 foreach (var cost in pieceData.costs)
                 {
@@ -109,7 +109,7 @@ public class ConstructionSite : MonoBehaviour
         if (_constructedPieces.ContainsKey(pieceCell))
         {
             _constructedPieces[pieceCell] = true;
-            _pendingRequests.RemoveAll(r => r.targetPieceCell == pieceCell); // 남아있는 요청 모두 제거
+            _pendingRequests.RemoveAll(r => r.targetPieceCell == pieceCell);
             
             if (drone != null)
             {
@@ -123,7 +123,6 @@ public class ConstructionSite : MonoBehaviour
         }
     }
     
-    // 드론에게 자원 배달을 위한 상호작용 셀 할당
     public Vector3 AssignDeliveryInteractionCell(Unit_Construct drone, Vector3Int pieceCell)
     {
         return AssignInteractionCellInternal(drone, pieceCell);
@@ -138,7 +137,6 @@ public class ConstructionSite : MonoBehaviour
         
         List<Vector3Int> availableCells = GetAvailableInteractionCells(pieceCell);
         
-        // 상호작용 가능한 셀이 없는 경우 셀 자체를 할당
         if (availableCells.Count == 0)
         {
             return BuildingManager.Instance.grid.GetCellCenterWorld(pieceCell);
@@ -154,7 +152,6 @@ public class ConstructionSite : MonoBehaviour
         return BuildingManager.Instance.grid.GetCellCenterWorld(bestCell);
     }
     
-    // 가장 가까운 상호작용 셀 찾는 함수
     private Vector3Int FindBestInteractionCell(Unit_Construct drone, List<Vector3Int> availableCells)
     {
         Vector3Int bestCell = availableCells[0];
@@ -245,6 +242,11 @@ public class ConstructionSite : MonoBehaviour
     
     private void Start()
     {
+        if (ConstructionManager.Instance != null)
+        {
+            ConstructionManager.Instance.RegisterConstructionSite(this);
+        }
+        
         if (buildingData != null && buildingData.recipe != null)
         {
             CalculateCosts();
@@ -324,7 +326,12 @@ public class ConstructionSite : MonoBehaviour
     
     public ConstructionRequest GetAndAssignNextResourceRequest(Unit_Construct drone, int droneCapacity)
     {
-        if (_requiredResources.Count == 0 || drone == null)
+        if (drone == null)
+        {
+            return null;
+        }
+        
+        if (_pieceRequiredResources.Count == 0)
         {
             return null;
         }
@@ -378,32 +385,27 @@ public class ConstructionSite : MonoBehaviour
         
         if (request == null)
         {
-            // 해당하는 요청 없음
             bool isDuplicate = _requestsBeingDelivered.Any(r => r.assignedDrone == drone && r.type == type);
             if (isDuplicate)
             {
-                return false; // 이미 다른 드론에 의해 자원 배달이 완료됨
+                return false;
             }
-            // 아예 요청이 존재하지 않음
             return false;
         }
         
-        // 자원이 현재 배달 중인 상태임
         if (_requestsBeingDelivered.Contains(request))
         {
             return false;
         }
         
-        // 이 자원이 필요한지 확인
         int totalNeeded = _requiredResources.TryGetValue(type, out var requiredResource) ? requiredResource : 0;
         int totalDelivered = _deliveredResources.TryGetValue(type, out var resource) ? resource : 0;
         
         if (totalNeeded <= totalDelivered)
         {
-            return false; // 필요한 자원의 양보다 배달되는 양이 더 많음
+            return false;
         }
         
-        // 자원 요청이 존재하고, 아직 배달되지 않았으며, 자원이 필요함
         return true;
     }
     
@@ -413,26 +415,14 @@ public class ConstructionSite : MonoBehaviour
         
         if (request == null)
         {
-            // 현재 이미 진행 중인 요청인지 확인
-            bool isDuplicate = _requestsBeingDelivered.Any(r => r.assignedDrone == drone && r.type == type);
-            if (isDuplicate)
-            {
-                Debug.Log($"[ConstructionSite:{name}] Deposit REJECTED: duplicate delivery attempt from drone {drone.name} for {type} (request already being processed)");
-            }
-            else
-            {
-                Debug.Log($"[ConstructionSite:{name}] Deposit FAILED: no matching pending request for {type} from drone {drone.name}");
-            }
             return false;
         }
         
-        // 이미 배달 중인 요청인지 확인
         if (!_requestsBeingDelivered.Add(request))
         {
             return false;
         }
         
-        // '보류 중'에서 제거하기 전에 '배달 됨'으로 요청을 표시
         _pendingRequests.Remove(request);
         
         try
@@ -444,7 +434,6 @@ public class ConstructionSite : MonoBehaviour
             
             if (totalCanAccept <= 0)
             {
-                Debug.Log($"[ConstructionSite:{name}] Deposit rejected: piece already has sufficient resources of type {type}");
                 return false;
             }
 
@@ -500,13 +489,11 @@ public class ConstructionSite : MonoBehaviour
         
         if (!PieceHasAllResources(pieceCell))
         {
-            Debug.LogWarning($"[ConstructionSite:{name}] Cannot construct piece at {pieceCell} - resources not fully delivered.");
             return;
         }
         
         if (buildingData == null || BuildingManager.Instance == null)
         {
-            Debug.LogError($"[ConstructionSite:{name}] Cannot construct piece: missing comboCardData or BuildingManager");
             return;
         }
         
@@ -522,10 +509,6 @@ public class ConstructionSite : MonoBehaviour
                 ConstructionManager.Instance.OnPieceConstructed(this);
             }
         }
-        else
-        {
-            Debug.LogError($"[ConstructionSite:{name}] Failed to construct piece at {pieceCell} - piece was not placed!");
-        }
     }
     
     public void CancelRequest(ConstructionRequest request)
@@ -536,7 +519,6 @@ public class ConstructionSite : MonoBehaviour
         _requestsBeingDelivered.Remove(request);
     }
     
-    // IDLE 상태인 유닛들의 요청을 제거
     private void CleanupStaleRequests()
     {
         _pendingRequests.RemoveAll(r => {
@@ -575,4 +557,3 @@ public class ConstructionSite : MonoBehaviour
         public Vector3Int? targetPieceCell;
     }
 }
-

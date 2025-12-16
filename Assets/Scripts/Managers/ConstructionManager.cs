@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class ConstructionManager : MonoBehaviour
@@ -32,6 +31,15 @@ public class ConstructionManager : MonoBehaviour
             }
         }
         
+        ConstructionSite[] existingSites = FindObjectsByType<ConstructionSite>(FindObjectsSortMode.None);
+        foreach (var site in existingSites)
+        {
+            if (!_constructionSites.Contains(site))
+            {
+                RegisterConstructionSite(site);
+            }
+        }
+        
         if (_constructionSites.Count > 0)
         {
             AssignDronesToSites();
@@ -42,7 +50,6 @@ public class ConstructionManager : MonoBehaviour
     {
         if (site == null)
         {
-            Debug.LogWarning("[ConstructionManager] Attempted to register null construction site");
             return;
         }
         
@@ -50,10 +57,6 @@ public class ConstructionManager : MonoBehaviour
         {
             _constructionSites.Add(site);
             AssignDronesToSites();
-        }
-        else
-        {
-            Debug.LogWarning($"[ConstructionManager] Construction site at {site.cellPosition} already registered");
         }
     }
     
@@ -74,10 +77,6 @@ public class ConstructionManager : MonoBehaviour
             _constructDrones.Add(drone);
             AssignDroneToSite(drone);
         }
-        else
-        {
-            Debug.LogWarning($"[ConstructionManager] Construct drone {drone.name} already registered");
-        }
     }
     
     public void UnregisterConstructDrone(Unit_Construct drone)
@@ -89,7 +88,6 @@ public class ConstructionManager : MonoBehaviour
     {
         if (drone == null)
         {
-            Debug.LogWarning("[ConstructionManager] RequestTask called with null drone");
             return;
         }
         
@@ -98,21 +96,23 @@ public class ConstructionManager : MonoBehaviour
     
     private void TryAssignResourceFetchTask(Unit_Construct drone, ConstructionSite prioritySite)
     {
-        if (prioritySite != null && !prioritySite.IsComplete && TryAssignResourceRequest(drone, prioritySite, true))
+        if (prioritySite != null && !prioritySite.IsComplete && TryAssignResourceRequest(drone, prioritySite))
         {
             return;
         }
         
         foreach (var site in _constructionSites)
         {
-            if (site != null && !site.IsComplete && TryAssignResourceRequest(drone, site, false))
+            if (site != null && site != prioritySite && !site.IsComplete && TryAssignResourceRequest(drone, site))
             {
                 return;
             }
         }
+        
+        drone.SetTaskRequestCooldown(1.0f);
     }
     
-    private bool TryAssignResourceRequest(Unit_Construct drone, ConstructionSite site, bool isPriority)
+    private bool TryAssignResourceRequest(Unit_Construct drone, ConstructionSite site)
     {
         ConstructionSite.ConstructionRequest request = site.GetAndAssignNextResourceRequest(drone, drone.carryCapacity);
         if (request == null) return false;
@@ -121,7 +121,6 @@ public class ConstructionManager : MonoBehaviour
         if (storage == null)
         {
             site.CancelRequest(request);
-            drone.SetTaskRequestCooldown(1.0f);
             return false;
         }
         
@@ -144,6 +143,7 @@ public class ConstructionManager : MonoBehaviour
     {
         if (drone == null || !drone.IsIdle()) return;
         
+        drone.SetTaskRequestCooldown(0f);
         RequestTask(drone);
     }
     
@@ -185,4 +185,3 @@ public class ConstructionManager : MonoBehaviour
         }
     }
 }
-

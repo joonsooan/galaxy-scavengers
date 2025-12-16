@@ -79,7 +79,7 @@ SpriteRenderer:
   m_SortingLayerID: -1289577761
   m_SortingLayer: 4
   m_SortingOrder: 0
-  m_Sprite: {fileID: 5856981904466133357, guid: e279a7b148d84b24a82b2a7e34ab288c, type: 3}
+  m_Sprite: {fileID: 2544712925334621364, guid: 135e80e3fb0b8044a8dfc67e688cb32f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -128,7 +128,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.5, y: 1.5}
+    oldSize: {x: 1, y: 3}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -152,9 +152,6 @@ MonoBehaviour:
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
   maxStorageAmount: 200
-  storageSliderPrefab: {fileID: 0}
-  canvasName: ObjectUI_Canvas
-  sliderOffset: {x: 0, y: 1, z: 0}
 --- !u!114 &3827199288077238633
 MonoBehaviour:
   m_ObjectHideFlags: 0
