@@ -14,6 +14,7 @@ public class MapGenerator : MonoBehaviour
     public Tilemap Tilemap => groundTilemap;
     public Tilemap GroundTilemap => groundTilemap;
     public Tilemap WallTilemap => wallTilemap;
+    public IReadOnlyList<Vector2Int> EnemySpawnHolePositions => _enemySpawnHolePositions;
     
     [Header("Tilemaps")]
     [SerializeField] private Tilemap groundTilemap;
@@ -85,6 +86,16 @@ public class MapGenerator : MonoBehaviour
     private float[,] _gradientMap;
     
     private readonly List<Vector2Int> _enemySpawnHolePositions = new ();
+
+    public Vector3 GetEnemySpawnHoleWorldPosition(Vector2Int holePosition)
+    {
+        if (grid == null)
+        {
+            return Vector3.zero;
+        }
+        Vector3Int cellPos = new Vector3Int(holePosition.x - _mapCenterXOffset, holePosition.y - _mapCenterYOffset, 0);
+        return grid.GetCellCenterWorld(cellPos);
+    }
 
     private void SetGroundTile(Vector3Int cellPosition, TileBase tile)
     {
@@ -377,18 +388,12 @@ public class MapGenerator : MonoBehaviour
             
             for (int holeIndex = 0; holeIndex < enemySpawnHolesPerSector; holeIndex++)
             {
-                float angle = Random.Range(0f, Mathf.PI * 2f);
-                float distance = Random.Range(minRadius, maxRadius);
-                
-                int holeCenterX = centerX + Mathf.RoundToInt(Mathf.Cos(angle) * distance);
-                int holeCenterY = centerY + Mathf.RoundToInt(Mathf.Sin(angle) * distance);
-                
-                holeCenterX = Mathf.Clamp(holeCenterX, enemySpawnHoleRadius + 1, width - enemySpawnHoleRadius - 2);
-                holeCenterY = Mathf.Clamp(holeCenterY, enemySpawnHoleRadius + 1, height - enemySpawnHoleRadius - 2);
-                
-                _enemySpawnHolePositions.Add(new Vector2Int(holeCenterX, holeCenterY));
-                
-                PunchHoleWithThreshold(holeCenterX, holeCenterY, enemySpawnHoleRadius);
+                Vector2Int? validHolePos = FindValidHolePosition(centerX, centerY, minRadius, maxRadius, enemySpawnHoleRadius);
+                if (validHolePos.HasValue)
+                {
+                    _enemySpawnHolePositions.Add(validHolePos.Value);
+                    PunchHoleWithThreshold(validHolePos.Value.x, validHolePos.Value.y, enemySpawnHoleRadius);
+                }
             }
         }
         
@@ -397,18 +402,76 @@ public class MapGenerator : MonoBehaviour
             float minRadius = divisionRadii[startIndex];
             float maxRadius = divisionRadii[divisionRadii.Count - 1];
             
+            Vector2Int? validHolePos = FindValidHolePosition(centerX, centerY, minRadius, maxRadius, enemySpawnHoleRadius);
+            if (validHolePos.HasValue)
+            {
+                _enemySpawnHolePositions.Add(validHolePos.Value);
+                PunchHoleWithThreshold(validHolePos.Value.x, validHolePos.Value.y, enemySpawnHoleRadius);
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+    
+    private Vector2Int? FindValidHolePosition(int centerX, int centerY, float minRadius, float maxRadius, int holeRadius)
+    {
+        int maxAttempts = 1000;
+        
+        for (int attempt = 0; attempt < maxAttempts; attempt++)
+        {
             float angle = Random.Range(0f, Mathf.PI * 2f);
             float distance = Random.Range(minRadius, maxRadius);
             
             int holeCenterX = centerX + Mathf.RoundToInt(Mathf.Cos(angle) * distance);
             int holeCenterY = centerY + Mathf.RoundToInt(Mathf.Sin(angle) * distance);
             
-            holeCenterX = Mathf.Clamp(holeCenterX, enemySpawnHoleRadius + 1, width - enemySpawnHoleRadius - 2);
-            holeCenterY = Mathf.Clamp(holeCenterY, enemySpawnHoleRadius + 1, height - enemySpawnHoleRadius - 2);
+            holeCenterX = Mathf.Clamp(holeCenterX, holeRadius + 1, width - holeRadius - 2);
+            holeCenterY = Mathf.Clamp(holeCenterY, holeRadius + 1, height - holeRadius - 2);
             
-            _enemySpawnHolePositions.Add(new Vector2Int(holeCenterX, holeCenterY));
-            PunchHoleWithThreshold(holeCenterX, holeCenterY, enemySpawnHoleRadius);
+            if (IsValidHolePosition(holeCenterX, holeCenterY, holeRadius))
+            {
+                return new Vector2Int(holeCenterX, holeCenterY);
+            }
         }
+        
+        return null;
+    }
+    
+    private bool IsValidHolePosition(int centerX, int centerY, int radius)
+    {
+        float innerRadius = radius * 0.7f;
+        int groundCellCount = 0;
+        int totalCellCount = 0;
+        
+        for (int x = centerX - radius; x <= centerX + radius; x++)
+        {
+            for (int y = centerY - radius; y <= centerY + radius; y++)
+            {
+                if (x < 1 || x >= width - 1 || y < 1 || y >= height - 1)
+                    continue;
+                
+                float distance = Mathf.Sqrt((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY));
+                
+                if (distance <= innerRadius)
+                {
+                    totalCellCount++;
+                    Vector3Int cellPos = new Vector3Int(x - _mapCenterXOffset, y - _mapCenterYOffset, 0);
+                    TileBase tile = GetTileAtPosition(cellPos);
+                    
+                    if (tile == groundTile || !IsTerrainTile(tile))
+                    {
+                        groundCellCount++;
+                    }
+                }
+            }
+        }
+        
+        if (totalCellCount == 0) return false;
+        
+        float groundRatio = (float)groundCellCount / totalCellCount;
+        return groundRatio >= 0.6f;
     }
     
     private void DrawCircleGizmo(Vector3 center, float radius)
@@ -500,10 +563,6 @@ public class MapGenerator : MonoBehaviour
 
     private void PunchHoleWithThreshold(int centerX, int centerY, int radius)
     {
-        float transitionStartRatio = 0.7f;
-        float transitionEnd = radius;
-        float transitionStart = radius * transitionStartRatio;
-        
         for (int x = centerX - radius; x <= centerX + radius; x++)
         {
             for (int y = centerY - radius; y <= centerY + radius; y++)
@@ -516,25 +575,32 @@ public class MapGenerator : MonoBehaviour
                 if (distance <= radius)
                 {
                     Vector3Int cellPos = new Vector3Int(x - _mapCenterXOffset, y - _mapCenterYOffset, 0);
+                    SetGroundTile(cellPos, groundTile);
+                }
+            }
+        }
+        
+        float edgeTolerance = 1.5f;
+        float edgeMin = radius - edgeTolerance;
+        float edgeMax = radius + edgeTolerance;
+        
+        for (int x = centerX - radius - 1; x <= centerX + radius + 1; x++)
+        {
+            for (int y = centerY - radius - 1; y <= centerY + radius + 1; y++)
+            {
+                if (x < 1 || x >= width - 1 || y < 1 || y >= height - 1)
+                    continue;
+                
+                float distance = Mathf.Sqrt((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY));
+                
+                if (distance >= edgeMin && distance <= edgeMax)
+                {
+                    Vector3Int cellPos = new Vector3Int(x - _mapCenterXOffset, y - _mapCenterYOffset, 0);
+                    TileBase tile = GetTileAtPosition(cellPos);
                     
-                    if (distance <= transitionStart)
+                    if (tile == highWallTile)
                     {
-                        SetGroundTile(cellPos, groundTile);
-                    }
-                    else
-                    {
-                        TileBase originalTile = GetTileForPosition(x, y);
-                        float transitionFactor = (distance - transitionStart) / (transitionEnd - transitionStart);
-                        TileBase transitionTile = GetTileForSmoothTransition(x, y, transitionFactor, originalTile);
-                        
-                        if (IsTerrainTile(transitionTile))
-                        {
-                            SetWallTile(cellPos, transitionTile);
-                        }
-                        else
-                        {
-                            SetGroundTile(cellPos, transitionTile);
-                        }
+                        SetWallTile(cellPos, lowWallTile != null ? lowWallTile : groundTile);
                     }
                 }
             }

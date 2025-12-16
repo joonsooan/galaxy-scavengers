@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayName: "\uD3EC\uD0D1"
   description: Attacks enemy units
-  icon: {fileID: 907466949, guid: 4b4d97bc9df3e3244a75d745e708e8e5, type: 3}
+  icon: {fileID: -6644075587529047432, guid: bdd2f55a697171d499fbfbb18a3c6a04, type: 3}
   buildingPrefab: {fileID: 1574451153020646121, guid: dbd9ea1139f913d409d177ba28ce9ddd, type: 3}
   buildingTile: {fileID: 11400000, guid: eb52d49e34f0a7349b188d1a0f47dcf8, type: 2}
   buildingType: 8

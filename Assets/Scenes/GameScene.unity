@@ -3269,8 +3269,8 @@ MonoBehaviour:
   enableEnemySpawnHoles: 1
   enemySpawnHoleCount: 3
   enemySpawnHoleRadius: 4
-  enemySpawnHolesPerSector: 1
-  enemySpawnHoleStartCircleIndex: 3
+  enemySpawnHolesPerSector: 4
+  enemySpawnHoleStartCircleIndex: 2
   showEnemySpawnHoleGizmos: 1
   enemySpawnHoleGizmoColor: {r: 1, g: 0, b: 0, a: 0.5}
   concentricCircleGizmoColor: {r: 1, g: 1, b: 0, a: 0.3}
@@ -3286,11 +3286,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c1b6965b69088843b0d523477f7dc1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyPrefab: {fileID: 7944764008120523387, guid: 15cabd88de00d244b9df4101ebda75ba, type: 3}
-  initialSpawnDelay: 1000
-  spawnInterval: 600
-  baseSpawnCount: 1
-  spawnCountIncreasePerWave: 1
+  enemyPrefab: {fileID: 7944764008120523387, guid: 6ef6e727776f20b46a722ca01f6b9153, type: 3}
+  enemiesPerHole: 4
+  spawnRadiusOffset: 2
 --- !u!114 &313771330
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4810,6 +4808,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 327025570}
     m_Modifications:
     - target: {fileID: 819041302710811902, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
+      propertyPath: buildingData
+      value: 
+      objectReference: {fileID: 11400000, guid: 6a375b82248aff4438a80132fb46c2a5, type: 2}
+    - target: {fileID: 819041302710811902, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: controlPanel
       value: 
       objectReference: {fileID: 152035980}
@@ -4851,7 +4853,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4448073754042335789, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4448073754042335789, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: m_AnchorMin.x
@@ -4859,7 +4861,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4448073754042335789, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4448073754042335789, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: m_SizeDelta.x
@@ -4899,11 +4901,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4448073754042335789, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 176
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4448073754042335789, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -16
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4448073754042335789, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -4923,7 +4925,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7908266427385395844, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

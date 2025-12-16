@@ -179,6 +179,11 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        foreach (EnemySpawner enemySpawner in FindObjectsByType<EnemySpawner>(FindObjectsSortMode.None))
+        {
+            enemySpawner.SpawnEnemies();
+        }
+
         foreach (Unit_Miner unit in FindObjectsByType<Unit_Miner>(FindObjectsSortMode.None)) {
             unit.TryStartActions();
         }
