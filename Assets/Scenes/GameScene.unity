@@ -3296,8 +3296,8 @@ MonoBehaviour:
   enemySpawnHoleCount: 3
   enemySpawnHoleRadius: 4
   enemySpawnHoleDistanceRatio: 0.7
-  enemySpawnHolesPerSector: 3
-  enemySpawnHoleStartCircleIndex: 2
+  enemySpawnHolesPerSector: 1
+  enemySpawnHoleStartCircleIndex: 3
   showEnemySpawnHoleGizmos: 1
   enemySpawnHoleGizmoColor: {r: 1, g: 0, b: 0, a: 0.5}
   concentricCircleGizmoColor: {r: 1, g: 1, b: 0, a: 0.3}
@@ -25100,7 +25100,6 @@ MonoBehaviour:
   groundTilemap: {fileID: 558756081}
   fogTilemap: {fileID: 80026093}
   updateInterval: 0.1
-  enableDebugLogs: 0
   fogTile: {fileID: 11400000, guid: 10bd3c981c2104842b1ff71688283ee8, type: 2}
   fullyVisibleColor: {r: 1, g: 1, b: 1, a: 0}
   partlyVisibleColor: {r: 0.2509804, g: 0.2509804, b: 0.2509804, a: 0.5882353}
