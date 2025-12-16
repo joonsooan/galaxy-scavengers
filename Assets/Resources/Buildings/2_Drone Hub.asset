@@ -19,13 +19,13 @@ MonoBehaviour:
   buildingTile: {fileID: 11400000, guid: eb52d49e34f0a7349b188d1a0f47dcf8, type: 2}
   buildingType: 2
   recipe:
-  - buildingPieceType: 0
+  - buildingPieceType: 1
     relativePosition: {x: -1, y: 0, z: 0}
-  - buildingPieceType: 0
+  - buildingPieceType: 1
     relativePosition: {x: 1, y: 0, z: 0}
-  - buildingPieceType: 0
+  - buildingPieceType: 2
     relativePosition: {x: -1, y: 1, z: 0}
-  - buildingPieceType: 0
+  - buildingPieceType: 2
     relativePosition: {x: 0, y: 1, z: 0}
-  - buildingPieceType: 0
+  - buildingPieceType: 2
     relativePosition: {x: 1, y: 1, z: 0}
