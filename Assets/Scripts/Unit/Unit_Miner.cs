@@ -382,10 +382,8 @@ public class Unit_Miner : UnitBase
 
     private UnloadTarget FindClosestUnloadPosition()
     {
-        UnloadTarget bestTarget = new UnloadTarget { distance = float.MaxValue };
         Grid grid = BuildingManager.Instance.grid;
 
-        // Check what resources the lifter is carrying
         bool hasAether = _currentCarryAmounts.ContainsKey(ResourceType.Aether) &&
             _currentCarryAmounts[ResourceType.Aether] > 0;
         bool hasNonAether = _currentCarryAmounts.Any(p => p.Key != ResourceType.Aether && p.Value > 0);
@@ -393,29 +391,21 @@ public class Unit_Miner : UnitBase
         IEnumerable<IStorage> allStorages = ResourceManager.Instance.GetAllStorages()
             .Where(s => s != null && s.GetTotalCurrentAmount() < s.GetMaxCapacity());
 
-        // If lifter has NO Aether, exclude Battery objects completely
         if (!hasAether) {
-            // Only search through non-Battery storages
             allStorages = allStorages.Where(s => !(s is Battery));
         }
         else {
-            // Lifter has Aether - prioritize Battery for Aether, but also need regular storage if has other resources
             if (hasNonAether) {
-                // Has both Aether and other resources
-                // First, try to find Battery to unload Aether
                 List<IStorage> batteryStorages = allStorages.Where(s => s is Battery).ToList();
                 UnloadTarget batteryTarget = FindClosestStorageInList(batteryStorages, grid);
 
                 if (batteryTarget.storage != null) {
-                    // Found a Battery - use it first (will unload Aether, other resources will remain)
                     return batteryTarget;
                 }
 
-                // No Battery available or all full - use regular storage for all resources
                 allStorages = allStorages.Where(s => !(s is Battery));
             }
             else {
-                // Only has Aether - prioritize Battery, but can use regular storage if Battery is full
                 List<IStorage> batteryStorages = allStorages.Where(s => s is Battery).ToList();
                 UnloadTarget batteryTarget = FindClosestStorageInList(batteryStorages, grid);
 
@@ -423,12 +413,10 @@ public class Unit_Miner : UnitBase
                     return batteryTarget;
                 }
 
-                // No Battery available - use regular storage
                 allStorages = allStorages.Where(s => !(s is Battery));
             }
         }
 
-        // Search through the filtered storages
         return FindClosestStorageInList(allStorages, grid);
     }
 
@@ -622,7 +610,7 @@ public class Unit_Miner : UnitBase
 
     private void AdjustSpriteDirectionForUnloading()
     {
-        if (_targetStorage == null || !TryGetComponent<UnitSpriteController>(out UnitSpriteController spriteController)) return;
+        if (_targetStorage == null || !TryGetComponent(out UnitSpriteController spriteController)) return;
 
         Grid grid = BuildingManager.Instance.grid;
         Vector3Int unitCell = grid.WorldToCell(transform.position);

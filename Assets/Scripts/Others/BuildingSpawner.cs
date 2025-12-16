@@ -10,11 +10,7 @@ public class BuildingSpawner : MonoBehaviour
     [SerializeField] private Grid grid;
     [SerializeField] private Transform parentTransform;
 
-    public Tilemap BuildingTilemap {
-        get {
-            return buildingTilemap;
-        }
-    }
+    public Tilemap BuildingTilemap => buildingTilemap;
 
     public void SpawnBuildings()
     {
@@ -24,7 +20,7 @@ public class BuildingSpawner : MonoBehaviour
         }
         
         if (parentTransform == null) {
-            parentTransform = this.transform;
+            parentTransform = transform;
         }
 
         foreach (Vector3Int cellPosition in buildingTilemap.cellBounds.allPositionsWithin) {

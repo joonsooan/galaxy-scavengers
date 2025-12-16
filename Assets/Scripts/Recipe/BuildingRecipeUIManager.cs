@@ -3,13 +3,11 @@ using UnityEngine;
 
 public class BuildingRecipeUIManager : MonoBehaviour
 {
-    public RecipeInfo recipeInfo;
-    
     [Header("UI References")]
     public GameObject recipeCellPrefab;
     public Transform contentParent;
     
-    private List<ComboCardData> _allRecipes;
+    private List<BuildingData> _allRecipes;
 
     private void Awake()
     {
@@ -18,8 +16,8 @@ public class BuildingRecipeUIManager : MonoBehaviour
 
     private void LoadAllRecipes()
     {
-        _allRecipes = new List<ComboCardData>();
-        ComboCardData[] loadedData = Resources.LoadAll<ComboCardData>("Combo Cards");
+        _allRecipes = new List<BuildingData>();
+        BuildingData[] loadedData = Resources.LoadAll<BuildingData>("Buildings");
         _allRecipes.AddRange(loadedData);
         
         InstantiateRecipeCells();
@@ -42,15 +40,5 @@ public class BuildingRecipeUIManager : MonoBehaviour
                 newCell.Initialize(recipeData);
             }
         }
-    }
-
-    public ComboCardData GetRecipeByName(string comboName)
-    {
-        return _allRecipes.Find(recipe => recipe.displayName == comboName);
-    }
-
-    public List<ComboCardData> GetAllRecipes()
-    {
-        return _allRecipes;
     }
 }

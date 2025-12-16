@@ -9,8 +9,8 @@ using UnityEngine.UI;
 public class InventorySystem : MonoBehaviour
 {
     [Header("UI References")]
-    [SerializeField] private GameObject inventoryPanel; // Controls the active state of the whole UI component
-    [SerializeField] private GameObject inventoryGridContainer; // Contains the GridLayoutGroup for cell placement
+    [SerializeField] private GameObject inventoryPanel;
+    [SerializeField] private GameObject inventoryGridContainer;
     [SerializeField] private GameObject currentResourcePanel;
     [SerializeField] private Button sortButton;
 
@@ -22,7 +22,7 @@ public class InventorySystem : MonoBehaviour
     [SerializeField] private int inventoryWidth = 5;
     [SerializeField] private int inventoryHeight = 5;
     [SerializeField] private int defaultMaxStackAmount = 100;
-    [SerializeField] private List<ResourceStackData> customMaxStackAmounts = new List<ResourceStackData>();
+    [SerializeField] private List<ResourceStackData> customMaxStackAmounts = new ();
 
     [Serializable]
     public class ResourceStackData
@@ -31,10 +31,10 @@ public class InventorySystem : MonoBehaviour
         public int maxStackAmount;
     }
 
-    private Dictionary<ResourceType, int> maxStackAmounts = new Dictionary<ResourceType, int>();
+    private readonly Dictionary<ResourceType, int> _maxStackAmounts = new ();
 
-    private List<InventoryCell> _inventoryCells = new List<InventoryCell>();
-    private List<ResourceInfoCellClickable> _resourceInfoCells = new List<ResourceInfoCellClickable>();
+    private readonly List<InventoryCell> _inventoryCells = new ();
+    private readonly List<ResourceInfoCellClickable> _resourceInfoCells = new ();
     private GridLayoutGroup _inventoryGrid;
     private RectTransform _resourcePanelContent;
 
@@ -89,14 +89,14 @@ public class InventorySystem : MonoBehaviour
     {
         foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
         {
-            maxStackAmounts[type] = defaultMaxStackAmount;
+            _maxStackAmounts[type] = defaultMaxStackAmount;
         }
 
         foreach (ResourceStackData data in customMaxStackAmounts)
         {
-            if (maxStackAmounts.ContainsKey(data.resourceType))
+            if (_maxStackAmounts.ContainsKey(data.resourceType))
             {
-                maxStackAmounts[data.resourceType] = data.maxStackAmount;
+                _maxStackAmounts[data.resourceType] = data.maxStackAmount;
             }
         }
     }
@@ -230,13 +230,13 @@ public class InventorySystem : MonoBehaviour
 
     public int GetMaxStackAmount(ResourceType type)
     {
-        maxStackAmounts.TryGetValue(type, out int maxStack);
+        _maxStackAmounts.TryGetValue(type, out int maxStack);
         return maxStack;
     }
 
     public void SetMaxStackAmount(ResourceType type, int amount)
     {
-        maxStackAmounts[type] = amount;
+        _maxStackAmounts[type] = amount;
     }
 
     public InventoryCell FindFirstEmptyCell()

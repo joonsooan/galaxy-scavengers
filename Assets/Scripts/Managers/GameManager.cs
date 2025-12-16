@@ -125,6 +125,12 @@ public class GameManager : MonoBehaviour
             Time.timeScale = 1f;
             InitializeGameScene();
         }
+        if (scene.name == "LightTestScene") {
+            _isPaused = false;
+            Time.timeScale = 1f;
+            
+            StartCoroutine(DelayedInitialization());
+        }
     }
 
     private void InitializeGameScene()
@@ -162,7 +168,7 @@ public class GameManager : MonoBehaviour
         RegisterPrePlacedMainStructure();
         RegisterPrePlacedBuildings();
 
-        ProceduralResourceSpawner proceduralSpawner = FindFirstObjectByType<ProceduralResourceSpawner>();
+        MapObjectSpawner proceduralSpawner = FindFirstObjectByType<MapObjectSpawner>();
         if (proceduralSpawner != null) {
             proceduralSpawner.SpawnResources();
             if (proceduralSpawner.GetComponent<ResourceSpawner>() != null) {

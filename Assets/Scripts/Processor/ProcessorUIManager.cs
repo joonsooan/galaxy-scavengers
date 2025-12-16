@@ -17,10 +17,6 @@ public class ProcessorUIManager : MonoBehaviour
     public GameObject unitAssignCellPrefab;
     public Transform unitAssignContentParent;
 
-    // [Header("Test")]
-    // [SerializeField] private ResourceProcessorData testData;
-
-    private List<ProcessorRecipe> _allRecipes;
     private ProcessorData _currentData;
     private Processor _currentProcessor;
 
@@ -74,7 +70,6 @@ public class ProcessorUIManager : MonoBehaviour
     private void LoadAllRecipes(ProcessorData data)
     {
         ClearAllRecipes();
-        _allRecipes = data.Recipes;
         InstantiateRecipeCells();
     }
 

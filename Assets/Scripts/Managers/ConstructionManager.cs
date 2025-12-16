@@ -1,11 +1,10 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class ConstructionManager : MonoBehaviour
 {
-    private readonly List<ConstructionSite> _constructionSites = new List<ConstructionSite>();
-    private readonly List<Unit_Construct> _constructDrones = new List<Unit_Construct>();
+    private readonly List<ConstructionSite> _constructionSites = new ();
+    private readonly List<Unit_Construct> _constructDrones = new ();
     
     public static ConstructionManager Instance { get; private set; }
     
@@ -14,7 +13,6 @@ public class ConstructionManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            Debug.Log("[ConstructionManager] Instance initialized");
         }
         else if (Instance != this)
         {
@@ -33,6 +31,15 @@ public class ConstructionManager : MonoBehaviour
             }
         }
         
+        ConstructionSite[] existingSites = FindObjectsByType<ConstructionSite>(FindObjectsSortMode.None);
+        foreach (var site in existingSites)
+        {
+            if (!_constructionSites.Contains(site))
+            {
+                RegisterConstructionSite(site);
+            }
+        }
+        
         if (_constructionSites.Count > 0)
         {
             AssignDronesToSites();
@@ -43,20 +50,13 @@ public class ConstructionManager : MonoBehaviour
     {
         if (site == null)
         {
-            Debug.LogWarning("[ConstructionManager] Attempted to register null construction site");
             return;
         }
         
         if (!_constructionSites.Contains(site))
         {
             _constructionSites.Add(site);
-            Debug.Log($"[ConstructionManager] Registered construction site at {site.cellPosition}. Total sites: {_constructionSites.Count}, Available drones: {_constructDrones.Count}");
-            
             AssignDronesToSites();
-        }
-        else
-        {
-            Debug.LogWarning($"[ConstructionManager] Construction site at {site.cellPosition} already registered");
         }
     }
     
@@ -69,20 +69,13 @@ public class ConstructionManager : MonoBehaviour
     {
         if (drone == null)
         {
-            Debug.LogWarning("[ConstructionManager] Attempted to register null construct drone");
             return;
         }
         
         if (!_constructDrones.Contains(drone))
         {
             _constructDrones.Add(drone);
-            Debug.Log($"[ConstructionManager] Registered construct drone: {drone.name}. Total drones: {_constructDrones.Count}, Active sites: {_constructionSites.Count}");
-            
             AssignDroneToSite(drone);
-        }
-        else
-        {
-            Debug.LogWarning($"[ConstructionManager] Construct drone {drone.name} already registered");
         }
     }
     
@@ -95,32 +88,31 @@ public class ConstructionManager : MonoBehaviour
     {
         if (drone == null)
         {
-            Debug.LogWarning("[ConstructionManager] RequestTask called with null drone");
             return;
         }
         
         TryAssignResourceFetchTask(drone, prioritySite);
     }
     
-    private bool TryAssignResourceFetchTask(Unit_Construct drone, ConstructionSite prioritySite)
+    private void TryAssignResourceFetchTask(Unit_Construct drone, ConstructionSite prioritySite)
     {
-        if (prioritySite != null && !prioritySite.IsComplete && TryAssignResourceRequest(drone, prioritySite, true))
+        if (prioritySite != null && !prioritySite.IsComplete && TryAssignResourceRequest(drone, prioritySite))
         {
-            return true;
+            return;
         }
         
         foreach (var site in _constructionSites)
         {
-            if (site != null && !site.IsComplete && TryAssignResourceRequest(drone, site, false))
+            if (site != null && site != prioritySite && !site.IsComplete && TryAssignResourceRequest(drone, site))
             {
-                return true;
+                return;
             }
         }
         
-        return false;
+        drone.SetTaskRequestCooldown(1.0f);
     }
     
-    private bool TryAssignResourceRequest(Unit_Construct drone, ConstructionSite site, bool isPriority)
+    private bool TryAssignResourceRequest(Unit_Construct drone, ConstructionSite site)
     {
         ConstructionSite.ConstructionRequest request = site.GetAndAssignNextResourceRequest(drone, drone.carryCapacity);
         if (request == null) return false;
@@ -129,13 +121,10 @@ public class ConstructionManager : MonoBehaviour
         if (storage == null)
         {
             site.CancelRequest(request);
-            drone.SetTaskRequestCooldown(1.0f);
             return false;
         }
         
         drone.SetTask_FetchResource(request, site);
-        string priority = isPriority ? " (priority)" : "";
-        Debug.Log($"[ConstructionManager] Assigned drone '{drone.name}' to fetch {request.amount} {request.type} for site at {site.cellPosition}{priority}");
         return true;
     }
     
@@ -154,12 +143,13 @@ public class ConstructionManager : MonoBehaviour
     {
         if (drone == null || !drone.IsIdle()) return;
         
+        drone.SetTaskRequestCooldown(0f);
         RequestTask(drone);
     }
     
     public void OnSiteResourceDelivered(ConstructionSite site, Unit_Construct deliveringDrone = null)
     {
-        if (site == null || site.comboCardData == null || site.AreAllPiecesConstructed())
+        if (site == null || site.buildingData == null || site.AreAllPiecesConstructed())
         {
             return;
         }
@@ -184,10 +174,9 @@ public class ConstructionManager : MonoBehaviour
 
         if (site.AreAllPiecesConstructed())
         {
-            if (site.comboCardData != null && BuildingManager.Instance != null)
+            if (site.buildingData != null && BuildingManager.Instance != null)
             {
-                BuildingManager.Instance.CreateComboBuildingFromConstruction(site.cellPosition, site.comboCardData);
-                Debug.Log($"[ConstructionManager] All pieces constructed for '{site.comboCardData.displayName}', spawning combo prefab");
+                BuildingManager.Instance.CreateBuildingFromConstruction(site.cellPosition, site.buildingData);
             }
         }
         else
@@ -196,4 +185,3 @@ public class ConstructionManager : MonoBehaviour
         }
     }
 }
-

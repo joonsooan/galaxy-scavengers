@@ -8,30 +8,12 @@ public class Battery : Damageable, IStorage
 
     [Header("Storage Settings")]
     [SerializeField] private int maxStorageAmount;
-    
-    private int _currentAetherAmount = 0;
 
-    [Header("UI Settings")]
-    [SerializeField] private GameObject storageSliderPrefab;
-    [SerializeField] private string canvasName = "ObjectUI_Canvas";
-    [SerializeField] private Vector3 sliderOffset = new Vector3(0, 1.0f, 0);
-    private GameObject _sliderInstance;
+    private int _currentAetherAmount;
 
     private void Start()
     {
         currentHealth = maxHealth;
-
-        if (storageSliderPrefab != null)
-        {
-            Canvas canvas = GameObject.Find(canvasName)?.GetComponent<Canvas>();
-            
-            if (canvas != null)
-            {
-                _sliderInstance = Instantiate(storageSliderPrefab, canvas.transform);
-                var controller = _sliderInstance.GetComponent<StorageSlider>();
-                controller?.Initialize(this, sliderOffset);
-            }
-        }
         
         OnResourceChanged?.Invoke(ResourceType.Aether, GetCurrentResourceAmount(ResourceType.Aether), GetMaxCapacity());
     }
@@ -42,22 +24,11 @@ public class Battery : Damageable, IStorage
         {
             ResourceManager.Instance.RemoveStorage(this);
         }
-
-        if (_sliderInstance != null)
-        {
-            Destroy(_sliderInstance);
-        }
     }
 
     public bool TryAddResource(ResourceType type, int amount)
     {
-        // Battery only stores Aether
-        if (type != ResourceType.Aether)
-        {
-            return false;
-        }
-
-        if (_currentAetherAmount >= maxStorageAmount)
+        if (type != ResourceType.Aether || _currentAetherAmount >= maxStorageAmount)
         {
             return false;
         }
@@ -71,40 +42,9 @@ public class Battery : Damageable, IStorage
         return canAddAmount > 0;
     }
     
-    public bool TryUseResources(ResourceCost[] costs)
-    {
-        // Battery only stores Aether, so check if all costs are Aether
-        int totalAetherNeeded = 0;
-        foreach (var cost in costs)
-        {
-            if (cost.resourceType != ResourceType.Aether)
-            {
-                return false; // Battery can't provide non-Aether resources
-            }
-            totalAetherNeeded += cost.amount;
-        }
-
-        if (_currentAetherAmount < totalAetherNeeded)
-        {
-            return false;
-        }
-
-        _currentAetherAmount -= totalAetherNeeded;
-        OnResourceChanged?.Invoke(ResourceType.Aether, _currentAetherAmount, maxStorageAmount);
-
-        return true;
-    }
-    
     public bool TryWithdrawResource(ResourceType type, int amountToWithdraw, out int amountWithdrawn)
     {
-        // Battery only stores Aether
-        if (type != ResourceType.Aether)
-        {
-            amountWithdrawn = 0;
-            return false;
-        }
-
-        if (_currentAetherAmount <= 0)
+        if (type != ResourceType.Aether || _currentAetherAmount <= 0)
         {
             amountWithdrawn = 0;
             return false;
@@ -120,13 +60,13 @@ public class Battery : Damageable, IStorage
     
     public bool HasEnoughResources(ResourceCost[] costs)
     {
-        // Battery only stores Aether
         int totalAetherNeeded = 0;
+        
         foreach (var cost in costs)
         {
             if (cost.resourceType != ResourceType.Aether)
             {
-                return false; // Battery can't provide non-Aether resources
+                return false;
             }
             totalAetherNeeded += cost.amount;
         }
@@ -136,7 +76,6 @@ public class Battery : Damageable, IStorage
     
     public int GetCurrentResourceAmount(ResourceType type)
     {
-        // Battery only stores Aether
         if (type == ResourceType.Aether)
         {
             return _currentAetherAmount;

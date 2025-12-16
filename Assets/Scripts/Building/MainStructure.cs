@@ -7,20 +7,15 @@ using UnityEngine.UI;
 
 public class MainStructure : Damageable, IStorage, IClickable
 {
-    [Header("UI Settings")]
-    [SerializeField] private GameObject storageSliderPrefab;
-    [SerializeField] private string canvasName = "ObjectUI_Canvas";
-    [SerializeField] private Vector3 sliderOffset = new Vector3(0, 1.5f, 0);
-
     [Header("Storage Settings")]
     [SerializeField] private int maxStorageAmount = 1000;
 
     [Header("Production Settings")]
     [SerializeField] private List<UnitData> producibleUnits;
 
-    private readonly Dictionary<ResourceType, int> _currentResources = new Dictionary<ResourceType, int>();
-    private readonly Queue<UnitData> _productionQueue = new Queue<UnitData>();
-    private Vector3 unitSpawnPos;
+    private readonly Dictionary<ResourceType, int> _currentResources = new ();
+    private readonly Queue<UnitData> _productionQueue = new ();
+    private Vector3 _unitSpawnPos;
 
     private bool _isProducing;
     private GameObject _sliderInstance;
@@ -35,67 +30,24 @@ public class MainStructure : Damageable, IStorage, IClickable
             _currentResources[type] = 0;
         }
         
-        unitSpawnPos = transform.position - 2 * Vector3.up;
+        _unitSpawnPos = transform.position - 2 * Vector3.up;
         
-        // Ensure the Main Structure has a collider for click detection
-        EnsureCollider();
-    }
-    
-    private void EnsureCollider()
-    {
-        // Check if there's already a non-trigger collider
-        Collider2D[] allColliders = GetComponents<Collider2D>();
-        foreach (Collider2D col in allColliders)
-        {
-            if (col != null && !col.isTrigger)
-            {
-                return; // Already has a proper non-trigger collider
-            }
-        }
-        
-        // If there's only trigger colliders or no collider, add/update a BoxCollider2D
-        BoxCollider2D boxCollider = GetComponent<BoxCollider2D>();
-        if (boxCollider == null)
-        {
-            boxCollider = gameObject.AddComponent<BoxCollider2D>();
-        }
-        
-        // Try to get size from SpriteRenderer bounds, otherwise use default 3x3 for Main Structure
-        SpriteRenderer spriteRenderer = GetComponent<SpriteRenderer>();
-        if (spriteRenderer != null && spriteRenderer.sprite != null)
-        {
-            Bounds spriteBounds = spriteRenderer.sprite.bounds;
-            boxCollider.size = spriteBounds.size;
-            boxCollider.offset = spriteBounds.center;
-        }
-        else
-        {
-            // Default size for 3x3 building (Main Structure size)
-            // Assuming 1 unit per grid cell
-            boxCollider.size = new Vector2(3f, 3f);
-            boxCollider.offset = Vector2.zero;
-        }
-        
-        boxCollider.isTrigger = false; // Must be non-trigger for click detection
     }
 
     private void Start()
     {
         InitUnitBtns();
-        InitSlider();
         InitResources();
         _inventorySystem = GetComponent<InventorySystem>();
     }
 
     public void OnClicked()
     {
-        // Notify UIManager that main structure UI is being opened
         if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
         {
             GameManager.Instance.uiManager.ShowMainStructureUI();
         }
 
-        // Get component if not already cached (in case it's added at runtime)
         if (_inventorySystem == null)
         {
             _inventorySystem = GetComponent<InventorySystem>();
@@ -136,20 +88,6 @@ public class MainStructure : Damageable, IStorage, IClickable
         ResourceManager.Instance.AddResource(type, canAddAmount);
 
         return canAddAmount > 0;
-    }
-
-    public bool TryUseResources(ResourceCost[] costs)
-    {
-        if (!HasEnoughResources(costs)) {
-            return false;
-        }
-
-        foreach (ResourceCost cost in costs) {
-            _currentResources[cost.resourceType] -= cost.amount;
-            OnResourceChanged?.Invoke(cost.resourceType, _currentResources[cost.resourceType], maxStorageAmount);
-        }
-
-        return true;
     }
 
     public bool TryWithdrawResource(ResourceType type, int amountToWithdraw, out int amountWithdrawn)
@@ -217,18 +155,6 @@ public class MainStructure : Damageable, IStorage, IClickable
         }
     }
 
-    private void InitSlider()
-    {
-        if (storageSliderPrefab != null) {
-            Canvas canvas = GameObject.Find(canvasName)?.GetComponent<Canvas>();
-            if (canvas != null) {
-                _sliderInstance = Instantiate(storageSliderPrefab, canvas.transform);
-                StorageSlider controller = _sliderInstance.GetComponent<StorageSlider>();
-                controller?.Initialize(this, sliderOffset);
-            }
-        }
-    }
-
     private void InitResources()
     {
         foreach (ResourceType type in Enum.GetValues(typeof(ResourceType))) {
@@ -248,11 +174,6 @@ public class MainStructure : Damageable, IStorage, IClickable
         foreach (ResourceType type in Enum.GetValues(typeof(ResourceType))) {
             OnResourceChanged?.Invoke(type, GetCurrentResourceAmount(type), GetMaxCapacity());
         }
-    }
-
-    public bool StorageIsFull()
-    {
-        return GetTotalCurrentAmount() >= maxStorageAmount;
     }
 
     public int AddResourceToStorageOnly(ResourceType type, int amount)
@@ -298,7 +219,7 @@ public class MainStructure : Damageable, IStorage, IClickable
 
             yield return new WaitForSeconds(unitToProduce.productionTime);
             
-            Instantiate(unitToProduce.unitPrefab, unitSpawnPos, Quaternion.identity, BuildingManager.Instance.grid.transform);
+            Instantiate(unitToProduce.unitPrefab, _unitSpawnPos, Quaternion.identity, BuildingManager.Instance.grid.transform);
         }
 
         _isProducing = false;

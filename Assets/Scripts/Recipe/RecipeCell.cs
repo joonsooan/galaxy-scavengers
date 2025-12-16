@@ -1,4 +1,3 @@
-using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
@@ -7,9 +6,9 @@ public class RecipeCell : InfoDisplayTrigger
     public Image comboIcon;
     public TMP_Text comboNameText;
 
-    private ComboCardData _comboData;
+    private BuildingData _comboData;
 
-    public void Initialize(ComboCardData data)
+    public void Initialize(BuildingData data)
     {
         _comboData = data;
         comboIcon.sprite = data.icon;

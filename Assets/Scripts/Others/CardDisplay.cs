@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class CardDisplay : InfoDisplayTrigger, IPointerClickHandler, IPointerExitHandler
 {
-    public CardData cardData;
+    public BuildingPieceData buildingPieceData;
 
     [Header("UI References")]
     [SerializeField] private Image cardIcon;
@@ -23,11 +23,11 @@ public class CardDisplay : InfoDisplayTrigger, IPointerClickHandler, IPointerExi
         UpdateButtonState();
     }
 
-    protected override DisplayableData GetData() => cardData;
+    protected override DisplayableData GetData() => buildingPieceData;
 
     protected override void ShowInfo()
     {
-        GameManager.Instance?.uiManager.DisplayCardInfo(cardData);
+        GameManager.Instance?.uiManager.DisplayCardInfo(buildingPieceData);
         GameManager.Instance?.uiManager.DisplayCardBtn();
     }
 
@@ -39,7 +39,7 @@ public class CardDisplay : InfoDisplayTrigger, IPointerClickHandler, IPointerExi
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        GameManager.Instance?.uiManager.PinCardInfo(cardData);
+        GameManager.Instance?.uiManager.PinCardInfo(buildingPieceData);
     }
 
     public new void OnPointerExit(PointerEventData eventData)
@@ -50,31 +50,31 @@ public class CardDisplay : InfoDisplayTrigger, IPointerClickHandler, IPointerExi
     
     public void OnClick()
     {
-        if (GameManager.Instance != null && cardData != null)
+        if (GameManager.Instance != null && buildingPieceData != null)
         {
-            if (GameManager.Instance.IsDragging() && GameManager.Instance.GetActiveData() == cardData)
+            if (GameManager.Instance.IsDragging() && GameManager.Instance.GetActiveData() == buildingPieceData)
             {
                 GameManager.Instance.EndDrag();
             }
             else
             {
-                GameManager.Instance.StartDrag(cardData);
+                GameManager.Instance.StartDrag(buildingPieceData);
             }
         }
     }
 
     private void UpdateButtonState()
     {
-        if (cardData != null && ResourceManager.Instance != null && buyButton != null)
+        if (buildingPieceData != null && ResourceManager.Instance != null && buyButton != null)
         {
-            bool canAfford = ResourceManager.Instance.HasEnoughResources(cardData.costs);
+            bool canAfford = ResourceManager.Instance.HasEnoughResources(buildingPieceData.costs);
             buyButton.interactable = canAfford;
         }
     }
 
     private void UpdateCardUI()
     {
-        nameText.text = cardData.displayName;
-        cardIcon.sprite = cardData.icon;
+        nameText.text = buildingPieceData.displayName;
+        cardIcon.sprite = buildingPieceData.icon;
     }
 }

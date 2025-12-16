@@ -34,10 +34,10 @@ public class UIManager : MonoBehaviour
     private Processor _currentProcessor;
     private DroneHub _currentDroneHub;
 
-    private CardData _pinnedCardData;
+    private BuildingPieceData _pinnedBuildingPieceData;
     private ProcessorData _pinnedProcessorData;
     private DroneHubData _pinnedDroneHubData;
-    private ComboCardData _pinnedRecipeData;
+    private BuildingData _pinnedRecipeData;
 
     private enum ActiveUIPanel
     {
@@ -150,7 +150,7 @@ public class UIManager : MonoBehaviour
 
     public void UnpinAndHideAllPanels()
     {
-        _pinnedCardData = null;
+        _pinnedBuildingPieceData = null;
         if (cardInfoPanel != null) {
             cardInfoPanel.SetActive(false);
         }
@@ -173,7 +173,7 @@ public class UIManager : MonoBehaviour
         HideCurrentIClickableUI();
     }
 
-    public void DisplayCardInfo(CardData data)
+    public void DisplayCardInfo(BuildingPieceData data)
     {
         if (data == null) return;
         cardInfoPanel.SetActive(true);
@@ -189,34 +189,34 @@ public class UIManager : MonoBehaviour
 
     public void HideCardInfo()
     {
-        if (_pinnedCardData == null) {
+        if (_pinnedBuildingPieceData == null) {
             cardInfoPanel.SetActive(false);
         }
         else {
-            DisplayCardInfo(_pinnedCardData);
+            DisplayCardInfo(_pinnedBuildingPieceData);
         }
     }
 
-    public void PinCardInfo(CardData data)
+    public void PinCardInfo(BuildingPieceData data)
     {
-        if (_pinnedCardData == data) {
+        if (_pinnedBuildingPieceData == data) {
             UnpinAndHideAllPanels();
         }
         else {
-            _pinnedCardData = data;
+            _pinnedBuildingPieceData = data;
             DisplayCardInfo(data);
         }
     }
 
     public void UnpinAndHideCardPanel()
     {
-        _pinnedCardData = null;
+        _pinnedBuildingPieceData = null;
         if (cardInfoPanel != null) {
             cardInfoPanel.SetActive(false);
         }
     }
 
-    public void DisplayRecipeInfo(ComboCardData data)
+    public void DisplayRecipeInfo(BuildingData data)
     {
         if (data == null || recipeInfoComponent == null) return;
         recipeInfoPanel.SetActive(true);
@@ -235,7 +235,7 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void PinRecipeInfo(ComboCardData data)
+    public void PinRecipeInfo(BuildingData data)
     {
         if (_pinnedRecipeData == data) {
             _pinnedRecipeData = null;

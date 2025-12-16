@@ -12,12 +12,12 @@ public class RecipeInfo : MonoBehaviour
     public GadgetPrefabMapping[] gadgetPrefabs;
     public GameObject emptyPrefab;
     
-    private Dictionary<GadgetType, GameObject> gadgetPrefabMap = new Dictionary<GadgetType, GameObject>();
+    private Dictionary<BuildingPieceType, GameObject> gadgetPrefabMap = new Dictionary<BuildingPieceType, GameObject>();
 
     [System.Serializable]
     public class GadgetPrefabMapping
     {
-        public GadgetType type;
+        public BuildingPieceType type;
         public GameObject prefab;
     }
     
@@ -32,17 +32,17 @@ public class RecipeInfo : MonoBehaviour
         }
     }
     
-    public void UpdateRecipeInfo(ComboCardData data)
+    public void UpdateRecipeInfo(BuildingData data)
     {
         recipeNameText.text = data.displayName;
         recipeDescriptionText.text = data.description;
 
         ClearRecipeGrid();
 
-        Dictionary<Vector2, GadgetType> recipeDict = new Dictionary<Vector2, GadgetType>();
+        Dictionary<Vector2, BuildingPieceType> recipeDict = new Dictionary<Vector2, BuildingPieceType>();
         foreach (var piece in data.recipe)
         {
-            recipeDict.Add(new Vector2(piece.relativePosition.x, piece.relativePosition.y), piece.gadgetType);
+            recipeDict.Add(new Vector2(piece.relativePosition.x, piece.relativePosition.y), piece.buildingPieceType);
         }
 
         for (int y = 1; y >= -1; y--)
@@ -69,7 +69,7 @@ public class RecipeInfo : MonoBehaviour
         }
     }
 
-    private GameObject GetGadgetPrefab(GadgetType type)
+    private GameObject GetGadgetPrefab(BuildingPieceType type)
     {
         if (gadgetPrefabMap.TryGetValue(type, out GameObject prefab))
         {
