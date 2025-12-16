@@ -3,8 +3,6 @@ using UnityEngine;
 
 public class BuildingRecipeUIManager : MonoBehaviour
 {
-    public RecipeInfo recipeInfo;
-    
     [Header("UI References")]
     public GameObject recipeCellPrefab;
     public Transform contentParent;
@@ -42,15 +40,5 @@ public class BuildingRecipeUIManager : MonoBehaviour
                 newCell.Initialize(recipeData);
             }
         }
-    }
-
-    public BuildingData GetRecipeByName(string comboName)
-    {
-        return _allRecipes.Find(recipe => recipe.displayName == comboName);
-    }
-
-    public List<BuildingData> GetAllRecipes()
-    {
-        return _allRecipes;
     }
 }

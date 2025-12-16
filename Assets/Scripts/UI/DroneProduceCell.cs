@@ -14,7 +14,6 @@ public class DroneProduceCell : MonoBehaviour
 
     private const int MaxProduceAmount = 999;
 
-    private UnitData _unitData;
     private DroneHub _droneHub;
     private int _unitIndex;
     private int _currentProducedCount;
@@ -22,7 +21,6 @@ public class DroneProduceCell : MonoBehaviour
 
     public void Initialize(UnitData unitData, DroneHub droneHub, int unitIndex)
     {
-        _unitData = unitData;
         _droneHub = droneHub;
         _unitIndex = unitIndex;
 
@@ -61,13 +59,10 @@ public class DroneProduceCell : MonoBehaviour
 
                 if (newCell != null)
                 {
-                    // Set info without rebuilding immediately - we'll rebuild the parent after all cells are set
                     newCell.SetInfo(cost.resourceType, cost.amount, false);
                 }
             }
             
-            // Rebuild all resource info cells first, then rebuild the ingredient panel
-            // This ensures the ingredient panel updates its size after all cells have updated
             foreach (Transform child in contentParent)
             {
                 ResourceInfoCell cell = child.GetComponent<ResourceInfoCell>();
@@ -77,7 +72,6 @@ public class DroneProduceCell : MonoBehaviour
                 }
             }
             
-            // Now rebuild the ingredient panel after all resource info cells have updated their sizes
             LayoutRebuilder.ForceRebuildLayoutImmediate(contentParent);
         }
 
@@ -142,11 +136,6 @@ public class DroneProduceCell : MonoBehaviour
         int newTarget = Mathf.Max(_targetCount - amountToSubtract, 0);
         
         _droneHub.SetTargetUnitCount(_unitIndex, newTarget);
-    }
-
-    private Sprite GetResourceImage(ResourceType type)
-    {
-        return ResourceManager.Instance?.GetResourceIcon(type);
     }
 }
 

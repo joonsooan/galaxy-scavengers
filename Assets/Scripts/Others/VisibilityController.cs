@@ -60,7 +60,6 @@ public class VisibilityController : MonoBehaviour
     {
         if (!_isSubscribed && FogOfWarManager.Instance != null)
         {
-            FogOfWarManager.OnVisibilityChanged += OnVisibilityChanged;
             _isSubscribed = true;
         }
     }
@@ -71,10 +70,6 @@ public class VisibilityController : MonoBehaviour
         {
             try
             {
-                if (FogOfWarManager.Instance != null)
-                {
-                    FogOfWarManager.OnVisibilityChanged -= OnVisibilityChanged;
-                }
             }
             catch (System.Exception)
             {
@@ -271,9 +266,8 @@ public class VisibilityController : MonoBehaviour
                 _wasVisible = shouldBeVisible;
             }
         }
-        catch (System.Exception e)
+        catch (System.Exception)
         {
-            // Handle missing reference gracefully - just make it visible
             if (this != null && gameObject != null)
             {
                 SetVisible(true);

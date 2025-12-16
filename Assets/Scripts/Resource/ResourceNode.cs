@@ -19,11 +19,7 @@ public class ResourceNode : MonoBehaviour
 
     public bool IsReserved { get; private set; }
 
-    public bool IsDepleted {
-        get {
-            return amountToMine <= 0;
-        }
-    }
+    public bool IsDepleted => amountToMine <= 0;
 
     private void Awake()
     {
@@ -32,14 +28,10 @@ public class ResourceNode : MonoBehaviour
         {
             _originalColor = _sr.color;
         }
-
-        // Defer ResourceManager registration to avoid MissingReferenceException
-        // Will be called from Start() or manually after managers are initialized
     }
     
     private void Start()
     {
-        // Register with ResourceManager now that managers should be initialized
         if (ResourceManager.Instance != null)
         {
             ResourceManager.Instance.AddResourceNode(this);
@@ -52,7 +44,6 @@ public class ResourceNode : MonoBehaviour
             }
         }
         
-        // Set cell position if BuildingManager is available
         if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null)
         {
             cellPosition = BuildingManager.Instance.grid.WorldToCell(transform.position);

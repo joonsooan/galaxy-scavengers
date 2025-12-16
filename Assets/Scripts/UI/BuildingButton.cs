@@ -11,7 +11,7 @@ public class BuildingButton : MonoBehaviour
     [Header("Optional Settings")]
     [SerializeField] private Image icon;
     [SerializeField] private TMP_Text btnName;
-    [SerializeField] private bool closePanelOnClick = false;
+    [SerializeField] private bool closePanelOnClick;
     [SerializeField] private MainControlPanel controlPanel;
     
     private Button _button;

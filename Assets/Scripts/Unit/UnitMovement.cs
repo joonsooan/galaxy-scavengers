@@ -5,14 +5,14 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class UnitMovement : MonoBehaviour
 {
-    private static readonly List<Node> NodePool = new List<Node>();
-    private static int _nodePoolIndex;
+    private static readonly List<Node> NodePool = new ();
+    private static int nodePoolIndex;
     private static readonly Vector3Int[] NeighborOffsets = {
-        new Vector3Int(1, 0, 0), new Vector3Int(-1, 0, 0), new Vector3Int(0, 1, 0), new Vector3Int(0, -1, 0),
-        new Vector3Int(1, 1, 0), new Vector3Int(1, -1, 0), new Vector3Int(-1, 1, 0), new Vector3Int(-1, -1, 0)
+        new (1, 0, 0), new (-1, 0, 0), new (0, 1, 0), new (0, -1, 0),
+        new (1, 1, 0), new (1, -1, 0), new (-1, 1, 0), new (-1, -1, 0)
     };
     private static readonly Vector3Int[] CardinalOffsets = {
-        new Vector3Int(1, 0, 0), new Vector3Int(-1, 0, 0), new Vector3Int(0, 1, 0), new Vector3Int(0, -1, 0)
+        new (1, 0, 0), new (-1, 0, 0), new (0, 1, 0), new (0, -1, 0)
     };
 
     [Header("Movement Settings")]
@@ -20,33 +20,24 @@ public class UnitMovement : MonoBehaviour
 
     [Header("Pathfinding")]
     public float waypointTolerance = 0.1f;
-    [SerializeField] private float alignmentSpeed = 3f; // Speed for aligning to cell center
+    [SerializeField] private float alignmentSpeed = 3f;
     private Vector3 _currentWaypoint;
     private float _finalStoppingDistance;
     private Vector3 _finalTargetPosition;
     private Grid _grid;
-    private bool _isAtFinalTarget = false;
-    private bool _isAligningToCenter = false;
+    private bool _isAtFinalTarget;
+    private bool _isAligningToCenter;
     private Vector3 _targetCellCenter;
-    private bool _isForceStopped = false; // Flag to prevent any movement updates
-    private bool _disableAlignment = false; // Flag to disable center alignment for specific tasks
+    private bool _isForceStopped;
+    private bool _disableAlignment;
 
-    private Queue<Vector3> _path = new Queue<Vector3>();
+    private Queue<Vector3> _path = new ();
 
     private Rigidbody2D _rb;
     private UnitSpriteController _spriteController;
 
-    public bool IsMoving {
-        get {
-            return _rb.linearVelocity.sqrMagnitude > 0.01f || _path.Count > 0 || _currentWaypoint != default;
-        }
-    }
-    
-    public Vector3 FinalTargetPosition {
-        get {
-            return _finalTargetPosition;
-        }
-    }
+    public bool IsMoving => _rb.linearVelocity.sqrMagnitude > 0.01f || _path.Count > 0 || _currentWaypoint != default;
+    public Vector3 FinalTargetPosition => _finalTargetPosition;
 
     public bool HasReachedTarget(float tolerance = 0.1f) {
         if (_finalTargetPosition == default) {
@@ -71,14 +62,12 @@ public class UnitMovement : MonoBehaviour
     
     private void FixedUpdate()
     {
-        // If force stopped, ensure velocity is zero and don't update anything
         if (_isForceStopped)
         {
             _rb.linearVelocity = Vector2.zero;
             return;
         }
         
-        // Explore current cell (for fog of war)
         if (_grid != null && FogOfWarManager.Instance != null)
         {
             Vector3Int currentCell = _grid.WorldToCell(transform.position);
@@ -89,7 +78,6 @@ public class UnitMovement : MonoBehaviour
             }
         }
         
-        // 0. If we're aligning to center, handle that first
         if (_isAligningToCenter)
         {
             Vector3 toCenter = _targetCellCenter - transform.position;
@@ -296,34 +284,8 @@ public class UnitMovement : MonoBehaviour
         return false;
     }
 
-    // public void MoveToTarget()
-    // {
-    //     if (_path.Count == 0 && _currentWaypoint == default) {
-    //         StopMovement();
-    //         return;
-    //     }
-    //
-    //     Vector3 direction = (_currentWaypoint - transform.position).normalized;
-    //     _rb.linearVelocity = direction * moveSpeed;
-    //     _spriteController?.UpdateSpriteDirection(direction);
-    //
-    //     float distanceToWaypoint = Vector3.Distance(transform.position, _currentWaypoint);
-    //
-    //     if (distanceToWaypoint < waypointTolerance) {
-    //         if (_path.Count > 0) {
-    //             _currentWaypoint = _path.Dequeue();
-    //         }
-    //         else {
-    //             // _rb.linearVelocity = Vector2.zero;
-    //             StopMovement();
-    //         }
-    //     }
-    // }
-
     public void StopMovement()
     {
-        // If we're at the final target (interaction cell), start aligning to center
-        // Only if alignment is not disabled
         if (_isAtFinalTarget && _finalTargetPosition != default && !_isAligningToCenter && !_disableAlignment)
         {
             StartAligningToCellCenter();
@@ -332,12 +294,10 @@ public class UnitMovement : MonoBehaviour
         _rb.linearVelocity = Vector2.zero;
         _path.Clear();
         _currentWaypoint = default;
-        // Don't reset _isAtFinalTarget here - let alignment complete first
     }
     
     public void ForceStopAllMovement()
     {
-        // Force stop all movement including alignment - used when unit needs to wait
         _isForceStopped = true;
         _rb.linearVelocity = Vector2.zero;
         _path.Clear();
@@ -345,13 +305,11 @@ public class UnitMovement : MonoBehaviour
         _isAligningToCenter = false;
         _isAtFinalTarget = false;
         _finalTargetPosition = default;
-        _disableAlignment = false; // Reset alignment flag when force stopping
+        _disableAlignment = false;
     }
     
     public void ResumeMovement()
     {
-        // Resume movement after force stop
-        // Explicitly zero velocity to prevent any residual movement
         _rb.linearVelocity = Vector2.zero;
         _isForceStopped = false;
     }
@@ -372,7 +330,7 @@ public class UnitMovement : MonoBehaviour
 
     private Queue<Vector3> FindPath(Vector3 startPos, Vector3 endPos)
     {
-        _nodePoolIndex = 0;
+        nodePoolIndex = 0;
 
         Vector3Int startCell = _grid.WorldToCell(startPos);
         Vector3Int endCell = _grid.WorldToCell(endPos);
@@ -435,24 +393,20 @@ public class UnitMovement : MonoBehaviour
     private bool IsCellWalkable(Vector3Int cell)
     {
         if (BuildingManager.Instance == null) {
-            return true; // If BuildingManager is null, assume cell is walkable
+            return true;
         }
         
-        // Check if cell is terrain - terrain blocks unit movement
         if (BuildingManager.Instance.IsTerrainCell(cell))
         {
             return false;
         }
         
-        // Check if cell is a resource tile or building tile
-        // Note: Temporary tiles are intentionally passable
         if (BuildingManager.Instance.IsResourceTile(cell) || 
             BuildingManager.Instance.IsBuildingTile(cell))
         {
             return false;
         }
         
-        // Check if there's a building piece GameObject at this cell (even without a tile)
         BuildingPiece piece = BuildingManager.Instance.GetPieceAt(cell);
         if (piece != null)
         {
@@ -521,11 +475,11 @@ public class UnitMovement : MonoBehaviour
 
     private Node GetNodeFromPool(Vector3Int position, Node parent, float gCost, float hCost)
     {
-        if (_nodePoolIndex >= NodePool.Count) {
+        if (nodePoolIndex >= NodePool.Count) {
             NodePool.Add(new Node());
         }
 
-        Node node = NodePool[_nodePoolIndex++];
+        Node node = NodePool[nodePoolIndex++];
         node.position = position;
         node.parent = parent;
         node.gCost = gCost;
@@ -540,10 +494,6 @@ public class UnitMovement : MonoBehaviour
         public Node parent;
         public Vector3Int position;
 
-        public float FCost {
-            get {
-                return gCost + hCost;
-            }
-        }
+        public float FCost => gCost + hCost;
     }
 }

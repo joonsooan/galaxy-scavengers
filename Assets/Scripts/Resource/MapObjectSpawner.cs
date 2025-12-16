@@ -42,92 +42,66 @@ public class MapObjectSpawner : MonoBehaviour
     [SerializeField] private List<ResourceSpawnSettings> resourceSettings = new List<ResourceSpawnSettings>();
     
     [Header("Concentric Circle Division")]
-    [Tooltip("Number of concentric circles to divide the map into.")]
     [Range(0, 20)]
     [SerializeField] private int numberOfCircles = 10;
     
-    [Tooltip("Padding from map borders (in tiles) to exclude from resource spawning.")]
     [Range(0, 50)]
     [SerializeField] private int borderPadding = 10;
     
     [Header("Resource Circle Spawning")]
-    [Tooltip("Minimum radius for resource spawn circles (in tiles).")]
     [Range(0, 20)]
     [SerializeField] private float minCircleRadius = 5f;
     
-    [Tooltip("Maximum radius for resource spawn circles (in tiles).")]
     [Range(0, 50)]
     [SerializeField] private float maxCircleRadius = 15f;
     
-    [Tooltip("Percentage of potential spawn circles that will actually spawn (0-100).")]
     [Range(0f, 100f)]
     [SerializeField] private float circleSpawnPercentage = 30f;
     
-    [Tooltip("Maximum number of circles that can spawn (prevents excessive spawning).")]
     [Range(10, 200)]
     [SerializeField] private int maxCircles = 50;
     
-    [Tooltip("Maximum number of resources per circle (prevents memory issues with large circles).")]
     [Range(10, 1000)]
     [SerializeField] private int maxResourcesPerCircle = 200;
     
     [Header("Starting Area")]
-    [Tooltip("Minimum radius from center where NO resources spawn (safe zone).")]
     [Range(0, 50)]
     [SerializeField] private int minSpawnRadius = 5;
     
-    [Tooltip("Maximum radius of starting area where starting area circles can spawn.")]
     [Range(0, 50)]
     [SerializeField] private int startingAreaRadius = 15;
     
-    [Tooltip("Number of circles to spawn in the starting area (between minSpawnRadius and startingAreaRadius).")]
     [Range(0, 20)]
     [SerializeField] private int startingAreaCircleCount = 3;
     
-    [Tooltip("Minimum distance between starting area resource circles (as multiplier of combined radii, 0-1).")]
     [Range(0f, 1f)]
     [SerializeField] private float startingAreaMinDistance = 0.3f;
     
     [Header("Debug")]
-    [Tooltip("Show gizmos in scene view to visualize circles.")]
     [SerializeField] private bool showGizmos = true;
+    [SerializeField] private Color divisionCircleColor = new(1f, 1f, 0f, 0.3f);
+    [SerializeField] private Color resourceCircleColor = new(0f, 1f, 0f, 0.5f);
+    [SerializeField] private Color startingAreaMinRadiusColor = new(1f, 0f, 0f, 0.5f);
+    [SerializeField] private Color startingAreaMaxRadiusColor = new(0f, 0f, 1f, 0.5f);
     
-    [Tooltip("Color for division circles (concentric).")]
-    [SerializeField] private Color divisionCircleColor = new Color(1f, 1f, 0f, 0.3f);
-    
-    [Tooltip("Color for resource spawn circles.")]
-    [SerializeField] private Color resourceCircleColor = new Color(0f, 1f, 0f, 0.5f);
-    
-    [Tooltip("Color for starting area min spawn radius (safe zone).")]
-    [SerializeField] private Color startingAreaMinRadiusColor = new Color(1f, 0f, 0f, 0.5f);
-    
-    [Tooltip("Color for starting area max radius.")]
-    [SerializeField] private Color startingAreaMaxRadiusColor = new Color(0f, 0f, 1f, 0.5f);
-    
-    private readonly List<GameObject> _spawnedResources = new List<GameObject>();
+    private readonly List<GameObject> _spawnedResources = new ();
     private Vector2Int _mapCenter;
     private int _mapWidth;
     private int _mapHeight;
     private float _maxMapRadius;
     private float _radiusStep;
-    private List<float> _divisionRadii = new List<float>();
-    private List<float> _sectorPowerValues = new List<float>();
-    private List<ResourceCircle> _resourceCircles = new List<ResourceCircle>();
+    private readonly List<float> _divisionRadii = new ();
+    private readonly List<float> _sectorPowerValues = new ();
+    private readonly List<ResourceCircle> _resourceCircles = new ();
     
-    // Static flag to override resource visibility (regardless of fog)
-    private static bool _resourcesAlwaysVisible = false;
-    public static bool ResourcesAlwaysVisible => _resourcesAlwaysVisible;
+    private static bool resourcesAlwaysVisible;
+    public static bool ResourcesAlwaysVisible => resourcesAlwaysVisible;
     
-    // Static flag to disable visibility updates during resource spawning
-    private static bool _isSpawningResources = false;
-    public static bool IsSpawningResources => _isSpawningResources;
+    private static bool isSpawningResources;
+    public static bool IsSpawningResources => isSpawningResources;
     
-    public Tilemap ResourceTilemap => resourceTilemap;
-    
-    // Public accessors for concentric circle data (used by MapGenerator for enemy spawn holes)
     public List<float> GetDivisionRadii()
     {
-        // Initialize circles if not already done
         if (_divisionRadii == null || _divisionRadii.Count == 0)
         {
             InitializeConcentricCircles();
@@ -135,22 +109,6 @@ public class MapObjectSpawner : MonoBehaviour
         return _divisionRadii;
     }
     
-    public float GetMaxMapRadius()
-    {
-        // Initialize circles if not already done
-        if (_divisionRadii == null || _divisionRadii.Count == 0)
-        {
-            InitializeConcentricCircles();
-        }
-        return _maxMapRadius;
-    }
-    
-    public int GetNumberOfCircles()
-    {
-        return numberOfCircles;
-    }
-    
-    // Initialize concentric circles (can be called early by MapGenerator)
     private void InitializeConcentricCircles()
     {
         if (mapGenerator == null)
@@ -163,18 +121,15 @@ public class MapObjectSpawner : MonoBehaviour
             }
         }
         
-        // Get map dimensions
         Vector2Int mapSize = mapGenerator.MapSize;
         _mapWidth = mapSize.x;
         _mapHeight = mapSize.y;
         _mapCenter = Vector2Int.zero; // Map center is at (0, 0)
         
-        // Calculate max radius (with padding)
         float halfWidth = (_mapWidth / 2f) - borderPadding;
         float halfHeight = (_mapHeight / 2f) - borderPadding;
         _maxMapRadius = Mathf.Min(halfWidth, halfHeight);
         
-        // Divide map into concentric circles
         DivideMapIntoConcentricCircles();
     }
     
@@ -211,27 +166,22 @@ public class MapObjectSpawner : MonoBehaviour
             parentTransform = transform;
         }
         
-        // Get map dimensions
         Vector2Int mapSize = mapGenerator.MapSize;
         _mapWidth = mapSize.x;
         _mapHeight = mapSize.y;
         _mapCenter = Vector2Int.zero; // Map center is at (0, 0)
         
-        // Calculate max radius (with padding)
         float halfWidth = (_mapWidth / 2f) - borderPadding;
         float halfHeight = (_mapHeight / 2f) - borderPadding;
         _maxMapRadius = Mathf.Min(halfWidth, halfHeight);
         
-        // Clear existing resources
         _spawnedResources.Clear();
         _divisionRadii.Clear();
         _sectorPowerValues.Clear();
         _resourceCircles.Clear();
         
-        // Disable visibility updates during spawning to prevent performance issues
-        _isSpawningResources = true;
+        isSpawningResources = true;
         
-        // Suppress FogOfWarManager event invocations during spawning
         if (FogOfWarManager.Instance != null)
         {
             FogOfWarManager.SetSuppressVisibilityEvents(true);
@@ -239,35 +189,24 @@ public class MapObjectSpawner : MonoBehaviour
         
         try
         {
-            // Step 1: Divide map into concentric circles
             DivideMapIntoConcentricCircles();
-            
-            // Step 2: Spawn resource circles (outside starting area)
             SpawnResourceCircles();
-            
-            // Step 3: Spawn starting area circles (between minSpawnRadius and startingAreaRadius)
             SpawnStartingAreaCircles();
-            
-            // Step 4: Spawn resources in circles
             SpawnResourcesInCircles();
             
             Debug.Log($"[ProceduralResourceSpawner] Spawned {_spawnedResources.Count} resource nodes. Created {_resourceCircles.Count} resource circles.");
         }
         finally
         {
-            // Re-enable visibility updates after spawning is complete
-            _isSpawningResources = false;
+            isSpawningResources = false;
             
-            // Re-enable FogOfWarManager event invocations
             if (FogOfWarManager.Instance != null)
             {
                 FogOfWarManager.SetSuppressVisibilityEvents(false);
                 
-                // Defer fog refresh to next frame to avoid blocking
                 StartCoroutine(DeferredFogRefresh());
             }
             
-            // Batch update all visibility controllers after spawning
             UpdateAllResourceVisibility();
         }
     }
@@ -277,23 +216,17 @@ public class MapObjectSpawner : MonoBehaviour
         _divisionRadii.Clear();
         _sectorPowerValues.Clear();
         
-        // Calculate radius step (equal difference between circles)
         _radiusStep = _maxMapRadius / numberOfCircles;
         
-        // Create division radii and calculate power values
         for (int i = 0; i <= numberOfCircles; i++)
         {
             float radius = i * _radiusStep;
             _divisionRadii.Add(radius);
             
-            // Power value increases with distance from center
-            // Power = 1.0 at center, increases linearly to maxPower at edge
             float normalizedDistance = radius / _maxMapRadius;
             float powerValue = 1f + normalizedDistance; // Starts at 1.0, goes to 2.0 at edge
             _sectorPowerValues.Add(powerValue);
         }
-        
-        // Debug.Log($"[ProceduralResourceSpawner] Divided map into {numberOfCircles} concentric circles. Max radius: {_maxMapRadius}");
     }
     
     private void SpawnStartingAreaCircles()
@@ -476,7 +409,7 @@ public class MapObjectSpawner : MonoBehaviour
                 {
                     for (int offsetX = -5; offsetX <= 5 && !foundValid; offsetX++)
                     {
-                        for (int offsetY = -5; offsetY <= 5 && !foundValid; offsetY++)
+                        for (int offsetY = -5; offsetY <= 5; offsetY++)
                         {
                             Vector2Int testCenter = center + new Vector2Int(offsetX, offsetY);
                             if (!CircleOverlapsTerrain(testCenter, radius))
@@ -763,9 +696,7 @@ public class MapObjectSpawner : MonoBehaviour
         for (int i = list.Count - 1; i > 0; i--)
         {
             int j = Random.Range(0, i + 1);
-            T temp = list[i];
-            list[i] = list[j];
-            list[j] = temp;
+            (list[i], list[j]) = (list[j], list[i]);
         }
     }
     
@@ -787,7 +718,7 @@ public class MapObjectSpawner : MonoBehaviour
     
     public static void ToggleResourceVisibility()
     {
-        _resourcesAlwaysVisible = !_resourcesAlwaysVisible;
+        resourcesAlwaysVisible = !resourcesAlwaysVisible;
         UpdateAllResourceVisibilityStatic();
         // Debug.Log($"[ProceduralResourceSpawner] Resources always visible: {_resourcesAlwaysVisible}");
     }
@@ -895,13 +826,9 @@ public class MapObjectSpawner : MonoBehaviour
     
     private IEnumerator DeferredFogRefresh()
     {
-        // Wait a frame to let all resources finish initializing
+        yield return null;
         yield return null;
         
-        // Wait another frame to ensure all Awake/OnEnable calls are complete
-        yield return null;
-        
-        // Now refresh fog of war
         if (FogOfWarManager.Instance != null)
         {
             FogOfWarManager.Instance.RefreshFogOfWar();

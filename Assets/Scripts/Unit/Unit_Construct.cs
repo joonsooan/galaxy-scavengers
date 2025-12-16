@@ -5,6 +5,7 @@ public class Unit_Construct : UnitBase
 {
     private const float RepathInterval = 0.5f;
     private const float TaskRequestCooldown = 1.0f;
+    
     [Header("Construct Drone Settings")]
     [SerializeField] public int carryCapacity = 10;
     [SerializeField] private float loadingTime = 1f;
@@ -143,14 +144,11 @@ public class Unit_Construct : UnitBase
             _carriedResourceType = _currentRequest.type;
             _carriedAmount = withdrawnAmount;
             
-            // Validate deposit can succeed BEFORE starting to move to delivery location
             if (!CanDepositResource())
             {
                 Debug.Log($"[Construct:{name}] Cannot deposit resources - request invalid. Returning resources and aborting.");
-                // Return resources to storage if possible
                 if (_targetStorage != null)
                 {
-                    // Note: TryAddResource might not exist, so we'll just clear and abort
                     _carriedAmount = 0;
                 }
                 SetTask_Idle();
@@ -163,7 +161,6 @@ public class Unit_Construct : UnitBase
             movement.ResumeMovement();
             movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
             _currentState = ConstructState.DeliveringResource;
-            Debug.Log($"[Construct:{name}] Loaded {withdrawnAmount} {_carriedResourceType} from storage, moving to delivery interaction cell at piece {targetPieceCell}");
         }
         else
         {
@@ -184,10 +181,8 @@ public class Unit_Construct : UnitBase
             return;
         }
 
-        // Validate deposit can succeed ASAP - check continuously during delivery
         if (!CanDepositResource())
         {
-            Debug.Log($"[Construct:{name}] Cannot deposit resources - request invalid or no longer needed. Aborting delivery.");
             SetTask_Idle();
             return;
         }
@@ -195,10 +190,8 @@ public class Unit_Construct : UnitBase
         bool isAtDelivery = IsAtTarget();
 
         if (isAtDelivery) {
-            // Final validation right before starting unloading
             if (!CanDepositResource())
             {
-                Debug.Log($"[Construct:{name}] Cannot deposit resources at delivery location. Aborting.");
                 SetTask_Idle();
                 return;
             }
@@ -225,19 +218,15 @@ public class Unit_Construct : UnitBase
     {
         movement.ForceStopAllMovement();
 
-        // Validate request before proceeding
         if (_currentRequest == null || _currentRequest.site == null)
         {
-            Debug.LogWarning($"[Construct:{name}] UnloadingResourceCoroutine: No valid request, aborting");
             _unloadingCoroutine = null;
             SetTask_Idle();
             yield break;
         }
         
-        // Validate deposit can succeed IMMEDIATELY, before any waiting
         if (!CanDepositResource())
         {
-            Debug.LogWarning($"[Construct:{name}] UnloadingResourceCoroutine: Cannot deposit resources - request invalid. Aborting immediately.");
             _unloadingCoroutine = null;
             SetTask_Idle();
             yield break;
@@ -252,33 +241,24 @@ public class Unit_Construct : UnitBase
 
         yield return new WaitForSeconds(unloadingTime);
         
-        // Validate again after wait time - request might have been cancelled
         if (!CanDepositResource())
         {
-            Debug.LogWarning($"[Construct:{name}] UnloadingResourceCoroutine: Cannot deposit after wait - request became invalid. Aborting.");
             _unloadingCoroutine = null;
             SetTask_Idle();
             yield break;
         }
 
-        // Clear the unloading coroutine reference immediately to prevent duplicate execution
         _unloadingCoroutine = null;
 
         if (_currentRequest != null && _currentRequest.site != null) {
             ConstructionSite site = _currentRequest.site;
             ResourceType resourceType = _carriedResourceType;
             int resourceAmount = _carriedAmount;
-            
-            // Clear request reference BEFORE deposit to prevent duplicate attempts
-            ConstructionSite.ConstructionRequest request = _currentRequest;
+
             _currentRequest = null;
-            
-            // Clear carried resources
             _carriedAmount = 0;
             
-            bool deposited = site.TryDepositResource(resourceType, resourceAmount, this);
-            Debug.Log($"[Construct:{name}] Delivering: deposit {resourceAmount} {resourceType} -> {(deposited ? "OK" : "FAILED")}");
-
+            site.TryDepositResource(resourceType, resourceAmount, this);
             site.ReleaseDrone(this);
 
             _currentState = ConstructState.Idle;
@@ -382,7 +362,6 @@ public class Unit_Construct : UnitBase
         _currentRequest?.site?.CancelRequest(_currentRequest);
         _nextTaskRequestTime = Time.time + TaskRequestCooldown;
         SetTask_Idle();
-        Debug.Log($"[Construct:{name}] Fetch failed: no storage or path blocked - request cancelled");
     }
 
 
@@ -390,7 +369,6 @@ public class Unit_Construct : UnitBase
     {
         ReleaseFromConstruction();
         _currentState = ConstructState.Idle;
-        Debug.Log($"[Construct:{name}] State -> Idle");
     }
     
     public void SetTaskRequestCooldown(float duration)

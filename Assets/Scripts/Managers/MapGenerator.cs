@@ -67,9 +67,6 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private int enemySpawnHoleCount = 3;
     [SerializeField] private int enemySpawnHoleRadius = 5;
 
-    [Range(0.3f, 0.9f)]
-    [SerializeField] private float enemySpawnHoleDistanceRatio = 0.7f;
-    
     [Header("Enemy Spawn Hole - Concentric Circle Settings")]
     [Range(1, 10)]
     [SerializeField] private int enemySpawnHolesPerSector = 1;

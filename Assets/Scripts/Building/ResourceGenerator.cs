@@ -8,9 +8,6 @@ public class ResourceGenerator : Damageable
     [SerializeField] private int resourceAmount = 1;
     [SerializeField] private ResourceType resourceType;
     
-    [Header("VFX")]
-    [SerializeField] private string canvasName = "FloatingText Canvas";
-    
     private Coroutine _productionCoroutine;
     private bool _isConstructed;
 

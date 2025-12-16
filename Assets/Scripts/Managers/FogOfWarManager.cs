@@ -19,9 +19,6 @@ public class FogOfWarManager : MonoBehaviour
     [SerializeField] private Tilemap groundTilemap;
     [SerializeField] private Tilemap fogTilemap;
     
-    [Header("Settings")]
-    [SerializeField] private float updateInterval = 0.1f;
-    
     [Header("Visual Settings")]
     [SerializeField] private TileBase fogTile;
     [SerializeField] private Color fullyVisibleColor = new (1f, 1f, 1f, 0f);
@@ -35,8 +32,6 @@ public class FogOfWarManager : MonoBehaviour
     private Dictionary<IVisionProvider, HashSet<Vector3Int>> _providerAffectedTiles = new ();
     private readonly Dictionary<Vector3Int, List<VisibilityController>> _tileToControllers = new ();
     private readonly HashSet<Vector3Int> _currentlyVisibleTiles = new();
-    
-    public static event Action<Vector3Int, FogOfWarState> OnVisibilityChanged;
     
     private static bool suppressVisibilityEvents;
     

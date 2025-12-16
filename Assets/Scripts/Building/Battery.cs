@@ -9,9 +9,6 @@ public class Battery : Damageable, IStorage
     [Header("Storage Settings")]
     [SerializeField] private int maxStorageAmount;
 
-    [Header("UI Settings")]
-    [SerializeField] private string canvasName = "ObjectUI_Canvas";
-    
     private int _currentAetherAmount;
 
     private void Start()

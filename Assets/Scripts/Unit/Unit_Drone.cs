@@ -12,18 +12,16 @@ public class Unit_Drone : UnitBase
     [SerializeField] private float assignmentTime = 1f;
     [SerializeField] private UnitMovement movement;
     [SerializeField] private Sprite droneIcon;
-    // [SerializeField] private float interactionDistance = 1.1f;
 
     private int _carriedAmount;
     private ResourceType _carriedResourceType;
     private Processor.ResourceRequest _currentRequest;
     private DroneState _currentState = DroneState.Idle;
 
-    // private bool _isManuallyAssigned;
     private IStorage _targetStorage;
-    private Processor currentProcessor;
+    private Processor _currentProcessor;
     public ActiveRecipe CurrentRecipeTask { get; private set; }
-    private bool _hasCheckedIn = false;
+    private bool _hasCheckedIn;
     
     private float _nextRepathTime;
     private const float RepathInterval = 0.5f;
@@ -32,11 +30,7 @@ public class Unit_Drone : UnitBase
     private Coroutine _unloadingCoroutine;
     private Coroutine _assignmentCoroutine;
 
-    public bool IsAssigned {
-        get {
-            return currentProcessor != null;
-        }
-    }
+    public bool IsAssigned => _currentProcessor != null;
 
     public bool HasCheckedIn {
         get {
@@ -58,14 +52,6 @@ public class Unit_Drone : UnitBase
 
     private void Update()
     {
-        // if (currentProcessor == null) {
-        //     // 자동 모드인 경우
-        //     if (!_isManuallyAssigned) {
-        //         FindAndAssignClosestProcessor();
-        //     }
-        //     if (currentProcessor == null) return;
-        // }
-
         DecideNextAction();
     }
 
@@ -111,15 +97,13 @@ public class Unit_Drone : UnitBase
     {
         ReleaseFromProcessor();
 
-        currentProcessor = processor;
-        _hasCheckedIn = false; // Reset check-in status when assigned to a new processor
+        _currentProcessor = processor;
+        _hasCheckedIn = false;
 
-        // _isManuallyAssigned = isManual;
-
-        if (currentProcessor != null) {
-            currentProcessor.AssignDrone(this);
+        if (_currentProcessor != null) {
+            _currentProcessor.AssignDrone(this);
             _currentState = DroneState.Idle;
-            Debug.Log($"[Drone:{name}] Assigned to processor '{currentProcessor.name}' (manual:{isManual}). Must check in before receiving tasks.");
+            Debug.Log($"[Drone:{name}] Assigned to processor '{_currentProcessor.name}' (manual:{isManual}). Must check in before receiving tasks.");
         }
         else {
             _currentState = DroneState.Idle;
@@ -131,7 +115,6 @@ public class Unit_Drone : UnitBase
     {
         ReleaseFromRecipeTask();
         
-        // Stop any ongoing coroutines
         if (_loadingCoroutine != null) {
             StopCoroutine(_loadingCoroutine);
             _loadingCoroutine = null;
@@ -145,64 +128,49 @@ public class Unit_Drone : UnitBase
             _assignmentCoroutine = null;
         }
 
-        if (currentProcessor != null) {
-            currentProcessor.ReleaseDrone(this);
+        if (_currentProcessor != null) {
+            _currentProcessor.ReleaseDrone(this);
             if (_currentRequest != null) {
-                currentProcessor.CancelRequest(_currentRequest);
+                _currentProcessor.CancelRequest(_currentRequest);
                 _currentRequest = null;
             }
-            Debug.Log($"[Drone:{name}] Released from processor '{currentProcessor.name}'");
+            Debug.Log($"[Drone:{name}] Released from processor '{_currentProcessor.name}'");
         }
-        currentProcessor = null;
+        _currentProcessor = null;
     }
 
     private void ReleaseFromRecipeTask()
     {
-        if (CurrentRecipeTask != null && currentProcessor != null) {
-            currentProcessor.ReleaseDroneFromRecipe(this);
+        if (CurrentRecipeTask != null && _currentProcessor != null) {
+            _currentProcessor.ReleaseDroneFromRecipe(this);
             Debug.Log($"[Drone:{name}] Released from recipe {CurrentRecipeTask.recipeData.resourceType}");
         }
         CurrentRecipeTask = null;
     }
 
-    // private void FindAndAssignClosestProcessor()
-    // {
-    //     ResourceProcessor closestProcessor = BuildingManager.Instance.FindClosestAvailableProcessor(transform.position);
-    //     if (closestProcessor != null) {
-    //         AssignProcessor(closestProcessor);
-    //     }
-    // }
-
     private void UpdateIdle()
     {
-        if (currentProcessor == null)
+        if (_currentProcessor == null)
             return;
 
-        // Check if drone needs to check in (arrive at processor for the first time)
         if (!_hasCheckedIn) {
-            // If assignment coroutine is running, don't do anything - just wait
             if (_assignmentCoroutine != null) {
                 return;
             }
             
-            // Check if we're already at the processor (same distance check as processing)
             bool isAtProcessorForCheckIn = movement.HasReachedTarget(movement.waypointTolerance + 0.1f);
             
             if (isAtProcessorForCheckIn) {
-                // Drone has arrived at processor - start assignment/initialization
                 if (_assignmentCoroutine == null) {
                     _assignmentCoroutine = StartCoroutine(AssignmentCoroutine());
                 }
                 return;
             }
             
-            // Not at processor yet - move towards it using assigned interaction cell
             if (!movement.IsMoving) {
-                Vector3 interactionPos = currentProcessor.AssignInteractionCell(this);
+                Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
                 bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
                 if (!hasPath) {
-                    // Can't path to processor, but still need to check in
-                    // Start assignment coroutine anyway so it goes through the assignment time
                     if (_assignmentCoroutine == null) {
                         _assignmentCoroutine = StartCoroutine(AssignmentCoroutine());
                     }
@@ -211,29 +179,22 @@ public class Unit_Drone : UnitBase
             return;
         }
 
-        // Already checked in - normal idle behavior
-        // Check if we're already at the processor
         bool isAtProcessor = movement.HasReachedTarget(movement.waypointTolerance + 0.1f);
         
         if (isAtProcessor) {
-            // Already at processor - stay still and request task if needed
             if (!movement.IsMoving) {
-                // Ensure we're completely still
                 movement.ForceStopAllMovement();
-                // Face the processor building
-                AdjustSpriteDirectionToBuilding(currentProcessor.transform);
-                // Request task (will do nothing if already requested)
-                currentProcessor.RequestTask(this);
+                AdjustSpriteDirectionToBuilding(_currentProcessor.transform);
+                _currentProcessor.RequestTask(this);
             }
         }
         else {
-            // Not at processor - move towards it
             if (!movement.IsMoving) {
-                Vector3 interactionPos = currentProcessor.AssignInteractionCell(this);
+                Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
                 bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
                 if (!hasPath) {
-                    currentProcessor.RequestTask(this);
-                    Debug.Log($"[Drone:{name}] Idle: cannot path to processor '{currentProcessor.name}', requesting task");
+                    _currentProcessor.RequestTask(this);
+                    Debug.Log($"[Drone:{name}] Idle: cannot path to processor '{_currentProcessor.name}', requesting task");
                 }
             }
         }
@@ -247,7 +208,6 @@ public class Unit_Drone : UnitBase
         }
 
         if (!movement.IsMoving) {
-            // Start loading coroutine if not already running
             if (_loadingCoroutine == null) {
                 _loadingCoroutine = StartCoroutine(LoadingResourceCoroutine());
             }
@@ -256,15 +216,12 @@ public class Unit_Drone : UnitBase
     
     private IEnumerator LoadingResourceCoroutine()
     {
-        // Force stop all movement including alignment to prevent vibration
         movement.ForceStopAllMovement();
         
-        // Face the storage building and keep it stable
         if (_targetStorage != null) {
-            AdjustSpriteDirectionToBuilding((_targetStorage as Component).transform);
+            AdjustSpriteDirectionToBuilding(((Component)_targetStorage).transform);
         }
         
-        // Wait for loading time - unit should remain completely still
         yield return new WaitForSeconds(loadingTime);
         
         if (_targetStorage != null && _currentRequest != null) {
@@ -272,7 +229,7 @@ public class Unit_Drone : UnitBase
                 if (withdrawnAmount > 0) {
                     _carriedResourceType = _currentRequest.type;
                     _carriedAmount = withdrawnAmount;
-                    Vector3 interactionPos = currentProcessor.AssignInteractionCell(this);
+                    Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
                     movement.ResumeMovement(); // Resume movement before setting new target
                     movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
                     _currentState = DroneState.DeliveringResource;
@@ -296,7 +253,6 @@ public class Unit_Drone : UnitBase
     private void UpdateDelivering()
     {
         if (!movement.IsMoving) {
-            // Start unloading coroutine if not already running
             if (_unloadingCoroutine == null) {
                 _unloadingCoroutine = StartCoroutine(UnloadingResourceCoroutine());
             }
@@ -305,27 +261,22 @@ public class Unit_Drone : UnitBase
     
     private IEnumerator UnloadingResourceCoroutine()
     {
-        // Force stop all movement including alignment to prevent vibration
         movement.ForceStopAllMovement();
         
-        // Face the processor building before depositing and keep it stable
-        if (currentProcessor != null) {
-            AdjustSpriteDirectionToBuilding(currentProcessor.transform);
+        if (_currentProcessor != null) {
+            AdjustSpriteDirectionToBuilding(_currentProcessor.transform);
         }
         
-        // Wait for unloading time - unit should remain completely still
         yield return new WaitForSeconds(unloadingTime);
         
-        if (currentProcessor != null) {
-            bool deposited = currentProcessor.TryDepositIngredient(_carriedResourceType, _carriedAmount, this);
-            Debug.Log($"[Drone:{name}] Delivering: deposit {_carriedAmount} {_carriedResourceType} to '{currentProcessor.name}' -> {(deposited ? "OK" : "FAILED")}" );
+        if (_currentProcessor != null) {
+            bool deposited = _currentProcessor.TryDepositIngredient(_carriedResourceType, _carriedAmount, this);
 
             _carriedAmount = 0;
             _currentRequest = null;
             _currentState = DroneState.Idle;
-            Debug.Log($"[Drone:{name}] State -> Idle (after delivery)");
             
-            currentProcessor.RequestTask(this);
+            _currentProcessor.RequestTask(this);
         }
         else {
             _currentState = DroneState.Idle;
@@ -336,24 +287,18 @@ public class Unit_Drone : UnitBase
     
     private IEnumerator AssignmentCoroutine()
     {
-        // Force stop all movement including alignment to prevent vibration
         movement.ForceStopAllMovement();
         
-        // Face the processor building during assignment and keep it stable
-        if (currentProcessor != null) {
-            AdjustSpriteDirectionToBuilding(currentProcessor.transform);
+        if (_currentProcessor != null) {
+            AdjustSpriteDirectionToBuilding(_currentProcessor.transform);
         }
         
-        // Wait for assignment time - unit should remain completely still
         yield return new WaitForSeconds(assignmentTime);
         
-        // Drone has completed assignment/initialization - check in
         _hasCheckedIn = true;
-        Debug.Log($"[Drone:{name}] Checked in at processor '{currentProcessor.name}'. Now available for tasks.");
         
-        // After checking in, request a task
-        if (currentProcessor != null) {
-            currentProcessor.RequestTask(this);
+        if (_currentProcessor != null) {
+            _currentProcessor.RequestTask(this);
         }
         
         _assignmentCoroutine = null;
@@ -367,7 +312,6 @@ public class Unit_Drone : UnitBase
         Vector3Int unitCell = BuildingManager.Instance.grid.WorldToCell(transform.position);
         Vector3Int buildingCell = BuildingManager.Instance.grid.WorldToCell(buildingTransform.position);
         
-        // For large buildings, find the nearest occupied cell
         Vector3Int targetCell = buildingCell;
         if (BuildingManager.Instance.GetBuildingAt(buildingCell, out List<Vector3Int> occupiedCells))
         {
@@ -420,33 +364,26 @@ public class Unit_Drone : UnitBase
                 movement.StopMovement();
             }
             
-            // Face the processor building
-            AdjustSpriteDirectionToBuilding(currentProcessor.transform);
+            AdjustSpriteDirectionToBuilding(_currentProcessor.transform);
             
-            currentProcessor.ProcessRecipeWork(CurrentRecipeTask, Time.deltaTime * processingSpeed);
+            _currentProcessor.ProcessRecipeWork(CurrentRecipeTask, Time.deltaTime * processingSpeed);
             
-            // Check if processing is complete (recipe should be cleared by ProcessRecipeWork)
             if (CurrentRecipeTask == null || (!CurrentRecipeTask.isProcessing && CurrentRecipeTask.assignedDrone == null)) {
-                // Processing is done, but ProcessRecipeWork already set the drone to Idle
-                // This is just a safety check
                 return;
             }
         }
 
         if (!movement.IsMoving && !isAtProcessor) {
-            // Only attempt to re-path if enough time has passed
             if (Time.time >= _nextRepathTime) {
                 _nextRepathTime = Time.time + RepathInterval;
-                Vector3 interactionPos = currentProcessor.AssignInteractionCell(this);
+                Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
                 bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
                 if (hasPath) {
                     float distanceToTarget = movement.FinalTargetPosition != default 
                         ? Vector3.Distance(transform.position, movement.FinalTargetPosition)
                         : 0f;
-                    Debug.Log($"[Drone:{name}] Processing: moving to processor '{currentProcessor.name}' for recipe {CurrentRecipeTask.recipeData.resourceType} (distance to target: {distanceToTarget:F2})");
                 }
                 else {
-                    Debug.Log($"[Drone:{name}] Processing: cannot path to processor '{currentProcessor.name}', going Idle");
                     SetTask_Idle();
                 }
             }
@@ -455,13 +392,13 @@ public class Unit_Drone : UnitBase
 
     private void UpdateReturnHome()
     {
-        if (currentProcessor == null) {
+        if (_currentProcessor == null) {
             movement.StopMovement();
             _currentState = DroneState.Idle;
             return;
         }
         
-        Vector3 interactionPos = currentProcessor.AssignInteractionCell(this);
+        Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
         movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
 
         if (!movement.IsMoving) {
@@ -478,13 +415,11 @@ public class Unit_Drone : UnitBase
             bool hasPath = movement.SetNewTarget(_targetStorage.GetPosition());
             if (hasPath) {
                 _currentState = DroneState.FetchingResource;
-                Debug.Log($"[Drone:{name}] State -> FetchingResource: {_currentRequest.amount} {_currentRequest.type} from '{(_targetStorage as Object)?.name}' for processor '{processor.name}'");
                 return;
             }
         }
 
         SetTask_ReturnHome(true);
-        Debug.Log($"[Drone:{name}] Fetch failed: no storage or path blocked. Returning home.");
     }
 
     public void SetTask_Process(Processor processor, ActiveRecipe recipeTask)
@@ -500,14 +435,12 @@ public class Unit_Drone : UnitBase
         
         _currentState = DroneState.Processing;
         CurrentRecipeTask = recipeTask;
-        Debug.Log($"[Drone:{name}] State -> Processing: {recipeTask.recipeData.resourceType} on '{processor.name}'");
     }
 
     public void SetTask_Idle()
     {
         ReleaseFromRecipeTask();
         _currentState = DroneState.Idle;
-        Debug.Log($"[Drone:{name}] State -> Idle");
     }
 
     private void SetTask_ReturnHome(bool stopMovement = false)
@@ -515,12 +448,11 @@ public class Unit_Drone : UnitBase
         ReleaseFromRecipeTask();
 
         if (_currentRequest != null) {
-            currentProcessor?.CancelRequest(_currentRequest);
+            _currentProcessor?.CancelRequest(_currentRequest);
             _currentRequest = null;
         }
 
         _currentState = DroneState.ReturnHome;
-        Debug.Log($"[Drone:{name}] State -> ReturnHome (stopMovement:{stopMovement})");
 
         if (stopMovement) {
             movement.StopMovement();
