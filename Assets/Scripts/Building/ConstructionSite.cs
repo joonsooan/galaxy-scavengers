@@ -17,11 +17,8 @@ public class ConstructionSite : MonoBehaviour
     
     private readonly Dictionary<Vector3Int, bool> _constructedPieces = new ();
     private readonly Dictionary<Vector3Int, Unit_Construct> _pieceAssignedDrone = new ();
-    private readonly Dictionary<Vector3Int, Unit_Construct> _pieceCommittedDrone = new ();
     private readonly Dictionary<Unit_Construct, Vector3Int> _droneInteractionCells = new ();
     private readonly HashSet<ConstructionRequest> _requestsBeingDelivered = new ();
-    
-    private static int nextRequestId = 1;
     
     public bool IsComplete { get; private set; }
     
@@ -38,14 +35,14 @@ public class ConstructionSite : MonoBehaviour
         _pieceRequiredResources.Clear();
         _pieceDeliveredResources.Clear();
         
-        BuildingPieceData[] allCards = Resources.LoadAll<BuildingPieceData>("Building Pieces");
-        Dictionary<BuildingPieceType, BuildingPieceData> buildingPieceAndCardMap = new Dictionary<BuildingPieceType, BuildingPieceData>();
+        BuildingPieceData[] buildingPieceDataList = Resources.LoadAll<BuildingPieceData>("Building Pieces");
+        Dictionary<BuildingPieceType, BuildingPieceData> buildingPieceAndDataMap = new Dictionary<BuildingPieceType, BuildingPieceData>();
         
-        foreach (var card in allCards)
+        foreach (var data in buildingPieceDataList)
         {
-            if (card.buildingPieceType != BuildingPieceType.None)
+            if (data.buildingPieceType != BuildingPieceType.None)
             {
-                buildingPieceAndCardMap.TryAdd(card.buildingPieceType, card);
+                buildingPieceAndDataMap.TryAdd(data.buildingPieceType, data);
             }
         }
         
@@ -54,13 +51,12 @@ public class ConstructionSite : MonoBehaviour
             Vector3Int pieceCell = cellPosition + piece.relativePosition;
             _constructedPieces[pieceCell] = false;
             
-            // Get resources required for this specific piece
-            if (buildingPieceAndCardMap.TryGetValue(piece.buildingPieceType, out BuildingPieceData pieceCard) && pieceCard.costs != null)
+            if (buildingPieceAndDataMap.TryGetValue(piece.buildingPieceType, out BuildingPieceData pieceData) && pieceData.costs != null)
             {
-                Dictionary<ResourceType, int> pieceRequired = new Dictionary<ResourceType, int>();
-                Dictionary<ResourceType, int> pieceDelivered = new Dictionary<ResourceType, int>();
+                Dictionary<ResourceType, int> pieceRequired = new Dictionary<ResourceType, int>(); // 요청 중인 남은 자원
+                Dictionary<ResourceType, int> pieceDelivered = new Dictionary<ResourceType, int>(); // 지금까지 배달된 자원
                 
-                foreach (var cost in pieceCard.costs)
+                foreach (var cost in pieceData.costs)
                 {
                     pieceRequired[cost.resourceType] = cost.amount;
                     pieceDelivered[cost.resourceType] = 0;
@@ -71,127 +67,29 @@ public class ConstructionSite : MonoBehaviour
             }
         }
     }
-    
-    // Atomically get and assign the next piece to construct (prevents race conditions)
-    public Vector3Int? GetAndAssignNextPieceToConstruct(Unit_Construct drone)
-    {
-        if (buildingData == null || buildingData.recipe == null || drone == null) return null;
-        
-        foreach (var piece in buildingData.recipe)
-        {
-            Vector3Int pieceCell = cellPosition + piece.relativePosition;
-            
-            if (!CanAssignPieceToDrone(pieceCell, drone))
-            {
-                continue;
-            }
-            
-            if (HasPieceAllResources(pieceCell) && AssignDroneToPiece(pieceCell, drone))
-            {
-                return pieceCell;
-            }
-        }
-        return null;
-    }
-    
-    private bool CanAssignPieceToDrone(Vector3Int pieceCell, Unit_Construct drone)
-    {
-        if (IsPieceConstructed(pieceCell))
-        {
-            return false;
-        }
-        
-        if (_pieceAssignedDrone.ContainsKey(pieceCell))
-        {
-            Unit_Construct assignedDrone = _pieceAssignedDrone[pieceCell];
-            if (assignedDrone == null)
-            {
-                _pieceAssignedDrone.Remove(pieceCell);
-            }
-            else if (drone == null || assignedDrone != drone)
-            {
-                return false;
-            }
-        }
-        
-        if (IsPieceCommitted(pieceCell) && (drone == null || !IsPieceCommittedTo(pieceCell, drone)))
-        {
-            return false;
-        }
-        
-        return true;
-    }
-    
-    // Assign a drone to work on a specific piece
-    public bool AssignDroneToPiece(Vector3Int pieceCell, Unit_Construct drone)
-    {
-        // Check if piece is already assigned to another drone
-        if (_pieceAssignedDrone.ContainsKey(pieceCell))
-        {
-            Unit_Construct assignedDrone = _pieceAssignedDrone[pieceCell];
-            if (assignedDrone != null && assignedDrone != drone)
-            {
-                // Another drone is already working on this piece
-                return false;
-            }
-        }
-        
-        _pieceAssignedDrone[pieceCell] = drone;
-        return true;
-    }
-    
-    // Release a drone from a piece (when construction is complete or cancelled)
-    public void ReleaseDroneFromPiece(Vector3Int pieceCell, Unit_Construct drone)
+
+    private void ReleaseDroneFromPiece(Vector3Int pieceCell, Unit_Construct drone)
     {
         if (_pieceAssignedDrone.ContainsKey(pieceCell) && _pieceAssignedDrone[pieceCell] == drone)
         {
             _pieceAssignedDrone.Remove(pieceCell);
         }
     }
-    
-    // Commit a drone to constructing a piece (after delivering resources)
-    public void CommitDroneToPiece(Vector3Int pieceCell, Unit_Construct drone)
+
+    private bool PieceHasAllResources(Vector3Int pieceCell)
     {
-        _pieceCommittedDrone[pieceCell] = drone;
-    }
-    
-    // Check if a piece is committed to a specific drone
-    public bool IsPieceCommittedTo(Vector3Int pieceCell, Unit_Construct drone)
-    {
-        return _pieceCommittedDrone.ContainsKey(pieceCell) && _pieceCommittedDrone[pieceCell] == drone;
-    }
-    
-    // Check if a piece is committed to any drone
-    public bool IsPieceCommitted(Vector3Int pieceCell)
-    {
-        return _pieceCommittedDrone.ContainsKey(pieceCell) && _pieceCommittedDrone[pieceCell] != null;
-    }
-    
-    // Release a drone's commitment to a piece (after construction is complete)
-    public void ReleaseCommitmentFromPiece(Vector3Int pieceCell, Unit_Construct drone)
-    {
-        if (_pieceCommittedDrone.ContainsKey(pieceCell) && _pieceCommittedDrone[pieceCell] == drone)
-        {
-            _pieceCommittedDrone.Remove(pieceCell);
-        }
-    }
-    
-    // Check if a specific piece has all its required resources
-    public bool HasPieceAllResources(Vector3Int pieceCell)
-    {
-        if (!_pieceRequiredResources.ContainsKey(pieceCell))
+        if (!_pieceRequiredResources.TryGetValue(pieceCell, out var required))
         {
             return false;
         }
-        
-        var required = _pieceRequiredResources[pieceCell];
-        var delivered = _pieceDeliveredResources.ContainsKey(pieceCell) 
-            ? _pieceDeliveredResources[pieceCell] 
+
+        var delivered = _pieceDeliveredResources.TryGetValue(pieceCell, out var resource) 
+            ? resource 
             : new Dictionary<ResourceType, int>();
         
         foreach (var req in required)
         {
-            int deliveredAmount = delivered.ContainsKey(req.Key) ? delivered[req.Key] : 0;
+            int deliveredAmount = delivered.TryGetValue(req.Key, out var value) ? value : 0;
             if (deliveredAmount < req.Value)
             {
                 return false;
@@ -200,30 +98,18 @@ public class ConstructionSite : MonoBehaviour
         
         return true;
     }
-    
-    // Check if a piece is already constructed
-    public bool IsPieceConstructed(Vector3Int pieceCell)
+
+    private bool IsPieceConstructed(Vector3Int pieceCell)
     {
         return _constructedPieces.ContainsKey(pieceCell) && _constructedPieces[pieceCell];
     }
-    
-    // Check if a piece is assigned to a specific drone
-    public bool IsPieceAssignedToMe(Vector3Int pieceCell, Unit_Construct drone)
-    {
-        if (!_pieceAssignedDrone.ContainsKey(pieceCell))
-        {
-            return false;
-        }
-        return _pieceAssignedDrone[pieceCell] == drone;
-    }
-    
-    // Mark a piece as constructed
-    public void MarkPieceConstructed(Vector3Int pieceCell, Unit_Construct drone)
+
+    private void MarkPieceAsConstructed(Vector3Int pieceCell, Unit_Construct drone)
     {
         if (_constructedPieces.ContainsKey(pieceCell))
         {
             _constructedPieces[pieceCell] = true;
-            _pendingRequests.RemoveAll(r => r.targetPieceCell == pieceCell);
+            _pendingRequests.RemoveAll(r => r.targetPieceCell == pieceCell); // 남아있는 요청 모두 제거
             
             if (drone != null)
             {
@@ -233,18 +119,11 @@ public class ConstructionSite : MonoBehaviour
             if (AreAllPiecesConstructed())
             {
                 IsComplete = true;
-                Debug.Log($"[ConstructionSite:{name}] All pieces constructed!");
             }
         }
     }
     
-    // Assign interaction cell for a drone at a specific piece position
-    public Vector3 AssignInteractionCell(Unit_Construct drone, Vector3Int pieceCell)
-    {
-        return AssignInteractionCellInternal(drone, pieceCell);
-    }
-    
-    // Assign delivery interaction cell (for resource delivery)
+    // 드론에게 자원 배달을 위한 상호작용 셀 할당
     public Vector3 AssignDeliveryInteractionCell(Unit_Construct drone, Vector3Int pieceCell)
     {
         return AssignInteractionCellInternal(drone, pieceCell);
@@ -259,6 +138,7 @@ public class ConstructionSite : MonoBehaviour
         
         List<Vector3Int> availableCells = GetAvailableInteractionCells(pieceCell);
         
+        // 상호작용 가능한 셀이 없는 경우 셀 자체를 할당
         if (availableCells.Count == 0)
         {
             return BuildingManager.Instance.grid.GetCellCenterWorld(pieceCell);
@@ -274,6 +154,7 @@ public class ConstructionSite : MonoBehaviour
         return BuildingManager.Instance.grid.GetCellCenterWorld(bestCell);
     }
     
+    // 가장 가까운 상호작용 셀 찾는 함수
     private Vector3Int FindBestInteractionCell(Unit_Construct drone, List<Vector3Int> availableCells)
     {
         Vector3Int bestCell = availableCells[0];
@@ -308,8 +189,8 @@ public class ConstructionSite : MonoBehaviour
         HashSet<Vector3Int> occupiedCells = GetOccupiedCells();
         
         Vector3Int[] cardinalOffsets = {
-            new Vector3Int(1, 0, 0), new Vector3Int(-1, 0, 0),
-            new Vector3Int(0, 1, 0), new Vector3Int(0, -1, 0)
+            new (1, 0, 0), new (-1, 0, 0),
+            new (0, 1, 0), new (0, -1, 0)
         };
         
         foreach (Vector3Int offset in cardinalOffsets)
@@ -368,10 +249,6 @@ public class ConstructionSite : MonoBehaviour
         {
             CalculateComboCosts();
         }
-        else
-        {
-            Debug.LogWarning($"[ConstructionSite] comboCardData is null or has no recipe at Start()");
-        }
     }
     
     public void CalculateComboCosts()
@@ -381,37 +258,33 @@ public class ConstructionSite : MonoBehaviour
         
         if (buildingData == null)
         {
-            Debug.LogError($"[ConstructionSite:{name}] Cannot calculate costs: comboCardData is null");
             return;
         }
         
         if (buildingData.recipe == null || buildingData.recipe.Count == 0)
         {
-            Debug.LogError($"[ConstructionSite:{name}] Cannot calculate costs: recipe is null or empty");
             return;
         }
         
-        // Load all CardData to find costs for each gadget type
-        BuildingPieceData[] allCards = Resources.LoadAll<BuildingPieceData>("Building Pieces");
-        Dictionary<BuildingPieceType, BuildingPieceData> gadgetToCardMap = new Dictionary<BuildingPieceType, BuildingPieceData>();
+        BuildingPieceData[] buildingPieceDataList = Resources.LoadAll<BuildingPieceData>("Building Pieces");
+        Dictionary<BuildingPieceType, BuildingPieceData> buildingPieceAndDataMap = new Dictionary<BuildingPieceType, BuildingPieceData>();
         
-        foreach (var card in allCards)
+        foreach (var data in buildingPieceDataList)
         {
-            if (card.buildingPieceType != BuildingPieceType.None && !gadgetToCardMap.ContainsKey(card.buildingPieceType))
+            if (data.buildingPieceType != BuildingPieceType.None)
             {
-                gadgetToCardMap[card.buildingPieceType] = card;
+                buildingPieceAndDataMap.TryAdd(data.buildingPieceType, data);
             }
         }
         
         foreach (var piece in buildingData.recipe)
         {
-            if (!gadgetToCardMap.TryGetValue(piece.buildingPieceType, out BuildingPieceData pieceCard) || pieceCard.costs == null)
+            if (!buildingPieceAndDataMap.TryGetValue(piece.buildingPieceType, out BuildingPieceData pieceData) || pieceData.costs == null)
             {
-                Debug.LogWarning($"[ConstructionSite:{name}] Could not find CardData for gadget type {piece.buildingPieceType}");
                 continue;
             }
 
-            foreach (var cost in pieceCard.costs)
+            foreach (var cost in pieceData.costs)
             {
                 if (_requiredResources.ContainsKey(cost.resourceType))
                 {
@@ -423,16 +296,6 @@ public class ConstructionSite : MonoBehaviour
                 }
                 _deliveredResources[cost.resourceType] = 0;
             }
-        }
-        
-        if (_requiredResources.Count > 0)
-        {
-            string costString = string.Join(", ", _requiredResources.Select(kvp => $"{kvp.Value} {kvp.Key}"));
-            Debug.Log($"[ConstructionSite:{name}] Calculated costs: {costString} (Total resources needed: {_requiredResources.Count} types)");
-        }
-        else
-        {
-            Debug.LogError($"[ConstructionSite:{name}] Calculated costs but _requiredResources is empty!");
         }
         
         InitializePieceTracking();
@@ -448,20 +311,6 @@ public class ConstructionSite : MonoBehaviour
         }
     }
     
-    public bool HasAllResources()
-    {
-        foreach (var required in _requiredResources)
-        {
-            if (!_deliveredResources.ContainsKey(required.Key) || 
-                _deliveredResources[required.Key] < required.Value)
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    // Check if all pieces are constructed
     public bool AreAllPiecesConstructed()
     {
         if (_constructedPieces.Count == 0) return false;
@@ -473,60 +322,10 @@ public class ConstructionSite : MonoBehaviour
         return true;
     }
     
-    public ConstructionRequest GetNextResourceRequest(int droneCapacity)
-    {
-        if (_requiredResources.Count == 0)
-        {
-            Debug.LogWarning($"[ConstructionSite:{name}] GetNextResourceRequest called but _requiredResources is empty!");
-            return null;
-        }
-        
-        foreach (var pieceCell in _pieceRequiredResources.Keys)
-        {
-            if (_constructedPieces.ContainsKey(pieceCell) && _constructedPieces[pieceCell])
-            {
-                continue;
-            }
-            
-            var pieceRequired = _pieceRequiredResources[pieceCell];
-            var pieceDelivered = _pieceDeliveredResources.ContainsKey(pieceCell) 
-                ? _pieceDeliveredResources[pieceCell] 
-                : new Dictionary<ResourceType, int>();
-            
-            foreach (var required in pieceRequired)
-            {
-                int deliveredAmount = pieceDelivered.ContainsKey(required.Key) ? pieceDelivered[required.Key] : 0;
-                int stillNeeded = required.Value - deliveredAmount;
-                int onTheWay = GetOnTheWayAmount(required.Key, pieceCell);
-                int totalNeeded = stillNeeded - onTheWay;
-                
-                if (totalNeeded > 0)
-                {
-                    int amountToRequest = Mathf.Min(totalNeeded, droneCapacity);
-                    ConstructionRequest newRequest = new ConstructionRequest
-                    {
-                        type = required.Key,
-                        amount = amountToRequest,
-                        site = this,
-                        targetPieceCell = pieceCell
-                    };
-                    _pendingRequests.Add(newRequest);
-                    Debug.Log($"[ConstructionSite:{name}] Created resource request: {amountToRequest} {required.Key} for piece at {pieceCell} (still needed: {stillNeeded}, on the way: {onTheWay})");
-                    return newRequest;
-                }
-            }
-        }
-        
-        Debug.Log($"[ConstructionSite:{name}] GetNextResourceRequest: No resources needed. Required: {_requiredResources.Count} types");
-        return null;
-    }
-    
-    // Atomically get and assign a resource request to a drone (prevents duplicate requests)
     public ConstructionRequest GetAndAssignNextResourceRequest(Unit_Construct drone, int droneCapacity)
     {
         if (_requiredResources.Count == 0 || drone == null)
         {
-            Debug.LogWarning($"[ConstructionSite:{name}] GetAndAssignNextResourceRequest called but _requiredResources is empty or drone is null!");
             return null;
         }
         
@@ -540,13 +339,13 @@ public class ConstructionSite : MonoBehaviour
             }
             
             var pieceRequired = _pieceRequiredResources[pieceCell];
-            var pieceDelivered = _pieceDeliveredResources.ContainsKey(pieceCell) 
-                ? _pieceDeliveredResources[pieceCell] 
+            var pieceDelivered = _pieceDeliveredResources.TryGetValue(pieceCell, out var resource) 
+                ? resource 
                 : new Dictionary<ResourceType, int>();
             
             foreach (var required in pieceRequired)
             {
-                int deliveredAmount = pieceDelivered.ContainsKey(required.Key) ? pieceDelivered[required.Key] : 0;
+                int deliveredAmount = pieceDelivered.TryGetValue(required.Key, out var value) ? value : 0;
                 int stillNeeded = required.Value - deliveredAmount;
                 int onTheWay = GetOnTheWayAmount(required.Key, pieceCell);
                 int totalNeeded = stillNeeded - onTheWay;
@@ -563,13 +362,11 @@ public class ConstructionSite : MonoBehaviour
                         assignedDrone = drone
                     };
                     _pendingRequests.Add(newRequest);
-                    Debug.Log($"[ConstructionSite:{name}] Created and assigned resource request: {amountToRequest} {required.Key} for piece at {pieceCell} to drone {drone.name} (still needed: {stillNeeded}, on the way: {onTheWay})");
                     return newRequest;
                 }
             }
         }
         
-        Debug.Log($"[ConstructionSite:{name}] GetAndAssignNextResourceRequest: No resources needed. Required: {_requiredResources.Count} types");
         return null;
     }
     
@@ -577,54 +374,46 @@ public class ConstructionSite : MonoBehaviour
     {
         if (drone == null) return false;
         
-        // Find the request for this specific drone and resource type
         ConstructionRequest request = _pendingRequests.FirstOrDefault(r => r.assignedDrone == drone && r.type == type);
         
         if (request == null)
         {
-            // No pending request found - check if it's already being delivered (duplicate)
+            // 해당하는 요청 없음
             bool isDuplicate = _requestsBeingDelivered.Any(r => r.assignedDrone == drone && r.type == type);
             if (isDuplicate)
             {
-                return false; // Already being delivered
+                return false; // 이미 다른 드론에 의해 자원 배달이 완료됨
             }
-            // Request doesn't exist - can't deposit
+            // 아예 요청이 존재하지 않음
             return false;
         }
         
-        // Check if this exact request is already being delivered
+        // 자원이 현재 배달 중인 상태임
         if (_requestsBeingDelivered.Contains(request))
         {
             return false;
         }
         
-        // Check if we still need this resource type
-        int totalNeeded = _requiredResources.ContainsKey(type) ? _requiredResources[type] : 0;
-        int totalDelivered = _deliveredResources.ContainsKey(type) ? _deliveredResources[type] : 0;
+        // 이 자원이 필요한지 확인
+        int totalNeeded = _requiredResources.TryGetValue(type, out var requiredResource) ? requiredResource : 0;
+        int totalDelivered = _deliveredResources.TryGetValue(type, out var resource) ? resource : 0;
         
         if (totalNeeded <= totalDelivered)
         {
-            return false; // Already have enough resources
+            return false; // 필요한 자원의 양보다 배달되는 양이 더 많음
         }
         
-        // Request exists, not being delivered, and we still need resources
+        // 자원 요청이 존재하고, 아직 배달되지 않았으며, 자원이 필요함
         return true;
     }
     
     public bool TryDepositResource(ResourceType type, int amount, Unit_Construct drone)
     {
-        if (drone == null)
-        {
-            Debug.LogWarning($"[ConstructionSite:{name}] TryDepositResource called with null drone");
-            return false;
-        }
-
-        // Find the request for this specific drone and resource type
         ConstructionRequest request = _pendingRequests.FirstOrDefault(r => r.assignedDrone == drone && r.type == type);
         
         if (request == null)
         {
-            // Check if this request is already being delivered (duplicate attempt)
+            // 현재 이미 진행 중인 요청인지 확인
             bool isDuplicate = _requestsBeingDelivered.Any(r => r.assignedDrone == drone && r.type == type);
             if (isDuplicate)
             {
@@ -637,22 +426,20 @@ public class ConstructionSite : MonoBehaviour
             return false;
         }
         
-        // Check if this exact request is already being delivered
-        if (_requestsBeingDelivered.Contains(request))
+        // 이미 배달 중인 요청인지 확인
+        if (!_requestsBeingDelivered.Add(request))
         {
-            Debug.Log($"[ConstructionSite:{name}] Deposit REJECTED: request {request.requestId} from drone {drone.name} is already being processed");
             return false;
         }
         
-        // Mark request as being delivered BEFORE removing from pending (atomic operation)
-        _requestsBeingDelivered.Add(request);
+        // '보류 중'에서 제거하기 전에 '배달 됨'으로 요청을 표시
         _pendingRequests.Remove(request);
         
         try
         {
             int remainingAmount = amount;
-            int totalNeeded = _requiredResources.ContainsKey(type) ? _requiredResources[type] : 0;
-            int totalDelivered = _deliveredResources.ContainsKey(type) ? _deliveredResources[type] : 0;
+            int totalNeeded = _requiredResources.TryGetValue(type, out var resource) ? resource : 0;
+            int totalDelivered = _deliveredResources.TryGetValue(type, out var deliveredResource) ? deliveredResource : 0;
             int totalCanAccept = Mathf.Min(remainingAmount, totalNeeded - totalDelivered);
             
             if (totalCanAccept <= 0)
@@ -661,10 +448,7 @@ public class ConstructionSite : MonoBehaviour
                 return false;
             }
 
-            if (!_deliveredResources.ContainsKey(type))
-            {
-                _deliveredResources[type] = 0;
-            }
+            _deliveredResources.TryAdd(type, 0);
             _deliveredResources[type] += totalCanAccept;
             
             HashSet<Vector3Int> piecesThatReceivedResources = new HashSet<Vector3Int>();
@@ -679,15 +463,12 @@ public class ConstructionSite : MonoBehaviour
 
                 var pieceDelivered = _pieceDeliveredResources[pieceCell];
                 int pieceNeeded = pieceRequired[type];
-                int pieceDeliveredAmount = pieceDelivered.ContainsKey(type) ? pieceDelivered[type] : 0;
+                int pieceDeliveredAmount = pieceDelivered.TryGetValue(type, out var value) ? value : 0;
                 int pieceCanAccept = Mathf.Min(remainingAmount, pieceNeeded - pieceDeliveredAmount);
                 
                 if (pieceCanAccept > 0)
                 {
-                    if (!pieceDelivered.ContainsKey(type))
-                    {
-                        pieceDelivered[type] = 0;
-                    }
+                    pieceDelivered.TryAdd(type, 0);
                     pieceDelivered[type] += pieceCanAccept;
                     remainingAmount -= pieceCanAccept;
                     piecesThatReceivedResources.Add(pieceCell);
@@ -696,7 +477,7 @@ public class ConstructionSite : MonoBehaviour
             
             foreach (var pieceCell in piecesThatReceivedResources)
             {
-                if (HasPieceAllResources(pieceCell) && !IsPieceConstructed(pieceCell))
+                if (PieceHasAllResources(pieceCell) && !IsPieceConstructed(pieceCell))
                 {
                     StartPieceConstruction(pieceCell);
                 }
@@ -706,7 +487,6 @@ public class ConstructionSite : MonoBehaviour
         }
         finally
         {
-            // Always remove from in-progress tracking, even if there was an error
             _requestsBeingDelivered.Remove(request);
         }
     }
@@ -718,7 +498,7 @@ public class ConstructionSite : MonoBehaviour
             return;
         }
         
-        if (!HasPieceAllResources(pieceCell))
+        if (!PieceHasAllResources(pieceCell))
         {
             Debug.LogWarning($"[ConstructionSite:{name}] Cannot construct piece at {pieceCell} - resources not fully delivered.");
             return;
@@ -735,8 +515,7 @@ public class ConstructionSite : MonoBehaviour
         BuildingPiece placedPiece = BuildingManager.Instance.GetPieceAt(pieceCell);
         if (placedPiece != null)
         {
-            MarkPieceConstructed(pieceCell, null);
-            Debug.Log($"[ConstructionSite:{name}] Immediately constructed piece at {pieceCell} for '{buildingData.displayName}'");
+            MarkPieceAsConstructed(pieceCell, null);
             
             if (ConstructionManager.Instance != null)
             {
@@ -757,15 +536,14 @@ public class ConstructionSite : MonoBehaviour
         _requestsBeingDelivered.Remove(request);
     }
     
-    // Clean up stale requests assigned to units that are idle
-    public void CleanupStaleRequests()
+    // IDLE 상태인 유닛들의 요청을 제거
+    private void CleanupStaleRequests()
     {
         _pendingRequests.RemoveAll(r => {
             if (r.assignedDrone == null) return true;
             return r.assignedDrone.IsIdle();
         });
         
-        // Also clean up in-progress requests if the drone is idle (shouldn't happen, but safety check)
         _requestsBeingDelivered.RemoveWhere(r => {
             if (r.assignedDrone == null) return true;
             return r.assignedDrone.IsIdle();
@@ -790,17 +568,11 @@ public class ConstructionSite : MonoBehaviour
     
     public class ConstructionRequest
     {
-        public int requestId; // Unique identifier for this request
         public ResourceType type;
         public int amount;
         public ConstructionSite site;
         public Unit_Construct assignedDrone;
-        public Vector3Int? targetPieceCell; // The piece cell that needs this resource
-        
-        public ConstructionRequest()
-        {
-            requestId = nextRequestId++;
-        }
+        public Vector3Int? targetPieceCell;
     }
 }
 

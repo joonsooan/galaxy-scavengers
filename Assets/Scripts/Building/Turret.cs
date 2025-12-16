@@ -12,7 +12,7 @@ public class Turret : Damageable
     private Transform _target;
     private Coroutine _attackCoroutine;
     private WaitForSeconds _findTargetWait;
-    private Vector3 bulletSpawnPosition;
+    private Vector3 _bulletSpawnPosition;
     
     private void OnDrawGizmosSelected()
     {
@@ -24,7 +24,7 @@ public class Turret : Damageable
     {
         base.OnEnable();
         
-        bulletSpawnPosition = transform.position + new Vector3(0.5f, 0.5f, 0f);
+        _bulletSpawnPosition = transform.position + new Vector3(0.5f, 0.5f, 0f);
         _findTargetWait = new WaitForSeconds(0.2f);
         StartCoroutine(UpdateTargetCoroutine());
     }
@@ -125,7 +125,7 @@ public class Turret : Damageable
             return;
         }
         
-        GameObject bulletObj = ObjectPooler.Instance.SpawnFromPool("TurretBullet", bulletSpawnPosition, Quaternion.identity);
+        GameObject bulletObj = ObjectPooler.Instance.SpawnFromPool("TurretBullet", _bulletSpawnPosition, Quaternion.identity);
 
         if (bulletObj != null && bulletObj.TryGetComponent<Turret_Bullet>(out var bulletScript))
         {

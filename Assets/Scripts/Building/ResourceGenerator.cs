@@ -11,20 +11,12 @@ public class ResourceGenerator : Damageable
     [Header("VFX")]
     [SerializeField] private string canvasName = "FloatingText Canvas";
     
-    private Canvas _canvas;
     private Coroutine _productionCoroutine;
-    private bool _isConstructed = false;
+    private bool _isConstructed;
 
     protected override void OnEnable()
     {
         base.OnEnable();
-        
-        GameObject canvasObject = GameObject.Find(canvasName);
-        
-        if (canvasObject != null)
-        {
-            _canvas = canvasObject.GetComponent<Canvas>();
-        }
         
         ActivateComboCard();
     }

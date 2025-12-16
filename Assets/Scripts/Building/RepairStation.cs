@@ -63,7 +63,6 @@ public class RepairStation : Damageable
     {
         Vector3 stationPosition = transform.position;
         
-        // Heal nearby buildings (Damageable)
         if (TargetManager.Instance != null)
         {
             foreach (Damageable building in TargetManager.Instance.AllTargets)
@@ -79,7 +78,6 @@ public class RepairStation : Damageable
             }
         }
         
-        // Heal nearby ally units (UnitBase)
         if (UnitManager.Instance != null)
         {
             foreach (UnitBase unit in UnitManager.Instance.AllyUnits)

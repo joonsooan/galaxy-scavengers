@@ -8,27 +8,18 @@ public class DroneHub : Damageable, IClickable
 {
     [SerializeField] private DroneHubData droneHubData;
 
-    private readonly Queue<UnitData> _productionQueue = new Queue<UnitData>();
-    private readonly Dictionary<int, int> _targetUnitCounts = new Dictionary<int, int>();
-    private readonly Dictionary<int, int> _producedUnitCounts = new Dictionary<int, int>();
+    private readonly Queue<UnitData> _productionQueue = new ();
+    private readonly Dictionary<int, int> _targetUnitCounts = new ();
+    private readonly Dictionary<int, int> _producedUnitCounts = new ();
     private bool _isProducing;
 
     public static event Action<DroneHub> OnDroneHubClicked;
-    public static event Action<int, int, int> OnUnitTargetChanged; // unitIndex, currentCount, targetCount
+    public static event Action<int, int, int> OnUnitTargetChanged;
 
-    public DroneHubData DroneHubData {
-        get {
-            return droneHubData;
-        }
-    }
-
-    // Drone count properties for UI
-    public int TotalAllyDrones => GetTotalAllyDroneCount();
-    public int AvailableDrones => GetAvailableDroneCount();
+    public DroneHubData DroneHubData => droneHubData;
 
     public void OnClicked()
     {
-        Debug.Log($"[DroneHub] OnClicked called on {gameObject.name}");
         OnDroneHubClicked?.Invoke(this);
     }
 
@@ -46,19 +37,13 @@ public class DroneHub : Damageable, IClickable
 
     public void SetTargetUnitCount(int unitIndex, int targetCount)
     {
-        if (droneHubData == null || droneHubData.ProducibleUnits == null)
+        if (droneHubData == null || droneHubData.ProducibleUnits == null || 
+            unitIndex < 0 || unitIndex >= droneHubData.ProducibleUnits.Count)
         {
             return;
         }
 
-        if (unitIndex < 0 || unitIndex >= droneHubData.ProducibleUnits.Count)
-        {
-            return;
-        }
-
-        int currentTarget = GetTargetUnitCount(unitIndex);
         int currentProduced = GetCurrentUnitCount(unitIndex);
-        
         _targetUnitCounts[unitIndex] = Mathf.Max(0, targetCount);
 
         int neededInTotal = targetCount - currentProduced;
@@ -66,13 +51,11 @@ public class DroneHub : Damageable, IClickable
 
         if (neededInTotal > currentlyQueued)
         {
-            // Need to add more units to queue
             int unitsToAdd = neededInTotal - currentlyQueued;
             AddUnitsToQueue(unitIndex, unitsToAdd);
         }
         else if (neededInTotal < currentlyQueued)
         {
-            // Need to remove units from queue
             int unitsToRemove = currentlyQueued - neededInTotal;
             RemoveUnitsFromQueue(unitIndex, unitsToRemove);
         }
@@ -115,12 +98,8 @@ public class DroneHub : Damageable, IClickable
 
     private void RemoveUnitsFromQueue(int unitIndex, int count)
     {
-        if (droneHubData == null || droneHubData.ProducibleUnits == null)
-        {
-            return;
-        }
-
-        if (unitIndex < 0 || unitIndex >= droneHubData.ProducibleUnits.Count)
+        if (droneHubData == null || droneHubData.ProducibleUnits == null ||
+            unitIndex < 0 || unitIndex >= droneHubData.ProducibleUnits.Count)
         {
             return;
         }
@@ -147,17 +126,10 @@ public class DroneHub : Damageable, IClickable
             }
         }
 
-        // Rebuild queue
         foreach (UnitData unit in queueList)
         {
             _productionQueue.Enqueue(unit);
         }
-    }
-
-    public void AddUnitToQueue(int unitIndex)
-    {
-        int currentTarget = GetTargetUnitCount(unitIndex);
-        SetTargetUnitCount(unitIndex, currentTarget + 1);
     }
 
     private IEnumerator ProcessProductionQueue()
@@ -166,8 +138,6 @@ public class DroneHub : Damageable, IClickable
 
         while (_productionQueue.Count > 0 || HasPendingTargets())
         {
-            // Only update queue from targets when queue is empty (before starting new production)
-            // This prevents adding duplicate units during production
             if (_productionQueue.Count == 0)
             {
                 UpdateQueueFromTargets();
@@ -183,7 +153,6 @@ public class DroneHub : Damageable, IClickable
 
             yield return new WaitForSeconds(unitToProduce.productionTime);
 
-            // Find which unit index this is
             int unitIndex = FindUnitIndex(unitToProduce);
             if (unitIndex >= 0)
             {
@@ -284,29 +253,5 @@ public class DroneHub : Damageable, IClickable
             }
         }
         return -1;
-    }
-
-    private int GetTotalAllyDroneCount()
-    {
-        if (UnitManager.Instance == null)
-        {
-            return 0;
-        }
-
-        return UnitManager.Instance.AllyUnits
-            .OfType<Unit_Drone>()
-            .Count();
-    }
-
-    private int GetAvailableDroneCount()
-    {
-        if (UnitManager.Instance == null)
-        {
-            return 0;
-        }
-
-        return UnitManager.Instance.AllyUnits
-            .OfType<Unit_Drone>()
-            .Count(d => !d.IsAssigned);
     }
 }

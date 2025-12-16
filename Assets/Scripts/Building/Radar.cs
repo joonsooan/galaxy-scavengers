@@ -8,6 +8,6 @@ public class Radar : Damageable
 
     private void ActivateComboCard()
     {
-        // GameManager.Instance.expansionPanel.TogglePanelVisibility();
+        // Add Radar Function
     }
 }

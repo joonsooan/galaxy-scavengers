@@ -12,12 +12,6 @@ public class Storage : Damageable, IStorage
     
     private readonly Dictionary<ResourceType, int> _currentResources = new();
 
-    [Header("UI Settings")]
-    [SerializeField] private GameObject storageSliderPrefab;
-    [SerializeField] private string canvasName = "ObjectUI_Canvas";
-    [SerializeField] private Vector3 sliderOffset = new Vector3(0, 1.0f, 0);
-    private GameObject _sliderInstance;
-
     protected override void Awake()
     {
         base.Awake();
@@ -31,18 +25,6 @@ public class Storage : Damageable, IStorage
     private void Start()
     {
         currentHealth = maxHealth;
-
-        if (storageSliderPrefab != null)
-        {
-            Canvas canvas = GameObject.Find(canvasName)?.GetComponent<Canvas>();
-            
-            if (canvas != null)
-            {
-                _sliderInstance = Instantiate(storageSliderPrefab, canvas.transform);
-                var controller = _sliderInstance.GetComponent<StorageSlider>();
-                controller?.Initialize(this, sliderOffset);
-            }
-        }
         
         foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
         {
@@ -55,11 +37,6 @@ public class Storage : Damageable, IStorage
         if (ResourceManager.Instance != null)
         {
             ResourceManager.Instance.RemoveStorage(this);
-        }
-
-        if (_sliderInstance != null)
-        {
-            Destroy(_sliderInstance);
         }
     }
 
@@ -79,22 +56,6 @@ public class Storage : Damageable, IStorage
         ResourceManager.Instance.AddResource(type, canAddAmount); 
         
         return canAddAmount > 0;
-    }
-    
-    public bool TryUseResources(ResourceCost[] costs)
-    {
-        if (!HasEnoughResources(costs))
-        {
-            return false;
-        }
-
-        foreach (var cost in costs)
-        {
-            _currentResources[cost.resourceType] -= cost.amount;
-            OnResourceChanged?.Invoke(cost.resourceType, _currentResources[cost.resourceType], maxStorageAmount);
-        }
-
-        return true;
     }
     
     public bool TryWithdrawResource(ResourceType type, int amountToWithdraw, out int amountWithdrawn)
