@@ -308,11 +308,6 @@ public class ResourceManager : MonoBehaviour
         return true;
     }
 
-    public bool SpendResources(ResourceType type, int amount)
-    {
-        return SpendResources(new[] { new ResourceCost { resourceType = type, amount = amount } });
-    }
-
     public bool HasEnoughResources(ResourceCost[] costs)
     {
         foreach (ResourceCost cost in costs) {
@@ -515,7 +510,7 @@ public class ResourceManager : MonoBehaviour
         }
     }
 
-    public void UpdateAllResourceUI()
+    private void UpdateAllResourceUI()
     {
         if (!IsUIConnected()) return;
 
@@ -544,13 +539,6 @@ public class ResourceManager : MonoBehaviour
         UpdateResourceUI(ResourceType.NexusData);
         UpdateResourceUI(ResourceType.NeuralMatrix);
     }
-
-    // private void UpdateSolanaUI()
-    // {
-    //     int requiredAmount = GameManager.Instance != null ? GameManager.Instance.GetRequiredAmountForCurrentQuota() : 0;
-    //
-    //     // solanaNumber.text = $"{_resourceCounts[ResourceType.Solana]} / {requiredAmount}";
-    // }
 
     private bool IsUIConnected()
     {

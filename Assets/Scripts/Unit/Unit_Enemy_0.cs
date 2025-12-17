@@ -14,8 +14,11 @@ public class Unit_Enemy_0 : UnitBase
     [SerializeField] private float homeRadius = 3f;
     [SerializeField] private float territoryRadius = 6f;
     [SerializeField] private float chaseTime = 5f;
-    [SerializeField] private float roamInterval = 2f;
     [SerializeField] private float detectionRadius = 8f;
+    // [SerializeField] private float roamInterval = 2f;
+    public float minRoamInterval = 2.0f;
+    public float maxRoamInterval = 3.0f;
+    private float _currentRoamInterval;
 
     [Header("Combat")]
     [SerializeField] private int attackDamage = 10;
@@ -45,6 +48,11 @@ public class Unit_Enemy_0 : UnitBase
         }
         _spawnPosition = Vector3.zero;
         _aiState = AIState.Idle;
+    }
+    
+    private void Start()
+    {
+        SetNewRoamInterval();
     }
     
     public void SetTerritoryCenter(Vector3 territoryCenter)
@@ -91,8 +99,9 @@ public class Unit_Enemy_0 : UnitBase
     private void HandleIdle()
     {
         _roamTimer += Time.deltaTime;
-        if (_roamTimer < roamInterval) return;
+        if (_roamTimer < _currentRoamInterval) return;
         _roamTimer = 0f;
+        SetNewRoamInterval();
         
         if (!_lastActionWasMove)
         {
@@ -115,6 +124,11 @@ public class Unit_Enemy_0 : UnitBase
                 _lastActionWasMove = true;
             }
         }
+    }
+    
+    private void SetNewRoamInterval()
+    {
+        _currentRoamInterval = Random.Range(minRoamInterval, maxRoamInterval);
     }
 
     private void HandleTerritoryEntry()

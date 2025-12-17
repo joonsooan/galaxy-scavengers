@@ -62,7 +62,7 @@ public class GameManager : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.Alpha3)) Time.timeScale = 3;
         else if (Input.GetKeyDown(KeyCode.Alpha4)) Time.timeScale = 4;
 
-        if (Input.GetKeyDown(KeyCode.I))
+        if (Input.GetKeyDown(KeyCode.F))
         {
             if (FogOfWarManager.Instance != null)
             {

@@ -3270,7 +3270,7 @@ MonoBehaviour:
   fillDisconnectedAreas: 1
   enableEnemySpawnHoles: 1
   enemySpawnHoleMinimalAmount: 20
-  enemySpawnPunchHoleRadius: 6
+  enemySpawnPunchHoleRadius: 6.5
   enemySpawnHolesPerSector: 4
   enemySpawnHoleStartCircleIndex: 2
   showEnemySpawnHoleGizmos: 1
@@ -3306,7 +3306,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b540b3e99609b94c8c7ea595d7de236, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resourceTilemap: {fileID: 431047631}
   grid: {fileID: 2115591665}
   parentTransform: {fileID: 956259329}
   mapGenerator: {fileID: 313771328}
@@ -5095,7 +5094,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &431047629
 Transform:
   m_ObjectHideFlags: 0
@@ -28067,7 +28066,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   grid: {fileID: 2115591665}
   groundTilemap: {fileID: 558756081}
-  resourceTilemap: {fileID: 431047631}
   buildingTilemap: {fileID: 2119450981}
   mainStructureTile: {fileID: 11400000, guid: 557c4e99678d2d54e8fa805b63fce0ce, type: 2}
   temporaryTile: {fileID: 11400000, guid: 1a272a0c37b7bdf48a1ad47ad0cd0fa7, type: 2}
@@ -39184,11 +39182,11 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 80026091}
   - {fileID: 558756079}
   - {fileID: 1829347662}
   - {fileID: 2119450979}
   - {fileID: 431047629}
+  - {fileID: 80026091}
   - {fileID: 955001230}
   - {fileID: 620467672}
   - {fileID: 491759635}
@@ -39767,12 +39765,12 @@ SceneRoots:
   - {fileID: 122526417}
   - {fileID: 1201997229}
   - {fileID: 1084632212}
+  - {fileID: 1355668859}
   - {fileID: 1538527376}
   - {fileID: 313771326}
   - {fileID: 956259329}
   - {fileID: 1482201535}
-  - {fileID: 1355668859}
-  - {fileID: 239569685}
   - {fileID: 2115591666}
   - {fileID: 1490465122}
   - {fileID: 1170139636}
+  - {fileID: 239569685}

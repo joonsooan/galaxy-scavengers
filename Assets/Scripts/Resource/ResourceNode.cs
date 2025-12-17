@@ -10,7 +10,6 @@ public class ResourceNode : MonoBehaviour
     [Header("Visuals")]
     [SerializeField] private Color highlightColor = Color.red;
     [HideInInspector] public Vector3Int cellPosition;
-    
     [HideInInspector] public ResourceSpawner spawner;
 
     private Color _originalColor;
@@ -18,7 +17,6 @@ public class ResourceNode : MonoBehaviour
     private Unit_Miner _reservedUnit;
 
     public bool IsReserved { get; private set; }
-
     public bool IsDepleted => amountToMine <= 0;
 
     private void Awake()
@@ -62,9 +60,7 @@ public class ResourceNode : MonoBehaviour
             ResourceManager.Instance.RemoveResourceNode(this);
         }
         
-        if (BuildingManager.Instance != null) {
-            BuildingManager.Instance.RemoveResourceTile(cellPosition);
-        }
+        // No resource tilemap anymore; nothing to clear on tilemaps.
     }
 
     public bool Reserve(Unit_Miner unit)

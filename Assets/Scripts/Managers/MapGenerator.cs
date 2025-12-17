@@ -68,7 +68,7 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private bool fillDisconnectedAreas = true;
     [SerializeField] private bool enableEnemySpawnHoles = true;
     [SerializeField] private int enemySpawnHoleMinimalAmount = 3;
-    [SerializeField] private int enemySpawnPunchHoleRadius = 5;
+    [SerializeField] private float enemySpawnPunchHoleRadius = 5f;
 
     [Header("Enemy Spawn Hole - Concentric Circle Settings")]
     [Range(1, 10)]
@@ -422,7 +422,7 @@ public class MapGenerator : MonoBehaviour
         }
     }
     
-    private Vector2Int? FindValidHolePosition(int centerX, int centerY, float minRadius, float maxRadius, int holeRadius)
+    private Vector2Int? FindValidHolePosition(int centerX, int centerY, float minRadius, float maxRadius, float holeRadius)
     {
         int maxAttempts = 1000;
         
@@ -434,8 +434,9 @@ public class MapGenerator : MonoBehaviour
             int holeCenterX = centerX + Mathf.RoundToInt(Mathf.Cos(angle) * distance);
             int holeCenterY = centerY + Mathf.RoundToInt(Mathf.Sin(angle) * distance);
             
-            holeCenterX = Mathf.Clamp(holeCenterX, holeRadius + 1, width - holeRadius - 2);
-            holeCenterY = Mathf.Clamp(holeCenterY, holeRadius + 1, height - holeRadius - 2);
+            int holeRadiusInt = Mathf.CeilToInt(holeRadius);
+            holeCenterX = Mathf.Clamp(holeCenterX, holeRadiusInt + 1, width - holeRadiusInt - 2);
+            holeCenterY = Mathf.Clamp(holeCenterY, holeRadiusInt + 1, height - holeRadiusInt - 2);
             
             if (IsValidHolePosition(holeCenterX, holeCenterY, holeRadius))
             {
@@ -446,15 +447,16 @@ public class MapGenerator : MonoBehaviour
         return null;
     }
     
-    private bool IsValidHolePosition(int centerX, int centerY, int radius)
+    private bool IsValidHolePosition(int centerX, int centerY, float radius)
     {
         float innerRadius = radius * 0.7f;
         int groundCellCount = 0;
         int totalCellCount = 0;
         
-        for (int x = centerX - radius; x <= centerX + radius; x++)
+        int radiusInt = Mathf.CeilToInt(radius);
+        for (int x = centerX - radiusInt; x <= centerX + radiusInt; x++)
         {
-            for (int y = centerY - radius; y <= centerY + radius; y++)
+            for (int y = centerY - radiusInt; y <= centerY + radiusInt; y++)
             {
                 if (x < 1 || x >= width - 1 || y < 1 || y >= height - 1)
                     continue;
@@ -568,11 +570,12 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    private void PunchHoleWithThreshold(int centerX, int centerY, int radius)
+    private void PunchHoleWithThreshold(int centerX, int centerY, float radius)
     {
-        for (int x = centerX - radius; x <= centerX + radius; x++)
+        int radiusInt = Mathf.CeilToInt(radius);
+        for (int x = centerX - radiusInt; x <= centerX + radiusInt; x++)
         {
-            for (int y = centerY - radius; y <= centerY + radius; y++)
+            for (int y = centerY - radiusInt; y <= centerY + radiusInt; y++)
             {
                 if (x < 1 || x >= width - 1 || y < 1 || y >= height - 1)
                     continue;
@@ -591,9 +594,9 @@ public class MapGenerator : MonoBehaviour
         float edgeMin = radius - edgeTolerance;
         float edgeMax = radius + edgeTolerance;
         
-        for (int x = centerX - radius - 1; x <= centerX + radius + 1; x++)
+        for (int x = centerX - radiusInt - 1; x <= centerX + radiusInt + 1; x++)
         {
-            for (int y = centerY - radius - 1; y <= centerY + radius + 1; y++)
+            for (int y = centerY - radiusInt - 1; y <= centerY + radiusInt + 1; y++)
             {
                 if (x < 1 || x >= width - 1 || y < 1 || y >= height - 1)
                     continue;

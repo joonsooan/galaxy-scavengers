@@ -8,7 +8,6 @@ public class BuildingManager : MonoBehaviour
     [Header("References")]
     public Grid grid;
     [SerializeField] private Tilemap groundTilemap;
-    [SerializeField] private Tilemap resourceTilemap;
     [SerializeField] private Tilemap buildingTilemap;
     [SerializeField] private TileBase mainStructureTile;
     [SerializeField] private TileBase temporaryTile;
@@ -86,8 +85,26 @@ public class BuildingManager : MonoBehaviour
 
     public bool IsResourceTile(Vector3Int cellPosition)
     {
-        if (resourceTilemap == null) return false;
-        return resourceTilemap.HasTile(cellPosition);
+        // Resource tiles are now represented purely by ResourceNode objects,
+        // not by a dedicated resource tilemap.
+        if (ResourceManager.Instance == null)
+        {
+            return false;
+        }
+
+        var resources = ResourceManager.Instance.GetAllResources();
+        for (int i = 0; i < resources.Count; i++)
+        {
+            ResourceNode node = resources[i];
+            if (node == null) continue;
+
+            if (node.cellPosition == cellPosition)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public bool IsBuildingTile(Vector3Int cellPosition)
@@ -123,14 +140,14 @@ public class BuildingManager : MonoBehaviour
     public bool CanPlaceBuilding(Vector3Int cellPosition)
     {
         if (grid == null || groundTilemap == null ||
-            resourceTilemap == null || buildingTilemap == null) {
+            buildingTilemap == null) {
             return false;
         }
 
         if (!groundTilemap.HasTile(cellPosition)) return false;
 
         if (IsTerrainCell(cellPosition)) return false;
-        if (resourceTilemap.HasTile(cellPosition)) return false;
+        if (IsResourceTile(cellPosition)) return false;
         if (buildingTilemap.HasTile(cellPosition)) return false;
         if (IsTemporaryTile(cellPosition)) return false;
         if (GetPieceAt(cellPosition) != null) return false;
@@ -538,13 +555,6 @@ public class BuildingManager : MonoBehaviour
             foreach (Vector3Int cell in structure.occupiedCells) {
                 _cellToStructureMap.Remove(cell);
             }
-        }
-    }
-
-    public void RemoveResourceTile(Vector3Int cellPosition)
-    {
-        if (resourceTilemap != null) {
-            resourceTilemap.SetTile(cellPosition, null);
         }
     }
 
