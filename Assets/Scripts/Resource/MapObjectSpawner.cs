@@ -94,9 +94,6 @@ public class MapObjectSpawner : MonoBehaviour
     private readonly List<float> _sectorPowerValues = new ();
     private readonly List<ResourceCircle> _resourceCircles = new ();
     
-    private static bool resourcesAlwaysVisible;
-    public static bool ResourcesAlwaysVisible => resourcesAlwaysVisible;
-    
     private static bool isSpawningResources;
     public static bool IsSpawningResources => isSpawningResources;
     
@@ -698,29 +695,6 @@ public class MapObjectSpawner : MonoBehaviour
             int j = Random.Range(0, i + 1);
             (list[i], list[j]) = (list[j], list[i]);
         }
-    }
-    
-    public void NotifyResourceDestroyed(ResourceNode node)
-    {
-        if (node != null && node.gameObject != null)
-        {
-            _spawnedResources.Remove(node.gameObject);
-        }
-    }
-    
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            ToggleResourceVisibility();
-        }
-    }
-    
-    public static void ToggleResourceVisibility()
-    {
-        resourcesAlwaysVisible = !resourcesAlwaysVisible;
-        UpdateAllResourceVisibilityStatic();
-        // Debug.Log($"[ProceduralResourceSpawner] Resources always visible: {_resourcesAlwaysVisible}");
     }
     
     private static void UpdateAllResourceVisibilityStatic()

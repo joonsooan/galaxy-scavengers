@@ -19799,6 +19799,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &620467671
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 620467672}
+  m_Layer: 0
+  m_Name: Enemy Pool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &620467672
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 620467671}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 2115591666}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &645661487
 GameObject:
   m_ObjectHideFlags: 0
@@ -29213,6 +29244,10 @@ MonoBehaviour:
     size: 20
     prefab: {fileID: 176529985360585926, guid: c122ec1d854b9a04994f510c553243e5, type: 3}
     parent: {fileID: 1824578857}
+  - tag: Enemy_0
+    size: 200
+    prefab: {fileID: 7944764008120523387, guid: 6ef6e727776f20b46a722ca01f6b9153, type: 3}
+    parent: {fileID: 620467672}
 --- !u!4 &1355668859
 Transform:
   m_ObjectHideFlags: 0
@@ -30808,7 +30843,7 @@ Canvas:
   m_GameObject: {fileID: 1490465118}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 1
+  m_RenderMode: 0
   m_Camera: {fileID: 519420031}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
@@ -39155,6 +39190,7 @@ Transform:
   - {fileID: 2119450979}
   - {fileID: 431047629}
   - {fileID: 955001230}
+  - {fileID: 620467672}
   - {fileID: 491759635}
   - {fileID: 1639744556}
   - {fileID: 1835927342}

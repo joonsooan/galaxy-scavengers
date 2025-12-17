@@ -29,7 +29,6 @@ public class EnemySpawner : MonoBehaviour
             return;
         }
         
-        Transform parent = BuildingManager.Instance.grid.transform;
         Grid grid = BuildingManager.Instance.grid;
         
         for (int i = 0; i < holes.Count; i++)
@@ -40,7 +39,15 @@ public class EnemySpawner : MonoBehaviour
                 Vector3 spawnPos = FindValidSpawnPosition(center, spawnRadiusOffset, grid);
                 if (spawnPos != Vector3.zero)
                 {
-                    Object.Instantiate(enemyPrefab, spawnPos, Quaternion.identity, parent);
+                    GameObject enemy = ObjectPooler.Instance.SpawnFromPool("Enemy_0", spawnPos, Quaternion.identity);
+                    if (enemy != null)
+                    {
+                        Unit_Enemy_0 enemyScript = enemy.GetComponent<Unit_Enemy_0>();
+                        if (enemyScript != null)
+                        {
+                            enemyScript.SetTerritoryCenter(center);
+                        }
+                    }
                 }
             }
         }

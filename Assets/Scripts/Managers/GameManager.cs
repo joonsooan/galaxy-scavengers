@@ -6,8 +6,6 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    [Header("References")]
-    public Slider slider;
     public MapGenerator mapGenerator;
     public UIManager uiManager;
     public CardDragger cardDragger;
@@ -64,7 +62,7 @@ public class GameManager : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.Alpha3)) Time.timeScale = 3;
         else if (Input.GetKeyDown(KeyCode.Alpha4)) Time.timeScale = 4;
 
-        if (Input.GetKeyDown(KeyCode.F))
+        if (Input.GetKeyDown(KeyCode.I))
         {
             if (FogOfWarManager.Instance != null)
             {
@@ -143,7 +141,7 @@ public class GameManager : MonoBehaviour
 
     private void InitializeGameScene()
     {
-        slider = FindFirstObjectByType<Slider>();
+        FindFirstObjectByType<Slider>();
         mapGenerator = FindFirstObjectByType<MapGenerator>();
         uiManager = FindFirstObjectByType<UIManager>();
         cardDragger = FindFirstObjectByType<CardDragger>();
