@@ -64,6 +64,14 @@ public class GameManager : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.Alpha3)) Time.timeScale = 3;
         else if (Input.GetKeyDown(KeyCode.Alpha4)) Time.timeScale = 4;
 
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            if (FogOfWarManager.Instance != null)
+            {
+                FogOfWarManager.Instance.ToggleFogVisibility();
+            }
+        }
+
         if (Input.GetKeyDown(KeyCode.Escape)) {
             Application.Quit();
         }
@@ -182,6 +190,11 @@ public class GameManager : MonoBehaviour
         foreach (EnemySpawner enemySpawner in FindObjectsByType<EnemySpawner>(FindObjectsSortMode.None))
         {
             enemySpawner.SpawnEnemies();
+        }
+        
+        if (mapGenerator != null)
+        {
+            mapGenerator.DrawEnemyTerritoryTiles();
         }
 
         foreach (Unit_Miner unit in FindObjectsByType<Unit_Miner>(FindObjectsSortMode.None)) {

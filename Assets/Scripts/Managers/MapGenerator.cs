@@ -26,6 +26,8 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private TileBase lowWallTile;
     [SerializeField] private TileBase highWallTile;
     [SerializeField] private TileBase wallTile;
+    [SerializeField] private TileBase enemyHomeTile;
+    [SerializeField] private TileBase enemyTerritoryTile;
 
     [Header("Map Generation Settings")]
     [SerializeField] private int width = 250;
@@ -65,8 +67,8 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private int centerCircleRadius = 10;
     [SerializeField] private bool fillDisconnectedAreas = true;
     [SerializeField] private bool enableEnemySpawnHoles = true;
-    [SerializeField] private int enemySpawnHoleCount = 3;
-    [SerializeField] private int enemySpawnHoleRadius = 5;
+    [SerializeField] private int enemySpawnHoleMinimalAmount = 3;
+    [SerializeField] private int enemySpawnPunchHoleRadius = 5;
 
     [Header("Enemy Spawn Hole - Concentric Circle Settings")]
     [Range(1, 10)]
@@ -79,6 +81,11 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private bool showEnemySpawnHoleGizmos = true;
     [SerializeField] private Color enemySpawnHoleGizmoColor = new Color(1f, 0f, 0f, 0.5f);
     [SerializeField] private Color concentricCircleGizmoColor = new Color(1f, 1f, 0f, 0.3f);
+    
+    [Header("Enemy Territory Settings")]
+    [SerializeField] private float enemyHomeRadius = 3f;
+    [SerializeField] private float enemyTerritoryRadius = 6f;
+    [SerializeField] private bool drawEnemyTerritoryTiles = true;
 
     private int _mapCenterXOffset;
     private int _mapCenterYOffset;
@@ -388,25 +395,25 @@ public class MapGenerator : MonoBehaviour
             
             for (int holeIndex = 0; holeIndex < enemySpawnHolesPerSector; holeIndex++)
             {
-                Vector2Int? validHolePos = FindValidHolePosition(centerX, centerY, minRadius, maxRadius, enemySpawnHoleRadius);
+                Vector2Int? validHolePos = FindValidHolePosition(centerX, centerY, minRadius, maxRadius, enemySpawnPunchHoleRadius);
                 if (validHolePos.HasValue)
                 {
                     _enemySpawnHolePositions.Add(validHolePos.Value);
-                    PunchHoleWithThreshold(validHolePos.Value.x, validHolePos.Value.y, enemySpawnHoleRadius);
+                    PunchHoleWithThreshold(validHolePos.Value.x, validHolePos.Value.y, enemySpawnPunchHoleRadius);
                 }
             }
         }
         
-        while (_enemySpawnHolePositions.Count < enemySpawnHoleCount && divisionRadii.Count > 1)
+        while (_enemySpawnHolePositions.Count < enemySpawnHoleMinimalAmount && divisionRadii.Count > 1)
         {
             float minRadius = divisionRadii[startIndex];
             float maxRadius = divisionRadii[divisionRadii.Count - 1];
             
-            Vector2Int? validHolePos = FindValidHolePosition(centerX, centerY, minRadius, maxRadius, enemySpawnHoleRadius);
+            Vector2Int? validHolePos = FindValidHolePosition(centerX, centerY, minRadius, maxRadius, enemySpawnPunchHoleRadius);
             if (validHolePos.HasValue)
             {
                 _enemySpawnHolePositions.Add(validHolePos.Value);
-                PunchHoleWithThreshold(validHolePos.Value.x, validHolePos.Value.y, enemySpawnHoleRadius);
+                PunchHoleWithThreshold(validHolePos.Value.x, validHolePos.Value.y, enemySpawnPunchHoleRadius);
             }
             else
             {
@@ -867,6 +874,140 @@ public class MapGenerator : MonoBehaviour
         buildingManagerGroundTilemap.CompressBounds();
     }
     
+    public void DrawEnemyTerritoryTiles()
+    {
+        if (!drawEnemyTerritoryTiles || enemyHomeTile == null || enemyTerritoryTile == null)
+        {
+            return;
+        }
+        
+        if (groundTilemap == null || grid == null)
+        {
+            return;
+        }
+        
+        if (_enemySpawnHolePositions == null || _enemySpawnHolePositions.Count == 0)
+        {
+            return;
+        }
+        
+        HashSet<Vector3Int> homeTileCells = new HashSet<Vector3Int>();
+        
+        foreach (Vector2Int holePos in _enemySpawnHolePositions)
+        {
+            Vector3 worldPos = GetEnemySpawnHoleWorldPosition(holePos);
+            Vector3Int centerCell = grid.WorldToCell(worldPos);
+            
+            int homeRadiusCells = Mathf.CeilToInt(enemyHomeRadius);
+            for (int x = -homeRadiusCells; x <= homeRadiusCells; x++)
+            {
+                for (int y = -homeRadiusCells; y <= homeRadiusCells; y++)
+                {
+                    Vector3Int cell = centerCell + new Vector3Int(x, y, 0);
+                    Vector3 cellWorldPos = grid.GetCellCenterWorld(cell);
+                    float distance = Vector3.Distance(worldPos, cellWorldPos);
+                    
+                    if (distance <= enemyHomeRadius)
+                    {
+                        if (groundTilemap.HasTile(cell))
+                        {
+                            groundTilemap.SetTile(cell, enemyHomeTile);
+                            homeTileCells.Add(cell);
+                        }
+                    }
+                }
+            }
+            
+            int territoryRadiusCells = Mathf.CeilToInt(enemyTerritoryRadius);
+            for (int x = -territoryRadiusCells; x <= territoryRadiusCells; x++)
+            {
+                for (int y = -territoryRadiusCells; y <= territoryRadiusCells; y++)
+                {
+                    Vector3Int cell = centerCell + new Vector3Int(x, y, 0);
+                    
+                    if (homeTileCells.Contains(cell))
+                    {
+                        continue;
+                    }
+                    
+                    Vector3 cellWorldPos = grid.GetCellCenterWorld(cell);
+                    float distance = Vector3.Distance(worldPos, cellWorldPos);
+                    
+                    if (distance <= enemyTerritoryRadius && distance > enemyHomeRadius)
+                    {
+                        if (groundTilemap.HasTile(cell))
+                        {
+                            TileBase existingTile = groundTilemap.GetTile(cell);
+                            if (existingTile != enemyHomeTile)
+                            {
+                                groundTilemap.SetTile(cell, enemyTerritoryTile);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (BuildingManager.Instance != null && BuildingManager.Instance.GroundTilemap != null)
+        {
+            Tilemap buildingManagerGroundTilemap = BuildingManager.Instance.GroundTilemap;
+            foreach (Vector2Int holePos in _enemySpawnHolePositions)
+            {
+                Vector3 worldPos = GetEnemySpawnHoleWorldPosition(holePos);
+                Vector3Int centerCell = grid.WorldToCell(worldPos);
+                
+                int homeRadiusCells = Mathf.CeilToInt(enemyHomeRadius);
+                for (int x = -homeRadiusCells; x <= homeRadiusCells; x++)
+                {
+                    for (int y = -homeRadiusCells; y <= homeRadiusCells; y++)
+                    {
+                        Vector3Int cell = centerCell + new Vector3Int(x, y, 0);
+                        Vector3 cellWorldPos = grid.GetCellCenterWorld(cell);
+                        float distance = Vector3.Distance(worldPos, cellWorldPos);
+                        
+                        if (distance <= enemyHomeRadius && buildingManagerGroundTilemap.HasTile(cell))
+                        {
+                            buildingManagerGroundTilemap.SetTile(cell, enemyHomeTile);
+                        }
+                    }
+                }
+                
+                int territoryRadiusCells = Mathf.CeilToInt(enemyTerritoryRadius);
+                for (int x = -territoryRadiusCells; x <= territoryRadiusCells; x++)
+                {
+                    for (int y = -territoryRadiusCells; y <= territoryRadiusCells; y++)
+                    {
+                        Vector3Int cell = centerCell + new Vector3Int(x, y, 0);
+                        
+                        if (homeTileCells.Contains(cell))
+                        {
+                            continue;
+                        }
+                        
+                        TileBase existingTile = buildingManagerGroundTilemap.GetTile(cell);
+                        if (existingTile == enemyHomeTile)
+                        {
+                            continue;
+                        }
+                        
+                        Vector3 cellWorldPos = grid.GetCellCenterWorld(cell);
+                        float distance = Vector3.Distance(worldPos, cellWorldPos);
+                        
+                        if (distance <= enemyTerritoryRadius && distance > enemyHomeRadius && buildingManagerGroundTilemap.HasTile(cell))
+                        {
+                            buildingManagerGroundTilemap.SetTile(cell, enemyTerritoryTile);
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (groundTilemap != null)
+        {
+            groundTilemap.RefreshAllTiles();
+        }
+    }
+    
     private void OnDrawGizmos()
     {
         if (!showEnemySpawnHoleGizmos) return;
@@ -915,7 +1056,7 @@ public class MapGenerator : MonoBehaviour
             foreach (var holePos in _enemySpawnHolePositions)
             {
                 Vector3 holeWorldPos = grid.GetCellCenterWorld(new Vector3Int(holePos.x - _mapCenterXOffset, holePos.y - _mapCenterYOffset, 0));
-                float holeRadiusWorld = enemySpawnHoleRadius * cellSize;
+                float holeRadiusWorld = enemySpawnPunchHoleRadius * cellSize;
                 DrawCircleGizmo(holeWorldPos, holeRadiusWorld);
             }
         }

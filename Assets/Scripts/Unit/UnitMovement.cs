@@ -35,6 +35,7 @@ public class UnitMovement : MonoBehaviour
 
     private Rigidbody2D _rb;
     private UnitSpriteController _spriteController;
+    private UnitBase _unitBase;
 
     public bool IsMoving => _rb.linearVelocity.sqrMagnitude > 0.01f || _path.Count > 0 || _currentWaypoint != default;
     public Vector3 FinalTargetPosition => _finalTargetPosition;
@@ -50,6 +51,7 @@ public class UnitMovement : MonoBehaviour
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
+        _unitBase = GetComponent<UnitBase>();
         _spriteController = GetComponent<UnitSpriteController>();
     }
 
@@ -68,7 +70,9 @@ public class UnitMovement : MonoBehaviour
             return;
         }
         
-        if (_grid != null && FogOfWarManager.Instance != null)
+        bool isEnemy = _unitBase != null && _unitBase.unitType == UnitBase.UnitType.Enemy;
+        
+        if (!isEnemy && _grid != null && FogOfWarManager.Instance != null)
         {
             Vector3Int currentCell = _grid.WorldToCell(transform.position);
             if (currentCell != _lastExploredCell)

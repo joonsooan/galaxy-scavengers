@@ -46,6 +46,7 @@ public class FogOfWarManager : MonoBehaviour
     
     private bool _isInitializing;
     private bool _fogInitialized;
+    private bool _respectFogVisibility = true;
     
     private void Awake()
     {
@@ -725,13 +726,41 @@ public class FogOfWarManager : MonoBehaviour
     
     public bool CanSeeEnemies(Vector3Int cellPosition)
     {
+        if (!_respectFogVisibility)
+        {
+            return true;
+        }
         return GetVisibilityState(cellPosition) == FogOfWarState.FullyVisible;
     }
     
     public bool CanSeeResources(Vector3Int cellPosition)
     {
+        if (!_respectFogVisibility)
+        {
+            return true;
+        }
         FogOfWarState state = GetVisibilityState(cellPosition);
-        return state == FogOfWarState.FullyVisible || state == FogOfWarState.PartlyVisible;
+        return state != FogOfWarState.Invisible;
+    }
+    
+    public void ToggleFogVisibility()
+    {
+        _respectFogVisibility = !_respectFogVisibility;
+        UpdateAllVisibilityControllers();
+    }
+    
+    private void UpdateAllVisibilityControllers()
+    {
+        if (grid == null) return;
+        
+        VisibilityController[] controllers = FindObjectsByType<VisibilityController>(FindObjectsSortMode.None);
+        foreach (var controller in controllers)
+        {
+            if (controller != null)
+            {
+                controller.ForceUpdateVisibility();
+            }
+        }
     }
     
     public void RefreshFogOfWar()
