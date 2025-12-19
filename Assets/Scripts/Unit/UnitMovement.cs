@@ -372,7 +372,7 @@ public class UnitMovement : MonoBehaviour
                 Vector3Int neighborPos = currentNode.position + offset;
                 if (closedList.Contains(neighborPos)) continue;
 
-                if (neighborPos != endCell && !IsCellWalkable(neighborPos)) {
+                if (!IsCellWalkable(neighborPos)) {
                     continue;
                 }
 
@@ -396,13 +396,14 @@ public class UnitMovement : MonoBehaviour
 
     private bool IsCellWalkable(Vector3Int cell)
     {
-        if (BuildingManager.Instance.IsTerrainCell(cell))
+        if (BuildingManager.Instance.IsTerrainCell(cell) ||
+            BuildingManager.Instance.IsResourceTile(cell) || 
+            BuildingManager.Instance.IsBuildingTile(cell))
         {
             return false;
         }
         
-        if (BuildingManager.Instance.IsResourceTile(cell) || 
-            BuildingManager.Instance.IsBuildingTile(cell))
+        if (BuildingManager.Instance.GetBuildingAt(cell, out List<Vector3Int> occupiedCells))
         {
             return false;
         }

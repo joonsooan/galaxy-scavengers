@@ -33,6 +33,26 @@ public class UnitManager : MonoBehaviour
         }
         _currentMineableTypes = ((ResourceType[])Enum.GetValues(typeof(ResourceType))).ToList();
     }
+    
+    private void Start()
+    {
+        RegisterExistingUnits();
+    }
+    
+    private void RegisterExistingUnits()
+    {
+        if (unitParent == null) return;
+        
+        UnitBase[] existingUnits = unitParent.GetComponentsInChildren<UnitBase>(true);
+        
+        foreach (UnitBase unit in existingUnits)
+        {
+            if (unit != null)
+            {
+                AddUnit(unit);
+            }
+        }
+    }
 
     public void UpdateAllLifterMineableTypes(List<ResourceType> newTypes)
     {

@@ -86,13 +86,16 @@ public class BeaconManager : MonoBehaviour
     
     private bool IsCellWalkable(Vector3Int cell)
     {
-        if (BuildingManager.Instance.IsTerrainCell(cell))
+        if (BuildingManager.Instance == null) return true;
+        
+        if (BuildingManager.Instance.IsTerrainCell(cell) ||
+            BuildingManager.Instance.IsResourceTile(cell) || 
+            BuildingManager.Instance.IsBuildingTile(cell))
         {
             return false;
         }
         
-        if (BuildingManager.Instance.IsResourceTile(cell) || 
-            BuildingManager.Instance.IsBuildingTile(cell))
+        if (BuildingManager.Instance.GetBuildingAt(cell, out List<Vector3Int> occupiedCells))
         {
             return false;
         }
@@ -113,6 +116,9 @@ public class BeaconManager : MonoBehaviour
         
         Vector3Int cellPos = _grid.WorldToCell(worldPos);
         Vector3 beaconPos = _grid.GetCellCenterWorld(cellPos);
+
+        // 비컨 설치 시도로 자원 있는지 없는지 확인할 수 있다..?
+        // if (!IsCellWalkable(cellPos)) return;
         
         if (_currentWaypointGroup == null)
         {

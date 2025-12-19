@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -106,6 +107,77 @@ public class BuildingManager : MonoBehaviour
         {
             RebuildResourceCache();
         }
+        
+        RegisterExistingBuildings();
+    }
+    
+    private void RegisterExistingBuildings()
+    {
+        if (parentTransform == null) return;
+        
+        RegisterExistingProcessors();
+        RegisterExistingStorages();
+        RegisterExistingResourceNodes();
+    }
+    
+    private void RegisterExistingProcessors()
+    {
+        Processor[] existingProcessors = parentTransform.GetComponentsInChildren<Processor>(true);
+        
+        foreach (Processor processor in existingProcessors)
+        {
+            if (processor != null && !_processors.Contains(processor))
+            {
+                RegisterProcessor(processor);
+            }
+        }
+    }
+    
+    private void RegisterExistingStorages()
+    {
+        if (ResourceManager.Instance == null) return;
+        
+        IStorage[] existingStorages = parentTransform.GetComponentsInChildren<IStorage>(true);
+        
+        foreach (IStorage storage in existingStorages)
+        {
+            if (storage == null) continue;
+            
+            bool alreadyRegistered = false;
+            foreach (IStorage registeredStorage in ResourceManager.Instance.GetAllStorages())
+            {
+                if (registeredStorage == storage)
+                {
+                    alreadyRegistered = true;
+                    break;
+                }
+            }
+            
+            if (!alreadyRegistered)
+            {
+                ResourceManager.Instance.AddStorage(storage);
+                
+                if (storage is MainStructure mainStructure)
+                {
+                    ResourceManager.Instance.RegisterMainStructure(mainStructure);
+                }
+            }
+        }
+    }
+    
+    private void RegisterExistingResourceNodes()
+    {
+        if (ResourceManager.Instance == null) return;
+        
+        ResourceNode[] existingResources = parentTransform.GetComponentsInChildren<ResourceNode>(true);
+        
+        foreach (ResourceNode node in existingResources)
+        {
+            if (node != null)
+            {
+                ResourceManager.Instance.AddResourceNode(node);
+            }
+        }
     }
 
     public static event Action<Vector3Int> OnTilemapChanged;
@@ -184,13 +256,18 @@ public class BuildingManager : MonoBehaviour
         }
 
         if (!groundTilemap.HasTile(cellPosition)) return false;
-
         if (IsTerrainCell(cellPosition)) return false;
         if (IsResourceTile(cellPosition)) return false;
+        
         if (buildingTilemap.HasTile(cellPosition)) return false;
         if (IsTemporaryTile(cellPosition)) return false;
         if (GetPieceAt(cellPosition) != null) return false;
         if (IsMainStructureCell(cellPosition)) return false;
+        
+        if (GetBuildingAt(cellPosition, out _))
+        {
+            return false;
+        }
 
         if (FogOfWarManager.Instance != null && !FogOfWarManager.Instance.CanPlaceBuilding(cellPosition)) {
             return false;

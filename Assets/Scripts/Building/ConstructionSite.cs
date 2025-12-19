@@ -303,7 +303,7 @@ public class ConstructionSite : MonoBehaviour
         InitializePieceTracking();
     }
     
-    private void OnDestroy()
+    public void OnDestroy()
     {
         _requestsBeingDelivered.Clear();
         
@@ -311,6 +311,8 @@ public class ConstructionSite : MonoBehaviour
         {
             ConstructionManager.Instance.UnregisterConstructionSite(this);
         }
+        
+        Destroy(gameObject);
     }
     
     public bool AreAllPiecesConstructed()
@@ -409,18 +411,18 @@ public class ConstructionSite : MonoBehaviour
         return true;
     }
     
-    public bool TryDepositResource(ResourceType type, int amount, Unit_Construct drone)
+    public void TryDepositResource(ResourceType type, int amount, Unit_Construct drone)
     {
         ConstructionRequest request = _pendingRequests.FirstOrDefault(r => r.assignedDrone == drone && r.type == type);
         
         if (request == null)
         {
-            return false;
+            return;
         }
         
         if (!_requestsBeingDelivered.Add(request))
         {
-            return false;
+            return;
         }
         
         _pendingRequests.Remove(request);
@@ -434,7 +436,7 @@ public class ConstructionSite : MonoBehaviour
             
             if (totalCanAccept <= 0)
             {
-                return false;
+                return;
             }
 
             _deliveredResources.TryAdd(type, 0);
@@ -471,8 +473,8 @@ public class ConstructionSite : MonoBehaviour
                     StartPieceConstruction(pieceCell);
                 }
             }
-            
-            return true;
+
+            return;
         }
         finally
         {
