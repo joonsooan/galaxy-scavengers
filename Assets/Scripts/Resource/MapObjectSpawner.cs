@@ -131,26 +131,6 @@ public class MapObjectSpawner : MonoBehaviour
     
     public void SpawnResources()
     {
-        if (mapGenerator == null)
-        {
-            mapGenerator = FindFirstObjectByType<MapGenerator>();
-            if (mapGenerator == null)
-            {
-                Debug.LogError("[ProceduralResourceSpawner] MapGenerator not found!");
-                return;
-            }
-        }
-        
-        if (grid == null)
-        {
-            grid = FindFirstObjectByType<Grid>();
-            if (grid == null)
-            {
-                Debug.LogError("[ProceduralResourceSpawner] Grid not found!");
-                return;
-            }
-        }
-        
         Vector2Int mapSize = mapGenerator.MapSize;
         _mapWidth = mapSize.x;
         _mapHeight = mapSize.y;
@@ -209,7 +189,7 @@ public class MapObjectSpawner : MonoBehaviour
             _divisionRadii.Add(radius);
             
             float normalizedDistance = radius / _maxMapRadius;
-            float powerValue = 1f + normalizedDistance; // Starts at 1.0, goes to 2.0 at edge
+            float powerValue = 1f + normalizedDistance;
             _sectorPowerValues.Add(powerValue);
         }
     }
@@ -221,7 +201,7 @@ public class MapObjectSpawner : MonoBehaviour
         
         int startingAreaCirclesSpawned = 0;
         int attempts = 0;
-        int maxAttempts = startingAreaCircleCount * 50; // Increased attempts for better success rate
+        int maxAttempts = startingAreaCircleCount * 50;
         
         while (startingAreaCirclesSpawned < startingAreaCircleCount && attempts < maxAttempts)
         {
@@ -312,28 +292,24 @@ public class MapObjectSpawner : MonoBehaviour
         int maxPossibleCircles = Mathf.RoundToInt(mapArea / avgCircleArea);
         int circlesToSpawn = Mathf.RoundToInt(maxPossibleCircles * (circleSpawnPercentage / 100f));
         
-        // Cap the maximum number of circles to prevent excessive spawning
         circlesToSpawn = Mathf.Min(circlesToSpawn, maxCircles);
-        circlesToSpawn = Mathf.Max(circlesToSpawn, 10); // Ensure minimum
+        circlesToSpawn = Mathf.Max(circlesToSpawn, 10);
         
         int attempts = 0;
-        int maxAttempts = circlesToSpawn * 30; // Reasonable limit on attempts
+        int maxAttempts = circlesToSpawn * 30;
         
         while (_resourceCircles.Count < circlesToSpawn && attempts < maxAttempts)
         {
             attempts++;
             
-            // Random position within map bounds (with padding), but outside starting area
             int centerX = Random.Range(-(_mapWidth / 2) + borderPadding, (_mapWidth / 2) - borderPadding);
             int centerY = Random.Range(-(_mapHeight / 2) + borderPadding, (_mapHeight / 2) - borderPadding);
             Vector2Int center = new Vector2Int(centerX, centerY);
             
-            // Ensure circle is outside the starting area (startingAreaRadius + maxCircleRadius to ensure full circle is outside)
             float distanceFromCenter = Vector2.Distance(center, _mapCenter);
             float minRequiredDistance = startingAreaRadius + maxCircleRadius;
             if (distanceFromCenter < minRequiredDistance)
             {
-                // Adjust position to be outside starting area
                 if (distanceFromCenter > 0)
                 {
                     float scale = minRequiredDistance / distanceFromCenter;
@@ -347,24 +323,19 @@ public class MapObjectSpawner : MonoBehaviour
                     center = new Vector2Int(Mathf.CeilToInt(minRequiredDistance), 0);
                 }
                 
-                // Re-check bounds after adjustment
                 if (center.x < -(_mapWidth / 2) + borderPadding || center.x >= (_mapWidth / 2) - borderPadding ||
                     center.y < -(_mapHeight / 2) + borderPadding || center.y >= (_mapHeight / 2) - borderPadding)
                 {
-                    continue; // Skip if out of bounds after adjustment
+                    continue;
                 }
             }
             
-            // Random radius
             float radius = Random.Range(minCircleRadius, maxCircleRadius);
             
-            // Check if circle overlaps with terrain
             if (CircleOverlapsTerrain(center, radius))
             {
-                // Try to adjust: reduce radius or move center
                 bool foundValid = false;
                 
-                // Try reducing radius first
                 for (float testRadius = radius * 0.9f; testRadius >= minCircleRadius; testRadius -= 0.5f)
                 {
                     if (!CircleOverlapsTerrain(center, testRadius))
@@ -375,7 +346,6 @@ public class MapObjectSpawner : MonoBehaviour
                     }
                 }
                 
-                // If reducing radius didn't work, try moving center in a wider area
                 if (!foundValid)
                 {
                     for (int offsetX = -5; offsetX <= 5 && !foundValid; offsetX++)
@@ -393,15 +363,14 @@ public class MapObjectSpawner : MonoBehaviour
                     }
                 }
                 
-                if (!foundValid) continue; // Skip this circle if we can't make it valid
+                if (!foundValid) continue;
             }
             
-            // Check if circle is too close to existing circles (less strict)
             bool tooClose = false;
             foreach (var existingCircle in _resourceCircles)
             {
                 float distance = Vector2.Distance(center, existingCircle.center);
-                float minDistance = (radius + existingCircle.radius) * 0.5f; // Reduced from 0.8f to 0.5f
+                float minDistance = (radius + existingCircle.radius) * 0.5f;
                 if (distance < minDistance)
                 {
                     tooClose = true;
@@ -429,10 +398,8 @@ public class MapObjectSpawner : MonoBehaviour
     {
         if (BuildingManager.Instance == null) return false;
         
-        // Optimize: Sample fewer points for larger circles, but ensure minimum coverage
-        int samplePoints = Mathf.Min(Mathf.CeilToInt(radius * 2f), 16); // Cap at 16 samples max
+        int samplePoints = Mathf.Min(Mathf.CeilToInt(radius * 2f), 16);
         
-        // Sample points around the circle perimeter
         for (int i = 0; i < samplePoints; i++)
         {
             float angle = (i / (float)samplePoints) * Mathf.PI * 2f;
@@ -441,21 +408,18 @@ public class MapObjectSpawner : MonoBehaviour
             
             Vector3Int cellPos = new Vector3Int(x, y, 0);
             
-            // Check if this position is terrain
             if (BuildingManager.Instance.IsTerrainCell(cellPos))
             {
                 return true;
             }
         }
         
-        // Also check center and a few inner points
         Vector3Int centerCell = new Vector3Int(center.x, center.y, 0);
         if (BuildingManager.Instance.IsTerrainCell(centerCell))
         {
             return true;
         }
         
-        // Check a few points at half radius
         for (int i = 0; i < 4; i++)
         {
             float angle = (i / 4f) * Mathf.PI * 2f;
@@ -484,8 +448,6 @@ public class MapObjectSpawner : MonoBehaviour
                 break;
             }
         }
-        
-        if (sectorIndex >= _sectorPowerValues.Count) sectorIndex = _sectorPowerValues.Count - 1;
         
         List<ResourceSpawnSettings> validSettings = new List<ResourceSpawnSettings>();
         foreach (var settings in resourceSettings)
@@ -663,10 +625,8 @@ public class MapObjectSpawner : MonoBehaviour
     private void OnDrawGizmos()
     {
         if (!showGizmos) return;
-        
         if (mapGenerator == null) return;
-        
-        Vector2Int mapSize = mapGenerator.MapSize;
+
         Vector3 centerWorld = grid != null ? grid.GetCellCenterWorld(Vector3Int.zero) : Vector3.zero;
         
         float cellSize = grid != null ? grid.cellSize.x : 1f;
@@ -682,7 +642,7 @@ public class MapObjectSpawner : MonoBehaviour
         Gizmos.color = divisionCircleColor;
         for (int i = 0; i < _divisionRadii.Count; i++)
         {
-            float radius = _divisionRadii[i] * cellSize; // Convert tiles to world units
+            float radius = _divisionRadii[i] * cellSize;
             DrawCircleGizmo(centerWorld, radius);
         }
         
@@ -690,7 +650,7 @@ public class MapObjectSpawner : MonoBehaviour
         foreach (var circle in _resourceCircles)
         {
             Vector3 circleWorldPos = grid != null ? grid.GetCellCenterWorld(new Vector3Int(circle.center.x, circle.center.y, 0)) : new Vector3(circle.center.x, circle.center.y, 0);
-            float circleRadiusWorld = circle.radius * cellSize; // Convert tiles to world units
+            float circleRadiusWorld = circle.radius * cellSize;
             DrawCircleGizmo(circleWorldPos, circleRadiusWorld);
         }
     }

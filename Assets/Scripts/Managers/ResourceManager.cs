@@ -104,10 +104,10 @@ public class ResourceManager : MonoBehaviour
     [SerializeField] private GameObject nexusDataPanel;
     [SerializeField] private GameObject neuralMatrixPanel;
 
-    private readonly HashSet<ResourceNode> _allResources = new HashSet<ResourceNode>();
-    private readonly List<IStorage> _allStorages = new List<IStorage>();
-    private readonly Dictionary<ResourceType, int> _resourceCounts = new Dictionary<ResourceType, int>();
-    private readonly Dictionary<ResourceType, ResourceStats> _resourceStats = new Dictionary<ResourceType, ResourceStats>();
+    private readonly HashSet<ResourceNode> _allResources = new ();
+    private readonly List<IStorage> _allStorages = new ();
+    private readonly Dictionary<ResourceType, int> _resourceCounts = new ();
+    private readonly Dictionary<ResourceType, ResourceStats> _resourceStats = new ();
     private MainStructure _mainStructure;
     public static ResourceManager Instance { get; private set; }
 
@@ -406,15 +406,11 @@ public class ResourceManager : MonoBehaviour
 
     public List<ResourceNode> GetAllResources()
     {
-        // Convert HashSet to List when needed (rare operation)
         return new List<ResourceNode>(_allResources);
     }
 
     private void FindAndConnectUI()
     {
-        // Try to find panels by name if not assigned in inspector
-        // Assuming panel names follow a pattern like "Resource0_Panel", "Resource1_Panel", etc.
-        // Or they might be named after the resource type
         if (ferritePanel == null)
             ferritePanel = GameObject.Find("Resource0_Panel") ?? GameObject.Find("FerritePanel");
 
@@ -498,13 +494,11 @@ public class ResourceManager : MonoBehaviour
         if (resourcePanel != null) {
             int amount = _resourceCounts.GetValueOrDefault(type, 0);
             
-            // Find the TMP_Text child component and update its text
             TMP_Text resourceText = resourcePanel.GetComponentInChildren<TMP_Text>();
             if (resourceText != null) {
                 resourceText.text = amount.ToString();
             }
             
-            // Show/hide the panel itself based on whether resource amount is greater than 0
             bool shouldShow = amount > 0;
             resourcePanel.SetActive(shouldShow);
         }

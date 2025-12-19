@@ -30,6 +30,7 @@ public class VisibilityController : MonoBehaviour
         if (visibilityType == VisibilityType.Resource && MapObjectSpawner.IsSpawningResources)
         {
             _isSubscribed = false;
+            _wasVisible = false;
             SetVisible(false); 
             return;
         }
@@ -193,7 +194,6 @@ public class VisibilityController : MonoBehaviour
             if (_wasVisible != shouldBeVisible)
             {
                 SetVisible(shouldBeVisible);
-                _wasVisible = shouldBeVisible;
             }
         }
         catch (System.Exception)
@@ -212,6 +212,8 @@ public class VisibilityController : MonoBehaviour
     
     private void SetVisible(bool visible)
     {
+        _wasVisible = visible;
+        
         foreach (var sr in _spriteRenderers)
         {
             if (sr != null)
