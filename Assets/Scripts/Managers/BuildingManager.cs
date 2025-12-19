@@ -18,6 +18,7 @@ public class BuildingManager : MonoBehaviour
     private readonly Dictionary<BuildingPieceType, TileBase> _gadgetTypeToTileCache = new ();
     private readonly HashSet<Vector3Int> _mainStructureCells = new ();
     private readonly Dictionary<Vector3Int, BuildingPiece> _placedPieces = new ();
+    private readonly HashSet<Vector3Int> _resourceCellCache = new ();
 
     private readonly List<Processor> _processors = new ();
     private readonly HashSet<Vector3Int> _temporaryTiles = new ();
@@ -47,6 +48,64 @@ public class BuildingManager : MonoBehaviour
         LoadAllBuildings();
         CacheAllGadgetTiles();
         CacheMapGenerator();
+        InitializeResourceCache();
+    }
+    
+    private void InitializeResourceCache()
+    {
+        ResourceManager.OnResourceNodeAdded += OnResourceNodeAdded;
+        ResourceManager.OnResourceNodeRemoved += OnResourceNodeRemoved;
+        
+        if (ResourceManager.Instance != null)
+        {
+            RebuildResourceCache();
+        }
+    }
+    
+    private void RebuildResourceCache()
+    {
+        _resourceCellCache.Clear();
+        if (ResourceManager.Instance != null)
+        {
+            var resources = ResourceManager.Instance.GetAllResources();
+            foreach (var node in resources)
+            {
+                if (node != null)
+                {
+                    _resourceCellCache.Add(node.cellPosition);
+                }
+            }
+        }
+    }
+    
+    private void OnResourceNodeAdded(ResourceNode node)
+    {
+        if (node != null)
+        {
+            _resourceCellCache.Add(node.cellPosition);
+        }
+    }
+    
+    private void OnResourceNodeRemoved(ResourceNode node)
+    {
+        if (node != null)
+        {
+            _resourceCellCache.Remove(node.cellPosition);
+        }
+    }
+    
+    private void OnDestroy()
+    {
+        ResourceManager.OnResourceNodeAdded -= OnResourceNodeAdded;
+        ResourceManager.OnResourceNodeRemoved -= OnResourceNodeRemoved;
+    }
+    
+    private void Start()
+    {
+        if (ResourceManager.Instance != null)
+        {
+            RebuildResourceCache();
+        }
     }
 
     public static event Action<Vector3Int> OnTilemapChanged;
@@ -85,26 +144,7 @@ public class BuildingManager : MonoBehaviour
 
     public bool IsResourceTile(Vector3Int cellPosition)
     {
-        // Resource tiles are now represented purely by ResourceNode objects,
-        // not by a dedicated resource tilemap.
-        if (ResourceManager.Instance == null)
-        {
-            return false;
-        }
-
-        var resources = ResourceManager.Instance.GetAllResources();
-        for (int i = 0; i < resources.Count; i++)
-        {
-            ResourceNode node = resources[i];
-            if (node == null) continue;
-
-            if (node.cellPosition == cellPosition)
-            {
-                return true;
-            }
-        }
-
-        return false;
+        return _resourceCellCache.Contains(cellPosition);
     }
 
     public bool IsBuildingTile(Vector3Int cellPosition)
@@ -135,7 +175,6 @@ public class BuildingManager : MonoBehaviour
 
         return false;
     }
-
 
     public bool CanPlaceBuilding(Vector3Int cellPosition)
     {

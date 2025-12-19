@@ -145,6 +145,8 @@ public class ResourceManager : MonoBehaviour
     public static event Action OnNewStorageAdded;
     public static event Action<IStorage> OnStorageRemoved;
     public static event Action<ResourceType, int> OnResourceAmountChanged;
+    public static event Action<ResourceNode> OnResourceNodeAdded;
+    public static event Action<ResourceNode> OnResourceNodeRemoved;
 
     private void Initialize()
     {
@@ -396,12 +398,18 @@ public class ResourceManager : MonoBehaviour
     public void AddResourceNode(ResourceNode node)
     {
         // HashSet automatically prevents duplicates, O(1) operation
-        _allResources.Add(node);
+        if (_allResources.Add(node))
+        {
+            OnResourceNodeAdded?.Invoke(node);
+        }
     }
 
     public void RemoveResourceNode(ResourceNode node)
     {
-        _allResources.Remove(node);
+        if (_allResources.Remove(node))
+        {
+            OnResourceNodeRemoved?.Invoke(node);
+        }
     }
 
     public List<ResourceNode> GetAllResources()

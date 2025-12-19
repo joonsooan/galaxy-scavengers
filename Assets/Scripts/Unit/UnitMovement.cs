@@ -215,8 +215,8 @@ public class UnitMovement : MonoBehaviour
     {
         return SetNewTargetDirect(targetPosition, stoppingDistance, false);
     }
-    
-    public bool SetNewTargetDirect(Vector2 targetPosition, float stoppingDistance, bool disableAlignment)
+
+    private bool SetNewTargetDirect(Vector2 targetPosition, float stoppingDistance, bool disableAlignment)
     {
         if (_rb == null || _grid == null) {
             return false;
@@ -396,10 +396,6 @@ public class UnitMovement : MonoBehaviour
 
     private bool IsCellWalkable(Vector3Int cell)
     {
-        if (BuildingManager.Instance == null) {
-            return true;
-        }
-        
         if (BuildingManager.Instance.IsTerrainCell(cell))
         {
             return false;

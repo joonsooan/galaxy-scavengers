@@ -9,6 +9,7 @@ public class UnitManager : MonoBehaviour
 
     public static event Action<ResourceType[]> OnMineableTypesChanged;
     public IReadOnlyList<ResourceType> CurrentMineableTypes => _currentMineableTypes;
+    public Transform unitParent;
     
     private List<ResourceType> _currentMineableTypes = new();
     

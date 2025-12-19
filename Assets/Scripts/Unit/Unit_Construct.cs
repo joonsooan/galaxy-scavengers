@@ -54,16 +54,6 @@ public class Unit_Construct : UnitBase
 
     private void Start()
     {
-        if (ConstructionManager.Instance == null)
-        {
-            ConstructionManager existingManager = FindFirstObjectByType<ConstructionManager>();
-            if (existingManager == null)
-            {
-                GameObject managerObj = new GameObject("ConstructionManager");
-                managerObj.AddComponent<ConstructionManager>();
-            }
-        }
-
         if (ConstructionManager.Instance != null && movement != null)
         {
             ConstructionManager.Instance.RegisterConstructDrone(this);
