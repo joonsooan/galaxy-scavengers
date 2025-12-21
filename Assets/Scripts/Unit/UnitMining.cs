@@ -6,17 +6,10 @@ public class UnitMining : MonoBehaviour
 {
     [Header("Gathering Stats")]
     public int mineAmountPerAction = 1; // 한번 채굴 시 캐는 양
-    public float miningRange = 1.5f;
 
     private Coroutine _mineCoroutine;
     private WaitForSeconds _miningDelay;
     private ResourceNode _targetResourceNode;
-
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(transform.position, miningRange);
-    }
 
     public event Action<ResourceType, int> OnResourceMined;
 

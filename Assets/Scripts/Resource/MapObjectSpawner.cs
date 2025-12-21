@@ -1,9 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using Random = UnityEngine.Random;
 
-[System.Serializable]
+[Serializable]
 public class ResourceSpawnSettings
 {
     [Header("Resource Type")]
@@ -22,7 +24,7 @@ public class ResourceSpawnSettings
     public int baseRichness = 100;
 }
 
-[System.Serializable]
+[Serializable]
 public class ResourceCircle
 {
     public Vector2Int center;
@@ -92,7 +94,9 @@ public class MapObjectSpawner : MonoBehaviour
     private readonly List<float> _divisionRadii = new ();
     private readonly List<float> _sectorPowerValues = new ();
     private readonly List<ResourceCircle> _resourceCircles = new ();
-    
+    private readonly List<ResourceNode> _pendingResourceNodes = new ();
+
+    public static event Action OnAllObjectsSpawned;
     private static bool isSpawningResources;
     public static bool IsSpawningResources => isSpawningResources;
     
@@ -144,6 +148,7 @@ public class MapObjectSpawner : MonoBehaviour
         _divisionRadii.Clear();
         _sectorPowerValues.Clear();
         _resourceCircles.Clear();
+        _pendingResourceNodes.Clear();
         
         isSpawningResources = true;
         
@@ -158,8 +163,11 @@ public class MapObjectSpawner : MonoBehaviour
             SpawnResourceCircles();
             SpawnStartingAreaCircles();
             SpawnResourcesInCircles();
+            RegisterBufferedResources();
             
-            Debug.Log($"[ProceduralResourceSpawner] Spawned {_spawnedResources.Count} resource nodes. Created {_resourceCircles.Count} resource circles.");
+            OnAllObjectsSpawned.Invoke();
+            
+            Debug.Log($"Spawned {_spawnedResources.Count} resource nodes. Created {_resourceCircles.Count} resource circles.");
         }
         finally
         {
@@ -529,6 +537,21 @@ public class MapObjectSpawner : MonoBehaviour
         }
     }
     
+    private void RegisterBufferedResources()
+    {
+        if (ResourceManager.Instance == null) return;
+
+        foreach (var node in _pendingResourceNodes)
+        {
+            if (node != null)
+            {
+                ResourceManager.Instance.AddResourceNode(node);
+            }
+        }
+        
+        _pendingResourceNodes.Clear(); 
+    }
+    
     private bool IsValidSpawnPosition(Vector3Int cellPos)
     {
         Vector2Int mapSize = mapGenerator.MapSize;
@@ -561,22 +584,18 @@ public class MapObjectSpawner : MonoBehaviour
         {
             return;
         }
-        
         try
         {
-            if (grid == null)
-            {
-                return;
-            }
+            if (grid == null) return;
             
             Vector3 worldPos = grid.GetCellCenterWorld(cellPos);
             GameObject resourceNodeObj = Instantiate(settings.resourcePrefab, worldPos, Quaternion.identity, parentTransform);
             
-            if (resourceNodeObj == null)
-            {
-                return;
-            }
+            if (resourceNodeObj == null) return;
             
+            ResourceNode resourceNode = resourceNodeObj.GetComponent<ResourceNode>();
+            resourceNode.amountToMine = richness;
+            _pendingResourceNodes.Add(resourceNode);
             _spawnedResources.Add(resourceNodeObj);
         }
         catch (System.Exception e)

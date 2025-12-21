@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -11,7 +10,8 @@ public class BuildingManager : MonoBehaviour
     [SerializeField] private Tilemap groundTilemap;
     [SerializeField] private Tilemap buildingTilemap;
     [SerializeField] private TileBase temporaryTile;
-    [SerializeField] private Transform parentTransform;
+    [SerializeField] private Transform buildingParentTransform;
+    [SerializeField] private Transform resourceParentTransform;
 
     private readonly Dictionary<Vector3Int, BuildingStructure> _buildingStructuresByAnchor = new ();
     private readonly Dictionary<Vector3Int, BuildingStructure> _cellToStructureMap = new ();
@@ -33,16 +33,12 @@ public class BuildingManager : MonoBehaviour
     public static BuildingManager Instance { get; private set; }
 
     private void Awake()
-    {
+    {                   
         if (Instance == null) {
             Instance = this;
         }
         else {
             Destroy(gameObject);
-        }
-
-        if (parentTransform == null) {
-            parentTransform = transform;
         }
 
         LoadAllBuildings();
@@ -53,6 +49,7 @@ public class BuildingManager : MonoBehaviour
     
     private void InitializeResourceCache()
     {
+        MapObjectSpawner.OnAllObjectsSpawned += RegisterExistingBuildings;
         ResourceManager.OnResourceNodeAdded += OnResourceNodeAdded;
         ResourceManager.OnResourceNodeRemoved += OnResourceNodeRemoved;
         
@@ -96,24 +93,13 @@ public class BuildingManager : MonoBehaviour
     
     private void OnDestroy()
     {
+        MapObjectSpawner.OnAllObjectsSpawned -= RegisterExistingBuildings;
         ResourceManager.OnResourceNodeAdded -= OnResourceNodeAdded;
         ResourceManager.OnResourceNodeRemoved -= OnResourceNodeRemoved;
     }
     
-    private void Start()
-    {
-        if (ResourceManager.Instance != null)
-        {
-            RebuildResourceCache();
-        }
-        
-        RegisterExistingBuildings();
-    }
-    
     private void RegisterExistingBuildings()
     {
-        if (parentTransform == null) return;
-        
         RegisterExistingProcessors();
         RegisterExistingStorages();
         RegisterExistingResourceNodes();
@@ -122,7 +108,7 @@ public class BuildingManager : MonoBehaviour
     
     private void RegisterExistingProcessors()
     {
-        Processor[] existingProcessors = parentTransform.GetComponentsInChildren<Processor>(true);
+        Processor[] existingProcessors = buildingParentTransform.GetComponentsInChildren<Processor>(true);
         
         foreach (Processor processor in existingProcessors)
         {
@@ -137,7 +123,7 @@ public class BuildingManager : MonoBehaviour
     {
         if (ResourceManager.Instance == null) return;
         
-        IStorage[] existingStorages = parentTransform.GetComponentsInChildren<IStorage>(true);
+        IStorage[] existingStorages = buildingParentTransform.GetComponentsInChildren<IStorage>(true);
         
         foreach (IStorage storage in existingStorages)
         {
@@ -169,7 +155,7 @@ public class BuildingManager : MonoBehaviour
     {
         if (ResourceManager.Instance == null) return;
         
-        ResourceNode[] existingResources = parentTransform.GetComponentsInChildren<ResourceNode>(true);
+        ResourceNode[] existingResources = resourceParentTransform.GetComponentsInChildren<ResourceNode>(true);
         
         foreach (ResourceNode node in existingResources)
         {
@@ -196,8 +182,6 @@ public class BuildingManager : MonoBehaviour
             Vector3Int anchorCell = centerCell - new Vector3Int(1, 1, 0);
             
             RegisterMainStructure(anchorCell, new Vector2Int(3, 3));
-            
-            Debug.Log($"[BuildingManager] Found and Registered MainStructure at {anchorCell}");
         }
     }
 
@@ -347,7 +331,7 @@ public class BuildingManager : MonoBehaviour
         Vector3 worldPosition = grid.GetCellCenterWorld(anchorCellPosition);
         GameObject siteObject = new GameObject($"ConstructionSite_{anchorCellPosition}");
         siteObject.transform.position = worldPosition;
-        siteObject.transform.SetParent(parentTransform);
+        siteObject.transform.SetParent(buildingParentTransform);
 
         ConstructionSite site = siteObject.AddComponent<ConstructionSite>();
         site.buildingData = buildingData;
@@ -399,7 +383,7 @@ public class BuildingManager : MonoBehaviour
     {
         Vector3 worldPosition = grid.GetCellCenterWorld(cellPosition);
         GameObject newPieceObject =
-            Instantiate(buildingPieceData.buildingPiecePrefab, worldPosition, Quaternion.identity, parentTransform);
+            Instantiate(buildingPieceData.buildingPiecePrefab, worldPosition, Quaternion.identity, buildingParentTransform);
 
         BuildingPiece pieceComponent = newPieceObject.GetComponent<BuildingPiece>();
         if (pieceComponent != null) {
@@ -448,7 +432,7 @@ public class BuildingManager : MonoBehaviour
         RegisterBuildingStructure(structure);
 
         Vector3 worldPos = grid.GetCellCenterWorld(originPos);
-        GameObject newPieceObject = Instantiate(data.buildingPrefab, worldPos, Quaternion.identity, parentTransform);
+        GameObject newPieceObject = Instantiate(data.buildingPrefab, worldPos, Quaternion.identity, buildingParentTransform);
 
         BuildingPiece mainPiece = newPieceObject.GetComponent<BuildingPiece>();
         if (mainPiece == null) {
@@ -536,7 +520,7 @@ public class BuildingManager : MonoBehaviour
         RegisterBuildingStructure(structure);
 
         Vector3 worldPos = grid.GetCellCenterWorld(originPos);
-        GameObject pieceObject = Instantiate(data.buildingPrefab, worldPos, Quaternion.identity, parentTransform);
+        GameObject pieceObject = Instantiate(data.buildingPrefab, worldPos, Quaternion.identity, buildingParentTransform);
 
         BuildingPiece mainPiece = pieceObject.GetComponent<BuildingPiece>();
         if (mainPiece == null) {
@@ -654,7 +638,6 @@ public class BuildingManager : MonoBehaviour
     private void RegisterBuildingStructure(BuildingStructure structure)
     {
         if (_buildingStructuresByAnchor.ContainsKey(structure.anchor)) {
-            Debug.LogWarning($"Building structure already exists at anchor {structure.anchor}. Overwriting.");
             UnregisterBuildingStructure(structure.anchor);
         }
 

@@ -397,7 +397,6 @@ public class ResourceManager : MonoBehaviour
 
     public void AddResourceNode(ResourceNode node)
     {
-        // HashSet automatically prevents duplicates, O(1) operation
         if (_allResources.Add(node))
         {
             OnResourceNodeAdded?.Invoke(node);

@@ -5390,6 +5390,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6865986198788389803, guid: a62b629273deb2546809fa02708c2b80, type: 3}
+      propertyPath: m_SortingOrder
+      value: -1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -28315,9 +28319,9 @@ MonoBehaviour:
   grid: {fileID: 2115591665}
   groundTilemap: {fileID: 558756081}
   buildingTilemap: {fileID: 2119450981}
-  mainStructureTile: {fileID: 11400000, guid: c0fcb9881a61bf543b82097e4bfaf6f9, type: 2}
   temporaryTile: {fileID: 11400000, guid: 1a272a0c37b7bdf48a1ad47ad0cd0fa7, type: 2}
-  parentTransform: {fileID: 1482201535}
+  buildingParentTransform: {fileID: 1482201535}
+  resourceParentTransform: {fileID: 956259329}
 --- !u!4 &1272048963
 Transform:
   m_ObjectHideFlags: 0
