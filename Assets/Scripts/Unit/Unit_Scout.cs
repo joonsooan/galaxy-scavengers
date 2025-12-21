@@ -192,6 +192,32 @@ public class Unit_Scout : UnitBase
         
         yield return new WaitForSeconds(beacon.StayInterval);
         
+        if (BeaconManager.Instance != null)
+        {
+            Beacon availableBeacon = BeaconManager.Instance.FindAvailableBeacon();
+            if (availableBeacon != null)
+            {
+                if (_assignedBeacon != null)
+                {
+                    _assignedBeacon.UnassignUnit();
+                    _assignedBeacon.DestroyBeacon();
+                    _assignedBeacon = null;
+                }
+                
+                _assignedBeacon = availableBeacon;
+                _assignedBeacon.AssignUnit(this);
+                currentState = UnitState.Moving;
+                
+                if (unitMovement != null)
+                {
+                    unitMovement.SetNewTarget(availableBeacon.Position);
+                }
+                
+                _beaconCoroutine = null;
+                yield break;
+            }
+        }
+        
         ReturnHome();
     }
     

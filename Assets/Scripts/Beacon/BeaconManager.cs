@@ -261,5 +261,42 @@ public class BeaconManager : MonoBehaviour
             }
         }
     }
+    
+    public Beacon FindAvailableBeacon()
+    {
+        foreach (var beacon in _beacons)
+        {
+            if (beacon != null && beacon.AssignedUnit == null)
+            {
+                bool isInWaypointGroup = false;
+                foreach (var group in _waypointGroups)
+                {
+                    if (group.Waypoints.Contains(beacon))
+                    {
+                        isInWaypointGroup = true;
+                        break;
+                    }
+                }
+                
+                if (!isInWaypointGroup)
+                {
+                    return beacon;
+                }
+            }
+        }
+        return null;
+    }
+    
+    public void AssignScoutToAvailableBeacon(Unit_Scout scout)
+    {
+        if (scout == null) return;
+        
+        Beacon availableBeacon = FindAvailableBeacon();
+        if (availableBeacon != null)
+        {
+            scout.AssignToBeacon(availableBeacon);
+            availableBeacon.AssignUnit(scout);
+        }
+    }
 }
 

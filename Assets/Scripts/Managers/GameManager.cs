@@ -161,10 +161,10 @@ public class GameManager : MonoBehaviour
     {
         yield return null;
 
-        InitializeSpawnersAndUnits();
+        yield return StartCoroutine(InitializeSpawnersAndUnits());
     }
 
-    private void InitializeSpawnersAndUnits()
+    private IEnumerator InitializeSpawnersAndUnits()
     {
         foreach (BuildingSpawner spawner in FindObjectsByType<BuildingSpawner>(FindObjectsSortMode.None)) {
             spawner.SpawnBuildings();
@@ -185,6 +185,9 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        yield return null;
+        yield return null;
+        
         foreach (EnemySpawner enemySpawner in FindObjectsByType<EnemySpawner>(FindObjectsSortMode.None))
         {
             enemySpawner.SpawnEnemies();

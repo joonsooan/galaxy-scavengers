@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Unity.VisualScripting;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -10,7 +10,6 @@ public class BuildingManager : MonoBehaviour
     public Grid grid;
     [SerializeField] private Tilemap groundTilemap;
     [SerializeField] private Tilemap buildingTilemap;
-    [SerializeField] private TileBase mainStructureTile;
     [SerializeField] private TileBase temporaryTile;
     [SerializeField] private Transform parentTransform;
 
@@ -118,6 +117,7 @@ public class BuildingManager : MonoBehaviour
         RegisterExistingProcessors();
         RegisterExistingStorages();
         RegisterExistingResourceNodes();
+        RegisterExistingMainStructure();
     }
     
     private void RegisterExistingProcessors()
@@ -177,6 +177,27 @@ public class BuildingManager : MonoBehaviour
             {
                 ResourceManager.Instance.AddResourceNode(node);
             }
+        }
+    }
+
+    private void RegisterExistingMainStructure()
+    {
+        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
+        
+        if (mainStructure != null)
+        {
+            if (ResourceManager.Instance != null)
+            {
+                ResourceManager.Instance.RegisterMainStructure(mainStructure);
+                ResourceManager.Instance.AddStorage(mainStructure);
+            }
+
+            Vector3Int centerCell = grid.WorldToCell(mainStructure.transform.position);
+            Vector3Int anchorCell = centerCell - new Vector3Int(1, 1, 0);
+            
+            RegisterMainStructure(anchorCell, new Vector2Int(3, 3));
+            
+            Debug.Log($"[BuildingManager] Found and Registered MainStructure at {anchorCell}");
         }
     }
 
@@ -281,7 +302,7 @@ public class BuildingManager : MonoBehaviour
         return _temporaryTiles.Contains(cellPosition);
     }
 
-    private bool IsMainStructureCell(Vector3Int cellPosition)
+    public bool IsMainStructureCell(Vector3Int cellPosition)
     {
         return _mainStructureCells.Contains(cellPosition);
     }

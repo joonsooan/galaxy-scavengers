@@ -20,16 +20,13 @@ public class UnitMovement : MonoBehaviour
 
     [Header("Pathfinding")]
     public float waypointTolerance = 0.1f;
-    [SerializeField] private float alignmentSpeed = 3f;
+
     private Vector3 _currentWaypoint;
     private float _finalStoppingDistance;
     private Vector3 _finalTargetPosition;
     private Grid _grid;
     private bool _isAtFinalTarget;
-    private bool _isAligningToCenter;
-    private Vector3 _targetCellCenter;
     private bool _isForceStopped;
-    private bool _disableAlignment;
 
     private Queue<Vector3> _path = new ();
 
@@ -44,8 +41,7 @@ public class UnitMovement : MonoBehaviour
         if (_finalTargetPosition == default) {
             return false;
         }
-        float distanceToTarget = Vector3.Distance(transform.position, _finalTargetPosition);
-        return distanceToTarget <= tolerance;
+        return _isAtFinalTarget || Vector3.Distance(transform.position, _finalTargetPosition) <= tolerance;
     }
 
     private void Awake()
@@ -60,7 +56,7 @@ public class UnitMovement : MonoBehaviour
         _grid = BuildingManager.Instance.grid;
     }
     
-    private Vector3Int _lastExploredCell = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
+    private Vector3Int _lastExploredCell = new (int.MinValue, int.MinValue, int.MinValue);
     
     private void FixedUpdate()
     {
@@ -71,7 +67,6 @@ public class UnitMovement : MonoBehaviour
         }
         
         bool isEnemy = _unitBase != null && _unitBase.unitType == UnitBase.UnitType.Enemy;
-        
         if (!isEnemy && _grid != null && FogOfWarManager.Instance != null)
         {
             Vector3Int currentCell = _grid.WorldToCell(transform.position);
@@ -82,28 +77,6 @@ public class UnitMovement : MonoBehaviour
             }
         }
         
-        if (_isAligningToCenter)
-        {
-            Vector3 toCenter = _targetCellCenter - transform.position;
-            float distanceToCenter = toCenter.magnitude;
-            
-            if (distanceToCenter < 0.01f)
-            {
-                transform.position = new Vector3(_targetCellCenter.x, _targetCellCenter.y, transform.position.z);
-                _rb.linearVelocity = Vector2.zero;
-                _isAligningToCenter = false;
-                _isAtFinalTarget = false;
-                return;
-            }
-            
-            Vector3 alignDirection = toCenter.normalized;
-            float speed = alignmentSpeed * Mathf.Min(1f, distanceToCenter);
-            _rb.linearVelocity = alignDirection * speed;
-            _spriteController?.UpdateSpriteDirection(alignDirection);
-            return;
-        }
-        
-        // 1. 이동할 웨이포인트가 없으면(경로가 없거나 완료) 즉시 정지하고 종료
         if (_currentWaypoint == default) 
         {
             if (_rb.linearVelocity.sqrMagnitude > 0.01f)
@@ -113,77 +86,46 @@ public class UnitMovement : MonoBehaviour
             return;
         }
 
-        // 2. 웨이포인트를 향해 이동
-        // Calculate direction and set velocity - this ensures clean movement start
+        float distanceToWaypoint = Vector3.Distance(transform.position, _currentWaypoint);
+        bool isFinalWaypoint = _path.Count == 0;
+
+        float currentTolerance = isFinalWaypoint ? 0.02f : waypointTolerance;
+
+        if (distanceToWaypoint < currentTolerance) 
+        {
+            if (!isFinalWaypoint) 
+            {
+                _currentWaypoint = _path.Dequeue();
+            }
+            else 
+            {
+                _isAtFinalTarget = true;
+                StopMovement();
+                return;
+            }
+        }
+
         Vector3 direction = (_currentWaypoint - transform.position).normalized;
-        // Only set velocity if direction is valid (not zero)
+        
         if (direction.sqrMagnitude > 0.001f)
         {
-            _rb.linearVelocity = direction * moveSpeed;
+            float currentSpeed = moveSpeed;
+
+            if (isFinalWaypoint && distanceToWaypoint < 0.5f)
+            {
+                float slowDownFactor = Mathf.Clamp01(distanceToWaypoint / 0.5f);
+                currentSpeed = Mathf.Lerp(0.5f, moveSpeed, slowDownFactor); 
+            }
+
+            _rb.linearVelocity = direction * currentSpeed;
             _spriteController?.UpdateSpriteDirection(direction);
         }
         else
         {
-            // If direction is invalid, zero velocity
             _rb.linearVelocity = Vector2.zero;
         }
-
-        // 3. 웨이포인트에 도착했는지 확인
-        float distanceToWaypoint = Vector3.Distance(transform.position, _currentWaypoint);
-        if (distanceToWaypoint < waypointTolerance) 
-        {
-            // 3-1. 아직 경로에 다음 웨이포인트가 남아있다면
-            if (_path.Count > 0) 
-            {
-                // 다음 웨이포인트를 목표로 설정
-                _currentWaypoint = _path.Dequeue();
-            }
-            // 3-2. 마지막 웨이포인트에 도착했다면
-            else 
-            {
-                // Check if this is the final target (interaction cell)
-                if (_finalTargetPosition != default && Vector3.Distance(_currentWaypoint, _finalTargetPosition) < 0.01f)
-                {
-                    _isAtFinalTarget = true;
-                    // Only start aligning if alignment is not disabled
-                    if (!_disableAlignment)
-                    {
-                        StartAligningToCellCenter();
-                    }
-                }
-                
-                // 이동 완료 및 정지
-                StopMovement();
-            }
-        }
     }
     
-    private void StartAligningToCellCenter()
-    {
-        if (_grid == null || _finalTargetPosition == default) return;
-        
-        // Get the cell position of the final target
-        Vector3Int targetCell = _grid.WorldToCell(_finalTargetPosition);
-        
-        // Get the exact center of that cell
-        _targetCellCenter = _grid.GetCellCenterWorld(targetCell);
-        _targetCellCenter = new Vector3(_targetCellCenter.x, _targetCellCenter.y, transform.position.z);
-        
-        // Start aligning smoothly
-        _isAligningToCenter = true;
-    }
-    
-    public void SnapToTargetCellCenter()
-    {
-        // Public method to start aligning to the final target cell center
-        // Used when units need to align immediately (e.g., when starting to attack)
-        if (_finalTargetPosition != default)
-        {
-            _isAtFinalTarget = true;
-            StartAligningToCellCenter();
-        }
-    }
-
     private void OnEnable()
     {
         BuildingManager.OnTilemapChanged += HandleTilemapChange;
@@ -213,11 +155,6 @@ public class UnitMovement : MonoBehaviour
     
     public bool SetNewTargetDirect(Vector2 targetPosition, float stoppingDistance)
     {
-        return SetNewTargetDirect(targetPosition, stoppingDistance, false);
-    }
-
-    private bool SetNewTargetDirect(Vector2 targetPosition, float stoppingDistance, bool disableAlignment)
-    {
         if (_rb == null || _grid == null) {
             return false;
         }
@@ -227,8 +164,6 @@ public class UnitMovement : MonoBehaviour
         _finalTargetPosition = targetPosition;
         _finalStoppingDistance = stoppingDistance;
         _isAtFinalTarget = false;
-        _isAligningToCenter = false;
-        _disableAlignment = disableAlignment;
         
         _path = FindPath(transform.position, _finalTargetPosition);
         
@@ -251,7 +186,6 @@ public class UnitMovement : MonoBehaviour
         Vector3Int targetCellForPathfinding = targetCellPos;
 
         if (BuildingManager.Instance != null && BuildingManager.Instance.GetBuildingAt(targetCellPos, out List<Vector3Int> cells)) {
-            // 다양한 크기의 건물
             targetCellForPathfinding = FindBestInteractionCell(cells, transform.position);
 
             if (targetCellForPathfinding == new Vector3Int(int.MinValue, int.MinValue, int.MinValue)) {
@@ -260,24 +194,19 @@ public class UnitMovement : MonoBehaviour
             }
         }
         else if (!IsCellWalkable(targetCellPos)) {
-            // 건물이 아니지만 걸을 수 없는 타일 (예: 1x1 자원)
-            // 1x1 건물처럼 취급하여 상호작용 위치 탐색
             List<Vector3Int> occupiedCells = new List<Vector3Int> { targetCellPos };
-
             targetCellForPathfinding = FindBestInteractionCell(occupiedCells, transform.position);
 
-            if (targetCellForPathfinding == new Vector3Int(int.MinValue, int.MinValue, int.MinValue)) // 유효한 셀 없음
+            if (targetCellForPathfinding == new Vector3Int(int.MinValue, int.MinValue, int.MinValue))
             {
                 Debug.LogWarning($"[{name}] No valid interaction cell found for resource at {targetCellPos}");
                 return false;
             }
         }
 
-        // _finalTargetPosition = _grid.GetCellCenterWorld(targetCellPos);
         _finalTargetPosition = _grid.GetCellCenterWorld(targetCellForPathfinding);
         _finalStoppingDistance = stoppingDistance;
         _isAtFinalTarget = false;
-        _isAligningToCenter = false; // Reset alignment when setting new target
 
         _path = FindPath(transform.position, _finalTargetPosition);
 
@@ -290,11 +219,6 @@ public class UnitMovement : MonoBehaviour
 
     public void StopMovement()
     {
-        if (_isAtFinalTarget && _finalTargetPosition != default && !_isAligningToCenter && !_disableAlignment)
-        {
-            StartAligningToCellCenter();
-        }
-        
         _rb.linearVelocity = Vector2.zero;
         _path.Clear();
         _currentWaypoint = default;
@@ -306,10 +230,8 @@ public class UnitMovement : MonoBehaviour
         _rb.linearVelocity = Vector2.zero;
         _path.Clear();
         _currentWaypoint = default;
-        _isAligningToCenter = false;
         _isAtFinalTarget = false;
         _finalTargetPosition = default;
-        _disableAlignment = false;
     }
     
     public void ResumeMovement()
@@ -397,19 +319,12 @@ public class UnitMovement : MonoBehaviour
     private bool IsCellWalkable(Vector3Int cell)
     {
         if (BuildingManager.Instance.IsTerrainCell(cell) ||
-            BuildingManager.Instance.IsResourceTile(cell) || 
-            BuildingManager.Instance.IsBuildingTile(cell))
+            BuildingManager.Instance.IsResourceTile(cell))
         {
             return false;
         }
         
-        if (BuildingManager.Instance.GetBuildingAt(cell, out List<Vector3Int> occupiedCells))
-        {
-            return false;
-        }
-        
-        BuildingPiece piece = BuildingManager.Instance.GetPieceAt(cell);
-        if (piece != null)
+        if (BuildingManager.Instance.IsMainStructureCell(cell) || BuildingManager.Instance.GetBuildingAt(cell, out _))
         {
             return false;
         }
@@ -422,7 +337,6 @@ public class UnitMovement : MonoBehaviour
         HashSet<Vector3Int> interactionCells = new HashSet<Vector3Int>();
         HashSet<Vector3Int> occupiedSet = new HashSet<Vector3Int>(occupiedCells);
 
-        // 건물이 차지하는 모든 셀 추가
         foreach (Vector3Int occupiedCell in occupiedSet) {
             foreach (Vector3Int offset in CardinalOffsets) {
                 Vector3Int neighbor = occupiedCell + offset;
@@ -440,7 +354,7 @@ public class UnitMovement : MonoBehaviour
         List<Vector3Int> potentialCells = GetInteractionCells(occupiedCells);
         Vector3Int startCell = _grid.WorldToCell(startPos);
 
-        Vector3Int bestCell = new Vector3Int(int.MinValue, int.MinValue, int.MinValue); // 유효하지 않은 값으로 초기화
+        Vector3Int bestCell = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
         float minDistance = float.MaxValue;
 
         foreach (Vector3Int cell in potentialCells) {

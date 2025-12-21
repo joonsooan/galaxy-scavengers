@@ -173,7 +173,6 @@ public class Unit_Enemy_Legacy : UnitBase
         currentState = UnitState.Attacking;
         
         // Snap to the interaction cell center before stopping movement
-        unitMovement.SnapToTargetCellCenter();
         unitMovement.StopMovement();
         
         // Face the target building
