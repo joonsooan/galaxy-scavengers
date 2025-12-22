@@ -19,6 +19,7 @@ public class CameraController : MonoBehaviour
     private int _defaultPpu;
     private float _defaultPanSpeed;
     private float _defaultEdgePanSpeed;
+    private bool isEdgePanEnable;
 
     private void Awake()
     {
@@ -52,6 +53,11 @@ public class CameraController : MonoBehaviour
             transform.position = new Vector3(0.5f, 0.5f, -10f);
             ZoomNormal();
         }
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            isEdgePanEnable = !isEdgePanEnable;
+        }
     }
 
     private void LateUpdate()
@@ -64,23 +70,26 @@ public class CameraController : MonoBehaviour
     {
         Vector3 mousePanDirection = Vector3.zero;
 
-        if (Input.mousePosition.y >= Screen.height - panBorderThickness)
+        if (isEdgePanEnable)
         {
-            mousePanDirection += Vector3.up;
+            if (Input.mousePosition.y >= Screen.height - panBorderThickness)
+            {
+                mousePanDirection += Vector3.up;
+            }
+            if (Input.mousePosition.y <= panBorderThickness * 0.01f)
+            {
+                mousePanDirection += Vector3.down;
+            }
+            if (Input.mousePosition.x >= Screen.width - panBorderThickness)
+            {
+                mousePanDirection += Vector3.right;
+            }
+            if (Input.mousePosition.x <= panBorderThickness)
+            {
+                mousePanDirection += Vector3.left;
+            }
+            mousePanDirection.Normalize();
         }
-        if (Input.mousePosition.y <= panBorderThickness * 0.01f)
-        {
-            mousePanDirection += Vector3.down;
-        }
-        if (Input.mousePosition.x >= Screen.width - panBorderThickness)
-        {
-            mousePanDirection += Vector3.right;
-        }
-        if (Input.mousePosition.x <= panBorderThickness)
-        {
-            mousePanDirection += Vector3.left;
-        }
-        mousePanDirection.Normalize();
 
         if (_direction != Vector3.zero || mousePanDirection != Vector3.zero)
         {
