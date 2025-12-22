@@ -102,7 +102,6 @@ public class MainControlPanel : MonoBehaviour
             resourceStatPanel.SetActive(false);
         }
         
-        // buildingInfoPanel.SetActive(false);
         _currentlyActivePanel = null;
     }
     

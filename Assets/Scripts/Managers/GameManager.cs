@@ -18,7 +18,6 @@ public class GameManager : MonoBehaviour
     private DisplayableData _activeCardData;
 
     private bool _isPaused;
-    private Coroutine _quotaCoroutine;
     public static GameManager Instance { get; private set; }
 
     private void Awake()
@@ -61,15 +60,6 @@ public class GameManager : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.Alpha2)) Time.timeScale = 2;
         else if (Input.GetKeyDown(KeyCode.Alpha3)) Time.timeScale = 3;
         else if (Input.GetKeyDown(KeyCode.Alpha4)) Time.timeScale = 4;
-
-        if (IsDragging() && Input.GetMouseButtonDown(1))
-        {
-            if (BuildingInfoPanel.Instance != null)
-            {
-                BuildingInfoPanel.Instance.TogglePinnedVisibility();
-            }
-            return;
-        }
 
         if (Input.GetKeyDown(KeyCode.F))
         {
@@ -116,7 +106,6 @@ public class GameManager : MonoBehaviour
         }
         _activeCardData = null;
         onEndDrag?.Invoke();
-        // uiManager?.UnpinAndHideCardPanel();
 
         if (uiManager != null) {
             uiManager.UnpinAndHideAllPanels();
@@ -150,7 +139,6 @@ public class GameManager : MonoBehaviour
 
     private void InitializeGameScene()
     {
-        FindFirstObjectByType<Slider>();
         mapGenerator = FindFirstObjectByType<MapGenerator>();
         uiManager = FindFirstObjectByType<UIManager>();
         cardDragger = FindFirstObjectByType<CardDragger>();

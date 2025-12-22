@@ -31956,10 +31956,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d71dd33e6bc24986ba8435647f9f3563, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardInfoPanel: {fileID: 886580898}
-  cardNameText: {fileID: 1034809628}
-  cardDescriptionText: {fileID: 2056899316}
-  cardResourcePanel: {fileID: 1171605817}
+  buildingInfoPanel: {fileID: 886580898}
+  buildingNameText: {fileID: 1034809628}
+  buildingDescText: {fileID: 2056899316}
+  buildingResourcePanel: {fileID: 1171605817}
   resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: 87d776b852749c2428050baaea9b40b1, type: 3}
   recipeInfoPanel: {fileID: 964695054}
   recipeInfoComponent: {fileID: 713129548}
@@ -39833,11 +39833,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8261322360633804967, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: m_Delegates.Array.data[0].callback.m_PersistentCalls.m_Calls.Array.size
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8261322360633804967, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: m_Delegates.Array.data[1].callback.m_PersistentCalls.m_Calls.Array.size
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8261322360633804967, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: m_Delegates.Array.data[0].callback.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
@@ -39850,7 +39850,7 @@ PrefabInstance:
     - target: {fileID: 8261322360633804967, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: m_Delegates.Array.data[0].callback.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 886580903}
+      objectReference: {fileID: 886580898}
     - target: {fileID: 8261322360633804967, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: m_Delegates.Array.data[1].callback.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -39865,7 +39865,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8261322360633804967, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: m_Delegates.Array.data[0].callback.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnMouseHover
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 8261322360633804967, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: m_Delegates.Array.data[1].callback.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName

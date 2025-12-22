@@ -1,6 +1,5 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 public class BuildingInfoPanel : MonoBehaviour
 {
@@ -10,7 +9,6 @@ public class BuildingInfoPanel : MonoBehaviour
     [SerializeField] private TMP_Text buildingDesc;
 
     private BuildingData _currentData;
-    private bool _isFixed;
 
     public static BuildingInfoPanel Instance { get; private set; }
 
@@ -26,69 +24,12 @@ public class BuildingInfoPanel : MonoBehaviour
         ClearPanel();
     }
 
-    public void OnMouseHover(BaseEventData eventData)
-    {
-        if (_isFixed)
-        {
-            return;
-        }
-
-        var pointerData = eventData as PointerEventData;
-        if (pointerData == null)
-        {
-            return;
-        }
-
-        var button = pointerData.pointerEnter != null
-            ? pointerData.pointerEnter.GetComponentInParent<BuildingButton>() 
-            : null;
-
-        if (button == null)
-        {
-            return;
-        }
-
-        ShowInfo(button.GetComboCardData(), false);
-    }
-
-    public void OnMouseExit()
-    {
-        if (_isFixed)
-        {
-            return;
-        }
-
-        ClearPanel();
-    }
-
     public void FixInfo(BuildingData data)
     {
-        ShowInfo(data, true);
+        ShowInfo(data);
     }
 
-    public void UnfixInfo()
-    {
-        _isFixed = false;
-    }
-
-    public void TogglePinnedVisibility()
-    {
-        if (_currentData == null)
-        {
-            return;
-        }
-
-        if (_isFixed)
-        {
-            ClearPanel();
-        }
-        else
-        {
-            _isFixed = true;
-        }
-    }
-
-    private void ShowInfo(BuildingData data, bool fix)
+    private void ShowInfo(BuildingData data)
     {
         if (data == null)
         {
@@ -97,7 +38,6 @@ public class BuildingInfoPanel : MonoBehaviour
         }
 
         _currentData = data;
-        _isFixed = fix;
 
         if (buildingName != null)
         {
@@ -118,7 +58,6 @@ public class BuildingInfoPanel : MonoBehaviour
     private void ClearPanel()
     {
         _currentData = null;
-        _isFixed = false;
 
         if (buildingName != null)
         {
