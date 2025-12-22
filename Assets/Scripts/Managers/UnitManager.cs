@@ -9,6 +9,7 @@ public class UnitManager : MonoBehaviour
 
     public static event Action<ResourceType[]> OnMineableTypesChanged;
     public IReadOnlyList<ResourceType> CurrentMineableTypes => _currentMineableTypes;
+    public Transform unitParent;
     
     private List<ResourceType> _currentMineableTypes = new();
     
@@ -31,6 +32,26 @@ public class UnitManager : MonoBehaviour
             Instance = this;
         }
         _currentMineableTypes = ((ResourceType[])Enum.GetValues(typeof(ResourceType))).ToList();
+    }
+    
+    private void Start()
+    {
+        RegisterExistingUnits();
+    }
+    
+    private void RegisterExistingUnits()
+    {
+        if (unitParent == null) return;
+        
+        UnitBase[] existingUnits = unitParent.GetComponentsInChildren<UnitBase>(true);
+        
+        foreach (UnitBase unit in existingUnits)
+        {
+            if (unit != null)
+            {
+                AddUnit(unit);
+            }
+        }
     }
 
     public void UpdateAllLifterMineableTypes(List<ResourceType> newTypes)

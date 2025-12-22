@@ -51,11 +51,9 @@ public abstract class UnitBase : MonoBehaviour
             UnitManager.Instance.AddUnit(this);
         }
         
-        // Auto-add VisionProvider for ally units if not present
         if (unitType == UnitType.Ally && GetComponent<VisionProvider>() == null)
         {
             VisionProvider visionProvider = gameObject.AddComponent<VisionProvider>();
-            // Set default vision range for units (3 units)
             visionProvider.SetVisionRange(3f);
         }
     }
@@ -96,9 +94,7 @@ public abstract class UnitBase : MonoBehaviour
         if (_sr == null) yield break;
 
         _sr.material.color = flashColor;
-
         yield return new WaitForSeconds(flashDuration);
-
         _sr.material.color = _originalColor;
     }
 }

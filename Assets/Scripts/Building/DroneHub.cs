@@ -163,7 +163,7 @@ public class DroneHub : Damageable, IClickable
                 OnUnitTargetChanged?.Invoke(unitIndex, currentCount + 1, targetCount);
             }
 
-            Instantiate(unitToProduce.unitPrefab, transform.position, Quaternion.identity, BuildingManager.Instance.grid.transform);
+            Instantiate(unitToProduce.unitPrefab, transform.position, Quaternion.identity, UnitManager.Instance.unitParent);
         }
 
         _isProducing = false;

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -104,10 +105,10 @@ public class ResourceManager : MonoBehaviour
     [SerializeField] private GameObject nexusDataPanel;
     [SerializeField] private GameObject neuralMatrixPanel;
 
-    private readonly HashSet<ResourceNode> _allResources = new HashSet<ResourceNode>();
-    private readonly List<IStorage> _allStorages = new List<IStorage>();
-    private readonly Dictionary<ResourceType, int> _resourceCounts = new Dictionary<ResourceType, int>();
-    private readonly Dictionary<ResourceType, ResourceStats> _resourceStats = new Dictionary<ResourceType, ResourceStats>();
+    private readonly HashSet<ResourceNode> _allResources = new ();
+    private readonly List<IStorage> _allStorages = new ();
+    private readonly Dictionary<ResourceType, int> _resourceCounts = new ();
+    private readonly Dictionary<ResourceType, ResourceStats> _resourceStats = new ();
     private MainStructure _mainStructure;
     public static ResourceManager Instance { get; private set; }
 
@@ -145,6 +146,8 @@ public class ResourceManager : MonoBehaviour
     public static event Action OnNewStorageAdded;
     public static event Action<IStorage> OnStorageRemoved;
     public static event Action<ResourceType, int> OnResourceAmountChanged;
+    public static event Action<ResourceNode> OnResourceNodeAdded;
+    public static event Action<ResourceNode> OnResourceNodeRemoved;
 
     private void Initialize()
     {
@@ -212,7 +215,7 @@ public class ResourceManager : MonoBehaviour
         }
     }
     
-    private System.Collections.IEnumerator DelayedSceneInitialization()
+    private IEnumerator DelayedSceneInitialization()
     {
         yield return null;
         
@@ -308,11 +311,6 @@ public class ResourceManager : MonoBehaviour
         return true;
     }
 
-    public bool SpendResources(ResourceType type, int amount)
-    {
-        return SpendResources(new[] { new ResourceCost { resourceType = type, amount = amount } });
-    }
-
     public bool HasEnoughResources(ResourceCost[] costs)
     {
         foreach (ResourceCost cost in costs) {
@@ -400,26 +398,27 @@ public class ResourceManager : MonoBehaviour
 
     public void AddResourceNode(ResourceNode node)
     {
-        // HashSet automatically prevents duplicates, O(1) operation
-        _allResources.Add(node);
+        if (_allResources.Add(node))
+        {
+            OnResourceNodeAdded?.Invoke(node);
+        }
     }
 
     public void RemoveResourceNode(ResourceNode node)
     {
-        _allResources.Remove(node);
+        if (_allResources.Remove(node))
+        {
+            OnResourceNodeRemoved?.Invoke(node);
+        }
     }
 
     public List<ResourceNode> GetAllResources()
     {
-        // Convert HashSet to List when needed (rare operation)
         return new List<ResourceNode>(_allResources);
     }
 
     private void FindAndConnectUI()
     {
-        // Try to find panels by name if not assigned in inspector
-        // Assuming panel names follow a pattern like "Resource0_Panel", "Resource1_Panel", etc.
-        // Or they might be named after the resource type
         if (ferritePanel == null)
             ferritePanel = GameObject.Find("Resource0_Panel") ?? GameObject.Find("FerritePanel");
 
@@ -503,19 +502,17 @@ public class ResourceManager : MonoBehaviour
         if (resourcePanel != null) {
             int amount = _resourceCounts.GetValueOrDefault(type, 0);
             
-            // Find the TMP_Text child component and update its text
             TMP_Text resourceText = resourcePanel.GetComponentInChildren<TMP_Text>();
             if (resourceText != null) {
                 resourceText.text = amount.ToString();
             }
             
-            // Show/hide the panel itself based on whether resource amount is greater than 0
             bool shouldShow = amount > 0;
             resourcePanel.SetActive(shouldShow);
         }
     }
 
-    public void UpdateAllResourceUI()
+    private void UpdateAllResourceUI()
     {
         if (!IsUIConnected()) return;
 
@@ -544,13 +541,6 @@ public class ResourceManager : MonoBehaviour
         UpdateResourceUI(ResourceType.NexusData);
         UpdateResourceUI(ResourceType.NeuralMatrix);
     }
-
-    // private void UpdateSolanaUI()
-    // {
-    //     int requiredAmount = GameManager.Instance != null ? GameManager.Instance.GetRequiredAmountForCurrentQuota() : 0;
-    //
-    //     // solanaNumber.text = $"{_resourceCounts[ResourceType.Solana]} / {requiredAmount}";
-    // }
 
     private bool IsUIConnected()
     {

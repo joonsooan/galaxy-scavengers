@@ -1,10 +1,16 @@
 fileFormatVersion: 2
-guid: 346ec09c589690748b8b2a0986506c63
+guid: 135e80e3fb0b8044a8dfc67e688cb32f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3742767559468808067
-    second: SIDCORE_3_0
+      213: -2447318104963349794
+    second: 1216_0
+  - first:
+      213: 4429987260442136131
+    second: 1216_1
+  - first:
+      213: 2544712925334621364
+    second: 1216_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -96,14 +102,49 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: SIDCORE_3_0
+      name: 1216_0
       rect:
         serializedVersion: 2
         x: 0
+        y: 16
+        width: 16
+        height: 32
+      alignment: 9
+      pivot: {x: 0.5, y: 0.25}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed207456621690ed0800000000000000
+      internalID: -2447318104963349794
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 1216_1
+      rect:
+        serializedVersion: 2
+        x: 17
         y: 0
         width: 48
         height: 48
@@ -115,8 +156,30 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d7881051cb40f0cc0800000000000000
-      internalID: -3742767559468808067
+      spriteID: 34ec82a31f97a7d30800000000000000
+      internalID: 4429987260442136131
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 1216_2
+      rect:
+        serializedVersion: 2
+        x: 66
+        y: 0
+        width: 16
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4bc4ae15ce2a05320800000000000000
+      internalID: 2544712925334621364
       vertices: []
       indices: 
       edges: []
@@ -125,7 +188,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 570c664ba48f2c54d8c157600c5bfa1a
     internalID: 0
     vertices: []
     indices: 
@@ -135,7 +198,9 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      SIDCORE_3_0: -3742767559468808067
+      1216_0: -2447318104963349794
+      1216_1: 4429987260442136131
+      1216_2: 2544712925334621364
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

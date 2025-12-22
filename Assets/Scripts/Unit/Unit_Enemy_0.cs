@@ -1,256 +1,487 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class Unit_Enemy_0 : UnitBase
 {
-    [Header("Enemy Stats")]
+    private enum AIState
+    {
+        Idle,
+        Warning,
+        Attack
+    }
+
+    [Header("Zones")]
+    [SerializeField] private float homeRadius = 3f;
+    [SerializeField] private float territoryRadius = 6f;
+    [SerializeField] private float chaseTime = 5f;
+    [SerializeField] private float detectionRadius = 8f;
+    // [SerializeField] private float roamInterval = 2f;
+    public float minRoamInterval = 2.0f;
+    public float maxRoamInterval = 3.0f;
+    private float _currentRoamInterval;
+
+    [Header("Combat")]
     [SerializeField] private int attackDamage = 10;
     [SerializeField] private float attackRange = 1.5f;
-    [SerializeField] private float attackSpeed = 1.0f;
-    [SerializeField] private float targetSearchInterval = 1.0f;
+    [SerializeField] private float attackSpeed = 1f;
 
     [Header("References")]
     [SerializeField] private UnitMovement unitMovement;
 
-    private Damageable _target;
+    private Vector3 _spawnPosition;
+    private AIState _aiState;
+    private Damageable _buildingTarget;
+    private UnitBase _unitTarget;
+    
+    private float _roamTimer;
+    private bool _lastActionWasMove;
+    private float _warningTimer;
+    
     private Coroutine _attackCoroutine;
-    private WaitForSeconds _searchWait;
 
     protected override void Awake()
     {
         base.Awake();
-        
-        unitMovement = GetComponent<UnitMovement>();
-        _searchWait = new WaitForSeconds(targetSearchInterval);
+        if (unitMovement == null)
+        {
+            unitMovement = GetComponent<UnitMovement>();
+        }
+        _spawnPosition = Vector3.zero;
+        _aiState = AIState.Idle;
     }
-
-    private IEnumerator Start()
+    
+    private void Start()
     {
-        currentState = UnitState.Idle;
-
-        yield return null;
-        
-        StartCoroutine(FindTargetCoroutine());
+        SetNewRoamInterval();
+    }
+    
+    public void SetTerritoryCenter(Vector3 territoryCenter)
+    {
+        _spawnPosition = territoryCenter;
     }
 
     private void Update()
     {
-        DecideNextAction();
+        UpdateStateLogic();
     }
-    
-    private void DecideNextAction()
+
+    private void UpdateStateLogic()
     {
-        if (_target == null || _target.CurrentHealth <= 0)
+        // if (_aiState != AIState.Attack)
+        // {
+        //     if (IsAnyBuildingInZone(homeRadius) || IsAnyUnitInZone(homeRadius))
+        //     {
+        //         EnterAttackState();
+        //     }
+        //     else if (IsAnyBuildingInZone(territoryRadius))
+        //     {
+        //         EnterAttackState();
+        //     }
+        // }
+
+        switch (_aiState)
         {
-            HandleTargetLoss();
-            return;
-        }
-
-        // Check if enemy has reached the interaction cell (where it should attack from)
-        bool hasReachedInteractionCell = unitMovement.HasReachedTarget(unitMovement.waypointTolerance + 0.1f);
-        
-        // Also check distance to target as a fallback (for non-building targets or edge cases)
-        float distanceToTarget = GetDistanceToTarget(_target);
-        bool isWithinAttackRange = distanceToTarget <= attackRange;
-
-        switch (currentState)
-        {
-            case UnitState.Idle:
+            case AIState.Idle:
+                HandleIdle();
+                // HandleTerritoryEntry();
                 break;
-
-            case UnitState.Moving:
-                // Start attacking when we've reached the interaction cell AND are within attack range
-                if (hasReachedInteractionCell && isWithinAttackRange)
-                {
-                    // Face the target before starting to attack
-                    if (_target != null)
-                    {
-                        AdjustSpriteDirectionToTarget(_target.transform);
-                    }
-                    StartAttacking();
-                }
-                break;
-
-            case UnitState.Attacking:
-                // Continue facing the target while attacking
-                if (_target != null)
-                {
-                    AdjustSpriteDirectionToTarget(_target.transform);
-                }
-                
-                // Stop attacking if we're no longer at the interaction cell or out of range
-                if (!hasReachedInteractionCell || !isWithinAttackRange)
-                {
-                    StopAttacking();
-                    MoveToTarget();
-                }
-                break;
+            
+            // case AIState.Warning:
+            //     HandleWarning();
+            //     break;
+            //
+            // case AIState.Attack:
+            //     HandleAttack();
+            //     break;
         }
     }
-    
-    private float GetDistanceToTarget(Damageable target)
+
+    private void HandleIdle()
     {
-        // For buildings, check distance to the nearest occupied cell, not just the center
-        if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null)
-        {
-            Vector3Int targetCell = BuildingManager.Instance.grid.WorldToCell(target.transform.position);
-            if (BuildingManager.Instance.GetBuildingAt(targetCell, out List<Vector3Int> occupiedCells))
-            {
-                // Find the closest occupied cell to the enemy
-                float minDistance = float.MaxValue;
-                foreach (Vector3Int cell in occupiedCells)
-                {
-                    Vector3 cellWorldPos = BuildingManager.Instance.grid.GetCellCenterWorld(cell);
-                    float distance = Vector2.Distance(transform.position, cellWorldPos);
-                    if (distance < minDistance)
-                    {
-                        minDistance = distance;
-                    }
-                }
-                return minDistance;
-            }
-        }
+        _roamTimer += Time.deltaTime;
+        if (_roamTimer < _currentRoamInterval) return;
+        _roamTimer = 0f;
+        SetNewRoamInterval();
         
-        // Fallback to center distance for non-buildings or if BuildingManager is unavailable
-        return Vector2.Distance(transform.position, target.transform.position);
-    }
-    
-    private void MoveToTarget()
-    {
-        if (_target == null) return;
-        
-        // Use SetNewTarget which automatically finds interaction cells for buildings
-        // Use a small stopping distance since we want to reach the interaction cell exactly
-        if (unitMovement.SetNewTarget(_target.transform.position, unitMovement.waypointTolerance))
+        if (!_lastActionWasMove)
         {
-            currentState = UnitState.Moving;
+            ChooseRoamDestination();
+            _lastActionWasMove = true;
         }
         else
         {
-            currentState = UnitState.Idle;
+            if (Random.value < 0.5f)
+            {
+                if (unitMovement != null)
+                {
+                    unitMovement.StopMovement();
+                }
+                _lastActionWasMove = false;
+            }
+            else
+            {
+                ChooseRoamDestination();
+                _lastActionWasMove = true;
+            }
         }
     }
     
-    private IEnumerator FindTargetCoroutine()
+    private void SetNewRoamInterval()
     {
-        while (true)
+        _currentRoamInterval = Random.Range(minRoamInterval, maxRoamInterval);
+    }
+
+    private void HandleTerritoryEntry()
+    {
+        UnitBase unit = FindClosestAllyInRing(homeRadius, territoryRadius);
+        if (unit == null) return;
+        
+        _unitTarget = unit;
+        _buildingTarget = null;
+        _aiState = AIState.Warning;
+        _warningTimer = 0f;
+        
+        MoveToCurrentTarget();
+    }
+
+    private void HandleWarning()
+    {
+        _warningTimer += Time.deltaTime;
+        
+        if (_unitTarget == null)
         {
-            if (currentState == UnitState.Idle)
+            ReturnHome();
+            return;
+        }
+        
+        float distanceFromSpawn = Vector3.Distance(_spawnPosition, _unitTarget.transform.position);
+        
+        if (distanceFromSpawn > territoryRadius)
+        {
+            ReturnHome();
+            return;
+        }
+        if (distanceFromSpawn <= homeRadius || _warningTimer >= chaseTime)
+        {
+            EnterAttackState();
+            return;
+        }
+        
+        MoveToCurrentTarget();
+    }
+
+    private void HandleAttack()
+    {
+        if (_buildingTarget == null && _unitTarget == null)
+        {
+            SelectAttackTarget();
+        }
+        if (_buildingTarget == null && _unitTarget == null)
+        {
+            return;
+        }
+        
+        Vector3 targetPos = _buildingTarget != null ? _buildingTarget.transform.position : _unitTarget.transform.position;
+        float distanceToTarget = Vector3.Distance(transform.position, targetPos);
+        bool withinRange = distanceToTarget <= attackRange;
+        
+        if (!withinRange)
+        {
+            MoveToCurrentTarget();
+        }
+        else
+        {
+            if (unitMovement != null)
             {
-                if (TargetManager.Instance != null && TargetManager.Instance.AllTargets.Count > 0)
+                unitMovement.StopMovement();
+            }
+            if (_attackCoroutine == null)
+            {
+                _attackCoroutine = StartCoroutine(AttackCoroutine());
+            }
+        }
+    }
+
+    private void ChooseRoamDestination()
+    {
+        if (unitMovement == null) return;
+        
+        Vector3 destination = FindWalkableRoamDestination();
+        if (destination != Vector3.zero)
+        {
+            unitMovement.SetNewTarget(destination, unitMovement.waypointTolerance);
+        }
+    }
+    
+    private Vector3 FindWalkableRoamDestination()
+    {
+        Grid grid = BuildingManager.Instance.grid;
+        Vector3Int spawnCell = grid.WorldToCell(_spawnPosition);
+        
+        int maxAttempts = 50;
+        for (int attempt = 0; attempt < maxAttempts; attempt++)
+        {
+            Vector2 randomDir = Random.insideUnitCircle.normalized;
+            float randomRadius = Random.Range(0f, homeRadius);
+            Vector3 candidatePos = _spawnPosition + new Vector3(randomDir.x, randomDir.y, 0f) * randomRadius;
+            Vector3Int candidateCell = grid.WorldToCell(candidatePos);
+            
+            if (IsCellWalkable(candidateCell))
+            {
+                float distanceFromSpawn = Vector3.Distance(_spawnPosition, candidatePos);
+                if (distanceFromSpawn <= homeRadius)
                 {
-                    var potentialTargets = TargetManager.Instance.AllTargets
-                        .OrderBy(u => Vector2.Distance(transform.position, u.transform.position));
-
-                    Damageable closestTarget = potentialTargets.FirstOrDefault();
-
-                    if (closestTarget != null)
+                    return grid.GetCellCenterWorld(candidateCell);
+                }
+            }
+        }
+        
+        for (int radius = 1; radius <= Mathf.CeilToInt(homeRadius); radius++)
+        {
+            for (int x = -radius; x <= radius; x++)
+            {
+                for (int y = -radius; y <= radius; y++)
+                {
+                    if (Mathf.Abs(x) != radius && Mathf.Abs(y) != radius) continue;
+                    
+                    Vector3Int testCell = spawnCell + new Vector3Int(x, y, 0);
+                    float distanceFromSpawn = Vector3.Distance(_spawnPosition, grid.GetCellCenterWorld(testCell));
+                    
+                    if (distanceFromSpawn <= homeRadius && IsCellWalkable(testCell))
                     {
-                        _target = closestTarget;
-                        MoveToTarget();
+                        return grid.GetCellCenterWorld(testCell);
                     }
                 }
             }
-            yield return _searchWait;
         }
-    }
-
-    private void HandleTargetLoss()
-    {
-        _target = null;
-        if (currentState != UnitState.Idle)
-        {
-            StopAttacking();
-            unitMovement.StopMovement();
-            currentState = UnitState.Idle;
-        }
+        
+        return _spawnPosition;
     }
     
-    private void StartAttacking()
+    private bool IsCellWalkable(Vector3Int cell)
     {
-        currentState = UnitState.Attacking;
+        if (BuildingManager.Instance == null) return false;
         
-        // Snap to the interaction cell center before stopping movement
-        unitMovement.SnapToTargetCellCenter();
-        unitMovement.StopMovement();
+        if (BuildingManager.Instance.IsTerrainCell(cell)) return false;
+        if (BuildingManager.Instance.IsBuildingTile(cell)) return false;
+        if (BuildingManager.Instance.IsResourceTile(cell)) return false;
+        if (BuildingManager.Instance.GetPieceAt(cell) != null) return false;
         
-        // Face the target building
-        if (_target != null)
+        return true;
+    }
+
+    private void MoveToCurrentTarget()
+    {
+        if (unitMovement == null) return;
+        
+        Vector3 targetPos;
+        
+        if (_buildingTarget != null)
         {
-            AdjustSpriteDirectionToTarget(_target.transform);
+            targetPos = _buildingTarget.transform.position;
         }
+        else if (_unitTarget != null)
+        {
+            targetPos = _unitTarget.transform.position;
+        }
+        else
+        {
+            return;
+        }
+        unitMovement.SetNewTarget(targetPos, unitMovement.waypointTolerance);
+    }
+
+    private void EnterAttackState()
+    {
+        if (_aiState == AIState.Attack) return;
+        
+        _aiState = AIState.Attack;
+        SelectAttackTarget();
         
         if (_attackCoroutine == null)
         {
             _attackCoroutine = StartCoroutine(AttackCoroutine());
         }
     }
-    
-    private void AdjustSpriteDirectionToTarget(Transform targetTransform)
-    {
-        if (targetTransform == null || BuildingManager.Instance == null || BuildingManager.Instance.grid == null) return;
-        if (!TryGetComponent<UnitSpriteController>(out var spriteController)) return;
 
-        Vector3Int unitCell = BuildingManager.Instance.grid.WorldToCell(transform.position);
-        Vector3Int targetCell = BuildingManager.Instance.grid.WorldToCell(targetTransform.position);
+    private void ReturnHome()
+    {
+        _aiState = AIState.Idle;
+        _warningTimer = 0f;
+        _buildingTarget = null;
+        _unitTarget = null;
         
-        // For large buildings, find the nearest occupied cell
-        if (BuildingManager.Instance.GetBuildingAt(targetCell, out List<Vector3Int> occupiedCells))
+        if (unitMovement != null)
         {
-            float minDistance = float.MaxValue;
-            foreach (Vector3Int cell in occupiedCells)
-            {
-                float distance = Vector3.Distance(transform.position, BuildingManager.Instance.grid.GetCellCenterWorld(cell));
-                if (distance < minDistance)
-                {
-                    minDistance = distance;
-                    targetCell = cell;
-                }
-            }
+            unitMovement.SetNewTarget(_spawnPosition, unitMovement.waypointTolerance);
         }
-
-        Vector3Int relativePosition = targetCell - unitCell;
-        Vector2 targetDirection = Vector2.zero;
-
-        if (relativePosition.x > 0)
-        {
-            targetDirection = Vector2.right;
-        }
-        else if (relativePosition.x < 0)
-        {
-            targetDirection = Vector2.left;
-        }
-        else if (relativePosition.y > 0)
-        {
-            targetDirection = Vector2.up;
-        }
-        else if (relativePosition.y < 0)
-        {
-            targetDirection = Vector2.down;
-        }
-
-        spriteController.UpdateSpriteDirection(targetDirection);
-    }
-
-    private void StopAttacking()
-    {
         if (_attackCoroutine != null)
         {
             StopCoroutine(_attackCoroutine);
             _attackCoroutine = null;
         }
     }
-    
+
+    private void SelectAttackTarget()
+    {
+        _buildingTarget = FindClosestBuildingInRange(detectionRadius);
+        _unitTarget = null;
+        if (_buildingTarget != null)
+        {
+            return;
+        }
+        _unitTarget = FindClosestAllyInRange(detectionRadius);
+    }
+
+    private Damageable FindClosestBuildingInRange(float range)
+    {
+        if (TargetManager.Instance == null || TargetManager.Instance.AllTargets.Count == 0)
+        {
+            return null;
+        }
+        
+        float bestDistance = float.MaxValue;
+        Damageable bestTarget = null;
+        
+        foreach (Damageable target in TargetManager.Instance.AllTargets)
+        {
+            if (target == null) continue;
+            if (target.GetComponent<UnitBase>() != null) continue;
+            float dist = Vector3.Distance(transform.position, target.transform.position);
+            if (dist <= range && dist < bestDistance)
+            {
+                bestDistance = dist;
+                bestTarget = target;
+            }
+        }
+        return bestTarget;
+    }
+
+    private UnitBase FindClosestAllyInRange(float range)
+    {
+        if (UnitManager.Instance == null || UnitManager.Instance.AllyUnits == null || UnitManager.Instance.AllyUnits.Count == 0)
+        {
+            return null;
+        }
+        
+        float bestDistance = float.MaxValue;
+        UnitBase bestUnit = null;
+        
+        foreach (UnitBase unit in UnitManager.Instance.AllyUnits)
+        {
+            if (unit == null) continue;
+            float dist = Vector3.Distance(transform.position, unit.transform.position);
+            if (dist <= range && dist < bestDistance)
+            {
+                bestDistance = dist;
+                bestUnit = unit;
+            }
+        }
+        return bestUnit;
+    }
+
+    private UnitBase FindClosestAllyInRing(float innerRadius, float outerRadius)
+    {
+        if (UnitManager.Instance == null || UnitManager.Instance.AllyUnits == null || UnitManager.Instance.AllyUnits.Count == 0)
+        {
+            return null;
+        }
+        
+        float bestDistance = float.MaxValue;
+        UnitBase bestUnit = null;
+        
+        foreach (UnitBase unit in UnitManager.Instance.AllyUnits)
+        {
+            if (unit == null) continue;
+            float distFromSpawn = Vector3.Distance(_spawnPosition, unit.transform.position);
+            if (distFromSpawn > innerRadius && distFromSpawn <= outerRadius && distFromSpawn < bestDistance)
+            {
+                bestDistance = distFromSpawn;
+                bestUnit = unit;
+            }
+        }
+        return bestUnit;
+    }
+
+    private bool IsAnyBuildingInZone(float radius)
+    {
+        if (TargetManager.Instance == null || TargetManager.Instance.AllTargets.Count == 0)
+        {
+            return false;
+        }
+        foreach (Damageable target in TargetManager.Instance.AllTargets)
+        {
+            if (target == null) continue;
+            if (target.GetComponent<UnitBase>() != null) continue;
+            float distFromSpawn = Vector3.Distance(_spawnPosition, target.transform.position);
+            
+            if (distFromSpawn <= radius)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private bool IsAnyUnitInZone(float radius)
+    {
+        if (UnitManager.Instance == null || UnitManager.Instance.AllyUnits == null || UnitManager.Instance.AllyUnits.Count == 0)
+        {
+            return false;
+        }
+        foreach (UnitBase unit in UnitManager.Instance.AllyUnits)
+        {
+            if (unit == null) continue;
+            float distFromSpawn = Vector3.Distance(_spawnPosition, unit.transform.position);
+            if (distFromSpawn <= radius)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private IEnumerator AttackCoroutine()
     {
-        while (currentState == UnitState.Attacking && _target != null)
+        WaitForSeconds wait = new WaitForSeconds(1f / attackSpeed);
+        while (_aiState == AIState.Attack)
         {
-            _target.TakeDamage(attackDamage);
-            
-            yield return new WaitForSeconds(1f / attackSpeed);
+            if (_buildingTarget == null && _unitTarget == null)
+            {
+                SelectAttackTarget();
+            }
+            if (_buildingTarget != null)
+            {
+                if (_buildingTarget.CurrentHealth > 0)
+                {
+                    _buildingTarget.TakeDamage(attackDamage);
+                }
+                else
+                {
+                    _buildingTarget = null;
+                }
+            }
+            else if (_unitTarget != null)
+            {
+                _unitTarget.TakeDamage(attackDamage);
+                if (_unitTarget.currentHealth <= 0f)
+                {
+                    _unitTarget = null;
+                }
+            }
+            yield return wait;
         }
         _attackCoroutine = null;
     }
+
+    private void OnDrawGizmosSelected()
+    {
+        Vector3 center = Application.isPlaying ? _spawnPosition : transform.position;
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(center, homeRadius);
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(center, territoryRadius);
+    }
 }
+
+

@@ -35,6 +35,8 @@ public class FogOfWarManager : MonoBehaviour
     
     private static bool suppressVisibilityEvents;
     
+    public bool IsInitialized => _fogInitialized;
+    
     public static void SetSuppressVisibilityEvents(bool suppress)
     {
         suppressVisibilityEvents = suppress;
@@ -46,6 +48,7 @@ public class FogOfWarManager : MonoBehaviour
     
     private bool _isInitializing;
     private bool _fogInitialized;
+    private bool _respectFog = true;
     
     private void Awake()
     {
@@ -146,6 +149,7 @@ public class FogOfWarManager : MonoBehaviour
         _fogInitialized = true;
         
         UpdateVisibility();
+        UpdateAllVisibilityControllers();
     }
     
     private void RegisterAllExistingVisionProviders()
@@ -720,18 +724,52 @@ public class FogOfWarManager : MonoBehaviour
     public bool CanPlaceBuilding(Vector3Int cellPosition)
     {
         FogOfWarState state = GetVisibilityState(cellPosition);
-        return state == FogOfWarState.FullyVisible || state == FogOfWarState.PartlyVisible;
+        return state != FogOfWarState.Invisible;
     }
     
     public bool CanSeeEnemies(Vector3Int cellPosition)
     {
+        if (!_respectFog)
+        {
+            return true;
+        }
         return GetVisibilityState(cellPosition) == FogOfWarState.FullyVisible;
     }
     
     public bool CanSeeResources(Vector3Int cellPosition)
     {
+        if (!_respectFog)
+        {
+            return true;
+        }
         FogOfWarState state = GetVisibilityState(cellPosition);
-        return state == FogOfWarState.FullyVisible || state == FogOfWarState.PartlyVisible;
+        return state != FogOfWarState.Invisible;
+    }
+    
+    public void ToggleFogVisibility()
+    {
+        _respectFog = !_respectFog;
+        
+        if (fogTilemap != null)
+        {
+            fogTilemap.gameObject.SetActive(_respectFog);
+        }
+        
+        UpdateAllVisibilityControllers();
+    }
+    
+    private void UpdateAllVisibilityControllers()
+    {
+        if (grid == null) return;
+        
+        VisibilityController[] controllers = FindObjectsByType<VisibilityController>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (var controller in controllers)
+        {
+            if (controller != null)
+            {
+                controller.ForceUpdateVisibility();
+            }
+        }
     }
     
     public void RefreshFogOfWar()

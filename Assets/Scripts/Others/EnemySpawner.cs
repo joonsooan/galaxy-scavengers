@@ -1,83 +1,93 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class EnemySpawner : MonoBehaviour
 {
-    [Header("Spawning Settings")]
     [SerializeField] private GameObject enemyPrefab;
-    [SerializeField] private float initialSpawnDelay = 60f;
-    [SerializeField] private float spawnInterval = 120f;
-    [SerializeField] private int baseSpawnCount = 1;
-    [SerializeField] private int spawnCountIncreasePerWave = 1;
+    [SerializeField] private int enemiesPerHole = 3;
+    [SerializeField] private float spawnRadiusOffset = 1f;
 
-    private int _currentWave = 0;
-
-    private void Start()
+    public void SpawnEnemies()
     {
-        StartCoroutine(SpawnCoroutine());
-    }
-
-    private IEnumerator SpawnCoroutine()
-    {
-        yield return new WaitForSeconds(initialSpawnDelay);
-
-        while (true)
+        if (enemyPrefab == null)
         {
-            _currentWave++;
-            SpawnWave();
-            yield return new WaitForSeconds(spawnInterval);
+            return;
         }
-    }
-
-    private void SpawnWave()
-    {
-        int spawnCount = baseSpawnCount + (_currentWave - 1) * spawnCountIncreasePerWave;
-        Debug.Log($"Wave {_currentWave}: {spawnCount}마리의 적을 스폰합니다.");
-
-        for (int i = 0; i < spawnCount; i++)
+        if (GameManager.Instance == null || GameManager.Instance.mapGenerator == null)
         {
-            Vector3 spawnPosition = GetRandomEdgeTilePosition();
-            Instantiate(enemyPrefab, spawnPosition, Quaternion.identity, BuildingManager.Instance.grid.transform);
+            return;
         }
-    }
-
-    private Vector3 GetRandomEdgeTilePosition()
-    {
-        var mapGenerator = GameManager.Instance.mapGenerator;
-        Vector2Int mapSize = mapGenerator.MapSize;
-        
-        // Choose a random edge (left, right, top, bottom)
-        Vector2Int[] directions = { Vector2Int.left, Vector2Int.right, Vector2Int.up, Vector2Int.down };
-        Vector2Int chosenDirection = directions[Random.Range(0, directions.Length)];
-
-        float mapCenterXOffset = mapSize.x / 2f;
-        float mapCenterYOffset = mapSize.y / 2f;
-
-        float spawnX = 0, spawnY = 0;
-
-        if (chosenDirection == Vector2Int.right) // Right edge
+        if (BuildingManager.Instance == null || BuildingManager.Instance.grid == null)
         {
-            spawnX = mapSize.x - 1 - mapCenterXOffset;
-            spawnY = Random.Range(-mapCenterYOffset, mapSize.y - 1 - mapCenterYOffset);
-        }
-        else if (chosenDirection == Vector2Int.left) // Left edge
-        {
-            spawnX = -mapCenterXOffset;
-            spawnY = Random.Range(-mapCenterYOffset, mapSize.y - 1 - mapCenterYOffset);
-        }
-        else if (chosenDirection == Vector2Int.up) // Top edge
-        {
-            spawnX = Random.Range(-mapCenterXOffset, mapSize.x - 1 - mapCenterXOffset);
-            spawnY = mapSize.y - 1 - mapCenterYOffset;
-        }
-        else if (chosenDirection == Vector2Int.down) // Bottom edge
-        {
-            spawnX = Random.Range(-mapCenterXOffset, mapSize.x - 1 - mapCenterXOffset);
-            spawnY = -mapCenterYOffset;
+            return;
         }
         
-        return mapGenerator.Tilemap.transform.TransformPoint(new Vector3(spawnX + 0.5f, spawnY + 0.5f, 0));
+        MapGenerator mapGenerator = GameManager.Instance.mapGenerator;
+        IReadOnlyList<Vector2Int> holes = mapGenerator.EnemySpawnHolePositions;
+        if (holes == null || holes.Count == 0)
+        {
+            return;
+        }
+        
+        Grid grid = BuildingManager.Instance.grid;
+        
+        for (int i = 0; i < holes.Count; i++)
+        {
+            Vector3 center = mapGenerator.GetEnemySpawnHoleWorldPosition(holes[i]);
+            for (int j = 0; j < enemiesPerHole; j++)
+            {
+                Vector3 spawnPos = FindValidSpawnPosition(center, spawnRadiusOffset, grid);
+                if (spawnPos != Vector3.zero)
+                {
+                    GameObject enemy = ObjectPooler.Instance.SpawnFromPool("Enemy_0", spawnPos, Quaternion.identity);
+                    if (enemy != null)
+                    {
+                        Unit_Enemy_0 enemyScript = enemy.GetComponent<Unit_Enemy_0>();
+                        if (enemyScript != null)
+                        {
+                            enemyScript.SetTerritoryCenter(center);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    private Vector3 FindValidSpawnPosition(Vector3 center, float maxRadius, Grid grid)
+    {
+        int maxAttempts = 50;
+        
+        for (int attempt = 0; attempt < maxAttempts; attempt++)
+        {
+            Vector2 offset = Random.insideUnitCircle * maxRadius;
+            Vector3 candidatePos = new Vector3(center.x + offset.x, center.y + offset.y, center.z);
+            Vector3Int cell = grid.WorldToCell(candidatePos);
+            
+            if (!BuildingManager.Instance.IsResourceTile(cell))
+            {
+                return grid.GetCellCenterWorld(cell);
+            }
+        }
+        
+        for (int radius = 1; radius <= Mathf.CeilToInt(maxRadius); radius++)
+        {
+            for (int x = -radius; x <= radius; x++)
+            {
+                for (int y = -radius; y <= radius; y++)
+                {
+                    if (Mathf.Abs(x) != radius && Mathf.Abs(y) != radius) continue;
+                    
+                    Vector3Int testCell = grid.WorldToCell(center) + new Vector3Int(x, y, 0);
+                    float distance = Vector3.Distance(center, grid.GetCellCenterWorld(testCell));
+                    
+                    if (distance <= maxRadius && !BuildingManager.Instance.IsResourceTile(testCell))
+                    {
+                        return grid.GetCellCenterWorld(testCell);
+                    }
+                }
+            }
+        }
+        
+        return center;
     }
 }

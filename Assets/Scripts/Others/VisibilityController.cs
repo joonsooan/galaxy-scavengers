@@ -4,8 +4,8 @@ public class VisibilityController : MonoBehaviour
 {
     [Header("Visibility Settings")]
     [SerializeField] private VisibilityType visibilityType = VisibilityType.Enemy;
-    
-    public enum VisibilityType
+
+    private enum VisibilityType
     {
         Enemy,
         Resource,
@@ -16,8 +16,8 @@ public class VisibilityController : MonoBehaviour
     private SpriteRenderer[] _spriteRenderers;
     private Canvas[] _canvases;
     private bool _wasVisible = true;
-    private bool _isSubscribed = false;
-    private Vector3Int _lastRegisteredCell = new Vector3Int(int.MaxValue, int.MaxValue, int.MaxValue);
+    private bool _isSubscribed;
+    private Vector3Int _lastRegisteredCell = new (int.MaxValue, int.MaxValue, int.MaxValue);
     
     private void Awake()
     {
@@ -27,17 +27,14 @@ public class VisibilityController : MonoBehaviour
     
     private void OnEnable()
     {
-        // For resources, defer event subscription during spawning to prevent GC allocations
         if (visibilityType == VisibilityType.Resource && MapObjectSpawner.IsSpawningResources)
         {
-            // Don't subscribe yet - will be done in batch after spawning
             _isSubscribed = false;
-            // Set initial visibility without checking fog (will be updated after spawning)
-            SetVisible(true);
+            _wasVisible = false;
+            SetVisible(false); 
             return;
         }
         
-        // For non-resources or when not spawning, subscribe immediately
         SubscribeToEvent();
         RegisterWithFogOfWar();
         UpdateVisibility();
@@ -51,7 +48,6 @@ public class VisibilityController : MonoBehaviour
     
     private void OnDestroy()
     {
-        // Ensure we unsubscribe when object is destroyed
         UnregisterFromFogOfWar();
         UnsubscribeFromEvent();
     }
@@ -66,21 +62,8 @@ public class VisibilityController : MonoBehaviour
     
     private void UnsubscribeFromEvent()
     {
-        if (_isSubscribed)
-        {
-            try
-            {
-            }
-            catch (System.Exception)
-            {
-                // Ignore errors during unsubscribe (object might be destroyed)
-            }
-            finally
-            {
-                _isSubscribed = false;
-            }
-        }
-    }
+        if (_isSubscribed) _isSubscribed = false;
+     }
     
     public void SubscribeIfNeeded()
     {
@@ -99,13 +82,11 @@ public class VisibilityController : MonoBehaviour
         Vector3Int currentCell = GetCurrentCell();
         if (currentCell != _lastRegisteredCell)
         {
-            // Unregister from old position if we were registered
             if (_lastRegisteredCell.x != int.MaxValue)
             {
                 FogOfWarManager.Instance.UnregisterVisibilityController(this, _lastRegisteredCell);
             }
             
-            // Register at new position
             FogOfWarManager.Instance.RegisterVisibilityController(this, currentCell);
             _lastRegisteredCell = currentCell;
         }
@@ -122,77 +103,35 @@ public class VisibilityController : MonoBehaviour
         }
     }
     
-    // Called directly by FogOfWarManager when this specific tile's visibility changes
-    // This is much more efficient than the global event system
     public void OnVisibilityChangedDirect(Vector3Int cell, FogOfWarState state)
     {
-        // Check if this object is still valid before processing
         if (this == null || gameObject == null)
         {
             return;
         }
         
-        // Skip visibility updates during resource spawning to prevent performance issues
-        if (visibilityType == VisibilityType.Resource && MapObjectSpawner.IsSpawningResources)
-        {
-            return;
-        }
-        
-        // Since we're registered at this specific tile, we know this notification is for us
         UpdateVisibility();
     }
-    
-    // Legacy event handler for backward compatibility (should rarely be called now)
-    private void OnVisibilityChanged(Vector3Int cell, FogOfWarState state)
-    {
-        // Check if this object is still valid before processing
-        if (this == null || gameObject == null)
-        {
-            // Object was destroyed, unsubscribe immediately
-            UnsubscribeFromEvent();
-            return;
-        }
-        
-        // Skip visibility updates during resource spawning to prevent performance issues
-        if (visibilityType == VisibilityType.Resource && MapObjectSpawner.IsSpawningResources)
-        {
-            return;
-        }
-        
-        if (FogOfWarManager.Instance != null)
-        {
-            Vector3Int ourCell = GetCurrentCell();
-            if (ourCell == cell)
-            {
-                UpdateVisibility();
-            }
-        }
-    }
-    
+
     private Vector3Int GetCurrentCell()
     {
-        // Check if object is destroyed using Unity's pattern
         if (this == null || gameObject == null)
         {
             return Vector3Int.zero;
         }
         
-        // Check transform using Unity's destroyed object pattern
         if (transform == null)
         {
             return Vector3Int.zero;
         }
         
-        // Check BuildingManager and grid
         if (BuildingManager.Instance == null)
         {
             return Vector3Int.zero;
         }
         
-        // Check if BuildingManager.Instance is actually destroyed (Unity's pattern)
         try
         {
-            // Access a property to check if object is destroyed
             if (BuildingManager.Instance.grid == null)
             {
                 return Vector3Int.zero;
@@ -202,29 +141,26 @@ public class VisibilityController : MonoBehaviour
         }
         catch (System.Exception)
         {
-            // Handle missing reference gracefully - object was destroyed
             return Vector3Int.zero;
         }
     }
     
     private void UpdateVisibility()
     {
-        // Skip if object is being destroyed
         if (this == null || gameObject == null)
         {
             return;
         }
         
-        // Update registration if position changed (for moving objects)
         Vector3Int currentCell = GetCurrentCell();
         if (currentCell != _lastRegisteredCell)
         {
             RegisterWithFogOfWar();
         }
         
-        if (FogOfWarManager.Instance == null)
+        if (FogOfWarManager.Instance == null || !FogOfWarManager.Instance.IsInitialized)
         {
-            SetVisible(true);
+            SetVisible(false);
             return;
         }
         
@@ -243,12 +179,7 @@ public class VisibilityController : MonoBehaviour
                     break;
                     
                 case VisibilityType.Resource:
-                    // Check if resources should always be visible (override fog)
-                    if (MapObjectSpawner.ResourcesAlwaysVisible)
-                    {
-                        shouldBeVisible = true;
-                    }
-                    else if (FogOfWarManager.Instance != null)
+                    if (FogOfWarManager.Instance != null)
                     {
                         shouldBeVisible = FogOfWarManager.Instance.CanSeeResources(cell);
                     }
@@ -263,7 +194,6 @@ public class VisibilityController : MonoBehaviour
             if (_wasVisible != shouldBeVisible)
             {
                 SetVisible(shouldBeVisible);
-                _wasVisible = shouldBeVisible;
             }
         }
         catch (System.Exception)
@@ -282,6 +212,8 @@ public class VisibilityController : MonoBehaviour
     
     private void SetVisible(bool visible)
     {
+        _wasVisible = visible;
+        
         foreach (var sr in _spriteRenderers)
         {
             if (sr != null)

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Unit_Drone
   m_EditorClassIdentifier: 
   unitName: Drone
-  unitIcon: {fileID: 5933919724943432134, guid: 2e9dd00a9d898794d9325559858bad30, type: 3}
+  unitIcon: {fileID: -3046166157356519439, guid: ccc7ae344c43fa840a83a453f8257ff6, type: 3}
   unitPrefab: {fileID: 6649466925040614564, guid: ad58a73b9aa5be94a8091fe8e942c31c, type: 3}
   productionTime: 3
   productionCosts:

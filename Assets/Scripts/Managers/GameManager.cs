@@ -6,8 +6,6 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    [Header("References")]
-    public Slider slider;
     public MapGenerator mapGenerator;
     public UIManager uiManager;
     public CardDragger cardDragger;
@@ -63,6 +61,14 @@ public class GameManager : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.Alpha2)) Time.timeScale = 2;
         else if (Input.GetKeyDown(KeyCode.Alpha3)) Time.timeScale = 3;
         else if (Input.GetKeyDown(KeyCode.Alpha4)) Time.timeScale = 4;
+
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            if (FogOfWarManager.Instance != null)
+            {
+                FogOfWarManager.Instance.ToggleFogVisibility();
+            }
+        }
 
         if (Input.GetKeyDown(KeyCode.Escape)) {
             Application.Quit();
@@ -135,7 +141,7 @@ public class GameManager : MonoBehaviour
 
     private void InitializeGameScene()
     {
-        slider = FindFirstObjectByType<Slider>();
+        FindFirstObjectByType<Slider>();
         mapGenerator = FindFirstObjectByType<MapGenerator>();
         uiManager = FindFirstObjectByType<UIManager>();
         cardDragger = FindFirstObjectByType<CardDragger>();
@@ -155,10 +161,10 @@ public class GameManager : MonoBehaviour
     {
         yield return null;
 
-        InitializeSpawnersAndUnits();
+        yield return StartCoroutine(InitializeSpawnersAndUnits());
     }
 
-    private void InitializeSpawnersAndUnits()
+    private IEnumerator InitializeSpawnersAndUnits()
     {
         foreach (BuildingSpawner spawner in FindObjectsByType<BuildingSpawner>(FindObjectsSortMode.None)) {
             spawner.SpawnBuildings();
@@ -177,6 +183,19 @@ public class GameManager : MonoBehaviour
                     resourceSpawner.ResourceTilemap.gameObject.SetActive(false);
                 }
             }
+        }
+
+        yield return null;
+        yield return null;
+        
+        foreach (EnemySpawner enemySpawner in FindObjectsByType<EnemySpawner>(FindObjectsSortMode.None))
+        {
+            enemySpawner.SpawnEnemies();
+        }
+        
+        if (mapGenerator != null)
+        {
+            mapGenerator.DrawEnemyTerritoryTiles();
         }
 
         foreach (Unit_Miner unit in FindObjectsByType<Unit_Miner>(FindObjectsSortMode.None)) {

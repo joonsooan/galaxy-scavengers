@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 2a2de143701d1d04fa5f04febe72e086
+guid: 90eb553e607cfb6469b021492f4f21ac
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 978782236917189718
-    second: SIDCORE_4_0
+      213: -6361802009885916369
+    second: unitPlus_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -96,17 +96,30 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: SIDCORE_4_0
+      name: unitPlus_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 48
-        height: 48
+        width: 16
+        height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 65c49e73245559d00800000000000000
-      internalID: 978782236917189718
+      spriteID: f23426d37c656b7a0800000000000000
+      internalID: -6361802009885916369
       vertices: []
       indices: 
       edges: []
@@ -135,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      SIDCORE_4_0: 978782236917189718
+      unitPlus_0: -6361802009885916369
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

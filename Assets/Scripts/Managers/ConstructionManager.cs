@@ -177,6 +177,7 @@ public class ConstructionManager : MonoBehaviour
             if (site.buildingData != null && BuildingManager.Instance != null)
             {
                 BuildingManager.Instance.CreateBuildingFromConstruction(site.cellPosition, site.buildingData);
+                site.OnDestroy();
             }
         }
         else

@@ -1,16 +1,10 @@
 fileFormatVersion: 2
-guid: 135e80e3fb0b8044a8dfc67e688cb32f
+guid: 1a2d92749f4265f44b1854fdd5e58b76
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2447318104963349794
-    second: 1216_0
-  - first:
-      213: 4429987260442136131
-    second: 1216_1
-  - first:
-      213: 2544712925334621364
-    second: 1216_2
+      213: -2077689376795794299
+    second: AutoTurret_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -102,71 +96,40 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: 1216_0
+      name: AutoTurret_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 16
-        width: 16
+        y: 0
+        width: 32
         height: 32
       alignment: 9
-      pivot: {x: 0.5, y: 0.25}
+      pivot: {x: 0.25, y: 0.25}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ed207456621690ed0800000000000000
-      internalID: -2447318104963349794
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: 1216_1
-      rect:
-        serializedVersion: 2
-        x: 17
-        y: 0
-        width: 48
-        height: 48
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 34ec82a31f97a7d30800000000000000
-      internalID: 4429987260442136131
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: 1216_2
-      rect:
-        serializedVersion: 2
-        x: 66
-        y: 0
-        width: 16
-        height: 48
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4bc4ae15ce2a05320800000000000000
-      internalID: 2544712925334621364
+      spriteID: 584eb7615809a23e0800000000000000
+      internalID: -2077689376795794299
       vertices: []
       indices: 
       edges: []
@@ -175,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 570c664ba48f2c54d8c157600c5bfa1a
+    spriteID: c63cf075443914a4ba19ca8bdc555ef9
     internalID: 0
     vertices: []
     indices: 
@@ -185,9 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      1216_0: -2447318104963349794
-      1216_1: 4429987260442136131
-      1216_2: 2544712925334621364
+      AutoTurret_0: -2077689376795794299
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
