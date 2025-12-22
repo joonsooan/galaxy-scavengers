@@ -62,6 +62,15 @@ public class GameManager : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.Alpha3)) Time.timeScale = 3;
         else if (Input.GetKeyDown(KeyCode.Alpha4)) Time.timeScale = 4;
 
+        if (IsDragging() && Input.GetMouseButtonDown(1))
+        {
+            if (BuildingInfoPanel.Instance != null)
+            {
+                BuildingInfoPanel.Instance.TogglePinnedVisibility();
+            }
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.F))
         {
             if (FogOfWarManager.Instance != null)
@@ -107,7 +116,7 @@ public class GameManager : MonoBehaviour
         }
         _activeCardData = null;
         onEndDrag?.Invoke();
-        uiManager?.UnpinAndHideCardPanel();
+        // uiManager?.UnpinAndHideCardPanel();
 
         if (uiManager != null) {
             uiManager.UnpinAndHideAllPanels();

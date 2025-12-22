@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 public class UIManager : MonoBehaviour
 {
     [Header("Card Info Panel")]
-    [SerializeField] private GameObject cardInfoPanel;
+    [SerializeField] private GameObject buildingInfoPanel;
     [SerializeField] private TMP_Text cardNameText;
     [SerializeField] private TMP_Text cardDescriptionText;
     [SerializeField] private GameObject cardResourcePanel;
@@ -51,7 +51,7 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        if (cardInfoPanel != null) cardInfoPanel.SetActive(false);
+        if (buildingInfoPanel != null) buildingInfoPanel.SetActive(false);
         if (recipeInfoPanel != null) recipeInfoPanel.SetActive(false);
         if (processorInfoPanel != null) processorInfoPanel.SetActive(false);
         if (droneHubInfoPanel != null) droneHubInfoPanel.SetActive(false);
@@ -135,9 +135,9 @@ public class UIManager : MonoBehaviour
 
     private void HideMainStructureInventory()
     {
-        MainStructure mainStructure = UnityEngine.Object.FindFirstObjectByType<MainStructure>();
+        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
         InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
-        GameObject inventoryPanel = inventorySystem.GetInventoryPanel();
+        inventorySystem.GetInventoryPanel();
         inventorySystem.ToggleInventory();
     }
 
@@ -151,8 +151,8 @@ public class UIManager : MonoBehaviour
     public void UnpinAndHideAllPanels()
     {
         _pinnedBuildingPieceData = null;
-        if (cardInfoPanel != null) {
-            cardInfoPanel.SetActive(false);
+        if (buildingInfoPanel != null) {
+            buildingInfoPanel.SetActive(false);
         }
 
         _pinnedRecipeData = null;
@@ -176,7 +176,7 @@ public class UIManager : MonoBehaviour
     public void DisplayCardInfo(BuildingPieceData data)
     {
         if (data == null) return;
-        cardInfoPanel.SetActive(true);
+        buildingInfoPanel.SetActive(true);
         cardNameText.text = data.displayName;
         cardDescriptionText.text = data.description;
 
@@ -190,7 +190,7 @@ public class UIManager : MonoBehaviour
     public void HideCardInfo()
     {
         if (_pinnedBuildingPieceData == null) {
-            cardInfoPanel.SetActive(false);
+            buildingInfoPanel.SetActive(false);
         }
         else {
             DisplayCardInfo(_pinnedBuildingPieceData);
@@ -211,8 +211,8 @@ public class UIManager : MonoBehaviour
     public void UnpinAndHideCardPanel()
     {
         _pinnedBuildingPieceData = null;
-        if (cardInfoPanel != null) {
-            cardInfoPanel.SetActive(false);
+        if (buildingInfoPanel != null) {
+            buildingInfoPanel.SetActive(false);
         }
     }
 

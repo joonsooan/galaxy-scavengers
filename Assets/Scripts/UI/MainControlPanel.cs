@@ -7,8 +7,9 @@ public class MainControlPanel : MonoBehaviour
     [SerializeField] private Button baseBuildingBtn;
     [SerializeField] private Button processorBtn;
     [SerializeField] private Button resourceStatBtn;
-    
+
     [Header("UI Panels")]
+    [SerializeField] private GameObject buildingInfoPanel;
     [SerializeField] private GameObject baseBuildingPanel;
     [SerializeField] private GameObject processorPanel;
     [SerializeField] private GameObject resourceStatPanel;
@@ -39,29 +40,26 @@ public class MainControlPanel : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(1))
         {
-            // First, check if we're dragging a building - if so, end the drag first
-            // The UI will be hidden after the drag ends
             if (GameManager.Instance != null && GameManager.Instance.IsDragging()) {
-                // Don't hide UI yet - let the drag end first
                 return;
             }
-            
-            // Only hide UI if we're not dragging
             HideAllPanels();
         }
     }
-    
-    public void OnBaseBuildingBtnClicked()
+
+    private void OnBaseBuildingBtnClicked()
     {
+        buildingInfoPanel.SetActive(true);
         ShowPanel(baseBuildingPanel);
     }
-    
-    public void OnProcessorBtnClicked()
+
+    private void OnProcessorBtnClicked()
     {
+        buildingInfoPanel.SetActive(true);
         ShowPanel(processorPanel);
     }
-    
-    public void OnResourceStatBtnClicked()
+
+    private void OnResourceStatBtnClicked()
     {
         ShowPanel(resourceStatPanel);
     }
@@ -104,6 +102,7 @@ public class MainControlPanel : MonoBehaviour
             resourceStatPanel.SetActive(false);
         }
         
+        // buildingInfoPanel.SetActive(false);
         _currentlyActivePanel = null;
     }
     

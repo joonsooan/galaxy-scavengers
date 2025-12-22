@@ -24,10 +24,6 @@ public class BuildingButton : MonoBehaviour
         {
             _button.onClick.AddListener(OnButtonClicked);
         }
-        else
-        {
-            Debug.LogWarning($"[BuildingButton] No Button component found on {gameObject.name}");
-        }
 
         InitializeBtn();
     }
@@ -40,22 +36,13 @@ public class BuildingButton : MonoBehaviour
 
     private void OnButtonClicked()
     {
-        if (buildingData == null)
-        {
-            Debug.LogWarning($"[BuildingButton] No ComboCardData assigned to button on {gameObject.name}");
-            return;
-        }
-        
-        if (GameManager.Instance == null)
-        {
-            Debug.LogWarning("[BuildingButton] GameManager.Instance is null");
-            return;
-        }
-        
-        // Start the building construction process for combo buildings
         GameManager.Instance.StartDrag(buildingData);
+
+        if (BuildingInfoPanel.Instance != null)
+        {
+            BuildingInfoPanel.Instance.FixInfo(buildingData);
+        }
         
-        // Optionally close the panel
         if (closePanelOnClick)
         {
             ClosePanel();
@@ -64,19 +51,12 @@ public class BuildingButton : MonoBehaviour
     
     private void ClosePanel()
     {
-        // Try to find MainControlPanel if not assigned
-        if (controlPanel == null)
-        {
-            controlPanel = FindObjectsByType<MainControlPanel>(FindObjectsSortMode.None).FirstOrDefault();
-        }
-        
         if (controlPanel != null)
         {
             controlPanel.HideAllPanels();
         }
         else
         {
-            // Fallback: hide the parent panel GameObject
             Transform panelTransform = transform.parent;
             while (panelTransform != null)
             {
@@ -88,11 +68,6 @@ public class BuildingButton : MonoBehaviour
                 panelTransform = panelTransform.parent;
             }
         }
-    }
-    
-    public void SetComboCardData(BuildingData data)
-    {
-        buildingData = data;
     }
     
     public BuildingData GetComboCardData()

@@ -101,7 +101,7 @@ public class CardDragger : MonoBehaviour
             Destroy(_ghostBuildingInstance);
         }
 
-        GameManager.Instance.uiManager?.UnpinAndHideCardPanel();
+        // GameManager.Instance.uiManager?.UnpinAndHideCardPanel();
 
         _isDragging = false;
         _activeBuildingData = null;
