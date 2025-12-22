@@ -95,7 +95,7 @@ public class BeaconManager : MonoBehaviour
             return false;
         }
         
-        if (BuildingManager.Instance.GetBuildingAt(cell, out List<Vector3Int> occupiedCells))
+        if (BuildingManager.Instance.GetBuildingAt(cell, out _))
         {
             return false;
         }
@@ -268,35 +268,17 @@ public class BeaconManager : MonoBehaviour
         {
             if (beacon != null && beacon.AssignedUnit == null)
             {
-                bool isInWaypointGroup = false;
                 foreach (var group in _waypointGroups)
                 {
-                    if (group.Waypoints.Contains(beacon))
+                    if (group.Waypoints.Contains(beacon) && group.Waypoints[0] == beacon)
                     {
-                        isInWaypointGroup = true;
-                        break;
+                        return beacon;
                     }
                 }
-                
-                if (!isInWaypointGroup)
-                {
-                    return beacon;
-                }
+                return beacon;
             }
         }
         return null;
-    }
-    
-    public void AssignScoutToAvailableBeacon(Unit_Scout scout)
-    {
-        if (scout == null) return;
-        
-        Beacon availableBeacon = FindAvailableBeacon();
-        if (availableBeacon != null)
-        {
-            scout.AssignToBeacon(availableBeacon);
-            availableBeacon.AssignUnit(scout);
-        }
     }
 }
 
