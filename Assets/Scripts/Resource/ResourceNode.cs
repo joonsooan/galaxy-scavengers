@@ -30,6 +30,11 @@ public class ResourceNode : MonoBehaviour
     
     private void Start()
     {
+        if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null)
+        {
+            cellPosition = BuildingManager.Instance.grid.WorldToCell(transform.position);
+        }
+        
         if (ResourceManager.Instance != null)
         {
             ResourceManager.Instance.AddResourceNode(this);
@@ -40,11 +45,6 @@ public class ResourceNode : MonoBehaviour
                 amountToMine = stats.amountToMine;
                 timeToMinePerUnit = stats.timeToMinePerUnit;
             }
-        }
-        
-        if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null)
-        {
-            cellPosition = BuildingManager.Instance.grid.WorldToCell(transform.position);
         }
     }
     

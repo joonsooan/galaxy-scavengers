@@ -15,13 +15,13 @@ public class BuildingManager : MonoBehaviour
 
     private readonly Dictionary<Vector3Int, BuildingStructure> _buildingStructuresByAnchor = new ();
     private readonly Dictionary<Vector3Int, BuildingStructure> _cellToStructureMap = new ();
-    private readonly Dictionary<BuildingPieceType, TileBase> _gadgetTypeToTileCache = new ();
-    private readonly HashSet<Vector3Int> _mainStructureCells = new ();
+    private readonly Dictionary<BuildingPieceType, TileBase> _buildingPieceTypeToTileCache = new ();
     private readonly Dictionary<Vector3Int, BuildingPiece> _placedPieces = new ();
+    private readonly HashSet<Vector3Int> _mainStructureCells = new ();
     private readonly HashSet<Vector3Int> _resourceCellCache = new ();
 
-    private readonly List<Processor> _processors = new ();
     private readonly HashSet<Vector3Int> _temporaryTiles = new ();
+    private readonly List<Processor> _processors = new ();
 
     private MapGenerator _cachedMapGenerator;
 
@@ -42,11 +42,15 @@ public class BuildingManager : MonoBehaviour
         }
 
         LoadAllBuildings();
-        CacheAllGadgetTiles();
+        CacheAllBuildingPieces();
         CacheMapGenerator();
+    }
+
+    private void Start()
+    {
         InitializeResourceCache();
     }
-    
+
     private void InitializeResourceCache()
     {
         MapObjectSpawner.OnAllObjectsSpawned += RegisterExistingBuildings;
@@ -69,6 +73,10 @@ public class BuildingManager : MonoBehaviour
             {
                 if (node != null)
                 {
+                    if (node.cellPosition == Vector3Int.zero && grid != null)
+                    {
+                        node.cellPosition = grid.WorldToCell(node.transform.position);
+                    }
                     _resourceCellCache.Add(node.cellPosition);
                 }
             }
@@ -79,6 +87,10 @@ public class BuildingManager : MonoBehaviour
     {
         if (node != null)
         {
+            if (node.cellPosition == Vector3Int.zero && grid != null)
+            {
+                node.cellPosition = grid.WorldToCell(node.transform.position);
+            }
             _resourceCellCache.Add(node.cellPosition);
         }
     }
@@ -206,14 +218,14 @@ public class BuildingManager : MonoBehaviour
             Resources.LoadAll<BuildingData>("Buildings"));
     }
 
-    private void CacheAllGadgetTiles()
+    private void CacheAllBuildingPieces()
     {
         BuildingPieceData[] allData = Resources.LoadAll<BuildingPieceData>("Building Pieces");
 
         foreach (BuildingPieceData data in allData) {
             if (data.buildingPieceType != BuildingPieceType.None && data.buildingPieceTile != null) {
-                if (!_gadgetTypeToTileCache.ContainsKey(data.buildingPieceType)) {
-                    _gadgetTypeToTileCache[data.buildingPieceType] = data.buildingPieceTile;
+                if (!_buildingPieceTypeToTileCache.ContainsKey(data.buildingPieceType)) {
+                    _buildingPieceTypeToTileCache[data.buildingPieceType] = data.buildingPieceTile;
                 }
             }
         }
@@ -480,7 +492,7 @@ public class BuildingManager : MonoBehaviour
             Vector3Int targetPos = originPos + piece.relativePosition;
             TileBase targetTile = buildingTilemap.GetTile(targetPos);
 
-            if (!_gadgetTypeToTileCache.TryGetValue(piece.buildingPieceType, out TileBase requiredTile) ||
+            if (!_buildingPieceTypeToTileCache.TryGetValue(piece.buildingPieceType, out TileBase requiredTile) ||
                 targetTile != requiredTile) {
                 return false;
             }
@@ -731,7 +743,7 @@ public class BuildingManager : MonoBehaviour
         RegisterBuildingStructure(structure);
 
         if (buildingPiece.buildingPieceType != BuildingPieceType.None &&
-            _gadgetTypeToTileCache.TryGetValue(buildingPiece.buildingPieceType, out TileBase tile)) {
+            _buildingPieceTypeToTileCache.TryGetValue(buildingPiece.buildingPieceType, out TileBase tile)) {
             if (buildingTilemap != null && !buildingTilemap.HasTile(cellPosition)) {
                 buildingTilemap.SetTile(cellPosition, tile);
                 OnTilemapChanged?.Invoke(cellPosition);

@@ -324,7 +324,8 @@ public class UnitMovement : MonoBehaviour
             return false;
         }
         
-        if (BuildingManager.Instance.IsMainStructureCell(cell) || BuildingManager.Instance.GetBuildingAt(cell, out _))
+        if (BuildingManager.Instance.IsMainStructureCell(cell) || 
+            BuildingManager.Instance.GetBuildingAt(cell, out _))
         {
             return false;
         }
