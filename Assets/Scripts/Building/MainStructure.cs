@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class MainStructure : Damageable, IStorage, IClickable
@@ -223,5 +224,36 @@ public class MainStructure : Damageable, IStorage, IClickable
         }
 
         _isProducing = false;
+    }
+
+    public Dictionary<ResourceType, int> GetStoredResources()
+    {
+        return _currentResources;
+    }
+
+    private void ShowStoredResources()
+    {
+        if (GameManager.Instance.uiManager != null)
+        {
+            GameManager.Instance.uiManager.DisplayStorageInfo(this);
+        }
+    }
+
+    private void HideStoredResources()
+    {
+        if (GameManager.Instance.uiManager != null)
+        {
+            GameManager.Instance.uiManager.HideStorageInfo();
+        }
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        ShowStoredResources();
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        HideStoredResources();
     }
 }

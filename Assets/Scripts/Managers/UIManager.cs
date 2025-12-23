@@ -1,6 +1,7 @@
 ﻿using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
 public class UIManager : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TMP_Text buildingDescText;
     [SerializeField] private GameObject buildingResourcePanel;
     [SerializeField] private GameObject resourceInfoCellPrefab;
+    [SerializeField] private GameObject resourceInfoCellX2Prefab;
 
     [Header("Recipe Info Panel")]
     [SerializeField] private GameObject recipeInfoPanel;
@@ -20,6 +22,11 @@ public class UIManager : MonoBehaviour
 
     [Header("Drone Hub Info Panel")]
     [SerializeField] private GameObject droneHubInfoPanel;
+    
+    [Header("Storage Info Panel")]
+    [SerializeField] private GameObject storageInfoPanel;
+    [SerializeField] private GameObject storageResourceListParent;
+    [SerializeField] private Vector2 storageUIPanelOffset = new (100f, 0f);
 
     [Header("Tips Reference")]
     [SerializeField] private GameObject tipPanel;
@@ -53,6 +60,7 @@ public class UIManager : MonoBehaviour
         if (recipeInfoPanel != null) recipeInfoPanel.SetActive(false);
         if (processorInfoPanel != null) processorInfoPanel.SetActive(false);
         if (droneHubInfoPanel != null) droneHubInfoPanel.SetActive(false);
+        if (storageInfoPanel != null ) storageInfoPanel.SetActive(false);
     }
 
     private void Update()
@@ -163,6 +171,11 @@ public class UIManager : MonoBehaviour
         _pinnedDroneHubData = null;
         if (droneHubInfoPanel != null) {
             droneHubInfoPanel.SetActive(false);
+        }
+        
+        if (storageInfoPanel != null)
+        {
+            storageInfoPanel.SetActive(false);
         }
 
         HideCurrentIClickableUI();
@@ -310,6 +323,57 @@ public class UIManager : MonoBehaviour
             _pinnedDroneHubData = data;
             DisplayDroneHubInfo(droneHub);
         }
+    }
+    
+    public void DisplayStorageInfo(IStorage storage)
+    {
+        if (storageInfoPanel == null || storage == null) return;
+
+        storageInfoPanel.SetActive(true);
+        PositionStoragePanel(storage.GetPosition());
+
+        Transform parent = storageResourceListParent != null ? storageResourceListParent.transform : storageInfoPanel.transform;
+        foreach (Transform child in parent)
+        {
+            Destroy(child.gameObject);
+        }
+
+        Dictionary<ResourceType, int> resources = storage.GetStoredResources();
+
+        // bool hasResource = false;
+        foreach (var kvp in resources)
+        {
+            if (kvp.Value > 0)
+            {
+                // hasResource = true;
+                GameObject cell = Instantiate(resourceInfoCellX2Prefab, parent);
+                ResourceInfoCell cellScript = cell.GetComponent<ResourceInfoCell>();
+                if (cellScript != null)
+                {
+                    cellScript.SetInfo(kvp.Key, kvp.Value); 
+                }
+            }
+        }
+    }
+    
+    public void HideStorageInfo()
+    {
+        if (storageInfoPanel != null)
+        {
+            storageInfoPanel.SetActive(false);
+        }
+    }
+    
+    private void PositionStoragePanel(Vector3 worldPos)
+    {
+        if (Camera.main == null) return;
+
+        Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos);
+
+        screenPos.x += storageUIPanelOffset.x;
+        screenPos.y += storageUIPanelOffset.y;
+
+        storageInfoPanel.transform.position = screenPos;
     }
 
     public void ToggleRecipePanel()

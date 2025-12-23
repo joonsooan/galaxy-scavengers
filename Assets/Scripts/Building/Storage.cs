@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.EventSystems;
 
 public class Storage : Damageable, IStorage
 {
@@ -106,9 +107,40 @@ public class Storage : Damageable, IStorage
     {
         return _currentResources.Values.Sum();
     }
-    
+
     public Vector3 GetPosition()
     {
         return transform.position;
+    }
+    
+    public Dictionary<ResourceType, int> GetStoredResources()
+    {
+        return _currentResources;
+    }
+    
+    public void ShowStoredResources()
+    {
+        if (GameManager.Instance.uiManager != null)
+        {
+            GameManager.Instance.uiManager.DisplayStorageInfo(this);
+        }
+    }
+
+    public void HideStoredResources()
+    {
+        if (GameManager.Instance.uiManager != null)
+        {
+            GameManager.Instance.uiManager.HideStorageInfo();
+        }
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        ShowStoredResources();
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        HideStoredResources();
     }
 }

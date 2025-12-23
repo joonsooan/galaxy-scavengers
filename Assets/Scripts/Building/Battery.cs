@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.EventSystems;
 
 public class Battery : Damageable, IStorage
 {
@@ -96,6 +97,38 @@ public class Battery : Damageable, IStorage
     public Vector3 GetPosition()
     {
         return transform.position;
+    }
+
+    public Dictionary<ResourceType, int> GetStoredResources()
+    {
+        Dictionary<ResourceType, int> currentResources = new() { { ResourceType.Aether, _currentAetherAmount } };
+        return currentResources;
+    }
+
+    private void ShowStoredResources()
+    {
+        if (GameManager.Instance.uiManager != null)
+        {
+            GameManager.Instance.uiManager.DisplayStorageInfo(this);
+        }
+    }
+
+    private void HideStoredResources()
+    {
+        if (GameManager.Instance.uiManager != null)
+        {
+            GameManager.Instance.uiManager.HideStorageInfo();
+        }
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        ShowStoredResources();
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        HideStoredResources();
     }
 }
 
