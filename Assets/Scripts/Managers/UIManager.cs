@@ -144,7 +144,9 @@ public class UIManager : MonoBehaviour
     public void UnpinAndHideAllPanels()
     {
         _pinnedBuildingPieceData = null;
-        if (buildingInfoPanel != null) {
+        if (buildingInfoPanel != null)
+        {
+            if (GameManager.Instance.IsDragging()) return;
             buildingInfoPanel.SetActive(false);
         }
 

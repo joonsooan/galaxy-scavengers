@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -100,9 +99,7 @@ public class CardDragger : MonoBehaviour
         {
             Destroy(_ghostBuildingInstance);
         }
-
-        // GameManager.Instance.uiManager?.UnpinAndHideCardPanel();
-
+        
         _isDragging = false;
         _activeBuildingData = null;
         _cachedComboCosts = null;
@@ -232,6 +229,11 @@ public class CardDragger : MonoBehaviour
         }
         else if (Input.GetMouseButtonDown(1))
         {
+            if (EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
+            
             GameManager.Instance.EndDrag();
         }
     }

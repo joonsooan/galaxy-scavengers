@@ -1,9 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
-using System.Linq;
 using TMPro;
+using UnityEngine.EventSystems;
 
-public class BuildingButton : MonoBehaviour
+public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("Building Data")]
     [SerializeField] private BuildingData buildingData;
@@ -37,15 +37,27 @@ public class BuildingButton : MonoBehaviour
     private void OnButtonClicked()
     {
         GameManager.Instance.StartDrag(buildingData);
-
-        if (BuildingInfoPanel.Instance != null)
-        {
-            BuildingInfoPanel.Instance.FixInfo(buildingData);
-        }
+        BuildingInfoPanel.Instance.SelectBuilding(buildingData);
         
         if (closePanelOnClick)
         {
             ClosePanel();
+        }
+    }
+    
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (buildingData != null && BuildingInfoPanel.Instance != null)
+        {
+            BuildingInfoPanel.Instance.PreviewInfo(buildingData);
+        }
+    }
+    
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (BuildingInfoPanel.Instance != null)
+        {
+            BuildingInfoPanel.Instance.CancelPreview();
         }
     }
     

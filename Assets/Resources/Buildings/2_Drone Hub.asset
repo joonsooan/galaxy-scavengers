@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 2_Drone Hub
   m_EditorClassIdentifier: 
   displayName: "\uB4DC\uB860 \uD5C8\uBE0C"
-  description: Produces drones
+  description: "\uB2E4\uC591\uD55C \uC885\uB958\uC758 \uB4DC\uB860\uC744 \uC0DD\uC0B0\uD560
+    \uC218 \uC788\uB294 \uAC74\uBB3C\uC785\uB2C8\uB2E4."
   icon: {fileID: -5822311547626613287, guid: 2b5ff78d38d215e4181e38b9a8fb09bc, type: 3}
   buildingPrefab: {fileID: 1574451153020646121, guid: 94deb2d77a84adf468f541eb13675052, type: 3}
   buildingTile: {fileID: 11400000, guid: eb52d49e34f0a7349b188d1a0f47dcf8, type: 2}

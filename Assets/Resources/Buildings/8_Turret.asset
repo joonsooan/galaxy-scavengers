@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: 8_Turret
   m_EditorClassIdentifier: 
   displayName: "\uD3EC\uD0D1"
-  description: Attacks enemy units
+  description: "\uBC94\uC704 \uB0B4\uC758 \uC801 \uC720\uB2DB\uC744 \uC790\uB3D9\uC73C\uB85C
+    \uACF5\uACA9\uD558\uB294 \uBC29\uC5B4 \uC2DC\uC124\uC785\uB2C8\uB2E4."
   icon: {fileID: -2077689376795794299, guid: 1a2d92749f4265f44b1854fdd5e58b76, type: 3}
   buildingPrefab: {fileID: 1574451153020646121, guid: dbd9ea1139f913d409d177ba28ce9ddd, type: 3}
   buildingTile: {fileID: 11400000, guid: eb52d49e34f0a7349b188d1a0f47dcf8, type: 2}

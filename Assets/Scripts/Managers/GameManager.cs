@@ -2,7 +2,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -101,15 +100,15 @@ public class GameManager : MonoBehaviour
 
     public void EndDrag()
     {
+        if (uiManager != null) {
+            uiManager.UnpinAndHideAllPanels();
+        }
+        
         if (cardDragger != null) {
             cardDragger.EndDrag();
         }
         _activeCardData = null;
         onEndDrag?.Invoke();
-
-        if (uiManager != null) {
-            uiManager.UnpinAndHideAllPanels();
-        }
     }
 
     public bool IsDragging()

@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: 6_Battery
   m_EditorClassIdentifier: 
   displayName: "\uCD95\uC804\uAE30"
-  description: This is Battery
+  description: "\uC5D0\uD14C\uB974\uB97C \uB300\uC6A9\uB7C9\uC73C\uB85C \uC800\uC7A5\uD560
+    \uC218 \uC788\uB294 \uC2DC\uC124\uC785\uB2C8\uB2E4. \uB2E4\uB978 \uC885\uB958\uC758
+    \uC790\uC6D0\uC740 \uC800\uC7A5\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4."
   icon: {fileID: 2544712925334621364, guid: 135e80e3fb0b8044a8dfc67e688cb32f, type: 3}
   buildingPrefab: {fileID: 1574451153020646121, guid: e87ce886c7e21d34fa9bb3f07b27c4cd, type: 3}
   buildingTile: {fileID: 11400000, guid: eb52d49e34f0a7349b188d1a0f47dcf8, type: 2}

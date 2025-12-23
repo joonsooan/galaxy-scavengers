@@ -8,7 +8,7 @@ public class BuildingInfoPanel : MonoBehaviour
     [SerializeField] private GameObject resourcePanel;
     [SerializeField] private TMP_Text buildingDesc;
 
-    private BuildingData _currentData;
+    private BuildingData _selectedData;
 
     public static BuildingInfoPanel Instance { get; private set; }
 
@@ -21,7 +21,52 @@ public class BuildingInfoPanel : MonoBehaviour
         }
 
         Instance = this;
-        ClearPanel();
+        ClearAllInfo();
+    }
+    
+    public void SelectBuilding(BuildingData data)
+    {
+        _selectedData = data;
+        UpdateUI(data);
+    }
+    
+    public void PreviewInfo(BuildingData data)
+    {
+        UpdateUI(data);
+    }
+    
+    public void CancelPreview()
+    {
+        if (_selectedData != null)
+        {
+            UpdateUI(_selectedData);
+        }
+        else
+        {
+            ClearUI();
+        }
+    }
+    
+    public void ClearAllInfo()
+    {
+        _selectedData = null;
+        ClearUI();
+    }
+    
+    private void UpdateUI(BuildingData data)
+    {
+        if (data == null) return;
+
+        if (buildingName != null) buildingName.text = data.displayName;
+        if (buildingDesc != null) buildingDesc.text = data.description;
+        if (resourcePanel != null) resourcePanel.SetActive(true);
+    }
+
+    private void ClearUI()
+    {
+        if (buildingName != null) buildingName.text = string.Empty;
+        if (buildingDesc != null) buildingDesc.text = string.Empty;
+        if (resourcePanel != null) resourcePanel.SetActive(false);
     }
 
     public void FixInfo(BuildingData data)
@@ -33,11 +78,11 @@ public class BuildingInfoPanel : MonoBehaviour
     {
         if (data == null)
         {
-            ClearPanel();
+            ClearInfo();
             return;
         }
 
-        _currentData = data;
+        _selectedData = data;
 
         if (buildingName != null)
         {
@@ -55,9 +100,9 @@ public class BuildingInfoPanel : MonoBehaviour
         }
     }
 
-    private void ClearPanel()
+    public void ClearInfo()
     {
-        _currentData = null;
+        _selectedData = null;
 
         if (buildingName != null)
         {

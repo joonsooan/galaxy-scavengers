@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class MainControlPanel : MonoBehaviour
 {
@@ -15,9 +16,12 @@ public class MainControlPanel : MonoBehaviour
     [SerializeField] private GameObject resourceStatPanel;
     
     private GameObject _currentlyActivePanel;
+    private BuildingInfoPanel _buildingInfoPanelComponent;
     
     private void Start()
     {
+        _buildingInfoPanelComponent =  buildingInfoPanel.GetComponent<BuildingInfoPanel>();
+        
         if (baseBuildingBtn != null)
         {
             baseBuildingBtn.onClick.AddListener(OnBaseBuildingBtnClicked);
@@ -40,10 +44,17 @@ public class MainControlPanel : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(1))
         {
+            if (EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
+            
             if (GameManager.Instance != null && GameManager.Instance.IsDragging()) {
+                _buildingInfoPanelComponent.ClearAllInfo();
                 return;
             }
             HideAllPanels();
+            _buildingInfoPanelComponent.ClearAllInfo();
         }
     }
 
@@ -68,16 +79,22 @@ public class MainControlPanel : MonoBehaviour
     {
         if (panel == null) return;
         
+        // 현재 보여주고 있는 판넬과 다른 버튼 클릭 시 보여주던 판넬 비활성화
         if (_currentlyActivePanel != null && _currentlyActivePanel != panel)
         {
+            _buildingInfoPanelComponent.ClearInfo();
             _currentlyActivePanel.SetActive(false);
         }
         
+        // 같은 버튼 클릭 시 판넬 숨김
         if (_currentlyActivePanel == panel)
         {
             panel.SetActive(false);
+            _buildingInfoPanelComponent.ClearInfo();
+            buildingInfoPanel.SetActive(false);
             _currentlyActivePanel = null;
         }
+        // _currentlyActivePanel = null 일 때 버튼 클릭 시 보여줌
         else
         {
             panel.SetActive(true);
