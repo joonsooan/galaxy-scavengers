@@ -118,6 +118,7 @@ public class CardDragger : MonoBehaviour
             Color ghostColor = _ghostBuildingRenderer.color;
             ghostColor.a = 0.5f;
             _ghostBuildingRenderer.color = ghostColor;
+            // _ghostBuildingRenderer.order
         }
         
         VisionProvider[] visionProviders = _ghostBuildingInstance.GetComponentsInChildren<VisionProvider>(true);

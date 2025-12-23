@@ -26437,6 +26437,12 @@ MonoBehaviour:
   buildingName: {fileID: 1034809628}
   resourcePanel: {fileID: 1171605817}
   buildingDesc: {fileID: 2056899316}
+  resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: e7df702f8dd92fa41af20175b6de5baf, type: 3}
+  allPieceDatabase:
+  - {fileID: 11400000, guid: e22a64f09ec41444d8839854ab0cf12d, type: 2}
+  - {fileID: 11400000, guid: 4c8173cb4c763ac4a94d5d71eff20932, type: 2}
+  - {fileID: 11400000, guid: 68b4c758a3839aa4f948aaaff775f54d, type: 2}
+  - {fileID: 11400000, guid: c9bd8365310e1144ea58636ed7ab3655, type: 2}
 --- !u!1 &896777459
 GameObject:
   m_ObjectHideFlags: 0
@@ -30507,7 +30513,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 5, y: -19.21}
-  m_SizeDelta: {x: 90, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1171605819
 MonoBehaviour:
@@ -30559,7 +30565,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_HorizontalFit: 0
+  m_HorizontalFit: 1
   m_VerticalFit: 1
 --- !u!114 &1171605822
 MonoBehaviour:
@@ -30570,20 +30576,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 1171605817}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
+  m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Padding:
     m_Left: 0
     m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
+    m_Top: 1
+    m_Bottom: 1
   m_ChildAlignment: 0
-  m_Spacing: 2
-  m_ChildForceExpandWidth: 1
+  m_Spacing: -0.5
+  m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
-  m_ChildControlWidth: 1
-  m_ChildControlHeight: 0
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0

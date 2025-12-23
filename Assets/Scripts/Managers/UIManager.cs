@@ -137,7 +137,7 @@ public class UIManager : MonoBehaviour
     public void ShowMainStructureUI()
     {
         HideCurrentIClickableUI();
-        
+        UnpinAndHideAllPanels();
         _activeUIPanel = ActiveUIPanel.MainStructure;
     }
 

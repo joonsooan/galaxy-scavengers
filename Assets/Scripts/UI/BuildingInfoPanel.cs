@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class BuildingInfoPanel : MonoBehaviour
 {
@@ -7,6 +8,9 @@ public class BuildingInfoPanel : MonoBehaviour
     [SerializeField] private TMP_Text buildingName;
     [SerializeField] private GameObject resourcePanel;
     [SerializeField] private TMP_Text buildingDesc;
+    [SerializeField] private GameObject resourceInfoCellPrefab;
+    
+    [SerializeField] private List<BuildingPieceData> allPieceDatabase;
 
     private BuildingData _selectedData;
 
@@ -59,45 +63,83 @@ public class BuildingInfoPanel : MonoBehaviour
 
         if (buildingName != null) buildingName.text = data.displayName;
         if (buildingDesc != null) buildingDesc.text = data.description;
-        if (resourcePanel != null) resourcePanel.SetActive(true);
+        if (resourcePanel != null)
+        {
+            resourcePanel.SetActive(true);
+            UpdateResourceDisplay(data);
+        }
     }
 
     private void ClearUI()
     {
         if (buildingName != null) buildingName.text = string.Empty;
         if (buildingDesc != null) buildingDesc.text = string.Empty;
-        if (resourcePanel != null) resourcePanel.SetActive(false);
-    }
-
-    public void FixInfo(BuildingData data)
-    {
-        ShowInfo(data);
-    }
-
-    private void ShowInfo(BuildingData data)
-    {
-        if (data == null)
-        {
-            ClearInfo();
-            return;
-        }
-
-        _selectedData = data;
-
-        if (buildingName != null)
-        {
-            buildingName.text = data.displayName;
-        }
-
-        if (buildingDesc != null)
-        {
-            buildingDesc.text = data.description;
-        }
-
         if (resourcePanel != null)
         {
-            resourcePanel.SetActive(true);
+            foreach (Transform child in resourcePanel.transform)
+            {
+                Destroy(child.gameObject);
+            }
+            resourcePanel.SetActive(false);
         }
+    }
+    
+    private void UpdateResourceDisplay(BuildingData data)
+    {
+        foreach (Transform child in resourcePanel.transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        if (data.recipe == null || data.recipe.Count == 0) return;
+
+        Dictionary<ResourceType, int> totalCosts = new Dictionary<ResourceType, int>();
+
+        foreach (var piece in data.recipe)
+        {
+            BuildingPieceData pieceData = GetPieceDataByType(piece.buildingPieceType);
+
+            if (pieceData != null && pieceData.costs != null)
+            {
+                foreach (var cost in pieceData.costs)
+                {
+                    if (totalCosts.ContainsKey(cost.resourceType))
+                    {
+                        totalCosts[cost.resourceType] += cost.amount;
+                    }
+                    else
+                    {
+                        totalCosts[cost.resourceType] = cost.amount;
+                    }
+                }
+            }
+        }
+
+        foreach (var kvp in totalCosts)
+        {
+            ResourceType type = kvp.Key;
+            int amount = kvp.Value;
+
+            GameObject cellObj = Instantiate(resourceInfoCellPrefab, resourcePanel.transform);
+            ResourceInfoCell cell = cellObj.GetComponent<ResourceInfoCell>();
+            
+            if (cell != null)
+            {
+                cell.SetInfo(type, amount);
+            }
+        }
+    }
+    
+    private BuildingPieceData GetPieceDataByType(BuildingPieceType type)
+    {
+        foreach (var data in allPieceDatabase)
+        {
+            if (data.buildingPieceType == type)
+            {
+                return data;
+            }
+        }
+        return null;
     }
 
     public void ClearInfo()

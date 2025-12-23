@@ -1,10 +1,16 @@
 fileFormatVersion: 2
-guid: 98fbe670cdcb68949b3426572d57cc56
+guid: f68a2c2ba69b5c4439f66435f175067e
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6814034456240413500
-    second: battery 1_0
+      213: -6103725214798331939
+    second: construct_2_0
+  - first:
+      213: -954737804633247596
+    second: construct_2_1
+  - first:
+      213: -3241402941389329499
+    second: construct_2_2
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,23 +106,67 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: battery 1_0
+      name: construct_2_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 16
-        height: 48
-      alignment: 9
-      pivot: {x: 0.5, y: 0.16666667}
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c3b5b735c30509e50800000000000000
-      internalID: 6814034456240413500
+      spriteID: ddfb95d81463b4ba0800000000000000
+      internalID: -6103725214798331939
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: construct_2_1
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 0
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 490f23d660710c2f0800000000000000
+      internalID: -954737804633247596
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: construct_2_2
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 0
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ab2590d2393403d0800000000000000
+      internalID: -3241402941389329499
       vertices: []
       indices: 
       edges: []
@@ -125,7 +175,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: dd545b97de153f948a62c929ded2413a
+    spriteID: 7595a1a46b3226e499a70c6510c96c7a
     internalID: 0
     vertices: []
     indices: 
@@ -135,7 +185,9 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      battery 1_0: 6814034456240413500
+      construct_2_0: -6103725214798331939
+      construct_2_1: -954737804633247596
+      construct_2_2: -3241402941389329499
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

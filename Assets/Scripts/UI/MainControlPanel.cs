@@ -18,9 +18,21 @@ public class MainControlPanel : MonoBehaviour
     private GameObject _currentlyActivePanel;
     private BuildingInfoPanel _buildingInfoPanelComponent;
     
+    private void OnEnable()
+    {
+        DroneHub.OnDroneHubClicked += HideBuildingInfoPanel;
+        Processor.OnProcessorClicked += HideBuildingInfoPanel;
+    }
+
+    private void OnDisable()
+    {
+        DroneHub.OnDroneHubClicked -= HideBuildingInfoPanel;
+        Processor.OnProcessorClicked -= HideBuildingInfoPanel;
+    }
+    
     private void Start()
     {
-        _buildingInfoPanelComponent =  buildingInfoPanel.GetComponent<BuildingInfoPanel>();
+        _buildingInfoPanelComponent =  buildingInfoPanel.GetComponent<BuildingInfoPanel>(); 
         
         if (baseBuildingBtn != null)
         {
@@ -60,19 +72,27 @@ public class MainControlPanel : MonoBehaviour
 
     private void OnBaseBuildingBtnClicked()
     {
+        GameManager.Instance.uiManager.UnpinAndHideAllPanels();
         buildingInfoPanel.SetActive(true);
         ShowPanel(baseBuildingPanel);
     }
 
     private void OnProcessorBtnClicked()
     {
+        GameManager.Instance.uiManager.UnpinAndHideAllPanels();
         buildingInfoPanel.SetActive(true);
         ShowPanel(processorPanel);
     }
 
     private void OnResourceStatBtnClicked()
     {
+        HideAllPanels();
         ShowPanel(resourceStatPanel);
+    }
+
+    private void HideBuildingInfoPanel(Damageable _)
+    {
+        buildingInfoPanel.SetActive(false);
     }
     
     private void ShowPanel(GameObject panel)
