@@ -11,14 +11,14 @@ public enum GradientMode
 public class MapGenerator : MonoBehaviour
 {
     public Vector2Int MapSize => new (width, height);
-    public Tilemap Tilemap => groundTilemap;
     public Tilemap GroundTilemap => groundTilemap;
-    public Tilemap WallTilemap => wallTilemap;
+    public Tilemap WallTilemap => lowWallTilemap;
     public IReadOnlyList<Vector2Int> EnemySpawnHolePositions => _enemySpawnHolePositions;
     
     [Header("Tilemaps")]
     [SerializeField] private Tilemap groundTilemap;
-    [SerializeField] private Tilemap wallTilemap;
+    [SerializeField] private Tilemap lowWallTilemap;
+    [SerializeField] private Tilemap highWallTilemap;
     [SerializeField] private Grid grid;
     
     [Header("Tiles")]
@@ -110,25 +110,51 @@ public class MapGenerator : MonoBehaviour
         {
             groundTilemap.SetTile(cellPosition, tile);
         }
-        if (wallTilemap != null)
-        {
-            wallTilemap.SetTile(cellPosition, null);
-        }
+        
+        if (lowWallTilemap != null) lowWallTilemap.SetTile(cellPosition, null);
+        if (highWallTilemap != null) highWallTilemap.SetTile(cellPosition, null);
     }
 
     private void SetWallTile(Vector3Int cellPosition, TileBase tile)
     {
-        if (wallTilemap != null)
+        if (groundTilemap != null && !groundTilemap.HasTile(cellPosition))
         {
-            wallTilemap.SetTile(cellPosition, tile);
+            groundTilemap.SetTile(cellPosition, groundTile);
+        }
+
+        if (tile == null)
+        {
+            if (lowWallTilemap != null) lowWallTilemap.SetTile(cellPosition, null);
+            if (highWallTilemap != null) highWallTilemap.SetTile(cellPosition, null);
+            return;
+        }
+
+        if (tile == highWallTile)
+        {
+            if (lowWallTilemap != null) lowWallTilemap.SetTile(cellPosition, lowWallTile);
+            if (highWallTilemap != null) highWallTilemap.SetTile(cellPosition, highWallTile);
+        }
+        else if (tile == lowWallTile)
+        {
+            if (lowWallTilemap != null) lowWallTilemap.SetTile(cellPosition, lowWallTile);
+            if (highWallTilemap != null) highWallTilemap.SetTile(cellPosition, null);
+        }
+        else if (tile == wallTile)
+        {
+            if (lowWallTilemap != null) lowWallTilemap.SetTile(cellPosition, wallTile);
+            if (highWallTilemap != null) highWallTilemap.SetTile(cellPosition, wallTile);
         }
     }
 
     private TileBase GetTileAtPosition(Vector3Int cellPosition)
     {
-        if (wallTilemap != null && wallTilemap.HasTile(cellPosition))
+        if (highWallTilemap != null && highWallTilemap.HasTile(cellPosition))
         {
-            return wallTilemap.GetTile(cellPosition);
+            return highWallTilemap.GetTile(cellPosition);
+        }
+        if (lowWallTilemap != null && lowWallTilemap.HasTile(cellPosition))
+        {
+            return lowWallTilemap.GetTile(cellPosition);
         }
         if (groundTilemap != null && groundTilemap.HasTile(cellPosition))
         {
@@ -160,52 +186,57 @@ public class MapGenerator : MonoBehaviour
         BoundsInt mapBounds = new BoundsInt(mapOrigin, new Vector3Int(width, height, 1));
         
         TileBase[] groundTiles = new TileBase[width * height];
-        TileBase[] wallTiles = new TileBase[width * height];
-
+        TileBase[] lowWallTiles = new TileBase[width * height];
+        TileBase[] highWallTiles = new TileBase[width * height];
+        
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                TileBase tile = GetTileForPosition(x, y);
                 int index = x + y * width;
                 
-                if (tile == groundTile)
+                groundTiles[index] = groundTile;
+                bool isBorder = x == 0 || x == width - 1 || y == 0 || y == height - 1;
+                if (isBorder)
                 {
-                    groundTiles[index] = tile;
-                    wallTiles[index] = null;
+                    lowWallTiles[index] = wallTile;
+                    // highWallTiles[index] = wallTile;
+                    continue;
                 }
-                else if (IsTerrainTile(tile))
+                
+                float noiseVal = GetNoiseValueAt(x, y);
+
+                if (noiseVal >= lowWallThreshold)
                 {
-                    wallTiles[index] = tile;
+                    lowWallTiles[index] = lowWallTile;
                 }
                 else
                 {
-                    groundTiles[index] = tile;
-                    wallTiles[index] = null;
+                    lowWallTiles[index] = null;
+                }
+
+                if (noiseVal >= highWallThreshold)
+                {
+                    highWallTiles[index] = highWallTile;
+                }
+                else
+                {
+                    highWallTiles[index] = null;
                 }
             }
         }
         
-        if (groundTilemap != null)
-        {
-            groundTilemap.SetTilesBlock(mapBounds, groundTiles);
-        }
-        if (wallTilemap != null)
-        {
-            wallTilemap.SetTilesBlock(mapBounds, wallTiles);
-        }
+        if (groundTilemap != null) groundTilemap.SetTilesBlock(mapBounds, groundTiles);
+        if (lowWallTilemap != null) lowWallTilemap.SetTilesBlock(mapBounds, lowWallTiles);
+        if (highWallTilemap != null) highWallTilemap.SetTilesBlock(mapBounds, highWallTiles);
         
         PolishMap();
         CopyTilesToBuildingManagerGroundTilemap(mapBounds);
         
-        if (groundTilemap != null)
-        {
-            groundTilemap.CompressBounds();
-        }
-        if (wallTilemap != null)
-        {
-            wallTilemap.CompressBounds();
-        }
+        if (groundTilemap != null) groundTilemap.CompressBounds();
+        if (lowWallTilemap != null) lowWallTilemap.CompressBounds();
+        if (highWallTilemap != null) highWallTilemap.CompressBounds();
+        
         SetupCameraController();
         
         if (FogOfWarManager.Instance != null)
@@ -213,42 +244,47 @@ public class MapGenerator : MonoBehaviour
             FogOfWarManager.Instance.RefreshFogOfWar();
         }
     }
+    
+    private float GetNoiseValueAt(int x, int y)
+    {
+        if (!useProceduralTerrain || _noiseMap == null) return 0f;
+
+        float noiseValue = _noiseMap[x, y];
+        
+        if (useGradientMap && _gradientMap != null)
+        {
+            float gradientValue = _gradientMap[x, y];
+            float combinedValue = noiseValue + (gradientValue - 0.5f) * gradientStrength;
+            noiseValue = Mathf.Clamp01(combinedValue);
+        }
+        
+        return 1f - noiseValue;
+    }
 
     private void PolishMap()
     {
-        if (enableCenterCircle)
-        {
-            PunchCenterCircle();
-        }
-
-        if (fillDisconnectedAreas)
-        {
-            FillDisconnectedAreas();
-        }
-
-        if (enableEnemySpawnHoles)
-        {
-            PunchEnemySpawnHoles();
-        }
-        
-        if (fillDisconnectedAreas)
-        {
-            FillDisconnectedAreas();
-        }
-        
+        if (enableCenterCircle) PunchCenterCircle();
+        if (fillDisconnectedAreas) FillDisconnectedAreas();
+        if (enableEnemySpawnHoles) PunchEnemySpawnHoles();
+        if (fillDisconnectedAreas) FillDisconnectedAreas();
         ConnectWallsToBorders();
     }
 
     private TileBase GetTileForSmoothTransition(int x, int y, float transitionFactor, TileBase originalTile)
     {
-        if (transitionFactor < 0.5f)
-        {
-            return groundTile;
-        }
+        if (transitionFactor < 0.5f) return groundTile;
+        
         if (originalTile == highWallTile)
         {
-            return lowWallTile != null ? lowWallTile : groundTile;
+            if (transitionFactor < 0.8f) return lowWallTile; 
+            return highWallTile;
         }
+        
+        if (originalTile == lowWallTile)
+        {
+            return lowWallTile;
+        }
+
         return groundTile;
     }
 
@@ -310,7 +346,7 @@ public class MapGenerator : MonoBehaviour
         Vector3Int centerCellPos = new Vector3Int(centerX - _mapCenterXOffset, centerY - _mapCenterYOffset, 0);
         TileBase centerTile = GetTileAtPosition(centerCellPos);
         
-        if (centerTile == groundTile)
+        if (!IsTerrainTile(centerTile))
         {
             queue.Enqueue(new Vector2Int(centerX, centerY));
             connectedToCenter[centerX, centerY] = true;
@@ -343,7 +379,7 @@ public class MapGenerator : MonoBehaviour
                 Vector3Int neighborCellPos = new Vector3Int(nx - _mapCenterXOffset, ny - _mapCenterYOffset, 0);
                 TileBase neighborTile = GetTileAtPosition(neighborCellPos);
                 
-                if (neighborTile == groundTile)
+                if (!IsTerrainTile(neighborTile))
                 {
                     connectedToCenter[nx, ny] = true;
                     queue.Enqueue(neighbor);
@@ -356,11 +392,13 @@ public class MapGenerator : MonoBehaviour
             for (int y = 1; y < height - 1; y++)
             {
                 Vector3Int cellPos = new Vector3Int(x - _mapCenterXOffset, y - _mapCenterYOffset, 0);
-                TileBase currentTile = GetTileAtPosition(cellPos);
                 
-                if (currentTile == groundTile && !connectedToCenter[x, y])
+                if (!connectedToCenter[x, y])
                 {
-                    SetWallTile(cellPos, lowWallTile != null ? lowWallTile : groundTile);
+                    if (!IsTerrainCell(cellPos))
+                    {
+                        SetWallTile(cellPos, lowWallTile != null ? lowWallTile : wallTile);
+                    }
                 }
             }
         }
@@ -467,9 +505,8 @@ public class MapGenerator : MonoBehaviour
                 {
                     totalCellCount++;
                     Vector3Int cellPos = new Vector3Int(x - _mapCenterXOffset, y - _mapCenterYOffset, 0);
-                    TileBase tile = GetTileAtPosition(cellPos);
                     
-                    if (tile == groundTile || !IsTerrainTile(tile))
+                    if (!IsTerrainCell(cellPos)) 
                     {
                         groundCellCount++;
                     }
@@ -501,71 +538,48 @@ public class MapGenerator : MonoBehaviour
     
     private void ConnectWallsToBorders()
     {
-        // Check left border (x = 0)
+        // Left
         for (int y = 0; y < height; y++)
         {
             int innerX = 1;
-            if (innerX < width)
+            Vector3Int innerPos = new Vector3Int(innerX - _mapCenterXOffset, y - _mapCenterYOffset, 0);
+            if (GetTileAtPosition(innerPos) == highWallTile)
             {
-                Vector3Int innerCellPos = new Vector3Int(innerX - _mapCenterXOffset, y - _mapCenterYOffset, 0);
-                TileBase innerTile = GetTileAtPosition(innerCellPos);
-                
-                if (innerTile == highWallTile)
-                {
-                    Vector3Int borderCellPos = new Vector3Int(-_mapCenterXOffset, y - _mapCenterYOffset, 0);
-                    SetWallTile(borderCellPos, highWallTile);
-                }
+                Vector3Int borderPos = new Vector3Int(-_mapCenterXOffset, y - _mapCenterYOffset, 0);
+                SetWallTile(borderPos, highWallTile);
             }
         }
-        
-        // Check right border (x = width - 1)
+        // Right
         for (int y = 0; y < height; y++)
         {
             int innerX = width - 2;
-            if (innerX >= 0)
+            Vector3Int innerPos = new Vector3Int(innerX - _mapCenterXOffset, y - _mapCenterYOffset, 0);
+            if (GetTileAtPosition(innerPos) == highWallTile)
             {
-                Vector3Int innerCellPos = new Vector3Int(innerX - _mapCenterXOffset, y - _mapCenterYOffset, 0);
-                TileBase innerTile = GetTileAtPosition(innerCellPos);
-                
-                if (innerTile == highWallTile)
-                {
-                    Vector3Int borderCellPos = new Vector3Int((width - 1) - _mapCenterXOffset, y - _mapCenterYOffset, 0);
-                    SetWallTile(borderCellPos, highWallTile);
-                }
+                Vector3Int borderPos = new Vector3Int((width - 1) - _mapCenterXOffset, y - _mapCenterYOffset, 0);
+                SetWallTile(borderPos, highWallTile);
             }
         }
-        
-        // Check bottom border (y = 0)
+        // Bottom
         for (int x = 0; x < width; x++)
         {
             int innerY = 1;
-            if (innerY < height)
+            Vector3Int innerPos = new Vector3Int(x - _mapCenterXOffset, innerY - _mapCenterYOffset, 0);
+            if (GetTileAtPosition(innerPos) == highWallTile)
             {
-                Vector3Int innerCellPos = new Vector3Int(x - _mapCenterXOffset, innerY - _mapCenterYOffset, 0);
-                TileBase innerTile = GetTileAtPosition(innerCellPos);
-                
-                if (innerTile == highWallTile)
-                {
-                    Vector3Int borderCellPos = new Vector3Int(x - _mapCenterXOffset, -_mapCenterYOffset, 0);
-                    SetWallTile(borderCellPos, highWallTile);
-                }
+                Vector3Int borderPos = new Vector3Int(x - _mapCenterXOffset, -_mapCenterYOffset, 0);
+                SetWallTile(borderPos, highWallTile);
             }
         }
-        
-        // Check top border (y = height - 1)
+        // Top
         for (int x = 0; x < width; x++)
         {
             int innerY = height - 2;
-            if (innerY >= 0)
+            Vector3Int innerPos = new Vector3Int(x - _mapCenterXOffset, innerY - _mapCenterYOffset, 0);
+            if (GetTileAtPosition(innerPos) == highWallTile)
             {
-                Vector3Int innerCellPos = new Vector3Int(x - _mapCenterXOffset, innerY - _mapCenterYOffset, 0);
-                TileBase innerTile = GetTileAtPosition(innerCellPos);
-                
-                if (innerTile == highWallTile)
-                {
-                    Vector3Int borderCellPos = new Vector3Int(x - _mapCenterXOffset, (height - 1) - _mapCenterYOffset, 0);
-                    SetWallTile(borderCellPos, highWallTile);
-                }
+                Vector3Int borderPos = new Vector3Int(x - _mapCenterXOffset, (height - 1) - _mapCenterYOffset, 0);
+                SetWallTile(borderPos, highWallTile);
             }
         }
     }
@@ -716,81 +730,41 @@ public class MapGenerator : MonoBehaviour
     
     private void SetupCameraController()
     {
-        // Combine bounds from both tilemaps
-        Bounds combinedBounds = new Bounds();
-        bool boundsInitialized = false;
+        if (groundTilemap == null || groundTilemap.cellBounds.size.x == 0) return;
         
-        if (groundTilemap != null && groundTilemap.cellBounds.size.x > 0)
-        {
-            Bounds groundBounds = groundTilemap.localBounds;
-            combinedBounds = groundBounds;
-            boundsInitialized = true;
-        }
-        
-        if (wallTilemap != null && wallTilemap.cellBounds.size.x > 0)
-        {
-            Bounds wallBounds = wallTilemap.localBounds;
-            if (boundsInitialized)
-            {
-                combinedBounds.Encapsulate(wallBounds);
-            }
-            else
-            {
-                combinedBounds = wallBounds;
-                boundsInitialized = true;
-            }
-        }
-        
-        if (!boundsInitialized || groundTilemap == null)
-        {
-            return;
-        }
-        
+        Bounds combinedBounds = groundTilemap.localBounds;
         Vector3 worldCenter = groundTilemap.transform.TransformPoint(combinedBounds.center);
         Vector3 worldSize = Vector3.Scale(combinedBounds.size, groundTilemap.transform.lossyScale);
-        Bounds mapWorldBounds = new Bounds(worldCenter, worldSize);
-
+        
         if (Camera.main != null && Camera.main.TryGetComponent<CameraController>(out var cameraController))
         {
-            cameraController.SetBounds(mapWorldBounds);
+            cameraController.SetBounds(new Bounds(worldCenter, worldSize));
         }
     }
     
     private TileBase GetTileForPosition(int x, int y)
     {
-        // Always use wall tile for map borders
         bool isBorder = x == 0 || x == width - 1 || y == 0 || y == height - 1;
         if (isBorder)
         {
             return wallTile;
         }
 
-        // Use procedural terrain if enabled and noise map is generated
         if (useProceduralTerrain && _noiseMap != null)
         {
             float noiseValue = _noiseMap[x, y];
             
-            // Combine with gradient map if enabled
             if (useGradientMap && _gradientMap != null)
             {
                 float gradientValue = _gradientMap[x, y];
-                
-                // Combine noise and gradient values
-                // Gradient strength controls how much gradient affects the final value
                 float combinedValue = noiseValue + (gradientValue - 0.5f) * gradientStrength;
                 
-                // Normalize to 0-1 range
                 combinedValue = Mathf.Clamp01(combinedValue);
-                
-                // Use combined value for tile selection
                 noiseValue = combinedValue;
             }
             
-            // Invert noise value to swap ground and high wall tiles
-            // Low noise values become high (high walls), high noise values become low (ground)
             noiseValue = 1f - noiseValue;
             
-            // Map noise values to tile types based on thresholds
             if (noiseValue >= highWallThreshold)
             {
                 return highWallTile != null ? highWallTile : groundTile;
@@ -805,67 +779,36 @@ public class MapGenerator : MonoBehaviour
             }
         }
 
-        // Fallback to ground tile
         return groundTile;
     }
 
     public bool IsPositionInBounds(Vector3 worldPosition)
     {
         if (groundTilemap == null) return false;
-        
         Vector3 localPos = groundTilemap.transform.InverseTransformPoint(worldPosition);
-
         int cellX = Mathf.FloorToInt(localPos.x + _mapCenterXOffset);
         int cellY = Mathf.FloorToInt(localPos.y + _mapCenterYOffset);
-
         return cellX >= 0 && cellX < width && cellY >= 0 && cellY < height;
     }
     
-    /// <summary>
-    /// Checks if a tile is a terrain tile (wall, low wall, or high wall).
-    /// Terrain tiles block building placement and unit movement.
-    /// </summary>
     public bool IsTerrainTile(TileBase tile)
     {
         if (tile == null) return false;
         return tile == wallTile || tile == lowWallTile || tile == highWallTile;
     }
     
-    /// <summary>
-    /// Checks if a cell position contains terrain (wall, low wall, or high wall).
-    /// Checks the wall tilemap for terrain tiles.
-    /// </summary>
     public bool IsTerrainCell(Vector3Int cellPosition)
     {
-        if (wallTilemap == null) return false;
-        TileBase tile = wallTilemap.GetTile(cellPosition);
-        return IsTerrainTile(tile);
+        if (highWallTilemap != null && highWallTilemap.HasTile(cellPosition)) return true;
+        if (lowWallTilemap != null && lowWallTilemap.HasTile(cellPosition)) return true;
+        return false;
     }
     
     private void CopyTilesToBuildingManagerGroundTilemap(BoundsInt mapBounds)
     {
-        if (BuildingManager.Instance == null)
-        {
-            Debug.LogWarning("[MapGenerator] BuildingManager.Instance is null. Cannot copy tiles to groundTilemap.");
-            return;
-        }
+        if (BuildingManager.Instance == null || BuildingManager.Instance.GroundTilemap == null || groundTilemap == null) return;
         
-        Tilemap buildingManagerGroundTilemap = BuildingManager.Instance.GroundTilemap;
-        if (buildingManagerGroundTilemap == null)
-        {
-            Debug.LogWarning("[MapGenerator] BuildingManager.GroundTilemap is null. Cannot copy tiles to groundTilemap.");
-            return;
-        }
-        
-        if (groundTilemap == null)
-        {
-            Debug.LogWarning("[MapGenerator] GroundTilemap is null. Cannot copy tiles to BuildingManager.");
-            return;
-        }
-        
-        // Copy only ground tiles from MapGenerator's groundTilemap to BuildingManager's groundTilemap
-        // This ensures buildings can be placed and fog of war works correctly
-        // Read tiles from groundTilemap after PolishMap() has modified them
+        Tilemap bmTilemap = BuildingManager.Instance.GroundTilemap;
         TileBase[] tiles = new TileBase[mapBounds.size.x * mapBounds.size.y];
         int index = 0;
         foreach (Vector3Int pos in mapBounds.allPositionsWithin)
@@ -873,8 +816,8 @@ public class MapGenerator : MonoBehaviour
             tiles[index++] = groundTilemap.GetTile(pos);
         }
         
-        buildingManagerGroundTilemap.SetTilesBlock(mapBounds, tiles);
-        buildingManagerGroundTilemap.CompressBounds();
+        bmTilemap.SetTilesBlock(mapBounds, tiles);
+        bmTilemap.CompressBounds();
     }
     
     public void DrawEnemyTerritoryTiles()

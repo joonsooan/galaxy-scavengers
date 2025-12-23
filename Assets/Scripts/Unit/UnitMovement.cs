@@ -270,7 +270,7 @@ public class UnitMovement : MonoBehaviour
         allNodes.Add(startCell, startNode);
 
         int iterations = 0;
-        const int maxIterations = 2000;
+        const int maxIterations = 50000;
 
         while (openList.Count > 0 && iterations < maxIterations) {
             iterations++;
