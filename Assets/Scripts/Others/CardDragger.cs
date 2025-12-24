@@ -228,7 +228,7 @@ public class CardDragger : MonoBehaviour
                 }
             }
         }
-        else if (Input.GetMouseButtonDown(1))
+        else if (Input.GetMouseButtonUp(1))
         {
             if (EventSystem.current.IsPointerOverGameObject())
             {

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
+[DefaultExecutionOrder(-100)]
 public class MainControlPanel : MonoBehaviour
 {
     [Header("Buttons")]
@@ -58,29 +59,6 @@ public class MainControlPanel : MonoBehaviour
     
     private void Update()
     {
-        if (Input.GetMouseButtonDown(1))
-        {
-            if (EventSystem.current.IsPointerOverGameObject())
-            {
-                return;
-            }
-            
-            // Don't hide panels if area building destroyer is active and will handle the drag
-            if (_areaBuildingDestroyer != null)
-            {
-                // Let the destroyer handle it - it will start dragging
-                return;
-            }
-            
-            if (GameManager.Instance != null && GameManager.Instance.IsDragging()) {
-                _buildingInfoPanelComponent.ClearAllInfo();
-                return;
-            }
-            HideAllPanels();
-            _buildingInfoPanelComponent.ClearAllInfo();
-        }
-        
-        // Handle right-click up for non-drag clicks
         if (Input.GetMouseButtonUp(1))
         {
             if (EventSystem.current.IsPointerOverGameObject())
@@ -88,17 +66,21 @@ public class MainControlPanel : MonoBehaviour
                 return;
             }
             
-            // Only hide panels if it was a quick click (not a drag)
-            if (_areaBuildingDestroyer != null && _areaBuildingDestroyer.IsDragging && _areaBuildingDestroyer.HasMoved)
+            if (_areaBuildingDestroyer != null && _areaBuildingDestroyer.HasMoved)
             {
-                // Was a drag, don't hide panels
                 return;
             }
             
-            // Quick click - hide panels
-            if (GameManager.Instance != null && GameManager.Instance.IsDragging()) {
+            if (_areaBuildingDestroyer != null && _areaBuildingDestroyer.JustFinishedAreaDrag)
+            {
                 return;
             }
+            
+            if (GameManager.Instance != null && GameManager.Instance.IsDragging()) {
+                _buildingInfoPanelComponent.ClearAllInfo();
+                return;
+            }
+            
             HideAllPanels();
             _buildingInfoPanelComponent.ClearAllInfo();
         }

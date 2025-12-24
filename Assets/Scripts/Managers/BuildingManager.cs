@@ -458,8 +458,6 @@ public class BuildingManager : MonoBehaviour
         }
 
         HandleBuildingLogic(newPieceObject, data);
-
-        Debug.Log($"Building '{data.displayName}' Created (prefab only, no tiles)");
     }
 
     private void CheckForBuildings(Vector3Int placedPos)

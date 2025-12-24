@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.Tilemaps;
-using UnityEngine.UI;
 
 public class AreaBuildingDestroyer : MonoBehaviour
 {
@@ -15,14 +13,15 @@ public class AreaBuildingDestroyer : MonoBehaviour
     private BuildingManager _buildingManager;
     private bool _isDragging;
     private bool _hasMoved;
+    private bool _justFinishedAreaDrag;
     private Vector3Int _startCell;
     private Vector3Int _endCell;
     private Vector3 _startWorldPos;
     private readonly HashSet<Vector3Int> _selectedCells = new ();
     private readonly HashSet<Vector3Int> _previouslySelectedCells = new ();
-    
-    public bool IsDragging => _isDragging;
+
     public bool HasMoved => _hasMoved;
+    public bool JustFinishedAreaDrag => _justFinishedAreaDrag;
     
     private void Awake()
     {
@@ -41,26 +40,18 @@ public class AreaBuildingDestroyer : MonoBehaviour
         }
     }
     
+    private bool _wasJustFinishedAreaDrag;
+    
     private void Update()
     {
+        _justFinishedAreaDrag = _wasJustFinishedAreaDrag;
+        _wasJustFinishedAreaDrag = false;
+        
         HandleRightClickDrag();
     }
     
     private void HandleRightClickDrag()
     {
-        // if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
-        // {
-        //     // Check if the UI element under the pointer is a FloatingNumText (should be ignored)
-        //     if (!IsPointerOverIgnoredUI())
-        //     {
-        //         if (_isDragging)
-        //         {
-        //             CancelDrag();
-        //         }
-        //         return;
-        //     }
-        // }
-        
         if (GameManager.Instance != null && GameManager.Instance.IsDragging())
         {
             if (_isDragging)
@@ -98,6 +89,8 @@ public class AreaBuildingDestroyer : MonoBehaviour
         
         _isDragging = true;
         _hasMoved = false;
+        _justFinishedAreaDrag = false;
+        _wasJustFinishedAreaDrag = false;
         _selectedCells.Clear();
         _previouslySelectedCells.Clear();
     }
@@ -132,6 +125,7 @@ public class AreaBuildingDestroyer : MonoBehaviour
         
         if (_hasMoved)
         {
+            _wasJustFinishedAreaDrag = true;
             DestroyBuildingsInArea();
         }
         
@@ -147,6 +141,8 @@ public class AreaBuildingDestroyer : MonoBehaviour
     {
         ClearSelectionVisual();
         _isDragging = false;
+        _justFinishedAreaDrag = false;
+        _wasJustFinishedAreaDrag = false;
         _selectedCells.Clear();
         _previouslySelectedCells.Clear();
     }
@@ -394,32 +390,6 @@ public class AreaBuildingDestroyer : MonoBehaviour
                 beacon.DestroyBeacon();
             }
         }
-    }
-    
-    private bool IsPointerOverIgnoredUI()
-    {
-        if (EventSystem.current == null) return false;
-        
-        PointerEventData pointerEventData = new PointerEventData(EventSystem.current)
-        {
-            position = Input.mousePosition
-        };
-        
-        List<RaycastResult> results = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(pointerEventData, results);
-        
-        foreach (RaycastResult result in results)
-        {
-            if (result.gameObject != null)
-            {
-                FloatingNumText floatingText = result.gameObject.GetComponent<FloatingNumText>();
-                if (floatingText == null)
-                {
-                    return false;
-                }
-            }
-        }
-        return results.Count > 0;
     }
     
     private void OnDisable()

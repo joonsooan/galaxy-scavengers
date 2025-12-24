@@ -82,11 +82,6 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         }
     }
     
-    public BuildingData GetComboCardData()
-    {
-        return buildingData;
-    }
-    
     private void OnDestroy()
     {
         if (_button != null)
