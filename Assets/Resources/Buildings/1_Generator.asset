@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: 1_Generator
   m_EditorClassIdentifier: 
   displayName: "\uBC1C\uC804\uAE30"
-  description: Produces Aether energy
+  description: "\uC5D0\uD14C\uB974\uB97C \uC0DD\uC0B0\uD558\uB294 \uC2DC\uC124\uC785\uB2C8\uB2E4."
   icon: {fileID: -4550992031882759542, guid: 357de6c3f6d090946984b9be89ddb355, type: 3}
   buildingPrefab: {fileID: 1574451153020646121, guid: bca5fc75e320a7c4882e0538e3e0036b, type: 3}
   buildingTile: {fileID: 11400000, guid: eb52d49e34f0a7349b188d1a0f47dcf8, type: 2}

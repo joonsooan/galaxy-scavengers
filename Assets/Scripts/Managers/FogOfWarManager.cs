@@ -211,9 +211,9 @@ public class FogOfWarManager : MonoBehaviour
                 }
             }
             
-            if (mapGenerator.Tilemap != null)
+            if (mapGenerator.WallTilemap != null)
             {
-                Tilemap mapGenTilemap = mapGenerator.Tilemap;
+                Tilemap mapGenTilemap = mapGenerator.WallTilemap;
                 if (!terrainTilemaps.Contains(mapGenTilemap))
                 {
                     terrainTilemaps.Add(mapGenTilemap);

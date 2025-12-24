@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -100,9 +99,7 @@ public class CardDragger : MonoBehaviour
         {
             Destroy(_ghostBuildingInstance);
         }
-
-        GameManager.Instance.uiManager?.UnpinAndHideCardPanel();
-
+        
         _isDragging = false;
         _activeBuildingData = null;
         _cachedComboCosts = null;
@@ -121,6 +118,7 @@ public class CardDragger : MonoBehaviour
             Color ghostColor = _ghostBuildingRenderer.color;
             ghostColor.a = 0.5f;
             _ghostBuildingRenderer.color = ghostColor;
+            // _ghostBuildingRenderer.order
         }
         
         VisionProvider[] visionProviders = _ghostBuildingInstance.GetComponentsInChildren<VisionProvider>(true);
@@ -232,6 +230,11 @@ public class CardDragger : MonoBehaviour
         }
         else if (Input.GetMouseButtonDown(1))
         {
+            if (EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
+            
             GameManager.Instance.EndDrag();
         }
     }

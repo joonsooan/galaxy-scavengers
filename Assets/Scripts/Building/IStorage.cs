@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public interface IStorage
 {
@@ -12,6 +14,8 @@ public interface IStorage
     int GetCurrentResourceAmount(ResourceType type);
     int GetMaxCapacity();
     int GetTotalCurrentAmount();
+
+    Dictionary<ResourceType, int> GetStoredResources();
     
     Vector3 GetPosition();
 }

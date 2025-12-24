@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a13b966229d51842bb9a1ed9a8fd656, type: 3}
   m_Name: Unit_Scout
   m_EditorClassIdentifier: 
-  unitName: Scout
+  unitName: "\uC815\uCC30 \uC720\uB2DB"
   unitIcon: {fileID: 4992164939788663360, guid: 41d81b85481201c44bb0e26872455946, type: 3}
   unitPrefab: {fileID: 6649466925040614564, guid: 5244335d034f9eb4aa9a1298502258db, type: 3}
   productionTime: 3

@@ -100,7 +100,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03d7316432f2d044db6aae7fc0e92c62, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stayInterval: 3
+  stayInterval: 1
   spriteRenderer: {fileID: 3175802879121171361}
   defaultColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   activeColor: {r: 0, g: 1, b: 0, a: 1}

@@ -1,101 +1,27 @@
-using System;
-using UnityEngine;
-using System.Collections.Generic;
-
-public class Battery : Damageable, IStorage
+public class Battery : BaseStorage
 {
-    public event Action<ResourceType, int, int> OnResourceChanged;
-
-    [Header("Storage Settings")]
-    [SerializeField] private int maxStorageAmount;
-
-    private int _currentAetherAmount;
-
-    private void Start()
+    public override bool TryAddResource(ResourceType type, int amount)
     {
-        currentHealth = maxHealth;
-        
-        OnResourceChanged?.Invoke(ResourceType.Aether, GetCurrentResourceAmount(ResourceType.Aether), GetMaxCapacity());
+        if (type != ResourceType.Aether) return false;
+        return base.TryAddResource(type, amount);
     }
 
-    private void OnDestroy()
+    public override bool TryWithdrawResource(ResourceType type, int amountToWithdraw, out int amountWithdrawn)
     {
-        if (ResourceManager.Instance != null)
-        {
-            ResourceManager.Instance.RemoveStorage(this);
-        }
-    }
-
-    public bool TryAddResource(ResourceType type, int amount)
-    {
-        if (type != ResourceType.Aether || _currentAetherAmount >= maxStorageAmount)
-        {
-            return false;
-        }
-
-        int canAddAmount = Mathf.Min(amount, maxStorageAmount - _currentAetherAmount);
-        _currentAetherAmount += canAddAmount;
-        
-        OnResourceChanged?.Invoke(ResourceType.Aether, _currentAetherAmount, maxStorageAmount);
-        ResourceManager.Instance.AddResource(ResourceType.Aether, canAddAmount); 
-        
-        return canAddAmount > 0;
-    }
-    
-    public bool TryWithdrawResource(ResourceType type, int amountToWithdraw, out int amountWithdrawn)
-    {
-        if (type != ResourceType.Aether || _currentAetherAmount <= 0)
+        if (type != ResourceType.Aether)
         {
             amountWithdrawn = 0;
             return false;
         }
-
-        amountWithdrawn = Mathf.Min(_currentAetherAmount, amountToWithdraw);
-        _currentAetherAmount -= amountWithdrawn;
-        
-        OnResourceChanged?.Invoke(ResourceType.Aether, _currentAetherAmount, maxStorageAmount);
-        
-        return true;
+        return base.TryWithdrawResource(type, amountToWithdraw, out amountWithdrawn);
     }
-    
-    public bool HasEnoughResources(ResourceCost[] costs)
+
+    public override bool HasEnoughResources(ResourceCost[] costs)
     {
-        int totalAetherNeeded = 0;
-        
         foreach (var cost in costs)
         {
-            if (cost.resourceType != ResourceType.Aether)
-            {
-                return false;
-            }
-            totalAetherNeeded += cost.amount;
+            if (cost.resourceType != ResourceType.Aether) return false;
         }
-
-        return _currentAetherAmount >= totalAetherNeeded;
-    }
-    
-    public int GetCurrentResourceAmount(ResourceType type)
-    {
-        if (type == ResourceType.Aether)
-        {
-            return _currentAetherAmount;
-        }
-        return 0;
-    }
-    
-    public int GetMaxCapacity()
-    {
-        return maxStorageAmount;
-    }
-    
-    public int GetTotalCurrentAmount()
-    {
-        return _currentAetherAmount;
-    }
-    
-    public Vector3 GetPosition()
-    {
-        return transform.position;
+        return base.HasEnoughResources(costs);
     }
 }
-

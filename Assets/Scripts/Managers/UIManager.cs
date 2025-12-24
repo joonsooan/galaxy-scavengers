@@ -1,14 +1,15 @@
 ﻿using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
 public class UIManager : MonoBehaviour
 {
-    [Header("Card Info Panel")]
-    [SerializeField] private GameObject cardInfoPanel;
-    [SerializeField] private TMP_Text cardNameText;
-    [SerializeField] private TMP_Text cardDescriptionText;
-    [SerializeField] private GameObject cardResourcePanel;
+    [Header("Building Info Panel")]
+    [SerializeField] private GameObject buildingInfoPanel;
+    [SerializeField] private TMP_Text buildingNameText;
+    [SerializeField] private TMP_Text buildingDescText;
+    [SerializeField] private GameObject buildingResourcePanel;
     [SerializeField] private GameObject resourceInfoCellPrefab;
 
     [Header("Recipe Info Panel")]
@@ -20,6 +21,12 @@ public class UIManager : MonoBehaviour
 
     [Header("Drone Hub Info Panel")]
     [SerializeField] private GameObject droneHubInfoPanel;
+    
+    [Header("Storage Info Panel")]
+    [SerializeField] private GameObject storageInfoPanel;
+    [SerializeField] private GameObject storageResourceListParent;
+    [SerializeField] private TMP_Text storageAmountText;
+    [SerializeField] private Vector2 storageUIPanelOffset = new (100f, 0f);
 
     [Header("Tips Reference")]
     [SerializeField] private GameObject tipPanel;
@@ -31,8 +38,6 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject tipRemainTimePanel;
     [SerializeField] private GameObject tipMineTypePanel;
     [SerializeField] private GameObject tipUnitMakeBtn;
-    private Processor _currentProcessor;
-    private DroneHub _currentDroneHub;
 
     private BuildingPieceData _pinnedBuildingPieceData;
     private ProcessorData _pinnedProcessorData;
@@ -48,28 +53,28 @@ public class UIManager : MonoBehaviour
     }
     
     private ActiveUIPanel _activeUIPanel = ActiveUIPanel.None;
+    private IStorage _trackedStorage;
 
     private void Start()
     {
-        if (cardInfoPanel != null) cardInfoPanel.SetActive(false);
+        if (buildingInfoPanel != null) buildingInfoPanel.SetActive(false);
         if (recipeInfoPanel != null) recipeInfoPanel.SetActive(false);
         if (processorInfoPanel != null) processorInfoPanel.SetActive(false);
         if (droneHubInfoPanel != null) droneHubInfoPanel.SetActive(false);
+        if (storageInfoPanel != null ) storageInfoPanel.SetActive(false);
     }
 
     private void Update()
     {
         if (Input.GetMouseButtonDown(1)) {
-            if (EventSystem.current.IsPointerOverGameObject()) {
-                return;
-            }
-            
-            // 건물 드래그 중인 경우 UI 숨기기 방지
-            if (GameManager.Instance != null && GameManager.Instance.IsDragging()) {
-                return;
-            }
-
+            if (EventSystem.current.IsPointerOverGameObject()) return;
+            if (GameManager.Instance != null && GameManager.Instance.IsDragging()) return;
             UnpinAndHideAllPanels();
+        }
+
+        if (storageInfoPanel.activeSelf && _trackedStorage != null)
+        {
+            UpdateStorageUIPosition();
         }
     }
 
@@ -90,8 +95,7 @@ public class UIManager : MonoBehaviour
         if (processor == null) return;
 
         HideCurrentIClickableUI();
-        
-        _currentProcessor = processor;
+
         _activeUIPanel = ActiveUIPanel.Processor;
         DisplayProcessorInfo(processor);
     }
@@ -101,8 +105,7 @@ public class UIManager : MonoBehaviour
         if (droneHub == null) return;
 
         HideCurrentIClickableUI();
-        
-        _currentDroneHub = droneHub;
+
         _activeUIPanel = ActiveUIPanel.DroneHub;
         DisplayDroneHubInfo(droneHub);
     }
@@ -115,14 +118,12 @@ public class UIManager : MonoBehaviour
                 if (processorInfoPanel != null) {
                     processorInfoPanel.gameObject.SetActive(false);
                 }
-                _currentProcessor = null;
                 break;
                 
             case ActiveUIPanel.DroneHub:
                 if (droneHubInfoPanel != null) {
                     droneHubInfoPanel.gameObject.SetActive(false);
                 }
-                _currentDroneHub = null;
                 break;
                 
             case ActiveUIPanel.MainStructure:
@@ -135,24 +136,26 @@ public class UIManager : MonoBehaviour
 
     private void HideMainStructureInventory()
     {
-        MainStructure mainStructure = UnityEngine.Object.FindFirstObjectByType<MainStructure>();
+        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
         InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
-        GameObject inventoryPanel = inventorySystem.GetInventoryPanel();
+        inventorySystem.GetInventoryPanel();
         inventorySystem.ToggleInventory();
     }
 
     public void ShowMainStructureUI()
     {
         HideCurrentIClickableUI();
-        
+        UnpinAndHideAllPanels();
         _activeUIPanel = ActiveUIPanel.MainStructure;
     }
 
     public void UnpinAndHideAllPanels()
     {
         _pinnedBuildingPieceData = null;
-        if (cardInfoPanel != null) {
-            cardInfoPanel.SetActive(false);
+        if (buildingInfoPanel != null)
+        {
+            if (GameManager.Instance.IsDragging()) return;
+            buildingInfoPanel.SetActive(false);
         }
 
         _pinnedRecipeData = null;
@@ -169,6 +172,12 @@ public class UIManager : MonoBehaviour
         if (droneHubInfoPanel != null) {
             droneHubInfoPanel.SetActive(false);
         }
+        
+        if (storageInfoPanel != null)
+        {
+            storageInfoPanel.SetActive(false);
+            _trackedStorage = null;
+        }
 
         HideCurrentIClickableUI();
     }
@@ -176,13 +185,13 @@ public class UIManager : MonoBehaviour
     public void DisplayCardInfo(BuildingPieceData data)
     {
         if (data == null) return;
-        cardInfoPanel.SetActive(true);
-        cardNameText.text = data.displayName;
-        cardDescriptionText.text = data.description;
+        buildingInfoPanel.SetActive(true);
+        buildingNameText.text = data.displayName;
+        buildingDescText.text = data.description;
 
-        foreach (Transform child in cardResourcePanel.transform) Destroy(child.gameObject);
+        foreach (Transform child in buildingResourcePanel.transform) Destroy(child.gameObject);
         foreach (ResourceCost cost in data.costs) {
-            GameObject cell = Instantiate(resourceInfoCellPrefab, cardResourcePanel.transform);
+            GameObject cell = Instantiate(resourceInfoCellPrefab, buildingResourcePanel.transform);
             cell.GetComponent<ResourceInfoCell>().SetInfo(cost.resourceType, cost.amount);
         }
     }
@@ -190,7 +199,7 @@ public class UIManager : MonoBehaviour
     public void HideCardInfo()
     {
         if (_pinnedBuildingPieceData == null) {
-            cardInfoPanel.SetActive(false);
+            buildingInfoPanel.SetActive(false);
         }
         else {
             DisplayCardInfo(_pinnedBuildingPieceData);
@@ -211,8 +220,8 @@ public class UIManager : MonoBehaviour
     public void UnpinAndHideCardPanel()
     {
         _pinnedBuildingPieceData = null;
-        if (cardInfoPanel != null) {
-            cardInfoPanel.SetActive(false);
+        if (buildingInfoPanel != null) {
+            buildingInfoPanel.SetActive(false);
         }
     }
 
@@ -260,7 +269,6 @@ public class UIManager : MonoBehaviour
 
         if (_pinnedProcessorData == null) {
             processorInfoPanel.gameObject.SetActive(false);
-            _currentProcessor = null;
             if (_activeUIPanel == ActiveUIPanel.Processor) {
                 _activeUIPanel = ActiveUIPanel.None;
             }
@@ -279,7 +287,6 @@ public class UIManager : MonoBehaviour
         else {
             UnpinAndHideAllPanels();
             _pinnedProcessorData = data;
-            _currentProcessor = processor;
             DisplayProcessorInfo(processor);
         }
     }
@@ -297,7 +304,6 @@ public class UIManager : MonoBehaviour
 
         if (_pinnedDroneHubData == null) {
             droneHubInfoPanel.gameObject.SetActive(false);
-            _currentDroneHub = null;
             if (_activeUIPanel == ActiveUIPanel.DroneHub) {
                 _activeUIPanel = ActiveUIPanel.None;
             }
@@ -316,11 +322,75 @@ public class UIManager : MonoBehaviour
         else {
             UnpinAndHideAllPanels();
             _pinnedDroneHubData = data;
-            _currentDroneHub = droneHub;
             DisplayDroneHubInfo(droneHub);
         }
     }
+    
+    public void DisplayStorageInfo(IStorage storage)
+    {
+        if (storageInfoPanel == null || storage == null) return;
 
+        _trackedStorage = storage;
+        storageInfoPanel.SetActive(true);
+        UpdateStorageUIPosition();
+
+        Transform parent = storageResourceListParent != null ? storageResourceListParent.transform : storageInfoPanel.transform;
+
+        bool isFirstChild = true;
+        foreach (Transform child in parent)
+        {
+            if (isFirstChild)
+            {
+                isFirstChild = false;
+            }
+            else
+            {
+                Destroy(child.gameObject);
+            }
+        }
+
+        Dictionary<ResourceType, int> resources = storage.GetStoredResources();
+        int maxCapacity = storage.GetMaxCapacity();
+        int totalAmount = 0;
+        
+        foreach (var kvp in resources)
+        {
+            if (kvp.Value > 0)
+            {
+                GameObject cell = Instantiate(resourceInfoCellPrefab, parent);
+                ResourceInfoCell cellScript = cell.GetComponent<ResourceInfoCell>();
+                if (cellScript != null)
+                {
+                    cellScript.SetInfo(kvp.Key, kvp.Value);
+                    totalAmount += kvp.Value;
+                }
+            }
+        }
+        
+        storageAmountText.text =  $"{totalAmount.ToString()}/{maxCapacity.ToString()}";
+    }
+    
+    public void HideStorageInfo()
+    {
+        if (storageInfoPanel != null)
+        {
+            storageInfoPanel.SetActive(false);
+        }
+    }
+    
+    private void UpdateStorageUIPosition()
+    {
+        if (_trackedStorage == null || Camera.main == null) return;
+
+        Vector3 worldPos = _trackedStorage.GetPosition();
+        Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos);
+
+        screenPos.x += storageUIPanelOffset.x;
+        screenPos.y += storageUIPanelOffset.y;
+
+        storageInfoPanel.transform.position = screenPos;
+    }
+    
     public void ToggleRecipePanel()
     {
         if (recipeInfoPanel == null) return;
@@ -342,8 +412,6 @@ public class UIManager : MonoBehaviour
         bool isActive = !tipPanel.activeSelf;
         tipPanel.SetActive(isActive);
     }
-
-    // Tips UI : Display
 
     public void DisplayResourcePanel()
     {

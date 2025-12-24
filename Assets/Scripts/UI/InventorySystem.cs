@@ -55,7 +55,7 @@ public class InventorySystem : MonoBehaviour
 
         if (inventoryPanel != null)
         {
-            inventoryPanel.SetActive(false);
+            HideInventoryPanel();
         }
 
         if (currentResourcePanel != null)
@@ -67,9 +67,21 @@ public class InventorySystem : MonoBehaviour
         SubscribeToResourceEvents();
     }
 
+    private void HideInventoryPanel()
+    {
+        inventoryPanel.SetActive(false);
+    }
+    
+    private void HideInventoryPanel(Damageable _)
+    {
+        inventoryPanel.SetActive(false);
+    }
+
     private void OnEnable()
     {
         SubscribeToResourceEvents();
+        DroneHub.OnDroneHubClicked += HideInventoryPanel;
+        Processor.OnProcessorClicked += HideInventoryPanel;
     }
 
     private void SubscribeToResourceEvents()
@@ -83,6 +95,8 @@ public class InventorySystem : MonoBehaviour
     private void OnDisable()
     {
         ResourceManager.OnResourceAmountChanged -= UpdateResourceInfoCells;
+        DroneHub.OnDroneHubClicked -= HideInventoryPanel;
+        Processor.OnProcessorClicked -= HideInventoryPanel;
     }
 
     private void InitializeMaxStackAmounts()

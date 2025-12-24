@@ -2,7 +2,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -18,7 +17,6 @@ public class GameManager : MonoBehaviour
     private DisplayableData _activeCardData;
 
     private bool _isPaused;
-    private Coroutine _quotaCoroutine;
     public static GameManager Instance { get; private set; }
 
     private void Awake()
@@ -102,16 +100,15 @@ public class GameManager : MonoBehaviour
 
     public void EndDrag()
     {
+        if (uiManager != null) {
+            uiManager.UnpinAndHideAllPanels();
+        }
+        
         if (cardDragger != null) {
             cardDragger.EndDrag();
         }
         _activeCardData = null;
         onEndDrag?.Invoke();
-        uiManager?.UnpinAndHideCardPanel();
-
-        if (uiManager != null) {
-            uiManager.UnpinAndHideAllPanels();
-        }
     }
 
     public bool IsDragging()
@@ -141,7 +138,6 @@ public class GameManager : MonoBehaviour
 
     private void InitializeGameScene()
     {
-        FindFirstObjectByType<Slider>();
         mapGenerator = FindFirstObjectByType<MapGenerator>();
         uiManager = FindFirstObjectByType<UIManager>();
         cardDragger = FindFirstObjectByType<CardDragger>();

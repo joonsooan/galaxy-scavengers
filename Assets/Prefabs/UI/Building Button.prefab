@@ -65,9 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Name
-
-    Name'
+  m_text: Building
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1f55a221e169b4b41adc70f72323c1d6, type: 2}
   m_sharedMaterial: {fileID: -731586743875455862, guid: 1f55a221e169b4b41adc70f72323c1d6, type: 2}
@@ -273,7 +271,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 59f19b0d82bde084bb556482dc7741a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  comboCardData: {fileID: 11400000, guid: cc2ff3c9faf0e9142800037ebb18e402, type: 2}
+  buildingData: {fileID: 0}
   icon: {fileID: 8872987571468748854}
   btnName: {fileID: 3926490804507190757}
   closePanelOnClick: 0

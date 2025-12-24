@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a13b966229d51842bb9a1ed9a8fd656, type: 3}
   m_Name: Unit_Lifter
   m_EditorClassIdentifier: 
-  unitName: Lifter
-  unitIcon: {fileID: 4992164939788663360, guid: 41d81b85481201c44bb0e26872455946, type: 3}
+  unitName: "\uCC44\uAD74 \uC720\uB2DB"
+  unitIcon: {fileID: 3751741419470782174, guid: 41d81b85481201c44bb0e26872455946, type: 3}
   unitPrefab: {fileID: 6649466925040614564, guid: 5a38edecd5297e84d9adb4995b37971b, type: 3}
   productionTime: 3
   productionCosts:
