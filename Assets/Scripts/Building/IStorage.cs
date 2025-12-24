@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public interface IStorage : IPointerEnterHandler, IPointerExitHandler
+public interface IStorage
 {
     event Action<ResourceType, int, int> OnResourceChanged; 
     

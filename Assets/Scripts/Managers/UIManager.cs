@@ -11,7 +11,6 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TMP_Text buildingDescText;
     [SerializeField] private GameObject buildingResourcePanel;
     [SerializeField] private GameObject resourceInfoCellPrefab;
-    [SerializeField] private GameObject resourceInfoCellX2Prefab;
 
     [Header("Recipe Info Panel")]
     [SerializeField] private GameObject recipeInfoPanel;
@@ -26,6 +25,7 @@ public class UIManager : MonoBehaviour
     [Header("Storage Info Panel")]
     [SerializeField] private GameObject storageInfoPanel;
     [SerializeField] private GameObject storageResourceListParent;
+    [SerializeField] private TMP_Text storageAmountText;
     [SerializeField] private Vector2 storageUIPanelOffset = new (100f, 0f);
 
     [Header("Tips Reference")]
@@ -53,6 +53,7 @@ public class UIManager : MonoBehaviour
     }
     
     private ActiveUIPanel _activeUIPanel = ActiveUIPanel.None;
+    private IStorage _trackedStorage;
 
     private void Start()
     {
@@ -66,15 +67,14 @@ public class UIManager : MonoBehaviour
     private void Update()
     {
         if (Input.GetMouseButtonDown(1)) {
-            if (EventSystem.current.IsPointerOverGameObject()) {
-                return;
-            }
-            
-            if (GameManager.Instance != null && GameManager.Instance.IsDragging()) {
-                return;
-            }
-
+            if (EventSystem.current.IsPointerOverGameObject()) return;
+            if (GameManager.Instance != null && GameManager.Instance.IsDragging()) return;
             UnpinAndHideAllPanels();
+        }
+
+        if (storageInfoPanel.activeSelf && _trackedStorage != null)
+        {
+            UpdateStorageUIPosition();
         }
     }
 
@@ -176,6 +176,7 @@ public class UIManager : MonoBehaviour
         if (storageInfoPanel != null)
         {
             storageInfoPanel.SetActive(false);
+            _trackedStorage = null;
         }
 
         HideCurrentIClickableUI();
@@ -329,31 +330,44 @@ public class UIManager : MonoBehaviour
     {
         if (storageInfoPanel == null || storage == null) return;
 
+        _trackedStorage = storage;
         storageInfoPanel.SetActive(true);
-        PositionStoragePanel(storage.GetPosition());
+        UpdateStorageUIPosition();
 
         Transform parent = storageResourceListParent != null ? storageResourceListParent.transform : storageInfoPanel.transform;
+
+        bool isFirstChild = true;
         foreach (Transform child in parent)
         {
-            Destroy(child.gameObject);
+            if (isFirstChild)
+            {
+                isFirstChild = false;
+            }
+            else
+            {
+                Destroy(child.gameObject);
+            }
         }
 
         Dictionary<ResourceType, int> resources = storage.GetStoredResources();
-
-        // bool hasResource = false;
+        int maxCapacity = storage.GetMaxCapacity();
+        int totalAmount = 0;
+        
         foreach (var kvp in resources)
         {
             if (kvp.Value > 0)
             {
-                // hasResource = true;
-                GameObject cell = Instantiate(resourceInfoCellX2Prefab, parent);
+                GameObject cell = Instantiate(resourceInfoCellPrefab, parent);
                 ResourceInfoCell cellScript = cell.GetComponent<ResourceInfoCell>();
                 if (cellScript != null)
                 {
-                    cellScript.SetInfo(kvp.Key, kvp.Value); 
+                    cellScript.SetInfo(kvp.Key, kvp.Value);
+                    totalAmount += kvp.Value;
                 }
             }
         }
+        
+        storageAmountText.text =  $"{totalAmount.ToString()}/{maxCapacity.ToString()}";
     }
     
     public void HideStorageInfo()
@@ -364,10 +378,11 @@ public class UIManager : MonoBehaviour
         }
     }
     
-    private void PositionStoragePanel(Vector3 worldPos)
+    private void UpdateStorageUIPosition()
     {
-        if (Camera.main == null) return;
+        if (_trackedStorage == null || Camera.main == null) return;
 
+        Vector3 worldPos = _trackedStorage.GetPosition();
         Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos);
 
         screenPos.x += storageUIPanelOffset.x;
@@ -375,7 +390,7 @@ public class UIManager : MonoBehaviour
 
         storageInfoPanel.transform.position = screenPos;
     }
-
+    
     public void ToggleRecipePanel()
     {
         if (recipeInfoPanel == null) return;

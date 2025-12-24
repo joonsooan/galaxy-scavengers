@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a13b966229d51842bb9a1ed9a8fd656, type: 3}
   m_Name: Unit_Construct
   m_EditorClassIdentifier: 
-  unitName: Constructor
-  unitIcon: {fileID: -9113289940015720193, guid: 9a7eda586a52e9c4cbc0af50088074ba, type: 3}
+  unitName: "\uAC74\uC124 \uC720\uB2DB"
+  unitIcon: {fileID: -954737804633247596, guid: f68a2c2ba69b5c4439f66435f175067e, type: 3}
   unitPrefab: {fileID: 6649466925040614564, guid: 20209a0e29d055c4b8ec63641b9ca28e, type: 3}
   productionTime: 3
   productionCosts:
