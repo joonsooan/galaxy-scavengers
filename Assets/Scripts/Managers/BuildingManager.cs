@@ -623,6 +623,66 @@ public class BuildingManager : MonoBehaviour
         _placedPieces.TryGetValue(cellPosition, out BuildingPiece piece);
         return piece;
     }
+    
+    public void ClearConstructionSiteData(Vector3Int anchorCell, BuildingData buildingData)
+    {
+        if (buildingData == null || buildingData.recipe == null) return;
+        
+        HashSet<Vector3Int> structuresDestroyed = new HashSet<Vector3Int>();
+        
+        foreach (BuildingData.BuildingPiece piece in buildingData.recipe)
+        {
+            Vector3Int cellPos = anchorCell + piece.relativePosition;
+            
+            // Clear temporary tile
+            if (_temporaryTiles.Contains(cellPos))
+            {
+                _temporaryTiles.Remove(cellPos);
+                if (buildingTilemap != null && buildingTilemap.HasTile(cellPos))
+                {
+                    buildingTilemap.SetTile(cellPos, null);
+                    OnTilemapChanged?.Invoke(cellPos);
+                }
+            }
+            
+            // Destroy building piece if it exists
+            if (_placedPieces.TryGetValue(cellPos, out BuildingPiece pieceObj))
+            {
+                // Check if this piece is part of a building structure
+                if (_cellToStructureMap.TryGetValue(cellPos, out BuildingStructure structure))
+                {
+                    // This piece is part of a building structure - destroy the entire structure
+                    // But only destroy each structure once
+                    if (!structuresDestroyed.Contains(structure.anchor))
+                    {
+                        structuresDestroyed.Add(structure.anchor);
+                        ClearBuildingDataAt(structure.anchor);
+                    }
+                }
+                else
+                {
+                    // Not part of a structure, just destroy the piece
+                    if (pieceObj != null)
+                    {
+                        Destroy(pieceObj.gameObject);
+                    }
+                    _placedPieces.Remove(cellPos);
+                    
+                    // Clear tile if it exists
+                    if (buildingTilemap != null && buildingTilemap.HasTile(cellPos))
+                    {
+                        buildingTilemap.SetTile(cellPos, null);
+                        OnTilemapChanged?.Invoke(cellPos);
+                    }
+                }
+            }
+        }
+        
+        if (buildingTilemap != null)
+        {
+            buildingTilemap.RefreshAllTiles();
+        }
+    }
 
     private void RemoveBuildingPieceAtPosition(Vector3Int cellPos)
     {

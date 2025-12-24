@@ -30,9 +30,13 @@ public class MainControlPanel : MonoBehaviour
         Processor.OnProcessorClicked -= HideBuildingInfoPanel;
     }
     
+    
+    private AreaBuildingDestroyer _areaBuildingDestroyer;
+    
     private void Start()
     {
-        _buildingInfoPanelComponent =  buildingInfoPanel.GetComponent<BuildingInfoPanel>(); 
+        _buildingInfoPanelComponent =  buildingInfoPanel.GetComponent<BuildingInfoPanel>();
+        _areaBuildingDestroyer = FindFirstObjectByType<AreaBuildingDestroyer>();
         
         if (baseBuildingBtn != null)
         {
@@ -61,8 +65,38 @@ public class MainControlPanel : MonoBehaviour
                 return;
             }
             
+            // Don't hide panels if area building destroyer is active and will handle the drag
+            if (_areaBuildingDestroyer != null)
+            {
+                // Let the destroyer handle it - it will start dragging
+                return;
+            }
+            
             if (GameManager.Instance != null && GameManager.Instance.IsDragging()) {
                 _buildingInfoPanelComponent.ClearAllInfo();
+                return;
+            }
+            HideAllPanels();
+            _buildingInfoPanelComponent.ClearAllInfo();
+        }
+        
+        // Handle right-click up for non-drag clicks
+        if (Input.GetMouseButtonUp(1))
+        {
+            if (EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
+            
+            // Only hide panels if it was a quick click (not a drag)
+            if (_areaBuildingDestroyer != null && _areaBuildingDestroyer.IsDragging && _areaBuildingDestroyer.HasMoved)
+            {
+                // Was a drag, don't hide panels
+                return;
+            }
+            
+            // Quick click - hide panels
+            if (GameManager.Instance != null && GameManager.Instance.IsDragging()) {
                 return;
             }
             HideAllPanels();
