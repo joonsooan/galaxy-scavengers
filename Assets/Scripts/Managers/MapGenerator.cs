@@ -79,8 +79,8 @@ public class MapGenerator : MonoBehaviour
     
     [Header("Enemy Spawn Hole - Gizmo Settings")]
     [SerializeField] private bool showEnemySpawnHoleGizmos = true;
-    [SerializeField] private Color enemySpawnHoleGizmoColor = new Color(1f, 0f, 0f, 0.5f);
-    [SerializeField] private Color concentricCircleGizmoColor = new Color(1f, 1f, 0f, 0.3f);
+    [SerializeField] private Color enemySpawnHoleGizmoColor = new (1f, 0f, 0f, 0.5f);
+    [SerializeField] private Color concentricCircleGizmoColor = new (1f, 1f, 0f, 0.3f);
     
     [Header("Enemy Territory Settings")]
     [SerializeField] private float enemyHomeRadius = 3f;
@@ -236,8 +236,6 @@ public class MapGenerator : MonoBehaviour
         if (groundTilemap != null) groundTilemap.CompressBounds();
         if (lowWallTilemap != null) lowWallTilemap.CompressBounds();
         if (highWallTilemap != null) highWallTilemap.CompressBounds();
-        
-        SetupCameraController();
         
         if (FogOfWarManager.Instance != null)
         {
@@ -726,20 +724,6 @@ public class MapGenerator : MonoBehaviour
     {
         _mapCenterXOffset = width / 2;
         _mapCenterYOffset = height / 2;
-    }
-    
-    private void SetupCameraController()
-    {
-        if (groundTilemap == null || groundTilemap.cellBounds.size.x == 0) return;
-        
-        Bounds combinedBounds = groundTilemap.localBounds;
-        Vector3 worldCenter = groundTilemap.transform.TransformPoint(combinedBounds.center);
-        Vector3 worldSize = Vector3.Scale(combinedBounds.size, groundTilemap.transform.lossyScale);
-        
-        if (Camera.main != null && Camera.main.TryGetComponent<CameraController>(out var cameraController))
-        {
-            cameraController.SetBounds(new Bounds(worldCenter, worldSize));
-        }
     }
     
     private TileBase GetTileForPosition(int x, int y)
