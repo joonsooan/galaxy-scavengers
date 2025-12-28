@@ -3355,9 +3355,9 @@ MonoBehaviour:
   highWallTilemap: {fileID: 860813986}
   grid: {fileID: 2115591665}
   groundTile: {fileID: 11400000, guid: 7d463f590028a4e46a4251ccd769d5d4, type: 2}
-  lowWallTile: {fileID: 11400000, guid: 324d324c90e6ea94c906f282562404e7, type: 2}
+  lowWallTile: {fileID: 11400000, guid: c754ad168ae5c2a4fa94b6586cf103fe, type: 2}
   highWallTile: {fileID: 11400000, guid: eb928c309a2c05447bd982efd65ef475, type: 2}
-  wallTile: {fileID: 11400000, guid: 324d324c90e6ea94c906f282562404e7, type: 2}
+  wallTile: {fileID: 11400000, guid: c754ad168ae5c2a4fa94b6586cf103fe, type: 2}
   enemyHomeTile: {fileID: 11400000, guid: a1537402c07c3394592fb0ee3ff9b0b7, type: 2}
   enemyTerritoryTile: {fileID: 11400000, guid: cd3ec6303b4b8754fb684445a525d2b4, type: 2}
   width: 192
@@ -6509,7 +6509,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalPosition: {x: 0, y: 0, z: -40}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
