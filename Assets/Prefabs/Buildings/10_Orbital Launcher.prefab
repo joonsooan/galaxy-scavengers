@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6865986198788389803}
   - component: {fileID: 6139965253639955503}
   - component: {fileID: 7205248449290787444}
+  - component: {fileID: 1085220881149579309}
   m_Layer: 0
   m_Name: 10_Orbital Launcher
   m_TagString: Untagged
@@ -122,3 +123,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   visionRange: 4.5
   isActive: 1
+--- !u!114 &1085220881149579309
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1574451153020646121}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8cf13da5304644147ac30ec6b7387fd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

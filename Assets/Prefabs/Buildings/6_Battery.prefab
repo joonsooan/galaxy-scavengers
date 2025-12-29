@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: -6061306705261559489}
   - component: {fileID: 3827199288077238633}
   - component: {fileID: 4917661746267958598}
+  - component: {fileID: -5983112098264460423}
   m_Layer: 0
   m_Name: 6_Battery
   m_TagString: Untagged
@@ -128,7 +129,7 @@ BoxCollider2D:
   m_Offset: {x: 0.5, y: 0.5}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.16666667}
+    pivot: {x: 0.5, y: 0.5}
     oldSize: {x: 1, y: 3}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
@@ -153,6 +154,7 @@ MonoBehaviour:
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
   maxStorageAmount: 200
+  hoverDelay: 0.3
 --- !u!114 &3827199288077238633
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -204,7 +206,7 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 1}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.16666667}
+    pivot: {x: 0.5, y: 0.5}
     oldSize: {x: 1, y: 3}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
@@ -213,3 +215,15 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 3}
   m_EdgeRadius: 0
+--- !u!114 &-5983112098264460423
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1574451153020646121}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8cf13da5304644147ac30ec6b7387fd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
