@@ -32,6 +32,8 @@ public class CameraTargetController : MonoBehaviour
     private int _currentZoomIndex;
     private readonly int[] _zoomDivisors = { 1, 2, 4 };
     private readonly float[] _speedMultipliers = { 1f, 1.5f, 2.5f };
+    private Vector3[] _zoomLevelPositions;
+    private bool[] _zoomLevelInitialized;
     
     private void Awake()
     {
@@ -53,6 +55,14 @@ public class CameraTargetController : MonoBehaviour
 
         _defaultPanSpeed = panSpeed;
         _defaultEdgePanSpeed = edgePanSpeed;
+        
+        _zoomLevelPositions = new Vector3[zoomCameras.Length];
+        _zoomLevelInitialized = new bool[zoomCameras.Length];
+        for (int i = 0; i < _zoomLevelPositions.Length; i++)
+        {
+            _zoomLevelPositions[i] = transform.position;
+            _zoomLevelInitialized[i] = false;
+        }
         
         InitializeMapBounds();
         UpdateActiveCamera();
@@ -105,7 +115,19 @@ public class CameraTargetController : MonoBehaviour
     {
         if (!_hasBounds) return;
         
-        int currentDivisor = _zoomDivisors[_currentZoomIndex];
+        GetBoundsForZoomLevel(_currentZoomIndex, out float minX, out float maxX, out float minY, out float maxY);
+        
+        Vector3 pos = _zoomLevelPositions[_currentZoomIndex];
+        pos.x = Mathf.Clamp(pos.x, minX, maxX);
+        pos.y = Mathf.Clamp(pos.y, minY, maxY);
+        
+        _zoomLevelPositions[_currentZoomIndex] = pos;
+        transform.position = pos;
+    }
+    
+    private void GetBoundsForZoomLevel(int zoomIndex, out float minX, out float maxX, out float minY, out float maxY)
+    {
+        int currentDivisor = _zoomDivisors[zoomIndex];
         float currentPPU = (float)_defaultPpu / currentDivisor;
         
         float vertExtent;
@@ -120,16 +142,10 @@ public class CameraTargetController : MonoBehaviour
         
         float horzExtent = vertExtent * _mainCamera.aspect;
 
-        float minX = _mapBounds.min.x + horzExtent;
-        float maxX = _mapBounds.max.x - horzExtent;
-        float minY = _mapBounds.min.y + vertExtent;
-        float maxY = _mapBounds.max.y - vertExtent;
-
-        Vector3 pos = transform.position;
-        pos.x = Mathf.Clamp(pos.x, minX, maxX);
-        pos.y = Mathf.Clamp(pos.y, minY, maxY);
-        
-        transform.position = pos;
+        minX = _mapBounds.min.x + horzExtent;
+        maxX = _mapBounds.max.x - horzExtent;
+        minY = _mapBounds.min.y + vertExtent;
+        maxY = _mapBounds.max.y - vertExtent;
     }
 
     private void HandlePlayerInput()
@@ -148,6 +164,10 @@ public class CameraTargetController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.H))
         {
+            for (int i = 0; i < _zoomLevelPositions.Length; i++)
+            {
+                _zoomLevelPositions[i] = Vector3.zero;
+            }
             transform.position = Vector3.zero;
             _currentZoomIndex = 0;
             UpdateActiveCamera();
@@ -199,13 +219,26 @@ public class CameraTargetController : MonoBehaviour
 
         if (hasInput)
         {
-            transform.Translate(finalDirection * currentPanSpeed * Time.unscaledDeltaTime, Space.World);
+            Vector3 movement = finalDirection * currentPanSpeed * Time.unscaledDeltaTime;
+            for (int i = 0; i < _zoomLevelPositions.Length; i++)
+            {
+                Vector3 newPos = _zoomLevelPositions[i] + movement;
+                
+                GetBoundsForZoomLevel(i, out float minX, out float maxX, out float minY, out float maxY);
+                newPos.x = Mathf.Clamp(newPos.x, minX, maxX);
+                newPos.y = Mathf.Clamp(newPos.y, minY, maxY);
+                
+                _zoomLevelPositions[i] = newPos;
+            }
+            transform.position = _zoomLevelPositions[_currentZoomIndex];
         }
         
         if (!_isManualMode && followTarget != null)
         {
             Vector3 targetPosition = new Vector3(followTarget.position.x, followTarget.position.y, transform.position.z);
-            transform.position = Vector3.Lerp(transform.position, targetPosition, smoothing * Time.unscaledDeltaTime);
+            Vector3 newPos = Vector3.Lerp(_zoomLevelPositions[_currentZoomIndex], targetPosition, smoothing * Time.unscaledDeltaTime);
+            _zoomLevelPositions[_currentZoomIndex] = newPos;
+            transform.position = newPos;
         }
     }
 
@@ -215,16 +248,47 @@ public class CameraTargetController : MonoBehaviour
         if (scroll == 0 || _pixelPerfCam == null) return;
 
         int prevIndex = _currentZoomIndex;
+        int newIndex = prevIndex;
 
         if (scroll < 0)
-            _currentZoomIndex++;
+            newIndex++;
         else
-            _currentZoomIndex--;
+            newIndex--;
 
-        _currentZoomIndex = Mathf.Clamp(_currentZoomIndex, 0, zoomCameras.Length - 1);
+        newIndex = Mathf.Clamp(newIndex, 0, zoomCameras.Length - 1);
 
-        if (prevIndex != _currentZoomIndex)
+        if (prevIndex != newIndex)
         {
+            // Save current position for the previous zoom level
+            _zoomLevelPositions[prevIndex] = transform.position;
+            _zoomLevelInitialized[prevIndex] = true;
+            
+            // Determine if zooming in (higher index) or out (lower index)
+            bool isZoomingIn = newIndex > prevIndex;
+            Vector3 newPosition;
+            
+            if (isZoomingIn)
+            {
+                // When zooming in, use the position from the previous (lower) zoom level
+                newPosition = _zoomLevelPositions[prevIndex];
+            }
+            else
+            {
+                // When zooming out, calculate position based on current position clamped to new bounds
+                GetBoundsForZoomLevel(newIndex, out float minX, out float maxX, out float minY, out float maxY);
+                Vector3 pos = transform.position;
+                pos.x = Mathf.Clamp(pos.x, minX, maxX);
+                pos.y = Mathf.Clamp(pos.y, minY, maxY);
+                newPosition = pos;
+            }
+            
+            // Update position BEFORE changing zoom
+            transform.position = newPosition;
+            _zoomLevelPositions[newIndex] = newPosition;
+            _zoomLevelInitialized[newIndex] = true;
+            
+            // Now update the zoom level and camera settings
+            _currentZoomIndex = newIndex;
             UpdateActiveCamera();
         }
     }
@@ -250,6 +314,7 @@ public class CameraTargetController : MonoBehaviour
             edgePanSpeed = _defaultEdgePanSpeed * multiplier;
         }
         
+        // Position is already set before this is called, just ensure it's clamped
         ClampTargetPosition();
     }
 }
