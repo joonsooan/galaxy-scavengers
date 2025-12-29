@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
+[DefaultExecutionOrder(-100)]
 public class UIManager : MonoBehaviour
 {
     [Header("Building Info Panel")]
@@ -54,6 +55,7 @@ public class UIManager : MonoBehaviour
     
     private ActiveUIPanel _activeUIPanel = ActiveUIPanel.None;
     private IStorage _trackedStorage;
+    private AreaBuildingDestroyer _areaBuildingDestroyer;
 
     private void Start()
     {
@@ -62,13 +64,26 @@ public class UIManager : MonoBehaviour
         if (processorInfoPanel != null) processorInfoPanel.SetActive(false);
         if (droneHubInfoPanel != null) droneHubInfoPanel.SetActive(false);
         if (storageInfoPanel != null ) storageInfoPanel.SetActive(false);
+        
+        _areaBuildingDestroyer = FindFirstObjectByType<AreaBuildingDestroyer>();
     }
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(1)) {
+        if (Input.GetMouseButtonUp(1)) {
             if (EventSystem.current.IsPointerOverGameObject()) return;
             if (GameManager.Instance != null && GameManager.Instance.IsDragging()) return;
+            
+            if (_areaBuildingDestroyer != null && _areaBuildingDestroyer.HasMoved)
+            {
+                return;
+            }
+            
+            if (_areaBuildingDestroyer != null && _areaBuildingDestroyer.JustFinishedAreaDrag)
+            {
+                return;
+            }
+            
             UnpinAndHideAllPanels();
         }
 
@@ -155,6 +170,17 @@ public class UIManager : MonoBehaviour
         if (buildingInfoPanel != null)
         {
             if (GameManager.Instance.IsDragging()) return;
+            
+            if (_areaBuildingDestroyer != null && _areaBuildingDestroyer.HasMoved)
+            {
+                return;
+            }
+            
+            if (_areaBuildingDestroyer != null && _areaBuildingDestroyer.JustFinishedAreaDrag)
+            {
+                return;
+            }
+            
             buildingInfoPanel.SetActive(false);
         }
 

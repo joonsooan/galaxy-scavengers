@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
+[DefaultExecutionOrder(-100)]
 public class MainControlPanel : MonoBehaviour
 {
     [Header("Buttons")]
@@ -30,9 +31,13 @@ public class MainControlPanel : MonoBehaviour
         Processor.OnProcessorClicked -= HideBuildingInfoPanel;
     }
     
+    
+    private AreaBuildingDestroyer _areaBuildingDestroyer;
+    
     private void Start()
     {
-        _buildingInfoPanelComponent =  buildingInfoPanel.GetComponent<BuildingInfoPanel>(); 
+        _buildingInfoPanelComponent =  buildingInfoPanel.GetComponent<BuildingInfoPanel>();
+        _areaBuildingDestroyer = FindFirstObjectByType<AreaBuildingDestroyer>();
         
         if (baseBuildingBtn != null)
         {
@@ -54,9 +59,19 @@ public class MainControlPanel : MonoBehaviour
     
     private void Update()
     {
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonUp(1))
         {
             if (EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
+            
+            if (_areaBuildingDestroyer != null && _areaBuildingDestroyer.HasMoved)
+            {
+                return;
+            }
+            
+            if (_areaBuildingDestroyer != null && _areaBuildingDestroyer.JustFinishedAreaDrag)
             {
                 return;
             }
@@ -65,6 +80,7 @@ public class MainControlPanel : MonoBehaviour
                 _buildingInfoPanelComponent.ClearAllInfo();
                 return;
             }
+            
             HideAllPanels();
             _buildingInfoPanelComponent.ClearAllInfo();
         }
