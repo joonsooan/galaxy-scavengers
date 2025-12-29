@@ -7,95 +7,62 @@ public class CameraTargetController : MonoBehaviour
 {
     [Header("Cinemachine Cameras")]
     public CinemachineCamera[] zoomCameras;
-    
+
     [Header("Controls")]
     public float panSpeed = 10f;
     public float edgePanSpeed = 20f;
     public float panBorderThickness = 10f;
-    public float smoothing = 5f; 
+    public float smoothing = 5f;
 
-    private bool _isManualMode;
-    private Vector3 _direction;
-    private Camera _mainCamera;
-    
     public Transform followTarget;
     public MapGenerator mapGenerator;
-    private Bounds _mapBounds;
+    private readonly float[] _speedMultipliers = { 1f, 1.5f, 2.5f };
+    private readonly int[] _zoomDivisors = { 1, 2, 4 };
+
+    private int _currentZoomIndex;
+    private float _defaultEdgePanSpeed;
+    private float _defaultPanSpeed;
+    private int _defaultPpu;
+    private Vector3 _direction;
     private bool _hasBounds;
+    private bool _isEdgePanEnable;
+
+    private bool _isManualMode;
+    private Camera _mainCamera;
+    private Bounds _mapBounds;
 
     private PixelPerfectCamera _pixelPerfCam;
-    private int _defaultPpu;
-    private float _defaultPanSpeed;
-    private float _defaultEdgePanSpeed;
-    private bool _isEdgePanEnable;
-    
-    private int _currentZoomIndex;
-    private readonly int[] _zoomDivisors = { 1, 2, 4 };
-    private readonly float[] _speedMultipliers = { 1f, 1.5f, 2.5f };
-    private Vector3[] _zoomLevelPositions;
     private bool[] _zoomLevelInitialized;
-    
+    private Vector3[] _zoomLevelPositions;
+
     private void Awake()
     {
         _mainCamera = Camera.main;
     }
-    
+
     private void Start()
     {
         _pixelPerfCam = FindFirstObjectByType<PixelPerfectCamera>();
-        
-        if (_pixelPerfCam != null)
-        {
+
+        if (_pixelPerfCam != null) {
             _defaultPpu = _pixelPerfCam.assetsPPU;
         }
-        else
-        {
+        else {
             _defaultPpu = 16;
         }
 
         _defaultPanSpeed = panSpeed;
         _defaultEdgePanSpeed = edgePanSpeed;
-        
+
         _zoomLevelPositions = new Vector3[zoomCameras.Length];
         _zoomLevelInitialized = new bool[zoomCameras.Length];
-        for (int i = 0; i < _zoomLevelPositions.Length; i++)
-        {
+        for (int i = 0; i < _zoomLevelPositions.Length; i++) {
             _zoomLevelPositions[i] = transform.position;
             _zoomLevelInitialized[i] = false;
         }
-        
+
         InitializeMapBounds();
         UpdateActiveCamera();
-    }
-    
-    private void InitializeMapBounds()
-    {
-        if (mapGenerator == null)
-        {
-            mapGenerator = FindFirstObjectByType<MapGenerator>();
-        }
-        
-        if (mapGenerator != null && mapGenerator.GroundTilemap != null)
-        {
-            Tilemap groundTilemap = mapGenerator.GroundTilemap;
-            groundTilemap.CompressBounds();
-            BoundsInt cellBounds = groundTilemap.cellBounds;
-            
-            if (groundTilemap.layoutGrid != null)
-            {
-                Grid grid = groundTilemap.layoutGrid;
-                Vector3 worldMin = grid.CellToWorld(new Vector3Int(cellBounds.xMin, cellBounds.yMin, 0));
-                Vector3 worldMax = grid.CellToWorld(new Vector3Int(cellBounds.xMax - 1, cellBounds.yMax - 1, 0));
-                
-                _mapBounds = new Bounds
-                {
-                    min = worldMin,
-                    max = worldMax
-                };
-                _mapBounds.center = _mapBounds.min + (_mapBounds.max - _mapBounds.min) * 0.5f;
-                _hasBounds = true;
-            }
-        }
     }
 
     private void Update()
@@ -107,39 +74,63 @@ public class CameraTargetController : MonoBehaviour
     {
         HandleMovement();
         HandleZoom();
-        
+
         ClampTargetPosition();
     }
-    
+
+    private void InitializeMapBounds()
+    {
+        if (mapGenerator == null) {
+            mapGenerator = FindFirstObjectByType<MapGenerator>();
+        }
+
+        if (mapGenerator != null && mapGenerator.GroundTilemap != null) {
+            Tilemap groundTilemap = mapGenerator.GroundTilemap;
+            groundTilemap.CompressBounds();
+            BoundsInt cellBounds = groundTilemap.cellBounds;
+
+            if (groundTilemap.layoutGrid != null) {
+                Grid grid = groundTilemap.layoutGrid;
+                Vector3 worldMin = grid.CellToWorld(new Vector3Int(cellBounds.xMin, cellBounds.yMin, 0));
+                Vector3 worldMax = grid.CellToWorld(new Vector3Int(cellBounds.xMax - 1, cellBounds.yMax - 1, 0));
+
+                _mapBounds = new Bounds {
+                    min = worldMin,
+                    max = worldMax
+                };
+                _mapBounds.center = _mapBounds.min + (_mapBounds.max - _mapBounds.min) * 0.5f;
+                _hasBounds = true;
+            }
+        }
+    }
+
     private void ClampTargetPosition()
     {
         if (!_hasBounds) return;
-        
+
         GetBoundsForZoomLevel(_currentZoomIndex, out float minX, out float maxX, out float minY, out float maxY);
-        
+
         Vector3 pos = _zoomLevelPositions[_currentZoomIndex];
         pos.x = Mathf.Clamp(pos.x, minX, maxX);
         pos.y = Mathf.Clamp(pos.y, minY, maxY);
-        
+
         _zoomLevelPositions[_currentZoomIndex] = pos;
         transform.position = pos;
     }
-    
+
     private void GetBoundsForZoomLevel(int zoomIndex, out float minX, out float maxX, out float minY, out float maxY)
     {
         int currentDivisor = _zoomDivisors[zoomIndex];
         float currentPPU = (float)_defaultPpu / currentDivisor;
-        
+
         float vertExtent;
-        if (_pixelPerfCam != null && _pixelPerfCam.runInEditMode) 
-        {
-            vertExtent = (_pixelPerfCam.refResolutionY * 0.5f) / currentPPU;
+        if (_pixelPerfCam != null && _pixelPerfCam.runInEditMode) {
+            vertExtent = _pixelPerfCam.refResolutionY * 0.5f / currentPPU;
         }
-        else
-        {
-            vertExtent = (Screen.height * 0.5f) / currentPPU;
+        else {
+            vertExtent = Screen.height * 0.5f / currentPPU;
         }
-        
+
         float horzExtent = vertExtent * _mainCamera.aspect;
 
         minX = _mapBounds.min.x + horzExtent;
@@ -152,20 +143,16 @@ public class CameraTargetController : MonoBehaviour
     {
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveY = Input.GetAxisRaw("Vertical");
-        
-        if (moveX != 0f || moveY != 0f)
-        {
+
+        if (moveX != 0f || moveY != 0f) {
             _direction = new Vector3(moveX, moveY, 0).normalized;
         }
-        else
-        {
+        else {
             _direction = Vector3.zero;
         }
 
-        if (Input.GetKeyDown(KeyCode.H))
-        {
-            for (int i = 0; i < _zoomLevelPositions.Length; i++)
-            {
+        if (Input.GetKeyDown(KeyCode.H)) {
+            for (int i = 0; i < _zoomLevelPositions.Length; i++) {
                 _zoomLevelPositions[i] = Vector3.zero;
             }
             transform.position = Vector3.zero;
@@ -174,18 +161,16 @@ public class CameraTargetController : MonoBehaviour
             _isManualMode = false;
         }
 
-        if (Input.GetKeyDown(KeyCode.E))
-        {
+        if (Input.GetKeyDown(KeyCode.E)) {
             _isEdgePanEnable = !_isEdgePanEnable;
         }
     }
-    
+
     private void HandleMovement()
     {
         Vector3 mousePanDirection = Vector3.zero;
 
-        if (_isEdgePanEnable)
-        {
+        if (_isEdgePanEnable) {
             if (Input.mousePosition.y >= Screen.height - panBorderThickness)
                 mousePanDirection += Vector3.up;
             if (Input.mousePosition.y <= panBorderThickness * 0.01f)
@@ -194,7 +179,7 @@ public class CameraTargetController : MonoBehaviour
                 mousePanDirection += Vector3.right;
             if (Input.mousePosition.x <= panBorderThickness)
                 mousePanDirection += Vector3.left;
-            
+
             mousePanDirection.Normalize();
         }
 
@@ -202,39 +187,34 @@ public class CameraTargetController : MonoBehaviour
         float currentPanSpeed = 0f;
         bool hasInput = false;
 
-        if (_direction != Vector3.zero)
-        {
+        if (_direction != Vector3.zero) {
             finalDirection = _direction;
             currentPanSpeed = panSpeed;
             hasInput = true;
             _isManualMode = true;
         }
-        else if (mousePanDirection != Vector3.zero)
-        {
+        else if (mousePanDirection != Vector3.zero) {
             finalDirection = mousePanDirection;
             currentPanSpeed = edgePanSpeed;
             hasInput = true;
             _isManualMode = true;
         }
 
-        if (hasInput)
-        {
+        if (hasInput) {
             Vector3 movement = finalDirection * currentPanSpeed * Time.unscaledDeltaTime;
-            for (int i = 0; i < _zoomLevelPositions.Length; i++)
-            {
+            for (int i = 0; i < _zoomLevelPositions.Length; i++) {
                 Vector3 newPos = _zoomLevelPositions[i] + movement;
-                
+
                 GetBoundsForZoomLevel(i, out float minX, out float maxX, out float minY, out float maxY);
                 newPos.x = Mathf.Clamp(newPos.x, minX, maxX);
                 newPos.y = Mathf.Clamp(newPos.y, minY, maxY);
-                
+
                 _zoomLevelPositions[i] = newPos;
             }
             transform.position = _zoomLevelPositions[_currentZoomIndex];
         }
-        
-        if (!_isManualMode && followTarget != null)
-        {
+
+        if (!_isManualMode && followTarget != null) {
             Vector3 targetPosition = new Vector3(followTarget.position.x, followTarget.position.y, transform.position.z);
             Vector3 newPos = Vector3.Lerp(_zoomLevelPositions[_currentZoomIndex], targetPosition, smoothing * Time.unscaledDeltaTime);
             _zoomLevelPositions[_currentZoomIndex] = newPos;
@@ -257,63 +237,68 @@ public class CameraTargetController : MonoBehaviour
 
         newIndex = Mathf.Clamp(newIndex, 0, zoomCameras.Length - 1);
 
-        if (prevIndex != newIndex)
-        {
-            // Save current position for the previous zoom level
+        if (prevIndex != newIndex) {
             _zoomLevelPositions[prevIndex] = transform.position;
             _zoomLevelInitialized[prevIndex] = true;
-            
-            // Determine if zooming in (higher index) or out (lower index)
+
             bool isZoomingIn = newIndex > prevIndex;
+
+            Vector3 oldPosition = transform.position;
             Vector3 newPosition;
-            
-            if (isZoomingIn)
-            {
-                // When zooming in, use the position from the previous (lower) zoom level
+
+            if (!isZoomingIn) {
                 newPosition = _zoomLevelPositions[prevIndex];
             }
-            else
-            {
-                // When zooming out, calculate position based on current position clamped to new bounds
+            else {
                 GetBoundsForZoomLevel(newIndex, out float minX, out float maxX, out float minY, out float maxY);
                 Vector3 pos = transform.position;
                 pos.x = Mathf.Clamp(pos.x, minX, maxX);
                 pos.y = Mathf.Clamp(pos.y, minY, maxY);
                 newPosition = pos;
             }
-            
-            // Update position BEFORE changing zoom
+
             transform.position = newPosition;
             _zoomLevelPositions[newIndex] = newPosition;
             _zoomLevelInitialized[newIndex] = true;
-            
-            // Now update the zoom level and camera settings
+
+            Vector3 positionDelta = newPosition - oldPosition;
+
+            if (positionDelta.sqrMagnitude > 0.0001f || isZoomingIn) {
+                WarpCameras(positionDelta);
+            }
+
             _currentZoomIndex = newIndex;
             UpdateActiveCamera();
         }
     }
-    
+
+    private void WarpCameras(Vector3 deltaPos)
+    {
+        foreach (CinemachineCamera cam in zoomCameras) {
+            if (cam != null) {
+                cam.OnTargetObjectWarped(transform, deltaPos);
+            }
+        }
+    }
+
     private void UpdateActiveCamera()
     {
-        for (int i = 0; i < zoomCameras.Length; i++)
-        {
+        for (int i = 0; i < zoomCameras.Length; i++) {
             if (zoomCameras[i] == null) continue;
-            zoomCameras[i].Priority = (i == _currentZoomIndex) ? 20 : 10;
+            zoomCameras[i].Priority = i == _currentZoomIndex ? 20 : 10;
         }
 
-        if (_pixelPerfCam != null && _currentZoomIndex < _zoomDivisors.Length)
-        {
+        if (_pixelPerfCam != null && _currentZoomIndex < _zoomDivisors.Length) {
             int divisor = _zoomDivisors[_currentZoomIndex];
             _pixelPerfCam.assetsPPU = _defaultPpu / divisor;
         }
 
-        if (_currentZoomIndex < _speedMultipliers.Length)
-        {
+        if (_currentZoomIndex < _speedMultipliers.Length) {
             float multiplier = _speedMultipliers[_currentZoomIndex];
             panSpeed = _defaultPanSpeed * multiplier;
             edgePanSpeed = _defaultEdgePanSpeed * multiplier;
         }
-        
+
         // Position is already set before this is called, just ensure it's clamped
         ClampTargetPosition();
     }
