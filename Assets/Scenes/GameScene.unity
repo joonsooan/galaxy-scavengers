@@ -6484,7 +6484,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 11.25
+  orthographic size: 662.501
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -6509,7 +6509,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -40}
+  m_LocalPosition: {x: 0.5, y: 0.5, z: -40}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -25766,7 +25766,7 @@ PrefabInstance:
     - target: {fileID: 7018931428191121649, guid: 0ff68d7b7607f8f4ebb28034290708ce, type: 3}
       propertyPath: BoundingShape2D
       value: 
-      objectReference: {fileID: 280968464}
+      objectReference: {fileID: 0}
     - target: {fileID: 7018931428191121649, guid: 0ff68d7b7607f8f4ebb28034290708ce, type: 3}
       propertyPath: OversizeWindow.Enabled
       value: 1
@@ -31978,7 +31978,7 @@ PrefabInstance:
     - target: {fileID: 7018931428191121649, guid: 0ff68d7b7607f8f4ebb28034290708ce, type: 3}
       propertyPath: BoundingShape2D
       value: 
-      objectReference: {fileID: 280968464}
+      objectReference: {fileID: 0}
     - target: {fileID: 7018931428191121649, guid: 0ff68d7b7607f8f4ebb28034290708ce, type: 3}
       propertyPath: OversizeWindow.Enabled
       value: 1
@@ -39460,7 +39460,7 @@ PrefabInstance:
     - target: {fileID: 7018931428191121649, guid: 0ff68d7b7607f8f4ebb28034290708ce, type: 3}
       propertyPath: BoundingShape2D
       value: 
-      objectReference: {fileID: 280968464}
+      objectReference: {fileID: 0}
     - target: {fileID: 7018931428191121649, guid: 0ff68d7b7607f8f4ebb28034290708ce, type: 3}
       propertyPath: OversizeWindow.Enabled
       value: 1
