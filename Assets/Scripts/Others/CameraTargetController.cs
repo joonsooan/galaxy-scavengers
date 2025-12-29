@@ -1,6 +1,7 @@
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.Tilemaps;
 
 public class CameraTargetController : MonoBehaviour
 {
@@ -18,6 +19,7 @@ public class CameraTargetController : MonoBehaviour
     private Camera _mainCamera;
     
     public Transform followTarget;
+    public MapGenerator mapGenerator;
     private Bounds _mapBounds;
     private bool _hasBounds;
 
@@ -52,7 +54,38 @@ public class CameraTargetController : MonoBehaviour
         _defaultPanSpeed = panSpeed;
         _defaultEdgePanSpeed = edgePanSpeed;
         
+        InitializeMapBounds();
         UpdateActiveCamera();
+    }
+    
+    private void InitializeMapBounds()
+    {
+        if (mapGenerator == null)
+        {
+            mapGenerator = FindFirstObjectByType<MapGenerator>();
+        }
+        
+        if (mapGenerator != null && mapGenerator.GroundTilemap != null)
+        {
+            Tilemap groundTilemap = mapGenerator.GroundTilemap;
+            groundTilemap.CompressBounds();
+            BoundsInt cellBounds = groundTilemap.cellBounds;
+            
+            if (groundTilemap.layoutGrid != null)
+            {
+                Grid grid = groundTilemap.layoutGrid;
+                Vector3 worldMin = grid.CellToWorld(new Vector3Int(cellBounds.xMin, cellBounds.yMin, 0));
+                Vector3 worldMax = grid.CellToWorld(new Vector3Int(cellBounds.xMax - 1, cellBounds.yMax - 1, 0));
+                
+                _mapBounds = new Bounds
+                {
+                    min = worldMin,
+                    max = worldMax
+                };
+                _mapBounds.center = _mapBounds.min + (_mapBounds.max - _mapBounds.min) * 0.5f;
+                _hasBounds = true;
+            }
+        }
     }
 
     private void Update()
@@ -70,6 +103,8 @@ public class CameraTargetController : MonoBehaviour
     
     private void ClampTargetPosition()
     {
+        if (!_hasBounds) return;
+        
         int currentDivisor = _zoomDivisors[_currentZoomIndex];
         float currentPPU = (float)_defaultPpu / currentDivisor;
         
@@ -90,9 +125,6 @@ public class CameraTargetController : MonoBehaviour
         float minY = _mapBounds.min.y + vertExtent;
         float maxY = _mapBounds.max.y - vertExtent;
 
-        if (minX > maxX) minX = maxX = _mapBounds.center.x;
-        if (minY > maxY) minY = maxY = _mapBounds.center.y;
-
         Vector3 pos = transform.position;
         pos.x = Mathf.Clamp(pos.x, minX, maxX);
         pos.y = Mathf.Clamp(pos.y, minY, maxY);
@@ -104,7 +136,15 @@ public class CameraTargetController : MonoBehaviour
     {
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveY = Input.GetAxisRaw("Vertical");
-        _direction = new Vector3(moveX, moveY, 0).normalized;
+        
+        if (moveX != 0f || moveY != 0f)
+        {
+            _direction = new Vector3(moveX, moveY, 0).normalized;
+        }
+        else
+        {
+            _direction = Vector3.zero;
+        }
 
         if (Input.GetKeyDown(KeyCode.H))
         {
@@ -138,12 +178,27 @@ public class CameraTargetController : MonoBehaviour
             mousePanDirection.Normalize();
         }
 
-        if (_direction != Vector3.zero || mousePanDirection != Vector3.zero)
-        {
-            _isManualMode = true;
-            Vector3 finalDirection = (_direction != Vector3.zero) ? _direction : mousePanDirection;
-            float currentPanSpeed = (_direction != Vector3.zero) ? panSpeed : edgePanSpeed;
+        Vector3 finalDirection = Vector3.zero;
+        float currentPanSpeed = 0f;
+        bool hasInput = false;
 
+        if (_direction != Vector3.zero)
+        {
+            finalDirection = _direction;
+            currentPanSpeed = panSpeed;
+            hasInput = true;
+            _isManualMode = true;
+        }
+        else if (mousePanDirection != Vector3.zero)
+        {
+            finalDirection = mousePanDirection;
+            currentPanSpeed = edgePanSpeed;
+            hasInput = true;
+            _isManualMode = true;
+        }
+
+        if (hasInput)
+        {
             transform.Translate(finalDirection * currentPanSpeed * Time.unscaledDeltaTime, Space.World);
         }
         
