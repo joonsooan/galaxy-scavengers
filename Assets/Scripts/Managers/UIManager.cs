@@ -55,6 +55,7 @@ public class UIManager : MonoBehaviour
     private ActiveUIPanel _activeUIPanel = ActiveUIPanel.None;
     private IStorage _trackedStorage;
     private AreaBuildingDestroyer _areaBuildingDestroyer;
+    private System.Action<ResourceType, int, int> _storageResourceChangedHandler;
 
     private void Start()
     {
@@ -86,7 +87,7 @@ public class UIManager : MonoBehaviour
             UnpinAndHideAllPanels();
         }
 
-        if (storageInfoPanel.activeSelf && _trackedStorage != null)
+        if (storageInfoPanel != null && storageInfoPanel.activeSelf && _trackedStorage != null)
         {
             UpdateStorageUIPosition();
         }
@@ -151,15 +152,51 @@ public class UIManager : MonoBehaviour
     private void HideMainStructureInventory()
     {
         MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
+        if (mainStructure == null) return;
+        
         InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
-        inventorySystem.GetInventoryPanel();
-        inventorySystem.ToggleInventory();
+        if (inventorySystem == null) return;
+        
+        GameObject inventoryPanel = inventorySystem.GetInventoryPanel();
+        if (inventoryPanel != null && inventoryPanel.activeSelf)
+        {
+            inventorySystem.ToggleInventory();
+        }
     }
 
     public void ShowMainStructureUI()
     {
+        // Hide storage info panel (shown on hover) first
+        if (storageInfoPanel != null && storageInfoPanel.activeSelf)
+        {
+            if (_trackedStorage != null && _storageResourceChangedHandler != null)
+            {
+                _trackedStorage.OnResourceChanged -= _storageResourceChangedHandler;
+            }
+            storageInfoPanel.SetActive(false);
+            _trackedStorage = null;
+        }
+        
+        // Hide other UI panels first
         HideCurrentIClickableUI();
-        UnpinAndHideAllPanels();
+        
+        // Get main structure and inventory system
+        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
+        if (mainStructure == null) return;
+        
+        InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
+        if (inventorySystem == null) return;
+        
+        GameObject inventoryPanel = inventorySystem.GetInventoryPanel();
+        if (inventoryPanel == null) return;
+        
+        // Always show inventory panel when clicking
+        // Use ToggleInventory to ensure both inventoryPanel and currentResourcePanel are handled correctly
+        if (!inventoryPanel.activeSelf)
+        {
+            inventorySystem.ToggleInventory();
+        }
+        
         _activeUIPanel = ActiveUIPanel.MainStructure;
     }
 
@@ -200,6 +237,11 @@ public class UIManager : MonoBehaviour
         
         if (storageInfoPanel != null)
         {
+            // Unsubscribe from resource changes
+            if (_trackedStorage != null && _storageResourceChangedHandler != null)
+            {
+                _trackedStorage.OnResourceChanged -= _storageResourceChangedHandler;
+            }
             storageInfoPanel.SetActive(false);
             _trackedStorage = null;
         }
@@ -370,9 +412,27 @@ public class UIManager : MonoBehaviour
     {
         if (storageInfoPanel == null || storage == null) return;
 
+        if (_trackedStorage != null && _storageResourceChangedHandler != null)
+        {
+            _trackedStorage.OnResourceChanged -= _storageResourceChangedHandler;
+        }
+
         _trackedStorage = storage;
         storageInfoPanel.SetActive(true);
         UpdateStorageUIPosition();
+
+        if (_storageResourceChangedHandler == null)
+        {
+            _storageResourceChangedHandler = OnStorageResourceChanged;
+        }
+        storage.OnResourceChanged += _storageResourceChangedHandler;
+
+        RefreshStorageInfoUI();
+    }
+    
+    private void RefreshStorageInfoUI()
+    {
+        if (storageInfoPanel == null || _trackedStorage == null || !storageInfoPanel.activeSelf) return;
 
         Transform parent = storageResourceListParent != null ? storageResourceListParent.transform : storageInfoPanel.transform;
 
@@ -389,8 +449,8 @@ public class UIManager : MonoBehaviour
             }
         }
 
-        Dictionary<ResourceType, int> resources = storage.GetStoredResources();
-        int maxCapacity = storage.GetMaxCapacity();
+        Dictionary<ResourceType, int> resources = _trackedStorage.GetStoredResources();
+        int maxCapacity = _trackedStorage.GetMaxCapacity();
         int totalAmount = 0;
         
         foreach (var kvp in resources)
@@ -407,15 +467,34 @@ public class UIManager : MonoBehaviour
             }
         }
         
-        storageAmountText.text =  $"{totalAmount.ToString()}/{maxCapacity.ToString()}";
+        if (storageAmountText != null)
+        {
+            storageAmountText.text = $"{totalAmount.ToString()}/{maxCapacity.ToString()}";
+        }
+    }
+    
+    private void OnStorageResourceChanged(ResourceType type, int current, int max)
+    {
+        if (storageInfoPanel != null && storageInfoPanel.activeSelf && _trackedStorage != null)
+        {
+            RefreshStorageInfoUI();
+        }
     }
     
     public void HideStorageInfo()
     {
+        // Unsubscribe from resource changes
+        if (_trackedStorage != null && _storageResourceChangedHandler != null)
+        {
+            _trackedStorage.OnResourceChanged -= _storageResourceChangedHandler;
+        }
+        
         if (storageInfoPanel != null)
         {
             storageInfoPanel.SetActive(false);
         }
+        
+        _trackedStorage = null;
     }
     
     private void UpdateStorageUIPosition()
