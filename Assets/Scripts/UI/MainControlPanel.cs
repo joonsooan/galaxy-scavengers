@@ -61,7 +61,7 @@ public class MainControlPanel : MonoBehaviour
     {
         if (Input.GetMouseButtonUp(1))
         {
-            if (EventSystem.current.IsPointerOverGameObject())
+            if (UIUtils.IsPointerOverUI())
             {
                 return;
             }

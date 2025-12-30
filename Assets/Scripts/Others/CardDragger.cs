@@ -206,7 +206,7 @@ public class CardDragger : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            if (UIUtils.IsPointerOverUI())
             {
                 return;
             }
@@ -230,7 +230,7 @@ public class CardDragger : MonoBehaviour
         }
         else if (Input.GetMouseButtonUp(1))
         {
-            if (EventSystem.current.IsPointerOverGameObject())
+            if (UIUtils.IsPointerOverUI())
             {
                 return;
             }

@@ -6320,6 +6320,7 @@ GameObject:
   - component: {fileID: 519420035}
   - component: {fileID: 519420036}
   - component: {fileID: 519420037}
+  - component: {fileID: 519420038}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -6406,7 +6407,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 11.25
+  orthographic size: 16.9375
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -6507,6 +6508,22 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
   CustomBlends: {fileID: 0}
+--- !u!114 &519420038
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519420028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56666c5a40171f54783dd416a44f42bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EventMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_MaxRayIntersections: 0
 --- !u!1 &522400551
 GameObject:
   m_ObjectHideFlags: 0
@@ -32930,6 +32947,7 @@ GameObject:
   - component: {fileID: 1538527377}
   - component: {fileID: 1538527378}
   - component: {fileID: 1538527379}
+  - component: {fileID: 1538527380}
   m_Layer: 0
   m_Name: _UIManager
   m_TagString: Untagged
@@ -33016,6 +33034,18 @@ MonoBehaviour:
   countdownText: {fileID: 1011157122}
   countdownDurationSeconds: 10
   targetSceneName: TitleScene
+--- !u!114 &1538527380
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1538527375}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b84f01ee4d14dc499cd775d439b614c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1539729019
 GameObject:
   m_ObjectHideFlags: 0

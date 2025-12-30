@@ -53,7 +53,7 @@ public class BaseStorage : Damageable, IStorage
 
     private void CheckMouseHover()
     {
-        if (GameManager.Instance.IsDragging() || EventSystem.current.IsPointerOverGameObject()) 
+        if (GameManager.Instance.IsDragging() || UIUtils.IsPointerOverUI()) 
         {
             ResetHover();
             return;

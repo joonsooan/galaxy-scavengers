@@ -1,6 +1,5 @@
 ﻿using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
 [DefaultExecutionOrder(-100)]
@@ -71,7 +70,7 @@ public class UIManager : MonoBehaviour
     private void Update()
     {
         if (Input.GetMouseButtonUp(1)) {
-            if (EventSystem.current.IsPointerOverGameObject()) return;
+            if (UIUtils.IsPointerOverUI()) return;
             if (GameManager.Instance != null && GameManager.Instance.IsDragging()) return;
             
             if (_areaBuildingDestroyer != null && _areaBuildingDestroyer.HasMoved)
