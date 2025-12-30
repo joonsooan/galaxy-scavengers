@@ -10,7 +10,8 @@ public class UnitSpriteController : MonoBehaviour
     private static readonly int InputYHash = Animator.StringToHash("InputY");
     private static readonly int IsMovingHash = Animator.StringToHash("IsMoving");
     private static readonly int IsMiningHash = Animator.StringToHash("IsMining");
-
+    private static readonly int CargoFillHash = Animator.StringToHash("CargoFill");
+    
     private Vector2 _lastDirection = Vector2.down;
     
     private void Awake()
@@ -44,5 +45,15 @@ public class UnitSpriteController : MonoBehaviour
 
         _animator.SetBool(IsMovingHash, isMoving);
         _animator.SetBool(IsMiningHash, isMining);
+    }
+    
+    public void UpdateCargoFill(int currentAmount, int maxCapacity)
+    {
+        float fillPercent = 0f;
+        if (maxCapacity > 0)
+        {
+            fillPercent = (float)currentAmount / maxCapacity;
+        }
+        _animator.SetFloat(CargoFillHash, fillPercent);
     }
 }

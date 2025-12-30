@@ -117,6 +117,9 @@ public class Unit_Miner : UnitBase
             Vector3 dir = (((Component)_targetStorage).transform.position - transform.position).normalized;
             spriteController?.UpdateSpriteDirection(dir);
         }
+        
+        int currentTotal = _currentCarryAmounts.Values.Sum();
+        spriteController.UpdateCargoFill(currentTotal, maxCarryAmount);
     }
 
     private void OnMoving()
