@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 3
   tags:
   - TurretBullet
+  - MouseHoverDetector
   layers:
   - Default
   - TransparentFX

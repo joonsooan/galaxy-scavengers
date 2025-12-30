@@ -37,12 +37,29 @@ public class ObjClickManager : MonoBehaviour
             return;
         }
         
+        // Clear hover when clicking
+        if (BuildingHoverManager.Instance != null)
+        {
+            BuildingHoverManager.Instance.ClearHoverOnClick();
+        }
+        
         RaycastHit2D[] hits = Physics2D.RaycastAll(mainCamera.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
         
         foreach (RaycastHit2D hit in hits) {
             if (hit.collider != null && !hit.collider.isTrigger) {
                 if (hit.collider.GetComponent<ConstructionSite>() != null) {
                     continue;
+                }
+                
+                // Check if it's a processor first - if so, hide buildingInfoPanel and show processor UI
+                Processor processor = hit.collider.GetComponent<Processor>();
+                if (processor != null) {
+                    // Hide buildingInfoPanel if it's showing
+                    if (BuildingInfoPanel.Instance != null) {
+                        BuildingInfoPanel.Instance.gameObject.SetActive(false);
+                    }
+                    processor.OnClicked();
+                    return;
                 }
                 
                 IClickable clickableObject = hit.collider.GetComponent<IClickable>();

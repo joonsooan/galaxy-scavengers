@@ -542,6 +542,25 @@ public class BuildingManager : MonoBehaviour
             return;
         }
 
+        BuildingDataHolder dataHolder = obj.GetComponent<BuildingDataHolder>();
+        if (dataHolder == null) {
+            dataHolder = obj.AddComponent<BuildingDataHolder>();
+        }
+        dataHolder.SetBuildingData(data);
+
+        BoxCollider2D[] triggerColliders = obj.GetComponentsInChildren<BoxCollider2D>();
+        foreach (BoxCollider2D collider in triggerColliders)
+        {
+            if (collider.isTrigger)
+            {
+                BuildingHoverTrigger hoverTrigger = collider.GetComponent<BuildingHoverTrigger>();
+                if (hoverTrigger == null)
+                {
+                    collider.gameObject.AddComponent<BuildingHoverTrigger>();
+                }
+            }
+        }
+
         switch (data.buildingType) {
         case BuildingType.Storage:
             IStorage storage = obj.GetComponent<IStorage>();

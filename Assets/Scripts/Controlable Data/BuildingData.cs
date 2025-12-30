@@ -14,7 +14,8 @@ public enum BuildingType
     RepairStation,
     Turret,
     Radar,
-    OrbitalLauncher
+    OrbitalLauncher,
+    MainStructure
 }
 
 [CreateAssetMenu(fileName = "New Building Data", menuName = "Building/Building Data")]
