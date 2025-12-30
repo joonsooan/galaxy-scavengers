@@ -25744,6 +25744,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Unit_Construct (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 6649466925040614564, guid: 20209a0e29d055c4b8ec63641b9ca28e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8588832122909675608, guid: 20209a0e29d055c4b8ec63641b9ca28e, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.5
@@ -28702,6 +28706,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Unit_Scout
       objectReference: {fileID: 0}
+    - target: {fileID: 6649466925040614564, guid: 5244335d034f9eb4aa9a1298502258db, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8588832122909675608, guid: 5244335d034f9eb4aa9a1298502258db, type: 3}
       propertyPath: m_LocalPosition.x
       value: 2.5
@@ -30500,6 +30508,10 @@ PrefabInstance:
     - target: {fileID: 6649466925040614564, guid: ad58a73b9aa5be94a8091fe8e942c31c, type: 3}
       propertyPath: m_Name
       value: Unit_Drone
+      objectReference: {fileID: 0}
+    - target: {fileID: 6649466925040614564, guid: ad58a73b9aa5be94a8091fe8e942c31c, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8588832122909675608, guid: ad58a73b9aa5be94a8091fe8e942c31c, type: 3}
       propertyPath: m_LocalPosition.x
@@ -36179,6 +36191,10 @@ PrefabInstance:
     - target: {fileID: 6649466925040614564, guid: 20209a0e29d055c4b8ec63641b9ca28e, type: 3}
       propertyPath: m_Name
       value: Unit_Construct
+      objectReference: {fileID: 0}
+    - target: {fileID: 6649466925040614564, guid: 20209a0e29d055c4b8ec63641b9ca28e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8588832122909675608, guid: 20209a0e29d055c4b8ec63641b9ca28e, type: 3}
       propertyPath: m_LocalPosition.x
