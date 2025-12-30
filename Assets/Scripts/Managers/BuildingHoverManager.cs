@@ -9,11 +9,10 @@ public class BuildingHoverManager : MonoBehaviour
     private Camera _mainCamera;
     private BuildingDataHolder _currentHoveredBuilding;
     private IStorage _currentHoveredStorage;
-    private float _hoverTimer;
-    private float _storageHoverTimer;
-    private bool _isUIShown;
-    private bool _isStorageUIShown;
-    private const float HoverDelay = 0.3f;
+    private bool _keepPanelVisible = false;
+    private bool _panelsJustClosed = false;
+    private float _panelsClosedTime = 0f;
+    private const float PanelCloseCooldown = 0.1f;
 
     private GameObject _mouseHoverDetector;
     private BoxCollider2D _mouseDetectorCollider;
@@ -81,31 +80,17 @@ public class BuildingHoverManager : MonoBehaviour
             return;
         }
 
-        UpdateHoverTimers();
-    }
-
-    private void UpdateHoverTimers()
-    {
-        if (_currentHoveredBuilding != null)
+        if (_panelsJustClosed)
         {
-            _hoverTimer += Time.unscaledDeltaTime;
-            if (_hoverTimer >= HoverDelay && !_isUIShown)
+            _panelsClosedTime += Time.unscaledDeltaTime;
+            if (_panelsClosedTime >= PanelCloseCooldown)
             {
-                ShowBuildingInfo(_currentHoveredBuilding);
-                _isUIShown = true;
-            }
-        }
-
-        if (_currentHoveredStorage != null)
-        {
-            _storageHoverTimer += Time.unscaledDeltaTime;
-            if (_storageHoverTimer >= HoverDelay && !_isStorageUIShown)
-            {
-                ShowStorageInfo(_currentHoveredStorage);
-                _isStorageUIShown = true;
+                _panelsJustClosed = false;
+                _panelsClosedTime = 0f;
             }
         }
     }
+
 
     public void OnBuildingEnter(BuildingDataHolder buildingDataHolder)
     {
@@ -118,15 +103,22 @@ public class BuildingHoverManager : MonoBehaviour
         }
 
         _currentHoveredBuilding = buildingDataHolder;
-        _hoverTimer = 0f;
-        _isUIShown = false;
+        _keepPanelVisible = false;
+        ShowBuildingInfo(buildingDataHolder);
     }
 
     public void OnBuildingExit(BuildingDataHolder buildingDataHolder)
     {
         if (buildingDataHolder == _currentHoveredBuilding)
         {
-            ClearHover();
+            if (_keepPanelVisible)
+            {
+                ClearBuildingInfoButKeepPanel();
+            }
+            else
+            {
+                ClearHover();
+            }
         }
     }
 
@@ -141,8 +133,7 @@ public class BuildingHoverManager : MonoBehaviour
         }
 
         _currentHoveredStorage = storage;
-        _storageHoverTimer = 0f;
-        _isStorageUIShown = false;
+        ShowStorageInfo(storage);
     }
 
     public void OnStorageExit(IStorage storage)
@@ -164,8 +155,35 @@ public class BuildingHoverManager : MonoBehaviour
         if (BuildingInfoPanel.Instance == null) return;
         if (buildingDataHolder.buildingData == null) return;
 
+        if (IsProcessorOrDroneHubPanelActive() || _panelsJustClosed)
+        {
+            return;
+        }
+
+        BuildingInfoPanel.Instance.gameObject.SetActive(true);
         BuildingInfoPanel.Instance.PreviewInfo(buildingDataHolder.buildingData);
-        Debug.Log($"Show {_currentHoveredBuilding.buildingData.name}");
+    }
+
+    private bool IsProcessorOrDroneHubPanelActive()
+    {
+        if (GameManager.Instance == null || GameManager.Instance.uiManager == null)
+        {
+            return false;
+        }
+
+        UIManager uiManager = GameManager.Instance.uiManager;
+        
+        if (uiManager.IsProcessorPanelActive())
+        {
+            return true;
+        }
+
+        if (uiManager.IsDroneHubPanelActive())
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private bool IsPointerOverFloatingNumText()
@@ -198,13 +216,21 @@ public class BuildingHoverManager : MonoBehaviour
                 BuildingInfoPanel.Instance.CancelPreview();
                 BuildingInfoPanel.Instance.gameObject.SetActive(false);
             }
-            Debug.Log($"Hide {_currentHoveredBuilding.buildingData.name}");
             _currentHoveredBuilding = null;
-            _hoverTimer = 0f;
-            _isUIShown = false;
         }
     }
 
+    private void ClearBuildingInfoButKeepPanel()
+    {
+        if (_currentHoveredBuilding != null)
+        {
+            if (BuildingInfoPanel.Instance != null)
+            {
+                BuildingInfoPanel.Instance.CancelPreview();
+            }
+            _currentHoveredBuilding = null;
+        }
+    }
 
     private void ShowStorageInfo(IStorage storage)
     {
@@ -223,14 +249,24 @@ public class BuildingHoverManager : MonoBehaviour
                 GameManager.Instance.uiManager.HideStorageInfo();
             }
             _currentHoveredStorage = null;
-            _storageHoverTimer = 0f;
-            _isStorageUIShown = false;
         }
     }
 
     public void ClearHoverOnClick()
     {
+        bool panelsActive = IsProcessorOrDroneHubPanelActive();
+        if (!panelsActive && _currentHoveredBuilding != null)
+        {
+            _keepPanelVisible = true;
+        }
+        
         ClearAllHovers();
+    }
+
+    public void NotifyPanelsClosed()
+    {
+        _panelsJustClosed = true;
+        _panelsClosedTime = 0f;
     }
 
     private void OnDisable()

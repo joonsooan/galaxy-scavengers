@@ -205,6 +205,11 @@ public class UIManager : MonoBehaviour
         }
 
         HideCurrentIClickableUI();
+        
+        if (BuildingHoverManager.Instance != null)
+        {
+            BuildingHoverManager.Instance.NotifyPanelsClosed();
+        }
     }
 
     public void DisplayCardInfo(BuildingPieceData data)
@@ -349,6 +354,16 @@ public class UIManager : MonoBehaviour
             _pinnedDroneHubData = data;
             DisplayDroneHubInfo(droneHub);
         }
+    }
+
+    public bool IsProcessorPanelActive()
+    {
+        return processorInfoPanel != null && processorInfoPanel.activeSelf;
+    }
+
+    public bool IsDroneHubPanelActive()
+    {
+        return droneHubInfoPanel != null && droneHubInfoPanel.activeSelf;
     }
     
     public void DisplayStorageInfo(IStorage storage)
