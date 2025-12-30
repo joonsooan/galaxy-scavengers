@@ -148,6 +148,19 @@ public class UnitMovement : MonoBehaviour
         }
     }
 
+    public Vector3 GetMoveDirection()
+    {
+        if (_rb.linearVelocity.sqrMagnitude > 0.01f)
+        {
+            return _rb.linearVelocity.normalized;
+        }
+        if (_currentWaypoint != default && _path.Count > 0)
+        {
+            return (_currentWaypoint - transform.position).normalized;
+        }
+        return Vector3.zero;
+    }
+
     public bool SetNewTarget(Vector2 targetPosition)
     {
         return SetNewTarget(targetPosition, waypointTolerance);

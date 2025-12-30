@@ -31,7 +31,7 @@ public class Unit_Miner : UnitBase
     private ResourceNode _targetResourceNode;
     private IStorage _targetStorage;
     private Vector3Int _targetUnloadCell;
-
+    
     protected override void Awake()
     {
         base.Awake();
@@ -50,6 +50,7 @@ public class Unit_Miner : UnitBase
     private void Update()
     {
         DecideNextAction();
+        UpdateAnimationState();
     }
 
     protected override void OnEnable()
@@ -91,6 +92,30 @@ public class Unit_Miner : UnitBase
         case UnitState.ReturningToStorage:
             OnReturnToStorage();
             break;
+        }
+    }
+
+    private void UpdateAnimationState()
+    {
+        var spriteController = unitMovement.GetComponent<UnitSpriteController>(); 
+        if (spriteController != null)
+        {
+            spriteController.UpdateAnimationState(currentState);
+        }
+        if (currentState == UnitState.Moving || currentState == UnitState.ReturningToStorage)
+        {
+            Vector3 moveDir = unitMovement.GetMoveDirection();
+            spriteController?.UpdateSpriteDirection(moveDir);
+        }
+        else if (currentState == UnitState.Mining && _targetResourceNode != null)
+        {
+            Vector3 dir = (_targetResourceNode.transform.position - transform.position).normalized;
+            spriteController?.UpdateSpriteDirection(dir);
+        }
+        else if ((currentState == UnitState.Unloading || currentState == UnitState.ReturningToStorage) && _targetStorage != null)
+        {
+            Vector3 dir = (((Component)_targetStorage).transform.position - transform.position).normalized;
+            spriteController?.UpdateSpriteDirection(dir);
         }
     }
 
