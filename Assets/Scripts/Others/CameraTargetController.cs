@@ -124,7 +124,7 @@ public class CameraTargetController : MonoBehaviour
         float currentPPU = (float)_defaultPpu / currentDivisor;
 
         float vertExtent;
-        if (_pixelPerfCam != null && _pixelPerfCam.runInEditMode) {
+        if (_pixelPerfCam != null) {
             vertExtent = _pixelPerfCam.refResolutionY * 0.5f / currentPPU;
         }
         else {
