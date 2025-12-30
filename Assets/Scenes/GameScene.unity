@@ -3277,9 +3277,9 @@ MonoBehaviour:
   highWallTilemap: {fileID: 860813986}
   grid: {fileID: 2115591665}
   groundTile: {fileID: 11400000, guid: 7d463f590028a4e46a4251ccd769d5d4, type: 2}
-  lowWallTile: {fileID: 11400000, guid: 1b8376ab9172bcc43bec8fa3dcd5a652, type: 2}
+  lowWallTile: {fileID: 11400000, guid: 28693dd6af850a54992ec4a6f5641226, type: 2}
   highWallTile: {fileID: 11400000, guid: eb928c309a2c05447bd982efd65ef475, type: 2}
-  wallTile: {fileID: 11400000, guid: 1b8376ab9172bcc43bec8fa3dcd5a652, type: 2}
+  wallTile: {fileID: 11400000, guid: 28693dd6af850a54992ec4a6f5641226, type: 2}
   enemyHomeTile: {fileID: 11400000, guid: a1537402c07c3394592fb0ee3ff9b0b7, type: 2}
   enemyTerritoryTile: {fileID: 11400000, guid: cd3ec6303b4b8754fb684445a525d2b4, type: 2}
   width: 192
@@ -6406,7 +6406,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 662.501
+  orthographic size: 11.25
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
