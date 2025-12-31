@@ -166,7 +166,6 @@ public class UIManager : MonoBehaviour
 
     public void ShowMainStructureUI()
     {
-        // Hide storage info panel (shown on hover) first
         if (storageInfoPanel != null && storageInfoPanel.activeSelf)
         {
             if (_trackedStorage != null && _storageResourceChangedHandler != null)
@@ -177,10 +176,8 @@ public class UIManager : MonoBehaviour
             _trackedStorage = null;
         }
         
-        // Hide other UI panels first
         HideCurrentIClickableUI();
         
-        // Get main structure and inventory system
         MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
         if (mainStructure == null) return;
         
@@ -190,8 +187,6 @@ public class UIManager : MonoBehaviour
         GameObject inventoryPanel = inventorySystem.GetInventoryPanel();
         if (inventoryPanel == null) return;
         
-        // Always show inventory panel when clicking
-        // Use ToggleInventory to ensure both inventoryPanel and currentResourcePanel are handled correctly
         if (!inventoryPanel.activeSelf)
         {
             inventorySystem.ToggleInventory();
@@ -237,7 +232,6 @@ public class UIManager : MonoBehaviour
         
         if (storageInfoPanel != null)
         {
-            // Unsubscribe from resource changes
             if (_trackedStorage != null && _storageResourceChangedHandler != null)
             {
                 _trackedStorage.OnResourceChanged -= _storageResourceChangedHandler;
@@ -483,7 +477,6 @@ public class UIManager : MonoBehaviour
     
     public void HideStorageInfo()
     {
-        // Unsubscribe from resource changes
         if (_trackedStorage != null && _storageResourceChangedHandler != null)
         {
             _trackedStorage.OnResourceChanged -= _storageResourceChangedHandler;
@@ -568,7 +561,6 @@ public class UIManager : MonoBehaviour
         tipUnitMakeBtn.SetActive(true);
     }
 
-    // Tips UI : Hide
 
     public void HideResourcePanel()
     {

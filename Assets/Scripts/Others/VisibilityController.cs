@@ -152,8 +152,6 @@ public class VisibilityController : MonoBehaviour
             return;
         }
         
-        // Skip visibility updates for ResourceNode objects - they should always be hidden
-        // Visibility is now controlled by rule tiles instead
         if (GetComponent<ResourceNode>() != null || GetComponentInParent<ResourceNode>() != null)
         {
             SetVisible(false);
@@ -195,7 +193,7 @@ public class VisibilityController : MonoBehaviour
                     
                 case VisibilityType.Building:
                 case VisibilityType.Terrain:
-                    shouldBeVisible = true; // Always visible
+                    shouldBeVisible = true;
                     break;
             }
             
@@ -220,7 +218,6 @@ public class VisibilityController : MonoBehaviour
     
     private void SetVisible(bool visible)
     {
-        // ResourceNode objects should always be hidden (visibility controlled by rule tiles)
         if (GetComponent<ResourceNode>() != null || GetComponentInParent<ResourceNode>() != null)
         {
             visible = false;

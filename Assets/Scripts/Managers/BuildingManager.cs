@@ -770,22 +770,6 @@ public class BuildingManager : MonoBehaviour
         _processors.Remove(processor);
     }
 
-    // public Processor FindClosestAvailableProcessor(Vector3 position)
-    // {
-    //     Processor closestProcessor = null;
-    //     float minDistance = float.MaxValue;
-    //
-    //     foreach (Processor processor in _processors) {
-    //         if (processor.IsFull) continue;
-    //
-    //         float dist = Vector3.Distance(position, processor.GetPosition());
-    //         if (dist < minDistance) {
-    //             minDistance = dist;
-    //             closestProcessor = processor;
-    //         }
-    //     }
-    //     return closestProcessor;
-    // }
 
     public void RegisterPrePlacedBuilding(BuildingPiece buildingPiece)
     {

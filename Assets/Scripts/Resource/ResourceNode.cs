@@ -18,45 +18,38 @@ public class ResourceNode : MonoBehaviour
     
     private void Awake()
     {
-        // Disable VisibilityController - resources should never be visible
         _visibilityController = GetComponent<VisibilityController>();
         if (_visibilityController != null)
         {
             _visibilityController.enabled = false;
         }
         
-        // Also check in children
         _visibilityController = GetComponentInChildren<VisibilityController>();
         if (_visibilityController != null)
         {
             _visibilityController.enabled = false;
         }
         
-        // Hide all sprite renderers - only rule tiles are visible
         DisableAllSpriteRenderers();
     }
 
     private void OnEnable()
     {
-        // Ensure VisibilityController stays disabled
         if (_visibilityController != null)
         {
             _visibilityController.enabled = false;
         }
         
-        // Ensure sprite renderers stay hidden even if VisibilityController tries to enable them
         DisableAllSpriteRenderers();
     }
 
     private void Start()
     {
-        // Ensure VisibilityController stays disabled
         if (_visibilityController != null)
         {
             _visibilityController.enabled = false;
         }
         
-        // Ensure sprite renderers stay hidden
         DisableAllSpriteRenderers();
         
         if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null)
@@ -83,7 +76,6 @@ public class ResourceNode : MonoBehaviour
             ResourceManager.Instance.RemoveResourceNode(this);
         }
         
-        // Update nearby rule tiles when this resource is mined
         if (MapObjectSpawner.Instance != null && cellPosition != Vector3Int.zero)
         {
             MapObjectSpawner.Instance.UpdateNearbyRuleTiles(cellPosition);

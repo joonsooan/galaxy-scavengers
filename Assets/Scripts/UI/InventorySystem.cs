@@ -63,7 +63,6 @@ public class InventorySystem : MonoBehaviour
             currentResourcePanel.SetActive(false);
         }
 
-        // Ensure event subscription happens in Start as well
         SubscribeToResourceEvents();
     }
 
@@ -167,7 +166,6 @@ public class InventorySystem : MonoBehaviour
             return;
         }
 
-        // Get the ScrollRect and its content
         ScrollRect scrollRect = currentResourcePanelScroll.GetComponent<ScrollRect>();
         if (scrollRect == null)
         {
@@ -182,7 +180,6 @@ public class InventorySystem : MonoBehaviour
             return;
         }
 
-        // Initialize all resource cells with current data
         foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
         {
             GameObject cellObj = Instantiate(resourceInfoCellPrefab, _resourcePanelContent);
@@ -192,7 +189,6 @@ public class InventorySystem : MonoBehaviour
                 cell.Initialize(type, this);
                 _resourceInfoCells.Add(cell);
                 
-                // Initialize with current resource amount from ResourceManager
                 if (ResourceManager.Instance != null)
                 {
                     int currentAmount = ResourceManager.Instance.GetResourceAmount(type);
@@ -215,7 +211,6 @@ public class InventorySystem : MonoBehaviour
         {
             currentResourcePanel.SetActive(!isActive);
             
-            // Refresh all resource cells when panel is shown to ensure data is up to date
             if (!isActive)
             {
                 RefreshAllResourceCells();
@@ -285,24 +280,21 @@ public class InventorySystem : MonoBehaviour
             InventoryCell emptyCell = FindFirstEmptyCell();
             if (emptyCell == null)
             {
-                break; // Inventory is full
+                break;
             }
 
             int amountForThisCell = Mathf.Min(remainingToMove, maxStack);
             if (ResourceManager.Instance.RemoveResource(type, amountForThisCell))
             {
-                // Set the resource in the inventory cell
                 emptyCell.SetResource(type, amountForThisCell);
                 remainingToMove -= amountForThisCell;
             }
             else
             {
-                break; // Can't remove more from ResourceManager
+                break;
             }
         }
 
-        // Manually update the resource info cell to ensure it reflects the current amount
-        // The event should also trigger, but this ensures it updates even if there's a timing issue
         if (ResourceManager.Instance != null)
         {
             int currentAmount = ResourceManager.Instance.GetResourceAmount(type);
@@ -330,7 +322,6 @@ public class InventorySystem : MonoBehaviour
         int totalAmount = 0;
         List<InventoryCell> cellsToClear = new List<InventoryCell>();
 
-        // Find all cells with the same resource type and calculate total amount
         foreach (InventoryCell cell in _inventoryCells)
         {
             if (!cell.IsEmpty() && cell.ResourceType == type)
@@ -340,12 +331,10 @@ public class InventorySystem : MonoBehaviour
             }
         }
 
-        // Return all resources to ResourceManager
         if (totalAmount > 0)
         {
             ResourceManager.Instance.AddResource(type, totalAmount);
             
-            // Clear all cells that had this resource type
             foreach (InventoryCell cell in cellsToClear)
             {
                 cell.Clear();
@@ -355,7 +344,6 @@ public class InventorySystem : MonoBehaviour
 
     private void UpdateResourceInfoCells(ResourceType type, int amount)
     {
-        // Update the specific resource cell with the new amount
         ResourceInfoCellClickable cell = _resourceInfoCells.FirstOrDefault(c => c.ResourceType == type);
         if (cell != null)
         {

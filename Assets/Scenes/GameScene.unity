@@ -3277,9 +3277,9 @@ MonoBehaviour:
   highWallTilemap: {fileID: 860813986}
   grid: {fileID: 2115591665}
   groundTile: {fileID: 11400000, guid: 7d463f590028a4e46a4251ccd769d5d4, type: 2}
-  lowWallTile: {fileID: 11400000, guid: a49361b790b54a4448c3c5b19220ed49, type: 2}
-  highWallTile: {fileID: 11400000, guid: b3dd623c8d89611468d9390ac5d4d881, type: 2}
-  wallTile: {fileID: 11400000, guid: a49361b790b54a4448c3c5b19220ed49, type: 2}
+  lowWallTile: {fileID: 11400000, guid: fde47eaf094a3af49901a9b2e5882636, type: 2}
+  highWallTile: {fileID: 11400000, guid: 5a5122fe1d03a3a4eb776067cff0c928, type: 2}
+  wallTile: {fileID: 11400000, guid: fde47eaf094a3af49901a9b2e5882636, type: 2}
   enemyHomeTile: {fileID: 11400000, guid: a1537402c07c3394592fb0ee3ff9b0b7, type: 2}
   enemyTerritoryTile: {fileID: 11400000, guid: cd3ec6303b4b8754fb684445a525d2b4, type: 2}
   width: 192
@@ -3344,7 +3344,7 @@ MonoBehaviour:
   resourceTilemap: {fileID: 2116328957}
   resourceSettings:
   - resourceType: 0
-    resourceRuleTile: {fileID: 11400000, guid: 4d6ccb7e6a56cef40bfcd63d9023e43d, type: 2}
+    resourceRuleTile: {fileID: 11400000, guid: 2b70f27aa31c62b4b863f659dbee3bf0, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: 9e542c61b3b4f0745ab05a9dadeccb8f, type: 3}
     spawnFrequencyPercent: 60
     baseRichness: 10
