@@ -1,97 +1,13 @@
 fileFormatVersion: 2
-guid: 5a33ae9ead8a43e4191443930d0f5078
+guid: 6c6801ca2ceed3e4ea22a34e3b856a79
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1259865251972503641
-    second: tile_ferrite_0
+      213: -3322546367944974676
+    second: tile_cryocrystal_0
   - first:
-      213: -4145966499019035615
-    second: tile_ferrite_1
-  - first:
-      213: -5027509340213622084
-    second: 0
-  - first:
-      213: -2374222918679686493
-    second: 1
-  - first:
-      213: -761933863725385812
-    second: 2
-  - first:
-      213: -5906598218874874896
-    second: 3
-  - first:
-      213: -1816755548282093316
-    second: 4
-  - first:
-      213: 2008176328888099268
-    second: 5
-  - first:
-      213: 6967745887157389618
-    second: 6
-  - first:
-      213: 6501298950303736333
-    second: 7
-  - first:
-      213: -3181606171480048652
-    second: 8
-  - first:
-      213: -7010260848350730462
-    second: 9
-  - first:
-      213: -8655818156195654838
-    second: 10
-  - first:
-      213: 6346318911325233748
-    second: 11
-  - first:
-      213: 1840059084634729652
-    second: 12
-  - first:
-      213: 1127223760459724062
-    second: 13
-  - first:
-      213: 2450565909728410856
-    second: 14
-  - first:
-      213: -3165705482850905674
-    second: 15
-  - first:
-      213: -5774996654182199871
-    second: 16
-  - first:
-      213: 4443897450750874535
-    second: 17
-  - first:
-      213: 5661049957185019681
-    second: 18
-  - first:
-      213: 8474981341611232960
-    second: 19
-  - first:
-      213: 6836142153017594085
-    second: 20
-  - first:
-      213: 2185498278340178504
-    second: 21
-  - first:
-      213: 430984766625829748
-    second: 22
-  - first:
-      213: -1317986280940093683
-    second: 23
-  - first:
-      213: -8326724806951850010
-    second: 24
-  - first:
-      213: 8914089594741642868
-    second: 25
-  - first:
-      213: 276181914589855336
-    second: 26
-  - first:
-      213: 588497054336764479
-    second: 27
+      213: 6994954262748687120
+    second: tile_cryocrystal_1
   - first:
       213: -540048619370252142
     second: 28
@@ -105,15 +21,6 @@ TextureImporter:
       213: 8251907811329543855
     second: 31
   - first:
-      213: -8946788012438720712
-    second: 32
-  - first:
-      213: -3538851436377425636
-    second: 33
-  - first:
-      213: 5837620518785745679
-    second: 34
-  - first:
       213: 735763825654373507
     second: 35
   - first:
@@ -126,15 +33,6 @@ TextureImporter:
       213: 1812952166184403864
     second: 38
   - first:
-      213: 765628930423093814
-    second: 39
-  - first:
-      213: 3140112598110723769
-    second: 40
-  - first:
-      213: -1761356356439173420
-    second: 41
-  - first:
       213: -4344009131248462207
     second: 42
   - first:
@@ -146,9 +44,6 @@ TextureImporter:
   - first:
       213: 1744244361374601134
     second: 45
-  - first:
-      213: 2612548079664777360
-    second: 46
   - first:
       213: 3221110418805894947
     second: other
@@ -248,7 +143,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -260,7 +155,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: tile_ferrite_0
+      name: 28
       rect:
         serializedVersion: 2
         x: 0
@@ -268,21 +163,21 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 30a83ba2be28f3b49b82281a63450dbd
-      internalID: 1259865251972503641
+      spriteID: e6bcac7f7307559429c3daaf5ca02db0
+      internalID: -929627786
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tile_ferrite_1
+      name: 29
       rect:
         serializedVersion: 2
         x: 16
@@ -290,21 +185,21 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 4c240868a486e4d47bef0128d15fb842
-      internalID: -4145966499019035615
+      spriteID: aa872158e6dd7324fa280fc2c21bfb86
+      internalID: -594457093
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tile_ferrite_2
+      name: 30
       rect:
         serializedVersion: 2
         x: 32
@@ -312,21 +207,21 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 333a66312fa5a0b48b5c24230af20c05
-      internalID: 2096279781
+      spriteID: 8b7eec7d50972524fa8420748dc9247c
+      internalID: 732054854
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tile_ferrite_3
+      name: 31
       rect:
         serializedVersion: 2
         x: 48
@@ -334,21 +229,21 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 130765b35375e844b9307ec810177e23
-      internalID: -398285930
+      spriteID: 99163467d86839e49af5968dd6ef37b0
+      internalID: 837721952
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tile_ferrite_4
+      name: 35
       rect:
         serializedVersion: 2
         x: 0
@@ -356,21 +251,21 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 6850b13ffccbed94292905ce6c215024
-      internalID: -1305378347
+      spriteID: c2185d41671aaea43af7f6a82499f677
+      internalID: -1052453329
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tile_ferrite_5
+      name: 36
       rect:
         serializedVersion: 2
         x: 16
@@ -378,21 +273,21 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 390abd7f1a33f24448fa8f793ea6e4be
-      internalID: 123440881
+      spriteID: fd43a82b2fa1bd24eb6cfa80ca07d8ad
+      internalID: 1904155483
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tile_ferrite_6
+      name: 37
       rect:
         serializedVersion: 2
         x: 32
@@ -400,21 +295,21 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: c54d82212775f934883ffa4350874e4a
-      internalID: -266839693
+      spriteID: 9328578872e0d8e4b975474f4cf0f722
+      internalID: 1660208009
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tile_ferrite_7
+      name: 38
       rect:
         serializedVersion: 2
         x: 48
@@ -422,21 +317,21 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 1f6417ef388e25b4f860df6d7edd2965
-      internalID: -316250382
+      spriteID: 4c9892d624d2bf843bac24b651699d6f
+      internalID: -1019064900
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tile_ferrite_8
+      name: 42
       rect:
         serializedVersion: 2
         x: 0
@@ -444,21 +339,21 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 8d78f28dceb82694d9a7e6430e392ac8
-      internalID: 253241253
+      spriteID: 9a8138ea2b50d174284c68bc1d99b057
+      internalID: 759571828
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tile_ferrite_9
+      name: 43
       rect:
         serializedVersion: 2
         x: 16
@@ -466,21 +361,21 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 7628eca434cb3314c8393b9460d706a7
-      internalID: 1693463554
+      spriteID: f2f030388eaa9de4397210bd04f61956
+      internalID: -1269048916
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tile_ferrite_10
+      name: 44
       rect:
         serializedVersion: 2
         x: 32
@@ -488,21 +383,21 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 02f6bfb8ad530b74db13a22a8285dbd9
-      internalID: 1034675435
+      spriteID: 24041f44c6a01904a8fa36d80f33834b
+      internalID: -245415084
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tile_ferrite_11
+      name: 45
       rect:
         serializedVersion: 2
         x: 48
@@ -510,21 +405,87 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 99a6956627bd6134cbac59061cd22b86
-      internalID: 1610669002
+      spriteID: 81330948b508a8a4cb94315aa3d9fb61
+      internalID: -1079358907
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: tile_ferrite_12
+      name: other
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 0
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 17f13983b4ce0054db3f490034341b64
+      internalID: -1278764636
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: other
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 0
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3c1b22074bf45574a883d8d3785a5f48
+      internalID: -1183217250
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: other
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 0
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 457c345690ca51c4b93d47f6f181244c
+      internalID: 953608789
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: other
       rect:
         serializedVersion: 2
         x: 0
@@ -532,81 +493,15 @@ TextureImporter:
         width: 16
         height: 16
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 1fe87bb7221879445875b51c5eccd212
-      internalID: 511535611
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: tile_ferrite_13
-      rect:
-        serializedVersion: 2
-        x: 16
-        y: 0
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 2d219e46920ee45418e0aee439e57bcf
-      internalID: -527261699
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: tile_ferrite_14
-      rect:
-        serializedVersion: 2
-        x: 32
-        y: 0
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: b2d09bd6da585fc48882b2864649f81b
-      internalID: -1682617586
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: tile_ferrite_15
-      rect:
-        serializedVersion: 2
-        x: 48
-        y: 0
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 2f543b0948891554bb706a31ca9049ab
-      internalID: 1276705861
+      spriteID: 826699bac9ec66948b578b0fb6577b80
+      internalID: -699217305
       vertices: []
       indices: 
       edges: []
@@ -615,7 +510,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5c63762a3eea681449007a555863a2f6
+    spriteID: 18e507017ed31bb429321dbb3ffe7aa1
     internalID: 0
     vertices: []
     indices: 
@@ -625,22 +520,43 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      tile_ferrite_0: 1259865251972503641
-      tile_ferrite_1: -4145966499019035615
-      tile_ferrite_10: 1034675435
-      tile_ferrite_11: 1610669002
-      tile_ferrite_12: 511535611
-      tile_ferrite_13: -527261699
-      tile_ferrite_14: -1682617586
-      tile_ferrite_15: 1276705861
-      tile_ferrite_2: 2096279781
-      tile_ferrite_3: -398285930
-      tile_ferrite_4: -1305378347
-      tile_ferrite_5: 123440881
-      tile_ferrite_6: -266839693
-      tile_ferrite_7: -316250382
-      tile_ferrite_8: 253241253
-      tile_ferrite_9: 1693463554
+      1: 1400161767
+      2: 1831105651
+      28: 660768650
+      29: 1748396558
+      3: -105991056
+      30: 1939792792
+      31: 163815107
+      35: -1454971634
+      36: 1823214873
+      37: -819195982
+      38: 2000654234
+      4: 1760732823
+      42: 1574932995
+      43: -1676447425
+      44: -1025262988
+      45: 1749100096
+      5: -232499081
+      6: 20886616
+      7: 1439352087
+      8: 80842503
+      other: -1885279946
+      tile_cryocrystal_0: -3322546367944974676
+      tile_cryocrystal_1: 6994954262748687120
+      tile_cryocrystal_10: -555447665
+      tile_cryocrystal_11: -1410427565
+      tile_cryocrystal_12: 1141227579
+      tile_cryocrystal_13: -1165798927
+      tile_cryocrystal_14: 547655641
+      tile_cryocrystal_15: 1515937096
+      tile_cryocrystal_2: -1348182086
+      tile_cryocrystal_3: -91323806
+      tile_cryocrystal_4: 1727012236
+      tile_cryocrystal_5: -1748252963
+      tile_cryocrystal_6: -866157488
+      tile_cryocrystal_7: 1524719747
+      tile_cryocrystal_8: -1782050245
+      tile_cryocrystal_9: 1686335979
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

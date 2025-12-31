@@ -440,8 +440,19 @@ public class FogOfWarManager : MonoBehaviour
                 if (!suppressVisibilityEvents)
                 {
                     SafeInvokeVisibilityChanged(tile, newState);
+                    // Update resource tile visibility if there's a resource at this position
+                    UpdateResourceTileVisibilityAtTile(tile);
                 }
             }
+        }
+    }
+    
+    private void UpdateResourceTileVisibilityAtTile(Vector3Int tile)
+    {
+        // Update the specific resource tile at this position if it exists
+        if (MapObjectSpawner.Instance != null)
+        {
+            MapObjectSpawner.Instance.UpdateResourceTileVisibilityAtCell(tile);
         }
     }
     
@@ -610,6 +621,8 @@ public class FogOfWarManager : MonoBehaviour
                 if (!suppressVisibilityEvents)
                 {
                     SafeInvokeVisibilityChanged(tile, newState);
+                    // Update resource tile visibility if there's a resource at this position
+                    UpdateResourceTileVisibilityAtTile(tile);
                 }
             }
         }
@@ -742,8 +755,25 @@ public class FogOfWarManager : MonoBehaviour
         {
             return true;
         }
-        FogOfWarState state = GetVisibilityState(cellPosition);
-        return state != FogOfWarState.Invisible;
+        
+        // Resource tiles use the same visibility as the terrain tile at that position
+        // Check if the tile position is tracked in _tileVisibility
+        if (_tileVisibility.TryGetValue(cellPosition, out FogOfWarState state))
+        {
+            // Tile is tracked, use its state
+            return state != FogOfWarState.Invisible;
+        }
+        
+        // If tile is not tracked yet, check if it's been explored
+        // This handles cases where resource tiles exist but haven't been processed by fog yet
+        if (_exploredTiles.Contains(cellPosition))
+        {
+            // Tile has been explored, make it visible (PartlyVisible)
+            return true;
+        }
+        
+        // Tile is not tracked and not explored, it's invisible
+        return false;
     }
     
     public void ToggleFogVisibility()
@@ -756,6 +786,12 @@ public class FogOfWarManager : MonoBehaviour
         }
         
         UpdateAllVisibilityControllers();
+        
+        // Update resource tile visibility when fog is toggled
+        if (MapObjectSpawner.Instance != null)
+        {
+            MapObjectSpawner.Instance.UpdateResourceTileVisibility();
+        }
     }
     
     private void UpdateAllVisibilityControllers()
@@ -784,6 +820,12 @@ public class FogOfWarManager : MonoBehaviour
             InitializeFogOfWar();
         }
         UpdateVisibility();
+        
+        // Update resource tile visibility when fog refreshes
+        if (MapObjectSpawner.Instance != null)
+        {
+            MapObjectSpawner.Instance.UpdateResourceTileVisibility();
+        }
     }
     
     public void ExploreTile(Vector3Int cellPosition)
@@ -799,6 +841,8 @@ public class FogOfWarManager : MonoBehaviour
                 if (!suppressVisibilityEvents)
                 {
                     SafeInvokeVisibilityChanged(cellPosition, FogOfWarState.PartlyVisible);
+                    // Update resource tile visibility when tile is explored
+                    UpdateResourceTileVisibilityAtTile(cellPosition);
                 }
             }
         }

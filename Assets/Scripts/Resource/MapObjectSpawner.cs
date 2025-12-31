@@ -10,7 +10,7 @@ public class ResourceSpawnSettings
 {
     [Header("Resource Type")]
     public ResourceType resourceType;
-    public TileBase resourceTile;
+    public RuleTile resourceRuleTile;
     public GameObject resourcePrefab;
     
     [Header("Spawn Frequency")]
@@ -34,10 +34,25 @@ public class ResourceCircle
 
 public class MapObjectSpawner : MonoBehaviour
 {
-[Header("References")]
-[SerializeField] private Grid grid;
+    [Header("References")]
+    [SerializeField] private Grid grid;
     [SerializeField] private Transform parentTransform;
     [SerializeField] private MapGenerator mapGenerator;
+    [SerializeField] private Tilemap resourceTilemap;
+    
+    private void Awake()
+    {
+        if (_instance == null)
+        {
+            _instance = this;
+        }
+        else if (_instance != this)
+        {
+            Destroy(gameObject);
+        }
+    }
+    
+    public static MapObjectSpawner Instance => _instance;
     
     [Header("Resource Settings")]
     [SerializeField] private List<ResourceSpawnSettings> resourceSettings = new ();
@@ -85,7 +100,6 @@ public class MapObjectSpawner : MonoBehaviour
     [SerializeField] private Color startingAreaMinRadiusColor = new(1f, 0f, 0f, 0.5f);
     [SerializeField] private Color startingAreaMaxRadiusColor = new(0f, 0f, 1f, 0.5f);
     
-    private readonly List<GameObject> _spawnedResources = new ();
     private Vector2Int _mapCenter;
     private int _mapWidth;
     private int _mapHeight;
@@ -95,10 +109,14 @@ public class MapObjectSpawner : MonoBehaviour
     private readonly List<float> _sectorPowerValues = new ();
     private readonly List<ResourceCircle> _resourceCircles = new ();
     private readonly List<ResourceNode> _pendingResourceNodes = new ();
+    private readonly Dictionary<Vector3Int, ResourceType> _resourceTilePositions = new ();
+    private static MapObjectSpawner _instance;
 
     public static event Action OnAllObjectsSpawned;
     private static bool isSpawningResources;
     public static bool IsSpawningResources => isSpawningResources;
+    
+    public Tilemap ResourceTilemap => resourceTilemap;
     
     public List<float> GetDivisionRadii()
     {
@@ -144,7 +162,6 @@ public class MapObjectSpawner : MonoBehaviour
         float halfHeight = (_mapHeight / 2f) - borderPadding;
         _maxMapRadius = Mathf.Min(halfWidth, halfHeight);
         
-        _spawnedResources.Clear();
         _divisionRadii.Clear();
         _sectorPowerValues.Clear();
         _resourceCircles.Clear();
@@ -165,9 +182,12 @@ public class MapObjectSpawner : MonoBehaviour
             SpawnResourcesInCircles();
             RegisterBufferedResources();
             
+            // Initialize rule tiles after all resources are placed
+            InitializeResourceRuleTiles();
+            
             OnAllObjectsSpawned.Invoke();
             
-            Debug.Log($"Spawned {_spawnedResources.Count} resource nodes. Created {_resourceCircles.Count} resource circles.");
+            Debug.Log($"Spawned {_pendingResourceNodes.Count} resource nodes. Created {_resourceCircles.Count} resource circles.");
         }
         finally
         {
@@ -179,8 +199,6 @@ public class MapObjectSpawner : MonoBehaviour
                 
                 StartCoroutine(DeferredFogRefresh());
             }
-            
-            UpdateAllResourceVisibility();
         }
     }
     
@@ -460,7 +478,7 @@ public class MapObjectSpawner : MonoBehaviour
         List<ResourceSpawnSettings> validSettings = new List<ResourceSpawnSettings>();
         foreach (var settings in resourceSettings)
         {
-            if (settings.resourcePrefab == null || settings.resourceTile == null) continue;
+            if (settings.resourcePrefab == null || settings.resourceRuleTile == null) continue;
             if (Random.Range(0f, 100f) <= settings.spawnFrequencyPercent)
             {
                 validSettings.Add(settings);
@@ -478,7 +496,7 @@ public class MapObjectSpawner : MonoBehaviour
         foreach (var circle in _resourceCircles)
         {
             ResourceSpawnSettings settings = resourceSettings.Find(s => s.resourceType == circle.resourceType);
-            if (settings == null || settings.resourcePrefab == null || settings.resourceTile == null) continue;
+            if (settings == null || settings.resourcePrefab == null || settings.resourceRuleTile == null) continue;
             
             float distanceFromCenter = Vector2.Distance(circle.center, _mapCenter);
             int sectorIndex = 0;
@@ -502,17 +520,12 @@ public class MapObjectSpawner : MonoBehaviour
             int minY = circle.center.y - radiusInt;
             int maxY = circle.center.y + radiusInt;
             
-            int spawned = 0;
-            int checkedPositions = 0;
-            
             List<Vector3Int> validPositions = new List<Vector3Int>();
             
             for (int x = minX; x <= maxX; x++)
             {
                 for (int y = minY; y <= maxY; y++)
                 {
-                    checkedPositions++;
-                    
                     float distanceFromCircleCenter = Vector2.Distance(new Vector2(x, y), circle.center);
                     if (distanceFromCircleCenter > circle.radius) continue;
                     
@@ -529,10 +542,10 @@ public class MapObjectSpawner : MonoBehaviour
                 ShuffleList(validPositions);
                 validPositions = validPositions.GetRange(0, maxResourcesPerCircle);
             }
+            
             foreach (var cellPos in validPositions)
             {
                 SpawnResourceAtPosition(cellPos, settings, richness);
-                spawned++;
             }
         }
     }
@@ -595,8 +608,11 @@ public class MapObjectSpawner : MonoBehaviour
             
             ResourceNode resourceNode = resourceNodeObj.GetComponent<ResourceNode>();
             resourceNode.amountToMine = richness;
+            resourceNode.cellPosition = cellPos;
             _pendingResourceNodes.Add(resourceNode);
-            _spawnedResources.Add(resourceNodeObj);
+            
+            // Track resource position for rule tile placement
+            _resourceTilePositions[cellPos] = settings.resourceType;
         }
         catch (System.Exception e)
         {
@@ -613,32 +629,40 @@ public class MapObjectSpawner : MonoBehaviour
         }
     }
     
-    private void UpdateAllResourceVisibility()
+    public void UpdateResourceTileVisibility()
     {
-        try
+        if (resourceTilemap == null) return;
+        
+        // Ensure tilemap is active and visible
+        if (resourceTilemap.gameObject != null && !resourceTilemap.gameObject.activeSelf)
         {
-            VisibilityController[] allControllers =
-                FindObjectsByType<VisibilityController>(FindObjectsSortMode.None);
-            foreach (var controller in allControllers)
-            {
-                if (controller != null && controller.gameObject != null)
-                {
-                    try
-                    {
-                        controller.SubscribeIfNeeded();
-                        controller.ForceUpdateVisibility();
-                    }
-                    catch (System.Exception)
-                    {
-                        //
-                    }
-                }
-            }
+            resourceTilemap.gameObject.SetActive(true);
         }
-        catch (System.Exception)
+        
+        // Update visibility for all resource tiles based on fog of war
+        foreach (var kvp in _resourceTilePositions)
         {
-            //
+            Vector3Int cellPos = kvp.Key;
+            UpdateResourceTileVisibilityAtCell(cellPos);
         }
+    }
+    
+    public void UpdateResourceTileVisibilityAtCell(Vector3Int cellPos)
+    {
+        if (resourceTilemap == null || !resourceTilemap.HasTile(cellPos)) return;
+        
+        // Check visibility if fog is initialized, otherwise default to visible
+        bool isVisible = true;
+        if (FogOfWarManager.Instance != null && FogOfWarManager.Instance.IsInitialized)
+        {
+            isVisible = FogOfWarManager.Instance.CanSeeResources(cellPos);
+        }
+        
+        // Set tile color with proper RGB and alpha based on visibility
+        // Visible = white with alpha 1.0, Invisible = white with alpha 0.0
+        Color tileColor = isVisible ? new Color(1f, 1f, 1f, 1f) : new Color(1f, 1f, 1f, 0f);
+        resourceTilemap.SetColor(cellPos, tileColor);
+        resourceTilemap.RefreshTile(cellPos);
     }
     
     private void OnDrawGizmos()
@@ -698,6 +722,94 @@ public class MapObjectSpawner : MonoBehaviour
         if (FogOfWarManager.Instance != null)
         {
             FogOfWarManager.Instance.RefreshFogOfWar();
+            // RefreshFogOfWar now automatically calls UpdateResourceTileVisibility
+        }
+    }
+    
+    private void InitializeResourceRuleTiles()
+    {
+        if (resourceTilemap == null)
+        {
+            Debug.LogWarning("[MapObjectSpawner] Resource tilemap not assigned. Cannot initialize rule tiles.");
+            return;
+        }
+        
+        // Ensure tilemap is visible
+        if (resourceTilemap.gameObject != null)
+        {
+            resourceTilemap.gameObject.SetActive(true);
+        }
+        
+        // Place rule tiles at all resource positions
+        foreach (var kvp in _resourceTilePositions)
+        {
+            Vector3Int cellPos = kvp.Key;
+            ResourceType resourceType = kvp.Value;
+            
+            ResourceSpawnSettings settings = resourceSettings.Find(s => s.resourceType == resourceType);
+            if (settings != null && settings.resourceRuleTile != null)
+            {
+                resourceTilemap.SetTile(cellPos, settings.resourceRuleTile);
+                // Set initial color to white with full alpha (visible)
+                resourceTilemap.SetColor(cellPos, Color.white);
+            }
+        }
+        
+        // Refresh all rule tiles to apply proper tiling rules
+        RefreshRuleTiles(_resourceTilePositions.Keys);
+        
+        // Update visibility for all resource tiles based on fog of war
+        UpdateResourceTileVisibility();
+        
+        Debug.Log($"[MapObjectSpawner] Initialized {_resourceTilePositions.Count} resource rule tiles.");
+    }
+    
+    public void UpdateNearbyRuleTiles(Vector3Int minedPosition)
+    {
+        if (resourceTilemap == null) return;
+        
+        // Remove the mined tile
+        _resourceTilePositions.Remove(minedPosition);
+        resourceTilemap.SetTile(minedPosition, null);
+        
+        // Update nearby tiles (check all 8 neighbors)
+        HashSet<Vector3Int> tilesToRefresh = new HashSet<Vector3Int>();
+        
+        for (int x = -1; x <= 1; x++)
+        {
+            for (int y = -1; y <= 1; y++)
+            {
+                if (x == 0 && y == 0) continue; // Skip the mined tile itself
+                
+                Vector3Int neighborPos = minedPosition + new Vector3Int(x, y, 0);
+                
+                // If this neighbor has a resource tile, refresh it
+                if (_resourceTilePositions.ContainsKey(neighborPos))
+                {
+                    tilesToRefresh.Add(neighborPos);
+                }
+            }
+        }
+        
+        RefreshRuleTiles(tilesToRefresh);
+    }
+    
+    private void RefreshRuleTiles(IEnumerable<Vector3Int> positions)
+    {
+        if (resourceTilemap == null) return;
+        
+        // Refresh each tile position to update RuleTile sprites based on neighbors
+        foreach (Vector3Int pos in positions)
+        {
+            if (_resourceTilePositions.ContainsKey(pos))
+            {
+                // Unity's RuleTile system automatically updates based on neighbors
+                // We just need to trigger a refresh
+                resourceTilemap.RefreshTile(pos);
+                
+                // Update visibility after refreshing tile
+                UpdateResourceTileVisibilityAtCell(pos);
+            }
         }
     }
 }

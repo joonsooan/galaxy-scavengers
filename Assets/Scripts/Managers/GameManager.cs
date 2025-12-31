@@ -173,12 +173,6 @@ public class GameManager : MonoBehaviour
         MapObjectSpawner proceduralSpawner = FindFirstObjectByType<MapObjectSpawner>();
         if (proceduralSpawner != null) {
             proceduralSpawner.SpawnResources();
-            if (proceduralSpawner.GetComponent<ResourceSpawner>() != null) {
-                ResourceSpawner resourceSpawner = proceduralSpawner.GetComponent<ResourceSpawner>();
-                if (resourceSpawner.ResourceTilemap != null) {
-                    resourceSpawner.ResourceTilemap.gameObject.SetActive(false);
-                }
-            }
         }
 
         yield return null;
