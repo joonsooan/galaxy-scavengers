@@ -17,10 +17,6 @@ public class Unit_Construct : UnitBase
     [SerializeField] private ParticleSystem constructingParticleSystem;
     [SerializeField] private float particleOffsetDistance = 0.5f;
     [SerializeField] private float yOffset;
-    
-    [Header("Floating Animation")]
-    [SerializeField] private float floatAmplitude = 0.1f;
-    [SerializeField] private float floatDuration = 2f;
 
     private int _carriedAmount;
     private ResourceType _carriedResourceType;
@@ -40,10 +36,7 @@ public class Unit_Construct : UnitBase
     private Coroutine _unloadingCoroutine;
     private UnitSpriteController _spriteController;
     
-    private Tween _floatingTween;
-    private float _floatingPhase;
     private Vector3 _currentConstructionDirection;
-    private float _startYPosition;
 
     protected override void Awake()
     {
@@ -66,24 +59,6 @@ public class Unit_Construct : UnitBase
         UpdateUnitBaseState();
         DecideNextAction();
         UpdateAnimationState();
-        
-        // Handle floating animation for Idle and Moving states
-        if (currentState == UnitState.Idle || currentState == UnitState.Moving)
-        {
-            if (_floatingTween == null || !_floatingTween.IsActive())
-            {
-                StartFloatingAnimation();
-            }
-            else if (_floatingTween.IsActive())
-            {
-                // Apply floating offset to current position each frame
-                ApplyFloatingOffset();
-            }
-        }
-        else
-        {
-            StopFloatingAnimation();
-        }
         
         if (currentState == UnitState.Constructing)
         {
@@ -113,7 +88,6 @@ public class Unit_Construct : UnitBase
     
     private void OnDestroy()
     {
-        StopFloatingAnimation();
         StopConstructionParticles();
     }
 
@@ -559,52 +533,6 @@ public class Unit_Construct : UnitBase
         }
 
         _currentConstructionDirection = targetDirection;
-    }
-    
-    private void StartFloatingAnimation()
-    {
-        StopFloatingAnimation();
-        
-        _startYPosition = transform.position.y;
-        _floatingPhase = 0f;
-        
-        _floatingTween = DOTween.To(
-            () => _floatingPhase,
-            phase => _floatingPhase = phase,
-            1f,
-            floatDuration
-        )
-        .SetEase(Ease.Linear)
-        .SetLoops(-1, LoopType.Restart);
-    }
-    
-    private void ApplyFloatingOffset()
-    {
-        if (_floatingTween == null || !_floatingTween.IsActive()) return;
-        
-        float offset = Mathf.Sin(_floatingPhase * Mathf.PI * 2f) * floatAmplitude;
-        
-        if (_rb != null)
-        {
-            Vector2 currentPos = _rb.position;
-            float targetY = _startYPosition + offset;
-            _rb.MovePosition(new Vector2(currentPos.x, targetY));
-        }
-        else
-        {
-            Vector3 pos = transform.position;
-            transform.position = new Vector3(pos.x, _startYPosition + offset, pos.z);
-        }
-    }
-    
-    private void StopFloatingAnimation()
-    {
-        if (_floatingTween != null && _floatingTween.IsActive())
-        {
-            _floatingTween.Kill();
-            _floatingTween = null;
-        }
-        _floatingPhase = 0f;
     }
     
     private void StartConstructionParticles()
