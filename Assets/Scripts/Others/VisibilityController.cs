@@ -152,6 +152,12 @@ public class VisibilityController : MonoBehaviour
             return;
         }
         
+        if (GetComponent<ResourceNode>() != null || GetComponentInParent<ResourceNode>() != null)
+        {
+            SetVisible(false);
+            return;
+        }
+        
         Vector3Int currentCell = GetCurrentCell();
         if (currentCell != _lastRegisteredCell)
         {
@@ -187,7 +193,7 @@ public class VisibilityController : MonoBehaviour
                     
                 case VisibilityType.Building:
                 case VisibilityType.Terrain:
-                    shouldBeVisible = true; // Always visible
+                    shouldBeVisible = true;
                     break;
             }
             
@@ -212,6 +218,11 @@ public class VisibilityController : MonoBehaviour
     
     private void SetVisible(bool visible)
     {
+        if (GetComponent<ResourceNode>() != null || GetComponentInParent<ResourceNode>() != null)
+        {
+            visible = false;
+        }
+        
         _wasVisible = visible;
         
         foreach (var sr in _spriteRenderers)

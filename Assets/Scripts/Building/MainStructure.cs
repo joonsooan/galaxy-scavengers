@@ -14,6 +14,22 @@ public class MainStructure : BaseStorage, IClickable
     {
         base.Start();
         _inventorySystem = GetComponent<InventorySystem>();
+        
+        if (GetComponent<BuildingHoverTrigger>() == null)
+        {
+            gameObject.AddComponent<BuildingHoverTrigger>();
+        }
+        
+        BoxCollider2D[] colliders = GetComponents<BoxCollider2D>();
+        bool hasTriggerCollider = false;
+        foreach (BoxCollider2D collider in colliders)
+        {
+            if (collider != null && collider.isTrigger)
+            {
+                hasTriggerCollider = true;
+                break;
+            }
+        }
     }
     
     public void OnClicked()
@@ -22,9 +38,6 @@ public class MainStructure : BaseStorage, IClickable
         {
             GameManager.Instance.uiManager.ShowMainStructureUI();
         }
-
-        if (_inventorySystem == null) _inventorySystem = GetComponent<InventorySystem>();
-        if (_inventorySystem != null) _inventorySystem.ToggleInventory();
     }
     
     public void AddResourceToStorageOnly(ResourceType type, int amount)

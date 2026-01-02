@@ -14,7 +14,7 @@ public class Unit_Miner : UnitBase
     [Header("Cargo")]
     public int maxCarryAmount = 50;
     [SerializeField] private float resourceSearchInterval = 2.0f;
-    [SerializeField] private float maxSearchRadius = 50f; // Maximum distance to search for resources
+    [SerializeField] private float maxSearchRadius = 50f;
     public ResourceType[] mineableResourceTypes;
 
     [Header("VFX")]
@@ -211,22 +211,18 @@ public class Unit_Miner : UnitBase
         yield return new WaitForSeconds(1f);
 
         if (_targetStorage != null) {
-            // Track resources before unloading to calculate what was actually accepted
             Dictionary<ResourceType, int> resourcesBefore = new Dictionary<ResourceType, int>();
             Dictionary<ResourceType, int> resourcesToUnload = new Dictionary<ResourceType, int>();
 
-            // Record current storage state and what we want to unload
             foreach (KeyValuePair<ResourceType, int> pair in _currentCarryAmounts.Where(p => p.Value > 0)) {
                 resourcesBefore[pair.Key] = _targetStorage.GetCurrentResourceAmount(pair.Key);
                 resourcesToUnload[pair.Key] = pair.Value;
             }
 
-            // Try to unload each resource
             foreach (KeyValuePair<ResourceType, int> pair in resourcesToUnload) {
                 _targetStorage.TryAddResource(pair.Key, pair.Value);
             }
 
-            // Calculate how much was actually accepted by comparing before/after
             Dictionary<ResourceType, int> remainingResources = new Dictionary<ResourceType, int>();
             foreach (KeyValuePair<ResourceType, int> pair in resourcesToUnload) {
                 int amountBefore = resourcesBefore[pair.Key];
@@ -239,7 +235,6 @@ public class Unit_Miner : UnitBase
                 }
             }
 
-            // Update carry amounts - remove only the amount that was actually accepted
             foreach (KeyValuePair<ResourceType, int> pair in resourcesToUnload) {
                 int amountBefore = resourcesBefore[pair.Key];
                 int amountAfter = _targetStorage.GetCurrentResourceAmount(pair.Key);
@@ -251,7 +246,6 @@ public class Unit_Miner : UnitBase
                 }
             }
 
-            // If there are remaining resources, find another storage
             if (remainingResources.Count > 0 && remainingResources.Values.Sum() > 0) {
                 _targetStorage = null;
                 GoToStorage();
@@ -314,7 +308,6 @@ public class Unit_Miner : UnitBase
             return bestTarget;
         }
 
-        // Get all available resources and filter by distance first to reduce checks
         List<ResourceNode> availableResources = ResourceManager.Instance.GetAllResources()
             .Where(r =>
                 r != null && !r.IsDepleted && r.gameObject.activeInHierarchy &&
@@ -323,13 +316,11 @@ public class Unit_Miner : UnitBase
             )
             .ToList();
 
-        // Early exit if no resources available
         if (availableResources.Count == 0)
         {
             return bestTarget;
         }
 
-        // Pre-calculate distances and sort by distance to prioritize closer resources
         Vector3 unitPosition = transform.position;
         List<(ResourceNode node, float distance)> resourcesWithDistance = new List<(ResourceNode, float)>();
         
@@ -338,7 +329,6 @@ public class Unit_Miner : UnitBase
             Vector3 resourceWorldPos = BuildingManager.Instance.grid.GetCellCenterWorld(resourceNode.cellPosition);
             float distanceToResource = Vector3.Distance(unitPosition, resourceWorldPos);
             
-            // Skip resources beyond max search radius
             if (distanceToResource > maxSearchRadius)
             {
                 continue;
@@ -347,17 +337,14 @@ public class Unit_Miner : UnitBase
             resourcesWithDistance.Add((resourceNode, distanceToResource));
         }
 
-        // Sort by distance to check closest resources first
         resourcesWithDistance.Sort((a, b) => a.distance.CompareTo(b.distance));
 
         Vector3Int[] neighborOffsets = { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
         Grid grid = BuildingManager.Instance.grid;
 
-        // Check neighbors of each resource, starting with closest
         foreach (var (resourceNode, resourceDistance) in resourcesWithDistance)
         {
-            // Early exit: if we already found a target and this resource is further than our best target's mining cell, skip
-            if (bestTarget.resourceNode != null && resourceDistance > bestTarget.distance + 2f)
+                if (bestTarget.resourceNode != null && resourceDistance > bestTarget.distance + 2f)
             {
                 break; // All remaining resources are further away
             }
@@ -366,17 +353,14 @@ public class Unit_Miner : UnitBase
             {
                 Vector3Int neighborCell = resourceNode.cellPosition + offset;
 
-                // Quick distance check before expensive CanPlaceBuilding call
                 Vector3 neighborWorldPos = grid.GetCellCenterWorld(neighborCell);
                 float distanceToNeighbor = Vector3.Distance(unitPosition, neighborWorldPos);
                 
-                // Skip if this neighbor is further than our current best
                 if (distanceToNeighbor >= bestTarget.distance)
                 {
                     continue;
                 }
 
-                // Only call expensive CanPlaceBuilding if distance is promising
                 if (BuildingManager.Instance.CanPlaceBuilding(neighborCell))
                 {
                     if (distanceToNeighbor < bestTarget.distance)
@@ -385,7 +369,6 @@ public class Unit_Miner : UnitBase
                         bestTarget.miningCell = neighborCell;
                         bestTarget.distance = distanceToNeighbor;
                         
-                        // Early exit if we found a very close target (within 2 units)
                         if (distanceToNeighbor < 2f)
                         {
                             return bestTarget;
@@ -400,7 +383,6 @@ public class Unit_Miner : UnitBase
 
     private void FindAndSetStorage()
     {
-        // Use the same logic as FindClosestUnloadPosition but get the storage directly
         UnloadTarget bestTarget = FindClosestUnloadPosition();
         _targetStorage = bestTarget.storage;
     }
@@ -471,17 +453,14 @@ public class Unit_Miner : UnitBase
             Vector3 storagePosition = (storage as Component).transform.position;
             Vector3Int storageCell = grid.WorldToCell(storagePosition);
 
-            // Get all occupied cells if this is a registered building (handles 3x3 MainStructure)
             List<Vector3Int> occupiedCells = null;
             if (BuildingManager.Instance != null && BuildingManager.Instance.GetBuildingAt(storageCell, out List<Vector3Int> cells)) {
                 occupiedCells = cells;
             }
             else {
-                // Not a registered building, treat as single cell
                 occupiedCells = new List<Vector3Int> { storageCell };
             }
 
-            // Find all valid interaction cells around the building
             HashSet<Vector3Int> interactionCells = new HashSet<Vector3Int>();
             HashSet<Vector3Int> occupiedSet = new HashSet<Vector3Int>(occupiedCells);
 
@@ -489,7 +468,6 @@ public class Unit_Miner : UnitBase
                 foreach (Vector3Int offset in neighborOffsets) {
                     Vector3Int neighborCell = occupiedCell + offset;
 
-                    // Check if this neighbor is not part of the building and is walkable
                     if (!occupiedSet.Contains(neighborCell) &&
                         BuildingManager.Instance != null &&
                         BuildingManager.Instance.CanPlaceBuilding(neighborCell)) {
@@ -498,7 +476,6 @@ public class Unit_Miner : UnitBase
                 }
             }
 
-            // Find the closest interaction cell for this storage
             foreach (Vector3Int interactionCell in interactionCells) {
                 float distance = Vector3.Distance(transform.position, grid.GetCellCenterWorld(interactionCell));
                 if (distance < bestTarget.distance) {
@@ -659,10 +636,8 @@ public class Unit_Miner : UnitBase
 
         Vector3Int storageCell = grid.WorldToCell((_targetStorage as Component).transform.position);
 
-        // For large buildings (like 3x3 MainStructure), find the nearest occupied cell
         Vector3Int targetCell = storageCell;
         if (BuildingManager.Instance != null && BuildingManager.Instance.GetBuildingAt(storageCell, out List<Vector3Int> occupiedCells)) {
-            // Find the closest occupied cell to the unit
             float minDistance = float.MaxValue;
             foreach (Vector3Int cell in occupiedCells) {
                 float distance = Vector3.Distance(transform.position, grid.GetCellCenterWorld(cell));

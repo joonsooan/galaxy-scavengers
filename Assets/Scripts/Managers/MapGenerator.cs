@@ -200,7 +200,6 @@ public class MapGenerator : MonoBehaviour
                 if (isBorder)
                 {
                     lowWallTiles[index] = wallTile;
-                    // highWallTiles[index] = wallTile;
                     continue;
                 }
                 
@@ -536,7 +535,6 @@ public class MapGenerator : MonoBehaviour
     
     private void ConnectWallsToBorders()
     {
-        // Left
         for (int y = 0; y < height; y++)
         {
             int innerX = 1;
@@ -547,7 +545,6 @@ public class MapGenerator : MonoBehaviour
                 SetWallTile(borderPos, highWallTile);
             }
         }
-        // Right
         for (int y = 0; y < height; y++)
         {
             int innerX = width - 2;
@@ -558,7 +555,6 @@ public class MapGenerator : MonoBehaviour
                 SetWallTile(borderPos, highWallTile);
             }
         }
-        // Bottom
         for (int x = 0; x < width; x++)
         {
             int innerY = 1;
@@ -569,7 +565,6 @@ public class MapGenerator : MonoBehaviour
                 SetWallTile(borderPos, highWallTile);
             }
         }
-        // Top
         for (int x = 0; x < width; x++)
         {
             int innerY = height - 2;
@@ -637,16 +632,13 @@ public class MapGenerator : MonoBehaviour
         float offsetX = prng.Next(-100000, 100000) + noiseOffset.x;
         float offsetY = prng.Next(-100000, 100000) + noiseOffset.y;
 
-        // Generate Perlin noise values
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                // Calculate sample coordinates for Perlin noise
                 float sampleX = (x / noiseScale) + offsetX;
                 float sampleY = (y / noiseScale) + offsetY;
 
-                // Generate Perlin noise value (0 to 1)
                 float perlinValue = Mathf.PerlinNoise(sampleX, sampleY);
                 
                 _noiseMap[x, y] = perlinValue;
@@ -660,20 +652,16 @@ public class MapGenerator : MonoBehaviour
 
         if (gradientMode == GradientMode.Texture && gradientTexture != null)
         {
-            // Generate gradient map from texture
             for (int x = 0; x < width; x++)
             {
                 for (int y = 0; y < height; y++)
                 {
-                    // Sample texture at corresponding coordinates
                     int texX = Mathf.RoundToInt(x * (float)gradientTexture.width / width);
                     int texY = Mathf.RoundToInt(y * (float)gradientTexture.height / height);
                     
-                    // Clamp to texture bounds
                     texX = Mathf.Clamp(texX, 0, gradientTexture.width - 1);
                     texY = Mathf.Clamp(texY, 0, gradientTexture.height - 1);
                     
-                    // Get pixel color and convert to grayscale (0-1)
                     Color pixelColor = gradientTexture.GetPixel(texX, texY);
                     _gradientMap[x, y] = pixelColor.grayscale;
                 }
@@ -681,35 +669,28 @@ public class MapGenerator : MonoBehaviour
         }
         else if (gradientMode == GradientMode.Procedural)
         {
-            // Generate procedural gradient (radial falloff from center)
             for (int x = 0; x < width; x++)
             {
                 for (int y = 0; y < height; y++)
                 {
-                    // Normalize coordinates to 0-1 range
                     float normalizedX = (float)x / width;
                     float normalizedY = (float)y / height;
 
-                    // Calculate distance from gradient center
                     float dx = normalizedX - gradientCenter.x;
                     float dy = normalizedY - gradientCenter.y;
                     float distance = Mathf.Sqrt(dx * dx + dy * dy);
 
-                    // Apply falloff curve (max distance is from corner to center: ~0.707)
                     float maxDistance = Mathf.Sqrt(0.5f * 0.5f + 0.5f * 0.5f);
                     float normalizedDistance = Mathf.Clamp01(distance / maxDistance);
 
-                    // Apply exponent for falloff curve
                     float gradientValue = Mathf.Pow(normalizedDistance, falloffExponent);
                     
-                    // Invert so center has higher values (white) and edges have lower (black)
                     _gradientMap[x, y] = 1f - gradientValue;
                 }
             }
         }
         else
         {
-            // Fallback: create flat gradient map
             for (int x = 0; x < width; x++)
             {
                 for (int y = 0; y < height; y++)
@@ -949,7 +930,6 @@ public class MapGenerator : MonoBehaviour
         
         if (grid == null) return;
         
-        // Calculate map center offset if not already calculated
         if (_mapCenterXOffset == 0 && _mapCenterYOffset == 0)
         {
             CalculateMapDimensions();
@@ -959,17 +939,14 @@ public class MapGenerator : MonoBehaviour
         int centerY = height / 2;
         Vector3 centerWorld = grid.GetCellCenterWorld(new Vector3Int(centerX - _mapCenterXOffset, centerY - _mapCenterYOffset, 0));
         
-        // Get cell size for converting tile units to world units
         float cellSize = grid.cellSize.x;
         
-        // Get concentric circle data from MapObjectSpawner
         MapObjectSpawner mapObjectSpawner = FindFirstObjectByType<MapObjectSpawner>();
         if (mapObjectSpawner != null)
         {
             List<float> divisionRadii = mapObjectSpawner.GetDivisionRadii();
             if (divisionRadii != null && divisionRadii.Count > 0)
             {
-                // Draw concentric circle divisions
                 Gizmos.color = concentricCircleGizmoColor;
                 foreach (float radius in divisionRadii)
                 {
@@ -979,7 +956,6 @@ public class MapGenerator : MonoBehaviour
             }
         }
         
-        // Draw enemy spawn holes
         if (_enemySpawnHolePositions.Count > 0)
         {
             Gizmos.color = enemySpawnHoleGizmoColor;

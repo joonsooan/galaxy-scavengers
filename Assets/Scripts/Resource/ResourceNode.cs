@@ -7,29 +7,51 @@ public class ResourceNode : MonoBehaviour
     [HideInInspector] public int amountToMine; // 채굴해 얻을 수 있는 자원의 총량
     [HideInInspector] public float timeToMinePerUnit; // 한 번 채굴을 완료하는 데 걸리는 시간
 
-    [Header("Visuals")]
-    [SerializeField] private Color highlightColor = Color.red;
     [HideInInspector] public Vector3Int cellPosition;
-    [HideInInspector] public ResourceSpawner spawner;
-
-    private Color _originalColor;
-    private SpriteRenderer _sr;
+    
     private Unit_Miner _reservedUnit;
 
     public bool IsReserved { get; private set; }
     public bool IsDepleted => amountToMine <= 0;
 
+    private VisibilityController _visibilityController;
+    
     private void Awake()
     {
-        _sr = GetComponent<SpriteRenderer>();
-        if (_sr != null)
+        _visibilityController = GetComponent<VisibilityController>();
+        if (_visibilityController != null)
         {
-            _originalColor = _sr.color;
+            _visibilityController.enabled = false;
         }
+        
+        _visibilityController = GetComponentInChildren<VisibilityController>();
+        if (_visibilityController != null)
+        {
+            _visibilityController.enabled = false;
+        }
+        
+        DisableAllSpriteRenderers();
     }
-    
+
+    private void OnEnable()
+    {
+        if (_visibilityController != null)
+        {
+            _visibilityController.enabled = false;
+        }
+        
+        DisableAllSpriteRenderers();
+    }
+
     private void Start()
     {
+        if (_visibilityController != null)
+        {
+            _visibilityController.enabled = false;
+        }
+        
+        DisableAllSpriteRenderers();
+        
         if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null)
         {
             cellPosition = BuildingManager.Instance.grid.WorldToCell(transform.position);
@@ -47,20 +69,17 @@ public class ResourceNode : MonoBehaviour
             }
         }
     }
-    
-    
+
     private void OnDestroy()
     {
-        if (spawner != null)
-        {
-            spawner.NotifyResourceDestroyed(this);
-        }
-        
         if (ResourceManager.Instance != null) {
             ResourceManager.Instance.RemoveResourceNode(this);
         }
         
-        // No resource tilemap anymore; nothing to clear on tilemaps.
+        if (MapObjectSpawner.Instance != null && cellPosition != Vector3Int.zero)
+        {
+            MapObjectSpawner.Instance.UpdateNearbyRuleTiles(cellPosition);
+        }
     }
 
     public bool Reserve(Unit_Miner unit)
@@ -70,10 +89,6 @@ public class ResourceNode : MonoBehaviour
         }
         IsReserved = true;
         _reservedUnit = unit;
-        if (_sr != null) {
-            _sr.color = highlightColor;
-        }
-
         return true;
     }
 
@@ -81,9 +96,6 @@ public class ResourceNode : MonoBehaviour
     {
         IsReserved = false;
         _reservedUnit = null;
-        if (_sr != null) {
-            _sr.color = _originalColor;
-        }
     }
 
     public Unit_Miner GetReservedUnit()
@@ -101,5 +113,17 @@ public class ResourceNode : MonoBehaviour
         }
 
         return amountMined;
+    }
+    
+    private void DisableAllSpriteRenderers()
+    {
+        SpriteRenderer[] spriteRenderers = GetComponentsInChildren<SpriteRenderer>(true);
+        foreach (var sr in spriteRenderers)
+        {
+            if (sr != null)
+            {
+                sr.enabled = false;
+            }
+        }
     }
 }

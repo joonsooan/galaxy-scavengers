@@ -82,7 +82,6 @@ public class BuildingInfoPanel : MonoBehaviour
                 Destroy(child.gameObject);
             }
             resourcePanel.SetActive(false);
-            // gameObject.SetActive(false);
         }
     }
     

@@ -189,7 +189,7 @@ public class Processor : Damageable, IClickable
 
         foreach (ActiveRecipe recipe in _activeRecipes) {
             if (!PassesProductionCapCheck(recipe)) {
-                continue; // 다음 레시피 확인
+                continue;
             }
 
             // 레시피에 필요한 재료 확인
@@ -307,7 +307,6 @@ public class Processor : Damageable, IClickable
             Debug.Log($"[Processor:{name}] Processing PROGRESS: {recipe.recipeData.resourceType} - {progressPercent:F1}% ({recipe.processingProgress:F2}/{recipe.recipeData.processingTime:F2}s)");
         }
 
-        // Check if processing is complete
         if (recipe.processingProgress >= recipe.recipeData.processingTime) {
             ProduceOutput(recipe.recipeData);
 
@@ -316,7 +315,6 @@ public class Processor : Damageable, IClickable
             recipe.processingProgress = 0;
             recipe.assignedDrone = null;
 
-            // Release the drone and assign a new task
             completedDrone.SetTask_Idle();
 
             CheckProductionLimits(recipe);
@@ -396,17 +394,14 @@ public class Processor : Damageable, IClickable
         HashSet<Vector3Int> assignedCells = new HashSet<Vector3Int>(_droneInteractionCells.Values);
         
         foreach (Vector3Int cell in availableCells) {
-            // Prefer cells that aren't assigned to other drones
             bool isUnassigned = !assignedCells.Contains(cell);
             float distance = Vector3.Distance(dronePos, BuildingManager.Instance.grid.GetCellCenterWorld(cell));
             
-            // Prioritize unassigned cells, then by distance
             if (isUnassigned && assignedCells.Contains(bestCell)) {
                 bestCell = cell;
                 minDistance = distance;
             }
             else if (isUnassigned == !assignedCells.Contains(bestCell)) {
-                // Both are same assignment status, pick closer one
                 if (distance < minDistance) {
                     bestCell = cell;
                     minDistance = distance;
@@ -414,7 +409,6 @@ public class Processor : Damageable, IClickable
             }
         }
         
-        // Assign the cell to this drone
         _droneInteractionCells[drone] = bestCell;
         
         return BuildingManager.Instance.grid.GetCellCenterWorld(bestCell);

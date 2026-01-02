@@ -6,6 +6,8 @@ public class BuildingHoverTrigger : MonoBehaviour
     private IStorage _storage;
     private bool _isInitialized;
 
+    private BoxCollider2D[] _boxColliders;
+
     private void Awake()
     {
         Initialize();
@@ -17,6 +19,7 @@ public class BuildingHoverTrigger : MonoBehaviour
 
         _buildingDataHolder = GetComponent<BuildingDataHolder>();
         _storage = GetComponent<IStorage>();
+        _boxColliders = GetComponents<BoxCollider2D>();
         
         _isInitialized = true;
     }
@@ -25,11 +28,16 @@ public class BuildingHoverTrigger : MonoBehaviour
     {
         if (other.CompareTag("MouseHoverDetector"))
         {
+            if (!IsTouchingAnyBoxCollider(other))
+            {
+                return; 
+            }
+
             Initialize();
             
             if (BuildingHoverManager.Instance != null)
             {
-                if (_buildingDataHolder.buildingData != null)
+                if (_buildingDataHolder != null && _buildingDataHolder.buildingData != null)
                 {
                     BuildingHoverManager.Instance.OnBuildingEnter(_buildingDataHolder);
                 }
@@ -45,9 +53,14 @@ public class BuildingHoverTrigger : MonoBehaviour
     {
         if (other.CompareTag("MouseHoverDetector"))
         {
+            if (IsTouchingAnyBoxCollider(other))
+            {
+                return;
+            }
+
             if (BuildingHoverManager.Instance != null)
             {
-                if (_buildingDataHolder.buildingData != null)
+                if (_buildingDataHolder != null && _buildingDataHolder.buildingData != null)
                 {
                     BuildingHoverManager.Instance.OnBuildingExit(_buildingDataHolder);
                 }
@@ -57,5 +70,26 @@ public class BuildingHoverTrigger : MonoBehaviour
                 }
             }
         }
+    }
+
+    private bool IsTouchingAnyBoxCollider(Collider2D other)
+    {
+        if (_boxColliders == null)
+        {
+            _boxColliders = GetComponents<BoxCollider2D>();
+        }
+
+        foreach (BoxCollider2D boxCollider in _boxColliders)
+        {
+            if (boxCollider != null && boxCollider.enabled && boxCollider.isTrigger)
+            {
+                if (boxCollider.IsTouching(other))
+                {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
     }
 }
