@@ -3277,9 +3277,9 @@ MonoBehaviour:
   highWallTilemap: {fileID: 860813986}
   grid: {fileID: 2115591665}
   groundTile: {fileID: 11400000, guid: 7d463f590028a4e46a4251ccd769d5d4, type: 2}
-  lowWallTile: {fileID: 11400000, guid: fde47eaf094a3af49901a9b2e5882636, type: 2}
-  highWallTile: {fileID: 11400000, guid: 5a5122fe1d03a3a4eb776067cff0c928, type: 2}
-  wallTile: {fileID: 11400000, guid: fde47eaf094a3af49901a9b2e5882636, type: 2}
+  lowWallTile: {fileID: 11400000, guid: 88ad7647cd434264fbf438d30917e3dc, type: 2}
+  highWallTile: {fileID: 11400000, guid: ec638d0e9097c234a8c0680aa97447c8, type: 2}
+  wallTile: {fileID: 11400000, guid: 88ad7647cd434264fbf438d30917e3dc, type: 2}
   enemyHomeTile: {fileID: 11400000, guid: a1537402c07c3394592fb0ee3ff9b0b7, type: 2}
   enemyTerritoryTile: {fileID: 11400000, guid: cd3ec6303b4b8754fb684445a525d2b4, type: 2}
   width: 192
@@ -3344,22 +3344,22 @@ MonoBehaviour:
   resourceTilemap: {fileID: 2116328957}
   resourceSettings:
   - resourceType: 0
-    resourceRuleTile: {fileID: 11400000, guid: 2b70f27aa31c62b4b863f659dbee3bf0, type: 2}
+    resourceRuleTile: {fileID: 11400000, guid: 5aa7cb5c0e676f04e96b161674ceae34, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: 9e542c61b3b4f0745ab05a9dadeccb8f, type: 3}
     spawnFrequencyPercent: 60
     baseRichness: 10
   - resourceType: 1
-    resourceRuleTile: {fileID: 11400000, guid: 1db9ed11e3e5b4746a5e699eeb0a391c, type: 2}
+    resourceRuleTile: {fileID: 11400000, guid: 49a1ad555f0efea4c92c9fa663246efb, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: a3a2b3c4676bb844e898ce2cf3dd397b, type: 3}
     spawnFrequencyPercent: 25
     baseRichness: 10
   - resourceType: 2
-    resourceRuleTile: {fileID: 11400000, guid: 14c51ccea5600514d8603af667b8748a, type: 2}
+    resourceRuleTile: {fileID: 11400000, guid: 9d2a48dc029df964e9bfbfd7b8c482ba, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: 1a1e81616dceb074597d502c9527fe82, type: 3}
     spawnFrequencyPercent: 10
     baseRichness: 10
   - resourceType: 3
-    resourceRuleTile: {fileID: 11400000, guid: 4f48b4624e64bb24f9e0e4523bca142a, type: 2}
+    resourceRuleTile: {fileID: 11400000, guid: 54a8b52132242ac428d4aa571e26c25c, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: 787e38d9be4ec414aad7efd4b33c7a60, type: 3}
     spawnFrequencyPercent: 5
     baseRichness: 10
