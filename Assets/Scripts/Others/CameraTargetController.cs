@@ -299,7 +299,6 @@ public class CameraTargetController : MonoBehaviour
             edgePanSpeed = _defaultEdgePanSpeed * multiplier;
         }
 
-        // Position is already set before this is called, just ensure it's clamped
         ClampTargetPosition();
     }
 }

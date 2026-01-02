@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 3
   tags:
   - TurretBullet
+  - MouseHoverDetector
   layers:
   - Default
   - TransparentFX
@@ -48,14 +49,14 @@ TagManager:
   - name: Resource
     uniqueID: 1211456959
     locked: 0
+  - name: Terrain
+    uniqueID: 3267852943
+    locked: 0
   - name: Structure
     uniqueID: 3005389535
     locked: 0
   - name: Unit
     uniqueID: 580065311
-    locked: 0
-  - name: Terrain
-    uniqueID: 3267852943
     locked: 0
   - name: Fog
     uniqueID: 2127151825

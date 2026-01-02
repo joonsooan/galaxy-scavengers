@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: b5ea32b43d792ea498f19f460ec3cf9f
+guid: fbce02f2b0b43754daf5422bc736746d
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1699381067202353047
-    second: low-terrain-extra_0
+      213: -6250160196408200333
+    second: Txtr_7418_itspkr2388_0
   - first:
       213: -5027509340213622084
     second: 0
@@ -192,10 +192,10 @@ TextureImporter:
   compressionQuality: 50
   spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 1
+  spriteMeshType: 0
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 16
+  spritePixelsToUnits: 0
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -219,7 +219,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -245,7 +245,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -1725,7 +1725,7 @@ TextureImporter:
       7: 6501298950303736333
       8: -3181606171480048652
       9: -7010260848350730462
-      low-terrain-extra_0: -1699381067202353047
+      Txtr_7418_itspkr2388_0: -6250160196408200333
       other: 3221110418805894947
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0

@@ -106,6 +106,7 @@ MonoBehaviour:
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
   maxStorageAmount: 200
+  hoverDelay: 0.3
 --- !u!114 &5004616453792402242
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 public class BaseStorage : Damageable, IStorage
 {
@@ -10,20 +9,12 @@ public class BaseStorage : Damageable, IStorage
 
     [Header("Base Storage Settings")]
     [SerializeField] protected int maxStorageAmount = 1000;
-    
-    [Header("UI Settings")]
-    [SerializeField] protected float hoverDelay = 0.3f;
 
     protected readonly Dictionary<ResourceType, int> currentResources = new();
-    private BoxCollider2D _boxCollider;
-
-    private bool _isUIActive;
-    private float _hoverTimer;
 
     protected override void Awake()
     {
         base.Awake();
-        _boxCollider = GetComponent<BoxCollider2D>();
         
         foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
         {
@@ -37,71 +28,11 @@ public class BaseStorage : Damageable, IStorage
         RefreshAllResourcesUI();
     }
 
-    protected virtual void Update()
-    {
-        CheckMouseHover();
-    }
-    
     protected virtual void OnDestroy()
     {
         if (ResourceManager.Instance != null)
         {
             ResourceManager.Instance.RemoveStorage(this);
-        }
-        if (_isUIActive) HideStoredResources();
-    }
-
-    private void CheckMouseHover()
-    {
-        if (GameManager.Instance.IsDragging() || EventSystem.current.IsPointerOverGameObject()) 
-        {
-            ResetHover();
-            return;
-        }
-
-        Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Collider2D[] hitColliders = Physics2D.OverlapPointAll(mousePos);
-
-        bool isHitMe = false;
-        foreach (var col in hitColliders)
-        {
-            if (col == _boxCollider)
-            {
-                isHitMe = true;
-                break;
-            }
-        }
-
-        if (isHitMe)
-        {
-            if (!_isUIActive)
-            {
-                _hoverTimer += Time.deltaTime;
-                if (_hoverTimer >= hoverDelay)
-                {
-                    ShowUI();
-                }
-            }
-        }
-        else
-        {
-            ResetHover();
-        }
-    }
-
-    private void ShowUI()
-    {
-        _isUIActive = true;
-        ShowStoredResources();
-    }
-
-    private void ResetHover()
-    {
-        _hoverTimer = 0f;
-        if (_isUIActive)
-        {
-            _isUIActive = false;
-            HideStoredResources();
         }
     }
     
@@ -135,7 +66,6 @@ public class BaseStorage : Damageable, IStorage
         {
             ResourceManager.Instance.RemoveResource(type, amountWithdrawn);
         }
-        if (_isUIActive) ShowStoredResources();
         
         return true;
     }
@@ -166,7 +96,6 @@ public class BaseStorage : Damageable, IStorage
         if (addedAmount > 0 && ResourceManager.Instance != null)
             ResourceManager.Instance.AddResource(type, addedAmount);
             
-        if (_isUIActive) ShowStoredResources();
     }
     
     protected void InvokeResourceChanged(ResourceType type)
@@ -183,17 +112,5 @@ public class BaseStorage : Damageable, IStorage
         {
             OnResourceChanged?.Invoke(type, GetCurrentResourceAmount(type), GetMaxCapacity());
         }
-    }
-
-    private void ShowStoredResources()
-    {
-        if (GameManager.Instance.uiManager != null)
-            GameManager.Instance.uiManager.DisplayStorageInfo(this);
-    }
-
-    private void HideStoredResources()
-    {
-        if (GameManager.Instance.uiManager != null)
-            GameManager.Instance.uiManager.HideStorageInfo();
     }
 }

@@ -65,6 +65,7 @@ public class BuildingInfoPanel : MonoBehaviour
         if (buildingDesc != null) buildingDesc.text = data.description;
         if (resourcePanel != null)
         {
+            gameObject.SetActive(true);
             resourcePanel.SetActive(true);
             UpdateResourceDisplay(data);
         }
@@ -91,7 +92,13 @@ public class BuildingInfoPanel : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        if (data.recipe == null || data.recipe.Count == 0) return;
+        if (data.recipe == null || data.recipe.Count == 0)
+        {
+            if (data.buildingType != BuildingType.MainStructure)
+            {
+                return;
+            }
+        }
 
         Dictionary<ResourceType, int> totalCosts = new Dictionary<ResourceType, int>();
 

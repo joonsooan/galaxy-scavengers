@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 5fdce089faf54b5469f8b1bbfb327bc8
+guid: d4787cd858445d842956aec250d28582
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 9022439818148166360
-    second: Txtr_4548_itspkr11867_0
+      213: 5054164002591402774
+    second: Txtr_7529_itspkr4649_0
   - first:
       213: -5027509340213622084
     second: 0
@@ -195,7 +195,7 @@ TextureImporter:
   spriteMeshType: 0
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 16
+  spritePixelsToUnits: 0
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -245,7 +245,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -1725,7 +1725,7 @@ TextureImporter:
       7: 6501298950303736333
       8: -3181606171480048652
       9: -7010260848350730462
-      Txtr_4548_itspkr11867_0: 9022439818148166360
+      Txtr_7529_itspkr4649_0: 5054164002591402774
       other: 3221110418805894947
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0

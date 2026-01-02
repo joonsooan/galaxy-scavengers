@@ -1,6 +1,5 @@
 ﻿using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
 [DefaultExecutionOrder(-100)]
@@ -56,6 +55,7 @@ public class UIManager : MonoBehaviour
     private ActiveUIPanel _activeUIPanel = ActiveUIPanel.None;
     private IStorage _trackedStorage;
     private AreaBuildingDestroyer _areaBuildingDestroyer;
+    private System.Action<ResourceType, int, int> _storageResourceChangedHandler;
 
     private void Start()
     {
@@ -71,7 +71,7 @@ public class UIManager : MonoBehaviour
     private void Update()
     {
         if (Input.GetMouseButtonUp(1)) {
-            if (EventSystem.current.IsPointerOverGameObject()) return;
+            if (UIUtils.IsPointerOverUI()) return;
             if (GameManager.Instance != null && GameManager.Instance.IsDragging()) return;
             
             if (_areaBuildingDestroyer != null && _areaBuildingDestroyer.HasMoved)
@@ -87,7 +87,7 @@ public class UIManager : MonoBehaviour
             UnpinAndHideAllPanels();
         }
 
-        if (storageInfoPanel.activeSelf && _trackedStorage != null)
+        if (storageInfoPanel != null && storageInfoPanel.activeSelf && _trackedStorage != null)
         {
             UpdateStorageUIPosition();
         }
@@ -152,15 +152,46 @@ public class UIManager : MonoBehaviour
     private void HideMainStructureInventory()
     {
         MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
+        if (mainStructure == null) return;
+        
         InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
-        inventorySystem.GetInventoryPanel();
-        inventorySystem.ToggleInventory();
+        if (inventorySystem == null) return;
+        
+        GameObject inventoryPanel = inventorySystem.GetInventoryPanel();
+        if (inventoryPanel != null && inventoryPanel.activeSelf)
+        {
+            inventorySystem.ToggleInventory();
+        }
     }
 
     public void ShowMainStructureUI()
     {
+        if (storageInfoPanel != null && storageInfoPanel.activeSelf)
+        {
+            if (_trackedStorage != null && _storageResourceChangedHandler != null)
+            {
+                _trackedStorage.OnResourceChanged -= _storageResourceChangedHandler;
+            }
+            storageInfoPanel.SetActive(false);
+            _trackedStorage = null;
+        }
+        
         HideCurrentIClickableUI();
-        UnpinAndHideAllPanels();
+        
+        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
+        if (mainStructure == null) return;
+        
+        InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
+        if (inventorySystem == null) return;
+        
+        GameObject inventoryPanel = inventorySystem.GetInventoryPanel();
+        if (inventoryPanel == null) return;
+        
+        if (!inventoryPanel.activeSelf)
+        {
+            inventorySystem.ToggleInventory();
+        }
+        
         _activeUIPanel = ActiveUIPanel.MainStructure;
     }
 
@@ -201,11 +232,20 @@ public class UIManager : MonoBehaviour
         
         if (storageInfoPanel != null)
         {
+            if (_trackedStorage != null && _storageResourceChangedHandler != null)
+            {
+                _trackedStorage.OnResourceChanged -= _storageResourceChangedHandler;
+            }
             storageInfoPanel.SetActive(false);
             _trackedStorage = null;
         }
 
         HideCurrentIClickableUI();
+        
+        if (BuildingHoverManager.Instance != null)
+        {
+            BuildingHoverManager.Instance.NotifyPanelsClosed();
+        }
     }
 
     public void DisplayCardInfo(BuildingPieceData data)
@@ -351,14 +391,42 @@ public class UIManager : MonoBehaviour
             DisplayDroneHubInfo(droneHub);
         }
     }
+
+    public bool IsProcessorPanelActive()
+    {
+        return processorInfoPanel != null && processorInfoPanel.activeSelf;
+    }
+
+    public bool IsDroneHubPanelActive()
+    {
+        return droneHubInfoPanel != null && droneHubInfoPanel.activeSelf;
+    }
     
     public void DisplayStorageInfo(IStorage storage)
     {
         if (storageInfoPanel == null || storage == null) return;
 
+        if (_trackedStorage != null && _storageResourceChangedHandler != null)
+        {
+            _trackedStorage.OnResourceChanged -= _storageResourceChangedHandler;
+        }
+
         _trackedStorage = storage;
         storageInfoPanel.SetActive(true);
         UpdateStorageUIPosition();
+
+        if (_storageResourceChangedHandler == null)
+        {
+            _storageResourceChangedHandler = OnStorageResourceChanged;
+        }
+        storage.OnResourceChanged += _storageResourceChangedHandler;
+
+        RefreshStorageInfoUI();
+    }
+    
+    private void RefreshStorageInfoUI()
+    {
+        if (storageInfoPanel == null || _trackedStorage == null || !storageInfoPanel.activeSelf) return;
 
         Transform parent = storageResourceListParent != null ? storageResourceListParent.transform : storageInfoPanel.transform;
 
@@ -375,8 +443,8 @@ public class UIManager : MonoBehaviour
             }
         }
 
-        Dictionary<ResourceType, int> resources = storage.GetStoredResources();
-        int maxCapacity = storage.GetMaxCapacity();
+        Dictionary<ResourceType, int> resources = _trackedStorage.GetStoredResources();
+        int maxCapacity = _trackedStorage.GetMaxCapacity();
         int totalAmount = 0;
         
         foreach (var kvp in resources)
@@ -393,15 +461,33 @@ public class UIManager : MonoBehaviour
             }
         }
         
-        storageAmountText.text =  $"{totalAmount.ToString()}/{maxCapacity.ToString()}";
+        if (storageAmountText != null)
+        {
+            storageAmountText.text = $"{totalAmount.ToString()}/{maxCapacity.ToString()}";
+        }
+    }
+    
+    private void OnStorageResourceChanged(ResourceType type, int current, int max)
+    {
+        if (storageInfoPanel != null && storageInfoPanel.activeSelf && _trackedStorage != null)
+        {
+            RefreshStorageInfoUI();
+        }
     }
     
     public void HideStorageInfo()
     {
+        if (_trackedStorage != null && _storageResourceChangedHandler != null)
+        {
+            _trackedStorage.OnResourceChanged -= _storageResourceChangedHandler;
+        }
+        
         if (storageInfoPanel != null)
         {
             storageInfoPanel.SetActive(false);
         }
+        
+        _trackedStorage = null;
     }
     
     private void UpdateStorageUIPosition()
@@ -475,7 +561,6 @@ public class UIManager : MonoBehaviour
         tipUnitMakeBtn.SetActive(true);
     }
 
-    // Tips UI : Hide
 
     public void HideResourcePanel()
     {

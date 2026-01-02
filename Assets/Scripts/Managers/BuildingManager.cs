@@ -12,28 +12,32 @@ public class BuildingManager : MonoBehaviour
     [SerializeField] private TileBase temporaryTile;
     [SerializeField] private Transform buildingParentTransform;
     [SerializeField] private Transform resourceParentTransform;
+    private readonly Dictionary<BuildingPieceType, TileBase> _buildingPieceTypeToTileCache = new Dictionary<BuildingPieceType, TileBase>();
 
-    private readonly Dictionary<Vector3Int, BuildingStructure> _buildingStructuresByAnchor = new ();
-    private readonly Dictionary<Vector3Int, BuildingStructure> _cellToStructureMap = new ();
-    private readonly Dictionary<BuildingPieceType, TileBase> _buildingPieceTypeToTileCache = new ();
-    private readonly Dictionary<Vector3Int, BuildingPiece> _placedPieces = new ();
-    private readonly HashSet<Vector3Int> _mainStructureCells = new ();
-    private readonly HashSet<Vector3Int> _resourceCellCache = new ();
+    private readonly Dictionary<Vector3Int, BuildingStructure> _buildingStructuresByAnchor = new Dictionary<Vector3Int, BuildingStructure>();
+    private readonly Dictionary<Vector3Int, BuildingStructure> _cellToStructureMap = new Dictionary<Vector3Int, BuildingStructure>();
+    private readonly HashSet<Vector3Int> _mainStructureCells = new HashSet<Vector3Int>();
+    private readonly Dictionary<Vector3Int, BuildingPiece> _placedPieces = new Dictionary<Vector3Int, BuildingPiece>();
+    private readonly List<Processor> _processors = new List<Processor>();
+    private readonly HashSet<Vector3Int> _resourceCellCache = new HashSet<Vector3Int>();
 
-    private readonly HashSet<Vector3Int> _temporaryTiles = new ();
-    private readonly List<Processor> _processors = new ();
-
-    private MapGenerator _cachedMapGenerator;
+    private readonly HashSet<Vector3Int> _temporaryTiles = new HashSet<Vector3Int>();
 
     [Header("Buildings")]
     private List<BuildingData> _buildingDataList;
 
-    public Tilemap GroundTilemap => groundTilemap;
+    private MapGenerator _cachedMapGenerator;
+
+    public Tilemap GroundTilemap {
+        get {
+            return groundTilemap;
+        }
+    }
 
     public static BuildingManager Instance { get; private set; }
 
     private void Awake()
-    {                   
+    {
         if (Instance == null) {
             Instance = this;
         }
@@ -51,30 +55,32 @@ public class BuildingManager : MonoBehaviour
         InitializeResourceCache();
     }
 
+    private void OnDestroy()
+    {
+        MapObjectSpawner.OnAllObjectsSpawned -= RegisterExistingBuildings;
+        ResourceManager.OnResourceNodeAdded -= OnResourceNodeAdded;
+        ResourceManager.OnResourceNodeRemoved -= OnResourceNodeRemoved;
+    }
+
     private void InitializeResourceCache()
     {
         MapObjectSpawner.OnAllObjectsSpawned += RegisterExistingBuildings;
         ResourceManager.OnResourceNodeAdded += OnResourceNodeAdded;
         ResourceManager.OnResourceNodeRemoved += OnResourceNodeRemoved;
-        
-        if (ResourceManager.Instance != null)
-        {
+
+        if (ResourceManager.Instance != null) {
             RebuildResourceCache();
         }
     }
-    
+
     private void RebuildResourceCache()
     {
         _resourceCellCache.Clear();
-        if (ResourceManager.Instance != null)
-        {
-            var resources = ResourceManager.Instance.GetAllResources();
-            foreach (var node in resources)
-            {
-                if (node != null)
-                {
-                    if (node.cellPosition == Vector3Int.zero && grid != null)
-                    {
+        if (ResourceManager.Instance != null) {
+            List<ResourceNode> resources = ResourceManager.Instance.GetAllResources();
+            foreach (ResourceNode node in resources) {
+                if (node != null) {
+                    if (node.cellPosition == Vector3Int.zero && grid != null) {
                         node.cellPosition = grid.WorldToCell(node.transform.position);
                     }
                     _resourceCellCache.Add(node.cellPosition);
@@ -82,34 +88,24 @@ public class BuildingManager : MonoBehaviour
             }
         }
     }
-    
+
     private void OnResourceNodeAdded(ResourceNode node)
     {
-        if (node != null)
-        {
-            if (node.cellPosition == Vector3Int.zero && grid != null)
-            {
+        if (node != null) {
+            if (node.cellPosition == Vector3Int.zero && grid != null) {
                 node.cellPosition = grid.WorldToCell(node.transform.position);
             }
             _resourceCellCache.Add(node.cellPosition);
         }
     }
-    
+
     private void OnResourceNodeRemoved(ResourceNode node)
     {
-        if (node != null)
-        {
+        if (node != null) {
             _resourceCellCache.Remove(node.cellPosition);
         }
     }
-    
-    private void OnDestroy()
-    {
-        MapObjectSpawner.OnAllObjectsSpawned -= RegisterExistingBuildings;
-        ResourceManager.OnResourceNodeAdded -= OnResourceNodeAdded;
-        ResourceManager.OnResourceNodeRemoved -= OnResourceNodeRemoved;
-    }
-    
+
     private void RegisterExistingBuildings()
     {
         RegisterExistingProcessors();
@@ -117,62 +113,53 @@ public class BuildingManager : MonoBehaviour
         RegisterExistingResourceNodes();
         RegisterExistingMainStructure();
     }
-    
+
     private void RegisterExistingProcessors()
     {
         Processor[] existingProcessors = buildingParentTransform.GetComponentsInChildren<Processor>(true);
-        
-        foreach (Processor processor in existingProcessors)
-        {
-            if (processor != null && !_processors.Contains(processor))
-            {
+
+        foreach (Processor processor in existingProcessors) {
+            if (processor != null && !_processors.Contains(processor)) {
                 RegisterProcessor(processor);
             }
         }
     }
-    
+
     private void RegisterExistingStorages()
     {
         if (ResourceManager.Instance == null) return;
-        
+
         IStorage[] existingStorages = buildingParentTransform.GetComponentsInChildren<IStorage>(true);
-        
-        foreach (IStorage storage in existingStorages)
-        {
+
+        foreach (IStorage storage in existingStorages) {
             if (storage == null) continue;
-            
+
             bool alreadyRegistered = false;
-            foreach (IStorage registeredStorage in ResourceManager.Instance.GetAllStorages())
-            {
-                if (registeredStorage == storage)
-                {
+            foreach (IStorage registeredStorage in ResourceManager.Instance.GetAllStorages()) {
+                if (registeredStorage == storage) {
                     alreadyRegistered = true;
                     break;
                 }
             }
-            
-            if (!alreadyRegistered)
-            {
+
+            if (!alreadyRegistered) {
                 ResourceManager.Instance.AddStorage(storage);
-                
-                if (storage is MainStructure mainStructure)
-                {
+
+                if (storage is MainStructure mainStructure) {
                     ResourceManager.Instance.RegisterMainStructure(mainStructure);
                 }
             }
         }
     }
-    
+
     private void RegisterExistingResourceNodes()
     {
         if (ResourceManager.Instance == null) return;
-        
+
         ResourceNode[] existingResources = resourceParentTransform.GetComponentsInChildren<ResourceNode>(true);
-        
-        foreach (ResourceNode node in existingResources)
-        {
-            if (node != null)
-            {
+
+        foreach (ResourceNode node in existingResources) {
+            if (node != null) {
                 ResourceManager.Instance.AddResourceNode(node);
             }
         }
@@ -181,18 +168,16 @@ public class BuildingManager : MonoBehaviour
     private void RegisterExistingMainStructure()
     {
         MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
-        
-        if (mainStructure != null)
-        {
-            if (ResourceManager.Instance != null)
-            {
+
+        if (mainStructure != null) {
+            if (ResourceManager.Instance != null) {
                 ResourceManager.Instance.RegisterMainStructure(mainStructure);
                 ResourceManager.Instance.AddStorage(mainStructure);
             }
 
             Vector3Int centerCell = grid.WorldToCell(mainStructure.transform.position);
             Vector3Int anchorCell = centerCell - new Vector3Int(1, 1, 0);
-            
+
             RegisterMainStructure(anchorCell, new Vector2Int(3, 3));
         }
     }
@@ -245,18 +230,14 @@ public class BuildingManager : MonoBehaviour
     public bool IsTerrainCell(Vector3Int cellPosition)
     {
         MapGenerator mapGenerator = GetMapGenerator();
-        if (mapGenerator != null)
-        {
-            if (mapGenerator.IsTerrainCell(cellPosition))
-            {
+        if (mapGenerator != null) {
+            if (mapGenerator.IsTerrainCell(cellPosition)) {
                 return true;
             }
 
-            if (groundTilemap != null)
-            {
+            if (groundTilemap != null) {
                 TileBase tile = groundTilemap.GetTile(cellPosition);
-                if (tile != null && mapGenerator.IsTerrainTile(tile))
-                {
+                if (tile != null && mapGenerator.IsTerrainTile(tile)) {
                     return true;
                 }
             }
@@ -275,14 +256,13 @@ public class BuildingManager : MonoBehaviour
         if (!groundTilemap.HasTile(cellPosition)) return false;
         if (IsTerrainCell(cellPosition)) return false;
         if (IsResourceTile(cellPosition)) return false;
-        
+
         if (buildingTilemap.HasTile(cellPosition)) return false;
         if (IsTemporaryTile(cellPosition)) return false;
         if (GetPieceAt(cellPosition) != null) return false;
         if (IsMainStructureCell(cellPosition)) return false;
-        
-        if (GetBuildingAt(cellPosition, out _))
-        {
+
+        if (GetBuildingAt(cellPosition, out _)) {
             return false;
         }
 
@@ -303,18 +283,18 @@ public class BuildingManager : MonoBehaviour
         return _mainStructureCells.Contains(cellPosition);
     }
 
-    public void CreateConstructionSite(BuildingData buildingData,
-        Vector3Int anchorCellPosition)
+    public void CreateConstructionSite(
+        BuildingData buildingData,
+        Vector3Int anchorCellPosition
+    )
     {
-        if (buildingData == null || buildingData.recipe == null || buildingData.recipe.Count == 0)
-        {
+        if (buildingData == null || buildingData.recipe == null || buildingData.recipe.Count == 0) {
             return;
         }
 
         foreach (BuildingData.BuildingPiece piece in buildingData.recipe) {
             Vector3Int cellPos = anchorCellPosition + piece.relativePosition;
-            if (!CanPlaceBuilding(cellPos))
-            {
+            if (!CanPlaceBuilding(cellPos)) {
                 return;
             }
         }
@@ -322,8 +302,7 @@ public class BuildingManager : MonoBehaviour
         if (buildingTilemap != null) {
             buildingTilemap.gameObject.SetActive(true);
         }
-        else
-        {
+        else {
             return;
         }
 
@@ -350,6 +329,7 @@ public class BuildingManager : MonoBehaviour
         site.cellPosition = anchorCellPosition;
 
         site.CalculateCosts();
+
 
         if (ConstructionManager.Instance == null) {
             ConstructionManager existingManager = FindFirstObjectByType<ConstructionManager>();
@@ -562,6 +542,25 @@ public class BuildingManager : MonoBehaviour
             return;
         }
 
+        BuildingDataHolder dataHolder = obj.GetComponent<BuildingDataHolder>();
+        if (dataHolder == null) {
+            dataHolder = obj.AddComponent<BuildingDataHolder>();
+        }
+        dataHolder.SetBuildingData(data);
+
+        BoxCollider2D[] triggerColliders = obj.GetComponentsInChildren<BoxCollider2D>();
+        foreach (BoxCollider2D collider in triggerColliders)
+        {
+            if (collider.isTrigger)
+            {
+                BuildingHoverTrigger hoverTrigger = collider.GetComponent<BuildingHoverTrigger>();
+                if (hoverTrigger == null)
+                {
+                    collider.gameObject.AddComponent<BuildingHoverTrigger>();
+                }
+            }
+        }
+
         switch (data.buildingType) {
         case BuildingType.Storage:
             IStorage storage = obj.GetComponent<IStorage>();
@@ -577,8 +576,7 @@ public class BuildingManager : MonoBehaviour
             break;
         case BuildingType.Generator:
             ResourceGenerator generator = obj.GetComponent<ResourceGenerator>();
-            if (generator != null)
-            {
+            if (generator != null) {
                 generator.SetConstructed();
             }
             break;
@@ -621,63 +619,46 @@ public class BuildingManager : MonoBehaviour
         _placedPieces.TryGetValue(cellPosition, out BuildingPiece piece);
         return piece;
     }
-    
+
     public void ClearConstructionSiteData(Vector3Int anchorCell, BuildingData buildingData)
     {
         if (buildingData == null || buildingData.recipe == null) return;
-        
+
         HashSet<Vector3Int> structuresDestroyed = new HashSet<Vector3Int>();
-        
-        foreach (BuildingData.BuildingPiece piece in buildingData.recipe)
-        {
+
+        foreach (BuildingData.BuildingPiece piece in buildingData.recipe) {
             Vector3Int cellPos = anchorCell + piece.relativePosition;
-            
-            // Clear temporary tile
-            if (_temporaryTiles.Contains(cellPos))
-            {
+
+            if (_temporaryTiles.Contains(cellPos)) {
                 _temporaryTiles.Remove(cellPos);
-                if (buildingTilemap != null && buildingTilemap.HasTile(cellPos))
-                {
+                if (buildingTilemap != null && buildingTilemap.HasTile(cellPos)) {
                     buildingTilemap.SetTile(cellPos, null);
                     OnTilemapChanged?.Invoke(cellPos);
                 }
             }
-            
-            // Destroy building piece if it exists
-            if (_placedPieces.TryGetValue(cellPos, out BuildingPiece pieceObj))
-            {
-                // Check if this piece is part of a building structure
-                if (_cellToStructureMap.TryGetValue(cellPos, out BuildingStructure structure))
-                {
-                    // This piece is part of a building structure - destroy the entire structure
-                    // But only destroy each structure once
-                    if (!structuresDestroyed.Contains(structure.anchor))
-                    {
+
+            if (_placedPieces.TryGetValue(cellPos, out BuildingPiece pieceObj)) {
+                if (_cellToStructureMap.TryGetValue(cellPos, out BuildingStructure structure)) {
+                    if (!structuresDestroyed.Contains(structure.anchor)) {
                         structuresDestroyed.Add(structure.anchor);
                         ClearBuildingDataAt(structure.anchor);
                     }
                 }
-                else
-                {
-                    // Not part of a structure, just destroy the piece
-                    if (pieceObj != null)
-                    {
+                else {
+                    if (pieceObj != null) {
                         Destroy(pieceObj.gameObject);
                     }
                     _placedPieces.Remove(cellPos);
-                    
-                    // Clear tile if it exists
-                    if (buildingTilemap != null && buildingTilemap.HasTile(cellPos))
-                    {
+
+                    if (buildingTilemap != null && buildingTilemap.HasTile(cellPos)) {
                         buildingTilemap.SetTile(cellPos, null);
                         OnTilemapChanged?.Invoke(cellPos);
                     }
                 }
             }
         }
-        
-        if (buildingTilemap != null)
-        {
+
+        if (buildingTilemap != null) {
             buildingTilemap.RefreshAllTiles();
         }
     }
@@ -703,6 +684,35 @@ public class BuildingManager : MonoBehaviour
 
         occupiedCells = null;
         return false;
+    }
+
+    public BuildingData GetBuildingDataAt(Vector3Int cell)
+    {
+        if (_buildingDataList == null || _buildingDataList.Count == 0) return null;
+        if (buildingTilemap == null) return null;
+
+        if (_cellToStructureMap.TryGetValue(cell, out BuildingStructure structure)) {
+            Vector3Int anchor = structure.anchor;
+
+            TileBase anchorTile = buildingTilemap.GetTile(anchor);
+            if (anchorTile != null) {
+                foreach (BuildingData data in _buildingDataList) {
+                    if (data.buildingTile == anchorTile) {
+                        if (CheckPattern(anchor, data)) {
+                            return data;
+                        }
+                    }
+                }
+            }
+
+            foreach (BuildingData data in _buildingDataList) {
+                if (CheckPattern(anchor, data)) {
+                    return data;
+                }
+            }
+        }
+
+        return null;
     }
 
     private void RegisterBuildingStructure(BuildingStructure structure)
@@ -760,22 +770,6 @@ public class BuildingManager : MonoBehaviour
         _processors.Remove(processor);
     }
 
-    public Processor FindClosestAvailableProcessor(Vector3 position)
-    {
-        Processor closestProcessor = null;
-        float minDistance = float.MaxValue;
-
-        foreach (Processor processor in _processors) {
-            if (processor.IsFull) continue;
-
-            float dist = Vector3.Distance(position, processor.GetPosition());
-            if (dist < minDistance) {
-                minDistance = dist;
-                closestProcessor = processor;
-            }
-        }
-        return closestProcessor;
-    }
 
     public void RegisterPrePlacedBuilding(BuildingPiece buildingPiece)
     {

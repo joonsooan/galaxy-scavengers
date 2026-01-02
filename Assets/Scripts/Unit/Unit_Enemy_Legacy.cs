@@ -48,10 +48,8 @@ public class Unit_Enemy_Legacy : UnitBase
             return;
         }
 
-        // Check if enemy has reached the interaction cell (where it should attack from)
         bool hasReachedInteractionCell = unitMovement.HasReachedTarget(unitMovement.waypointTolerance + 0.1f);
         
-        // Also check distance to target as a fallback (for non-building targets or edge cases)
         float distanceToTarget = GetDistanceToTarget(_target);
         bool isWithinAttackRange = distanceToTarget <= attackRange;
 
@@ -61,10 +59,8 @@ public class Unit_Enemy_Legacy : UnitBase
                 break;
 
             case UnitState.Moving:
-                // Start attacking when we've reached the interaction cell AND are within attack range
                 if (hasReachedInteractionCell && isWithinAttackRange)
                 {
-                    // Face the target before starting to attack
                     if (_target != null)
                     {
                         AdjustSpriteDirectionToTarget(_target.transform);
@@ -74,13 +70,11 @@ public class Unit_Enemy_Legacy : UnitBase
                 break;
 
             case UnitState.Attacking:
-                // Continue facing the target while attacking
                 if (_target != null)
                 {
                     AdjustSpriteDirectionToTarget(_target.transform);
                 }
                 
-                // Stop attacking if we're no longer at the interaction cell or out of range
                 if (!hasReachedInteractionCell || !isWithinAttackRange)
                 {
                     StopAttacking();
@@ -92,13 +86,11 @@ public class Unit_Enemy_Legacy : UnitBase
     
     private float GetDistanceToTarget(Damageable target)
     {
-        // For buildings, check distance to the nearest occupied cell, not just the center
         if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null)
         {
             Vector3Int targetCell = BuildingManager.Instance.grid.WorldToCell(target.transform.position);
             if (BuildingManager.Instance.GetBuildingAt(targetCell, out List<Vector3Int> occupiedCells))
             {
-                // Find the closest occupied cell to the enemy
                 float minDistance = float.MaxValue;
                 foreach (Vector3Int cell in occupiedCells)
                 {
@@ -113,7 +105,6 @@ public class Unit_Enemy_Legacy : UnitBase
             }
         }
         
-        // Fallback to center distance for non-buildings or if BuildingManager is unavailable
         return Vector2.Distance(transform.position, target.transform.position);
     }
     
@@ -121,8 +112,6 @@ public class Unit_Enemy_Legacy : UnitBase
     {
         if (_target == null) return;
         
-        // Use SetNewTarget which automatically finds interaction cells for buildings
-        // Use a small stopping distance since we want to reach the interaction cell exactly
         if (unitMovement.SetNewTarget(_target.transform.position, unitMovement.waypointTolerance))
         {
             currentState = UnitState.Moving;
@@ -172,10 +161,8 @@ public class Unit_Enemy_Legacy : UnitBase
     {
         currentState = UnitState.Attacking;
         
-        // Snap to the interaction cell center before stopping movement
         unitMovement.StopMovement();
         
-        // Face the target building
         if (_target != null)
         {
             AdjustSpriteDirectionToTarget(_target.transform);
@@ -195,7 +182,6 @@ public class Unit_Enemy_Legacy : UnitBase
         Vector3Int unitCell = BuildingManager.Instance.grid.WorldToCell(transform.position);
         Vector3Int targetCell = BuildingManager.Instance.grid.WorldToCell(targetTransform.position);
         
-        // For large buildings, find the nearest occupied cell
         if (BuildingManager.Instance.GetBuildingAt(targetCell, out List<Vector3Int> occupiedCells))
         {
             float minDistance = float.MaxValue;

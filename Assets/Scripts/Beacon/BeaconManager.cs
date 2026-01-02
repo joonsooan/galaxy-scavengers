@@ -117,8 +117,6 @@ public class BeaconManager : MonoBehaviour
         Vector3Int cellPos = _grid.WorldToCell(worldPos);
         Vector3 beaconPos = _grid.GetCellCenterWorld(cellPos);
 
-        // 비컨 설치 시도로 자원 있는지 없는지 확인할 수 있다..?
-        // if (!IsCellWalkable(cellPos)) return;
         
         if (_currentWaypointGroup == null)
         {

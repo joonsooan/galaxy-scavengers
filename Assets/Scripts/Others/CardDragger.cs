@@ -118,7 +118,6 @@ public class CardDragger : MonoBehaviour
             Color ghostColor = _ghostBuildingRenderer.color;
             ghostColor.a = 0.5f;
             _ghostBuildingRenderer.color = ghostColor;
-            // _ghostBuildingRenderer.order
         }
         
         VisionProvider[] visionProviders = _ghostBuildingInstance.GetComponentsInChildren<VisionProvider>(true);
@@ -206,7 +205,7 @@ public class CardDragger : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            if (UIUtils.IsPointerOverUI())
             {
                 return;
             }
@@ -230,7 +229,7 @@ public class CardDragger : MonoBehaviour
         }
         else if (Input.GetMouseButtonUp(1))
         {
-            if (EventSystem.current.IsPointerOverGameObject())
+            if (UIUtils.IsPointerOverUI())
             {
                 return;
             }

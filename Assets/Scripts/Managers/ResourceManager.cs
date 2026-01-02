@@ -431,7 +431,6 @@ public class ResourceManager : MonoBehaviour
         if (cryoCrystalPanel == null)
             cryoCrystalPanel = GameObject.Find("Resource3_Panel") ?? GameObject.Find("CryoCrystalPanel");
 
-        // 1 Crafted Resource UI
         if (alloyPlatePanel == null)
             alloyPlatePanel = GameObject.Find("Resource4_Panel") ?? GameObject.Find("AlloyPlatePanel");
 
@@ -462,7 +461,6 @@ public class ResourceManager : MonoBehaviour
         if (ammunitionPanel == null)
             ammunitionPanel = GameObject.Find("Resource13_Panel") ?? GameObject.Find("AmmunitionPanel");
 
-        // 2 Crafted Resource UI
         if (heavyPlatingPanel == null)
             heavyPlatingPanel = GameObject.Find("Resource14_Panel") ?? GameObject.Find("HeavyPlatingPanel");
 
