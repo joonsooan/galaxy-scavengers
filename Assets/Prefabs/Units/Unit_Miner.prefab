@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 4483249089817793867}
   - component: {fileID: 7616754858952366261}
   - component: {fileID: 1616897775811544138}
+  - component: {fileID: 1513360931996844975}
   m_Layer: 0
   m_Name: Unit_Miner
   m_TagString: Untagged
@@ -80,9 +81,9 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 580065311
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 0
-  m_Sprite: {fileID: 3751741419470782174, guid: 41d81b85481201c44bb0e26872455946, type: 3}
+  m_Sprite: {fileID: -6825553535330482908, guid: 5a42342680028244ab2f61758e33d456, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -186,9 +187,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d119d16415c69741bcfa340b580f4c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spriteUp: {fileID: 8603391338363840403, guid: 41d81b85481201c44bb0e26872455946, type: 3}
-  spriteDown: {fileID: 3751741419470782174, guid: 41d81b85481201c44bb0e26872455946, type: 3}
-  spriteRight: {fileID: 4992164939788663360, guid: 41d81b85481201c44bb0e26872455946, type: 3}
 --- !u!114 &1616897775811544138
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -203,3 +201,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   visionRange: 5.5
   isActive: 1
+--- !u!95 &1513360931996844975
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6649466925040614564}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: fc23de8949a786847aafdab0beb73634, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

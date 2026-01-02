@@ -70,6 +70,15 @@ public class Unit_Drone : UnitBase
 
     private void DecideNextAction()
     {
+        // Clear target when moving
+        if (movement != null && movement.IsMoving)
+        {
+            if (TryGetComponent(out UnitSpriteController spriteController))
+            {
+                spriteController.ClearTarget();
+            }
+        }
+        
         switch (_currentState) {
         case DroneState.Idle:
             UpdateIdle();
@@ -184,7 +193,10 @@ public class Unit_Drone : UnitBase
         if (isAtProcessor) {
             if (!movement.IsMoving) {
                 movement.ForceStopAllMovement();
-                AdjustSpriteDirectionToBuilding(_currentProcessor.transform);
+                if (TryGetComponent(out UnitSpriteController spriteController))
+                {
+                    spriteController.SetTargetTransform(_currentProcessor.transform);
+                }
                 _currentProcessor.RequestTask(this);
             }
         }
@@ -219,7 +231,10 @@ public class Unit_Drone : UnitBase
         movement.ForceStopAllMovement();
         
         if (_targetStorage != null) {
-            AdjustSpriteDirectionToBuilding(((Component)_targetStorage).transform);
+            if (TryGetComponent(out UnitSpriteController spriteController))
+            {
+                spriteController.SetTargetTransform(((Component)_targetStorage).transform);
+            }
         }
         
         yield return new WaitForSeconds(loadingTime);
@@ -264,7 +279,10 @@ public class Unit_Drone : UnitBase
         movement.ForceStopAllMovement();
         
         if (_currentProcessor != null) {
-            AdjustSpriteDirectionToBuilding(_currentProcessor.transform);
+            if (TryGetComponent(out UnitSpriteController spriteController))
+            {
+                spriteController.SetTargetTransform(_currentProcessor.transform);
+            }
         }
         
         yield return new WaitForSeconds(unloadingTime);
@@ -290,7 +308,10 @@ public class Unit_Drone : UnitBase
         movement.ForceStopAllMovement();
         
         if (_currentProcessor != null) {
-            AdjustSpriteDirectionToBuilding(_currentProcessor.transform);
+            if (TryGetComponent(out UnitSpriteController spriteController))
+            {
+                spriteController.SetTargetTransform(_currentProcessor.transform);
+            }
         }
         
         yield return new WaitForSeconds(assignmentTime);
@@ -364,7 +385,10 @@ public class Unit_Drone : UnitBase
                 movement.StopMovement();
             }
             
-            AdjustSpriteDirectionToBuilding(_currentProcessor.transform);
+            if (TryGetComponent(out UnitSpriteController spriteController))
+            {
+                spriteController.SetTargetTransform(_currentProcessor.transform);
+            }
             
             _currentProcessor.ProcessRecipeWork(CurrentRecipeTask, Time.deltaTime * processingSpeed);
             

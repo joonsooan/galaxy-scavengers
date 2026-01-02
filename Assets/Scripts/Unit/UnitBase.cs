@@ -15,6 +15,7 @@ public abstract class UnitBase : MonoBehaviour
         Moving,
         Attacking,
         Mining,
+        Constructing,
         ReturningToStorage,
         Unloading
     }

@@ -31,7 +31,8 @@ public class Unit_Miner : UnitBase
     private ResourceNode _targetResourceNode;
     private IStorage _targetStorage;
     private Vector3Int _targetUnloadCell;
-
+    private UnitSpriteController _spriteController;
+    
     protected override void Awake()
     {
         base.Awake();
@@ -45,11 +46,13 @@ public class Unit_Miner : UnitBase
         mineableResourceTypes = UnitManager.Instance != null
             ? UnitManager.Instance.CurrentMineableTypes.ToArray()
             : (ResourceType[])Enum.GetValues(typeof(ResourceType));
+        _spriteController = unitMovement.GetComponent<UnitSpriteController>(); 
     }
 
     private void Update()
     {
         DecideNextAction();
+        UpdateAnimationState();
     }
 
     protected override void OnEnable()
@@ -92,6 +95,45 @@ public class Unit_Miner : UnitBase
             OnReturnToStorage();
             break;
         }
+    }
+
+    private void UpdateAnimationState()
+    {
+        if (_spriteController != null)
+        {
+            // Unit_Miner only needs IsMining state, not IsConstructing
+            bool isMining = currentState == UnitState.Mining;
+            _spriteController.UpdateAnimationState(currentState, isMining: isMining);
+        }
+        if (currentState == UnitState.Moving || currentState == UnitState.ReturningToStorage)
+        {
+            Vector3 moveDir = unitMovement.GetMoveDirection();
+            _spriteController?.UpdateSpriteDirection(moveDir);
+            _spriteController?.ClearTarget(); // Clear target when moving
+        }
+        else if (currentState == UnitState.Mining && _targetResourceNode != null)
+        {
+            _spriteController?.SetTargetTransform(_targetResourceNode.transform);
+        }
+        else if (currentState == UnitState.Unloading && _targetStorage != null)
+        {
+            _spriteController?.SetTargetTransform(((Component)_targetStorage).transform);
+        }
+        else if (currentState == UnitState.Idle)
+        {
+            // Keep facing the last target if available, or clear it
+            if (_targetResourceNode != null)
+            {
+                _spriteController?.SetTargetTransform(_targetResourceNode.transform);
+            }
+            else
+            {
+                _spriteController?.ClearTarget();
+            }
+        }
+        
+        int currentTotal = _currentCarryAmounts.Values.Sum();
+        _spriteController.UpdateCargoFill(currentTotal, maxCarryAmount);
     }
 
     private void OnMoving()
