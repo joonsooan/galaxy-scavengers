@@ -106,6 +106,7 @@ public class MapObjectSpawner : MonoBehaviour
     
     private ResourceCircleGenerator _circleGenerator;
     private ResourceTileManager _tileManager;
+    private List<ResourceCircle> _cachedResourceCircles = new ();
 
     public static event Action OnAllObjectsSpawned;
     private static bool isSpawningResources;
@@ -172,6 +173,8 @@ public class MapObjectSpawner : MonoBehaviour
             List<ResourceCircle> startingAreaCircles = _circleGenerator.GenerateStartingAreaCircles();
             
             resourceCircles.AddRange(startingAreaCircles);
+            
+            _cachedResourceCircles = new List<ResourceCircle>(resourceCircles);
             
             SpawnResourcesInCircles(resourceCircles);
             RegisterBufferedResources();
@@ -372,13 +375,9 @@ public class MapObjectSpawner : MonoBehaviour
         }
         
         Gizmos.color = resourceCircleColor;
-        if (_circleGenerator != null)
+        if (_cachedResourceCircles != null && _cachedResourceCircles.Count > 0)
         {
-            List<ResourceCircle> allCircles = new List<ResourceCircle>();
-            allCircles.AddRange(_circleGenerator.GenerateResourceCircles());
-            allCircles.AddRange(_circleGenerator.GenerateStartingAreaCircles());
-            
-            foreach (var circle in allCircles)
+            foreach (var circle in _cachedResourceCircles)
             {
                 Vector3 circleWorldPos = grid != null ? grid.GetCellCenterWorld(new Vector3Int(circle.center.x, circle.center.y, 0)) : new Vector3(circle.center.x, circle.center.y, 0);
                 float circleRadiusWorld = circle.radius * cellSize;
