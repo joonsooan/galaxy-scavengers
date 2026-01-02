@@ -31,6 +31,7 @@ public class Unit_Miner : UnitBase
     private ResourceNode _targetResourceNode;
     private IStorage _targetStorage;
     private Vector3Int _targetUnloadCell;
+    private UnitSpriteController _spriteController;
     
     protected override void Awake()
     {
@@ -45,6 +46,7 @@ public class Unit_Miner : UnitBase
         mineableResourceTypes = UnitManager.Instance != null
             ? UnitManager.Instance.CurrentMineableTypes.ToArray()
             : (ResourceType[])Enum.GetValues(typeof(ResourceType));
+        _spriteController = unitMovement.GetComponent<UnitSpriteController>(); 
     }
 
     private void Update()
@@ -97,29 +99,41 @@ public class Unit_Miner : UnitBase
 
     private void UpdateAnimationState()
     {
-        var spriteController = unitMovement.GetComponent<UnitSpriteController>(); 
-        if (spriteController != null)
+        if (_spriteController != null)
         {
-            spriteController.UpdateAnimationState(currentState);
+            // Unit_Miner only needs IsMining state, not IsConstructing
+            bool isMining = currentState == UnitState.Mining;
+            _spriteController.UpdateAnimationState(currentState, isMining: isMining);
         }
         if (currentState == UnitState.Moving || currentState == UnitState.ReturningToStorage)
         {
             Vector3 moveDir = unitMovement.GetMoveDirection();
-            spriteController?.UpdateSpriteDirection(moveDir);
+            _spriteController?.UpdateSpriteDirection(moveDir);
+            _spriteController?.ClearTarget(); // Clear target when moving
         }
         else if (currentState == UnitState.Mining && _targetResourceNode != null)
         {
-            Vector3 dir = (_targetResourceNode.transform.position - transform.position).normalized;
-            spriteController?.UpdateSpriteDirection(dir);
+            _spriteController?.SetTargetTransform(_targetResourceNode.transform);
         }
-        else if ((currentState == UnitState.Unloading || currentState == UnitState.ReturningToStorage) && _targetStorage != null)
+        else if (currentState == UnitState.Unloading && _targetStorage != null)
         {
-            Vector3 dir = (((Component)_targetStorage).transform.position - transform.position).normalized;
-            spriteController?.UpdateSpriteDirection(dir);
+            _spriteController?.SetTargetTransform(((Component)_targetStorage).transform);
+        }
+        else if (currentState == UnitState.Idle)
+        {
+            // Keep facing the last target if available, or clear it
+            if (_targetResourceNode != null)
+            {
+                _spriteController?.SetTargetTransform(_targetResourceNode.transform);
+            }
+            else
+            {
+                _spriteController?.ClearTarget();
+            }
         }
         
         int currentTotal = _currentCarryAmounts.Values.Sum();
-        spriteController.UpdateCargoFill(currentTotal, maxCarryAmount);
+        _spriteController.UpdateCargoFill(currentTotal, maxCarryAmount);
     }
 
     private void OnMoving()

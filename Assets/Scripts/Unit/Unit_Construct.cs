@@ -28,6 +28,7 @@ public class Unit_Construct : UnitBase
 
     private IStorage _targetStorage;
     private Coroutine _unloadingCoroutine;
+    private UnitSpriteController _spriteController;
 
     protected override void Awake()
     {
@@ -36,9 +37,20 @@ public class Unit_Construct : UnitBase
         _rb = GetComponent<Rigidbody2D>();
     }
 
+    private void Start()
+    {
+        if (ConstructionManager.Instance != null && movement != null)
+        {
+            ConstructionManager.Instance.RegisterConstructDrone(this);
+        }
+        _spriteController = GetComponent<UnitSpriteController>();
+    }
+
     private void Update()
     {
+        UpdateUnitBaseState();
         DecideNextAction();
+        UpdateAnimationState();
     }
 
     protected override void OnEnable()
@@ -52,13 +64,6 @@ public class Unit_Construct : UnitBase
         }
     }
 
-    private void Start()
-    {
-        if (ConstructionManager.Instance != null && movement != null)
-        {
-            ConstructionManager.Instance.RegisterConstructDrone(this);
-        }
-    }
 
     protected override void OnDisable()
     {
@@ -66,6 +71,47 @@ public class Unit_Construct : UnitBase
         UnitManager.Instance?.RemoveUnit(this);
         ConstructionManager.Instance?.UnregisterConstructDrone(this);
         ReleaseFromConstruction();
+    }
+
+    private void UpdateUnitBaseState()
+    {
+        switch (_currentState)
+        {
+            case ConstructState.Idle:
+                currentState = UnitState.Idle;
+                break;
+            case ConstructState.FetchingResource:
+                // When loading, use Idle state (not Unloading) to prevent animation speed issues
+                if (movement != null && movement.IsMoving)
+                {
+                    currentState = UnitState.Moving;
+                }
+                else if (_loadingCoroutine != null)
+                {
+                    // Loading from storage - use Idle state
+                    currentState = UnitState.Idle;
+                }
+                else
+                {
+                    currentState = UnitState.Idle;
+                }
+                break;
+            case ConstructState.DeliveringResource:
+                if (movement != null && movement.IsMoving)
+                {
+                    currentState = UnitState.Moving;
+                }
+                else if (_unloadingCoroutine != null)
+                {
+                    currentState = UnitState.Constructing;
+                }
+                else
+                {
+                    // Waiting at delivery location - use Idle state
+                    currentState = UnitState.Idle;
+                }
+                break;
+        }
     }
 
     private void DecideNextAction()
@@ -82,6 +128,55 @@ public class Unit_Construct : UnitBase
         case ConstructState.DeliveringResource:
             UpdateDelivering();
             break;
+        }
+    }
+
+    private void UpdateAnimationState()
+    {
+        if (_spriteController != null)
+        {
+            // Unit_Construct only needs IsConstructing state, not IsMining
+            // Explicitly set IsConstructing to false when not constructing to ensure proper state reset
+            bool isConstructing = currentState == UnitState.Constructing;
+            _spriteController.UpdateAnimationState(currentState, isConstructing: isConstructing);
+        }
+        
+        if (currentState == UnitState.Moving || currentState == UnitState.ReturningToStorage)
+        {
+            Vector3 moveDir = movement.GetMoveDirection();
+            _spriteController?.UpdateSpriteDirection(moveDir);
+            _spriteController?.ClearTarget(); // Clear target when moving
+        }
+        else if (currentState == UnitState.Constructing && _currentRequest != null && _currentRequest.site != null)
+        {
+            // Face the construction site when constructing
+            if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null)
+            {
+                Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
+                Vector3 piecePos = BuildingManager.Instance.grid.GetCellCenterWorld(targetPieceCell);
+                _spriteController?.SetTargetPosition(piecePos);
+            }
+        }
+        else if (currentState == UnitState.Unloading && _targetStorage != null)
+        {
+            _spriteController?.SetTargetTransform((_targetStorage as Component).transform);
+        }
+        else if (currentState == UnitState.Idle)
+        {
+            // Keep facing the last target if available, or clear it
+            if (_currentRequest != null && _currentRequest.site != null)
+            {
+                if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null)
+                {
+                    Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
+                    Vector3 piecePos = BuildingManager.Instance.grid.GetCellCenterWorld(targetPieceCell);
+                    _spriteController?.SetTargetPosition(piecePos);
+                }
+            }
+            else
+            {
+                _spriteController?.ClearTarget();
+            }
         }
     }
 
@@ -120,7 +215,10 @@ public class Unit_Construct : UnitBase
 
         if (_targetStorage != null)
         {
-            AdjustSpriteDirectionToBuilding((_targetStorage as Component).transform);
+            if (TryGetComponent(out UnitSpriteController spriteController))
+            {
+                spriteController.SetTargetTransform((_targetStorage as Component).transform);
+            }
         }
 
         yield return new WaitForSeconds(loadingTime);
@@ -228,7 +326,10 @@ public class Unit_Construct : UnitBase
         {
             Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
             Vector3 piecePos = BuildingManager.Instance.grid.GetCellCenterWorld(targetPieceCell);
-            AdjustSpriteDirectionToPosition(piecePos);
+            if (TryGetComponent(out UnitSpriteController spriteController))
+            {
+                spriteController.SetTargetPosition(piecePos);
+            }
         }
 
         yield return new WaitForSeconds(unloadingTime);

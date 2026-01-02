@@ -77,6 +77,14 @@ public class UnitMovement : MonoBehaviour
             }
         }
         
+        // Update sprite direction based on velocity, but only if velocity is significant
+        // This prevents rapid updates that could cause animation speed issues
+        if (_rb.linearVelocity.sqrMagnitude > 0.01f)
+        {
+            Vector2 normalizedVelocity = _rb.linearVelocity.normalized;
+            _spriteController?.UpdateSpriteDirection(normalizedVelocity);
+        }
+        
         if (_currentWaypoint == default) 
         {
             if (_rb.linearVelocity.sqrMagnitude > 0.01f)
@@ -118,7 +126,6 @@ public class UnitMovement : MonoBehaviour
             }
 
             _rb.linearVelocity = direction * currentSpeed;
-            _spriteController?.UpdateSpriteDirection(direction);
         }
         else
         {
