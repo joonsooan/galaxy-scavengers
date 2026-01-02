@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using DG.Tweening;
 
 public class Unit_Construct : UnitBase
 {
@@ -11,6 +12,15 @@ public class Unit_Construct : UnitBase
     [SerializeField] private float loadingTime = 1f;
     [SerializeField] private float unloadingTime = 1f;
     [SerializeField] public UnitMovement movement;
+    
+    [Header("VFX")]
+    [SerializeField] private ParticleSystem constructingParticleSystem;
+    [SerializeField] private float particleOffsetDistance = 0.5f;
+    [SerializeField] private float yOffset;
+    
+    [Header("Floating Animation")]
+    [SerializeField] private float floatAmplitude = 0.1f;
+    [SerializeField] private float floatDuration = 2f;
 
     private int _carriedAmount;
     private ResourceType _carriedResourceType;
@@ -29,6 +39,11 @@ public class Unit_Construct : UnitBase
     private IStorage _targetStorage;
     private Coroutine _unloadingCoroutine;
     private UnitSpriteController _spriteController;
+    
+    private Tween _floatingTween;
+    private float _floatingPhase;
+    private Vector3 _currentConstructionDirection;
+    private float _startYPosition;
 
     protected override void Awake()
     {
@@ -51,6 +66,29 @@ public class Unit_Construct : UnitBase
         UpdateUnitBaseState();
         DecideNextAction();
         UpdateAnimationState();
+        
+        // Handle floating animation for Idle and Moving states
+        if (currentState == UnitState.Idle || currentState == UnitState.Moving)
+        {
+            if (_floatingTween == null || !_floatingTween.IsActive())
+            {
+                StartFloatingAnimation();
+            }
+            else if (_floatingTween.IsActive())
+            {
+                // Apply floating offset to current position each frame
+                ApplyFloatingOffset();
+            }
+        }
+        else
+        {
+            StopFloatingAnimation();
+        }
+        
+        if (currentState == UnitState.Constructing)
+        {
+            UpdateParticlePosition();
+        }
     }
 
     protected override void OnEnable()
@@ -71,6 +109,12 @@ public class Unit_Construct : UnitBase
         UnitManager.Instance?.RemoveUnit(this);
         ConstructionManager.Instance?.UnregisterConstructDrone(this);
         ReleaseFromConstruction();
+    }
+    
+    private void OnDestroy()
+    {
+        StopFloatingAnimation();
+        StopConstructionParticles();
     }
 
     private void UpdateUnitBaseState()
@@ -135,8 +179,6 @@ public class Unit_Construct : UnitBase
     {
         if (_spriteController != null)
         {
-            // Unit_Construct only needs IsConstructing state, not IsMining
-            // Explicitly set IsConstructing to false when not constructing to ensure proper state reset
             bool isConstructing = currentState == UnitState.Constructing;
             _spriteController.UpdateAnimationState(currentState, isConstructing: isConstructing);
         }
@@ -149,7 +191,6 @@ public class Unit_Construct : UnitBase
         }
         else if (currentState == UnitState.Constructing && _currentRequest != null && _currentRequest.site != null)
         {
-            // Face the construction site when constructing
             if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null)
             {
                 Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
@@ -163,7 +204,6 @@ public class Unit_Construct : UnitBase
         }
         else if (currentState == UnitState.Idle)
         {
-            // Keep facing the last target if available, or clear it
             if (_currentRequest != null && _currentRequest.site != null)
             {
                 if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null)
@@ -310,6 +350,7 @@ public class Unit_Construct : UnitBase
 
         if (_currentRequest == null || _currentRequest.site == null)
         {
+            StopConstructionParticles();
             _unloadingCoroutine = null;
             SetTask_Idle();
             yield break;
@@ -317,6 +358,7 @@ public class Unit_Construct : UnitBase
 
         if (!CanDepositResource())
         {
+            StopConstructionParticles();
             _unloadingCoroutine = null;
             SetTask_Idle();
             yield break;
@@ -330,17 +372,23 @@ public class Unit_Construct : UnitBase
             {
                 spriteController.SetTargetPosition(piecePos);
             }
+            
+            AdjustConstructionDirection(piecePos);
         }
+
+        StartConstructionParticles();
 
         yield return new WaitForSeconds(unloadingTime);
         
         if (!CanDepositResource())
         {
+            StopConstructionParticles();
             _unloadingCoroutine = null;
             SetTask_Idle();
             yield break;
         }
 
+        StopConstructionParticles();
         _unloadingCoroutine = null;
 
         if (_currentRequest != null && _currentRequest.site != null) {
@@ -468,6 +516,8 @@ public class Unit_Construct : UnitBase
 
     private void ReleaseFromConstruction()
     {
+        StopConstructionParticles();
+        
         if (_currentRequest != null)
         {
             _currentRequest.site?.CancelRequest(_currentRequest);
@@ -483,6 +533,107 @@ public class Unit_Construct : UnitBase
         StopAllCoroutines();
         _loadingCoroutine = null;
         _unloadingCoroutine = null;
+    }
+    
+    private void AdjustConstructionDirection(Vector3 targetPosition)
+    {
+        if (BuildingManager.Instance == null || BuildingManager.Instance.grid == null) return;
+
+        Vector3Int unitCell = BuildingManager.Instance.grid.WorldToCell(transform.position);
+        Vector3Int targetCell = BuildingManager.Instance.grid.WorldToCell(targetPosition);
+        Vector3Int relativePosition = targetCell - unitCell;
+
+        Vector3 targetDirection = Vector3.zero;
+
+        if (relativePosition.x > 0) {
+            targetDirection = Vector3.right;
+        }
+        else if (relativePosition.x < 0) {
+            targetDirection = Vector3.left;
+        }
+        else if (relativePosition.y > 0) {
+            targetDirection = Vector3.up;
+        }
+        else if (relativePosition.y < 0) {
+            targetDirection = Vector3.down;
+        }
+
+        _currentConstructionDirection = targetDirection;
+    }
+    
+    private void StartFloatingAnimation()
+    {
+        StopFloatingAnimation();
+        
+        _startYPosition = transform.position.y;
+        _floatingPhase = 0f;
+        
+        _floatingTween = DOTween.To(
+            () => _floatingPhase,
+            phase => _floatingPhase = phase,
+            1f,
+            floatDuration
+        )
+        .SetEase(Ease.Linear)
+        .SetLoops(-1, LoopType.Restart);
+    }
+    
+    private void ApplyFloatingOffset()
+    {
+        if (_floatingTween == null || !_floatingTween.IsActive()) return;
+        
+        float offset = Mathf.Sin(_floatingPhase * Mathf.PI * 2f) * floatAmplitude;
+        
+        if (_rb != null)
+        {
+            Vector2 currentPos = _rb.position;
+            float targetY = _startYPosition + offset;
+            _rb.MovePosition(new Vector2(currentPos.x, targetY));
+        }
+        else
+        {
+            Vector3 pos = transform.position;
+            transform.position = new Vector3(pos.x, _startYPosition + offset, pos.z);
+        }
+    }
+    
+    private void StopFloatingAnimation()
+    {
+        if (_floatingTween != null && _floatingTween.IsActive())
+        {
+            _floatingTween.Kill();
+            _floatingTween = null;
+        }
+        _floatingPhase = 0f;
+    }
+    
+    private void StartConstructionParticles()
+    {
+        if (constructingParticleSystem != null)
+        {
+            UpdateParticlePosition();
+            if (!constructingParticleSystem.isPlaying)
+            {
+                constructingParticleSystem.Play();
+            }
+        }
+    }
+    
+    private void StopConstructionParticles()
+    {
+        if (constructingParticleSystem != null && constructingParticleSystem.isPlaying)
+        {
+            constructingParticleSystem.Stop();
+        }
+    }
+    
+    private void UpdateParticlePosition()
+    {
+        if (constructingParticleSystem == null) return;
+        
+        Transform particleTransform = constructingParticleSystem.transform;
+        Vector3 offsetPosition = transform.position + (_currentConstructionDirection * particleOffsetDistance) - new Vector3(0, yOffset, 0);
+        particleTransform.position = offsetPosition;
     }
 
     private enum ConstructState

@@ -23,11 +23,11 @@ public class Unit_Miner : UnitBase
     [SerializeField] private bool showFloatingText;
     [SerializeField] private ParticleSystem miningParticleSystem;
     [SerializeField] private float particleOffsetDistance = 0.5f;
+    [SerializeField] private float yOffset;
     
     [Header("Mining Animation")]
     [SerializeField] private float vibrationRadius = 0.1f;
     [SerializeField] private float vibrationSpeed = 2f;
-    [SerializeField] private float yOffset = 0f;
 
     private readonly Dictionary<ResourceType, int> _currentCarryAmounts = new Dictionary<ResourceType, int>();
     private Canvas _canvas;
@@ -365,7 +365,7 @@ public class Unit_Miner : UnitBase
 
         foreach (var (resourceNode, resourceDistance) in resourcesWithDistance)
         {
-                if (bestTarget.resourceNode != null && resourceDistance > bestTarget.distance + 2f)
+            if (bestTarget.resourceNode != null && resourceDistance > bestTarget.distance + 2f)
             {
                 break; // All remaining resources are further away
             }
@@ -376,7 +376,7 @@ public class Unit_Miner : UnitBase
 
                 Vector3 neighborWorldPos = grid.GetCellCenterWorld(neighborCell);
                 float distanceToNeighbor = Vector3.Distance(unitPosition, neighborWorldPos);
-                
+            
                 if (distanceToNeighbor >= bestTarget.distance)
                 {
                     continue;
@@ -389,7 +389,7 @@ public class Unit_Miner : UnitBase
                         bestTarget.resourceNode = resourceNode;
                         bestTarget.miningCell = neighborCell;
                         bestTarget.distance = distanceToNeighbor;
-                        
+                    
                         if (distanceToNeighbor < 2f)
                         {
                             return bestTarget;
