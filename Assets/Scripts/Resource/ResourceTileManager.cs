@@ -24,10 +24,49 @@ public class ResourceTileManager
             return;
         }
         
+        if (_resourceTilePositions.Count == 0) return;
+        
+        TilemapRenderer renderer = _resourceTilemap.GetComponent<TilemapRenderer>();
+        bool wasEnabled = renderer != null && renderer.enabled;
+        
+        if (renderer != null)
+        {
+            renderer.enabled = false;
+        }
+        
         if (_resourceTilemap.gameObject != null)
         {
             _resourceTilemap.gameObject.SetActive(true);
         }
+        
+        BatchSetRuleTiles();
+        
+        if (renderer != null)
+        {
+            renderer.enabled = wasEnabled;
+        }
+        
+        if (FogOfWarManager.Instance != null && FogOfWarManager.Instance.IsInitialized)
+        {
+            BatchUpdateResourceTileVisibility();
+        }
+    }
+    
+    private void BatchSetRuleTiles()
+    {
+        int minX = int.MaxValue, minY = int.MaxValue;
+        int maxX = int.MinValue, maxY = int.MinValue;
+        
+        foreach (var pos in _resourceTilePositions.Keys)
+        {
+            minX = Mathf.Min(minX, pos.x);
+            minY = Mathf.Min(minY, pos.y);
+            maxX = Mathf.Max(maxX, pos.x);
+            maxY = Mathf.Max(maxY, pos.y);
+        }
+        
+        BoundsInt bounds = new BoundsInt(minX, minY, 0, maxX - minX + 1, maxY - minY + 1, 1);
+        TileBase[] tiles = new TileBase[bounds.size.x * bounds.size.y];
         
         foreach (var kvp in _resourceTilePositions)
         {
@@ -37,31 +76,57 @@ public class ResourceTileManager
             ResourceSpawnSettings settings = _resourceSettings.Find(s => s.resourceType == resourceType);
             if (settings != null && settings.resourceRuleTile != null)
             {
-                _resourceTilemap.SetTile(cellPos, settings.resourceRuleTile);
+                int index = (cellPos.x - minX) + (cellPos.y - minY) * bounds.size.x;
+                tiles[index] = settings.resourceRuleTile;
             }
         }
         
-        RefreshRuleTiles(_resourceTilePositions.Keys);
+        _resourceTilemap.SetTilesBlock(bounds, tiles);
         
-        if (FogOfWarManager.Instance != null && FogOfWarManager.Instance.IsInitialized)
+        List<Vector3Int> positionsToRefresh = new List<Vector3Int>(_resourceTilePositions.Keys);
+        
+        if (positionsToRefresh.Count > 0)
         {
-            UpdateResourceTileVisibility();
+            _resourceTilemap.RefreshTiles(positionsToRefresh);
         }
     }
     
     public void UpdateResourceTileVisibility()
     {
+        BatchUpdateResourceTileVisibility();
+    }
+    
+    private void BatchUpdateResourceTileVisibility()
+    {
         if (_resourceTilemap == null) return;
         
-        if (_resourceTilemap.gameObject != null && !_resourceTilemap.gameObject.activeSelf)
-        {
-            _resourceTilemap.gameObject.SetActive(true);
-        }
+        if (_resourceTilePositions.Count == 0) return;
+        
+        bool fogInitialized = FogOfWarManager.Instance != null && FogOfWarManager.Instance.IsInitialized;
+        Color visibleColor = new Color(1f, 1f, 1f, 1f);
+        Color hiddenColor = new Color(1f, 1f, 1f, 0f);
+        
+        List<Vector3Int> positionsToRefresh = new List<Vector3Int>(_resourceTilePositions.Count);
         
         foreach (var kvp in _resourceTilePositions)
         {
             Vector3Int cellPos = kvp.Key;
-            UpdateResourceTileVisibilityAtCell(cellPos);
+            if (!_resourceTilemap.HasTile(cellPos)) continue;
+            
+            bool isVisible = true;
+            if (fogInitialized)
+            {
+                isVisible = FogOfWarManager.Instance.CanSeeResources(cellPos);
+            }
+            
+            Color tileColor = isVisible ? visibleColor : hiddenColor;
+            _resourceTilemap.SetColor(cellPos, tileColor);
+            positionsToRefresh.Add(cellPos);
+        }
+        
+        if (positionsToRefresh.Count > 0)
+        {
+            _resourceTilemap.RefreshTiles(positionsToRefresh);
         }
     }
     
@@ -111,13 +176,30 @@ public class ResourceTileManager
     {
         if (_resourceTilemap == null) return;
         
+        List<Vector3Int> positionsToRefresh = new List<Vector3Int>();
+        bool fogInitialized = FogOfWarManager.Instance != null && FogOfWarManager.Instance.IsInitialized;
+        Color visibleColor = new Color(1f, 1f, 1f, 1f);
+        Color hiddenColor = new Color(1f, 1f, 1f, 0f);
+        
         foreach (Vector3Int pos in positions)
         {
-            if (_resourceTilePositions.ContainsKey(pos))
+            if (_resourceTilePositions.ContainsKey(pos) && _resourceTilemap.HasTile(pos))
             {
-                _resourceTilemap.RefreshTile(pos);
-                UpdateResourceTileVisibilityAtCell(pos);
+                bool isVisible = true;
+                if (fogInitialized)
+                {
+                    isVisible = FogOfWarManager.Instance.CanSeeResources(pos);
+                }
+                
+                Color tileColor = isVisible ? visibleColor : hiddenColor;
+                _resourceTilemap.SetColor(pos, tileColor);
+                positionsToRefresh.Add(pos);
             }
+        }
+        
+        if (positionsToRefresh.Count > 0)
+        {
+            _resourceTilemap.RefreshTiles(positionsToRefresh);
         }
     }
 }

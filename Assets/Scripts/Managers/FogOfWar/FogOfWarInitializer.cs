@@ -47,10 +47,22 @@ public class FogOfWarInitializer
         
         if (allTilePositions.Count > 0)
         {
+            TilemapRenderer renderer = _fogTilemap.GetComponent<TilemapRenderer>();
+            bool wasEnabled = renderer != null && renderer.enabled;
+            
+            if (renderer != null)
+            {
+                renderer.enabled = false;
+            }
+            
             PlaceFogTiles(allTilePositions);
+            
+            if (renderer != null)
+            {
+                renderer.enabled = wasEnabled;
+            }
         }
         
-        _fogTilemap.RefreshAllTiles();
         _fogTilemap.CompressBounds();
     }
     
@@ -198,9 +210,21 @@ public class FogOfWarInitializer
         
         _fogTilemap.SetTilesBlock(fogBounds, fogTiles);
         
+        BatchSetFogColors(allTilePositions);
+    }
+    
+    private void BatchSetFogColors(HashSet<Vector3Int> allTilePositions)
+    {
         foreach (Vector3Int pos in allTilePositions)
         {
             _fogTilemap.SetColor(pos, _invisibleColor);
+        }
+        
+        List<Vector3Int> positionsToRefresh = new List<Vector3Int>(allTilePositions);
+        
+        if (positionsToRefresh.Count > 0)
+        {
+            _fogTilemap.RefreshTiles(positionsToRefresh);
         }
     }
 }
