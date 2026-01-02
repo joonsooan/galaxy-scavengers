@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 4483249089817793867}
   - component: {fileID: 7616754858952366261}
   - component: {fileID: 1616897775811544138}
-  - component: {fileID: 566071178862855242}
+  - component: {fileID: 1513360931996844975}
   m_Layer: 0
   m_Name: Unit_Miner
   m_TagString: Untagged
@@ -201,7 +201,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   visionRange: 5.5
   isActive: 1
---- !u!95 &566071178862855242
+--- !u!95 &1513360931996844975
 Animator:
   serializedVersion: 7
   m_ObjectHideFlags: 0
