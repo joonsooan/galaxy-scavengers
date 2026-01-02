@@ -222,9 +222,9 @@ public class FogOfWarInitializer
         
         List<Vector3Int> positionsToRefresh = new List<Vector3Int>(allTilePositions);
         
-        if (positionsToRefresh.Count > 0)
+        foreach (Vector3Int pos in positionsToRefresh)
         {
-            _fogTilemap.RefreshTiles(positionsToRefresh);
+            _fogTilemap.RefreshTile(pos);
         }
     }
 }

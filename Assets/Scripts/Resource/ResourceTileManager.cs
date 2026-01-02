@@ -85,9 +85,9 @@ public class ResourceTileManager
         
         List<Vector3Int> positionsToRefresh = new List<Vector3Int>(_resourceTilePositions.Keys);
         
-        if (positionsToRefresh.Count > 0)
+        foreach (Vector3Int pos in positionsToRefresh)
         {
-            _resourceTilemap.RefreshTiles(positionsToRefresh);
+            _resourceTilemap.RefreshTile(pos);
         }
     }
     
@@ -124,9 +124,9 @@ public class ResourceTileManager
             positionsToRefresh.Add(cellPos);
         }
         
-        if (positionsToRefresh.Count > 0)
+        foreach (Vector3Int pos in positionsToRefresh)
         {
-            _resourceTilemap.RefreshTiles(positionsToRefresh);
+            _resourceTilemap.RefreshTile(pos);
         }
     }
     
@@ -197,9 +197,9 @@ public class ResourceTileManager
             }
         }
         
-        if (positionsToRefresh.Count > 0)
+        foreach (Vector3Int pos in positionsToRefresh)
         {
-            _resourceTilemap.RefreshTiles(positionsToRefresh);
+            _resourceTilemap.RefreshTile(pos);
         }
     }
 }
