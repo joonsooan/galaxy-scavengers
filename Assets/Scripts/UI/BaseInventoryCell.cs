@@ -28,7 +28,7 @@ public class BaseInventoryCell : MonoBehaviour, IPointerClickHandler
     {
         _resourceType = type;
         _amount = amount;
-        _isEmpty = false;
+        _isEmpty = amount <= 0;
 
         UpdateUI();
     }

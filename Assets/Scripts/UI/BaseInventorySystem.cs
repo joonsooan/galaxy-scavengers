@@ -143,10 +143,10 @@ public class BaseInventorySystem : MonoBehaviour
             return;
         }
 
-        // Calculate number of cells needed based on current resources
-        int totalCellsNeeded = CalculateRequiredCells();
+        // Use BaseResourceDataManager resource icons length to determine grid size
+        int totalSlots = GetResourceIconCount();
         
-        for (int i = 0; i < totalCellsNeeded; i++)
+        for (int i = 0; i < totalSlots; i++)
         {
             GameObject cellObj = Instantiate(baseInventoryCellPrefab, inventoryGridContainer.transform);
             BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
@@ -158,29 +158,15 @@ public class BaseInventorySystem : MonoBehaviour
         }
     }
     
-    private int CalculateRequiredCells()
+    private int GetResourceIconCount()
     {
-        if (BaseInventoryManager.Instance == null)
+        if (BaseResourceDataManager.Instance != null)
         {
-            // Return minimum cells if manager not ready yet
-            return 1;
+            return BaseResourceDataManager.Instance.GetResourceIconCount();
         }
         
-        Dictionary<ResourceType, int> baseResources = BaseInventoryManager.Instance.GetAllResources();
-        int totalCells = 0;
-        
-        foreach (var resource in baseResources)
-        {
-            if (resource.Value > 0)
-            {
-                int maxStack = GetMaxStackAmount(resource.Key);
-                int cellsForThisResource = Mathf.CeilToInt((float)resource.Value / maxStack);
-                totalCells += cellsForThisResource;
-            }
-        }
-        
-        // Return at least 1 cell even if no resources
-        return Mathf.Max(1, totalCells);
+        // Fallback to enum length if BaseResourceDataManager not available
+        return Enum.GetValues(typeof(ResourceType)).Length;
     }
 
     public void ToggleInventory()
@@ -278,6 +264,12 @@ public class BaseInventorySystem : MonoBehaviour
             return;
         }
 
+        if (_inventoryCells == null || _inventoryCells.Count == 0)
+        {
+            Debug.LogWarning("BaseInventorySystem: Inventory cells not initialized");
+            return;
+        }
+
         Dictionary<ResourceType, int> baseResources = BaseInventoryManager.Instance.GetAllResources();
         
         var sortedResources = baseResources
@@ -285,40 +277,13 @@ public class BaseInventorySystem : MonoBehaviour
             .OrderBy(kvp => kvp.Key)
             .ToList();
 
-        int requiredCells = 0;
-        foreach (var resource in sortedResources)
-        {
-            int maxStack = GetMaxStackAmount(resource.Key);
-            int cellsForThisResource = Mathf.CeilToInt((float)resource.Value / maxStack);
-            requiredCells += cellsForThisResource;
-        }
-        
+        // Clear all cells first (show empty cells)
         foreach (BaseInventoryCell cell in _inventoryCells)
         {
             cell.Clear();
         }
-        
-        while (_inventoryCells.Count < requiredCells)
-        {
-            GameObject cellObj = Instantiate(baseInventoryCellPrefab, inventoryGridContainer.transform);
-            BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
-            if (cell != null)
-            {
-                cell.Initialize(this);
-                _inventoryCells.Add(cell);
-            }
-        }
-        
-        while (_inventoryCells.Count > requiredCells && _inventoryCells.Count > 0)
-        {
-            BaseInventoryCell cellToRemove = _inventoryCells[_inventoryCells.Count - 1];
-            _inventoryCells.RemoveAt(_inventoryCells.Count - 1);
-            if (cellToRemove != null)
-            {
-                Destroy(cellToRemove.gameObject);
-            }
-        }
 
+        // Update cells with resources (like game scene inventory)
         int cellIndex = 0;
         foreach (var resource in sortedResources)
         {
@@ -336,8 +301,6 @@ public class BaseInventorySystem : MonoBehaviour
                 cellIndex++;
             }
         }
-        
-        Debug.Log($"BaseInventorySystem: Refreshed inventory grid with {sortedResources.Count} resource types, {requiredCells} cells");
     }
 
     public bool TryAddResourceToInventory(ResourceType type, int amount, bool moveAll = false)

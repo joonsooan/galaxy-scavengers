@@ -36,5 +36,10 @@ public class BaseResourceDataManager : MonoBehaviour
 
         return null;
     }
+    
+    public int GetResourceIconCount()
+    {
+        return resourceIcons != null ? resourceIcons.Count : 0;
+    }
 }
 
