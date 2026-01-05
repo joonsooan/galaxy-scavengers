@@ -12,9 +12,8 @@ public class ModuleStationUIManager : MonoBehaviour
     [SerializeField] private GameObject recipeGridContainer;
     [SerializeField] private GameObject moduleGridCellPrefab;
     [SerializeField] private ModuleDetailPanel moduleDetailPanel;
-    [SerializeField] private Button closeButton;
-    
-    public static ModuleStationUIManager Instance { get; private set; }
+
+    private static ModuleStationUIManager Instance { get; set; }
     
     private ModuleStation _currentStation;
     private ModuleData _currentData;
@@ -34,11 +33,6 @@ public class ModuleStationUIManager : MonoBehaviour
     
     private void Start()
     {
-        if (closeButton != null)
-        {
-            closeButton.onClick.AddListener(HidePanel);
-        }
-        
         if (moduleStationPanel != null)
         {
             moduleStationPanel.SetActive(false);
@@ -59,8 +53,8 @@ public class ModuleStationUIManager : MonoBehaviour
     {
         ModuleStation.OnModuleStationClicked -= ShowModuleStationUI;
     }
-    
-    public void ShowModuleStationUI(ModuleStation station)
+
+    private void ShowModuleStationUI(ModuleStation station)
     {
         _currentStation = station;
         _currentData = station.ModuleData;
@@ -80,8 +74,8 @@ public class ModuleStationUIManager : MonoBehaviour
         UpdateStationInfo();
         LoadAllRecipes();
     }
-    
-    public void HidePanel()
+
+    private void HidePanel()
     {
         if (moduleStationPanel != null)
         {

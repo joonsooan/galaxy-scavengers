@@ -26,20 +26,34 @@ public class BaseResourceInfoCellClickable : MonoBehaviour, IPointerClickHandler
     {
         if (resourceImage == null) return;
 
-        if (ResourceManager.Instance != null)
+        Sprite resourceIcon = GetResourceIcon();
+        if (resourceIcon != null)
         {
-            Sprite resourceIcon = ResourceManager.Instance.GetResourceIcon(_resourceType);
-            if (resourceIcon != null)
-            {
-                resourceImage.sprite = resourceIcon;
-                resourceImage.enabled = true;
-            }
+            resourceImage.sprite = resourceIcon;
+            resourceImage.enabled = true;
         }
         else
         {
             resourceImage.sprite = null;
             resourceImage.enabled = false;
         }
+    }
+    
+    private Sprite GetResourceIcon()
+    {
+        // Try BaseResourceDataManager first (for base scene)
+        if (BaseResourceDataManager.Instance != null)
+        {
+            return BaseResourceDataManager.Instance.GetResourceIcon(_resourceType);
+        }
+        
+        // Fallback to ResourceManager (for game scene compatibility)
+        if (ResourceManager.Instance != null)
+        {
+            return ResourceManager.Instance.GetResourceIcon(_resourceType);
+        }
+        
+        return null;
     }
 
     public void UpdateAmount(int amount)

@@ -47,26 +47,57 @@ public class BaseInventoryCell : MonoBehaviour, IPointerClickHandler
 
         if (amountText != null)
         {
-            amountText.text = "";
+            amountText.gameObject.SetActive(false);
         }
     }
 
     private void UpdateUI()
     {
-        if (ResourceManager.Instance != null)
+        if (iconImage != null)
         {
-            Sprite icon = ResourceManager.Instance.GetResourceIcon(_resourceType);
-            if (iconImage != null)
+            Sprite icon = GetResourceIcon();
+            iconImage.sprite = icon;
+            iconImage.enabled = icon != null;
+            
+            // If icon is null, ensure image is disabled and sprite is cleared
+            if (icon == null)
             {
-                iconImage.sprite = icon;
-                iconImage.enabled = icon != null;
+                iconImage.sprite = null;
+                iconImage.enabled = false;
             }
         }
 
         if (amountText != null)
         {
-            amountText.text = _amount.ToString();
+            if (_amount > 0)
+            {
+                amountText.gameObject.SetActive(true);
+                amountText.text = _amount.ToString();
+            }
+            else
+            {
+                amountText.gameObject.SetActive(false);
+            }
         }
+    }
+    
+    private Sprite GetResourceIcon()
+    {
+        if (BaseResourceDataManager.Instance != null)
+        {
+            Sprite icon = BaseResourceDataManager.Instance.GetResourceIcon(_resourceType);
+            if (icon != null)
+            {
+                return icon;
+            }
+        }
+        
+        if (_amount > 0)
+        {
+            Debug.LogWarning($"BaseInventoryCell: No icon found for resource type {_resourceType}. Make sure BaseResourceDataManager has resource icons assigned.");
+        }
+        
+        return null;
     }
 
     public void OnPointerClick(PointerEventData eventData)

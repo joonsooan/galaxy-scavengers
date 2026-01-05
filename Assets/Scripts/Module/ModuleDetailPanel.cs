@@ -81,7 +81,7 @@ public class ModuleDetailPanel : MonoBehaviour
         
         if (moduleTypeText != null)
         {
-            moduleTypeText.text = $"Type: {_currentRecipe.moduleType} | Tier: {_currentRecipe.moduleTier}";
+            moduleTypeText.text = $"Type: {_currentRecipe.moduleType}";
         }
     }
     

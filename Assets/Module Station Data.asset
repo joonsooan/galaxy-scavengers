@@ -20,7 +20,7 @@ MonoBehaviour:
   - moduleName: "\uBB34\uB8CC \uBAA8\uB4C8"
     moduleDescription: "\uD2B9\uBCC4\uD55C \uAE30\uB2A5\uC740 \uC5C6\uB294 \uAE30\uBCF8\uC801\uC778
       \uBAA8\uB4C8\uC785\uB2C8\uB2E4."
-    moduleIcon: {fileID: 0}
+    moduleIcon: {fileID: -4716559796490163538, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
     ingredients:
     - resourceType: 4
       amount: 20
