@@ -35,7 +35,7 @@ public class BaseInventoryCell : MonoBehaviour, IPointerClickHandler
 
     public void Clear()
     {
-        _resourceType = ResourceType.Ferrite; // Default, but won't be used
+        _resourceType = ResourceType.Ferrite;
         _amount = 0;
         _isEmpty = true;
 
@@ -59,7 +59,6 @@ public class BaseInventoryCell : MonoBehaviour, IPointerClickHandler
             iconImage.sprite = icon;
             iconImage.enabled = icon != null;
             
-            // If icon is null, ensure image is disabled and sprite is cleared
             if (icon == null)
             {
                 iconImage.sprite = null;
@@ -107,17 +106,14 @@ public class BaseInventoryCell : MonoBehaviour, IPointerClickHandler
             return;
         }
 
-        // Check for shift key
         bool isShiftClick = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
 
         if (isShiftClick)
         {
-            // Shift + Click: Return ALL resources of the same type from inventory
             _baseInventorySystem.ReturnAllResourcesOfType(_resourceType);
         }
         else
         {
-            // Single Click: Return only this cell's resource to BaseInventoryManager
             _baseInventorySystem.ReturnResourceToBaseInventory(_resourceType, _amount);
             Clear();
         }

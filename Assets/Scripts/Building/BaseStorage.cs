@@ -95,7 +95,6 @@ public class BaseStorage : Damageable, IStorage
         
         if (addedAmount > 0 && ResourceManager.Instance != null)
             ResourceManager.Instance.AddResource(type, addedAmount);
-            
     }
     
     protected void InvokeResourceChanged(ResourceType type)

@@ -5,12 +5,11 @@ public class Module
 {
     public string moduleName;
     public string moduleDescription;
-    public string moduleIconPath; // Store sprite path/name instead of Sprite (for serialization)
+    public string moduleIconPath;
     public ModuleType moduleType;
     public int moduleTier;
-    public string moduleId; // Unique identifier
+    public string moduleId;
     
-    // Non-serialized field for runtime use
     [System.NonSerialized]
     public Sprite moduleIcon;
     
@@ -36,7 +35,6 @@ public class Module
         moduleId = System.Guid.NewGuid().ToString();
     }
     
-    // Default constructor for serialization
     public Module() { }
 }
 

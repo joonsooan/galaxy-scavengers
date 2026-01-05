@@ -92,13 +92,11 @@ public class ModuleDetailPanel : MonoBehaviour
             return;
         }
         
-        // Clear existing ingredients
         foreach (Transform child in ingredientsParent)
         {
             Destroy(child.gameObject);
         }
         
-        // Create ingredient cells
         foreach (ResourceCost ingredient in _currentRecipe.ingredients)
         {
             GameObject cellObj = Instantiate(ingredientCellPrefab, ingredientsParent);
@@ -135,7 +133,7 @@ public class ModuleDetailPanel : MonoBehaviour
         {
             _uiManager?.OnModuleCrafted();
             UpdateProduceButton();
-            SetupIngredients(); // Refresh ingredient availability
+            SetupIngredients();
         }
         else
         {
@@ -145,7 +143,6 @@ public class ModuleDetailPanel : MonoBehaviour
     
     private void Update()
     {
-        // Update produce button state periodically in case resources changed
         if (_station != null && _currentRecipe != null)
         {
             UpdateProduceButton();

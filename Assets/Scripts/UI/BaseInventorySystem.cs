@@ -14,6 +14,7 @@ public class BaseInventorySystem : MonoBehaviour
     [SerializeField] private GameObject moduleGridContainer;
     [SerializeField] private Button sortButton;
     [SerializeField] private Button unloadToBaseButton;
+    [SerializeField] private TMP_Text inventoryInfoText;
 
     [Header("Prefabs")]
     [SerializeField] private GameObject baseInventoryCellPrefab;
@@ -23,13 +24,12 @@ public class BaseInventorySystem : MonoBehaviour
     [SerializeField] private int inventoryWidth = 5;
     [SerializeField] private int inventoryHeight = 5;
     [SerializeField] private int defaultMaxStackAmount = 100;
-    [SerializeField] private List<InventorySystem.ResourceStackData> customMaxStackAmounts = new();
+    [SerializeField] private List<InventorySystem.ResourceStackData> customMaxStackAmounts = new List<InventorySystem.ResourceStackData>();
 
-    private readonly Dictionary<ResourceType, int> _maxStackAmounts = new();
-    private readonly List<BaseInventoryCell> _inventoryCells = new();
-    private readonly List<ModuleInventoryCell> _moduleCells = new();
+    private readonly List<BaseInventoryCell> _inventoryCells = new List<BaseInventoryCell>();
+    private readonly Dictionary<ResourceType, int> _maxStackAmounts = new Dictionary<ResourceType, int>();
+    private readonly List<ModuleInventoryCell> _moduleCells = new List<ModuleInventoryCell>();
     private GridLayoutGroup _inventoryGrid;
-    private GridLayoutGroup _moduleGrid;
 
     private void Awake()
     {
@@ -40,68 +40,75 @@ public class BaseInventorySystem : MonoBehaviour
     {
         InitializeInventory();
         InitializeModuleGrid();
-        
-        if (sortButton != null)
-        {
+
+        if (sortButton != null) {
             sortButton.onClick.AddListener(SortInventory);
         }
 
-        if (unloadToBaseButton != null)
-        {
+        if (unloadToBaseButton != null) {
             unloadToBaseButton.onClick.AddListener(UnloadAllToBaseInventory);
         }
 
-        if (inventoryPanel != null)
-        {
+        if (inventoryPanel != null) {
             HideInventoryPanel();
         }
-        
+
         SubscribeToModuleEvents();
+
+        StartCoroutine(RefreshInventoryAfterInitialization());
     }
-    
+
     private void OnEnable()
     {
         SubscribeToModuleEvents();
     }
-    
+
     private void OnDisable()
     {
         UnsubscribeFromModuleEvents();
     }
-    
+
+    private IEnumerator RefreshInventoryAfterInitialization()
+    {
+        yield return null;
+
+        while (BaseInventoryManager.Instance == null) {
+            yield return null;
+        }
+
+        RefreshInventoryGrid();
+    }
+
     private void SubscribeToModuleEvents()
     {
-        if (BaseInventoryManager.Instance != null)
-        {
+        if (BaseInventoryManager.Instance != null) {
             BaseInventoryManager.Instance.OnModuleAdded += OnModuleAdded;
             BaseInventoryManager.Instance.OnModuleRemoved += OnModuleRemoved;
             BaseInventoryManager.Instance.OnResourceChanged += OnResourceChanged;
         }
     }
-    
+
     private void UnsubscribeFromModuleEvents()
     {
-        if (BaseInventoryManager.Instance != null)
-        {
+        if (BaseInventoryManager.Instance != null) {
             BaseInventoryManager.Instance.OnModuleAdded -= OnModuleAdded;
             BaseInventoryManager.Instance.OnModuleRemoved -= OnModuleRemoved;
             BaseInventoryManager.Instance.OnResourceChanged -= OnResourceChanged;
         }
     }
-    
+
     private void OnResourceChanged(ResourceType type, int amount)
     {
-        if (inventoryPanel != null && inventoryPanel.activeSelf)
-        {
+        if (inventoryPanel != null && inventoryPanel.activeSelf) {
             RefreshInventoryGrid();
         }
     }
-    
+
     private void OnModuleAdded(Module module)
     {
         LoadModulesToGrid();
     }
-    
+
     private void OnModuleRemoved(Module module)
     {
         LoadModulesToGrid();
@@ -114,15 +121,12 @@ public class BaseInventorySystem : MonoBehaviour
 
     private void InitializeMaxStackAmounts()
     {
-        foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
-        {
+        foreach (ResourceType type in Enum.GetValues(typeof(ResourceType))) {
             _maxStackAmounts[type] = defaultMaxStackAmount;
         }
 
-        foreach (var data in customMaxStackAmounts)
-        {
-            if (_maxStackAmounts.ContainsKey(data.resourceType))
-            {
+        foreach (InventorySystem.ResourceStackData data in customMaxStackAmounts) {
+            if (_maxStackAmounts.ContainsKey(data.resourceType)) {
                 _maxStackAmounts[data.resourceType] = data.maxStackAmount;
             }
         }
@@ -130,99 +134,74 @@ public class BaseInventorySystem : MonoBehaviour
 
     private void InitializeInventory()
     {
-        if (inventoryGridContainer == null || baseInventoryCellPrefab == null)
-        {
+        if (inventoryGridContainer == null || baseInventoryCellPrefab == null) {
             Debug.LogError("InventoryGridContainer or BaseInventoryCellPrefab is not assigned!");
             return;
         }
 
         _inventoryGrid = inventoryGridContainer.GetComponent<GridLayoutGroup>();
-        if (_inventoryGrid == null)
-        {
+        if (_inventoryGrid == null) {
             Debug.LogError("InventoryGridContainer must have a GridLayoutGroup component!");
             return;
         }
 
-        // Use BaseResourceDataManager resource icons length to determine grid size
-        int totalSlots = GetResourceIconCount();
-        
-        for (int i = 0; i < totalSlots; i++)
-        {
+        int totalSlots = inventoryWidth * inventoryHeight;
+
+        for (int i = 0; i < totalSlots; i++) {
             GameObject cellObj = Instantiate(baseInventoryCellPrefab, inventoryGridContainer.transform);
             BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
-            if (cell != null)
-            {
+            if (cell != null) {
                 cell.Initialize(this);
                 _inventoryCells.Add(cell);
             }
         }
     }
-    
-    private int GetResourceIconCount()
-    {
-        if (BaseResourceDataManager.Instance != null)
-        {
-            return BaseResourceDataManager.Instance.GetResourceIconCount();
-        }
-        
-        // Fallback to enum length if BaseResourceDataManager not available
-        return Enum.GetValues(typeof(ResourceType)).Length;
-    }
 
     public void ToggleInventory()
     {
         bool isActive = inventoryPanel != null && inventoryPanel.activeSelf;
-        
-        if (inventoryPanel != null)
-        {
+
+        if (inventoryPanel != null) {
             inventoryPanel.SetActive(!isActive);
-            
-            if (!isActive)
-            {
-                // Load base inventory when opening - always refresh to show latest data
+
+            if (!isActive) {
                 RefreshInventoryGrid();
                 RefreshModuleGrid();
             }
         }
     }
-    
+
     private void InitializeModuleGrid()
     {
-        if (moduleGridContainer == null || moduleInventoryCellPrefab == null)
-        {
+        if (moduleGridContainer == null || moduleInventoryCellPrefab == null) {
             return;
         }
-        
-        _moduleGrid = moduleGridContainer.GetComponent<GridLayoutGroup>();
+
+        moduleGridContainer.GetComponent<GridLayoutGroup>();
     }
-    
+
     private void LoadModulesToGrid()
     {
         RefreshModuleGrid();
     }
-    
-    // Public method to refresh module grid (can be called anytime)
+
     public void RefreshModuleGrid()
     {
-        if (moduleGridContainer == null || moduleInventoryCellPrefab == null || BaseInventoryManager.Instance == null)
-        {
+        if (moduleGridContainer == null || moduleInventoryCellPrefab == null || BaseInventoryManager.Instance == null) {
             return;
         }
-        
-        foreach (Transform child in moduleGridContainer.transform)
-        {
+
+        foreach (Transform child in moduleGridContainer.transform) {
             Destroy(child.gameObject);
         }
         _moduleCells.Clear();
-        
+
         List<Module> modules = BaseInventoryManager.Instance.GetAllModules();
-        
-        foreach (Module module in modules)
-        {
+
+        foreach (Module module in modules) {
             GameObject cellObj = Instantiate(moduleInventoryCellPrefab, moduleGridContainer.transform);
             ModuleInventoryCell cell = cellObj.GetComponent<ModuleInventoryCell>();
-            if (cell != null)
-            {
+            if (cell != null) {
                 cell.Initialize(this);
                 cell.SetModule(module);
                 _moduleCells.Add(cell);
@@ -255,64 +234,65 @@ public class BaseInventorySystem : MonoBehaviour
     {
         RefreshInventoryGrid();
     }
-    
+
     public void RefreshInventoryGrid()
     {
-        if (BaseInventoryManager.Instance == null)
-        {
+        if (BaseInventoryManager.Instance == null) {
             Debug.LogWarning("BaseInventorySystem: BaseInventoryManager not available");
             return;
         }
 
-        if (_inventoryCells == null || _inventoryCells.Count == 0)
-        {
+        if (_inventoryCells == null || _inventoryCells.Count == 0) {
             Debug.LogWarning("BaseInventorySystem: Inventory cells not initialized");
             return;
         }
 
         Dictionary<ResourceType, int> baseResources = BaseInventoryManager.Instance.GetAllResources();
-        
-        var sortedResources = baseResources
+
+        List<KeyValuePair<ResourceType, int>> sortedResources = baseResources
             .Where(kvp => kvp.Value > 0)
             .OrderBy(kvp => kvp.Key)
             .ToList();
 
-        // Clear all cells first (show empty cells)
-        foreach (BaseInventoryCell cell in _inventoryCells)
-        {
+        foreach (BaseInventoryCell cell in _inventoryCells) {
             cell.Clear();
         }
 
-        // Update cells with resources (like game scene inventory)
         int cellIndex = 0;
-        foreach (var resource in sortedResources)
-        {
+        foreach (KeyValuePair<ResourceType, int> resource in sortedResources) {
             if (cellIndex >= _inventoryCells.Count) break;
 
             ResourceType type = resource.Key;
             int totalAmount = resource.Value;
             int maxStack = GetMaxStackAmount(type);
 
-            while (totalAmount > 0 && cellIndex < _inventoryCells.Count)
-            {
+            while (totalAmount > 0 && cellIndex < _inventoryCells.Count) {
                 int amountForCell = Mathf.Min(totalAmount, maxStack);
                 _inventoryCells[cellIndex].SetResource(type, amountForCell);
                 totalAmount -= amountForCell;
                 cellIndex++;
             }
         }
+
+        UpdateInventoryInfoText();
+    }
+
+    private void UpdateInventoryInfoText()
+    {
+        if (inventoryInfoText == null) return;
+
+        int nonEmptyCellCount = _inventoryCells.Count(cell => !cell.IsEmpty());
+        inventoryInfoText.text = $"기지 창고 ({nonEmptyCellCount.ToString()}/{_inventoryCells.Count})";
     }
 
     public bool TryAddResourceToInventory(ResourceType type, int amount, bool moveAll = false)
     {
-        if (BaseInventoryManager.Instance == null)
-        {
+        if (BaseInventoryManager.Instance == null) {
             return false;
         }
 
         int availableAmount = BaseInventoryManager.Instance.GetResourceAmount(type);
-        if (availableAmount <= 0)
-        {
+        if (availableAmount <= 0) {
             return false;
         }
 
@@ -320,24 +300,24 @@ public class BaseInventorySystem : MonoBehaviour
         int maxStack = GetMaxStackAmount(type);
         int remainingToMove = amountToMove;
 
-        while (remainingToMove > 0)
-        {
+        while (remainingToMove > 0) {
             BaseInventoryCell emptyCell = FindFirstEmptyCell();
-            if (emptyCell == null)
-            {
+            if (emptyCell == null) {
                 break;
             }
 
             int amountForThisCell = Mathf.Min(remainingToMove, maxStack);
-            if (BaseInventoryManager.Instance.RemoveResource(type, amountForThisCell))
-            {
+            if (BaseInventoryManager.Instance.RemoveResource(type, amountForThisCell)) {
                 emptyCell.SetResource(type, amountForThisCell);
                 remainingToMove -= amountForThisCell;
             }
-            else
-            {
+            else {
                 break;
             }
+        }
+
+        if (remainingToMove < amountToMove) {
+            UpdateInventoryInfoText();
         }
 
         return remainingToMove < amountToMove;
@@ -345,51 +325,46 @@ public class BaseInventorySystem : MonoBehaviour
 
     public void ReturnResourceToBaseInventory(ResourceType type, int amount)
     {
-        if (BaseInventoryManager.Instance != null)
-        {
+        if (BaseInventoryManager.Instance != null) {
             BaseInventoryManager.Instance.AddResource(type, amount);
+            UpdateInventoryInfoText();
         }
     }
 
     public void ReturnAllResourcesOfType(ResourceType type)
     {
-        if (BaseInventoryManager.Instance == null)
-        {
+        if (BaseInventoryManager.Instance == null) {
             return;
         }
 
         int totalAmount = 0;
         List<BaseInventoryCell> cellsToClear = new List<BaseInventoryCell>();
 
-        foreach (BaseInventoryCell cell in _inventoryCells)
-        {
-            if (!cell.IsEmpty() && cell.ResourceType == type)
-            {
+        foreach (BaseInventoryCell cell in _inventoryCells) {
+            if (!cell.IsEmpty() && cell.ResourceType == type) {
                 totalAmount += cell.Amount;
                 cellsToClear.Add(cell);
             }
         }
 
-        if (totalAmount > 0)
-        {
+        if (totalAmount > 0) {
             BaseInventoryManager.Instance.AddResource(type, totalAmount);
-            
-            foreach (BaseInventoryCell cell in cellsToClear)
-            {
+
+            foreach (BaseInventoryCell cell in cellsToClear) {
                 cell.Clear();
             }
+
+            UpdateInventoryInfoText();
         }
     }
 
     public void SortInventory()
     {
         List<BaseInventoryCell> filledCells = _inventoryCells.Where(cell => !cell.IsEmpty()).ToList();
-        
-        filledCells.Sort((a, b) =>
-        {
+
+        filledCells.Sort((a, b) => {
             int typeComparison = a.ResourceType.CompareTo(b.ResourceType);
-            if (typeComparison != 0)
-            {
+            if (typeComparison != 0) {
                 return typeComparison;
             }
             return b.Amount.CompareTo(a.Amount);
@@ -399,15 +374,15 @@ public class BaseInventorySystem : MonoBehaviour
             .Select(cell => (cell.ResourceType, cell.Amount))
             .ToList();
 
-        foreach (BaseInventoryCell cell in _inventoryCells)
-        {
+        foreach (BaseInventoryCell cell in _inventoryCells) {
             cell.Clear();
         }
 
-        for (int i = 0; i < cellData.Count && i < _inventoryCells.Count; i++)
-        {
+        for (int i = 0; i < cellData.Count && i < _inventoryCells.Count; i++) {
             _inventoryCells[i].SetResource(cellData[i].type, cellData[i].amount);
         }
+
+        UpdateInventoryInfoText();
     }
 
     public void UnloadAllToBaseInventory()
@@ -416,33 +391,28 @@ public class BaseInventorySystem : MonoBehaviour
 
         Dictionary<ResourceType, int> resourcesToTransfer = new Dictionary<ResourceType, int>();
 
-        foreach (BaseInventoryCell cell in _inventoryCells)
-        {
-            if (!cell.IsEmpty())
-            {
+        foreach (BaseInventoryCell cell in _inventoryCells) {
+            if (!cell.IsEmpty()) {
                 ResourceType type = cell.ResourceType;
                 int amount = cell.Amount;
-                
-                if (resourcesToTransfer.ContainsKey(type))
-                {
+
+                if (resourcesToTransfer.ContainsKey(type)) {
                     resourcesToTransfer[type] += amount;
                 }
-                else
-                {
+                else {
                     resourcesToTransfer[type] = amount;
                 }
             }
         }
 
-        foreach (var kvp in resourcesToTransfer)
-        {
+        foreach (KeyValuePair<ResourceType, int> kvp in resourcesToTransfer) {
             BaseInventoryManager.Instance.AddResource(kvp.Key, kvp.Value);
         }
 
-        foreach (BaseInventoryCell cell in _inventoryCells)
-        {
+        foreach (BaseInventoryCell cell in _inventoryCells) {
             cell.Clear();
         }
+
+        UpdateInventoryInfoText();
     }
 }
-

@@ -45,7 +45,7 @@ public class BaseInventoryDebugManager : MonoBehaviour
     
     [Header("Transfer Settings")]
     [SerializeField] private bool transferAllResources = true;
-    [SerializeField] private int transferPercentage = 100; // Percentage of resources to transfer (0-100)
+    [SerializeField] private int transferPercentage = 100;
     
     private void Start()
     {
@@ -91,40 +91,46 @@ public class BaseInventoryDebugManager : MonoBehaviour
             return;
         }
         
-        // Set all test resources
-        BaseInventoryManager.Instance.AddResource(ResourceType.Ferrite, testFerrite);
-        BaseInventoryManager.Instance.AddResource(ResourceType.Aether, testAether);
-        BaseInventoryManager.Instance.AddResource(ResourceType.Biomass, testBiomass);
-        BaseInventoryManager.Instance.AddResource(ResourceType.CryoCrystal, testCryoCrystal);
-        BaseInventoryManager.Instance.AddResource(ResourceType.AlloyPlate, testAlloyPlate);
-        BaseInventoryManager.Instance.AddResource(ResourceType.CompositeFrame, testCompositeFrame);
-        BaseInventoryManager.Instance.AddResource(ResourceType.EChip, testEChip);
-        BaseInventoryManager.Instance.AddResource(ResourceType.BioCable, testBioCable);
-        BaseInventoryManager.Instance.AddResource(ResourceType.PowerCube, testPowerCube);
-        BaseInventoryManager.Instance.AddResource(ResourceType.BioFuel, testBioFuel);
-        BaseInventoryManager.Instance.AddResource(ResourceType.CryoGel, testCryoGel);
-        BaseInventoryManager.Instance.AddResource(ResourceType.Solana, testSolana);
-        BaseInventoryManager.Instance.AddResource(ResourceType.Core, testCore);
-        BaseInventoryManager.Instance.AddResource(ResourceType.Ammunition, testAmmunition);
-        BaseInventoryManager.Instance.AddResource(ResourceType.HeavyPlating, testHeavyPlating);
-        BaseInventoryManager.Instance.AddResource(ResourceType.Actuator, testActuator);
-        BaseInventoryManager.Instance.AddResource(ResourceType.GenomeChip, testGenomeChip);
-        BaseInventoryManager.Instance.AddResource(ResourceType.PatchKit, testPatchKit);
-        BaseInventoryManager.Instance.AddResource(ResourceType.SensorUnit, testSensorUnit);
-        BaseInventoryManager.Instance.AddResource(ResourceType.PlasmaCube, testPlasmaCube);
-        BaseInventoryManager.Instance.AddResource(ResourceType.CryoConduit, testCryoConduit);
-        BaseInventoryManager.Instance.AddResource(ResourceType.SeekerMissile, testSeekerMissile);
-        BaseInventoryManager.Instance.AddResource(ResourceType.NexusData, testNexusData);
-        BaseInventoryManager.Instance.AddResource(ResourceType.NeuralMatrix, testNeuralMatrix);
+        int resourceIconCount = 0;
+        if (BaseResourceDataManager.Instance != null)
+        {
+            resourceIconCount = BaseResourceDataManager.Instance.GetResourceIconCount();
+        }
         
-        // Refresh inventory grid to show the new resources
+        if (resourceIconCount == 0)
+        {
+            Debug.LogWarning("BaseInventoryDebugManager: No resource icons found in BaseResourceDataManager");
+            return;
+        }
+        
+        ResourceType[] allResourceTypes = (ResourceType[])Enum.GetValues(typeof(ResourceType));
+        int[] testAmounts = new int[]
+        {
+            testFerrite, testAether, testBiomass, testCryoCrystal,
+            testAlloyPlate, testCompositeFrame, testEChip, testBioCable,
+            testPowerCube, testBioFuel, testCryoGel, testSolana,
+            testCore, testAmmunition, testHeavyPlating, testActuator,
+            testGenomeChip, testPatchKit, testSensorUnit, testPlasmaCube,
+            testCryoConduit, testSeekerMissile, testNexusData, testNeuralMatrix
+        };
+        
+        int countToSet = Mathf.Min(resourceIconCount, allResourceTypes.Length, testAmounts.Length);
+        
+        for (int i = 0; i < countToSet; i++)
+        {
+            if (i < allResourceTypes.Length && i < testAmounts.Length)
+            {
+                BaseInventoryManager.Instance.AddResource(allResourceTypes[i], testAmounts[i]);
+            }
+        }
+        
         BaseInventorySystem inventorySystem = FindFirstObjectByType<BaseInventorySystem>();
         if (inventorySystem != null)
         {
             inventorySystem.RefreshInventoryGrid();
         }
         
-        Debug.Log("BaseInventoryDebugManager: Test resources set");
+        Debug.Log($"BaseInventoryDebugManager: Test resources set for {countToSet} resource types");
     }
     
     private void ClearAllResources()
@@ -137,7 +143,6 @@ public class BaseInventoryDebugManager : MonoBehaviour
         
         BaseInventoryManager.Instance.ClearAllInventory();
         
-        // Refresh inventory grid to clear the display
         BaseInventorySystem inventorySystem = FindFirstObjectByType<BaseInventorySystem>();
         if (inventorySystem != null)
         {
@@ -157,7 +162,6 @@ public class BaseInventoryDebugManager : MonoBehaviour
         
         Dictionary<ResourceType, int> resourcesToTransfer = new Dictionary<ResourceType, int>();
         
-        // First, try to get resources from game scene InventorySystem (inventory cells)
         InventorySystem gameInventory = FindFirstObjectByType<InventorySystem>();
         if (gameInventory != null)
         {
@@ -170,14 +174,12 @@ public class BaseInventoryDebugManager : MonoBehaviour
                 }
             }
             
-            // Clear the game inventory cells after transferring
             if (resourcesToTransfer.Count > 0)
             {
                 gameInventory.ClearAllInventoryCells();
             }
         }
         
-        // Also get resources from ResourceManager (stored resources)
         if (ResourceManager.Instance != null)
         {
             foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
@@ -203,7 +205,6 @@ public class BaseInventoryDebugManager : MonoBehaviour
             return;
         }
         
-        // Transfer resources to base inventory
         int transferredCount = 0;
         int totalTransferred = 0;
         foreach (var kvp in resourcesToTransfer)

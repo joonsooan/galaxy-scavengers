@@ -1708,6 +1708,7 @@ MonoBehaviour:
   moduleGridContainer: {fileID: 136940242}
   sortButton: {fileID: 1898492856}
   unloadToBaseButton: {fileID: 0}
+  inventoryInfoText: {fileID: 2042421201}
   baseInventoryCellPrefab: {fileID: 3842191235755297668, guid: df38616bad9583543888ce713edbcf8e, type: 3}
   moduleInventoryCellPrefab: {fileID: 3842191235755297668, guid: 8cde97c2151af5648a313d92198fbeee, type: 3}
   inventoryWidth: 5
@@ -1744,7 +1745,6 @@ MonoBehaviour:
   recipeGridContainer: {fileID: 136940242}
   moduleGridCellPrefab: {fileID: 3842191235755297668, guid: 212cc6356ff0c2a40b4fb2779b9c11d8, type: 3}
   moduleDetailPanel: {fileID: 1391150705}
-  closeButton: {fileID: 0}
 --- !u!1 &712132662
 GameObject:
   m_ObjectHideFlags: 0
@@ -4783,7 +4783,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1898492855
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5079,7 +5079,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uAE30\uC9C0 \uCC3D\uACE0 (999/999)"
+  m_text: "\uAE30\uC9C0 \uCC3D\uACE0 (35/35)"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1f55a221e169b4b41adc70f72323c1d6, type: 2}
   m_sharedMaterial: {fileID: -731586743875455862, guid: 1f55a221e169b4b41adc70f72323c1d6, type: 2}

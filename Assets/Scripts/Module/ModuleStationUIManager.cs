@@ -59,7 +59,6 @@ public class ModuleStationUIManager : MonoBehaviour
         _currentStation = station;
         _currentData = station.ModuleData;
         
-        // Refresh module grid in inventory system to show current modules
         BaseInventorySystem inventorySystem = FindFirstObjectByType<BaseInventorySystem>();
         if (inventorySystem != null)
         {
@@ -107,7 +106,6 @@ public class ModuleStationUIManager : MonoBehaviour
             return;
         }
         
-        // Ensure grid layout group exists
         GridLayoutGroup gridLayout = recipeGridContainer.GetComponent<GridLayoutGroup>();
         if (gridLayout == null)
         {
@@ -149,12 +147,10 @@ public class ModuleStationUIManager : MonoBehaviour
     
     public void OnModuleCrafted()
     {
-        // Refresh recipe cells to update availability
         foreach (ModuleGridCell cell in _recipeCells)
         {
             if (cell != null && cell.Recipe != null && _currentStation != null)
             {
-                // Could update visual state here if needed
             }
         }
     }

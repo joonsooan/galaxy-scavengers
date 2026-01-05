@@ -24,7 +24,6 @@ public class ModuleStation : MonoBehaviour
         OnModuleStationClicked?.Invoke(this);
     }
     
-    // Check if we have enough resources in base inventory to craft a module
     public bool CanCraftModule(ModuleRecipe recipe)
     {
         if (BaseInventoryManager.Instance == null)
@@ -33,7 +32,6 @@ public class ModuleStation : MonoBehaviour
             return false;
         }
         
-        // Check if we have all required ingredients
         foreach (ResourceCost ingredient in recipe.ingredients)
         {
             int availableAmount = BaseInventoryManager.Instance.GetResourceAmount(ingredient.resourceType);
@@ -46,7 +44,6 @@ public class ModuleStation : MonoBehaviour
         return true;
     }
     
-    // Craft a module using resources from base inventory and add it to base inventory
     public bool CraftModule(ModuleRecipe recipe)
     {
         if (!CanCraftModule(recipe))
@@ -61,18 +58,15 @@ public class ModuleStation : MonoBehaviour
             return false;
         }
         
-        // Consume resources from base inventory
         foreach (ResourceCost ingredient in recipe.ingredients)
         {
             if (!BaseInventoryManager.Instance.RemoveResource(ingredient.resourceType, ingredient.amount))
             {
                 Debug.LogError($"ModuleStation: Failed to remove {ingredient.amount} {ingredient.resourceType} from base inventory");
-                // Rollback would be needed here, but for simplicity we'll just fail
                 return false;
             }
         }
         
-        // Create the module and add it to base inventory
         Module newModule = new Module(recipe);
         BaseInventoryManager.Instance.AddModule(newModule);
         
