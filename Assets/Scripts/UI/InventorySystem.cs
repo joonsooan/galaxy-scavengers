@@ -379,5 +379,52 @@ public class InventorySystem : MonoBehaviour
             _inventoryCells[i].SetResource(cellData[i].type, cellData[i].amount);
         }
     }
+
+    // Get all resources currently in inventory cells (for transfer to base)
+    public Dictionary<ResourceType, int> GetAllResourcesFromInventory()
+    {
+        Dictionary<ResourceType, int> resources = new Dictionary<ResourceType, int>();
+
+        foreach (InventoryCell cell in _inventoryCells)
+        {
+            if (!cell.IsEmpty())
+            {
+                ResourceType type = cell.ResourceType;
+                int amount = cell.Amount;
+
+                if (resources.ContainsKey(type))
+                {
+                    resources[type] += amount;
+                }
+                else
+                {
+                    resources[type] = amount;
+                }
+            }
+        }
+
+        return resources;
+    }
+
+    // Clear all inventory cells (used when transferring to base)
+    public void ClearAllInventoryCells()
+    {
+        foreach (InventoryCell cell in _inventoryCells)
+        {
+            cell.Clear();
+        }
+    }
+
+    // Transfer all resources from inventory to base inventory
+    public void TransferAllToBaseInventory()
+    {
+        if (ResourceTransferManager.Instance == null)
+        {
+            Debug.LogWarning("InventorySystem: ResourceTransferManager not available");
+            return;
+        }
+
+        ResourceTransferManager.Instance.TransferGameInventoryToBase(this);
+    }
 }
 
