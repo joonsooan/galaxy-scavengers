@@ -11,11 +11,13 @@ public class BaseInventorySystem : MonoBehaviour
     [Header("UI References")]
     [SerializeField] private GameObject inventoryPanel;
     [SerializeField] private GameObject inventoryGridContainer;
+    [SerializeField] private GameObject moduleGridContainer;
     [SerializeField] private Button sortButton;
     [SerializeField] private Button unloadToBaseButton;
 
     [Header("Prefabs")]
     [SerializeField] private GameObject baseInventoryCellPrefab;
+    [SerializeField] private GameObject moduleInventoryCellPrefab;
 
     [Header("Inventory Settings")]
     [SerializeField] private int inventoryWidth = 5;
@@ -25,7 +27,9 @@ public class BaseInventorySystem : MonoBehaviour
 
     private readonly Dictionary<ResourceType, int> _maxStackAmounts = new();
     private readonly List<BaseInventoryCell> _inventoryCells = new();
+    private readonly List<ModuleInventoryCell> _moduleCells = new();
     private GridLayoutGroup _inventoryGrid;
+    private GridLayoutGroup _moduleGrid;
 
     private void Awake()
     {
@@ -35,6 +39,7 @@ public class BaseInventorySystem : MonoBehaviour
     private void Start()
     {
         InitializeInventory();
+        InitializeModuleGrid();
         
         if (sortButton != null)
         {
@@ -50,6 +55,46 @@ public class BaseInventorySystem : MonoBehaviour
         {
             HideInventoryPanel();
         }
+        
+        SubscribeToModuleEvents();
+    }
+    
+    private void OnEnable()
+    {
+        SubscribeToModuleEvents();
+    }
+    
+    private void OnDisable()
+    {
+        UnsubscribeFromModuleEvents();
+    }
+    
+    private void SubscribeToModuleEvents()
+    {
+        if (BaseInventoryManager.Instance != null)
+        {
+            BaseInventoryManager.Instance.OnModuleAdded += OnModuleAdded;
+            BaseInventoryManager.Instance.OnModuleRemoved += OnModuleRemoved;
+        }
+    }
+    
+    private void UnsubscribeFromModuleEvents()
+    {
+        if (BaseInventoryManager.Instance != null)
+        {
+            BaseInventoryManager.Instance.OnModuleAdded -= OnModuleAdded;
+            BaseInventoryManager.Instance.OnModuleRemoved -= OnModuleRemoved;
+        }
+    }
+    
+    private void OnModuleAdded(Module module)
+    {
+        LoadModulesToGrid();
+    }
+    
+    private void OnModuleRemoved(Module module)
+    {
+        LoadModulesToGrid();
     }
 
     private void HideInventoryPanel()
@@ -115,6 +160,54 @@ public class BaseInventorySystem : MonoBehaviour
             {
                 // Load base inventory when opening
                 LoadBaseInventoryToCells();
+                RefreshModuleGrid();
+            }
+        }
+    }
+    
+    private void InitializeModuleGrid()
+    {
+        if (moduleGridContainer == null || moduleInventoryCellPrefab == null)
+        {
+            return;
+        }
+        
+        _moduleGrid = moduleGridContainer.GetComponent<GridLayoutGroup>();
+    }
+    
+    private void LoadModulesToGrid()
+    {
+        RefreshModuleGrid();
+    }
+    
+    // Public method to refresh module grid (can be called anytime)
+    public void RefreshModuleGrid()
+    {
+        if (moduleGridContainer == null || moduleInventoryCellPrefab == null || BaseInventoryManager.Instance == null)
+        {
+            return;
+        }
+        
+        // Clear existing module cells
+        foreach (Transform child in moduleGridContainer.transform)
+        {
+            Destroy(child.gameObject);
+        }
+        _moduleCells.Clear();
+        
+        // Get all modules from base inventory
+        List<Module> modules = BaseInventoryManager.Instance.GetAllModules();
+        
+        // Create cells for each module
+        foreach (Module module in modules)
+        {
+            GameObject cellObj = Instantiate(moduleInventoryCellPrefab, moduleGridContainer.transform);
+            ModuleInventoryCell cell = cellObj.GetComponent<ModuleInventoryCell>();
+            if (cell != null)
+            {
+                cell.Initialize(this);
+                cell.SetModule(module);
+                _moduleCells.Add(cell);
             }
         }
     }

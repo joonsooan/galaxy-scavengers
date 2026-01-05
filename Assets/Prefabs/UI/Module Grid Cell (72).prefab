@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 8086736094831419978}
   - component: {fileID: 829497281735151168}
   - component: {fileID: 4405612620870698826}
-  - component: {fileID: 2944262688703406021}
+  - component: {fileID: 4945084072694428998}
   m_Layer: 5
-  m_Name: Inventory Cell (72)
+  m_Name: Module Grid Cell (72)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -122,7 +122,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &2944262688703406021
+--- !u!114 &4945084072694428998
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -131,11 +131,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 3842191235755297668}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0d3615376fd76264a986f08bff89bd8f, type: 3}
+  m_Script: {fileID: 11500000, guid: 777713d8cb45030419e7a3cca12814ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  iconImage: {fileID: 3580741479228333915}
-  amountText: {fileID: 0}
+  moduleIcon: {fileID: 3580741479228333915}
+  moduleNameText: {fileID: 0}
 --- !u!1 &5156968405867722590
 GameObject:
   m_ObjectHideFlags: 0

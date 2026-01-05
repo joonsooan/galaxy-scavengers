@@ -9,8 +9,11 @@ public class BaseInventoryManager : MonoBehaviour
     private const string BaseInventoryPrefix = "BaseInventory_";
     
     private readonly Dictionary<ResourceType, int> _baseInventory = new();
+    private readonly List<Module> _baseModules = new();
 
     public event Action<ResourceType, int> OnResourceChanged;
+    public event Action<Module> OnModuleAdded;
+    public event Action<Module> OnModuleRemoved;
 
     private void Awake()
     {
@@ -28,13 +31,11 @@ public class BaseInventoryManager : MonoBehaviour
 
     private void InitializeInventory()
     {
-        // Initialize all resource types to 0
         foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
         {
             _baseInventory[type] = 0;
         }
         
-        // Load saved data
         LoadInventory();
     }
 
@@ -97,7 +98,7 @@ public class BaseInventoryManager : MonoBehaviour
 
     private void SaveResource(ResourceType type)
     {
-        string key = BaseInventoryPrefix + type.ToString();
+        string key = BaseInventoryPrefix + type;
         PlayerPrefs.SetInt(key, _baseInventory[type]);
         PlayerPrefs.Save();
     }
@@ -106,7 +107,7 @@ public class BaseInventoryManager : MonoBehaviour
     {
         foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
         {
-            string key = BaseInventoryPrefix + type.ToString();
+            string key = BaseInventoryPrefix + type;
             if (PlayerPrefs.HasKey(key))
             {
                 _baseInventory[type] = PlayerPrefs.GetInt(key);
@@ -122,16 +123,45 @@ public class BaseInventoryManager : MonoBehaviour
         }
     }
 
-    // Clear all base inventory (for testing/reset purposes)
     public void ClearAllInventory()
     {
         foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
         {
             _baseInventory[type] = 0;
-            string key = BaseInventoryPrefix + type.ToString();
+            string key = BaseInventoryPrefix + type;
             PlayerPrefs.DeleteKey(key);
         }
         PlayerPrefs.Save();
+    }
+    
+    public void AddModule(Module module)
+    {
+        if (module == null) return;
+        
+        _baseModules.Add(module);
+        OnModuleAdded?.Invoke(module);
+    }
+    
+    public bool RemoveModule(Module module)
+    {
+        if (module == null) return false;
+        
+        bool removed = _baseModules.Remove(module);
+        if (removed)
+        {
+            OnModuleRemoved?.Invoke(module);
+        }
+        return removed;
+    }
+    
+    public List<Module> GetAllModules()
+    {
+        return new List<Module>(_baseModules);
+    }
+    
+    public int GetModuleCount()
+    {
+        return _baseModules.Count;
     }
 }
 
