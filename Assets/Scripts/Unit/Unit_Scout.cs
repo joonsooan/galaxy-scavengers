@@ -12,6 +12,7 @@ public class Unit_Scout : UnitBase
     private Vector3 _homePosition;
     private Coroutine _beaconCoroutine;
     private bool _isReturningHome;
+    private UnitSpriteController _spriteController;
     
     public bool IsAssignedToBeacon => _assignedBeacon != null || _assignedWaypointGroup != null;
     
@@ -29,6 +30,8 @@ public class Unit_Scout : UnitBase
         {
             _homePosition = mainStructure.transform.position;
         }
+        
+        _spriteController = GetComponent<UnitSpriteController>();
     }
     
     private void Update()
@@ -36,6 +39,13 @@ public class Unit_Scout : UnitBase
         if (currentState == UnitState.Moving)
         {
             CheckBeaconArrival();
+            
+            // Update sprite direction based on movement
+            if (unitMovement != null && _spriteController != null)
+            {
+                Vector3 moveDir = unitMovement.GetMoveDirection();
+                _spriteController.UpdateSpriteDirection(moveDir);
+            }
         }
     }
     
