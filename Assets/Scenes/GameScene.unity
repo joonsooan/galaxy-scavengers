@@ -5325,6 +5325,74 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!1 &436789222
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 436789224}
+  - component: {fileID: 436789223}
+  m_Layer: 0
+  m_Name: _ResourceUIManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &436789223
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 436789222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ef83ea8e49dd044caca28653f378ef5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ferritePanel: {fileID: 2119646177}
+  aetherPanel: {fileID: 524463979}
+  biomassPanel: {fileID: 482755040}
+  cryoCrystalPanel: {fileID: 727194034}
+  alloyPlatePanel: {fileID: 404102868}
+  compositeFramePanel: {fileID: 1381910515}
+  eChipPanel: {fileID: 693126206}
+  bioCablePanel: {fileID: 1325463051}
+  powerCubePanel: {fileID: 1446259204}
+  bioFuelPanel: {fileID: 1792094202}
+  cryoGelPanel: {fileID: 499416618}
+  solanaPanel: {fileID: 1024473205}
+  corePanel: {fileID: 854884315}
+  ammunitionPanel: {fileID: 9762583}
+  heavyPlatingPanel: {fileID: 0}
+  actuatorPanel: {fileID: 0}
+  genomeChipPanel: {fileID: 0}
+  patchKitPanel: {fileID: 0}
+  sensorUnitPanel: {fileID: 0}
+  plasmaCubePanel: {fileID: 0}
+  cryoConduitPanel: {fileID: 0}
+  seekerMissilePanel: {fileID: 0}
+  nexusDataPanel: {fileID: 0}
+  neuralMatrixPanel: {fileID: 0}
+--- !u!4 &436789224
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 436789222}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &438974764
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6095,6 +6163,51 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8588832122909675608, guid: 5a38edecd5297e84d9adb4995b37971b, type: 3}
   m_PrefabInstance: {fileID: 491759634}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &492084325
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 492084327}
+  - component: {fileID: 492084326}
+  m_Layer: 0
+  m_Name: _QuestDataManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &492084326
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 492084325}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 678d34f5ad802274da362d7d8edce2cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  allQuests: []
+--- !u!4 &492084327
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 492084325}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &492095944
 GameObject:
   m_ObjectHideFlags: 0
@@ -6981,6 +7094,53 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 542929657}
   m_CullTransparentMesh: 1
+--- !u!1 &545757329
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 545757331}
+  - component: {fileID: 545757330}
+  m_Layer: 0
+  m_Name: _QuestUIManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &545757330
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 545757329}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 205a8679e58053847a2035dbbea20344, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  questInfoPanel: {fileID: 1213770155}
+  questCellPrefab: {fileID: 8886172208372129132, guid: c5b8f6229c1aa904b88ac940426139a7, type: 3}
+  questCellContentParent: {fileID: 151815920}
+--- !u!4 &545757331
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 545757329}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &556482167
 GameObject:
   m_ObjectHideFlags: 0
@@ -23550,6 +23710,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 865984211}
   m_CullTransparentMesh: 1
+--- !u!1 &871504945
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 871504947}
+  - component: {fileID: 871504946}
+  m_Layer: 0
+  m_Name: _ResourceDataManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &871504946
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 871504945}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d08d7e6fe10700846b15f9f202179f24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &871504947
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 871504945}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &877388914
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -27059,7 +27263,6 @@ MonoBehaviour:
   questInfoPanel: {fileID: 1213770155}
   questCellPrefab: {fileID: 8886172208372129132, guid: c5b8f6229c1aa904b88ac940426139a7, type: 3}
   questCellContentParent: {fileID: 151815920}
-  allQuests: []
 --- !u!4 &1084632212
 Transform:
   m_ObjectHideFlags: 0
@@ -37748,30 +37951,6 @@ MonoBehaviour:
   - resourceType: 3
     amountToMine: 10
     timeToMinePerUnit: 2
-  ferritePanel: {fileID: 2119646177}
-  aetherPanel: {fileID: 524463979}
-  biomassPanel: {fileID: 482755040}
-  cryoCrystalPanel: {fileID: 727194034}
-  alloyPlatePanel: {fileID: 404102868}
-  compositeFramePanel: {fileID: 1381910515}
-  eChipPanel: {fileID: 693126206}
-  bioCablePanel: {fileID: 1325463051}
-  powerCubePanel: {fileID: 1446259204}
-  bioFuelPanel: {fileID: 1792094202}
-  cryoGelPanel: {fileID: 499416618}
-  solanaPanel: {fileID: 1024473205}
-  corePanel: {fileID: 854884315}
-  ammunitionPanel: {fileID: 9762583}
-  heavyPlatingPanel: {fileID: 0}
-  actuatorPanel: {fileID: 0}
-  genomeChipPanel: {fileID: 0}
-  patchKitPanel: {fileID: 0}
-  sensorUnitPanel: {fileID: 0}
-  plasmaCubePanel: {fileID: 0}
-  cryoConduitPanel: {fileID: 0}
-  seekerMissilePanel: {fileID: 0}
-  nexusDataPanel: {fileID: 0}
-  neuralMatrixPanel: {fileID: 0}
 --- !u!4 &1995619767
 Transform:
   m_ObjectHideFlags: 0
@@ -39962,12 +40141,16 @@ SceneRoots:
   - {fileID: 528363157}
   - {fileID: 1022667848}
   - {fileID: 1995619767}
+  - {fileID: 871504947}
+  - {fileID: 436789224}
   - {fileID: 1272048963}
   - {fileID: 1564890046}
   - {fileID: 122526417}
   - {fileID: 1969397376}
   - {fileID: 1201997229}
   - {fileID: 1084632212}
+  - {fileID: 492084327}
+  - {fileID: 545757331}
   - {fileID: 1355668859}
   - {fileID: 1174281797}
   - {fileID: 1538527376}

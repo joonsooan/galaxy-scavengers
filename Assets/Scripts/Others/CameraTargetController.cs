@@ -54,6 +54,13 @@ public class CameraTargetController : MonoBehaviour
         _defaultPanSpeed = panSpeed;
         _defaultEdgePanSpeed = edgePanSpeed;
 
+        if (zoomCameras == null || zoomCameras.Length == 0) {
+            Debug.LogWarning("CameraTargetController: zoomCameras array is null or empty. Camera controls will not work.");
+            _zoomLevelPositions = new Vector3[0];
+            _zoomLevelInitialized = new bool[0];
+            return;
+        }
+
         _zoomLevelPositions = new Vector3[zoomCameras.Length];
         _zoomLevelInitialized = new bool[zoomCameras.Length];
         for (int i = 0; i < _zoomLevelPositions.Length; i++) {
@@ -274,6 +281,8 @@ public class CameraTargetController : MonoBehaviour
 
     private void WarpCameras(Vector3 deltaPos)
     {
+        if (zoomCameras == null) return;
+        
         foreach (CinemachineCamera cam in zoomCameras) {
             if (cam != null) {
                 cam.OnTargetObjectWarped(transform, deltaPos);
@@ -283,6 +292,8 @@ public class CameraTargetController : MonoBehaviour
 
     private void UpdateActiveCamera()
     {
+        if (zoomCameras == null || zoomCameras.Length == 0) return;
+        
         for (int i = 0; i < zoomCameras.Length; i++) {
             if (zoomCameras[i] == null) continue;
             zoomCameras[i].Priority = i == _currentZoomIndex ? 20 : 10;
