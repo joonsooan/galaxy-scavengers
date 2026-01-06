@@ -3344,7 +3344,7 @@ MonoBehaviour:
   resourceTilemap: {fileID: 2116328957}
   resourceSettings:
   - resourceType: 0
-    resourceRuleTile: {fileID: 11400000, guid: 32452b7e211c85f4bbf53a86126194dc, type: 2}
+    resourceRuleTile: {fileID: 11400000, guid: 1754c687980118f429cc381324160252, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: 9e542c61b3b4f0745ab05a9dadeccb8f, type: 3}
     spawnFrequencyPercent: 60
     baseRichness: 10
@@ -3354,12 +3354,12 @@ MonoBehaviour:
     spawnFrequencyPercent: 25
     baseRichness: 10
   - resourceType: 2
-    resourceRuleTile: {fileID: 11400000, guid: be7bd1724c206684eb9815e8aa852d8d, type: 2}
+    resourceRuleTile: {fileID: 11400000, guid: 54a4f32127477df4ca5f86948cfc1c86, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: 1a1e81616dceb074597d502c9527fe82, type: 3}
     spawnFrequencyPercent: 10
     baseRichness: 10
   - resourceType: 3
-    resourceRuleTile: {fileID: 11400000, guid: b06893a2bc49d234fa3aec5c5dd59abe, type: 2}
+    resourceRuleTile: {fileID: 11400000, guid: 126c07ed761759f4a8ef513be9dbd6aa, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: 787e38d9be4ec414aad7efd4b33c7a60, type: 3}
     spawnFrequencyPercent: 5
     baseRichness: 10
@@ -6412,7 +6412,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 662.501
+  orthographic size: 11.25
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
