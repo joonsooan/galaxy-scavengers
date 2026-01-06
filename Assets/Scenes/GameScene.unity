@@ -3175,8 +3175,8 @@ GameObject:
   m_Component:
   - component: {fileID: 313771326}
   - component: {fileID: 313771327}
-  - component: {fileID: 313771329}
   - component: {fileID: 313771331}
+  - component: {fileID: 313771329}
   - component: {fileID: 313771328}
   - component: {fileID: 313771330}
   m_Layer: 0
@@ -5303,7 +5303,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 436789224}
-  - component: {fileID: 436789223}
   - component: {fileID: 436789225}
   m_Layer: 0
   m_Name: _ResourceDataManager
@@ -5312,42 +5311,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &436789223
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 436789222}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6ef83ea8e49dd044caca28653f378ef5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ferritePanel: {fileID: 2119646177}
-  aetherPanel: {fileID: 524463979}
-  biomassPanel: {fileID: 482755040}
-  cryoCrystalPanel: {fileID: 727194034}
-  alloyPlatePanel: {fileID: 404102868}
-  compositeFramePanel: {fileID: 1381910515}
-  eChipPanel: {fileID: 693126206}
-  bioCablePanel: {fileID: 1325463051}
-  powerCubePanel: {fileID: 1446259204}
-  bioFuelPanel: {fileID: 1792094202}
-  cryoGelPanel: {fileID: 499416618}
-  solanaPanel: {fileID: 1024473205}
-  corePanel: {fileID: 854884315}
-  ammunitionPanel: {fileID: 9762583}
-  heavyPlatingPanel: {fileID: 0}
-  actuatorPanel: {fileID: 0}
-  genomeChipPanel: {fileID: 0}
-  patchKitPanel: {fileID: 0}
-  sensorUnitPanel: {fileID: 0}
-  plasmaCubePanel: {fileID: 0}
-  cryoConduitPanel: {fileID: 0}
-  seekerMissilePanel: {fileID: 0}
-  nexusDataPanel: {fileID: 0}
-  neuralMatrixPanel: {fileID: 0}
 --- !u!4 &436789224
 Transform:
   m_ObjectHideFlags: 0
@@ -7040,7 +7003,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 545757331}
-  - component: {fileID: 545757330}
   - component: {fileID: 545757332}
   m_Layer: 0
   m_Name: _QuestDataManager
@@ -7049,21 +7011,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &545757330
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 545757329}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 205a8679e58053847a2035dbbea20344, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  questInfoPanel: {fileID: 1213770155}
-  questCellPrefab: {fileID: 8886172208372129132, guid: c5b8f6229c1aa904b88ac940426139a7, type: 3}
-  questCellContentParent: {fileID: 151815920}
 --- !u!4 &545757331
 Transform:
   m_ObjectHideFlags: 0
@@ -33068,6 +33015,8 @@ GameObject:
   - component: {fileID: 1538527380}
   - component: {fileID: 1538527381}
   - component: {fileID: 1538527382}
+  - component: {fileID: 1538527383}
+  - component: {fileID: 1538527384}
   m_Layer: 0
   m_Name: _UIManager
   m_TagString: Untagged
@@ -33195,6 +33144,57 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   beaconPrefab: {fileID: 5453999205571622832, guid: 22a25dfc62db2d642907e974ab0b5935, type: 3}
   beaconParent: {fileID: 45027564}
+--- !u!114 &1538527383
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1538527375}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ef83ea8e49dd044caca28653f378ef5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ferritePanel: {fileID: 1089803132}
+  aetherPanel: {fileID: 524463979}
+  biomassPanel: {fileID: 482755040}
+  cryoCrystalPanel: {fileID: 727194034}
+  alloyPlatePanel: {fileID: 404102868}
+  compositeFramePanel: {fileID: 1381910515}
+  eChipPanel: {fileID: 693126206}
+  bioCablePanel: {fileID: 1325463051}
+  powerCubePanel: {fileID: 1446259204}
+  bioFuelPanel: {fileID: 1792094202}
+  cryoGelPanel: {fileID: 499416618}
+  solanaPanel: {fileID: 1024473205}
+  corePanel: {fileID: 854884315}
+  ammunitionPanel: {fileID: 9762583}
+  heavyPlatingPanel: {fileID: 0}
+  actuatorPanel: {fileID: 0}
+  genomeChipPanel: {fileID: 0}
+  patchKitPanel: {fileID: 0}
+  sensorUnitPanel: {fileID: 0}
+  plasmaCubePanel: {fileID: 0}
+  cryoConduitPanel: {fileID: 0}
+  seekerMissilePanel: {fileID: 0}
+  nexusDataPanel: {fileID: 0}
+  neuralMatrixPanel: {fileID: 0}
+--- !u!114 &1538527384
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1538527375}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 205a8679e58053847a2035dbbea20344, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  questInfoPanel: {fileID: 1213770155}
+  questCellPrefab: {fileID: 8886172208372129132, guid: c5b8f6229c1aa904b88ac940426139a7, type: 3}
+  questCellContentParent: {fileID: 151815920}
 --- !u!1 &1539729019
 GameObject:
   m_ObjectHideFlags: 0
@@ -37679,10 +37679,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 163725887cf43a3418506d1a895ccbed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ferriteInitialAmount: 2000
-  aetherInitialAmount: 1000
-  biomassInitialAmount: 1000
-  cryoCrystalInitialAmount: 1000
+  ferriteInitialAmount: 1000
+  aetherInitialAmount: 500
+  biomassInitialAmount: 500
+  cryoCrystalInitialAmount: 500
   alloyPlateInitialAmount: 0
   compositeFrameInitialAmount: 0
   eChipInitialAmount: 0
