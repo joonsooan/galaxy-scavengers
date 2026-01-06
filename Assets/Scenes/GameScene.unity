@@ -3282,8 +3282,8 @@ MonoBehaviour:
   wallTile: {fileID: 11400000, guid: dba3271a3711e6c46ae4842f14013bfb, type: 2}
   enemyHomeTile: {fileID: 11400000, guid: a1537402c07c3394592fb0ee3ff9b0b7, type: 2}
   enemyTerritoryTile: {fileID: 11400000, guid: cd3ec6303b4b8754fb684445a525d2b4, type: 2}
-  width: 192
-  height: 192
+  width: 224
+  height: 224
   useProceduralTerrain: 1
   seed: 0
   randomSeed: 1
@@ -3295,7 +3295,7 @@ MonoBehaviour:
   gradientStrength: 0.5
   gradientCenter: {x: 0.5, y: 0.5}
   falloffExponent: 1.6
-  lowWallThreshold: 0.44
+  lowWallThreshold: 0.45
   highWallThreshold: 0.6
   enableCenterCircle: 1
   centerCircleRadius: 10
@@ -3367,8 +3367,8 @@ MonoBehaviour:
   borderPadding: 10
   minCircleRadius: 1
   maxCircleRadius: 2.5
-  circleSpawnPercentage: 40
-  maxCircles: 60
+  circleSpawnPercentage: 30
+  maxCircles: 45
   maxResourcesPerCircle: 25
   minSpawnRadius: 8
   startingAreaRadius: 12
