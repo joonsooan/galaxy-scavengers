@@ -1,16 +1,16 @@
 fileFormatVersion: 2
-guid: 41d81b85481201c44bb0e26872455946
+guid: ce2426aeab4bce14c87c148ad9dafe5b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4992164939788663360
-    second: mining_2_0
+      213: 7260633080061073943
+    second: unit-processor-idle-down_0
   - first:
-      213: 3751741419470782174
-    second: mining_2_1
+      213: -4809275652316297177
+    second: unit-processor-idle-down_1
   - first:
-      213: 8603391338363840403
-    second: mining_2_2
+      213: 3221110418805894947
+    second: other
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -102,24 +102,11 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: WebGL
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: mining_2_0
+      name: unit-processor-idle-down_0
       rect:
         serializedVersion: 2
         x: 0
@@ -132,16 +119,16 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 04a3348209bb74540800000000000000
-      internalID: 4992164939788663360
+      spriteID: 6de9ccca47da369478abaa5597a995d7
+      internalID: 7260633080061073943
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: mining_2_1
+      name: unit-processor-idle-down_1
       rect:
         serializedVersion: 2
         x: 17
@@ -154,32 +141,10 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: edefca481fcd01430800000000000000
-      internalID: 3751741419470782174
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: mining_2_2
-      rect:
-        serializedVersion: 2
-        x: 34
-        y: 0
-        width: 16
-        height: 16
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 39769dae6d2656770800000000000000
-      internalID: 8603391338363840403
+      spriteID: e7c5acea93568eb49b37c8e637d32ce3
+      internalID: -4809275652316297177
       vertices: []
       indices: 
       edges: []
@@ -188,7 +153,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 7b05e8ec0ea283a448fc2740c5f6f504
+    spriteID: a57b7c99c66afdc4091c1f5b888a7985
     internalID: 0
     vertices: []
     indices: 
@@ -198,9 +163,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      mining_2_0: 4992164939788663360
-      mining_2_1: 3751741419470782174
-      mining_2_2: 8603391338363840403
+      unit-processor-idle-down_0: 7260633080061073943
+      unit-processor-idle-down_1: -4809275652316297177
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

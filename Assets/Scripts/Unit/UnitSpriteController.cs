@@ -13,6 +13,8 @@ public class UnitSpriteController : MonoBehaviour
     private static readonly int IsMovingHash = Animator.StringToHash("IsMoving");
     private static readonly int IsMiningHash = Animator.StringToHash("IsMining");
     private static readonly int IsConstructingHash = Animator.StringToHash("IsConstructing");
+    private static readonly int IsProcessingHash = Animator.StringToHash("IsProcessing");
+    private static readonly int IsPatrollingHash = Animator.StringToHash("IsPatrolling");
     private static readonly int CargoFillHash = Animator.StringToHash("CargoFill");
     
     private Vector2 _lastDirection = Vector2.down;
@@ -78,7 +80,12 @@ public class UnitSpriteController : MonoBehaviour
         _lastDirectionUpdateTime = Time.time;
     }
     
-    public void UpdateAnimationState(UnitBase.UnitState currentState, bool? isMining = null, bool? isConstructing = null)
+    public void UpdateAnimationState(
+        UnitBase.UnitState currentState, 
+        bool? isMining = null, 
+        bool? isConstructing = null,
+        bool? isProcessing = null,
+        bool? isPatrolling = null)
     {
         bool isMoving = currentState == UnitBase.UnitState.Moving || currentState == UnitBase.UnitState.ReturningToStorage;
         
@@ -100,6 +107,18 @@ public class UnitSpriteController : MonoBehaviour
         if (isConstructing.HasValue)
         {
             _animator.SetBool(IsConstructingHash, isConstructing.Value);
+        }
+        
+        // Only update processing state if explicitly provided (for processor drones)
+        if (isProcessing.HasValue)
+        {
+            _animator.SetBool(IsProcessingHash, isProcessing.Value);
+        }
+        
+        // Only update patrolling state if explicitly provided (for scouts)
+        if (isPatrolling.HasValue)
+        {
+            _animator.SetBool(IsPatrollingHash, isPatrolling.Value);
         }
     }
     

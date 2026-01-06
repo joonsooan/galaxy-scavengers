@@ -77,7 +77,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: IsPatrolling
+    m_ConditionEvent: IsProcessing
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 609178101605414255}
@@ -102,7 +102,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 2
-    m_ConditionEvent: IsPatrolling
+    m_ConditionEvent: IsProcessing
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -9071251822377639911}
@@ -127,7 +127,7 @@ BlendTree:
   m_Name: Idle
   m_Childs:
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: cdc319f80300c584092cf1697c95bc78, type: 2}
+    m_Motion: {fileID: 7400000, guid: 0d6b0c3d99c1cf94684ff72fc9050f72, type: 2}
     m_Threshold: 0
     m_Position: {x: 0, y: 1}
     m_TimeScale: 1
@@ -135,7 +135,7 @@ BlendTree:
     m_DirectBlendParameter: InputX
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: fef70615264e46548a1dd9b2802b7fba, type: 2}
+    m_Motion: {fileID: 7400000, guid: 28b5c4575d58175498699e3bb24b71df, type: 2}
     m_Threshold: 0.33333334
     m_Position: {x: 0, y: -1}
     m_TimeScale: 1
@@ -143,7 +143,7 @@ BlendTree:
     m_DirectBlendParameter: InputX
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: d7853c11dabc70c4a93f7bc7c848e4be, type: 2}
+    m_Motion: {fileID: 7400000, guid: fbbbe24c9a88e5849aebfa50dd4f85ad, type: 2}
     m_Threshold: 0.6666667
     m_Position: {x: 1, y: 0}
     m_TimeScale: 1
@@ -151,7 +151,7 @@ BlendTree:
     m_DirectBlendParameter: InputX
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 525234e1cb77f424e9569d0edfc46a8d, type: 2}
+    m_Motion: {fileID: 7400000, guid: 68df1e87b14a2e44eac56dab22b1a1ac, type: 2}
     m_Threshold: 1
     m_Position: {x: -1, y: 0}
     m_TimeScale: 1
@@ -199,7 +199,7 @@ BlendTree:
   m_Name: Moving
   m_Childs:
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: fe13f783cce75714fb5ad504af8237a6, type: 2}
+    m_Motion: {fileID: 7400000, guid: cdc319f80300c584092cf1697c95bc78, type: 2}
     m_Threshold: 0
     m_Position: {x: 0, y: 1}
     m_TimeScale: 1
@@ -207,7 +207,7 @@ BlendTree:
     m_DirectBlendParameter: InputX
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 5c9ec421f3f52534f9c7b80c4c1d6a93, type: 2}
+    m_Motion: {fileID: 7400000, guid: fef70615264e46548a1dd9b2802b7fba, type: 2}
     m_Threshold: 0.33333334
     m_Position: {x: 0, y: -1}
     m_TimeScale: 1
@@ -215,7 +215,7 @@ BlendTree:
     m_DirectBlendParameter: InputX
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: b51ead79bc6e6fe4c9464b4a736e3e1b, type: 2}
+    m_Motion: {fileID: 7400000, guid: d7853c11dabc70c4a93f7bc7c848e4be, type: 2}
     m_Threshold: 0.6666667
     m_Position: {x: 1, y: 0}
     m_TimeScale: 1
@@ -223,7 +223,7 @@ BlendTree:
     m_DirectBlendParameter: InputX
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 92f002fc4bb4cb14fbbfc43260f5ca40, type: 2}
+    m_Motion: {fileID: 7400000, guid: 525234e1cb77f424e9569d0edfc46a8d, type: 2}
     m_Threshold: 1
     m_Position: {x: -1, y: 0}
     m_TimeScale: 1
@@ -271,7 +271,7 @@ AnimatorController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Unit_Scout
+  m_Name: Unit_Processor
   serializedVersion: 5
   m_AnimatorParameters:
   - m_Name: IsMoving
@@ -287,6 +287,12 @@ AnimatorController:
     m_DefaultBool: 0
     m_Controller: {fileID: 9100000}
   - m_Name: IsPatrolling
+    m_Type: 4
+    m_DefaultFloat: 0
+    m_DefaultInt: 0
+    m_DefaultBool: 0
+    m_Controller: {fileID: 9100000}
+  - m_Name: IsProcessing
     m_Type: 4
     m_DefaultFloat: 0
     m_DefaultInt: 0
@@ -330,7 +336,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Patrolling
+  m_Name: Processing
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
@@ -388,7 +394,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 1
-    m_ConditionEvent: IsPatrolling
+    m_ConditionEvent: IsProcessing
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 609178101605414255}
@@ -410,10 +416,10 @@ BlendTree:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Patrolling
+  m_Name: Processing
   m_Childs:
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: fe13f783cce75714fb5ad504af8237a6, type: 2}
+    m_Motion: {fileID: 7400000, guid: d4a7a54129561b543bafd99d23e61e5c, type: 2}
     m_Threshold: 0
     m_Position: {x: 0, y: 1}
     m_TimeScale: 1
@@ -421,7 +427,7 @@ BlendTree:
     m_DirectBlendParameter: InputX
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 5c9ec421f3f52534f9c7b80c4c1d6a93, type: 2}
+    m_Motion: {fileID: 7400000, guid: 91407f5d55730e749a36ad89b17a701f, type: 2}
     m_Threshold: 0.11111113
     m_Position: {x: 0, y: -1}
     m_TimeScale: 1
@@ -429,7 +435,7 @@ BlendTree:
     m_DirectBlendParameter: InputX
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: b51ead79bc6e6fe4c9464b4a736e3e1b, type: 2}
+    m_Motion: {fileID: 7400000, guid: 66ca34e49074c7341ba2ef07e21646f9, type: 2}
     m_Threshold: 0.22222225
     m_Position: {x: 1, y: 0}
     m_TimeScale: 1
@@ -437,7 +443,7 @@ BlendTree:
     m_DirectBlendParameter: InputX
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 92f002fc4bb4cb14fbbfc43260f5ca40, type: 2}
+    m_Motion: {fileID: 7400000, guid: 8d53dc90c636a4e4f9701eda6defaf2e, type: 2}
     m_Threshold: 0.33333337
     m_Position: {x: -1, y: 0}
     m_TimeScale: 1
@@ -460,7 +466,7 @@ AnimatorStateTransition:
   m_Name: 
   m_Conditions:
   - m_ConditionMode: 2
-    m_ConditionEvent: IsPatrolling
+    m_ConditionEvent: IsProcessing
     m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 2622871540669941131}
