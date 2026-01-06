@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Unit_Scout
   m_EditorClassIdentifier: 
   unitName: "\uC815\uCC30 \uC720\uB2DB"
-  unitIcon: {fileID: 4992164939788663360, guid: 41d81b85481201c44bb0e26872455946, type: 3}
+  unitIcon: {fileID: -6290779443186176248, guid: 39c30738099c3424c80736d4163d9dbc, type: 3}
   unitPrefab: {fileID: 6649466925040614564, guid: 5244335d034f9eb4aa9a1298502258db, type: 3}
   productionTime: 3
   productionCosts:
