@@ -13,7 +13,7 @@ public class LaunchUIController : MonoBehaviour
 
     [Header("Launch Settings")]
     [SerializeField] private float countdownDurationSeconds = 10f;
-    [SerializeField] private string targetSceneName = "TitleScene";
+    [SerializeField] private string targetSceneName = "BaseScene";
 
     private bool _isCountingDown;
     private Coroutine _countdownCoroutine;

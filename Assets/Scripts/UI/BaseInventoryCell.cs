@@ -82,9 +82,10 @@ public class BaseInventoryCell : MonoBehaviour, IPointerClickHandler
     
     private Sprite GetResourceIcon()
     {
-        if (BaseResourceDataManager.Instance != null)
+        BaseResourceDataManager resourceDataManager = FindFirstObjectByType<BaseResourceDataManager>();
+        if (resourceDataManager != null)
         {
-            Sprite icon = BaseResourceDataManager.Instance.GetResourceIcon(_resourceType);
+            Sprite icon = resourceDataManager.GetResourceIcon(_resourceType);
             if (icon != null)
             {
                 return icon;

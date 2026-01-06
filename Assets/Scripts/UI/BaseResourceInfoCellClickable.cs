@@ -42,9 +42,10 @@ public class BaseResourceInfoCellClickable : MonoBehaviour, IPointerClickHandler
     private Sprite GetResourceIcon()
     {
         // Try BaseResourceDataManager first (for base scene)
-        if (BaseResourceDataManager.Instance != null)
+        BaseResourceDataManager resourceDataManager = FindFirstObjectByType<BaseResourceDataManager>();
+        if (resourceDataManager != null)
         {
-            return BaseResourceDataManager.Instance.GetResourceIcon(_resourceType);
+            return resourceDataManager.GetResourceIcon(_resourceType);
         }
         
         // Fallback to ResourceManager (for game scene compatibility)
@@ -74,7 +75,8 @@ public class BaseResourceInfoCellClickable : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (_baseInventorySystem == null || BaseInventoryManager.Instance == null)
+        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (_baseInventorySystem == null || inventoryManager == null)
         {
             return;
         }

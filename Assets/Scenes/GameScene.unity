@@ -33108,7 +33108,7 @@ MonoBehaviour:
   countdownPanel: {fileID: 542929657}
   countdownText: {fileID: 1011157122}
   countdownDurationSeconds: 10
-  targetSceneName: TitleScene
+  targetSceneName: BaseScene
 --- !u!114 &1538527380
 MonoBehaviour:
   m_ObjectHideFlags: 0

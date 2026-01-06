@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class BaseInventoryManager : MonoBehaviour
 {
-    public static BaseInventoryManager Instance { get; private set; }
-
     private const string BaseInventoryPrefix = "BaseInventory_";
     
     private readonly Dictionary<ResourceType, int> _baseInventory = new();
@@ -15,18 +13,9 @@ public class BaseInventoryManager : MonoBehaviour
     public event Action<Module> OnModuleAdded;
     public event Action<Module> OnModuleRemoved;
 
-    private void Awake()
+    private void Start()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-            InitializeInventory();
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        InitializeInventory();
     }
 
     private void InitializeInventory()

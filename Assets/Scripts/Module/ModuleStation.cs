@@ -26,7 +26,8 @@ public class ModuleStation : MonoBehaviour
     
     public bool CanCraftModule(ModuleRecipe recipe)
     {
-        if (BaseInventoryManager.Instance == null)
+        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (inventoryManager == null)
         {
             Debug.LogWarning("ModuleStation: BaseInventoryManager not available");
             return false;
@@ -34,7 +35,7 @@ public class ModuleStation : MonoBehaviour
         
         foreach (ResourceCost ingredient in recipe.ingredients)
         {
-            int availableAmount = BaseInventoryManager.Instance.GetResourceAmount(ingredient.resourceType);
+            int availableAmount = inventoryManager.GetResourceAmount(ingredient.resourceType);
             if (availableAmount < ingredient.amount)
             {
                 return false;
@@ -52,7 +53,8 @@ public class ModuleStation : MonoBehaviour
             return false;
         }
         
-        if (BaseInventoryManager.Instance == null)
+        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (inventoryManager == null)
         {
             Debug.LogWarning("ModuleStation: BaseInventoryManager not available");
             return false;
@@ -60,7 +62,7 @@ public class ModuleStation : MonoBehaviour
         
         foreach (ResourceCost ingredient in recipe.ingredients)
         {
-            if (!BaseInventoryManager.Instance.RemoveResource(ingredient.resourceType, ingredient.amount))
+            if (!inventoryManager.RemoveResource(ingredient.resourceType, ingredient.amount))
             {
                 Debug.LogError($"ModuleStation: Failed to remove {ingredient.amount} {ingredient.resourceType} from base inventory");
                 return false;
@@ -68,7 +70,7 @@ public class ModuleStation : MonoBehaviour
         }
         
         Module newModule = new Module(recipe);
-        BaseInventoryManager.Instance.AddModule(newModule);
+        inventoryManager.AddModule(newModule);
         
         Debug.Log($"ModuleStation: Successfully crafted module {newModule.moduleName} (ID: {newModule.moduleId}) and added to base inventory");
         

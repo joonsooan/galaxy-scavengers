@@ -183,7 +183,7 @@ public class MapObjectSpawner : MonoBehaviour
             
             OnAllObjectsSpawned.Invoke();
             
-            Debug.Log($"Spawned {_pendingResourceNodes.Count} resource nodes. Created {resourceCircles.Count} resource circles.");
+            // Debug.Log($"Spawned {_pendingResourceNodes.Count} resource nodes. Created {resourceCircles.Count} resource circles.");
         }
         finally
         {

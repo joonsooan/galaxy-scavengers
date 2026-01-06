@@ -10,7 +10,7 @@ public class BtnManager_Title : MonoBehaviour
     {
         if (startButton != null)
         {
-            startButton.onClick.AddListener(MapSelectScene);
+            startButton.onClick.AddListener(BaseScene);
         }
         
         if (quitButton != null)
@@ -23,7 +23,7 @@ public class BtnManager_Title : MonoBehaviour
     {
         if (startButton != null)
         {
-            startButton.onClick.RemoveListener(MapSelectScene);
+            startButton.onClick.RemoveListener(BaseScene);
         }
         if (quitButton != null)
         {
@@ -31,9 +31,9 @@ public class BtnManager_Title : MonoBehaviour
         }
     }
 
-    private void MapSelectScene()
+    private void BaseScene()
     {
-        SceneLoader.Instance.LoadMapSelectScene();
+        SceneLoader.Instance.LoadBaseScene();
     }
 
     private void QuitGame()

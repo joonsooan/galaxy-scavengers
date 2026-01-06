@@ -22,7 +22,8 @@ public class ResourceTransferManager : MonoBehaviour
     // Transfer all resources from game scene inventory to base inventory
     public void TransferGameInventoryToBase(InventorySystem gameInventory)
     {
-        if (gameInventory == null || BaseInventoryManager.Instance == null)
+        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (gameInventory == null || inventoryManager == null)
         {
             Debug.LogWarning("ResourceTransferManager: Cannot transfer - missing inventory systems");
             return;
@@ -44,7 +45,7 @@ public class ResourceTransferManager : MonoBehaviour
         {
             if (kvp.Value > 0)
             {
-                BaseInventoryManager.Instance.AddResource(kvp.Key, kvp.Value);
+                inventoryManager.AddResource(kvp.Key, kvp.Value);
             }
         }
 
@@ -57,13 +58,14 @@ public class ResourceTransferManager : MonoBehaviour
     // Transfer specific resource type from game scene to base scene
     public void TransferResourceTypeToBase(ResourceType type, int amount)
     {
-        if (BaseInventoryManager.Instance == null)
+        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (inventoryManager == null)
         {
             Debug.LogWarning("ResourceTransferManager: BaseInventoryManager not available");
             return;
         }
 
-        BaseInventoryManager.Instance.AddResource(type, amount);
+        inventoryManager.AddResource(type, amount);
     }
 }
 

@@ -85,16 +85,18 @@ public class BaseInventoryDebugManager : MonoBehaviour
     
     private void SetTestResources()
     {
-        if (BaseInventoryManager.Instance == null)
+        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (inventoryManager == null)
         {
             Debug.LogWarning("BaseInventoryDebugManager: BaseInventoryManager not available");
             return;
         }
         
         int resourceIconCount = 0;
-        if (BaseResourceDataManager.Instance != null)
+        BaseResourceDataManager resourceDataManager = FindFirstObjectByType<BaseResourceDataManager>();
+        if (resourceDataManager != null)
         {
-            resourceIconCount = BaseResourceDataManager.Instance.GetResourceIconCount();
+            resourceIconCount = resourceDataManager.GetResourceIconCount();
         }
         
         if (resourceIconCount == 0)
@@ -120,7 +122,7 @@ public class BaseInventoryDebugManager : MonoBehaviour
         {
             if (i < allResourceTypes.Length && i < testAmounts.Length)
             {
-                BaseInventoryManager.Instance.AddResource(allResourceTypes[i], testAmounts[i]);
+                inventoryManager.AddResource(allResourceTypes[i], testAmounts[i]);
             }
         }
         
@@ -135,13 +137,14 @@ public class BaseInventoryDebugManager : MonoBehaviour
     
     private void ClearAllResources()
     {
-        if (BaseInventoryManager.Instance == null)
+        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (inventoryManager == null)
         {
             Debug.LogWarning("BaseInventoryDebugManager: BaseInventoryManager not available");
             return;
         }
         
-        BaseInventoryManager.Instance.ClearAllInventory();
+        inventoryManager.ClearAllInventory();
         
         BaseInventorySystem inventorySystem = FindFirstObjectByType<BaseInventorySystem>();
         if (inventorySystem != null)
@@ -154,7 +157,8 @@ public class BaseInventoryDebugManager : MonoBehaviour
     
     private void TransferFromGameInventory()
     {
-        if (BaseInventoryManager.Instance == null)
+        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (inventoryManager == null)
         {
             Debug.LogWarning("BaseInventoryDebugManager: BaseInventoryManager not available");
             return;
@@ -215,7 +219,7 @@ public class BaseInventoryDebugManager : MonoBehaviour
             
             if (amountToTransfer > 0)
             {
-                BaseInventoryManager.Instance.AddResource(kvp.Key, amountToTransfer);
+                inventoryManager.AddResource(kvp.Key, amountToTransfer);
                 transferredCount++;
                 totalTransferred += amountToTransfer;
             }

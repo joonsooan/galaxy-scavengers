@@ -30,6 +30,7 @@ public class BaseInventorySystem : MonoBehaviour
     private readonly Dictionary<ResourceType, int> _maxStackAmounts = new Dictionary<ResourceType, int>();
     private readonly List<ModuleInventoryCell> _moduleCells = new List<ModuleInventoryCell>();
     private GridLayoutGroup _inventoryGrid;
+    private BaseInventoryManager _baseInventoryManager;
 
     private void Awake()
     {
@@ -72,7 +73,8 @@ public class BaseInventorySystem : MonoBehaviour
     {
         yield return null;
 
-        while (BaseInventoryManager.Instance == null) {
+        while (_baseInventoryManager == null) {
+            _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
             yield return null;
         }
 
@@ -81,19 +83,20 @@ public class BaseInventorySystem : MonoBehaviour
 
     private void SubscribeToModuleEvents()
     {
-        if (BaseInventoryManager.Instance != null) {
-            BaseInventoryManager.Instance.OnModuleAdded += OnModuleAdded;
-            BaseInventoryManager.Instance.OnModuleRemoved += OnModuleRemoved;
-            BaseInventoryManager.Instance.OnResourceChanged += OnResourceChanged;
+        _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (_baseInventoryManager != null) {
+            _baseInventoryManager.OnModuleAdded += OnModuleAdded;
+            _baseInventoryManager.OnModuleRemoved += OnModuleRemoved;
+            _baseInventoryManager.OnResourceChanged += OnResourceChanged;
         }
     }
 
     private void UnsubscribeFromModuleEvents()
     {
-        if (BaseInventoryManager.Instance != null) {
-            BaseInventoryManager.Instance.OnModuleAdded -= OnModuleAdded;
-            BaseInventoryManager.Instance.OnModuleRemoved -= OnModuleRemoved;
-            BaseInventoryManager.Instance.OnResourceChanged -= OnResourceChanged;
+        if (_baseInventoryManager != null) {
+            _baseInventoryManager.OnModuleAdded -= OnModuleAdded;
+            _baseInventoryManager.OnModuleRemoved -= OnModuleRemoved;
+            _baseInventoryManager.OnResourceChanged -= OnResourceChanged;
         }
     }
 
@@ -187,7 +190,12 @@ public class BaseInventorySystem : MonoBehaviour
 
     public void RefreshModuleGrid()
     {
-        if (moduleGridContainer == null || moduleInventoryCellPrefab == null || BaseInventoryManager.Instance == null) {
+        if (moduleGridContainer == null || moduleInventoryCellPrefab == null) {
+            return;
+        }
+
+        _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (_baseInventoryManager == null) {
             return;
         }
 
@@ -196,7 +204,7 @@ public class BaseInventorySystem : MonoBehaviour
         }
         _moduleCells.Clear();
 
-        List<Module> modules = BaseInventoryManager.Instance.GetAllModules();
+        List<Module> modules = _baseInventoryManager.GetAllModules();
 
         foreach (Module module in modules) {
             GameObject cellObj = Instantiate(moduleInventoryCellPrefab, moduleGridContainer.transform);
@@ -237,7 +245,8 @@ public class BaseInventorySystem : MonoBehaviour
 
     public void RefreshInventoryGrid()
     {
-        if (BaseInventoryManager.Instance == null) {
+        _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (_baseInventoryManager == null) {
             Debug.LogWarning("BaseInventorySystem: BaseInventoryManager not available");
             return;
         }
@@ -247,7 +256,7 @@ public class BaseInventorySystem : MonoBehaviour
             return;
         }
 
-        Dictionary<ResourceType, int> baseResources = BaseInventoryManager.Instance.GetAllResources();
+        Dictionary<ResourceType, int> baseResources = _baseInventoryManager.GetAllResources();
 
         List<KeyValuePair<ResourceType, int>> sortedResources = baseResources
             .Where(kvp => kvp.Value > 0)
@@ -287,11 +296,12 @@ public class BaseInventorySystem : MonoBehaviour
 
     public bool TryAddResourceToInventory(ResourceType type, int amount, bool moveAll = false)
     {
-        if (BaseInventoryManager.Instance == null) {
+        _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (_baseInventoryManager == null) {
             return false;
         }
 
-        int availableAmount = BaseInventoryManager.Instance.GetResourceAmount(type);
+        int availableAmount = _baseInventoryManager.GetResourceAmount(type);
         if (availableAmount <= 0) {
             return false;
         }
@@ -307,7 +317,7 @@ public class BaseInventorySystem : MonoBehaviour
             }
 
             int amountForThisCell = Mathf.Min(remainingToMove, maxStack);
-            if (BaseInventoryManager.Instance.RemoveResource(type, amountForThisCell)) {
+            if (_baseInventoryManager.RemoveResource(type, amountForThisCell)) {
                 emptyCell.SetResource(type, amountForThisCell);
                 remainingToMove -= amountForThisCell;
             }
@@ -325,15 +335,17 @@ public class BaseInventorySystem : MonoBehaviour
 
     public void ReturnResourceToBaseInventory(ResourceType type, int amount)
     {
-        if (BaseInventoryManager.Instance != null) {
-            BaseInventoryManager.Instance.AddResource(type, amount);
+        _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (_baseInventoryManager != null) {
+            _baseInventoryManager.AddResource(type, amount);
             UpdateInventoryInfoText();
         }
     }
 
     public void ReturnAllResourcesOfType(ResourceType type)
     {
-        if (BaseInventoryManager.Instance == null) {
+        _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (_baseInventoryManager == null) {
             return;
         }
 
@@ -348,7 +360,7 @@ public class BaseInventorySystem : MonoBehaviour
         }
 
         if (totalAmount > 0) {
-            BaseInventoryManager.Instance.AddResource(type, totalAmount);
+            _baseInventoryManager.AddResource(type, totalAmount);
 
             foreach (BaseInventoryCell cell in cellsToClear) {
                 cell.Clear();
@@ -387,7 +399,8 @@ public class BaseInventorySystem : MonoBehaviour
 
     public void UnloadAllToBaseInventory()
     {
-        if (BaseInventoryManager.Instance == null) return;
+        _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (_baseInventoryManager == null) return;
 
         Dictionary<ResourceType, int> resourcesToTransfer = new Dictionary<ResourceType, int>();
 
@@ -406,7 +419,7 @@ public class BaseInventorySystem : MonoBehaviour
         }
 
         foreach (KeyValuePair<ResourceType, int> kvp in resourcesToTransfer) {
-            BaseInventoryManager.Instance.AddResource(kvp.Key, kvp.Value);
+            _baseInventoryManager.AddResource(kvp.Key, kvp.Value);
         }
 
         foreach (BaseInventoryCell cell in _inventoryCells) {

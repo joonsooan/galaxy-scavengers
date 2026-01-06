@@ -12,24 +12,10 @@ public class ModuleStationUIManager : MonoBehaviour
     [SerializeField] private GameObject recipeGridContainer;
     [SerializeField] private GameObject moduleGridCellPrefab;
     [SerializeField] private ModuleDetailPanel moduleDetailPanel;
-
-    private static ModuleStationUIManager Instance { get; set; }
     
     private ModuleStation _currentStation;
     private ModuleData _currentData;
     private readonly List<ModuleGridCell> _recipeCells = new();
-    
-    private void Awake()
-    {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-        }
-        else
-        {
-            Instance = this;
-        }
-    }
     
     private void Start()
     {
