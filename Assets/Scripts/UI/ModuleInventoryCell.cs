@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ModuleInventoryCell : MonoBehaviour, IPointerClickHandler
+public class ModuleInventoryCell : MonoBehaviour, IPointerClickHandler, IBaseInventoryCell
 {
     [Header("References")]
     [SerializeField] private Image iconImage;

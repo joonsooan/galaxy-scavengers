@@ -53,6 +53,14 @@ public class ModuleStation : MonoBehaviour
             return false;
         }
         
+        // Check if inventory grid is full
+        BaseInventorySystem inventorySystem = FindFirstObjectByType<BaseInventorySystem>();
+        if (inventorySystem != null && inventorySystem.IsGridFull())
+        {
+            Debug.Log($"ModuleStation: Cannot craft module {recipe.moduleName} - inventory grid is full!");
+            return false;
+        }
+        
         BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
         if (inventoryManager == null)
         {

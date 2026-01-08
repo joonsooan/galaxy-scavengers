@@ -120,6 +120,8 @@ public class BaseInventoryManager : MonoBehaviour
             string key = BaseInventoryPrefix + type;
             PlayerPrefs.DeleteKey(key);
         }
+        
+        _baseModules.Clear();
         PlayerPrefs.Save();
     }
     

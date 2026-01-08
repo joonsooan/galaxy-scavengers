@@ -12,6 +12,7 @@ public class ModuleStationUIManager : MonoBehaviour
     [SerializeField] private GameObject recipeGridContainer;
     [SerializeField] private GameObject moduleGridCellPrefab;
     [SerializeField] private ModuleDetailPanel moduleDetailPanel;
+    [SerializeField] private Button closeButton;
     
     private ModuleStation _currentStation;
     private ModuleData _currentData;
@@ -27,6 +28,12 @@ public class ModuleStationUIManager : MonoBehaviour
         if (moduleDetailPanel != null)
         {
             moduleDetailPanel.Initialize(this);
+        }
+        
+        if (closeButton != null)
+        {
+            closeButton.onClick.RemoveAllListeners();
+            closeButton.onClick.AddListener(OnCloseButtonClicked);
         }
     }
     
@@ -45,27 +52,39 @@ public class ModuleStationUIManager : MonoBehaviour
         _currentStation = station;
         _currentData = station.ModuleData;
         
-        BaseInventorySystem inventorySystem = FindFirstObjectByType<BaseInventorySystem>();
-        if (inventorySystem != null)
-        {
-            inventorySystem.RefreshModuleGrid();
-        }
-        
         if (moduleStationPanel != null)
         {
             moduleStationPanel.SetActive(true);
+        }
+        
+        // Show detail panel with no info when opening module panel
+        if (moduleDetailPanel != null)
+        {
+            moduleDetailPanel.gameObject.SetActive(true);
+            moduleDetailPanel.ClearInfo();
         }
         
         UpdateStationInfo();
         LoadAllRecipes();
     }
 
-    private void HidePanel()
+    public void HidePanel()
     {
         if (moduleStationPanel != null)
         {
             moduleStationPanel.SetActive(false);
         }
+        
+        // Clear detail panel info when closing module panel
+        if (moduleDetailPanel != null)
+        {
+            moduleDetailPanel.HidePanel(); // HidePanel already calls ClearInfo internally
+        }
+    }
+    
+    public void OnCloseButtonClicked()
+    {
+        HidePanel();
     }
     
     private void UpdateStationInfo()
@@ -127,18 +146,14 @@ public class ModuleStationUIManager : MonoBehaviour
     {
         if (moduleDetailPanel != null && _currentStation != null)
         {
-            moduleDetailPanel.ShowModuleDetail(recipe, _currentStation);
+            moduleDetailPanel.ShowInfo(recipe, _currentStation);
         }
     }
     
     public void OnModuleCrafted()
     {
-        foreach (ModuleGridCell cell in _recipeCells)
-        {
-            if (cell != null && cell.Recipe != null && _currentStation != null)
-            {
-            }
-        }
+        // Module crafting is handled by BaseInventorySystem events
+        // No additional action needed here
     }
 }
 

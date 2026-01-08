@@ -26,7 +26,16 @@ public class ModuleDetailPanel : MonoBehaviour
         if (closeButton != null)
         {
             closeButton.onClick.RemoveAllListeners();
-            closeButton.onClick.AddListener(HidePanel);
+            if (_uiManager != null)
+            {
+                // Close the entire module panel (station + detail) when the close button is pressed
+                closeButton.onClick.AddListener(_uiManager.OnCloseButtonClicked);
+            }
+            else
+            {
+                // Fallback: just hide this detail panel
+                closeButton.onClick.AddListener(HidePanel);
+            }
         }
         
         if (produceButton != null)
@@ -52,11 +61,60 @@ public class ModuleDetailPanel : MonoBehaviour
         gameObject.SetActive(true);
     }
     
+    public void ShowInfo(ModuleRecipe recipe, ModuleStation station)
+    {
+        ShowModuleDetail(recipe, station);
+    }
+    
+    public void ClearInfo()
+    {
+        _currentRecipe = null;
+        _station = null;
+        
+        if (moduleIcon != null)
+        {
+            moduleIcon.sprite = null;
+            moduleIcon.enabled = false;
+        }
+        
+        if (moduleNameText != null)
+        {
+            moduleNameText.text = "";
+        }
+        
+        if (moduleDescriptionText != null)
+        {
+            moduleDescriptionText.text = "";
+        }
+        
+        if (moduleTypeText != null)
+        {
+            moduleTypeText.text = "";
+        }
+        
+        if (ingredientsParent != null)
+        {
+            foreach (Transform child in ingredientsParent)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+        
+        if (produceButton != null)
+        {
+            produceButton.interactable = false;
+        }
+        
+        if (produceButtonText != null)
+        {
+            produceButtonText.text = "";
+        }
+    }
+    
     public void HidePanel()
     {
         gameObject.SetActive(false);
-        _currentRecipe = null;
-        _station = null;
+        ClearInfo();
     }
     
     private void UpdateUI()
@@ -134,6 +192,15 @@ public class ModuleDetailPanel : MonoBehaviour
             _uiManager?.OnModuleCrafted();
             UpdateProduceButton();
             SetupIngredients();
+            
+            // Refresh only modules (preserves resources)
+            // The OnModuleAdded event will also trigger RefreshModulesOnly(), but we call it here
+            // to ensure immediate update if the panel is open
+            BaseInventorySystem inventorySystem = FindFirstObjectByType<BaseInventorySystem>();
+            if (inventorySystem != null && inventorySystem.GetInventoryPanel() != null && inventorySystem.GetInventoryPanel().activeSelf)
+            {
+                inventorySystem.RefreshModulesOnly();
+            }
         }
         else
         {

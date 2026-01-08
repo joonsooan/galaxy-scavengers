@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class BaseInventoryCell : MonoBehaviour, IPointerClickHandler
+public class BaseInventoryCell : MonoBehaviour, IPointerClickHandler, IBaseInventoryCell
 {
     [Header("References")]
     [SerializeField] private Image iconImage;
@@ -102,22 +102,7 @@ public class BaseInventoryCell : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (_isEmpty || _baseInventorySystem == null)
-        {
-            return;
-        }
-
-        bool isShiftClick = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-
-        if (isShiftClick)
-        {
-            _baseInventorySystem.ReturnAllResourcesOfType(_resourceType);
-        }
-        else
-        {
-            _baseInventorySystem.ReturnResourceToBaseInventory(_resourceType, _amount);
-            Clear();
-        }
+        // Click functionality removed - inventory cells are display-only
     }
 }
 

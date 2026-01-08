@@ -86,12 +86,6 @@ public class BaseInventoryDebugManager : MonoBehaviour
     private void SetTestResources()
     {
         BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
-        if (inventoryManager == null)
-        {
-            Debug.LogWarning("BaseInventoryDebugManager: BaseInventoryManager not available");
-            return;
-        }
-        
         int resourceIconCount = 0;
         BaseResourceDataManager resourceDataManager = FindFirstObjectByType<BaseResourceDataManager>();
         if (resourceDataManager != null)
@@ -106,8 +100,7 @@ public class BaseInventoryDebugManager : MonoBehaviour
         }
         
         ResourceType[] allResourceTypes = (ResourceType[])Enum.GetValues(typeof(ResourceType));
-        int[] testAmounts = new int[]
-        {
+        int[] testAmounts = {
             testFerrite, testAether, testBiomass, testCryoCrystal,
             testAlloyPlate, testCompositeFrame, testEChip, testBioCable,
             testPowerCube, testBioFuel, testCryoGel, testSolana,
@@ -131,19 +124,12 @@ public class BaseInventoryDebugManager : MonoBehaviour
         {
             inventorySystem.RefreshInventoryGrid();
         }
-        
-        Debug.Log($"BaseInventoryDebugManager: Test resources set for {countToSet} resource types");
     }
     
     private void ClearAllResources()
     {
         BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
-        if (inventoryManager == null)
-        {
-            Debug.LogWarning("BaseInventoryDebugManager: BaseInventoryManager not available");
-            return;
-        }
-        
+       
         inventoryManager.ClearAllInventory();
         
         BaseInventorySystem inventorySystem = FindFirstObjectByType<BaseInventorySystem>();
@@ -151,18 +137,11 @@ public class BaseInventoryDebugManager : MonoBehaviour
         {
             inventorySystem.RefreshInventoryGrid();
         }
-        
-        Debug.Log("BaseInventoryDebugManager: All resources cleared");
     }
     
     private void TransferFromGameInventory()
     {
         BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
-        if (inventoryManager == null)
-        {
-            Debug.LogWarning("BaseInventoryDebugManager: BaseInventoryManager not available");
-            return;
-        }
         
         Dictionary<ResourceType, int> resourcesToTransfer = new Dictionary<ResourceType, int>();
         
