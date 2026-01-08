@@ -5,7 +5,7 @@ public class ModuleRecipe
 {
     [Header("Module Info")]
     public string moduleName;
-    public string moduleDescription;
+    [TextArea(3, 10)] public string moduleDescription;
     public Sprite moduleIcon;
     
     [Header("Crafting Requirements")]

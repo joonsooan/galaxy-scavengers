@@ -26,3 +26,36 @@ MonoBehaviour:
       amount: 20
     moduleType: 3
     moduleTier: 1
+  - moduleName: "\uC57D\uD0C8 \uBAA8\uB4C8 1"
+    moduleDescription: "\uC2DC\uB4DC \uCF54\uC5B4\uC758 \uC800\uC7A5 \uACF5\uAC04\uC744
+      \uB298\uB824\uC8FC\uB294 \uBAA8\uB4C8\uC785\uB2C8\uB2E4."
+    moduleIcon: {fileID: -4716559796490163538, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
+    ingredients:
+    - resourceType: 4
+      amount: 20
+    - resourceType: 5
+      amount: 30
+    moduleType: 3
+    moduleTier: 1
+  - moduleName: "\uBC29\uC5B4 \uBAA8\uB4C8 1"
+    moduleDescription: "\uAC74\uBB3C\uB4E4\uC758 \uC804\uBC18\uC801\uC778 \uBC29\uC5B4\uB825\uC744
+      \uC62C\uB824\uC8FC\uB294 \uBAA8\uB4C8\uC785\uB2C8\uB2E4."
+    moduleIcon: {fileID: -4716559796490163538, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
+    ingredients:
+    - resourceType: 4
+      amount: 40
+    - resourceType: 8
+      amount: 40
+    moduleType: 3
+    moduleTier: 1
+  - moduleName: "\uC720\uB2DB \uAC15\uD654 \uBAA8\uB4C8 1"
+    moduleDescription: "\uC720\uB2DB\uB4E4\uC758 \uC774\uB3D9 \uC18D\uB3C4, \uC791\uC5C5
+      \uC18D\uB3C4\uB97C \uC99D\uAC00\uC2DC\uD0A4\uB294 \uBAA8\uB4C8\uC785\uB2C8\uB2E4."
+    moduleIcon: {fileID: -4716559796490163538, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
+    ingredients:
+    - resourceType: 4
+      amount: 30
+    - resourceType: 6
+      amount: 50
+    moduleType: 3
+    moduleTier: 1

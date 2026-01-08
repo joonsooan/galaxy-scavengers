@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4405612620870698826}
   - component: {fileID: 4945084072694428998}
   m_Layer: 5
-  m_Name: Module Grid Cell (72)
+  m_Name: Module Grid Cell
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -38,7 +38,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 120, y: 9}
+  m_SizeDelta: {x: 120, y: 96}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8086736094831419978
 CanvasRenderer:
