@@ -1,7 +1,6 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class LaunchUIController : MonoBehaviour
 {
@@ -12,7 +11,6 @@ public class LaunchUIController : MonoBehaviour
 
     [Header("Launch Settings")]
     [SerializeField] private float countdownDurationSeconds = 10f;
-    [SerializeField] private string targetSceneName = "BaseScene";
 
     private bool _isCountingDown;
     private Coroutine _countdownCoroutine;
@@ -109,10 +107,7 @@ public class LaunchUIController : MonoBehaviour
         _isCountingDown = false;
         _countdownCoroutine = null;
 
-        if (!string.IsNullOrEmpty(targetSceneName))
-        {
-            SceneManager.LoadScene(targetSceneName);
-        }
+        SceneLoader.Instance.LoadBaseScene();
     }
 
     private void UpdateCountdownText(float remainingSeconds)
