@@ -12,11 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49527cd14b8bc244c8968cf06ce143ca, type: 3}
   m_Name: Reactor_Data
   m_EditorClassIdentifier: 
-  processorName: Reactor
-  processorInfo: 'A basic processing facility.
-
-    Melts raw ore at high temperatures,
-    refining it into standard ingots or plates.'
+  processorName: "\uBC18\uC751\uB85C"
+  processorInfo: "\uACE0\uC628 \uACE0\uC555\uC758 \uD658\uACBD\uC5D0\uC11C \uC790\uC6D0\uC744
+    \uC735\uD569\uD574 \uAC00\uACF5\uD558\uB294 \uC2DC\uC124\uC785\uB2C8\uB2E4."
   maxIngredientStorage: 100
   maxAssignedDrones: 3
   recipes:

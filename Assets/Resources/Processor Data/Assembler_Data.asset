@@ -12,11 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49527cd14b8bc244c8968cf06ce143ca, type: 3}
   m_Name: Assembler_Data
   m_EditorClassIdentifier: 
-  processorName: Assembler
-  processorInfo: 'A basic processing facility.
-
-    Melts raw ore at high temperatures,
-    refining it into standard ingots or plates.'
+  processorName: "\uC870\uB9BD\uC18C"
+  processorInfo: "\uC790\uC6D0\uC5D0\uC11C \uAD11\uBB3C\uC744 \uCD94\uCD9C\uD574
+    \uC815\uBC00\uD55C \uBD80\uD488\uC744 \uC0DD\uC0B0\uD558\uB294 \uC2DC\uC124\uC785\uB2C8\uB2E4."
   maxIngredientStorage: 100
   maxAssignedDrones: 3
   recipes:
