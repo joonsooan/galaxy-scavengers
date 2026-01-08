@@ -20,42 +20,77 @@ MonoBehaviour:
   - moduleName: "\uBB34\uB8CC \uBAA8\uB4C8"
     moduleDescription: "\uD2B9\uBCC4\uD55C \uAE30\uB2A5\uC740 \uC5C6\uB294 \uAE30\uBCF8\uC801\uC778
       \uBAA8\uB4C8\uC785\uB2C8\uB2E4."
-    moduleIcon: {fileID: -4716559796490163538, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
+    moduleIcon: {fileID: 2658361925361728200, guid: fab7722ada301b640bf2fca2a51df314, type: 3}
     ingredients:
     - resourceType: 4
       amount: 20
-    moduleType: 3
+    moduleType: 0
     moduleTier: 1
-  - moduleName: "\uC57D\uD0C8 \uBAA8\uB4C8 1"
+  - moduleName: "\uC0DD\uC0B0 \uBAA8\uB4C8 1"
     moduleDescription: "\uC2DC\uB4DC \uCF54\uC5B4\uC758 \uC800\uC7A5 \uACF5\uAC04\uC744
       \uB298\uB824\uC8FC\uB294 \uBAA8\uB4C8\uC785\uB2C8\uB2E4."
-    moduleIcon: {fileID: -4716559796490163538, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
+    moduleIcon: {fileID: -7275754688302940475, guid: 94ecebacd1cc8d049872676f2c13d580, type: 3}
     ingredients:
     - resourceType: 4
       amount: 20
     - resourceType: 5
       amount: 30
-    moduleType: 3
+    moduleType: 5
     moduleTier: 1
   - moduleName: "\uBC29\uC5B4 \uBAA8\uB4C8 1"
     moduleDescription: "\uAC74\uBB3C\uB4E4\uC758 \uC804\uBC18\uC801\uC778 \uBC29\uC5B4\uB825\uC744
       \uC62C\uB824\uC8FC\uB294 \uBAA8\uB4C8\uC785\uB2C8\uB2E4."
-    moduleIcon: {fileID: -4716559796490163538, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
+    moduleIcon: {fileID: -1748801265210332779, guid: 108d5a1bd0d3ad540a136b28829d3a59, type: 3}
     ingredients:
     - resourceType: 4
       amount: 40
     - resourceType: 8
       amount: 40
-    moduleType: 3
+    moduleType: 2
     moduleTier: 1
   - moduleName: "\uC720\uB2DB \uAC15\uD654 \uBAA8\uB4C8 1"
     moduleDescription: "\uC720\uB2DB\uB4E4\uC758 \uC774\uB3D9 \uC18D\uB3C4, \uC791\uC5C5
       \uC18D\uB3C4\uB97C \uC99D\uAC00\uC2DC\uD0A4\uB294 \uBAA8\uB4C8\uC785\uB2C8\uB2E4."
-    moduleIcon: {fileID: -4716559796490163538, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
+    moduleIcon: {fileID: -2613736575101996164, guid: 53fb6835ab357fe4483e4f561078cd71, type: 3}
     ingredients:
     - resourceType: 4
       amount: 30
     - resourceType: 6
       amount: 50
+    moduleType: 4
+    moduleTier: 1
+  - moduleName: "\uC804\uB825 \uBAA8\uB4C8 1"
+    moduleDescription: "\uC804\uB825 \uC0DD\uC0B0\uB7C9\uC744 \uB300\uD3ED \uC99D\uAC00\uC2DC\uD0A4\uB294
+      \uBAA8\uB4C8\uC785\uB2C8\uB2E4."
+    moduleIcon: {fileID: -1748801265210332779, guid: 108d5a1bd0d3ad540a136b28829d3a59, type: 3}
+    ingredients:
+    - resourceType: 6
+      amount: 50
+    - resourceType: 8
+      amount: 100
+    moduleType: 1
+    moduleTier: 1
+  - moduleName: "\uACF5\uACA9 \uBAA8\uB4C8 1"
+    moduleDescription: "\uD3EC\uD0D1\uC758 \uB370\uBBF8\uC9C0\uB97C \uC99D\uAC00\uC2DC\uD0A4\uB294
+      \uBAA8\uB4C8\uC785\uB2C8\uB2E4."
+    moduleIcon: {fileID: -2613736575101996164, guid: 53fb6835ab357fe4483e4f561078cd71, type: 3}
+    ingredients:
+    - resourceType: 6
+      amount: 40
+    - resourceType: 9
+      amount: 100
+    - resourceType: 13
+      amount: 50
     moduleType: 3
+    moduleTier: 1
+  - moduleName: "\uC5F0\uAD6C \uBAA8\uB4C8 1"
+    moduleDescription: "\uC5F0\uAD6C \uC18D\uB3C4\uB97C \uC99D\uAC00\uC2DC\uD0A4\uB294
+      \uBAA8\uB4C8\uC785\uB2C8\uB2E4."
+    moduleIcon: {fileID: 1493692167465492477, guid: 72f3e83ef786bd946829eb12203b2d3e, type: 3}
+    ingredients:
+    - resourceType: 7
+      amount: 60
+    - resourceType: 12
+      amount: 40
+    moduleType: 6
     moduleTier: 1

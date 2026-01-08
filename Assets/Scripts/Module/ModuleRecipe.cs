@@ -18,6 +18,7 @@ public class ModuleRecipe
 
 public enum ModuleType
 {
+    Default,
     Power,
     Defense,
     Offense,

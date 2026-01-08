@@ -123,11 +123,27 @@ public class ModuleDetailPanel : MonoBehaviour
         
         if (moduleTypeText != null)
         {
-            moduleTypeText.text = $"Type: {_currentRecipe.moduleType}";
+            string koreanType = GetKoreanModuleType(_currentRecipe.moduleType);
+            moduleTypeText.text = $"타입 : {koreanType}";
         }
 
         yield return new WaitForEndOfFrame();
         LayoutRebuilder.ForceRebuildLayoutImmediate(resourcePanel);
+    }
+    
+    private string GetKoreanModuleType(ModuleType moduleType)
+    {
+        return moduleType switch
+        {
+            ModuleType.Default => "기본",
+            ModuleType.Power => "전력",
+            ModuleType.Defense => "방어",
+            ModuleType.Offense => "공격",
+            ModuleType.Utility => "유틸리티",
+            ModuleType.Production => "생산",
+            ModuleType.Research => "연구",
+            _ => moduleType.ToString()
+        };
     }
     
     private void SetupIngredients()
