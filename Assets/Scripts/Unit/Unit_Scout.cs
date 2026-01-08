@@ -12,6 +12,8 @@ public class Unit_Scout : UnitBase
     private Vector3 _homePosition;
     private Coroutine _beaconCoroutine;
     private bool _isReturningHome;
+    private UnitSpriteController _spriteController;
+    private MainStructure _mainStructure;
     
     public bool IsAssignedToBeacon => _assignedBeacon != null || _assignedWaypointGroup != null;
     
@@ -23,12 +25,8 @@ public class Unit_Scout : UnitBase
     
     private void Start()
     {
-        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
-        
-        if (mainStructure != null)
-        {
-            _homePosition = mainStructure.transform.position;
-        }
+        _mainStructure = FindFirstObjectByType<MainStructure>();
+        _spriteController = GetComponent<UnitSpriteController>();
     }
     
     private void Update()
@@ -37,6 +35,8 @@ public class Unit_Scout : UnitBase
         {
             CheckBeaconArrival();
         }
+        
+        UpdateAnimationState();
     }
     
     protected override void OnDisable()
@@ -65,6 +65,24 @@ public class Unit_Scout : UnitBase
         if (_assignedWaypointGroup != null)
         {
             _assignedWaypointGroup.UnassignUnit();
+        }
+    }
+    
+    private void UpdateAnimationState()
+    {
+        if (_spriteController == null)
+        {
+            return;
+        }
+
+        // Drive only the standard IsMoving flag based on currentState
+        _spriteController.UpdateAnimationState(currentState);
+
+        // When moving, keep sprite facing movement direction
+        if (currentState == UnitState.Moving && unitMovement != null)
+        {
+            Vector3 moveDir = unitMovement.GetMoveDirection();
+            _spriteController.UpdateSpriteDirection(moveDir);
         }
     }
     
@@ -283,8 +301,88 @@ public class Unit_Scout : UnitBase
         
         if (unitMovement != null)
         {
+            _homePosition = FindHomeInteractionPosition(_mainStructure);
             unitMovement.SetNewTarget(_homePosition);
         }
+    }
+
+    private Vector3 FindHomeInteractionPosition(MainStructure mainStructure)
+    {
+        if (mainStructure == null)
+        {
+            return transform.position;
+        }
+
+        if (BuildingManager.Instance == null || BuildingManager.Instance.grid == null)
+        {
+            return mainStructure.transform.position;
+        }
+
+        Grid grid = BuildingManager.Instance.grid;
+        Vector3Int centerCell = grid.WorldToCell(mainStructure.transform.position);
+
+        // MainStructure is a 3x3 centered on centerCell (see BuildingManager.RegisterMainStructure)
+        Vector3Int anchorCell = centerCell - new Vector3Int(1, 1, 0);
+
+        Vector3Int[] cardinalOffsets =
+        {
+            new Vector3Int(1, 0, 0), new Vector3Int(-1, 0, 0),
+            new Vector3Int(0, 1, 0), new Vector3Int(0, -1, 0)
+        };
+
+        System.Collections.Generic.List<Vector3Int> candidateCells = new System.Collections.Generic.List<Vector3Int>();
+
+        // Collect neighbor cells around each main-structure tile
+        for (int x = 0; x < 3; x++)
+        {
+            for (int y = 0; y < 3; y++)
+            {
+                Vector3Int mainCell = anchorCell + new Vector3Int(x, y, 0);
+
+                foreach (Vector3Int offset in cardinalOffsets)
+                {
+                    Vector3Int neighbor = mainCell + offset;
+
+                    // Skip cells inside the 3x3 main structure footprint
+                    bool insideMain =
+                        neighbor.x >= anchorCell.x && neighbor.x <= anchorCell.x + 2 &&
+                        neighbor.y >= anchorCell.y && neighbor.y <= anchorCell.y + 2;
+                    if (insideMain)
+                    {
+                        continue;
+                    }
+
+                    if (BuildingManager.Instance.CanPlaceBuilding(neighbor) &&
+                        !candidateCells.Contains(neighbor))
+                    {
+                        candidateCells.Add(neighbor);
+                    }
+                }
+            }
+        }
+
+        if (candidateCells.Count == 0)
+        {
+            // Fallback to center position if no walkable neighbors found
+            return mainStructure.transform.position;
+        }
+
+        // Choose the candidate closest to the scout's current position
+        Vector3 bestWorldPos = grid.GetCellCenterWorld(candidateCells[0]);
+        float bestDistance = Vector3.Distance(transform.position, bestWorldPos);
+
+        for (int i = 1; i < candidateCells.Count; i++)
+        {
+            Vector3 worldPos = grid.GetCellCenterWorld(candidateCells[i]);
+            float distance = Vector3.Distance(transform.position, worldPos);
+            if (distance < bestDistance)
+            {
+                bestDistance = distance;
+                bestWorldPos = worldPos;
+            }
+        }
+
+        return bestWorldPos;
     }
     
     public void OnBeaconDestroyed(Beacon beacon)

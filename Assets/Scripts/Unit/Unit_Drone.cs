@@ -29,6 +29,7 @@ public class Unit_Drone : UnitBase
     private Coroutine _loadingCoroutine;
     private Coroutine _unloadingCoroutine;
     private Coroutine _assignmentCoroutine;
+    private UnitSpriteController _spriteController;
 
     public bool IsAssigned => _currentProcessor != null;
 
@@ -48,10 +49,13 @@ public class Unit_Drone : UnitBase
     {
         base.Awake();
         movement = GetComponent<UnitMovement>();
+        _spriteController = GetComponent<UnitSpriteController>();
     }
 
     private void Update()
     {
+        UpdateUnitBaseState();
+        UpdateAnimationState();
         DecideNextAction();
     }
 
@@ -99,6 +103,47 @@ public class Unit_Drone : UnitBase
         case DroneState.ReturnHome:
             UpdateReturnHome();
             break;
+        }
+    }
+    
+    private void UpdateUnitBaseState()
+    {
+        switch (_currentState)
+        {
+            case DroneState.Idle:
+                currentState = UnitState.Idle;
+                break;
+            case DroneState.FetchingResource:
+            case DroneState.DeliveringResource:
+            case DroneState.ReturnHome:
+                currentState = UnitState.Moving;
+                break;
+            case DroneState.Processing:
+                // Processing is a stationary worker state; use Idle for base state
+                currentState = UnitState.Idle;
+                break;
+        }
+    }
+    
+    private void UpdateAnimationState()
+    {
+        if (_spriteController == null || movement == null)
+        {
+            return;
+        }
+
+        bool isProcessing = _currentState == DroneState.Processing;
+        _spriteController.UpdateAnimationState(currentState, isProcessing: isProcessing);
+
+        if (currentState == UnitState.Moving)
+        {
+            Vector3 moveDir = movement.GetMoveDirection();
+            _spriteController.UpdateSpriteDirection(moveDir);
+            _spriteController.ClearTarget();
+        }
+        else if (isProcessing && _currentProcessor != null)
+        {
+            _spriteController.SetTargetTransform(_currentProcessor.transform);
         }
     }
 

@@ -17,7 +17,7 @@ public class ResourceInfoCell : MonoBehaviour
     {
         resourceAmount.text = amount.ToString();
         
-        Sprite resourceIcon = ResourceManager.Instance.GetResourceIcon(type);
+        Sprite resourceIcon = GetResourceIcon(type);
         if (resourceIcon != null)
         {
             resourceImage.sprite = resourceIcon;
@@ -31,5 +31,23 @@ public class ResourceInfoCell : MonoBehaviour
         {
             LayoutRebuilder.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
         }
+    }
+    
+    private Sprite GetResourceIcon(ResourceType type)
+    {
+        // Try BaseResourceDataManager first (for base scene)
+        BaseResourceDataManager resourceDataManager = FindFirstObjectByType<BaseResourceDataManager>();
+        if (resourceDataManager != null)
+        {
+            return resourceDataManager.GetResourceIcon(type);
+        }
+        
+        // Fallback to ResourceManager (for game scene compatibility)
+        if (ResourceManager.Instance != null)
+        {
+            return ResourceManager.Instance.GetResourceIcon(type);
+        }
+        
+        return null;
     }
 }

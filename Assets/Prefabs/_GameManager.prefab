@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &2786448128311838106
+--- !u!1 &8793482693486272962
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,10 +8,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5899393846368650840}
-  - component: {fileID: 1704038245656320570}
-  - component: {fileID: 3108615705944115641}
-  - component: {fileID: 1714792262294398259}
+  - component: {fileID: 8256486884244902839}
+  - component: {fileID: 3129693049031710433}
+  - component: {fileID: 6823741737993451518}
   m_Layer: 0
   m_Name: _GameManager
   m_TagString: Untagged
@@ -19,38 +18,33 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5899393846368650840
+--- !u!4 &8256486884244902839
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2786448128311838106}
+  m_GameObject: {fileID: 8793482693486272962}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.08081508, y: 0.4173319, z: 5.3228135}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1704038245656320570
+--- !u!114 &3129693049031710433
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2786448128311838106}
+  m_GameObject: {fileID: 8793482693486272962}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 17ab7edb7e41cd14fba2d87c27d59786, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  resourceCheckInterval: 120
-  requiredResourceAmounts: 00000000050000003200000064000000c800000090010000e8030000d00700008813000010270000204e000050c30000
-  requiredResourceType: 4
-  slider: {fileID: 0}
-  expansionPanel: {fileID: 0}
   mapGenerator: {fileID: 0}
   uiManager: {fileID: 0}
   cardDragger: {fileID: 0}
@@ -61,27 +55,13 @@ MonoBehaviour:
   onEndDrag:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &3108615705944115641
+--- !u!114 &6823741737993451518
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2786448128311838106}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d1125de1f4a83054487c819a8e06b2be, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gameSceneName: GameScene
-  titleSceneName: TitleScene
---- !u!114 &1714792262294398259
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2786448128311838106}
+  m_GameObject: {fileID: 8793482693486272962}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 834e38c22d499c546ba316459731f197, type: 3}

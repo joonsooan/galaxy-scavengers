@@ -86,7 +86,7 @@ public class GameManager : MonoBehaviour
     public void GameOver()
     {
         Time.timeScale = 1;
-        SceneManager.LoadScene("TitleScene");
+        SceneLoader.Instance.LoadBaseScene();
     }
 
     public void StartDrag(DisplayableData data)

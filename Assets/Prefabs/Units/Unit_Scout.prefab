@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 4483249089817793867}
   - component: {fileID: 7616754858952366261}
   - component: {fileID: 1616897775811544138}
+  - component: {fileID: 156823049281101297}
   m_Layer: 0
   m_Name: Unit_Scout
   m_TagString: Untagged
@@ -79,14 +80,14 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 580065311
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 0
-  m_Sprite: {fileID: 3751741419470782174, guid: 41d81b85481201c44bb0e26872455946, type: 3}
-  m_Color: {r: 0.7990643, g: 0.39215684, b: 1, a: 1}
+  m_Sprite: {fileID: -6290779443186176248, guid: 39c30738099c3424c80736d4163d9dbc, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.17, y: 0.16}
+  m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -165,9 +166,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d119d16415c69741bcfa340b580f4c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spriteUp: {fileID: 8603391338363840403, guid: 41d81b85481201c44bb0e26872455946, type: 3}
-  spriteDown: {fileID: 3751741419470782174, guid: 41d81b85481201c44bb0e26872455946, type: 3}
-  spriteRight: {fileID: 4992164939788663360, guid: 41d81b85481201c44bb0e26872455946, type: 3}
 --- !u!114 &1616897775811544138
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -182,3 +180,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   visionRange: 6.5
   isActive: 1
+--- !u!95 &156823049281101297
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6649466925040614564}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: e58b71ba5600fe04888ec772df40f502, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

@@ -6,8 +6,7 @@ public class SceneLoader : MonoBehaviour
     public static SceneLoader Instance { get; private set; }
 
     [SerializeField] private string titleSceneName = "TitleScene";
-    [SerializeField] private string mapSelectSceneName = "MapSelectScene";
-    [SerializeField] private string seedCoreConfigSceneName = "SeedCoreConfigScene";
+    [SerializeField] private string baseSceneName = "BaseScene";
     [SerializeField] private string gameSceneName = "GameScene";
     
     private void Awake()
@@ -28,14 +27,9 @@ public class SceneLoader : MonoBehaviour
         SceneManager.LoadScene(titleSceneName);
     }
 
-    public void LoadMapSelectScene()
+    public void LoadBaseScene()
     {
-        SceneManager.LoadScene(mapSelectSceneName);
-    }
-
-    public void LoadSeedCoreConfigScene()
-    {
-        SceneManager.LoadScene(seedCoreConfigSceneName);
+        SceneManager.LoadScene(baseSceneName);
     }
 
     public void LoadGameScene()

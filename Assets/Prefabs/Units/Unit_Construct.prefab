@@ -83,12 +83,12 @@ SpriteRenderer:
   m_SortingLayerID: 580065311
   m_SortingLayer: 5
   m_SortingOrder: 0
-  m_Sprite: {fileID: -954737804633247596, guid: f68a2c2ba69b5c4439f66435f175067e, type: 3}
+  m_Sprite: {fileID: -4285660500280345620, guid: 30f01861364baa14a97fcbce326e83db, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.18, y: 0.16}
+  m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -146,8 +146,6 @@ MonoBehaviour:
   constructingParticleSystem: {fileID: 2654175848666590096}
   particleOffsetDistance: 0.75
   yOffset: 0.2
-  vibrationRadius: 0.015
-  vibrationSpeed: 10
 --- !u!114 &4483249089817793867
 MonoBehaviour:
   m_ObjectHideFlags: 0
