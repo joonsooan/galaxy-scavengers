@@ -180,6 +180,11 @@ public class BaseInventorySystem : MonoBehaviour
         return inventoryPanel;
     }
 
+    public GameObject GetInventoryResourceContainer()
+    {
+        return inventoryGridContainer;
+    }
+
     public int GetMaxStackAmount(ResourceType type)
     {
         _maxStackAmounts.TryGetValue(type, out int maxStack);

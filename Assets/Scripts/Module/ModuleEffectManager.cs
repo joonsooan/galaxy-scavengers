@@ -1,5 +1,7 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class ModuleEffectManager : MonoBehaviour
 {
@@ -23,20 +25,76 @@ public class ModuleEffectManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    private void Start()
+    private void OnEnable()
     {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "GameScene") {
+            StartCoroutine(WaitForCustomizationAndApplyEffects());
+        }
+    }
+
+    private IEnumerator WaitForCustomizationAndApplyEffects()
+    {
+        CoreCustomizationManager customizationManager = null;
+        int maxWaitFrames = 60;
+        int waitFrames = 0;
+
+        while (customizationManager == null && waitFrames < maxWaitFrames) {
+            customizationManager = FindFirstObjectByType<CoreCustomizationManager>();
+            if (customizationManager == null) {
+                yield return null;
+                waitFrames++;
+            }
+        }
+
+        if (customizationManager == null) {
+            Debug.LogError("ModuleEffectManager: CoreCustomizationManager를 찾을 수 없습니다.");
+            yield break;
+        }
+
+        yield return null;
+
         ApplyModuleEffects();
     }
 
     private void ApplyModuleEffects()
     {
-        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
-        List<Module> modules = inventoryManager.GetAllModules();
+        if (SceneManager.GetActiveScene().name != "GameScene") {
+            return;
+        }
+
+        CoreCustomizationManager customizationManager = FindFirstObjectByType<CoreCustomizationManager>();
+        if (customizationManager == null) {
+            Debug.LogError("ModuleEffectManager: CoreCustomizationManager를 찾을 수 없습니다.");
+            return;
+        }
+
+        List<Module> modules = customizationManager.GetActiveModules();
+        if (modules == null) {
+            Debug.LogWarning("ModuleEffectManager: 모듈 리스트가 null입니다.");
+            _activeStatModifiers.Clear();
+            return;
+        }
+
         _activeStatModifiers.Clear();
 
         Debug.Log($"ModuleEffectManager: 활성화된 모듈 {modules.Count} 개 발견");
         
         foreach (Module module in modules) {
+            if (module == null) {
+                Debug.LogWarning("ModuleEffectManager: null 모듈이 발견되었습니다.");
+                continue;
+            }
+
             if (module.effectData != null) {
                 ApplyModuleEffect(module);
             } else {
@@ -166,6 +224,13 @@ public class ModuleEffectManager : MonoBehaviour
 
         if (obj.TryGetComponent<StatModifierReceiver_TurretDamage>(out StatModifierReceiver_TurretDamage turretReceiver)) {
             turretReceiver.ApplyModifiers();
+        }
+    }
+
+    public void RefreshModuleEffects()
+    {
+        if (SceneManager.GetActiveScene().name == "GameScene") {
+            StartCoroutine(WaitForCustomizationAndApplyEffects());
         }
     }
 }

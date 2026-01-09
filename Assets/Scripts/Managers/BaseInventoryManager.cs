@@ -176,6 +176,7 @@ public class BaseInventoryManager : MonoBehaviour
         string modulesKey = BaseInventoryPrefix + "Modules";
         if (!PlayerPrefs.HasKey(modulesKey))
         {
+            Debug.Log("BaseInventoryManager: 저장된 모듈이 없습니다.");
             return;
         }
         
@@ -184,21 +185,20 @@ public class BaseInventoryManager : MonoBehaviour
         
         if (moduleNameList == null || moduleNameList.moduleNames == null)
         {
+            Debug.LogWarning("BaseInventoryManager: 모듈 리스트를 파싱할 수 없습니다.");
             return;
         }
         
         Dictionary<string, ModuleRecipe> recipeMap = GetAllModuleRecipes();
         
+        int loadedCount = 0;
         foreach (string moduleName in moduleNameList.moduleNames)
         {
             if (recipeMap.TryGetValue(moduleName, out ModuleRecipe recipe))
             {
                 Module module = new Module(recipe);
                 _baseModules.Add(module);
-            }
-            else
-            {
-                Debug.LogWarning($"BaseInventoryManager: Could not find recipe for module '{moduleName}'");
+                loadedCount++;
             }
         }
     }

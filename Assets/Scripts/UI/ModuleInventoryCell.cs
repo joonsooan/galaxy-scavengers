@@ -11,6 +11,7 @@ public class ModuleInventoryCell : MonoBehaviour, IPointerClickHandler, IBaseInv
     
     private Module _module;
     private BaseInventorySystem _baseInventorySystem;
+    private CoreCustomUIManager _coreCustomUIManager;
     private bool _isEmpty = true;
     
     public Module Module => _module;
@@ -19,6 +20,14 @@ public class ModuleInventoryCell : MonoBehaviour, IPointerClickHandler, IBaseInv
     public void Initialize(BaseInventorySystem baseInventorySystem)
     {
         _baseInventorySystem = baseInventorySystem;
+        _coreCustomUIManager = null;
+        Clear();
+    }
+
+    public void Initialize(CoreCustomUIManager coreCustomUIManager)
+    {
+        _coreCustomUIManager = coreCustomUIManager;
+        _baseInventorySystem = null;
         Clear();
     }
     
@@ -64,14 +73,21 @@ public class ModuleInventoryCell : MonoBehaviour, IPointerClickHandler, IBaseInv
     
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (_isEmpty || _baseInventorySystem == null || _module == null)
+        if (_isEmpty || _module == null)
         {
             return;
         }
         
-        // TODO: Show module details or allow removal/transfer to seed core
-        // For now, just log
-        Debug.Log($"Clicked module: {_module.moduleName}");
+        if (_coreCustomUIManager != null) {
+            _coreCustomUIManager.OnModuleCellClicked(_module);
+        } else if (_baseInventorySystem != null) {
+            CoreCustomUIManager customUIManager = FindFirstObjectByType<CoreCustomUIManager>();
+            if (customUIManager != null) {
+                customUIManager.OnModuleCellClicked(_module);
+            } else {
+                Debug.Log($"Clicked module: {_module.moduleName}");
+            }
+        }
     }
 }
 
