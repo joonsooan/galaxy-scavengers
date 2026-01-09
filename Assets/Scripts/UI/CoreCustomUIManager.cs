@@ -152,6 +152,14 @@ public class CoreCustomUIManager : MonoBehaviour
     {
         ClearModuleSelectionGrid();
 
+        if (_inventoryManager == null) {
+            _inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        }
+
+        if (_customizationManager == null) {
+            _customizationManager = FindFirstObjectByType<CoreCustomizationManager>();
+        }
+
         if (_inventoryManager == null || _customizationManager == null || moduleSelectionGridContainer == null || moduleSelectionCellPrefab == null) {
             return;
         }
@@ -253,19 +261,22 @@ public class CoreCustomUIManager : MonoBehaviour
             _inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
         }
         
-        StartCoroutine(RefreshModuleSelectionGridDelayed());
+        if (moduleSelectionPanel != null && moduleSelectionPanel.activeSelf) {
+            StartCoroutine(RefreshModuleSelectionGridDelayed());
+        }
     }
 
     private IEnumerator RefreshModuleSelectionGridDelayed()
     {
+        yield return null;
         yield return null;
         RefreshModuleSelectionGrid();
     }
 
     private void OnModuleInventoryChanged(Module module)
     {
-        if (coreCustomPanel != null && coreCustomPanel.activeSelf) {
-            RefreshModuleSelectionGrid();
+        if (coreCustomPanel != null && coreCustomPanel.activeSelf && moduleSelectionPanel != null && moduleSelectionPanel.activeSelf) {
+            StartCoroutine(RefreshModuleSelectionGridDelayed());
         }
     }
 

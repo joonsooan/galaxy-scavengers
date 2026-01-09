@@ -92,12 +92,6 @@ public class CoreCustomizationManager : MonoBehaviour
         SaveSelectedModules();
         
         BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
-        if (inventoryManager == null) {
-            Debug.LogError("CoreCustomizationManager: BaseInventoryManager를 찾을 수 없습니다. 모듈을 인벤토리로 반환할 수 없습니다.");
-            OnModuleSlotChanged?.Invoke(slotIndex, null);
-            return;
-        }
-
         inventoryManager.AddModule(moduleToRemove);
         
         List<Module> modulesAfterAdd = inventoryManager.GetAllModules();

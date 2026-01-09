@@ -13,9 +13,9 @@ public class ModuleStationUIManager : MonoBehaviour
     [SerializeField] private GameObject moduleGridCellPrefab;
     [SerializeField] private ModuleDetailPanel moduleDetailPanel;
     [SerializeField] private Button closeButton;
+
     private readonly List<ModuleGridCell> _recipeCells = new List<ModuleGridCell>();
     private ModuleData _currentData;
-
     private ModuleStation _currentStation;
 
     private void Start()

@@ -62,17 +62,18 @@ public class CoreCustomizationSlot : MonoBehaviour
         bool hasModule = _currentModule != null;
 
         if (moduleIconImage != null) {
-            if (hasModule && _currentModule.moduleIcon != null) {
+            if (hasModule && _currentModule != null && _currentModule.moduleIcon != null) {
                 moduleIconImage.sprite = _currentModule.moduleIcon;
                 moduleIconImage.enabled = true;
             } else {
                 moduleIconImage.sprite = null;
                 moduleIconImage.enabled = false;
+                moduleIconImage.color = Color.white;
             }
         }
 
         if (moduleNameText != null) {
-            moduleNameText.text = hasModule ? _currentModule.moduleName : "";
+            moduleNameText.text = hasModule && _currentModule != null ? _currentModule.moduleName : "";
         }
 
         if (emptySlotIndicator != null) {
