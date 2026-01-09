@@ -14,6 +14,9 @@ public class ModuleRecipe
     [Header("Module Properties")]
     public ModuleType moduleType;
     public int moduleTier = 1;
+    
+    [Header("Module Effect")]
+    public ModuleEffectData effectData;
 }
 
 public enum ModuleType

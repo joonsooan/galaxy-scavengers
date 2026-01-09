@@ -13,6 +13,9 @@ public class Module
     [System.NonSerialized]
     public Sprite moduleIcon;
     
+    [System.NonSerialized]
+    public ModuleEffectData effectData;
+    
     public Module(ModuleRecipe recipe)
     {
         moduleName = recipe.moduleName;
@@ -22,6 +25,7 @@ public class Module
         moduleType = recipe.moduleType;
         moduleTier = recipe.moduleTier;
         moduleId = System.Guid.NewGuid().ToString();
+        effectData = recipe.effectData;
     }
     
     public Module(Module other)
@@ -33,6 +37,7 @@ public class Module
         moduleType = other.moduleType;
         moduleTier = other.moduleTier;
         moduleId = System.Guid.NewGuid().ToString();
+        effectData = other.effectData;
     }
     
     public Module() { }

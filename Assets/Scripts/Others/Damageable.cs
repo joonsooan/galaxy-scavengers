@@ -15,6 +15,16 @@ public abstract class Damageable : MonoBehaviour, ICombo
     
     protected int currentHealth;
     
+    /// <summary>
+    /// Sets the maximum health (used by module effects)
+    /// </summary>
+    public virtual void SetMaxHealth(int newMaxHealth)
+    {
+        float healthRatio = maxHealth > 0 ? (float)currentHealth / maxHealth : 1f;
+        maxHealth = newMaxHealth;
+        currentHealth = Mathf.RoundToInt(maxHealth * healthRatio);
+    }
+    
     private SpriteRenderer _sr;
     private Color _originalColor;
     private Coroutine _flashCoroutine;

@@ -1,0 +1,171 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+public class ModuleEffectManager : MonoBehaviour
+{
+    private readonly Dictionary<ModuleStatType, float> _activeStatModifiers = new Dictionary<ModuleStatType, float>();
+    public static ModuleEffectManager Instance { get; private set; }
+
+    public IReadOnlyDictionary<ModuleStatType, float> ActiveStatModifiers {
+        get {
+            return _activeStatModifiers;
+        }
+    }
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this) {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
+
+    private void Start()
+    {
+        ApplyModuleEffects();
+    }
+
+    private void ApplyModuleEffects()
+    {
+        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        List<Module> modules = inventoryManager.GetAllModules();
+        _activeStatModifiers.Clear();
+
+        Debug.Log($"ModuleEffectManager: 활성화된 모듈 {modules.Count} 개 발견");
+        
+        foreach (Module module in modules) {
+            if (module.effectData != null) {
+                ApplyModuleEffect(module);
+            } else {
+                Debug.LogWarning($"ModuleEffectManager: 모듈 '{module.moduleName}'에 effectData가 없습니다.");
+            }
+        }
+
+        ApplyModifiersToExistingObjects();
+        UpdateActiveStatsDisplay();
+
+        Debug.Log($"ModuleEffectManager: 모듈 {modules.Count} 개 적용 완료");
+        
+        if (_activeStatModifiers.Count > 0) {
+            Debug.Log("ModuleEffectManager: 활성화된 스탯 수정자:");
+            foreach (var kvp in _activeStatModifiers) {
+                Debug.Log($"  - {kvp.Key}: +{kvp.Value * 100f:F0}%");
+            }
+        }
+    }
+
+    private void ApplyModuleEffect(Module module)
+    {
+        if (module.effectData == null) return;
+        
+        module.effectData.ApplyModifiers();
+
+        Debug.Log($"ModuleEffectManager: 모듈 '{module.moduleName}' 적용");
+        
+        if (module.effectData.StatModifiers != null && module.effectData.StatModifiers.Count > 0) {
+            foreach (var modifier in module.effectData.StatModifiers) {
+                if (modifier.modifierValue > 0f) {
+                    Debug.Log($"  - {modifier.statType}: +{modifier.modifierValue * 100f:F0}%");
+                }
+            }
+        }
+    }
+
+    public void AddStatModifier(ModuleStatType statType, float modifierValue)
+    {
+        if (_activeStatModifiers.ContainsKey(statType)) {
+            _activeStatModifiers[statType] += modifierValue;
+        }
+        else {
+            _activeStatModifiers[statType] = modifierValue;
+        }
+    }
+
+    public float GetStatModifier(ModuleStatType statType)
+    {
+        return _activeStatModifiers.TryGetValue(statType, out float value) ? value : 0f;
+    }
+
+    public float GetModifiedValue(float baseValue, ModuleStatType statType)
+    {
+        float modifier = GetStatModifier(statType);
+        return baseValue * (1f + modifier);
+    }
+
+    private void ApplyModifiersToExistingObjects()
+    {
+        foreach (BaseStorage storage in FindObjectsByType<BaseStorage>(FindObjectsSortMode.None)) {
+            if (storage.TryGetComponent<StatModifierReceiver_Storage>(out StatModifierReceiver_Storage receiver)) {
+                receiver.ApplyModifiers();
+            }
+        }
+
+        foreach (UnitBase unit in FindObjectsByType<UnitBase>(FindObjectsSortMode.None)) {
+            if (unit.TryGetComponent<StatModifierReceiver_UnitMovement>(out StatModifierReceiver_UnitMovement receiver)) {
+                receiver.ApplyModifiers();
+            }
+
+            if (unit.TryGetComponent<StatModifierReceiver_UnitWorkSpeed>(out StatModifierReceiver_UnitWorkSpeed receiver2)) {
+                receiver2.ApplyModifiers();
+            }
+        }
+
+        foreach (Damageable building in FindObjectsByType<Damageable>(FindObjectsSortMode.None)) {
+            if (building.TryGetComponent<StatModifierReceiver_BuildingHP>(out StatModifierReceiver_BuildingHP receiver)) {
+                receiver.ApplyModifiers();
+            }
+        }
+
+        foreach (ResourceGenerator generator in FindObjectsByType<ResourceGenerator>(FindObjectsSortMode.None)) {
+            if (generator.TryGetComponent<StatModifierReceiver_ResourceGeneration>(out StatModifierReceiver_ResourceGeneration receiver)) {
+                receiver.ApplyModifiers();
+            }
+        }
+
+        foreach (Turret turret in FindObjectsByType<Turret>(FindObjectsSortMode.None)) {
+            if (turret.TryGetComponent<StatModifierReceiver_TurretDamage>(out StatModifierReceiver_TurretDamage receiver)) {
+                receiver.ApplyModifiers();
+            }
+        }
+    }
+
+    private void UpdateActiveStatsDisplay()
+    {
+        ActiveStatDisplay display = FindFirstObjectByType<ActiveStatDisplay>();
+        if (display != null) {
+            display.UpdateDisplay();
+        }
+    }
+
+    public void OnObjectCreated(GameObject obj)
+    {
+        if (obj == null) return;
+
+        if (obj.TryGetComponent<StatModifierReceiver_Storage>(out StatModifierReceiver_Storage storageReceiver)) {
+            storageReceiver.ApplyModifiers();
+        }
+
+        if (obj.TryGetComponent<StatModifierReceiver_UnitMovement>(out StatModifierReceiver_UnitMovement movementReceiver)) {
+            movementReceiver.ApplyModifiers();
+        }
+
+        if (obj.TryGetComponent<StatModifierReceiver_UnitWorkSpeed>(out StatModifierReceiver_UnitWorkSpeed workSpeedReceiver)) {
+            workSpeedReceiver.ApplyModifiers();
+        }
+
+        if (obj.TryGetComponent<StatModifierReceiver_BuildingHP>(out StatModifierReceiver_BuildingHP hpReceiver)) {
+            hpReceiver.ApplyModifiers();
+        }
+
+        if (obj.TryGetComponent<StatModifierReceiver_ResourceGeneration>(out StatModifierReceiver_ResourceGeneration genReceiver)) {
+            genReceiver.ApplyModifiers();
+        }
+
+        if (obj.TryGetComponent<StatModifierReceiver_TurretDamage>(out StatModifierReceiver_TurretDamage turretReceiver)) {
+            turretReceiver.ApplyModifiers();
+        }
+    }
+}

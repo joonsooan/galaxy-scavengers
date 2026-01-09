@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5177927966069864011}
   - component: {fileID: -1685140727660024593}
   - component: {fileID: -1230124184689666094}
+  - component: {fileID: 2731464798948232543}
   m_Layer: 0
   m_Name: 2_Drone Hub
   m_TagString: Untagged
@@ -166,3 +167,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   visionRange: 4.5
   isActive: 1
+--- !u!114 &2731464798948232543
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1574451153020646121}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d1e266f63b995c4a9aae9c09a1ebcb9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

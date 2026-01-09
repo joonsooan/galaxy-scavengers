@@ -83,6 +83,15 @@ public class BaseStorage : Damageable, IStorage
     
     public virtual int GetMaxCapacity() => maxStorageAmount;
     
+    /// <summary>
+    /// Sets the maximum storage capacity (used by module effects)
+    /// </summary>
+    public virtual void SetMaxStorage(int newMaxStorage)
+    {
+        maxStorageAmount = newMaxStorage;
+        RefreshAllResourcesUI();
+    }
+    
     public virtual int GetTotalCurrentAmount() => currentResources.Values.Sum();
     
     public virtual Vector3 GetPosition() => transform.position;
