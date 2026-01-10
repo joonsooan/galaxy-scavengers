@@ -1,7 +1,7 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using TMPro;
 
 public class CoreCustomizationSlot : MonoBehaviour
 {
@@ -10,15 +10,15 @@ public class CoreCustomizationSlot : MonoBehaviour
     [SerializeField] private TMP_Text moduleNameText;
     [SerializeField] private GameObject emptySlotIndicator;
     [SerializeField] private Button slotButton;
-
-    private int _slotIndex;
-    private Module _currentModule;
+    [SerializeField] private GameObject lockIndicator;
     private CoreCustomizationManager _customizationManager;
-    private CoreCustomUIManager _uiManager;
     private EventTrigger _eventTrigger;
 
-    public int SlotIndex => _slotIndex;
-    public Module CurrentModule => _currentModule;
+    private CoreCustomUIManager _uiManager;
+
+    public int SlotIndex { get; private set; }
+
+    public Module CurrentModule { get; private set; }
 
     private void Awake()
     {
@@ -38,7 +38,7 @@ public class CoreCustomizationSlot : MonoBehaviour
 
         EventTrigger.Entry entry = new EventTrigger.Entry();
         entry.eventID = EventTriggerType.PointerClick;
-        entry.callback.AddListener((data) => {
+        entry.callback.AddListener(data => {
             PointerEventData pointerData = (PointerEventData)data;
             if (pointerData.button == PointerEventData.InputButton.Right) {
                 OnRightClick();
@@ -49,23 +49,42 @@ public class CoreCustomizationSlot : MonoBehaviour
 
     public void Initialize(int slotIndex, CoreCustomizationManager manager, CoreCustomUIManager uiManager)
     {
-        _slotIndex = slotIndex;
+        SlotIndex = slotIndex;
         _customizationManager = manager;
         _uiManager = uiManager;
+        
+        // Subscribe to unlocked slot count changes
+        if (_customizationManager != null) {
+            _customizationManager.OnUnlockedSlotCountChanged += OnUnlockedSlotCountChanged;
+        }
+        
         RefreshSlot();
+    }
+
+    private void OnDestroy()
+    {
+        if (_customizationManager != null) {
+            _customizationManager.OnUnlockedSlotCountChanged -= OnUnlockedSlotCountChanged;
+        }
+    }
+
+    private void OnUnlockedSlotCountChanged(int unlockedSlotCount)
+    {
+        // Update UI when unlocked slot count changes
+        UpdateLockUI();
     }
 
     public void RefreshSlot()
     {
-        _currentModule = _customizationManager != null ? _customizationManager.GetModuleInSlot(_slotIndex) : null;
-
-        bool hasModule = _currentModule != null;
+        CurrentModule = _customizationManager != null ? _customizationManager.GetModuleInSlot(SlotIndex) : null;
+        bool hasModule = CurrentModule != null;
 
         if (moduleIconImage != null) {
-            if (hasModule && _currentModule != null && _currentModule.moduleIcon != null) {
-                moduleIconImage.sprite = _currentModule.moduleIcon;
+            if (hasModule && CurrentModule != null && CurrentModule.moduleIcon != null) {
+                moduleIconImage.sprite = CurrentModule.moduleIcon;
                 moduleIconImage.enabled = true;
-            } else {
+            }
+            else {
                 moduleIconImage.sprite = null;
                 moduleIconImage.enabled = false;
                 moduleIconImage.color = Color.white;
@@ -73,25 +92,47 @@ public class CoreCustomizationSlot : MonoBehaviour
         }
 
         if (moduleNameText != null) {
-            moduleNameText.text = hasModule && _currentModule != null ? _currentModule.moduleName : "";
+            moduleNameText.text = hasModule && CurrentModule != null ? CurrentModule.moduleName : "";
         }
 
         if (emptySlotIndicator != null) {
             emptySlotIndicator.SetActive(!hasModule);
+        }
+
+        UpdateLockUI();
+    }
+
+    private void UpdateLockUI()
+    {
+        bool isLocked = _customizationManager != null && _customizationManager.IsSlotLocked(SlotIndex);
+        
+        if (lockIndicator != null) {
+            lockIndicator.SetActive(isLocked);
+        }
+
+        // Optionally disable slot button when locked
+        if (slotButton != null) {
+            slotButton.interactable = !isLocked;
         }
     }
 
     private void OnSlotButtonClicked()
     {
         if (_uiManager != null) {
-            _uiManager.OnSlotClicked(_slotIndex);
+            _uiManager.OnSlotClicked(SlotIndex);
         }
     }
 
     private void OnRightClick()
     {
-        if (_currentModule != null && _customizationManager != null) {
-            _customizationManager.RemoveModuleFromSlot(_slotIndex);
+        if (CurrentModule != null && _customizationManager != null) {
+            // Check if slot is locked before removing
+            if (_customizationManager.IsSlotLocked(SlotIndex)) {
+                Debug.LogWarning($"CoreCustomizationSlot: Cannot remove module from slot {SlotIndex} - slot is locked");
+                return;
+            }
+            _customizationManager.RemoveModuleFromSlot(SlotIndex);
         }
     }
+
 }

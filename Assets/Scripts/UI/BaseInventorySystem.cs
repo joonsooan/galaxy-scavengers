@@ -111,16 +111,20 @@ public class BaseInventorySystem : MonoBehaviour
 
     private void OnModuleAdded(Module module)
     {
+        // Always refresh when panel is active, or queue refresh for when panel opens
         if (inventoryPanel != null && inventoryPanel.activeSelf) {
             RefreshModulesOnly();
         }
+        // Note: If panel is not active, it will refresh when ToggleInventory is called
     }
 
     private void OnModuleRemoved(Module module)
     {
+        // Always refresh when panel is active, or queue refresh for when panel opens
         if (inventoryPanel != null && inventoryPanel.activeSelf) {
             RefreshModulesOnly();
         }
+        // Note: If panel is not active, it will refresh when ToggleInventory is called
     }
 
     private void HideInventoryPanel()
@@ -164,8 +168,16 @@ public class BaseInventorySystem : MonoBehaviour
             inventoryPanel.SetActive(!isActive);
 
             if (!isActive) {
+                // Panel is being opened - refresh to show current state
                 RefreshInventoryGrid();
             }
+        }
+    }
+
+    public void ForceRefreshInventory()
+    {
+        if (inventoryPanel != null && inventoryPanel.activeSelf) {
+            RefreshInventoryGrid();
         }
     }
 

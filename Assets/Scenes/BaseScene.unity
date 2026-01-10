@@ -393,7 +393,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &64477680
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2336,6 +2336,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: Module Slot (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 6957778665268516528, guid: 21c0b0ba2ed9f774cb66d10710bc1a92, type: 3}
+      propertyPath: m_Color.b
+      value: 0.56289303
+      objectReference: {fileID: 0}
+    - target: {fileID: 6957778665268516528, guid: 21c0b0ba2ed9f774cb66d10710bc1a92, type: 3}
+      propertyPath: m_Color.g
+      value: 0.56289303
+      objectReference: {fileID: 0}
+    - target: {fileID: 6957778665268516528, guid: 21c0b0ba2ed9f774cb66d10710bc1a92, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3508,7 +3520,6 @@ MonoBehaviour:
   moduleSelectionPanel: {fileID: 2582065}
   moduleSelectionGridContainer: {fileID: 297182957}
   moduleSelectionCellPrefab: {fileID: 3842191235755297668, guid: 8cde97c2151af5648a313d92198fbeee, type: 3}
-  closeModuleSelectionButton: {fileID: 0}
 --- !u!1 &679648652
 GameObject:
   m_ObjectHideFlags: 0
@@ -5328,6 +5339,18 @@ PrefabInstance:
     - target: {fileID: 1921487250857397776, guid: 21c0b0ba2ed9f774cb66d10710bc1a92, type: 3}
       propertyPath: m_Name
       value: Module Slot (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6957778665268516528, guid: 21c0b0ba2ed9f774cb66d10710bc1a92, type: 3}
+      propertyPath: m_Color.b
+      value: 0.56289303
+      objectReference: {fileID: 0}
+    - target: {fileID: 6957778665268516528, guid: 21c0b0ba2ed9f774cb66d10710bc1a92, type: 3}
+      propertyPath: m_Color.g
+      value: 0.56289303
+      objectReference: {fileID: 0}
+    - target: {fileID: 6957778665268516528, guid: 21c0b0ba2ed9f774cb66d10710bc1a92, type: 3}
+      propertyPath: m_Color.r
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -8280,7 +8303,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1873153447
 RectTransform:
   m_ObjectHideFlags: 0
@@ -9081,6 +9104,18 @@ PrefabInstance:
     - target: {fileID: 1921487250857397776, guid: 21c0b0ba2ed9f774cb66d10710bc1a92, type: 3}
       propertyPath: m_Name
       value: Module Slot
+      objectReference: {fileID: 0}
+    - target: {fileID: 6957778665268516528, guid: 21c0b0ba2ed9f774cb66d10710bc1a92, type: 3}
+      propertyPath: m_Color.b
+      value: 0.56289303
+      objectReference: {fileID: 0}
+    - target: {fileID: 6957778665268516528, guid: 21c0b0ba2ed9f774cb66d10710bc1a92, type: 3}
+      propertyPath: m_Color.g
+      value: 0.56289303
+      objectReference: {fileID: 0}
+    - target: {fileID: 6957778665268516528, guid: 21c0b0ba2ed9f774cb66d10710bc1a92, type: 3}
+      propertyPath: m_Color.r
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

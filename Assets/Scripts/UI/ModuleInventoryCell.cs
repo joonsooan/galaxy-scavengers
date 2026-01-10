@@ -79,13 +79,17 @@ public class ModuleInventoryCell : MonoBehaviour, IPointerClickHandler, IBaseInv
         }
         
         if (_coreCustomUIManager != null) {
+            // Only allow module placement if core custom panel is open
             _coreCustomUIManager.OnModuleCellClicked(_module);
         } else if (_baseInventorySystem != null) {
+            // Modules in base inventory system should not be placeable
+            // Only allow if core custom panel is explicitly open
             CoreCustomUIManager customUIManager = FindFirstObjectByType<CoreCustomUIManager>();
-            if (customUIManager != null) {
+            if (customUIManager != null && customUIManager.IsPanelOpen()) {
                 customUIManager.OnModuleCellClicked(_module);
             } else {
-                Debug.Log($"Clicked module: {_module.moduleName}");
+                // Module clicked in base inventory system - do nothing or show info
+                Debug.Log($"Clicked module in base inventory: {_module.moduleName}");
             }
         }
     }
