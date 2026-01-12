@@ -14,8 +14,8 @@ GameObject:
   - component: {fileID: 8054321829144718534}
   - component: {fileID: 3132766170232860239}
   - component: {fileID: 9023288875373990353}
-  - component: {fileID: 8856471310434924256}
   - component: {fileID: -5060092193258834609}
+  - component: {fileID: 8856471310434924256}
   m_Layer: 0
   m_Name: Unit_Enemy_0
   m_TagString: Untagged
@@ -80,14 +80,14 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 580065311
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 0
-  m_Sprite: {fileID: 4992164939788663360, guid: 41d81b85481201c44bb0e26872455946, type: 3}
-  m_Color: {r: 1, g: 0, b: 0, a: 1}
+  m_Sprite: {fileID: 1582198199920280722, guid: cb3d4115e9a45cc4ab4a66026a290c5d, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1.5625, y: 0.75}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -158,8 +158,8 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 1, y: 1}
+    oldSize: {x: 1.5625, y: 0.75}
+    newSize: {x: 1.5625, y: 0.75}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
@@ -192,9 +192,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d119d16415c69741bcfa340b580f4c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spriteUp: {fileID: 8603391338363840403, guid: 41d81b85481201c44bb0e26872455946, type: 3}
-  spriteDown: {fileID: 3751741419470782174, guid: 41d81b85481201c44bb0e26872455946, type: 3}
-  spriteRight: {fileID: 4992164939788663360, guid: 41d81b85481201c44bb0e26872455946, type: 3}
+--- !u!114 &-5060092193258834609
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7944764008120523387}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b6886121ea03594f865ae62420ead7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  visibilityType: 0
 --- !u!114 &8856471310434924256
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -213,26 +223,10 @@ MonoBehaviour:
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
   currentState: 0
-  homeRadius: 4
-  territoryRadius: 8
-  chaseTime: 5
-  detectionRadius: 8
-  minRoamInterval: 2
-  maxRoamInterval: 3
+  warningStatePersist: 10
   attackDamage: 10
   attackRange: 1.5
   attackSpeed: 1
+  minRoamInterval: 3
+  maxRoamInterval: 5
   unitMovement: {fileID: 3132766170232860239}
---- !u!114 &-5060092193258834609
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7944764008120523387}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b6886121ea03594f865ae62420ead7c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  visibilityType: 0

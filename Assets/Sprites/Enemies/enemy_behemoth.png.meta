@@ -1,10 +1,16 @@
 fileFormatVersion: 2
-guid: ef2c22612f5085746831e39832206483
+guid: 4774cd0804d23ea41a748e5b821b8d05
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6083241431176386767
-    second: Txtr_3280_itspkr2932_0
+      213: -582845187829330860
+    second: enemy_behemoth_0
+  - first:
+      213: 6821673189383450725
+    second: enemy_behemoth_1
+  - first:
+      213: 240110589837205577
+    second: enemy_behemoth_2
   - first:
       213: -5027509340213622084
     second: 0
@@ -192,10 +198,10 @@ TextureImporter:
   compressionQuality: 50
   spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 0
+  spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 0
+  spritePixelsToUnits: 16
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -233,19 +239,6 @@ TextureImporter:
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: WebGL
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -1668,7 +1661,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: e8df8297b87016f4eb7aae69eb0cf8ed
     internalID: 0
     vertices: []
     indices: 
@@ -1725,7 +1718,9 @@ TextureImporter:
       7: 6501298950303736333
       8: -3181606171480048652
       9: -7010260848350730462
-      Txtr_3280_itspkr2932_0: -6083241431176386767
+      enemy_behemoth_0: -582845187829330860
+      enemy_behemoth_1: 6821673189383450725
+      enemy_behemoth_2: 240110589837205577
       other: 3221110418805894947
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0

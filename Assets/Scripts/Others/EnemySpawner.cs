@@ -1,15 +1,25 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+
+[System.Serializable]
+public class EnemySpawnData
+{
+    public GameObject enemyPrefab;
+    [Range(0f, 100f)]
+    public float spawnProbability = 50f;
+}
 
 public class EnemySpawner : MonoBehaviour
 {
-    [SerializeField] private GameObject enemyPrefab;
-    [SerializeField] private int enemiesPerHole = 3;
+    [SerializeField] private List<EnemySpawnData> enemyPrefabs = new ();
+    [SerializeField] private int minEnemiesPerHole = 5;
+    [SerializeField] private int maxEnemiesPerHole = 7;
     [SerializeField] private float spawnRadiusOffset = 1f;
 
     public void SpawnEnemies()
     {
-        if (enemyPrefab == null)
+        if (enemyPrefabs == null || enemyPrefabs.Count == 0)
         {
             return;
         }
@@ -33,24 +43,104 @@ public class EnemySpawner : MonoBehaviour
         
         for (int i = 0; i < holes.Count; i++)
         {
-            Vector3 center = mapGenerator.GetEnemySpawnHoleWorldPosition(holes[i]);
+            Vector2Int holePos = holes[i];
+            Vector3 center = mapGenerator.GetEnemySpawnHoleWorldPosition(holePos);
+            (float homeRadius, float territoryRadius) = mapGenerator.GetHoleRadiusValues(holePos);
+            
+            if (homeRadius <= 0f || territoryRadius <= 0f)
+            {
+                continue;
+            }
+
+            int enemiesPerHole = Random.Range(minEnemiesPerHole, maxEnemiesPerHole);
+            
             for (int j = 0; j < enemiesPerHole; j++)
             {
+                GameObject selectedPrefab = SelectEnemyPrefab();
+                if (selectedPrefab == null)
+                {
+                    continue;
+                }
+                
                 Vector3 spawnPos = FindValidSpawnPosition(center, spawnRadiusOffset, grid);
                 if (spawnPos != Vector3.zero)
                 {
-                    GameObject enemy = ObjectPooler.Instance.SpawnFromPool("Enemy_0", spawnPos, Quaternion.identity);
+                    string poolTag = GetPoolTagFromPrefab(selectedPrefab);
+                    GameObject enemy = ObjectPooler.Instance.SpawnFromPool(poolTag, spawnPos, Quaternion.identity);
                     if (enemy != null)
                     {
-                        Unit_Enemy_0 enemyScript = enemy.GetComponent<Unit_Enemy_0>();
+                        EnemyUnitBase enemyScript = enemy.GetComponent<EnemyUnitBase>();
                         if (enemyScript != null)
                         {
-                            enemyScript.SetTerritoryCenter(center);
+                            enemyScript.SetTerritoryCenter(center, homeRadius, territoryRadius);
                         }
                     }
                 }
             }
         }
+    }
+    
+    private GameObject SelectEnemyPrefab()
+    {
+        if (enemyPrefabs == null || enemyPrefabs.Count == 0)
+        {
+            return null;
+        }
+        
+        List<EnemySpawnData> validEnemies = enemyPrefabs.Where(e => e != null && e.enemyPrefab != null && e.spawnProbability > 0f).ToList();
+        if (validEnemies.Count == 0)
+        {
+            return null;
+        }
+        
+        float totalProbability = validEnemies.Sum(e => e.spawnProbability);
+        if (totalProbability <= 0f)
+        {
+            return validEnemies[0].enemyPrefab;
+        }
+        
+        float randomValue = Random.Range(0f, totalProbability);
+        float cumulativeProbability = 0f;
+        
+        foreach (EnemySpawnData enemyData in validEnemies)
+        {
+            cumulativeProbability += enemyData.spawnProbability;
+            if (randomValue <= cumulativeProbability)
+            {
+                return enemyData.enemyPrefab;
+            }
+        }
+        
+        return validEnemies[validEnemies.Count - 1].enemyPrefab;
+    }
+    
+    private string GetPoolTagFromPrefab(GameObject prefab)
+    {
+        if (prefab == null)
+        {
+            return string.Empty;
+        }
+        
+        EnemyUnitBase enemyUnit = prefab.GetComponent<EnemyUnitBase>();
+        if (enemyUnit == null)
+        {
+            return string.Empty;
+        }
+        
+        if (enemyUnit is Unit_Enemy_0)
+        {
+            return "Enemy_0";
+        }
+        else if (enemyUnit is Unit_Enemy_1)
+        {
+            return "Enemy_1";
+        }
+        else if (enemyUnit is Unit_Enemy_2)
+        {
+            return "Enemy_2";
+        }
+        
+        return "Enemy_0";
     }
     
     private Vector3 FindValidSpawnPosition(Vector3 center, float maxRadius, Grid grid)
