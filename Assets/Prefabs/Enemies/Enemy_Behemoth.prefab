@@ -216,7 +216,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 330c45daea6434b46bc02141d339b613, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 2
+  moveSpeed: 1.5
   waypointTolerance: 0.1
 --- !u!114 &9023288875373990353
 MonoBehaviour:
@@ -261,10 +261,12 @@ MonoBehaviour:
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
   currentState: 0
-  warningStatePersist: 10
+  warningStatePersist: 5
+  outOfTerritoryChaseTime: 3
   attackDamage: 15
   attackRange: 1.5
   attackSpeed: 3
+  minTargetMoveDistance: 0.5
   minRoamInterval: 5
   maxRoamInterval: 7
   unitMovement: {fileID: 3132766170232860239}

@@ -121,6 +121,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   visionRange: 4.5
   isActive: 1
+  hasOffest: 1
+  offest: {x: 0, y: 0.5, z: 0}
 --- !u!61 &2808843624147846201
 BoxCollider2D:
   m_ObjectHideFlags: 0

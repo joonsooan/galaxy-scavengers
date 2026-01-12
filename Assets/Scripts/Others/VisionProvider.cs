@@ -6,6 +6,8 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
     [Header("Vision Settings")]
     [SerializeField] private float visionRange = 5f;
     [SerializeField] private bool isActive = true;
+    [SerializeField] private bool hasOffest;
+    [SerializeField] private Vector3 offest = new (0.5f, 0.5f, 0f);
     
     private bool _isRegistered;
     private CircleCollider2D _visionCollider;
@@ -195,7 +197,14 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.cyan;
-        Gizmos.DrawWireSphere(transform.position, visionRange);
+        if (hasOffest)
+        {
+            Gizmos.DrawWireSphere(transform.position + offest, visionRange);
+        }
+        else
+        {
+            Gizmos.DrawWireSphere(transform.position, visionRange);
+        }
     }
 }
 

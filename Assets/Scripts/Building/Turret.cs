@@ -17,7 +17,7 @@ public class Turret : Damageable
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
+        Gizmos.DrawWireSphere(transform.position + new Vector3(0.5f, 0.5f, 0f), attackRange);
     }
 
     protected override void OnEnable()

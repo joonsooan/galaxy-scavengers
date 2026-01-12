@@ -67,7 +67,7 @@ public abstract class UnitBase : MonoBehaviour
         }
     }
     
-    public void TakeDamage(float damage)
+    public virtual void TakeDamage(float damage)
     {
         currentHealth -= damage;
 

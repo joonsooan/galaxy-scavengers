@@ -12,6 +12,7 @@ public abstract class EnemyUnitBase : UnitBase
 
     [Header("Zones")]
     [SerializeField] protected float warningStatePersist = 5f;
+    [SerializeField] protected float outOfTerritoryChaseTime = 3f;
     protected float homeRadius;
     protected float territoryRadius;
 
@@ -41,8 +42,12 @@ public abstract class EnemyUnitBase : UnitBase
     private Vector3 _lastTargetPos;
     private Coroutine _attackCoroutine;
     private CircleCollider2D _attackRangeCollider;
+    private bool _isInInfiniteAttackState;
+    private float _lastInfiniteAttackTargetUpdateTime;
+    private float _outOfTerritoryTimer;
     
     private const float MinMoveUpdateInterval = 0.5f;
+    private const float InfiniteAttackTargetUpdateInterval = 0.5f;
     
     protected override void Awake()
     {
@@ -54,6 +59,18 @@ public abstract class EnemyUnitBase : UnitBase
         
         spawnPosition = Vector3.zero;
         aiState = AIState.Idle;
+        _isInInfiniteAttackState = false;
+    }
+    
+    public override void TakeDamage(float damage)
+    {
+        base.TakeDamage(damage);
+        
+        if (!_isInInfiniteAttackState)
+        {
+            _isInInfiniteAttackState = true;
+            EnterAttackState();
+        }
     }
     
     private void Start()
@@ -161,6 +178,7 @@ public abstract class EnemyUnitBase : UnitBase
         
         aiState = AIState.Warning;
         warningTimer = 0f;
+        _outOfTerritoryTimer = 0f;
         
         _lastMoveToTargetTime = -MinMoveUpdateInterval; 
         _lastTargetPos = Vector3.positiveInfinity;
@@ -189,8 +207,17 @@ public abstract class EnemyUnitBase : UnitBase
     
         if (distanceFromSpawn > territoryRadius)
         {
-            ReturnToIdle();
-            return;
+            _outOfTerritoryTimer += Time.deltaTime;
+            
+            if (_outOfTerritoryTimer > outOfTerritoryChaseTime)
+            {
+                ReturnToIdle();
+                return;
+            }
+        }
+        else
+        {
+            _outOfTerritoryTimer = 0f;
         }
     
         float distanceToTarget = Vector3.Distance(transform.position, targetPos);
@@ -226,18 +253,51 @@ public abstract class EnemyUnitBase : UnitBase
         Damageable currentBuilding = targetDamageable;
         UnitBase currentUnit = targetUnit;
     
+        if (_isInInfiniteAttackState && (currentBuilding == null && currentUnit == null))
+        {
+            FindClosestTargetForInfiniteAttack();
+            currentBuilding = targetDamageable;
+            currentUnit = targetUnit;
+        }
+        
         if (currentBuilding == null && currentUnit == null)
         {
-            EnterWarningState();
+            if (!_isInInfiniteAttackState)
+            {
+                EnterWarningState();
+            }
             return;
         }
     
         Vector3 targetPos = currentBuilding != null ? currentBuilding.transform.position : currentUnit.transform.position;
         float distanceToTarget = Vector3.Distance(transform.position, targetPos);
     
+        bool isMovingTarget = currentUnit != null;
+        
         if (distanceToTarget > attackRange)
         {
-            EnterWarningState();
+            if (!_isInInfiniteAttackState)
+            {
+                EnterWarningState();
+                return;
+            }
+            
+            if (isMovingTarget)
+            {
+                bool isTimeForUpdate = (Time.time - _lastMoveToTargetTime >= MinMoveUpdateInterval);
+                bool hasTargetMovedEnough = Vector3.Distance(targetPos, _lastTargetPos) > minTargetMoveDistance;
+                
+                if (isTimeForUpdate && (hasTargetMovedEnough || (unitMovement != null && !unitMovement.IsMoving)))
+                {
+                    _lastMoveToTargetTime = Time.time;
+                    _lastTargetPos = targetPos;
+                    MoveToCurrentTarget();
+                }
+            }
+            else if (!_isInInfiniteAttackState)
+            {
+                EnterWarningState();
+            }
             return;
         }
 
@@ -251,7 +311,10 @@ public abstract class EnemyUnitBase : UnitBase
             if (currentBuilding.CurrentHealth <= 0)
             {
                 targetDamageable = null;
-                EnterWarningState();
+                if (!_isInInfiniteAttackState)
+                {
+                    EnterWarningState();
+                }
                 return;
             }
         }
@@ -260,7 +323,10 @@ public abstract class EnemyUnitBase : UnitBase
             if (currentUnit.currentHealth <= 0)
             {
                 targetUnit = null;
-                EnterWarningState();
+                if (!_isInInfiniteAttackState)
+                {
+                    EnterWarningState();
+                }
                 return;
             }
         }
@@ -273,10 +339,15 @@ public abstract class EnemyUnitBase : UnitBase
     
     protected void EnterAttackState()
     {
-        if (aiState == AIState.Attack) return;
+        if (aiState == AIState.Attack)
+        {
+            return;
+        }
         
         aiState = AIState.Attack;
         warningTimer = 0f;
+        _lastMoveToTargetTime = -MinMoveUpdateInterval;
+        _lastTargetPos = Vector3.positiveInfinity;
         
         if (unitMovement != null)
         {
@@ -291,6 +362,11 @@ public abstract class EnemyUnitBase : UnitBase
 
     protected void ReturnToIdle()
     {
+        if (_isInInfiniteAttackState)
+        {
+            return;
+        }
+        
         aiState = AIState.Idle;
         warningTimer = 0f;
         targetDamageable = null;
@@ -449,6 +525,58 @@ public abstract class EnemyUnitBase : UnitBase
         }
         return bestUnit;
     }
+    
+    private void FindClosestTargetForInfiniteAttack()
+    {
+        if (Time.time - _lastInfiniteAttackTargetUpdateTime < InfiniteAttackTargetUpdateInterval)
+        {
+            return;
+        }
+        _lastInfiniteAttackTargetUpdateTime = Time.time;
+        
+        float bestDistance = float.MaxValue;
+        Damageable bestDamageable = null;
+        UnitBase bestUnit = null;
+        
+        if (TargetManager.Instance != null && TargetManager.Instance.AllTargets.Count > 0)
+        {
+            foreach (Damageable target in TargetManager.Instance.AllTargets)
+            {
+                if (target == null) continue;
+                if (target.GetComponent<UnitBase>() != null) continue;
+                
+                float dist = Vector3.Distance(transform.position, target.transform.position);
+                if (dist < bestDistance)
+                {
+                    bestDistance = dist;
+                    bestDamageable = target;
+                    bestUnit = null;
+                }
+            }
+        }
+        
+        if (UnitManager.Instance != null && UnitManager.Instance.AllyUnits != null && UnitManager.Instance.AllyUnits.Count > 0)
+        {
+            foreach (UnitBase unit in UnitManager.Instance.AllyUnits)
+            {
+                if (unit == null || unit.currentHealth <= 0) continue;
+                
+                float dist = Vector3.Distance(transform.position, unit.transform.position);
+                if (dist < bestDistance)
+                {
+                    bestDistance = dist;
+                    bestDamageable = null;
+                    bestUnit = unit;
+                }
+            }
+        }
+        
+        if (bestDamageable != null || bestUnit != null)
+        {
+            targetDamageable = bestDamageable;
+            targetUnit = bestUnit;
+        }
+    }
 
     private IEnumerator AttackCoroutine()
     {
@@ -458,9 +586,25 @@ public abstract class EnemyUnitBase : UnitBase
             Damageable currentBuilding = targetDamageable;
             UnitBase currentUnit = targetUnit;
             
+            if (_isInInfiniteAttackState && currentBuilding == null && currentUnit == null)
+            {
+                FindClosestTargetForInfiniteAttack();
+                currentBuilding = targetDamageable;
+                currentUnit = targetUnit;
+                
+                if (currentBuilding == null && currentUnit == null)
+                {
+                    yield return wait;
+                    continue;
+                }
+            }
+            
             if (currentBuilding == null && currentUnit == null)
             {
-                EnterWarningState();
+                if (!_isInInfiniteAttackState)
+                {
+                    EnterWarningState();
+                }
                 yield break;
             }
             
@@ -482,7 +626,10 @@ public abstract class EnemyUnitBase : UnitBase
                 else
                 {
                     targetDamageable = null;
-                    EnterWarningState();
+                    if (!_isInInfiniteAttackState)
+                    {
+                        EnterWarningState();
+                    }
                     yield break;
                 }
             }
@@ -496,7 +643,10 @@ public abstract class EnemyUnitBase : UnitBase
                 if (currentUnit.currentHealth <= 0f)
                 {
                     targetUnit = null;
-                    EnterWarningState();
+                    if (!_isInInfiniteAttackState)
+                    {
+                        EnterWarningState();
+                    }
                     yield break;
                 }
             }
