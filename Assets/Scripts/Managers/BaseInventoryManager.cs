@@ -81,11 +81,6 @@ public class BaseInventoryManager : MonoBehaviour
         return new Dictionary<ResourceType, int>(_baseInventory);
     }
 
-    public void TransferFromGameInventory(ResourceType type, int amount)
-    {
-        AddResource(type, amount);
-    }
-
     private void SaveResource(ResourceType type)
     {
         string key = BaseInventoryPrefix + type;
@@ -107,7 +102,7 @@ public class BaseInventoryManager : MonoBehaviour
         LoadModules();
     }
 
-    public void SaveAllInventory()
+    private void SaveAllInventory()
     {
         foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
         {

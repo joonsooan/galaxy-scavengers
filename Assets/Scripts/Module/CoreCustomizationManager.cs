@@ -15,10 +15,7 @@ public class CoreCustomizationManager : MonoBehaviour
     [SerializeField] private int unlockedSlotCount;
 
     public event Action<int, Module> OnModuleSlotChanged;
-    public event Action<int> OnUnlockedSlotCountChanged; // New unlocked slot count
-
-    public IReadOnlyList<Module> SelectedModules => _selectedModules;
-    public int UnlockedSlotCount => unlockedSlotCount;
+    public event Action<int> OnUnlockedSlotCountChanged;
 
     private void Awake()
     {
@@ -334,11 +331,11 @@ public class CoreCustomizationManager : MonoBehaviour
     [System.Serializable]
     private class SelectedModulesData
     {
-        public List<string> moduleNames; // For backward compatibility
-        public List<ModuleSlotData> slotDataList; // New format
+        public List<string> moduleNames;
+        public List<ModuleSlotData> slotDataList;
     }
 
-    [System.Serializable]
+    [Serializable]
     private class ModuleSlotData
     {
         public string moduleName;
