@@ -19,19 +19,6 @@ public class EnemySpawner : MonoBehaviour
 
     public void SpawnEnemies()
     {
-        if (enemyPrefabs == null || enemyPrefabs.Count == 0)
-        {
-            return;
-        }
-        if (GameManager.Instance == null || GameManager.Instance.mapGenerator == null)
-        {
-            return;
-        }
-        if (BuildingManager.Instance == null || BuildingManager.Instance.grid == null)
-        {
-            return;
-        }
-        
         MapGenerator mapGenerator = GameManager.Instance.mapGenerator;
         IReadOnlyList<Vector2Int> holes = mapGenerator.EnemySpawnHolePositions;
         if (holes == null || holes.Count == 0)
@@ -63,9 +50,9 @@ public class EnemySpawner : MonoBehaviour
                 }
                 
                 Vector3 spawnPos = FindValidSpawnPosition(center, spawnRadiusOffset, grid);
-                if (spawnPos != Vector3.zero)
+                if (spawnPos != Vector3.zero && center != Vector3.zero)
                 {
-                    string poolTag = EnemySpawner.GetPoolTagFromPrefab(selectedPrefab);
+                    string poolTag = GetPoolTagFromPrefab(selectedPrefab);
                     GameObject enemy = ObjectPooler.Instance.SpawnFromPool(poolTag, spawnPos, Quaternion.identity);
                     if (enemy != null)
                     {
@@ -129,7 +116,6 @@ public class EnemySpawner : MonoBehaviour
         
         if (enemyUnit is Unit_Enemy_0)
         {
-            return "Enemy_0";
         }
         else if (enemyUnit is Unit_Enemy_1)
         {

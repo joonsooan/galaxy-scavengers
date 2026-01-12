@@ -141,7 +141,7 @@ public class ObjectPooler : MonoBehaviour
         {
             GameObject parentObj = new GameObject(poolTag);
             parentObj.transform.SetParent(transform);
-            parentObj.SetActive(false);
+            parentObj.SetActive(true);
             poolParent = parentObj.transform;
         }
         return poolParent;
@@ -156,6 +156,12 @@ public class ObjectPooler : MonoBehaviour
         }
 
         GameObject objectToSpawn = _poolDictionary[objTag].Dequeue();
+
+        // Ensure parent is active so spawned objects are visible
+        if (objectToSpawn.transform.parent != null && !objectToSpawn.transform.parent.gameObject.activeSelf)
+        {
+            objectToSpawn.transform.parent.gameObject.SetActive(true);
+        }
 
         objectToSpawn.SetActive(true);
         objectToSpawn.transform.position = position;

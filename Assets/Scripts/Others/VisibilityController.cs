@@ -225,19 +225,25 @@ public class VisibilityController : MonoBehaviour
         
         _wasVisible = visible;
         
-        foreach (var sr in _spriteRenderers)
+        if (_spriteRenderers != null)
         {
-            if (sr != null)
+            foreach (var sr in _spriteRenderers)
             {
-                sr.enabled = visible;
+                if (sr != null)
+                {
+                    sr.enabled = visible;
+                }
             }
         }
         
-        foreach (var canvas in _canvases)
+        if (_canvases != null)
         {
-            if (canvas != null)
+            foreach (var canvas in _canvases)
             {
-                canvas.enabled = visible;
+                if (canvas != null)
+                {
+                    canvas.enabled = visible;
+                }
             }
         }
     }

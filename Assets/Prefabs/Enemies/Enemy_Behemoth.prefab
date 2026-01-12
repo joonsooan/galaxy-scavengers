@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 407409324728012381}
   - component: {fileID: 3169003736456806877}
   - component: {fileID: 952973934286858722}
+  - component: {fileID: -7692210126921437933}
   - component: {fileID: 8054321829144718534}
   - component: {fileID: 3132766170232860239}
   - component: {fileID: 9023288875373990353}
@@ -82,7 +83,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 580065311
   m_SortingLayer: 5
-  m_SortingOrder: 0
+  m_SortingOrder: 3
   m_Sprite: {fileID: 6150808516666299658, guid: 32571226b7a3f4b4eb477c649ff5ffe0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -121,6 +122,42 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
+--- !u!58 &-7692210126921437933
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7944764008120523387}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_Radius: 1
 --- !u!61 &8054321829144718534
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -179,7 +216,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 330c45daea6434b46bc02141d339b613, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 3
+  moveSpeed: 2
   waypointTolerance: 0.1
 --- !u!114 &9023288875373990353
 MonoBehaviour:
@@ -218,18 +255,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 351b09cb654fd844dafd3b21e8ddb6d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  maxHealth: 200
   currentHealth: 0
   unitType: 1
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
   currentState: 0
   warningStatePersist: 10
-  attackDamage: 10
+  attackDamage: 15
   attackRange: 1.5
-  attackSpeed: 1
-  minRoamInterval: 3
-  maxRoamInterval: 5
+  attackSpeed: 3
+  minRoamInterval: 5
+  maxRoamInterval: 7
   unitMovement: {fileID: 3132766170232860239}
 --- !u!95 &3904646312527365624
 Animator:
