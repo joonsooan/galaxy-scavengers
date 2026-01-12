@@ -164,7 +164,7 @@ public class CoreCustomUIManager : MonoBehaviour
         // Keeping method for potential future use
     }
 
-    private void RefreshModuleSelectionGrid()
+    public void RefreshModuleSelectionGrid()
     {
         ClearModuleSelectionGrid();
 

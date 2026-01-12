@@ -10,15 +10,15 @@ public class CoreCustomizationManager : MonoBehaviour
     private const string SelectedModulesKey = "CoreCustomization_SelectedModules";
     private const string UnlockedSlotCountKey = "CoreCustomization_UnlockedSlotCount";
     private const int MaxSlots = 3;
+    private readonly Module[] _selectedModules = new Module[MaxSlots];
 
-    private Module[] _selectedModules = new Module[MaxSlots];
-    private int _unlockedSlotCount = MaxSlots;
+    [SerializeField] private int unlockedSlotCount;
 
     public event Action<int, Module> OnModuleSlotChanged;
     public event Action<int> OnUnlockedSlotCountChanged; // New unlocked slot count
 
     public IReadOnlyList<Module> SelectedModules => _selectedModules;
-    public int UnlockedSlotCount => _unlockedSlotCount;
+    public int UnlockedSlotCount => unlockedSlotCount;
 
     private void Awake()
     {
@@ -35,6 +35,7 @@ public class CoreCustomizationManager : MonoBehaviour
     {
         LoadUnlockedSlotCount();
         StartCoroutine(LoadSelectedModulesDelayed());
+        SetUnlockedSlotCount(unlockedSlotCount);
     }
 
     private IEnumerator LoadSelectedModulesDelayed()
@@ -68,8 +69,8 @@ public class CoreCustomizationManager : MonoBehaviour
             return;
         }
 
-        if (slotIndex >= _unlockedSlotCount) {
-            Debug.LogWarning($"CoreCustomizationManager: Cannot set module in slot {slotIndex} - slot is locked (only {_unlockedSlotCount} slots unlocked)");
+        if (slotIndex >= unlockedSlotCount) {
+            Debug.LogWarning($"CoreCustomizationManager: Cannot set module in slot {slotIndex} - slot is locked (only {unlockedSlotCount} slots unlocked)");
             return;
         }
 
@@ -92,8 +93,8 @@ public class CoreCustomizationManager : MonoBehaviour
             return;
         }
 
-        if (slotIndex >= _unlockedSlotCount) {
-            Debug.LogWarning($"CoreCustomizationManager: Cannot remove module from slot {slotIndex} - slot is locked (only {_unlockedSlotCount} slots unlocked)");
+        if (slotIndex >= unlockedSlotCount) {
+            Debug.LogWarning($"CoreCustomizationManager: Cannot remove module from slot {slotIndex} - slot is locked (only {unlockedSlotCount} slots unlocked)");
             return;
         }
 
@@ -137,20 +138,15 @@ public class CoreCustomizationManager : MonoBehaviour
         if (slotIndex < 0 || slotIndex >= MaxSlots) {
             return true;
         }
-        return slotIndex >= _unlockedSlotCount;
+        return slotIndex >= unlockedSlotCount;
     }
 
     public void SetUnlockedSlotCount(int count)
     {
         int newCount = Mathf.Clamp(count, 0, MaxSlots);
-        
-        if (newCount == _unlockedSlotCount) {
-            return;
-        }
-
-        _unlockedSlotCount = newCount;
+        unlockedSlotCount = newCount;
         SaveUnlockedSlotCount();
-        OnUnlockedSlotCountChanged?.Invoke(_unlockedSlotCount);
+        OnUnlockedSlotCountChanged?.Invoke(unlockedSlotCount);
     }
 
     private void SaveSelectedModules()
@@ -306,18 +302,16 @@ public class CoreCustomizationManager : MonoBehaviour
 
     private void SaveUnlockedSlotCount()
     {
-        PlayerPrefs.SetInt(UnlockedSlotCountKey, _unlockedSlotCount);
+        PlayerPrefs.SetInt(UnlockedSlotCountKey, unlockedSlotCount);
         PlayerPrefs.Save();
     }
 
     private void LoadUnlockedSlotCount()
     {
-        if (PlayerPrefs.HasKey(UnlockedSlotCountKey)) {
-            _unlockedSlotCount = PlayerPrefs.GetInt(UnlockedSlotCountKey, MaxSlots);
-            _unlockedSlotCount = Mathf.Clamp(_unlockedSlotCount, 0, MaxSlots);
-        } else {
-            _unlockedSlotCount = MaxSlots; // Default: all slots unlocked
-        }
+        // if (PlayerPrefs.HasKey(UnlockedSlotCountKey)) {
+        //     unlockedSlotCount = PlayerPrefs.GetInt(UnlockedSlotCountKey, MaxSlots);
+        // }
+        unlockedSlotCount = Mathf.Clamp(unlockedSlotCount, 0, MaxSlots);
     }
 
     public void DeleteCurrentCoreModules()

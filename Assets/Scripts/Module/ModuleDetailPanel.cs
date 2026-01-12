@@ -202,6 +202,13 @@ public class ModuleDetailPanel : MonoBehaviour
             {
                 inventorySystem.RefreshModulesOnly();
             }
+            
+            // Refresh module selection grid in CoreCustomUIManager when module is produced
+            CoreCustomUIManager coreCustomUIManager = FindFirstObjectByType<CoreCustomUIManager>();
+            if (coreCustomUIManager != null)
+            {
+                coreCustomUIManager.RefreshModuleSelectionGrid();
+            }
         }
         else
         {
