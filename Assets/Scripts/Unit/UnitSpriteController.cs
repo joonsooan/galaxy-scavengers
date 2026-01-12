@@ -4,8 +4,6 @@ using UnityEngine;
 public class UnitSpriteController : MonoBehaviour
 {
     private Animator _animator;
-    private SpriteRenderer _sr;
-    private UnitBase _unitBase;
     private UnitMovement _unitMovement;
     
     private static readonly int InputXHash = Animator.StringToHash("InputX");
@@ -22,17 +20,14 @@ public class UnitSpriteController : MonoBehaviour
     private Vector3? _targetPosition;
     private float _lastUpdateTime;
     private float _lastDirectionUpdateTime;
-    private const float UpdateThrottle = 0.05f; // Update direction at most every 0.05 seconds
-    private const float DirectionUpdateThrottle = 0.1f; // Throttle direction updates to prevent rapid changes
+    private const float UpdateThrottle = 0.05f;
+    private const float DirectionUpdateThrottle = 0.1f;
     
     private void Awake()
     {
         _animator = GetComponent<Animator>();
-        _sr = GetComponent<SpriteRenderer>();
-        _unitBase = GetComponent<UnitBase>();
         _unitMovement = GetComponent<UnitMovement>();
         
-        // Ensure animator speed is normalized to prevent speed issues
         if (_animator != null)
         {
             _animator.speed = 1.0f;
@@ -43,13 +38,11 @@ public class UnitSpriteController : MonoBehaviour
     {
         if (direction.sqrMagnitude < 0.01f) return;
         
-        // Throttle direction updates to prevent rapid changes that cause animation speed issues
         if (Time.time - _lastDirectionUpdateTime < DirectionUpdateThrottle)
         {
             return;
         }
         
-        // Ensure animator speed stays at 1.0
         if (_animator.speed != 1.0f)
         {
             _animator.speed = 1.0f;
@@ -89,7 +82,6 @@ public class UnitSpriteController : MonoBehaviour
     {
         bool isMoving = currentState == UnitBase.UnitState.Moving || currentState == UnitBase.UnitState.ReturningToStorage;
         
-        // Ensure animator speed stays at 1.0 to prevent speed issues
         if (_animator.speed != 1.0f)
         {
             _animator.speed = 1.0f;
@@ -97,25 +89,21 @@ public class UnitSpriteController : MonoBehaviour
         
         _animator.SetBool(IsMovingHash, isMoving);
         
-        // Only update mining state if explicitly provided (for Unit_Miner)
         if (isMining.HasValue)
         {
             _animator.SetBool(IsMiningHash, isMining.Value);
         }
         
-        // Only update constructing state if explicitly provided (for Unit_Construct)
         if (isConstructing.HasValue)
         {
             _animator.SetBool(IsConstructingHash, isConstructing.Value);
         }
         
-        // Only update processing state if explicitly provided (for processor drones)
         if (isProcessing.HasValue)
         {
             _animator.SetBool(IsProcessingHash, isProcessing.Value);
         }
         
-        // Only update patrolling state if explicitly provided (for scouts)
         if (isPatrolling.HasValue)
         {
             _animator.SetBool(IsPatrollingHash, isPatrolling.Value);
@@ -152,19 +140,16 @@ public class UnitSpriteController : MonoBehaviour
     
     private void Update()
     {
-        // Throttle updates to prevent too frequent direction changes
         if (Time.time - _lastUpdateTime < UpdateThrottle)
         {
             return;
         }
         
-        // Ensure animator speed stays at 1.0
         if (_animator.speed != 1.0f)
         {
             _animator.speed = 1.0f;
         }
         
-        // Only update direction to target if not moving
         bool isMoving = _unitMovement != null && _unitMovement.IsMoving;
         
         if (!isMoving)

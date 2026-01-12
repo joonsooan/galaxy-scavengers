@@ -118,6 +118,23 @@ public class MapGenerator : MonoBehaviour
         return (0f, 0f);
     }
 
+    public void GenerateEnemyTerritoryRadiusValues()
+    {
+        if (_enemySpawnHolePositions == null || _enemySpawnHolePositions.Count == 0)
+        {
+            return;
+        }
+        
+        _holeRadiusValues.Clear();
+        
+        foreach (Vector2Int holePos in _enemySpawnHolePositions)
+        {
+            float homeRadius = Random.Range(minEnemyHomeRadius, maxEnemyHomeRadius) + 0.5f;
+            float territoryRadius = Random.Range(minEnemyTerritoryRadius, maxEnemyTerritoryRadius) + 0.5f;
+            _holeRadiusValues[holePos] = (homeRadius, territoryRadius);
+        }
+    }
+
     private void SetGroundTile(Vector3Int cellPosition, TileBase tile)
     {
         if (groundTilemap != null)
@@ -816,16 +833,25 @@ public class MapGenerator : MonoBehaviour
             return;
         }
         
+        if (_holeRadiusValues.Count == 0)
+        {
+            GenerateEnemyTerritoryRadiusValues();
+        }
+        
         HashSet<Vector3Int> homeTileCells = new HashSet<Vector3Int>();
         
         foreach (Vector2Int holePos in _enemySpawnHolePositions)
         {
+            if (!_holeRadiusValues.TryGetValue(holePos, out var radiusValues))
+            {
+                continue;
+            }
+            
+            float homeRadius = radiusValues.homeRadius;
+            float territoryRadius = radiusValues.territoryRadius;
+            
             Vector3 worldPos = GetEnemySpawnHoleWorldPosition(holePos);
             Vector3Int centerCell = grid.WorldToCell(worldPos);
-            
-            float homeRadius = Random.Range(minEnemyHomeRadius, maxEnemyHomeRadius) + 0.5f;
-            float territoryRadius = Random.Range(minEnemyTerritoryRadius, maxEnemyTerritoryRadius) + 0.5f;
-            _holeRadiusValues[holePos] = (homeRadius, territoryRadius);
             
             _enemyHomeRadius = homeRadius;
             int homeRadiusCells = Mathf.CeilToInt(_enemyHomeRadius);

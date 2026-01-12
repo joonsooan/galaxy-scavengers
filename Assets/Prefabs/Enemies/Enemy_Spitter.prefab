@@ -15,9 +15,10 @@ GameObject:
   - component: {fileID: 3132766170232860239}
   - component: {fileID: 9023288875373990353}
   - component: {fileID: -5060092193258834609}
-  - component: {fileID: -5414244451522802995}
+  - component: {fileID: -9190535632355532876}
+  - component: {fileID: 7210422969648940236}
   m_Layer: 0
-  m_Name: Unit_Enemy_2
+  m_Name: Enemy_Spitter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -82,12 +83,12 @@ SpriteRenderer:
   m_SortingLayerID: 580065311
   m_SortingLayer: 5
   m_SortingOrder: 0
-  m_Sprite: {fileID: -582845187829330860, guid: 4774cd0804d23ea41a748e5b821b8d05, type: 3}
+  m_Sprite: {fileID: 4246698446789957178, guid: e7ddcc5dff23d6a41a3149087e8653ef, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 2, y: 2}
+  m_Size: {x: 1.5, y: 1.5}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -158,8 +159,8 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2, y: 2}
-    newSize: {x: 2, y: 2}
+    oldSize: {x: 1.5, y: 1.5}
+    newSize: {x: 1.5, y: 1.5}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
@@ -205,7 +206,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   visibilityType: 0
---- !u!114 &-5414244451522802995
+--- !u!114 &-9190535632355532876
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -214,7 +215,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7944764008120523387}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 351b09cb654fd844dafd3b21e8ddb6d4, type: 3}
+  m_Script: {fileID: 11500000, guid: bcc6acac2691c8743aba9a6aeaa12b2c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 100
@@ -225,8 +226,30 @@ MonoBehaviour:
   currentState: 0
   warningStatePersist: 10
   attackDamage: 10
-  attackRange: 1.5
+  attackRange: 5
   attackSpeed: 1
   minRoamInterval: 3
   maxRoamInterval: 5
   unitMovement: {fileID: 3132766170232860239}
+--- !u!95 &7210422969648940236
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7944764008120523387}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 55076c66a7708954fbb1d7142068b06d, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

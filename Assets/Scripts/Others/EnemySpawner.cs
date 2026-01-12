@@ -65,7 +65,7 @@ public class EnemySpawner : MonoBehaviour
                 Vector3 spawnPos = FindValidSpawnPosition(center, spawnRadiusOffset, grid);
                 if (spawnPos != Vector3.zero)
                 {
-                    string poolTag = GetPoolTagFromPrefab(selectedPrefab);
+                    string poolTag = EnemySpawner.GetPoolTagFromPrefab(selectedPrefab);
                     GameObject enemy = ObjectPooler.Instance.SpawnFromPool(poolTag, spawnPos, Quaternion.identity);
                     if (enemy != null)
                     {
@@ -114,7 +114,7 @@ public class EnemySpawner : MonoBehaviour
         return validEnemies[validEnemies.Count - 1].enemyPrefab;
     }
     
-    private string GetPoolTagFromPrefab(GameObject prefab)
+    public static string GetPoolTagFromPrefab(GameObject prefab)
     {
         if (prefab == null)
         {
@@ -141,6 +141,16 @@ public class EnemySpawner : MonoBehaviour
         }
         
         return "Enemy_0";
+    }
+    
+    public List<EnemySpawnData> GetEnemyPrefabs()
+    {
+        return enemyPrefabs;
+    }
+    
+    public int GetMaxEnemiesPerHole()
+    {
+        return maxEnemiesPerHole;
     }
     
     private Vector3 FindValidSpawnPosition(Vector3 center, float maxRadius, Grid grid)
