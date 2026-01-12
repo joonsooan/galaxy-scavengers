@@ -19,6 +19,7 @@ public abstract class EnemyUnitBase : UnitBase
     [SerializeField] protected int attackDamage = 10;
     [SerializeField] protected float attackRange = 1.5f;
     [SerializeField] protected float attackSpeed = 1f;
+    [SerializeField] private float minTargetMoveDistance = 0.5f;
 
     [Header("Roaming")]
     public float minRoamInterval = 2.0f;
@@ -27,22 +28,26 @@ public abstract class EnemyUnitBase : UnitBase
 
     [Header("References")]
     [SerializeField] protected UnitMovement unitMovement;
-    private CircleCollider2D _attackRangeCollider;
 
+    protected float warningTimer;
     protected Vector3 spawnPosition;
     protected AIState aiState;
     protected Damageable targetDamageable;
     protected UnitBase targetUnit;
     
-    private float _roamTimer;
     private bool _lastActionWasMove;
-    protected float warningTimer;
-    
+    private float _roamTimer;
+    private float _lastMoveToTargetTime;
+    private Vector3 _lastTargetPos;
     private Coroutine _attackCoroutine;
-
+    private CircleCollider2D _attackRangeCollider;
+    
+    private const float MinMoveUpdateInterval = 0.5f;
+    
     protected override void Awake()
     {
         base.Awake();
+        
         _attackRangeCollider = GetComponent<CircleCollider2D>();
         _attackRangeCollider.radius = attackRange;
         _attackRangeCollider.isTrigger = true;
@@ -140,7 +145,6 @@ public abstract class EnemyUnitBase : UnitBase
             targetDamageable = null;
             this.targetUnit = targetUnit;
             EnterWarningState();
-            return;
         }
     }
 
@@ -158,6 +162,9 @@ public abstract class EnemyUnitBase : UnitBase
         aiState = AIState.Warning;
         warningTimer = 0f;
         
+        _lastMoveToTargetTime = -MinMoveUpdateInterval; 
+        _lastTargetPos = Vector3.positiveInfinity;
+        
         if (unitMovement != null)
         {
             unitMovement.StopMovement();
@@ -167,100 +174,103 @@ public abstract class EnemyUnitBase : UnitBase
     private void HandleWarning()
     {
         warningTimer += Time.deltaTime;
-        
+    
         Damageable currentBuilding = targetDamageable;
         UnitBase currentUnit = targetUnit;
-        
+    
         if (currentBuilding == null && currentUnit == null)
         {
             ReturnToIdle();
             return;
         }
-        
+    
         Vector3 targetPos = currentBuilding != null ? currentBuilding.transform.position : currentUnit.transform.position;
         float distanceFromSpawn = Vector3.Distance(spawnPosition, targetPos);
-        
+    
         if (distanceFromSpawn > territoryRadius)
         {
             ReturnToIdle();
             return;
         }
-        
+    
         float distanceToTarget = Vector3.Distance(transform.position, targetPos);
-        
+    
         if (distanceToTarget <= attackRange)
         {
             EnterAttackState();
             return;
         }
-        
+    
         if (warningTimer >= warningStatePersist)
         {
-            if (distanceToTarget > attackRange)
+            ReturnToIdle();
+            return;
+        }
+
+        bool isTimeForUpdate = (Time.time - _lastMoveToTargetTime >= MinMoveUpdateInterval);
+        bool hasTargetMovedEnough = Vector3.Distance(targetPos, _lastTargetPos) > minTargetMoveDistance;
+    
+        if (isTimeForUpdate)
+        {
+            if (hasTargetMovedEnough || (unitMovement != null && !unitMovement.IsMoving)) 
             {
-                ReturnToIdle();
-                return;
+                _lastMoveToTargetTime = Time.time;
+                _lastTargetPos = targetPos;
+                MoveToCurrentTarget();
             }
         }
-        
-        MoveToCurrentTarget();
     }
 
     private void HandleAttack()
     {
         Damageable currentBuilding = targetDamageable;
         UnitBase currentUnit = targetUnit;
-        
+    
         if (currentBuilding == null && currentUnit == null)
         {
             EnterWarningState();
             return;
         }
-        
+    
         Vector3 targetPos = currentBuilding != null ? currentBuilding.transform.position : currentUnit.transform.position;
         float distanceToTarget = Vector3.Distance(transform.position, targetPos);
-        
-        if (distanceToTarget > attackRange * 1.5f)
+    
+        if (distanceToTarget > attackRange)
         {
-            MoveToCurrentTarget();
+            EnterWarningState();
+            return;
         }
-        else if (distanceToTarget > attackRange)
+
+        if (unitMovement != null)
         {
-            MoveToCurrentTarget();
+            unitMovement.StopMovement();
         }
-        else
+    
+        if (currentBuilding != null)
         {
-            if (unitMovement != null)
+            if (currentBuilding.CurrentHealth <= 0)
             {
-                unitMovement.StopMovement();
+                targetDamageable = null;
+                EnterWarningState();
+                return;
             }
-            
-            if (currentBuilding != null)
+        }
+        else if (currentUnit != null)
+        {
+            if (currentUnit.currentHealth <= 0)
             {
-                if (currentBuilding.CurrentHealth <= 0)
-                {
-                    targetDamageable = null;
-                    EnterWarningState();
-                    return;
-                }
+                targetUnit = null;
+                EnterWarningState();
+                return;
             }
-            else if (currentUnit != null)
-            {
-                if (currentUnit.currentHealth <= 0)
-                {
-                    targetUnit = null;
-                    EnterWarningState();
-                    return;
-                }
-            }
-            
-            if (_attackCoroutine == null)
-            {
-                _attackCoroutine = StartCoroutine(AttackCoroutine());
-            }
+        }
+    
+        if (_attackCoroutine == null)
+        {
+            _attackCoroutine = StartCoroutine(AttackCoroutine());
         }
     }
-
+    
     protected void EnterAttackState()
     {
         if (aiState == AIState.Attack) return;
@@ -498,15 +508,7 @@ public abstract class EnemyUnitBase : UnitBase
 
     protected virtual void OnDrawGizmosSelected()
     {
-        Vector3 center = Application.isPlaying ? spawnPosition : transform.position;
-        float drawHomeRadius = Application.isPlaying ? homeRadius : 3f;
-        float drawTerritoryRadius = Application.isPlaying ? territoryRadius : 6f;
-        
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(center, drawHomeRadius);
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(center, drawTerritoryRadius);
-        Gizmos.color = Color.magenta;
         Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 }
