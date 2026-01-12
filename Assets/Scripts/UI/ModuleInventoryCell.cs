@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ModuleInventoryCell : MonoBehaviour, IPointerClickHandler
+public class ModuleInventoryCell : MonoBehaviour, IPointerClickHandler, IBaseInventoryCell
 {
     [Header("References")]
     [SerializeField] private Image iconImage;
@@ -11,6 +11,7 @@ public class ModuleInventoryCell : MonoBehaviour, IPointerClickHandler
     
     private Module _module;
     private BaseInventorySystem _baseInventorySystem;
+    private CoreCustomUIManager _coreCustomUIManager;
     private bool _isEmpty = true;
     
     public Module Module => _module;
@@ -19,6 +20,14 @@ public class ModuleInventoryCell : MonoBehaviour, IPointerClickHandler
     public void Initialize(BaseInventorySystem baseInventorySystem)
     {
         _baseInventorySystem = baseInventorySystem;
+        _coreCustomUIManager = null;
+        Clear();
+    }
+
+    public void Initialize(CoreCustomUIManager coreCustomUIManager)
+    {
+        _coreCustomUIManager = coreCustomUIManager;
+        _baseInventorySystem = null;
         Clear();
     }
     
@@ -64,14 +73,25 @@ public class ModuleInventoryCell : MonoBehaviour, IPointerClickHandler
     
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (_isEmpty || _baseInventorySystem == null || _module == null)
+        if (_isEmpty || _module == null)
         {
             return;
         }
         
-        // TODO: Show module details or allow removal/transfer to seed core
-        // For now, just log
-        Debug.Log($"Clicked module: {_module.moduleName}");
+        if (_coreCustomUIManager != null) {
+            // Only allow module placement if core custom panel is open
+            _coreCustomUIManager.OnModuleCellClicked(_module);
+        } else if (_baseInventorySystem != null) {
+            // Modules in base inventory system should not be placeable
+            // Only allow if core custom panel is explicitly open
+            CoreCustomUIManager customUIManager = FindFirstObjectByType<CoreCustomUIManager>();
+            if (customUIManager != null && customUIManager.IsPanelOpen()) {
+                customUIManager.OnModuleCellClicked(_module);
+            } else {
+                // Module clicked in base inventory system - do nothing or show info
+                Debug.Log($"Clicked module in base inventory: {_module.moduleName}");
+            }
+        }
     }
 }
 

@@ -29,8 +29,10 @@ public class BaseInventorySystem : MonoBehaviour
     private readonly List<BaseInventoryCell> _inventoryCells = new List<BaseInventoryCell>();
     private readonly Dictionary<ResourceType, int> _maxStackAmounts = new Dictionary<ResourceType, int>();
     private readonly List<ModuleInventoryCell> _moduleCells = new List<ModuleInventoryCell>();
-    private GridLayoutGroup _inventoryGrid;
+    private readonly Dictionary<int, ModuleInventoryCell> _moduleCellSlots = new Dictionary<int, ModuleInventoryCell>(); // Maps slot index to module cell
     private BaseInventoryManager _baseInventoryManager;
+    
+    private int TotalGridSlots => inventoryWidth * inventoryHeight;
 
     private void Awake()
     {
@@ -103,18 +105,26 @@ public class BaseInventorySystem : MonoBehaviour
     private void OnResourceChanged(ResourceType type, int amount)
     {
         if (inventoryPanel != null && inventoryPanel.activeSelf) {
-            RefreshInventoryGrid();
+            RefreshResourcesOnly();
         }
     }
 
     private void OnModuleAdded(Module module)
     {
-        LoadModulesToGrid();
+        // Always refresh when panel is active, or queue refresh for when panel opens
+        if (inventoryPanel != null && inventoryPanel.activeSelf) {
+            RefreshModulesOnly();
+        }
+        // Note: If panel is not active, it will refresh when ToggleInventory is called
     }
 
     private void OnModuleRemoved(Module module)
     {
-        LoadModulesToGrid();
+        // Always refresh when panel is active, or queue refresh for when panel opens
+        if (inventoryPanel != null && inventoryPanel.activeSelf) {
+            RefreshModulesOnly();
+        }
+        // Note: If panel is not active, it will refresh when ToggleInventory is called
     }
 
     private void HideInventoryPanel()
@@ -137,17 +147,7 @@ public class BaseInventorySystem : MonoBehaviour
 
     private void InitializeInventory()
     {
-        if (inventoryGridContainer == null || baseInventoryCellPrefab == null) {
-            Debug.LogError("InventoryGridContainer or BaseInventoryCellPrefab is not assigned!");
-            return;
-        }
-
-        _inventoryGrid = inventoryGridContainer.GetComponent<GridLayoutGroup>();
-        if (_inventoryGrid == null) {
-            Debug.LogError("InventoryGridContainer must have a GridLayoutGroup component!");
-            return;
-        }
-
+        inventoryGridContainer.GetComponent<GridLayoutGroup>();
         int totalSlots = inventoryWidth * inventoryHeight;
 
         for (int i = 0; i < totalSlots; i++) {
@@ -168,58 +168,33 @@ public class BaseInventorySystem : MonoBehaviour
             inventoryPanel.SetActive(!isActive);
 
             if (!isActive) {
+                // Panel is being opened - refresh to show current state
                 RefreshInventoryGrid();
-                RefreshModuleGrid();
             }
+        }
+    }
+
+    public void ForceRefreshInventory()
+    {
+        if (inventoryPanel != null && inventoryPanel.activeSelf) {
+            RefreshInventoryGrid();
         }
     }
 
     private void InitializeModuleGrid()
     {
-        if (moduleGridContainer == null || moduleInventoryCellPrefab == null) {
-            return;
-        }
-
-        moduleGridContainer.GetComponent<GridLayoutGroup>();
-    }
-
-    private void LoadModulesToGrid()
-    {
-        RefreshModuleGrid();
-    }
-
-    public void RefreshModuleGrid()
-    {
-        if (moduleGridContainer == null || moduleInventoryCellPrefab == null) {
-            return;
-        }
-
-        _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
-        if (_baseInventoryManager == null) {
-            return;
-        }
-
-        foreach (Transform child in moduleGridContainer.transform) {
-            Destroy(child.gameObject);
-        }
-        _moduleCells.Clear();
-
-        List<Module> modules = _baseInventoryManager.GetAllModules();
-
-        foreach (Module module in modules) {
-            GameObject cellObj = Instantiate(moduleInventoryCellPrefab, moduleGridContainer.transform);
-            ModuleInventoryCell cell = cellObj.GetComponent<ModuleInventoryCell>();
-            if (cell != null) {
-                cell.Initialize(this);
-                cell.SetModule(module);
-                _moduleCells.Add(cell);
-            }
-        }
+        // Modules are now handled in the unified inventory grid
+        // This method is kept for compatibility but does nothing
     }
 
     public GameObject GetInventoryPanel()
     {
         return inventoryPanel;
+    }
+
+    public GameObject GetInventoryResourceContainer()
+    {
+        return inventoryGridContainer;
     }
 
     public int GetMaxStackAmount(ResourceType type)
@@ -230,30 +205,95 @@ public class BaseInventorySystem : MonoBehaviour
 
     private BaseInventoryCell FindFirstEmptyCell()
     {
-        return _inventoryCells.FirstOrDefault(cell => cell.IsEmpty());
+        for (int i = 0; i < _inventoryCells.Count; i++) {
+            if (!IsSlotUsedByModule(i) && _inventoryCells[i] != null && _inventoryCells[i].IsEmpty()) {
+                return _inventoryCells[i];
+            }
+        }
+        return null;
     }
 
     public List<BaseInventoryCell> GetAllEmptyCells()
     {
-        return _inventoryCells.Where(cell => cell.IsEmpty()).ToList();
+        return _inventoryCells.Where((cell, index) => !IsSlotUsedByModule(index) && cell != null && cell.IsEmpty()).ToList();
     }
-
-    private void LoadBaseInventoryToCells()
+    
+    private int FindEmptySlotIndex()
     {
-        RefreshInventoryGrid();
+        for (int i = 0; i < _inventoryCells.Count; i++) {
+            if (!IsSlotUsedByModule(i) && _inventoryCells[i] != null && _inventoryCells[i].IsEmpty()) {
+                return i;
+            }
+        }
+        return -1;
     }
-
-    public void RefreshInventoryGrid()
+    
+    private bool IsSlotUsedByModule(int slotIndex)
     {
-        _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
-        if (_baseInventoryManager == null) {
-            Debug.LogWarning("BaseInventorySystem: BaseInventoryManager not available");
+        return _moduleCellSlots.ContainsKey(slotIndex);
+    }
+    
+    private void RestoreBaseInventoryCellsFromModules()
+    {
+        if (inventoryGridContainer == null || baseInventoryCellPrefab == null) {
             return;
         }
 
-        if (_inventoryCells == null || _inventoryCells.Count == 0) {
-            Debug.LogWarning("BaseInventorySystem: Inventory cells not initialized");
-            return;
+        List<int> slotsToRestore = new List<int>(_moduleCellSlots.Keys);
+        slotsToRestore.Sort((a, b) => b.CompareTo(a)); // Restore from highest to lowest to maintain indices
+        
+        foreach (int slotIndex in slotsToRestore) {
+            if (slotIndex < 0 || slotIndex >= _inventoryCells.Count) {
+                continue;
+            }
+            
+            ModuleInventoryCell moduleCell = _moduleCellSlots[slotIndex];
+            if (moduleCell != null) {
+                Transform moduleTransform = moduleCell.transform;
+                Transform parent = moduleTransform.parent;
+                int siblingIndex = moduleTransform.GetSiblingIndex();
+                
+                Destroy(moduleCell.gameObject);
+                
+                // Create new BaseInventoryCell at the same position
+                GameObject cellObj = Instantiate(baseInventoryCellPrefab, parent);
+                cellObj.transform.SetSiblingIndex(siblingIndex);
+                BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
+                if (cell != null) {
+                    cell.Initialize(this);
+                    _inventoryCells[slotIndex] = cell;
+                }
+            }
+        }
+        
+        _moduleCellSlots.Clear();
+    }
+    
+    private int GetUsedSlotCount()
+    {
+        int resourceSlots = 0;
+        for (int i = 0; i < _inventoryCells.Count; i++) {
+            if (!IsSlotUsedByModule(i) && _inventoryCells[i] != null && !_inventoryCells[i].IsEmpty()) {
+                resourceSlots++;
+            }
+        }
+        int moduleSlots = _moduleCells.Count;
+        return resourceSlots + moduleSlots;
+    }
+    
+    public bool IsGridFull()
+    {
+        return GetUsedSlotCount() >= TotalGridSlots;
+    }
+
+    private void RefreshResourcesOnly()
+    {
+        _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        
+        for (int i = 0; i < _inventoryCells.Count; i++) {
+            if (!IsSlotUsedByModule(i) && _inventoryCells[i] != null) {
+                _inventoryCells[i].Clear();
+            }
         }
 
         Dictionary<ResourceType, int> baseResources = _baseInventoryManager.GetAllResources();
@@ -263,35 +303,99 @@ public class BaseInventorySystem : MonoBehaviour
             .OrderBy(kvp => kvp.Key)
             .ToList();
 
-        foreach (BaseInventoryCell cell in _inventoryCells) {
-            cell.Clear();
-        }
-
         int cellIndex = 0;
+        
         foreach (KeyValuePair<ResourceType, int> resource in sortedResources) {
-            if (cellIndex >= _inventoryCells.Count) break;
-
             ResourceType type = resource.Key;
             int totalAmount = resource.Value;
             int maxStack = GetMaxStackAmount(type);
 
-            while (totalAmount > 0 && cellIndex < _inventoryCells.Count) {
+            while (totalAmount > 0) {
+                while (cellIndex < _inventoryCells.Count && (IsSlotUsedByModule(cellIndex) || _inventoryCells[cellIndex] == null)) {
+                    cellIndex++;
+                }
+                
+                if (cellIndex >= _inventoryCells.Count) {
+                    int usedSlots = GetUsedSlotCount();
+                    Debug.Log($"BaseInventorySystem: Inventory grid is full! Cannot add more resources. ({usedSlots}/{TotalGridSlots} slots used)");
+                    break;
+                }
+
                 int amountForCell = Mathf.Min(totalAmount, maxStack);
-                _inventoryCells[cellIndex].SetResource(type, amountForCell);
-                totalAmount -= amountForCell;
-                cellIndex++;
+                if (_inventoryCells[cellIndex] != null) {
+                    _inventoryCells[cellIndex].SetResource(type, amountForCell);
+                    totalAmount -= amountForCell;
+                    cellIndex++;
+                } else {
+                    cellIndex++;
+                }
+            }
+            
+            if (cellIndex >= _inventoryCells.Count) {
+                break;
             }
         }
 
         UpdateInventoryInfoText();
     }
 
+    public void RefreshModulesOnly()
+    {
+        _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        
+        RestoreBaseInventoryCellsFromModules();
+        _moduleCells.Clear();
+
+        List<Module> modules = _baseInventoryManager.GetAllModules();
+        if (modules != null && modules.Count > 0) {
+            int usedSlots = GetUsedSlotCount();
+            
+            foreach (Module module in modules) {
+                int emptySlotIndex = FindEmptySlotIndex();
+                
+                if (emptySlotIndex == -1) {
+                    Debug.Log($"BaseInventorySystem: Inventory grid is full! Cannot add more modules. ({usedSlots}/{TotalGridSlots} slots used)");
+                    break;
+                }
+
+                BaseInventoryCell baseCell = _inventoryCells[emptySlotIndex];
+                if (baseCell != null) {
+                    Transform parent = baseCell.transform.parent;
+                    int siblingIndex = baseCell.transform.GetSiblingIndex();
+                    
+                    Destroy(baseCell.gameObject);
+                    _inventoryCells[emptySlotIndex] = null;
+                    
+                    GameObject cellObj = Instantiate(moduleInventoryCellPrefab, parent);
+                    cellObj.transform.SetSiblingIndex(siblingIndex);
+                    ModuleInventoryCell cell = cellObj.GetComponent<ModuleInventoryCell>();
+                    if (cell != null) {
+                        cell.Initialize(this);
+                        cell.SetModule(module);
+                        _moduleCells.Add(cell);
+                        _moduleCellSlots[emptySlotIndex] = cell;
+                    }
+                }
+            }
+        }
+
+        UpdateInventoryInfoText();
+    }
+
+    public void RefreshInventoryGrid()
+    {
+        RefreshResourcesOnly();
+        RefreshModulesOnly();
+    }
+
     private void UpdateInventoryInfoText()
     {
         if (inventoryInfoText == null) return;
 
-        int nonEmptyCellCount = _inventoryCells.Count(cell => !cell.IsEmpty());
-        inventoryInfoText.text = $"기지 창고 ({nonEmptyCellCount.ToString()}/{_inventoryCells.Count})";
+        int totalItems = GetUsedSlotCount();
+        int totalSlots = TotalGridSlots;
+        
+        inventoryInfoText.text = $"기지 창고 ({totalItems.ToString()}/{totalSlots})";
     }
 
     public bool TryAddResourceToInventory(ResourceType type, int amount, bool moveAll = false)
@@ -311,8 +415,14 @@ public class BaseInventorySystem : MonoBehaviour
         int remainingToMove = amountToMove;
 
         while (remainingToMove > 0) {
+            if (IsGridFull()) {
+                Debug.Log("Inventory is full!)");
+                break;
+            }
+            
             BaseInventoryCell emptyCell = FindFirstEmptyCell();
             if (emptyCell == null) {
+                Debug.Log("Inventory is full!)");
                 break;
             }
 
@@ -370,7 +480,7 @@ public class BaseInventorySystem : MonoBehaviour
         }
     }
 
-    public void SortInventory()
+    private void SortInventory()
     {
         List<BaseInventoryCell> filledCells = _inventoryCells.Where(cell => !cell.IsEmpty()).ToList();
 
@@ -397,7 +507,7 @@ public class BaseInventorySystem : MonoBehaviour
         UpdateInventoryInfoText();
     }
 
-    public void UnloadAllToBaseInventory()
+    private void UnloadAllToBaseInventory()
     {
         _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
         if (_baseInventoryManager == null) return;

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class BaseInventoryManager : MonoBehaviour
@@ -102,6 +103,8 @@ public class BaseInventoryManager : MonoBehaviour
                 _baseInventory[type] = PlayerPrefs.GetInt(key);
             }
         }
+        
+        LoadModules();
     }
 
     public void SaveAllInventory()
@@ -120,6 +123,10 @@ public class BaseInventoryManager : MonoBehaviour
             string key = BaseInventoryPrefix + type;
             PlayerPrefs.DeleteKey(key);
         }
+        
+        _baseModules.Clear();
+        string modulesKey = BaseInventoryPrefix + "Modules";
+        PlayerPrefs.DeleteKey(modulesKey);
         PlayerPrefs.Save();
     }
     
@@ -128,6 +135,7 @@ public class BaseInventoryManager : MonoBehaviour
         if (module == null) return;
         
         _baseModules.Add(module);
+        SaveModules();
         OnModuleAdded?.Invoke(module);
     }
     
@@ -138,6 +146,7 @@ public class BaseInventoryManager : MonoBehaviour
         bool removed = _baseModules.Remove(module);
         if (removed)
         {
+            SaveModules();
             OnModuleRemoved?.Invoke(module);
         }
         return removed;
@@ -151,6 +160,90 @@ public class BaseInventoryManager : MonoBehaviour
     public int GetModuleCount()
     {
         return _baseModules.Count;
+    }
+    
+    private void SaveModules()
+    {
+        string modulesKey = BaseInventoryPrefix + "Modules";
+        List<string> moduleNames = _baseModules.Select(m => m.moduleName).ToList();
+        string json = JsonUtility.ToJson(new ModuleNameList { moduleNames = moduleNames });
+        PlayerPrefs.SetString(modulesKey, json);
+        PlayerPrefs.Save();
+    }
+    
+    private void LoadModules()
+    {
+        string modulesKey = BaseInventoryPrefix + "Modules";
+        if (!PlayerPrefs.HasKey(modulesKey))
+        {
+            Debug.Log("BaseInventoryManager: 저장된 모듈이 없습니다.");
+            return;
+        }
+        
+        string json = PlayerPrefs.GetString(modulesKey);
+        ModuleNameList moduleNameList = JsonUtility.FromJson<ModuleNameList>(json);
+        
+        if (moduleNameList == null || moduleNameList.moduleNames == null)
+        {
+            Debug.LogWarning("BaseInventoryManager: 모듈 리스트를 파싱할 수 없습니다.");
+            return;
+        }
+        
+        Dictionary<string, ModuleRecipe> recipeMap = GetAllModuleRecipes();
+        
+        int loadedCount = 0;
+        foreach (string moduleName in moduleNameList.moduleNames)
+        {
+            if (recipeMap.TryGetValue(moduleName, out ModuleRecipe recipe))
+            {
+                Module module = new Module(recipe);
+                _baseModules.Add(module);
+                loadedCount++;
+            }
+        }
+    }
+    
+    private Dictionary<string, ModuleRecipe> GetAllModuleRecipes()
+    {
+        Dictionary<string, ModuleRecipe> recipeMap = new Dictionary<string, ModuleRecipe>();
+        
+        ModuleData[] allModuleData = Resources.LoadAll<ModuleData>("");
+        foreach (ModuleData moduleData in allModuleData)
+        {
+            if (moduleData.Recipes != null)
+            {
+                foreach (ModuleRecipe recipe in moduleData.Recipes)
+                {
+                    if (!recipeMap.ContainsKey(recipe.moduleName))
+                    {
+                        recipeMap[recipe.moduleName] = recipe;
+                    }
+                }
+            }
+        }
+        
+        ModuleStation[] moduleStations = FindObjectsByType<ModuleStation>(FindObjectsSortMode.None);
+        foreach (ModuleStation station in moduleStations)
+        {
+            if (station.ModuleData != null && station.ModuleData.Recipes != null)
+            {
+                foreach (ModuleRecipe recipe in station.ModuleData.Recipes)
+                {
+                    if (!recipeMap.ContainsKey(recipe.moduleName))
+                    {
+                        recipeMap[recipe.moduleName] = recipe;
+                    }
+                }
+            }
+        }
+        
+        return recipeMap;
+    }
+    
+    [System.Serializable]
+    private class ModuleNameList
+    {
+        public List<string> moduleNames;
     }
 }
 

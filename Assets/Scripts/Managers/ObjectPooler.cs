@@ -58,6 +58,12 @@ public class ObjectPooler : MonoBehaviour
         objectToSpawn.transform.rotation = rotation;
 
         _poolDictionary[objTag].Enqueue(objectToSpawn);
+        
+        // Notify ModuleEffectManager if it exists (for dynamically spawned objects)
+        if (ModuleEffectManager.Instance != null)
+        {
+            ModuleEffectManager.Instance.OnObjectCreated(objectToSpawn);
+        }
 
         return objectToSpawn;
     }

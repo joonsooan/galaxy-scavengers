@@ -12,29 +12,33 @@ public class ModuleStationUIManager : MonoBehaviour
     [SerializeField] private GameObject recipeGridContainer;
     [SerializeField] private GameObject moduleGridCellPrefab;
     [SerializeField] private ModuleDetailPanel moduleDetailPanel;
-    
-    private ModuleStation _currentStation;
+    [SerializeField] private Button closeButton;
+
+    private readonly List<ModuleGridCell> _recipeCells = new List<ModuleGridCell>();
     private ModuleData _currentData;
-    private readonly List<ModuleGridCell> _recipeCells = new();
-    
+    private ModuleStation _currentStation;
+
     private void Start()
     {
-        if (moduleStationPanel != null)
-        {
+        if (moduleStationPanel != null) {
             moduleStationPanel.SetActive(false);
         }
-        
-        if (moduleDetailPanel != null)
-        {
+
+        if (moduleDetailPanel != null) {
             moduleDetailPanel.Initialize(this);
         }
+
+        if (closeButton != null) {
+            closeButton.onClick.RemoveAllListeners();
+            closeButton.onClick.AddListener(OnCloseButtonClicked);
+        }
     }
-    
+
     private void OnEnable()
     {
         ModuleStation.OnModuleStationClicked += ShowModuleStationUI;
     }
-    
+
     private void OnDisable()
     {
         ModuleStation.OnModuleStationClicked -= ShowModuleStationUI;
@@ -44,101 +48,94 @@ public class ModuleStationUIManager : MonoBehaviour
     {
         _currentStation = station;
         _currentData = station.ModuleData;
-        
-        BaseInventorySystem inventorySystem = FindFirstObjectByType<BaseInventorySystem>();
-        if (inventorySystem != null)
-        {
-            inventorySystem.RefreshModuleGrid();
-        }
-        
-        if (moduleStationPanel != null)
-        {
+
+        if (moduleStationPanel != null) {
             moduleStationPanel.SetActive(true);
         }
-        
+
+        if (moduleDetailPanel != null) {
+            moduleDetailPanel.gameObject.SetActive(true);
+            moduleDetailPanel.ClearInfo();
+        }
+
         UpdateStationInfo();
         LoadAllRecipes();
     }
 
     private void HidePanel()
     {
-        if (moduleStationPanel != null)
-        {
+        if (moduleStationPanel != null) {
             moduleStationPanel.SetActive(false);
         }
+
+        if (moduleDetailPanel != null) {
+            moduleDetailPanel.HidePanel();
+        }
     }
-    
+
+    private void OnCloseButtonClicked()
+    {
+        HidePanel();
+    }
+
     private void UpdateStationInfo()
     {
         if (_currentData == null) return;
-        
-        if (stationNameText != null)
-        {
+
+        if (stationNameText != null) {
             stationNameText.text = _currentData.StationName;
         }
-        
-        if (stationInfoText != null)
-        {
+
+        if (stationInfoText != null) {
             stationInfoText.text = _currentData.StationInfo;
         }
     }
-    
+
     private void LoadAllRecipes()
     {
         ClearAllRecipes();
-        
-        if (_currentData == null || recipeGridContainer == null || moduleGridCellPrefab == null)
-        {
+
+        if (_currentData == null || recipeGridContainer == null || moduleGridCellPrefab == null) {
             return;
         }
-        
+
         GridLayoutGroup gridLayout = recipeGridContainer.GetComponent<GridLayoutGroup>();
-        if (gridLayout == null)
-        {
+        if (gridLayout == null) {
             gridLayout = recipeGridContainer.AddComponent<GridLayoutGroup>();
         }
-        
-        foreach (ModuleRecipe recipe in _currentData.Recipes)
-        {
+
+        foreach (ModuleRecipe recipe in _currentData.Recipes) {
             GameObject cellObj = Instantiate(moduleGridCellPrefab, recipeGridContainer.transform);
             ModuleGridCell cell = cellObj.GetComponent<ModuleGridCell>();
-            
-            if (cell != null)
-            {
+
+            if (cell != null) {
                 cell.Initialize(recipe, this);
                 _recipeCells.Add(cell);
             }
         }
     }
-    
+
     private void ClearAllRecipes()
     {
         if (recipeGridContainer == null) return;
-        
-        foreach (Transform child in recipeGridContainer.transform)
-        {
+
+        foreach (Transform child in recipeGridContainer.transform) {
             Destroy(child.gameObject);
         }
-        
+
         _recipeCells.Clear();
     }
-    
+
     public void ShowModuleDetail(ModuleRecipe recipe)
     {
-        if (moduleDetailPanel != null && _currentStation != null)
-        {
-            moduleDetailPanel.ShowModuleDetail(recipe, _currentStation);
+        if (moduleDetailPanel != null && _currentStation != null) {
+            moduleDetailPanel.ShowInfo(recipe, _currentStation);
         }
     }
-    
+
     public void OnModuleCrafted()
     {
-        foreach (ModuleGridCell cell in _recipeCells)
-        {
-            if (cell != null && cell.Recipe != null && _currentStation != null)
-            {
-            }
-        }
+        // Module crafting is handled by BaseInventorySystem events
+        // No additional action needed here
     }
 }
-
