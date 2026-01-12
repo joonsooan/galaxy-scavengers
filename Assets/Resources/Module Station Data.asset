@@ -26,7 +26,7 @@ MonoBehaviour:
       amount: 20
     moduleType: 0
     moduleTier: 1
-    effectData: {fileID: 0}
+    effectData: {fileID: 11400000, guid: 1107935e6974d9e4682e8d842f699a10, type: 2}
   - moduleName: "\uC57D\uD0C8 \uBAA8\uB4C8 1"
     moduleDescription: "\uC2DC\uB4DC \uCF54\uC5B4\uC758 \uCD5C\uB300 \uC800\uC7A5
       \uACF5\uAC04\uC744 \uB298\uB824\uC8FC\uB294 \uBAA8\uB4C8\uC785\uB2C8\uB2E4."

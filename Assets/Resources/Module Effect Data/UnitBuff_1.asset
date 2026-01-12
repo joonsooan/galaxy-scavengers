@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: UnitBuff_1
   m_EditorClassIdentifier: 
   statModifiers:
-  - statType: 1
+  - statType: 2
     modifierValue: 0.15
     statIcon: {fileID: 0}
-  - statType: 2
+  - statType: 3
     modifierValue: 0.15
     statIcon: {fileID: 0}
   effectDescription: "\uBAA8\uB4E0 \uC720\uB2DB \uC774\uB3D9\uC18D\uB3C4 +15%\n\uC0DD\uC0B0

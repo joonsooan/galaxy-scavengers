@@ -16,6 +16,9 @@ public class CoreCustomUIManager : MonoBehaviour
     [SerializeField] private Transform moduleSelectionGridContainer;
     [SerializeField] private GameObject moduleSelectionCellPrefab;
 
+    [Header("Core Detail Panel")]
+    [SerializeField] private CoreDetailPanel coreDetailPanel;
+
     private readonly List<ModuleInventoryCell> _moduleSelectionCells = new List<ModuleInventoryCell>();
 
     private CoreCustomizationManager _customizationManager;
@@ -137,8 +140,14 @@ public class CoreCustomUIManager : MonoBehaviour
             FindManagers();
         }
         
+        // Update module selection grid with current modules from base inventory
         RefreshModuleSelectionGrid();
         RefreshSlots();
+        
+        // Update core detail panel to show current module effects
+        if (coreDetailPanel != null) {
+            coreDetailPanel.UpdateModuleEffects();
+        }
     }
 
     public bool IsPanelOpen()
@@ -309,6 +318,11 @@ public class CoreCustomUIManager : MonoBehaviour
         // Refresh module selection grid when slot changes
         if (IsPanelOpen()) {
             StartCoroutine(RefreshModuleSelectionGridDelayed());
+        }
+
+        // Update core detail panel when modules change
+        if (coreDetailPanel != null) {
+            coreDetailPanel.UpdateModuleEffects();
         }
 
         // Notify BaseInventorySystem to refresh if open

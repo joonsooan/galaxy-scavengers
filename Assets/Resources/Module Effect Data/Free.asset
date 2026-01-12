@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 75f4d774dd15e3145834514c4c64b522, type: 3}
-  m_Name: ResourceGeneration_1
+  m_Name: Free
   m_EditorClassIdentifier: 
   statModifiers:
-  - statType: 5
-    modifierValue: 0.2
+  - statType: 0
+    modifierValue: 0
     statIcon: {fileID: 0}
-  effectDescription: "\uBC1C\uC804\uAE30 \uC0DD\uC0B0\uC18D\uB3C4 +20%"
+  effectDescription: "\uD6A8\uACFC \uC5C6\uC74C"

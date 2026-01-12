@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: BuildingHP_2
   m_EditorClassIdentifier: 
   statModifiers:
-  - statType: 3
+  - statType: 4
     modifierValue: 0.4
     statIcon: {fileID: 0}
   effectDescription: "\uAC74\uBB3C \uCCB4\uB825 +40%"

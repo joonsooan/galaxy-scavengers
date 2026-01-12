@@ -2,6 +2,7 @@ using UnityEngine;
 
 public enum ModuleStatType
 {
+    None,
     StorageCapacity,
     UnitMoveSpeed,
     UnitWorkSpeed,
