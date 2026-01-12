@@ -178,6 +178,11 @@ public class GameManager : MonoBehaviour
         yield return null;
         yield return null;
         
+        if (mapGenerator != null)
+        {
+            mapGenerator.GenerateEnemyTerritoryRadiusValues();
+        }
+        
         foreach (EnemySpawner enemySpawner in FindObjectsByType<EnemySpawner>(FindObjectsSortMode.None))
         {
             enemySpawner.SpawnEnemies();

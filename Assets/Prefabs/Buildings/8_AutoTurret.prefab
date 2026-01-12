@@ -153,9 +153,9 @@ MonoBehaviour:
   maxHealth: 50
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
-  attackRange: 10
+  attackRange: 6.5
   fireInterval: 1
-  attackDamage: 4
+  attackDamage: 5
   bulletPrefab: {fileID: 3852804536807886205, guid: c773192e621cee54cb0e65277df6f731, type: 3}
 --- !u!114 &-1157859121563449324
 MonoBehaviour:
@@ -169,8 +169,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4df76de1adfb064e95b506d49b881b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  visionRange: 4.5
+  visionRange: 6.5
   isActive: 1
+  hasOffest: 1
+  offest: {x: 0.5, y: 0.5, z: 0}
 --- !u!114 &-451309890684058212
 MonoBehaviour:
   m_ObjectHideFlags: 0

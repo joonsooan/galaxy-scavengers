@@ -186,6 +186,18 @@ public class UnitMovement : MonoBehaviour
         _isAtFinalTarget = false;
         
         _path = FindPath(transform.position, _finalTargetPosition);
+       
+        if (_path.Count > 1)
+        {
+            Vector3 firstPoint = _path.Peek();
+            Vector3Int firstCell = _grid.WorldToCell(firstPoint);
+            Vector3Int currentCell = _grid.WorldToCell(transform.position);
+
+            if (firstCell == currentCell)
+            {
+                _path.Dequeue();
+            }
+        }
         
         if (_path.Count > 0) {
             _currentWaypoint = _path.Dequeue();
@@ -230,6 +242,18 @@ public class UnitMovement : MonoBehaviour
 
         _path = FindPath(transform.position, _finalTargetPosition);
 
+        if (_path.Count > 1)
+        {
+            Vector3 firstPoint = _path.Peek();
+            Vector3Int firstCell = _grid.WorldToCell(firstPoint);
+            Vector3Int currentCell = _grid.WorldToCell(transform.position);
+
+            if (firstCell == currentCell)
+            {
+                _path.Dequeue();
+            }
+        }
+        
         if (_path.Count > 0) {
             _currentWaypoint = _path.Dequeue();
             return true;

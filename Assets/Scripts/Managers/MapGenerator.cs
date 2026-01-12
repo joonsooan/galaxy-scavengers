@@ -83,16 +83,21 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private Color concentricCircleGizmoColor = new (1f, 1f, 0f, 0.3f);
     
     [Header("Enemy Territory Settings")]
-    [SerializeField] private float enemyHomeRadius = 3f;
-    [SerializeField] private float enemyTerritoryRadius = 6f;
+    [SerializeField] private int minEnemyHomeRadius = 3;
+    [SerializeField] private int maxEnemyHomeRadius = 5;
+    [SerializeField] private int minEnemyTerritoryRadius = 6;
+    [SerializeField] private int maxEnemyTerritoryRadius = 8;
     [SerializeField] private bool drawEnemyTerritoryTiles = true;
 
     private int _mapCenterXOffset;
     private int _mapCenterYOffset;
     private float[,] _noiseMap;
     private float[,] _gradientMap;
+    private float _enemyHomeRadius;
+    private float _enemyTerritoryRadius;
     
     private readonly List<Vector2Int> _enemySpawnHolePositions = new ();
+    private readonly Dictionary<Vector2Int, (float homeRadius, float territoryRadius)> _holeRadiusValues = new ();
 
     public Vector3 GetEnemySpawnHoleWorldPosition(Vector2Int holePosition)
     {
@@ -102,6 +107,32 @@ public class MapGenerator : MonoBehaviour
         }
         Vector3Int cellPos = new Vector3Int(holePosition.x - _mapCenterXOffset, holePosition.y - _mapCenterYOffset, 0);
         return grid.GetCellCenterWorld(cellPos);
+    }
+
+    public (float homeRadius, float territoryRadius) GetHoleRadiusValues(Vector2Int holePosition)
+    {
+        if (_holeRadiusValues.TryGetValue(holePosition, out var radiusValues))
+        {
+            return radiusValues;
+        }
+        return (0f, 0f);
+    }
+
+    public void GenerateEnemyTerritoryRadiusValues()
+    {
+        if (_enemySpawnHolePositions == null || _enemySpawnHolePositions.Count == 0)
+        {
+            return;
+        }
+        
+        _holeRadiusValues.Clear();
+        
+        foreach (Vector2Int holePos in _enemySpawnHolePositions)
+        {
+            float homeRadius = Random.Range(minEnemyHomeRadius, maxEnemyHomeRadius) + 0.5f;
+            float territoryRadius = Random.Range(minEnemyTerritoryRadius, maxEnemyTerritoryRadius) + 0.5f;
+            _holeRadiusValues[holePos] = (homeRadius, territoryRadius);
+        }
     }
 
     private void SetGroundTile(Vector3Int cellPosition, TileBase tile)
@@ -802,14 +833,29 @@ public class MapGenerator : MonoBehaviour
             return;
         }
         
+        if (_holeRadiusValues.Count == 0)
+        {
+            GenerateEnemyTerritoryRadiusValues();
+        }
+        
         HashSet<Vector3Int> homeTileCells = new HashSet<Vector3Int>();
         
         foreach (Vector2Int holePos in _enemySpawnHolePositions)
         {
+            if (!_holeRadiusValues.TryGetValue(holePos, out var radiusValues))
+            {
+                continue;
+            }
+            
+            float homeRadius = radiusValues.homeRadius;
+            float territoryRadius = radiusValues.territoryRadius;
+            
             Vector3 worldPos = GetEnemySpawnHoleWorldPosition(holePos);
             Vector3Int centerCell = grid.WorldToCell(worldPos);
             
-            int homeRadiusCells = Mathf.CeilToInt(enemyHomeRadius);
+            _enemyHomeRadius = homeRadius;
+            int homeRadiusCells = Mathf.CeilToInt(_enemyHomeRadius);
+            
             for (int x = -homeRadiusCells; x <= homeRadiusCells; x++)
             {
                 for (int y = -homeRadiusCells; y <= homeRadiusCells; y++)
@@ -818,7 +864,7 @@ public class MapGenerator : MonoBehaviour
                     Vector3 cellWorldPos = grid.GetCellCenterWorld(cell);
                     float distance = Vector3.Distance(worldPos, cellWorldPos);
                     
-                    if (distance <= enemyHomeRadius)
+                    if (distance <= _enemyHomeRadius)
                     {
                         if (groundTilemap.HasTile(cell))
                         {
@@ -828,8 +874,10 @@ public class MapGenerator : MonoBehaviour
                     }
                 }
             }
+
+            _enemyTerritoryRadius = territoryRadius;
+            int territoryRadiusCells = Mathf.CeilToInt(_enemyTerritoryRadius);
             
-            int territoryRadiusCells = Mathf.CeilToInt(enemyTerritoryRadius);
             for (int x = -territoryRadiusCells; x <= territoryRadiusCells; x++)
             {
                 for (int y = -territoryRadiusCells; y <= territoryRadiusCells; y++)
@@ -844,7 +892,7 @@ public class MapGenerator : MonoBehaviour
                     Vector3 cellWorldPos = grid.GetCellCenterWorld(cell);
                     float distance = Vector3.Distance(worldPos, cellWorldPos);
                     
-                    if (distance <= enemyTerritoryRadius && distance > enemyHomeRadius)
+                    if (distance <= _enemyTerritoryRadius && distance > _enemyHomeRadius)
                     {
                         if (groundTilemap.HasTile(cell))
                         {
@@ -864,10 +912,18 @@ public class MapGenerator : MonoBehaviour
             Tilemap buildingManagerGroundTilemap = BuildingManager.Instance.GroundTilemap;
             foreach (Vector2Int holePos in _enemySpawnHolePositions)
             {
+                if (!_holeRadiusValues.TryGetValue(holePos, out var radiusValues))
+                {
+                    continue;
+                }
+                
+                float homeRadius = radiusValues.homeRadius;
+                float territoryRadius = radiusValues.territoryRadius;
+                
                 Vector3 worldPos = GetEnemySpawnHoleWorldPosition(holePos);
                 Vector3Int centerCell = grid.WorldToCell(worldPos);
                 
-                int homeRadiusCells = Mathf.CeilToInt(enemyHomeRadius);
+                int homeRadiusCells = Mathf.CeilToInt(homeRadius);
                 for (int x = -homeRadiusCells; x <= homeRadiusCells; x++)
                 {
                     for (int y = -homeRadiusCells; y <= homeRadiusCells; y++)
@@ -876,14 +932,14 @@ public class MapGenerator : MonoBehaviour
                         Vector3 cellWorldPos = grid.GetCellCenterWorld(cell);
                         float distance = Vector3.Distance(worldPos, cellWorldPos);
                         
-                        if (distance <= enemyHomeRadius && buildingManagerGroundTilemap.HasTile(cell))
+                        if (distance <= homeRadius && buildingManagerGroundTilemap.HasTile(cell))
                         {
                             buildingManagerGroundTilemap.SetTile(cell, enemyHomeTile);
                         }
                     }
                 }
                 
-                int territoryRadiusCells = Mathf.CeilToInt(enemyTerritoryRadius);
+                int territoryRadiusCells = Mathf.CeilToInt(territoryRadius);
                 for (int x = -territoryRadiusCells; x <= territoryRadiusCells; x++)
                 {
                     for (int y = -territoryRadiusCells; y <= territoryRadiusCells; y++)
@@ -904,7 +960,7 @@ public class MapGenerator : MonoBehaviour
                         Vector3 cellWorldPos = grid.GetCellCenterWorld(cell);
                         float distance = Vector3.Distance(worldPos, cellWorldPos);
                         
-                        if (distance <= enemyTerritoryRadius && distance > enemyHomeRadius && buildingManagerGroundTilemap.HasTile(cell))
+                        if (distance <= territoryRadius && distance > homeRadius && buildingManagerGroundTilemap.HasTile(cell))
                         {
                             buildingManagerGroundTilemap.SetTile(cell, enemyTerritoryTile);
                         }

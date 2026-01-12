@@ -3233,9 +3233,9 @@ MonoBehaviour:
   highWallTilemap: {fileID: 860813986}
   grid: {fileID: 2115591665}
   groundTile: {fileID: 11400000, guid: 7d463f590028a4e46a4251ccd769d5d4, type: 2}
-  lowWallTile: {fileID: 11400000, guid: dba3271a3711e6c46ae4842f14013bfb, type: 2}
-  highWallTile: {fileID: 11400000, guid: 5270636ba8f8b6949bd3d0a500bc74f3, type: 2}
-  wallTile: {fileID: 11400000, guid: dba3271a3711e6c46ae4842f14013bfb, type: 2}
+  lowWallTile: {fileID: 11400000, guid: 86607de1d48cf8e48b479e179ad0a920, type: 2}
+  highWallTile: {fileID: 11400000, guid: bb32fc30967d5d046908f49f0d206e89, type: 2}
+  wallTile: {fileID: 11400000, guid: 86607de1d48cf8e48b479e179ad0a920, type: 2}
   enemyHomeTile: {fileID: 11400000, guid: a1537402c07c3394592fb0ee3ff9b0b7, type: 2}
   enemyTerritoryTile: {fileID: 11400000, guid: cd3ec6303b4b8754fb684445a525d2b4, type: 2}
   width: 224
@@ -3264,8 +3264,10 @@ MonoBehaviour:
   showEnemySpawnHoleGizmos: 1
   enemySpawnHoleGizmoColor: {r: 1, g: 0, b: 0, a: 0.5}
   concentricCircleGizmoColor: {r: 1, g: 1, b: 0, a: 0.3}
-  enemyHomeRadius: 5.5
-  enemyTerritoryRadius: 9.5
+  minEnemyHomeRadius: 4
+  maxEnemyHomeRadius: 5
+  minEnemyTerritoryRadius: 6
+  maxEnemyTerritoryRadius: 8
   drawEnemyTerritoryTiles: 1
 --- !u!114 &313771329
 MonoBehaviour:
@@ -3279,8 +3281,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c1b6965b69088843b0d523477f7dc1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyPrefab: {fileID: 7944764008120523387, guid: 6ef6e727776f20b46a722ca01f6b9153, type: 3}
-  enemiesPerHole: 0
+  enemyPrefabs:
+  - enemyPrefab: {fileID: 7944764008120523387, guid: 6ef6e727776f20b46a722ca01f6b9153, type: 3}
+    spawnProbability: 50
+  - enemyPrefab: {fileID: 7944764008120523387, guid: 81c943f3f9505ab4d8562d2c693ac7d5, type: 3}
+    spawnProbability: 30
+  - enemyPrefab: {fileID: 7944764008120523387, guid: 0aeed2fd5f8651c47b1db59e47ae792c, type: 3}
+    spawnProbability: 20
+  minEnemiesPerHole: 5
+  maxEnemiesPerHole: 7
   spawnRadiusOffset: 5
 --- !u!114 &313771330
 MonoBehaviour:
@@ -3300,22 +3309,22 @@ MonoBehaviour:
   resourceTilemap: {fileID: 2116328957}
   resourceSettings:
   - resourceType: 0
-    resourceRuleTile: {fileID: 11400000, guid: 1754c687980118f429cc381324160252, type: 2}
+    resourceRuleTile: {fileID: 11400000, guid: d91f31998a595bb43a0ae1409b93f536, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: 9e542c61b3b4f0745ab05a9dadeccb8f, type: 3}
     spawnFrequencyPercent: 60
     baseRichness: 10
   - resourceType: 1
-    resourceRuleTile: {fileID: 11400000, guid: c83acb1050e5f714d8f29d6cd34e886d, type: 2}
+    resourceRuleTile: {fileID: 11400000, guid: c91ffd6c8f4249946ba95758fe8932e5, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: a3a2b3c4676bb844e898ce2cf3dd397b, type: 3}
     spawnFrequencyPercent: 25
     baseRichness: 10
   - resourceType: 2
-    resourceRuleTile: {fileID: 11400000, guid: 54a4f32127477df4ca5f86948cfc1c86, type: 2}
+    resourceRuleTile: {fileID: 11400000, guid: 5717c75cf94904c43adea50e59439358, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: 1a1e81616dceb074597d502c9527fe82, type: 3}
     spawnFrequencyPercent: 10
     baseRichness: 10
   - resourceType: 3
-    resourceRuleTile: {fileID: 11400000, guid: 126c07ed761759f4a8ef513be9dbd6aa, type: 2}
+    resourceRuleTile: {fileID: 11400000, guid: 8affd25cb854b6649a39afee3fa75657, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: 787e38d9be4ec414aad7efd4b33c7a60, type: 3}
     spawnFrequencyPercent: 5
     baseRichness: 10
@@ -19946,37 +19955,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &620467671
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 620467672}
-  m_Layer: 0
-  m_Name: Enemy Pool
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &620467672
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 620467671}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 1
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &645661487
 GameObject:
   m_ObjectHideFlags: 0
@@ -30390,6 +30368,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 629779b24a1188e42a708a557b393bd0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  defaultPoolSize: 10
   pools:
   - tag: TurretBullet
     size: 20
@@ -30402,7 +30381,7 @@ MonoBehaviour:
   - tag: Enemy_0
     size: 200
     prefab: {fileID: 7944764008120523387, guid: 6ef6e727776f20b46a722ca01f6b9153, type: 3}
-    parent: {fileID: 620467672}
+    parent: {fileID: 0}
 --- !u!4 &1355668859
 Transform:
   m_ObjectHideFlags: 0
@@ -39990,7 +39969,6 @@ SceneRoots:
   - {fileID: 1774035406}
   - {fileID: 45027564}
   - {fileID: 955001230}
-  - {fileID: 620467672}
   - {fileID: 2115591666}
   - {fileID: 1490465122}
   - {fileID: 1170139636}

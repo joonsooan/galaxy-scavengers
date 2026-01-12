@@ -133,7 +133,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2ba850753fb03b4aa26fd6687d6fb34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 50
+  maxHealth: 10000
   currentHealth: 0
   unitType: 0
   flashColor: {r: 1, g: 0, b: 0, a: 1}
@@ -179,7 +179,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4df76de1adfb064e95b506d49b881b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  visionRange: 6.5
+  visionRange: 7.5
   isActive: 1
 --- !u!95 &156823049281101297
 Animator:
