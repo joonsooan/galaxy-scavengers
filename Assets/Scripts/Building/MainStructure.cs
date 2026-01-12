@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,27 +7,14 @@ public class MainStructure : BaseStorage, IClickable
     [SerializeField] private List<UnitData> producibleUnits;
     
     private bool _isProducing;
-    private InventorySystem _inventorySystem;
 
     protected override void Start()
     {
         base.Start();
-        _inventorySystem = GetComponent<InventorySystem>();
         
         if (GetComponent<BuildingHoverTrigger>() == null)
         {
             gameObject.AddComponent<BuildingHoverTrigger>();
-        }
-        
-        BoxCollider2D[] colliders = GetComponents<BoxCollider2D>();
-        bool hasTriggerCollider = false;
-        foreach (BoxCollider2D collider in colliders)
-        {
-            if (collider != null && collider.isTrigger)
-            {
-                hasTriggerCollider = true;
-                break;
-            }
         }
     }
     

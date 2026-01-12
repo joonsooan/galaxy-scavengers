@@ -3123,7 +3123,7 @@ RectTransform:
   m_Father: {fileID: 850344535}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -3233,9 +3233,9 @@ MonoBehaviour:
   highWallTilemap: {fileID: 860813986}
   grid: {fileID: 2115591665}
   groundTile: {fileID: 11400000, guid: 7d463f590028a4e46a4251ccd769d5d4, type: 2}
-  lowWallTile: {fileID: 11400000, guid: 86607de1d48cf8e48b479e179ad0a920, type: 2}
-  highWallTile: {fileID: 11400000, guid: bb32fc30967d5d046908f49f0d206e89, type: 2}
-  wallTile: {fileID: 11400000, guid: 86607de1d48cf8e48b479e179ad0a920, type: 2}
+  lowWallTile: {fileID: 11400000, guid: f0b14c3eff507b449adf6d27bb1639b9, type: 2}
+  highWallTile: {fileID: 11400000, guid: 7387ab038be892c4894149fbfc82750f, type: 2}
+  wallTile: {fileID: 11400000, guid: f0b14c3eff507b449adf6d27bb1639b9, type: 2}
   enemyHomeTile: {fileID: 11400000, guid: a1537402c07c3394592fb0ee3ff9b0b7, type: 2}
   enemyTerritoryTile: {fileID: 11400000, guid: cd3ec6303b4b8754fb684445a525d2b4, type: 2}
   width: 224
@@ -3309,22 +3309,22 @@ MonoBehaviour:
   resourceTilemap: {fileID: 2116328957}
   resourceSettings:
   - resourceType: 0
-    resourceRuleTile: {fileID: 11400000, guid: d91f31998a595bb43a0ae1409b93f536, type: 2}
+    resourceRuleTile: {fileID: 11400000, guid: 2588dfedbfd20f041a8858a30a5cab1a, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: 9e542c61b3b4f0745ab05a9dadeccb8f, type: 3}
     spawnFrequencyPercent: 60
     baseRichness: 10
   - resourceType: 1
-    resourceRuleTile: {fileID: 11400000, guid: c91ffd6c8f4249946ba95758fe8932e5, type: 2}
+    resourceRuleTile: {fileID: 11400000, guid: d33ac5649191bfb45a417603aa9d8a5c, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: a3a2b3c4676bb844e898ce2cf3dd397b, type: 3}
     spawnFrequencyPercent: 25
     baseRichness: 10
   - resourceType: 2
-    resourceRuleTile: {fileID: 11400000, guid: 5717c75cf94904c43adea50e59439358, type: 2}
+    resourceRuleTile: {fileID: 11400000, guid: 6b71e0cc54adef34489aed2adc317002, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: 1a1e81616dceb074597d502c9527fe82, type: 3}
     spawnFrequencyPercent: 10
     baseRichness: 10
   - resourceType: 3
-    resourceRuleTile: {fileID: 11400000, guid: 8affd25cb854b6649a39afee3fa75657, type: 2}
+    resourceRuleTile: {fileID: 11400000, guid: 607b91191dd9a244790d4c5823eeec8d, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: 787e38d9be4ec414aad7efd4b33c7a60, type: 3}
     spawnFrequencyPercent: 5
     baseRichness: 10
@@ -5364,6 +5364,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2037369537}
     - target: {fileID: -8380313627106497889, guid: a62b629273deb2546809fa02708c2b80, type: 3}
+      propertyPath: inventoryWidth
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: -8380313627106497889, guid: a62b629273deb2546809fa02708c2b80, type: 3}
       propertyPath: currentResourcePanel
       value: 
       objectReference: {fileID: 471620567}
@@ -5371,6 +5375,58 @@ PrefabInstance:
       propertyPath: inventoryGridContainer
       value: 
       objectReference: {fileID: 1185129392}
+    - target: {fileID: -8380313627106497889, guid: a62b629273deb2546809fa02708c2b80, type: 3}
+      propertyPath: customMaxStackAmounts.Array.data[0].maxStackAmount
+      value: 200
+      objectReference: {fileID: 0}
+    - target: {fileID: -8380313627106497889, guid: a62b629273deb2546809fa02708c2b80, type: 3}
+      propertyPath: customMaxStackAmounts.Array.data[1].maxStackAmount
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: -8380313627106497889, guid: a62b629273deb2546809fa02708c2b80, type: 3}
+      propertyPath: customMaxStackAmounts.Array.data[2].maxStackAmount
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: -8380313627106497889, guid: a62b629273deb2546809fa02708c2b80, type: 3}
+      propertyPath: customMaxStackAmounts.Array.data[3].maxStackAmount
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: -8380313627106497889, guid: a62b629273deb2546809fa02708c2b80, type: 3}
+      propertyPath: customMaxStackAmounts.Array.data[4].maxStackAmount
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: -8380313627106497889, guid: a62b629273deb2546809fa02708c2b80, type: 3}
+      propertyPath: customMaxStackAmounts.Array.data[5].maxStackAmount
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: -8380313627106497889, guid: a62b629273deb2546809fa02708c2b80, type: 3}
+      propertyPath: customMaxStackAmounts.Array.data[6].maxStackAmount
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: -8380313627106497889, guid: a62b629273deb2546809fa02708c2b80, type: 3}
+      propertyPath: customMaxStackAmounts.Array.data[7].maxStackAmount
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: -8380313627106497889, guid: a62b629273deb2546809fa02708c2b80, type: 3}
+      propertyPath: customMaxStackAmounts.Array.data[8].maxStackAmount
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: -8380313627106497889, guid: a62b629273deb2546809fa02708c2b80, type: 3}
+      propertyPath: customMaxStackAmounts.Array.data[9].maxStackAmount
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: -8380313627106497889, guid: a62b629273deb2546809fa02708c2b80, type: 3}
+      propertyPath: customMaxStackAmounts.Array.data[10].maxStackAmount
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: -8380313627106497889, guid: a62b629273deb2546809fa02708c2b80, type: 3}
+      propertyPath: customMaxStackAmounts.Array.data[11].maxStackAmount
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: -8380313627106497889, guid: a62b629273deb2546809fa02708c2b80, type: 3}
+      propertyPath: customMaxStackAmounts.Array.data[12].maxStackAmount
+      value: 50
+      objectReference: {fileID: 0}
     - target: {fileID: -1387882417002535567, guid: a62b629273deb2546809fa02708c2b80, type: 3}
       propertyPath: buildingData
       value: 
@@ -5803,8 +5859,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 100, y: 36}
-  m_SizeDelta: {x: 64, y: 150}
+  m_AnchoredPosition: {x: 120, y: 36}
+  m_SizeDelta: {x: 64, y: 166}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &471620569
 MonoBehaviour:
@@ -22526,7 +22582,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 12, y: 0}
-  m_SizeDelta: {x: 12, y: 0}
+  m_SizeDelta: {x: 12, y: 1.6}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &788684147
 MonoBehaviour:
@@ -23728,7 +23784,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &886580899
 RectTransform:
   m_ObjectHideFlags: 0
@@ -26559,10 +26615,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 886580899}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 5, y: -5}
+  m_SizeDelta: {x: 110, y: 9.21}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1034809628
 MonoBehaviour:
@@ -28172,7 +28228,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 5, y: -19.21}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 2}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1171605819
 MonoBehaviour:
@@ -28622,7 +28678,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 150}
+  m_SizeDelta: {x: 120, y: 166}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &1185129394
 MonoBehaviour:
@@ -28682,8 +28738,8 @@ MonoBehaviour:
   m_ChildAlignment: 0
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 16, y: 16}
-  m_Spacing: {x: 2, y: 2}
+  m_CellSize: {x: 24, y: 24}
+  m_Spacing: {x: 4, y: 4}
   m_Constraint: 0
   m_ConstraintCount: 2
 --- !u!1001 &1200639944
@@ -29662,7 +29718,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1300553940
 RectTransform:
   m_ObjectHideFlags: 0
@@ -30297,7 +30353,7 @@ RectTransform:
   m_Father: {fileID: 1783936214}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -30940,7 +30996,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 20}
+  m_SizeDelta: {x: 120, y: 20}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1408411640
 MonoBehaviour:
@@ -34571,7 +34627,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1666371509
 RectTransform:
   m_ObjectHideFlags: 0
@@ -38402,7 +38458,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2037369538
 RectTransform:
   m_ObjectHideFlags: 0
@@ -38423,7 +38479,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 36}
-  m_SizeDelta: {x: 120, y: 150}
+  m_SizeDelta: {x: 120, y: 166}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &2037369539
 MonoBehaviour:
@@ -38631,10 +38687,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 886580899}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 5, y: -26.21}
+  m_SizeDelta: {x: 110, y: 15.27}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &2056899316
 MonoBehaviour:

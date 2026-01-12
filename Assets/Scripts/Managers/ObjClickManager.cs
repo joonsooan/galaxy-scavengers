@@ -44,11 +44,22 @@ public class ObjClickManager : MonoBehaviour
         
         RaycastHit2D[] hits = Physics2D.RaycastAll(mainCamera.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
         
-        foreach (RaycastHit2D hit in hits) {
-            if (hit.collider != null && hit.collider is BoxCollider2D) {
+        foreach (RaycastHit2D hit in hits) 
+        {
+            if (hit.collider != null && hit.collider is BoxCollider2D) 
+            {
+                MainStructure mainStructure = hit.collider.GetComponent<MainStructure>();
+                if (mainStructure != null)
+                {
+                    mainStructure.OnClicked();
+                    return;
+                }
+                
                 Processor processor = hit.collider.gameObject.GetComponent<Processor>();
-                if (processor != null) {
-                    if (BuildingInfoPanel.Instance != null) {
+                if (processor != null) 
+                {
+                    if (BuildingInfoPanel.Instance != null) 
+                    {
                         BuildingInfoPanel.Instance.gameObject.SetActive(false);
                     }
                     processor.OnClicked();
@@ -56,10 +67,13 @@ public class ObjClickManager : MonoBehaviour
                 }
                 
                 DroneHub droneHub = hit.collider.gameObject.GetComponent<DroneHub>();
-                if (droneHub != null) {
-                    if (BuildingInfoPanel.Instance != null) {
+                if (droneHub != null)
+                {
+                    if (BuildingInfoPanel.Instance != null)
+                    {
                         BuildingInfoPanel.Instance.gameObject.SetActive(false);
                     }
+
                     droneHub.OnClicked();
                     return;
                 }

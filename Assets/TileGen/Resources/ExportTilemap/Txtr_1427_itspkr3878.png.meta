@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 5661189bb81db974294da7212b53598b
+guid: b021fc3ccd5a79e4b8cd37c519ad4192
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2102431068737273824
-    second: Txtr_1785_itspkr3193_0
+      213: -8619388364288518259
+    second: Txtr_1427_itspkr3878_0
   - first:
       213: -5027509340213622084
     second: 0
@@ -1712,7 +1712,7 @@ TextureImporter:
       7: 6501298950303736333
       8: -3181606171480048652
       9: -7010260848350730462
-      Txtr_1785_itspkr3193_0: -2102431068737273824
+      Txtr_1427_itspkr3878_0: -8619388364288518259
       other: 3221110418805894947
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
