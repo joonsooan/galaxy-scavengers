@@ -3233,9 +3233,9 @@ MonoBehaviour:
   highWallTilemap: {fileID: 860813986}
   grid: {fileID: 2115591665}
   groundTile: {fileID: 11400000, guid: 7d463f590028a4e46a4251ccd769d5d4, type: 2}
-  lowWallTile: {fileID: 11400000, guid: f0b14c3eff507b449adf6d27bb1639b9, type: 2}
-  highWallTile: {fileID: 11400000, guid: 7387ab038be892c4894149fbfc82750f, type: 2}
-  wallTile: {fileID: 11400000, guid: f0b14c3eff507b449adf6d27bb1639b9, type: 2}
+  lowWallTile: {fileID: 11400000, guid: 93afd56ec3515e544b883d2ff9a577f2, type: 2}
+  highWallTile: {fileID: 11400000, guid: b7ddf0a4ab22ed248857521fe858e07d, type: 2}
+  wallTile: {fileID: 11400000, guid: 93afd56ec3515e544b883d2ff9a577f2, type: 2}
   enemyHomeTile: {fileID: 11400000, guid: a1537402c07c3394592fb0ee3ff9b0b7, type: 2}
   enemyTerritoryTile: {fileID: 11400000, guid: cd3ec6303b4b8754fb684445a525d2b4, type: 2}
   width: 224
@@ -3309,22 +3309,22 @@ MonoBehaviour:
   resourceTilemap: {fileID: 2116328957}
   resourceSettings:
   - resourceType: 0
-    resourceRuleTile: {fileID: 11400000, guid: 2588dfedbfd20f041a8858a30a5cab1a, type: 2}
+    resourceRuleTile: {fileID: 11400000, guid: 7d01455128c2e81459aa804408a8a254, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: 9e542c61b3b4f0745ab05a9dadeccb8f, type: 3}
     spawnFrequencyPercent: 60
     baseRichness: 10
   - resourceType: 1
-    resourceRuleTile: {fileID: 11400000, guid: d33ac5649191bfb45a417603aa9d8a5c, type: 2}
+    resourceRuleTile: {fileID: 11400000, guid: 9a1e64488072b374899978330f64d230, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: a3a2b3c4676bb844e898ce2cf3dd397b, type: 3}
     spawnFrequencyPercent: 25
     baseRichness: 10
   - resourceType: 2
-    resourceRuleTile: {fileID: 11400000, guid: 6b71e0cc54adef34489aed2adc317002, type: 2}
+    resourceRuleTile: {fileID: 11400000, guid: 06152a8c8e304b74584b74a45184d0e9, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: 1a1e81616dceb074597d502c9527fe82, type: 3}
     spawnFrequencyPercent: 10
     baseRichness: 10
   - resourceType: 3
-    resourceRuleTile: {fileID: 11400000, guid: 607b91191dd9a244790d4c5823eeec8d, type: 2}
+    resourceRuleTile: {fileID: 11400000, guid: 99cc9ab8b2dbf8c4cb707e9fc82cdc8d, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: 787e38d9be4ec414aad7efd4b33c7a60, type: 3}
     spawnFrequencyPercent: 5
     baseRichness: 10
@@ -6490,7 +6490,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 662.501
+  orthographic size: 11.25
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -28854,16 +28854,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 86656bfb929f6584ab99bf264c1278f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  infoPanel: {fileID: 1213770149}
   questNameText: {fileID: 569441782}
   questIdText: {fileID: 0}
   questDescriptionText: {fileID: 288898947}
+  requiredResourceText: {fileID: 0}
+  rewardText: {fileID: 0}
   requiredResourcesGridContainer: {fileID: 0}
   rewardGridContainer: {fileID: 0}
   baseInventoryCellPrefab: {fileID: 0}
   moduleInventoryCellPrefab: {fileID: 0}
-  acceptButton: {fileID: 1903016508}
-  finishButton: {fileID: 70238218}
+  questActionButton: {fileID: 0}
+  questActionButtonText: {fileID: 0}
 --- !u!1 &1223657130
 GameObject:
   m_ObjectHideFlags: 0

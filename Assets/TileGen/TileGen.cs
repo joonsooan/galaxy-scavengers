@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR
+#if UNITY_EDITOR
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,7 +19,42 @@ public class SpriteProcessor : AssetPostprocessor
 
     public void OnPostprocessTexture(Texture2D texture)
     {
-        TileGen tileGen = new TileGen();
+        // Only process files that contain "itspkr" in their path
+        if (!assetPath.Contains("itspkr"))
+        {
+            return;
+        }
+
+        TextureImporter textureImporter = (TextureImporter)assetImporter;
+        
+        // Check if sprite sheet is already configured
+        // If it has sprites and they match our expected count (64 sprites), skip reimport
+        if (textureImporter.spritesheet != null && textureImporter.spritesheet.Length == 64)
+        {
+            // Verify the sprite sheet structure matches what we expect
+            bool isValid = true;
+            for (int j = 0; j < textureImporter.spritesheet.Length; j++)
+            {
+                if (string.IsNullOrEmpty(textureImporter.spritesheet[j].name))
+                {
+                    isValid = false;
+                    break;
+                }
+            }
+            
+            if (isValid)
+            {
+                // Sprite sheet is already configured correctly, don't reimport
+                return;
+            }
+        }
+
+        // Only proceed if tileSize is valid
+        if (TileGen.tileSize <= 0)
+        {
+            Debug.LogWarning($"TileGen: tileSize is {TileGen.tileSize}, cannot process texture. Skipping sprite sheet generation.");
+            return;
+        }
 
         int spriteSize = TileGen.tileSize;
         int count = 8;
@@ -57,21 +92,75 @@ public class SpriteProcessor : AssetPostprocessor
             finalMetas.Add(metasExtras[r]);
         }
 
-        TextureImporter textureImporter = (TextureImporter)assetImporter;
-        textureImporter.spritesheet = finalMetas.ToArray();
-        tileGen.Refresh();
+        // Only set spritesheet if it's different from current
+        bool needsUpdate = textureImporter.spritesheet == null || textureImporter.spritesheet.Length != finalMetas.Count;
+        if (!needsUpdate)
+        {
+            // Check if names match
+            for (int idx = 0; idx < finalMetas.Count; idx++)
+            {
+                if (textureImporter.spritesheet[idx].name != finalMetas[idx].name)
+                {
+                    needsUpdate = true;
+                    break;
+                }
+            }
+        }
+
+        if (needsUpdate)
+        {
+            textureImporter.spritesheet = finalMetas.ToArray();
+            // Don't call Refresh() here as it causes infinite reimport loop
+            // AssetDatabase.Refresh() will be called by Unity automatically after this method
+        }
     }
 
     private void OnPreprocessTexture()
     {
-        Debug.Log("Importing asset to " + assetPath);
-        if (assetPath.Contains("itspkr")) {
-            TextureImporter textureImporter = (TextureImporter)assetImporter;
-            textureImporter.textureType = TextureImporterType.Sprite;
-            textureImporter.spriteImportMode = SpriteImportMode.Multiple;
-            textureImporter.mipmapEnabled = false;
-            textureImporter.filterMode = FilterMode.Point;
-            textureImporter.spritePixelsPerUnit = TileGen.tileSize;
+        // Only process files that contain "itspkr" in their path
+        if (!assetPath.Contains("itspkr"))
+        {
+            return;
+        }
+
+        TextureImporter textureImporter = (TextureImporter)assetImporter;
+        
+        // Only set spritePixelsPerUnit if tileSize is valid
+        if (TileGen.tileSize > 0)
+        {
+            // Only update if it's different to avoid unnecessary reimports
+            if (textureImporter.spritePixelsPerUnit != TileGen.tileSize)
+            {
+                textureImporter.textureType = TextureImporterType.Sprite;
+                textureImporter.spriteImportMode = SpriteImportMode.Multiple;
+                textureImporter.mipmapEnabled = false;
+                textureImporter.filterMode = FilterMode.Point;
+                textureImporter.spritePixelsPerUnit = TileGen.tileSize;
+            }
+            else
+            {
+                // Ensure other settings are correct even if pixelsPerUnit is already set
+                if (textureImporter.textureType != TextureImporterType.Sprite)
+                {
+                    textureImporter.textureType = TextureImporterType.Sprite;
+                }
+                if (textureImporter.spriteImportMode != SpriteImportMode.Multiple)
+                {
+                    textureImporter.spriteImportMode = SpriteImportMode.Multiple;
+                }
+                if (textureImporter.mipmapEnabled)
+                {
+                    textureImporter.mipmapEnabled = false;
+                }
+                if (textureImporter.filterMode != FilterMode.Point)
+                {
+                    textureImporter.filterMode = FilterMode.Point;
+                }
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"TileGen: tileSize is {TileGen.tileSize}, cannot set spritePixelsPerUnit for {assetPath}. Make sure TileGen.tileSize is initialized before importing.");
         }
     }
 } //Class SpriteProcessor
