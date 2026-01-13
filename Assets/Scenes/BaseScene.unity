@@ -3455,7 +3455,7 @@ MonoBehaviour:
   moduleInventoryCellPrefab: {fileID: 3842191235755297668, guid: 8cde97c2151af5648a313d92198fbeee, type: 3}
   inventoryWidth: 5
   inventoryHeight: 7
-  defaultMaxStackAmount: 100
+  defaultMaxStackAmount: 200
   customMaxStackAmounts: []
 --- !u!114 &670148664
 MonoBehaviour:

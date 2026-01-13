@@ -99,6 +99,12 @@ public class ResourceTransferManager : MonoBehaviour
         _pendingResources = null;
 
         Debug.Log($"ResourceTransferManager: Transferred {resourceCount} resource types to base inventory");
+
+        BaseInventorySystem inventorySystem = FindFirstObjectByType<BaseInventorySystem>();
+        if (inventorySystem != null)
+        {
+            inventorySystem.ForceRefreshInventory();
+        }
     }
 }
 
