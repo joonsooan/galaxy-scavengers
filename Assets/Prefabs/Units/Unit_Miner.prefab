@@ -82,8 +82,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 580065311
-  m_SortingLayer: 5
+  m_SortingLayerID: -1027114353
+  m_SortingLayer: 2
   m_SortingOrder: 0
   m_Sprite: {fileID: -5932265281250941504, guid: b2344e19305fc3140bc7ee8cae2166c3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -150,8 +150,8 @@ MonoBehaviour:
   canvasName: ObjectUI Canvas
   showFloatingText: 1
   miningParticleSystem: {fileID: 6598129275130331582}
-  particleOffsetDistance: 0.75
-  yOffset: 0.2
+  particleOffsetDistance: 1
+  yOffset: -0.25
   vibrationRadius: 0.015
   vibrationSpeed: 10
 --- !u!114 &8882647708804449670
@@ -205,8 +205,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4df76de1adfb064e95b506d49b881b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  visionRange: 7.5
+  visionRange: 7.6
   isActive: 1
+  hasOffest: 0
+  offest: {x: 0.5, y: 0.5, z: 0}
 --- !u!95 &1513360931996844975
 Animator:
   serializedVersion: 7
