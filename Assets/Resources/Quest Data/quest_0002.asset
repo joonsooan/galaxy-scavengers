@@ -13,10 +13,13 @@ MonoBehaviour:
   m_Name: quest_0002
   m_EditorClassIdentifier: 
   questId: 2
+  questProvider: 0
   previousQuestId: 1
-  questName: Second Quest
+  questName: "\uB450\uBC88\uC9F8 \uD018\uC2A4\uD2B8"
   questInfo: 'I love nature.
 
     Collect 50 BioMass'
-  requiredResourceType: 2
-  requiredResourceAmount: 50
+  requiredResources: []
+  questFinishReward:
+    resourceRewards: []
+    moduleRewards: []

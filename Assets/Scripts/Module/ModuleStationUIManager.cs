@@ -32,7 +32,7 @@ public class ModuleStationUIManager : MonoBehaviour
     private void Start()
     {
         moduleStationPanel.SetActive(false);
-        moduleDetailPanel.Initialize(this);
+        moduleDetailPanel.Initialize();
 
         closeButton.onClick.RemoveAllListeners();
         closeButton.onClick.AddListener(OnCloseButtonClicked);

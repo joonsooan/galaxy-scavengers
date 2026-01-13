@@ -22,12 +22,9 @@ public class ModuleDetailPanel : MonoBehaviour
     
     private ModuleRecipe _currentRecipe;
     private ModuleStation _station;
-    private ModuleStationUIManager _uiManager;
     
-    public void Initialize(ModuleStationUIManager uiManager)
+    public void Initialize()
     {
-        _uiManager = uiManager;
-        
         if (produceButton != null)
         {
             produceButton.onClick.RemoveAllListeners();
