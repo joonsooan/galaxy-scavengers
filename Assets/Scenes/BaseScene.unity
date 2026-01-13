@@ -5350,7 +5350,7 @@ MonoBehaviour:
   questGridParent: {fileID: 441203460}
   questCellPrefab: {fileID: 8886172208372129132, guid: c5b8f6229c1aa904b88ac940426139a7, type: 3}
   questDetailPanel: {fileID: 804888628}
-  questProvider: 0
+  questProvider: 1
   questUIHandler: {fileID: 0}
   recipeCells: []
 --- !u!114 &670148666
@@ -5381,7 +5381,7 @@ MonoBehaviour:
   questGridParent: {fileID: 1901250953}
   questCellPrefab: {fileID: 8886172208372129132, guid: c5b8f6229c1aa904b88ac940426139a7, type: 3}
   questDetailPanel: {fileID: 846795941}
-  questProvider: 1
+  questProvider: 0
   questUIHandler: {fileID: 0}
   moduleSelectionCells: []
 --- !u!1001 &675643636
