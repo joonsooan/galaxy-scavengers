@@ -62,7 +62,6 @@ public class BaseSceneManager : MonoBehaviour
                 break;
             case 1:
                 targetPanel = moduleUIPanel;
-                inventoryUIPanel.SetActive(true);
                 break;
             case 2:
                 targetPanel = laboratoryUIPanel;
@@ -96,7 +95,6 @@ public class BaseSceneManager : MonoBehaviour
                 break;
             case 1:
                 targetPanel = moduleUIPanel;
-                inventoryUIPanel.SetActive(false);
                 break;
             case 2:
                 targetPanel = laboratoryUIPanel;

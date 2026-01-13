@@ -272,22 +272,32 @@ public class CoreCustomizationManager : MonoBehaviour
     {
         Dictionary<string, ModuleRecipe> recipeMap = new Dictionary<string, ModuleRecipe>();
 
+        // Load ModuleRecipe ScriptableObjects directly from Resources
+        ModuleRecipe[] allRecipes = Resources.LoadAll<ModuleRecipe>("");
+        foreach (ModuleRecipe recipe in allRecipes) {
+            if (recipe != null && !string.IsNullOrEmpty(recipe.moduleName) && !recipeMap.ContainsKey(recipe.moduleName)) {
+                recipeMap[recipe.moduleName] = recipe;
+            }
+        }
+
+        // Also load from ModuleData (for backward compatibility and module stations)
         ModuleData[] allModuleData = Resources.LoadAll<ModuleData>("");
         foreach (ModuleData moduleData in allModuleData) {
             if (moduleData.Recipes != null) {
                 foreach (ModuleRecipe recipe in moduleData.Recipes) {
-                    if (!recipeMap.ContainsKey(recipe.moduleName)) {
+                    if (recipe != null && !string.IsNullOrEmpty(recipe.moduleName) && !recipeMap.ContainsKey(recipe.moduleName)) {
                         recipeMap[recipe.moduleName] = recipe;
                     }
                 }
             }
         }
 
+        // Also check ModuleStations in the scene
         ModuleStation[] moduleStations = FindObjectsByType<ModuleStation>(FindObjectsSortMode.None);
         foreach (ModuleStation station in moduleStations) {
             if (station.ModuleData != null && station.ModuleData.Recipes != null) {
                 foreach (ModuleRecipe recipe in station.ModuleData.Recipes) {
-                    if (!recipeMap.ContainsKey(recipe.moduleName)) {
+                    if (recipe != null && !string.IsNullOrEmpty(recipe.moduleName) && !recipeMap.ContainsKey(recipe.moduleName)) {
                         recipeMap[recipe.moduleName] = recipe;
                     }
                 }

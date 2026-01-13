@@ -1,7 +1,18 @@
 using UnityEngine;
 
-[System.Serializable]
-public class ModuleRecipe
+public enum ModuleType
+{
+    Default,
+    Power,
+    Defense,
+    Offense,
+    Utility,
+    Production,
+    Research
+}
+
+[CreateAssetMenu(fileName = "New Module Recipe", menuName = "Module/Module Recipe")]
+public class ModuleRecipe : ScriptableObject
 {
     [Header("Module Info")]
     public string moduleName;
@@ -17,16 +28,5 @@ public class ModuleRecipe
     
     [Header("Module Effect")]
     public ModuleEffectData effectData;
-}
-
-public enum ModuleType
-{
-    Default,
-    Power,
-    Defense,
-    Offense,
-    Utility,
-    Production,
-    Research
 }
 

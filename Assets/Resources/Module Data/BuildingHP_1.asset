@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36da8054e533da44f85efae509af8de5, type: 3}
+  m_Name: BuildingHP_1
+  m_EditorClassIdentifier: 
+  moduleName: "\uAC74\uBB3C \uAC15\uD654 \uBAA8\uB4C8 1"
+  moduleDescription: "\uBAA8\uB4E0 \uAC74\uBB3C\uC758 \uCCB4\uB825\uC774 \uC18C\uD3ED
+    \uC99D\uAC00\uD569\uB2C8\uB2E4."
+  moduleIcon: {fileID: 7901670489268753837, guid: 5953256e67055b645a80974bbcc7bedb, type: 3}
+  ingredients:
+  - resourceType: 4
+    amount: 100
+  - resourceType: 5
+    amount: 100
+  moduleType: 2
+  moduleTier: 1
+  effectData: {fileID: 11400000, guid: 45a84bed18e78cf49a8d8716fe1ca2be, type: 2}

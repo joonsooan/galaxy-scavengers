@@ -13,10 +13,21 @@ public class ModuleStationUIManager : MonoBehaviour
     [SerializeField] private GameObject moduleGridCellPrefab;
     [SerializeField] private ModuleDetailPanel moduleDetailPanel;
     [SerializeField] private Button closeButton;
+    
+    [Header("Quest UI")]
+    [SerializeField] private Button questButton;
+    [SerializeField] private Button shopButton;
+    [SerializeField] private GameObject questGridPanel;
+    [SerializeField] private RectTransform questGridParent;
+    [SerializeField] private GameObject questCellPrefab;
+    [SerializeField] private QuestInfoPanel questDetailPanel;
+    [SerializeField] private QuestProvider questProvider = QuestProvider.NPC_1;
 
     private readonly List<ModuleGridCell> _recipeCells = new List<ModuleGridCell>();
+    private readonly List<QuestCell> _questCells = new List<QuestCell>();
     private ModuleData _currentData;
     private ModuleStation _currentStation;
+    private bool _isQuestMode = false;
 
     private void Start()
     {
@@ -32,16 +43,50 @@ public class ModuleStationUIManager : MonoBehaviour
             closeButton.onClick.RemoveAllListeners();
             closeButton.onClick.AddListener(OnCloseButtonClicked);
         }
+        
+        if (questButton != null) {
+            questButton.onClick.RemoveAllListeners();
+            questButton.onClick.AddListener(OnQuestButtonClicked);
+        }
+        
+        if (shopButton != null) {
+            shopButton.onClick.RemoveAllListeners();
+            shopButton.onClick.AddListener(OnShopButtonClicked);
+        }
+        
+        if (questGridPanel != null) {
+            questGridPanel.SetActive(false);
+        }
+        
+        if (questDetailPanel != null) {
+            questDetailPanel.gameObject.SetActive(false);
+        }
     }
 
     private void OnEnable()
     {
         ModuleStation.OnModuleStationClicked += ShowModuleStationUI;
+        
+        if (QuestDataManager.Instance != null) {
+            QuestDataManager.Instance.OnQuestStateChanged += OnQuestStateChanged;
+        }
     }
 
     private void OnDisable()
     {
         ModuleStation.OnModuleStationClicked -= ShowModuleStationUI;
+        
+        if (QuestDataManager.Instance != null) {
+            QuestDataManager.Instance.OnQuestStateChanged -= OnQuestStateChanged;
+        }
+    }
+    
+    private void OnQuestStateChanged(int questId)
+    {
+        // Refresh quest cells if we're in quest mode
+        if (_isQuestMode) {
+            LoadQuestCells();
+        }
     }
 
     private void ShowModuleStationUI(ModuleStation station)
@@ -59,7 +104,7 @@ public class ModuleStationUIManager : MonoBehaviour
         }
 
         UpdateStationInfo();
-        LoadAllRecipes();
+        ShowShopUI();
     }
 
     private void HidePanel()
@@ -70,6 +115,10 @@ public class ModuleStationUIManager : MonoBehaviour
 
         if (moduleDetailPanel != null) {
             moduleDetailPanel.HidePanel();
+        }
+        
+        if (questDetailPanel != null) {
+            questDetailPanel.gameObject.SetActive(false);
         }
     }
 
@@ -137,5 +186,108 @@ public class ModuleStationUIManager : MonoBehaviour
     {
         // Module crafting is handled by BaseInventorySystem events
         // No additional action needed here
+    }
+    
+    private void OnQuestButtonClicked()
+    {
+        ShowQuestUI();
+    }
+    
+    private void OnShopButtonClicked()
+    {
+        ShowShopUI();
+    }
+    
+    private void ShowQuestUI()
+    {
+        _isQuestMode = true;
+        
+        // Hide shop UI
+        if (recipeGridContainer != null) {
+            recipeGridContainer.SetActive(false);
+        }
+        
+        if (moduleDetailPanel != null) {
+            moduleDetailPanel.HidePanel();
+        }
+        
+        // Show quest UI
+        if (questGridPanel != null) {
+            questGridPanel.SetActive(true);
+        }
+        
+        // Hide quest detail panel initially (will show when quest cell is clicked)
+        if (questDetailPanel != null) {
+            questDetailPanel.gameObject.SetActive(false);
+        }
+        
+        LoadQuestCells();
+    }
+    
+    private void ShowShopUI()
+    {
+        _isQuestMode = false;
+        
+        // Hide quest UI
+        if (questGridPanel != null) {
+            questGridPanel.SetActive(false);
+        }
+        
+        if (questDetailPanel != null) {
+            questDetailPanel.gameObject.SetActive(false);
+        }
+        
+        // Show shop UI
+        if (recipeGridContainer != null) {
+            recipeGridContainer.SetActive(true);
+        }
+        
+        LoadAllRecipes();
+    }
+    
+    private void LoadQuestCells()
+    {
+        ClearQuestCells();
+        
+        if (questGridParent == null || questCellPrefab == null || questDetailPanel == null) {
+            return;
+        }
+        
+        if (QuestDataManager.Instance == null) {
+            return;
+        }
+        
+        // Get current quests for this provider (Available, Active, or Completed)
+        List<QuestData> currentQuests = QuestDataManager.Instance.GetCurrentQuestsByProvider(questProvider);
+        
+        foreach (QuestData quest in currentQuests) {
+            GameObject cellObject = Instantiate(questCellPrefab, questGridParent);
+            QuestCell questCell = cellObject.GetComponent<QuestCell>();
+            
+            if (questCell != null) {
+                questCell.Initialize(quest, questDetailPanel);
+                _questCells.Add(questCell);
+            }
+            else {
+                Debug.LogWarning($"QuestCell component not found on prefab {questCellPrefab.name}");
+                Destroy(cellObject);
+            }
+        }
+    }
+    
+    private void ClearQuestCells()
+    {
+        foreach (QuestCell cell in _questCells) {
+            if (cell != null) {
+                Destroy(cell.gameObject);
+            }
+        }
+        _questCells.Clear();
+        
+        if (questGridParent != null) {
+            foreach (Transform child in questGridParent) {
+                Destroy(child.gameObject);
+            }
+        }
     }
 }

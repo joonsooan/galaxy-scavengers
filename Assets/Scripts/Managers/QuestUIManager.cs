@@ -70,9 +70,18 @@ public class QuestUIManager : MonoBehaviour
         
         if (QuestDataManager.Instance == null) return;
         
-        List<QuestData> availableQuests = QuestDataManager.Instance.GetAvailableQuests();
+        // Get all quests that are not locked (Available, Active, or Completed)
+        List<QuestData> currentQuests = new List<QuestData>();
+        foreach (QuestData quest in QuestDataManager.Instance.GetAllQuests())
+        {
+            QuestState state = QuestDataManager.Instance.GetQuestState(quest.questId);
+            if (state != QuestState.Locked)
+            {
+                currentQuests.Add(quest);
+            }
+        }
 
-        foreach (QuestData quest in availableQuests)
+        foreach (QuestData quest in currentQuests)
         {
             GameObject cellObject = Instantiate(questCellPrefab, questCellContentParent);
             QuestCell questCell = cellObject.GetComponent<QuestCell>();
@@ -121,7 +130,7 @@ public class QuestUIManager : MonoBehaviour
         {
             if (cell != null && cell.GetQuestData() != null && cell.GetQuestData().questId == questId)
             {
-                cell.UpdateBadge();
+                // cell.UpdateBadge();
             }
         }
     }
@@ -132,7 +141,7 @@ public class QuestUIManager : MonoBehaviour
         {
             if (cell != null)
             {
-                cell.UpdateBadge();
+                // cell.UpdateBadge();
             }
         }
     }

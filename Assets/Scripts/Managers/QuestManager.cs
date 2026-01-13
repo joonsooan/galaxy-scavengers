@@ -69,4 +69,9 @@ public class QuestManager : MonoBehaviour
     {
         return QuestDataManager.Instance != null && QuestDataManager.Instance.IsQuestCompleted(questId);
     }
+    
+    public bool CheckQuestCompletion(int questId)
+    {
+        return QuestDataManager.Instance != null && QuestDataManager.Instance.CheckQuestCompletion(questId);
+    }
 }

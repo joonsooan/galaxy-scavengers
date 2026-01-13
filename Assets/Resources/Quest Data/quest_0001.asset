@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: quest_0001
   m_EditorClassIdentifier: 
   questId: 1
+  questProvider: 0
   previousQuestId: -1
   questName: "\uBA54\uC778 \uBC1C\uC804\uAE30 \uC218\uB9AC"
   questInfo: "\uBAA8\uC120\uC758 \uBA54\uC778 \uBC1C\uC804\uAE30\uAC00 \uACE0\uC7A5\uB098
@@ -23,3 +24,7 @@ MonoBehaviour:
     amount: 100
   - resourceType: 1
     amount: 50
+  questFinishReward:
+    resourceRewards: []
+    moduleRewards:
+    - {fileID: 0}

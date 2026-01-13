@@ -7,104 +7,68 @@ public class QuestInfoPanel : MonoBehaviour
 {
     [SerializeField] private GameObject infoPanel;
     [SerializeField] private TMP_Text questNameText;
+    [SerializeField] private TMP_Text questIdText;
     [SerializeField] private TMP_Text questDescriptionText;
-    [SerializeField] private GameObject questResourcePanel;
-    [SerializeField] private GameObject resourceInfoCellPrefab;
-    [SerializeField] private Button acceptButton;
-    [SerializeField] private Button finishButton;
+    [SerializeField] private GameObject requiredResourcesGridContainer;
+    [SerializeField] private GameObject rewardGridContainer;
+    [SerializeField] private GameObject baseInventoryCellPrefab;
+    [SerializeField] private GameObject moduleInventoryCellPrefab;
+    [SerializeField] private Button questActionButton;
+    [SerializeField] private TMP_Text questActionButtonText;
 
     private int _currentQuestId = -1;
 
     private void Awake()
     {
-        if (acceptButton != null)
+        if (questActionButton != null)
         {
-            acceptButton.onClick.AddListener(OnAcceptButtonClicked);
-        }
-
-        if (finishButton != null)
-        {
-            finishButton.onClick.AddListener(OnFinishButtonClicked);
+            questActionButton.onClick.RemoveAllListeners();
+            questActionButton.onClick.AddListener(OnQuestActionButtonClicked);
         }
     }
 
     private void Update()
     {
-        // Close panel on right-click if it's active
-        if (Input.GetMouseButtonDown(1))
-        {
-            if (infoPanel != null && infoPanel.activeSelf)
+       if (_currentQuestId != -1 && QuestDataManager.Instance != null)
+       {
+            QuestState questState = QuestDataManager.Instance.GetQuestState(_currentQuestId);
+            if (questState == QuestState.Active)
             {
-                // Don't close if dragging a building
-                if (GameManager.Instance != null && GameManager.Instance.IsDragging())
+                bool canFinish = QuestDataManager.Instance.CheckQuestCompletion(_currentQuestId);
+                if (canFinish && questActionButton != null && !questActionButton.gameObject.activeSelf)
                 {
-                    return;
+                    UpdateButtonVisibility();
                 }
-
-                // Close the panel on right-click (whether clicking on UI or not)
-                ClosePanel();
             }
-        }
-    }
-
-    private void ClosePanel()
-    {
-        if (infoPanel != null)
-        {
-            infoPanel.SetActive(false);
-        }
-        _currentQuestId = -1;
+       }
     }
 
     public void DisplayQuestInfo(QuestData questData, int questId)
     {
         if (questData == null) return;
 
-        if (_currentQuestId == questId && infoPanel != null && infoPanel.activeSelf)
+        if (_currentQuestId == questId && infoPanel != null)
         {
-            RebuildAllLayouts();
-            infoPanel.SetActive(false);
-            _currentQuestId = -1;
             return;
         }
 
-        bool wasInactive = infoPanel != null && !infoPanel.activeSelf;
         _currentQuestId = questId;
-
-        if (infoPanel != null && !infoPanel.activeSelf)
-        {
-            infoPanel.SetActive(true);
-        }
-
-        if (questNameText != null)
-        {
-            questNameText.text = questData.questName;
-        }
-
-        if (questDescriptionText != null)
-        {
-            questDescriptionText.text = questData.questInfo;
-        }
+        questNameText.text = questData.questName;
+        questIdText.text = $"퀘스트 ID : {questId}";
+        questDescriptionText.text = questData.questInfo;
 
         DisplayRequiredResources(questData);
+        DisplayQuestRewards(questData);
         UpdateButtonVisibility();
         
-        // If panel was just reactivated, rebuild layouts in next frame to ensure Unity has initialized layout components
-        if (wasInactive)
-        {
-            StartCoroutine(RebuildLayoutsNextFrame());
-        }
-        else
-        {
-            RebuildAllLayouts();
-        }
+        RebuildAllLayouts();
     }
 
     private void DisplayRequiredResources(QuestData questData)
     {
-        if (questResourcePanel == null || resourceInfoCellPrefab == null) return;
+        if (requiredResourcesGridContainer == null || baseInventoryCellPrefab == null) return;
 
-        foreach (Transform child in questResourcePanel.transform)
+        foreach (Transform child in requiredResourcesGridContainer.transform)
         {
             Destroy(child.gameObject);
         }
@@ -113,92 +77,225 @@ public class QuestInfoPanel : MonoBehaviour
         {
             foreach (ResourceCost cost in questData.requiredResources)
             {
-                GameObject cell = Instantiate(resourceInfoCellPrefab, questResourcePanel.transform);
-                ResourceInfoCell cellComponent = cell.GetComponent<ResourceInfoCell>();
-                if (cellComponent != null)
-                {
-                    cellComponent.SetInfo(cost.resourceType, cost.amount, false);
-                }
-            }
-
-            foreach (Transform child in questResourcePanel.transform)
-            {
-                ResourceInfoCell cell = child.GetComponent<ResourceInfoCell>();
+                GameObject cellObj = Instantiate(baseInventoryCellPrefab, requiredResourcesGridContainer.transform);
+                BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
                 if (cell != null)
                 {
-                    LayoutRebuilder.ForceRebuildLayoutImmediate(child.GetComponent<RectTransform>());
+                    cell.SetResource(cost.resourceType, cost.amount);
                 }
             }
 
-            if (questResourcePanel != null)
+            foreach (Transform child in requiredResourcesGridContainer.transform)
             {
-                LayoutRebuilder.ForceRebuildLayoutImmediate(questResourcePanel.GetComponent<RectTransform>());
+                LayoutRebuilder.ForceRebuildLayoutImmediate(child.GetComponent<RectTransform>());
+            }
+
+            if (requiredResourcesGridContainer != null)
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(requiredResourcesGridContainer.GetComponent<RectTransform>());
+            }
+        }
+    }
+    
+    private void DisplayQuestRewards(QuestData questData)
+    {
+        if (rewardGridContainer == null || baseInventoryCellPrefab == null || moduleInventoryCellPrefab == null) return;
+
+        foreach (Transform child in rewardGridContainer.transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        if (questData.questFinishReward != null)
+        {
+            if (questData.questFinishReward.resourceRewards != null && questData.questFinishReward.resourceRewards.Length > 0)
+            {
+                foreach (ResourceCost reward in questData.questFinishReward.resourceRewards)
+                {
+                    GameObject cellObj = Instantiate(baseInventoryCellPrefab, rewardGridContainer.transform);
+                    BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
+                    if (cell != null)
+                    {
+                        cell.SetResource(reward.resourceType, reward.amount);
+                    }
+                }
+            }
+
+            if (questData.questFinishReward.moduleRewards != null && questData.questFinishReward.moduleRewards.Length > 0)
+            {
+                foreach (ModuleRecipe moduleRecipe in questData.questFinishReward.moduleRewards)
+                {
+                    GameObject cellObj = Instantiate(moduleInventoryCellPrefab, rewardGridContainer.transform);
+                    ModuleInventoryCell cell = cellObj.GetComponent<ModuleInventoryCell>();
+                    if (cell != null)
+                    {
+                        Module module = new Module(moduleRecipe);
+                        cell.SetModule(module);
+                    }
+                }
+            }
+
+            foreach (Transform child in rewardGridContainer.transform)
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(child.GetComponent<RectTransform>());
+            }
+
+            if (rewardGridContainer != null)
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(rewardGridContainer.GetComponent<RectTransform>());
             }
         }
     }
 
     private void UpdateButtonVisibility()
     {
-        if (_currentQuestId == -1)
+        if (_currentQuestId == -1 || questActionButton == null)
         {
-            if (acceptButton != null) acceptButton.gameObject.SetActive(false);
-            if (finishButton != null) finishButton.gameObject.SetActive(false);
+            if (questActionButton != null) questActionButton.gameObject.SetActive(false);
             return;
         }
 
-        if (QuestManager.Instance != null)
+        if (QuestDataManager.Instance == null)
         {
-            QuestState questState = QuestManager.Instance.GetQuestState(_currentQuestId);
-            
-            if (acceptButton != null)
+            if (questActionButton != null) questActionButton.gameObject.SetActive(false);
+            return;
+        }
+
+        QuestState questState = QuestDataManager.Instance.GetQuestState(_currentQuestId);
+        
+        if (questState == QuestState.Available)
+        {
+            questActionButton.gameObject.SetActive(true);
+            if (questActionButtonText != null)
             {
-                acceptButton.gameObject.SetActive(questState == QuestState.Available);
+                questActionButtonText.text = "수락";
             }
-            
-            if (finishButton != null)
+        }
+        else if (questState == QuestState.Active)
+        {
+            bool canFinish = QuestDataManager.Instance.CheckQuestCompletion(_currentQuestId);
+            if (canFinish)
             {
-                finishButton.gameObject.SetActive(questState == QuestState.Completed);
+                questActionButton.gameObject.SetActive(true);
+                if (questActionButtonText != null)
+                {
+                    questActionButtonText.text = "완료";
+                }
+            }
+            else
+            {
+                questActionButton.gameObject.SetActive(false);
+            }
+        }
+        else if (questState == QuestState.Completed)
+        {
+            questActionButton.gameObject.SetActive(true);
+            if (questActionButtonText != null)
+            {
+                questActionButtonText.text = "Finish";
             }
         }
         else
         {
-            if (acceptButton != null) acceptButton.gameObject.SetActive(false);
-            if (finishButton != null) finishButton.gameObject.SetActive(false);
+            questActionButton.gameObject.SetActive(false);
         }
     }
-
-    private void OnAcceptButtonClicked()
+    
+    private void OnQuestActionButtonClicked()
     {
-        if (_currentQuestId == -1) return;
+        if (_currentQuestId == -1 || QuestDataManager.Instance == null) return;
 
-        if (QuestManager.Instance != null)
+        QuestState questState = QuestDataManager.Instance.GetQuestState(_currentQuestId);
+        
+        if (questState == QuestState.Available)
         {
-            bool success = QuestManager.Instance.StartQuest(_currentQuestId);
-            
-            if (success)
+            if (QuestManager.Instance != null)
             {
-                UpdateButtonVisibility();
-            }
-        }
-    }
-
-    private void OnFinishButtonClicked()
-    {
-        if (_currentQuestId == -1) return;
-
-        if (QuestManager.Instance != null)
-        {
-            bool success = QuestManager.Instance.FinishQuest(_currentQuestId);
-            
-            if (success)
-            {
-                if (infoPanel != null)
+                bool success = QuestManager.Instance.StartQuest(_currentQuestId);
+                if (success)
                 {
-                    infoPanel.SetActive(false);
+                    UpdateButtonVisibility();
                 }
-                _currentQuestId = -1;
             }
         }
+        else if (questState == QuestState.Active)
+        {
+            bool canFinish = QuestDataManager.Instance.CheckQuestCompletion(_currentQuestId);
+            if (canFinish)
+            {
+                if (QuestManager.Instance != null)
+                {
+                    bool completed = QuestManager.Instance.CompleteQuest(_currentQuestId);
+                    if (completed)
+                    {
+                        FinishQuestAndGiveRewards(_currentQuestId);
+                    }
+                }
+            }
+        }
+        else if (questState == QuestState.Completed)
+        {
+            FinishQuestAndGiveRewards(_currentQuestId);
+        }
+    }
+    
+    private void FinishQuestAndGiveRewards(int questId)
+    {
+        if (QuestDataManager.Instance == null) return;
+        
+        QuestData quest = QuestDataManager.Instance.GetQuestData(questId);
+        if (quest == null) return;
+        
+        if (quest.questFinishReward != null)
+        {
+            BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+            
+            if (quest.questFinishReward.resourceRewards != null && quest.questFinishReward.resourceRewards.Length > 0)
+            {
+                if (inventoryManager != null)
+                {
+                    foreach (ResourceCost reward in quest.questFinishReward.resourceRewards)
+                    {
+                        inventoryManager.AddResource(reward.resourceType, reward.amount);
+                    }
+                }
+            }
+
+            if (quest.questFinishReward.moduleRewards != null && quest.questFinishReward.moduleRewards.Length > 0)
+            {
+                if (inventoryManager != null)
+                {
+                    foreach (ModuleRecipe moduleRecipe in quest.questFinishReward.moduleRewards)
+                    {
+                        Module module = new Module(moduleRecipe);
+                        inventoryManager.AddModule(module);
+                    }
+                }
+            }
+            
+            BaseInventorySystem inventorySystem = FindFirstObjectByType<BaseInventorySystem>();
+            if (inventorySystem != null)
+            {
+                inventorySystem.ForceRefreshInventory();
+            }
+            
+            CoreCustomUIManager coreCustomUIManager = FindFirstObjectByType<CoreCustomUIManager>();
+            if (coreCustomUIManager != null)
+            {
+                coreCustomUIManager.RefreshModuleSelectionGrid();
+            }
+        }
+        
+        if (QuestManager.Instance != null)
+        {
+            QuestManager.Instance.FinishQuest(questId);
+        }
+        
+        if (infoPanel != null)
+        {
+            infoPanel.SetActive(false);
+        }
+        _currentQuestId = -1;
     }
 
     public void RefreshQuestState(int questId)
@@ -211,31 +308,17 @@ public class QuestInfoPanel : MonoBehaviour
 
     private void RebuildAllLayouts()
     {
-        if (questNameText != null)
-        {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(questNameText.rectTransform);
-        }
-        if (questDescriptionText != null)
-        {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(questDescriptionText.rectTransform);
-        }
-
-        if (questResourcePanel != null)
-        {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(questResourcePanel.GetComponent<RectTransform>());
-        }
-
-        if (infoPanel != null)
-        {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(infoPanel.GetComponent<RectTransform>());
-        }
-
-        Canvas.ForceUpdateCanvases();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(questNameText.rectTransform);
+        LayoutRebuilder.ForceRebuildLayoutImmediate(questIdText.rectTransform);
+        LayoutRebuilder.ForceRebuildLayoutImmediate(questDescriptionText.rectTransform);
+        LayoutRebuilder.ForceRebuildLayoutImmediate(requiredResourcesGridContainer.GetComponent<RectTransform>());
+        LayoutRebuilder.ForceRebuildLayoutImmediate(rewardGridContainer.GetComponent<RectTransform>());
+        LayoutRebuilder.ForceRebuildLayoutImmediate(infoPanel.GetComponent<RectTransform>());
     }
 
     private IEnumerator RebuildLayoutsNextFrame()
     {
-        yield return null; // Wait one frame for Unity to initialize layout components
+        yield return null;
         RebuildAllLayouts();
     }
 }

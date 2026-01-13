@@ -226,6 +226,25 @@ public class QuestDataManager : MonoBehaviour
 
         return true;
     }
+    
+    public bool CheckQuestCompletion(int questId)
+    {
+        if (!_questDataDict.ContainsKey(questId))
+        {
+            return false;
+        }
+        
+        QuestData quest = _questDataDict[questId];
+        QuestState currentState = _questStates[questId];
+        
+        // Only check completion for Active quests
+        if (currentState != QuestState.Active)
+        {
+            return false;
+        }
+        
+        return AreAllQuestRequirementsMet(quest);
+    }
 
     public bool CompleteQuest(int questId)
     {
@@ -265,6 +284,52 @@ public class QuestDataManager : MonoBehaviour
         {
             Debug.LogWarning($"Quest {questId} is {currentState} and cannot be finished. Quest must be Completed.");
             return false;
+        }
+
+        QuestData quest = _questDataDict[questId];
+        
+        // Give rewards
+        if (quest.questFinishReward != null)
+        {
+            BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+            
+            // Give resource rewards
+            if (quest.questFinishReward.resourceRewards != null && quest.questFinishReward.resourceRewards.Length > 0)
+            {
+                if (inventoryManager != null)
+                {
+                    foreach (ResourceCost reward in quest.questFinishReward.resourceRewards)
+                    {
+                        inventoryManager.AddResource(reward.resourceType, reward.amount);
+                    }
+                }
+            }
+
+            // Give module rewards
+            if (quest.questFinishReward.moduleRewards != null && quest.questFinishReward.moduleRewards.Length > 0)
+            {
+                if (inventoryManager != null)
+                {
+                    foreach (ModuleRecipe moduleRecipe in quest.questFinishReward.moduleRewards)
+                    {
+                        Module module = new Module(moduleRecipe);
+                        inventoryManager.AddModule(module);
+                    }
+                }
+            }
+            
+            // Refresh UI after giving rewards
+            BaseInventorySystem inventorySystem = FindFirstObjectByType<BaseInventorySystem>();
+            if (inventorySystem != null)
+            {
+                inventorySystem.ForceRefreshInventory();
+            }
+            
+            CoreCustomUIManager coreCustomUIManager = FindFirstObjectByType<CoreCustomUIManager>();
+            if (coreCustomUIManager != null)
+            {
+                coreCustomUIManager.RefreshModuleSelectionGrid();
+            }
         }
 
         UnlockDependentQuests(questId);
@@ -317,6 +382,25 @@ public class QuestDataManager : MonoBehaviour
     {
         return _questDataDict.Values
             .Where(quest => _questStates[quest.questId] == QuestState.Available)
+            .ToList();
+    }
+    
+    public List<QuestData> GetAllQuests()
+    {
+        return new List<QuestData>(_questDataDict.Values);
+    }
+    
+    public List<QuestData> GetQuestsByProvider(QuestProvider provider)
+    {
+        return _questDataDict.Values
+            .Where(quest => quest.questProvider == provider)
+            .ToList();
+    }
+    
+    public List<QuestData> GetCurrentQuestsByProvider(QuestProvider provider)
+    {
+        return _questDataDict.Values
+            .Where(quest => quest.questProvider == provider && _questStates[quest.questId] != QuestState.Locked)
             .ToList();
     }
 
