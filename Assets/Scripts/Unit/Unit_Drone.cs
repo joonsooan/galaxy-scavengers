@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Unit_Drone : UnitBase
 {
+    private const float RepathInterval = 0.5f;
     [Header("Drone Settings")]
     [SerializeField] public int carryCapacity = 10;
     [SerializeField] private float processingSpeed = 1f;
@@ -12,32 +13,30 @@ public class Unit_Drone : UnitBase
     [SerializeField] private float assignmentTime = 1f;
     [SerializeField] private UnitMovement movement;
     [SerializeField] private Sprite droneIcon;
+    private Coroutine _assignmentCoroutine;
 
     private int _carriedAmount;
     private ResourceType _carriedResourceType;
+    private Processor _currentProcessor;
     private Processor.ResourceRequest _currentRequest;
     private DroneState _currentState = DroneState.Idle;
 
-    private IStorage _targetStorage;
-    private Processor _currentProcessor;
-    public ActiveRecipe CurrentRecipeTask { get; private set; }
-    private bool _hasCheckedIn;
-    
-    private float _nextRepathTime;
-    private const float RepathInterval = 0.5f;
-    
     private Coroutine _loadingCoroutine;
-    private Coroutine _unloadingCoroutine;
-    private Coroutine _assignmentCoroutine;
+
+    private float _nextRepathTime;
     private UnitSpriteController _spriteController;
 
-    public bool IsAssigned => _currentProcessor != null;
+    private IStorage _targetStorage;
+    private Coroutine _unloadingCoroutine;
+    public ActiveRecipe CurrentRecipeTask { get; private set; }
 
-    public bool HasCheckedIn {
+    public bool IsAssigned {
         get {
-            return _hasCheckedIn;
+            return _currentProcessor != null;
         }
     }
+
+    public bool HasCheckedIn { get; private set; }
 
     public Sprite DroneIcon {
         get {
@@ -49,7 +48,11 @@ public class Unit_Drone : UnitBase
     {
         base.Awake();
         movement = GetComponent<UnitMovement>();
-        _spriteController = GetComponent<UnitSpriteController>();
+    }
+
+    protected override void Start()
+    {
+        _spriteController = GetComponentInChildren<UnitSpriteController>();
     }
 
     private void Update()
@@ -75,14 +78,12 @@ public class Unit_Drone : UnitBase
     private void DecideNextAction()
     {
         // Clear target when moving
-        if (movement != null && movement.IsMoving)
-        {
-            if (TryGetComponent(out UnitSpriteController spriteController))
-            {
+        if (movement != null && movement.IsMoving) {
+            if (TryGetComponent(out UnitSpriteController spriteController)) {
                 spriteController.ClearTarget();
             }
         }
-        
+
         switch (_currentState) {
         case DroneState.Idle:
             UpdateIdle();
@@ -105,44 +106,40 @@ public class Unit_Drone : UnitBase
             break;
         }
     }
-    
+
     private void UpdateUnitBaseState()
     {
-        switch (_currentState)
-        {
-            case DroneState.Idle:
-                currentState = UnitState.Idle;
-                break;
-            case DroneState.FetchingResource:
-            case DroneState.DeliveringResource:
-            case DroneState.ReturnHome:
-                currentState = UnitState.Moving;
-                break;
-            case DroneState.Processing:
-                // Processing is a stationary worker state; use Idle for base state
-                currentState = UnitState.Idle;
-                break;
+        switch (_currentState) {
+        case DroneState.Idle:
+            currentState = UnitState.Idle;
+            break;
+        case DroneState.FetchingResource:
+        case DroneState.DeliveringResource:
+        case DroneState.ReturnHome:
+            currentState = UnitState.Moving;
+            break;
+        case DroneState.Processing:
+            // Processing is a stationary worker state; use Idle for base state
+            currentState = UnitState.Idle;
+            break;
         }
     }
-    
+
     private void UpdateAnimationState()
     {
-        if (_spriteController == null || movement == null)
-        {
+        if (_spriteController == null || movement == null) {
             return;
         }
 
         bool isProcessing = _currentState == DroneState.Processing;
         _spriteController.UpdateAnimationState(currentState, isProcessing: isProcessing);
 
-        if (currentState == UnitState.Moving)
-        {
+        if (currentState == UnitState.Moving) {
             Vector3 moveDir = movement.GetMoveDirection();
             _spriteController.UpdateSpriteDirection(moveDir);
             _spriteController.ClearTarget();
         }
-        else if (isProcessing && _currentProcessor != null)
-        {
+        else if (isProcessing && _currentProcessor != null) {
             _spriteController.SetTargetTransform(_currentProcessor.transform);
         }
     }
@@ -152,7 +149,7 @@ public class Unit_Drone : UnitBase
         ReleaseFromProcessor();
 
         _currentProcessor = processor;
-        _hasCheckedIn = false;
+        HasCheckedIn = false;
 
         if (_currentProcessor != null) {
             _currentProcessor.AssignDrone(this);
@@ -168,7 +165,7 @@ public class Unit_Drone : UnitBase
     private void ReleaseFromProcessor()
     {
         ReleaseFromRecipeTask();
-        
+
         if (_loadingCoroutine != null) {
             StopCoroutine(_loadingCoroutine);
             _loadingCoroutine = null;
@@ -207,20 +204,20 @@ public class Unit_Drone : UnitBase
         if (_currentProcessor == null)
             return;
 
-        if (!_hasCheckedIn) {
+        if (!HasCheckedIn) {
             if (_assignmentCoroutine != null) {
                 return;
             }
-            
+
             bool isAtProcessorForCheckIn = movement.HasReachedTarget(movement.waypointTolerance + 0.1f);
-            
+
             if (isAtProcessorForCheckIn) {
                 if (_assignmentCoroutine == null) {
                     _assignmentCoroutine = StartCoroutine(AssignmentCoroutine());
                 }
                 return;
             }
-            
+
             if (!movement.IsMoving) {
                 Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
                 bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
@@ -234,12 +231,11 @@ public class Unit_Drone : UnitBase
         }
 
         bool isAtProcessor = movement.HasReachedTarget(movement.waypointTolerance + 0.1f);
-        
+
         if (isAtProcessor) {
             if (!movement.IsMoving) {
                 movement.ForceStopAllMovement();
-                if (TryGetComponent(out UnitSpriteController spriteController))
-                {
+                if (TryGetComponent(out UnitSpriteController spriteController)) {
                     spriteController.SetTargetTransform(_currentProcessor.transform);
                 }
                 _currentProcessor.RequestTask(this);
@@ -270,20 +266,19 @@ public class Unit_Drone : UnitBase
             }
         }
     }
-    
+
     private IEnumerator LoadingResourceCoroutine()
     {
         movement.ForceStopAllMovement();
-        
+
         if (_targetStorage != null) {
-            if (TryGetComponent(out UnitSpriteController spriteController))
-            {
+            if (TryGetComponent(out UnitSpriteController spriteController)) {
                 spriteController.SetTargetTransform(((Component)_targetStorage).transform);
             }
         }
-        
+
         yield return new WaitForSeconds(loadingTime);
-        
+
         if (_targetStorage != null && _currentRequest != null) {
             if (_targetStorage.TryWithdrawResource(_currentRequest.type, _currentRequest.amount, out int withdrawnAmount)) {
                 if (withdrawnAmount > 0) {
@@ -306,7 +301,7 @@ public class Unit_Drone : UnitBase
         else {
             SetTask_ReturnHome();
         }
-        
+
         _loadingCoroutine = null;
     }
 
@@ -318,75 +313,70 @@ public class Unit_Drone : UnitBase
             }
         }
     }
-    
+
     private IEnumerator UnloadingResourceCoroutine()
     {
         movement.ForceStopAllMovement();
-        
+
         if (_currentProcessor != null) {
-            if (TryGetComponent(out UnitSpriteController spriteController))
-            {
+            if (TryGetComponent(out UnitSpriteController spriteController)) {
                 spriteController.SetTargetTransform(_currentProcessor.transform);
             }
         }
-        
+
         yield return new WaitForSeconds(unloadingTime);
-        
+
         if (_currentProcessor != null) {
             bool deposited = _currentProcessor.TryDepositIngredient(_carriedResourceType, _carriedAmount, this);
 
             _carriedAmount = 0;
             _currentRequest = null;
             _currentState = DroneState.Idle;
-            
+
             _currentProcessor.RequestTask(this);
         }
         else {
             _currentState = DroneState.Idle;
         }
-        
+
         _unloadingCoroutine = null;
     }
-    
+
     private IEnumerator AssignmentCoroutine()
     {
         movement.ForceStopAllMovement();
-        
+
         if (_currentProcessor != null) {
-            if (TryGetComponent(out UnitSpriteController spriteController))
-            {
+            if (TryGetComponent(out UnitSpriteController spriteController)) {
                 spriteController.SetTargetTransform(_currentProcessor.transform);
             }
         }
-        
+
         yield return new WaitForSeconds(assignmentTime);
-        
-        _hasCheckedIn = true;
-        
+
+        HasCheckedIn = true;
+
         if (_currentProcessor != null) {
             _currentProcessor.RequestTask(this);
         }
-        
+
         _assignmentCoroutine = null;
     }
-    
+
     private void AdjustSpriteDirectionToBuilding(Transform buildingTransform)
     {
         if (buildingTransform == null || BuildingManager.Instance == null || BuildingManager.Instance.grid == null) return;
-        if (!TryGetComponent<UnitSpriteController>(out var spriteController)) return;
+        if (!TryGetComponent(out UnitSpriteController spriteController)) return;
 
         Vector3Int unitCell = BuildingManager.Instance.grid.WorldToCell(transform.position);
         Vector3Int buildingCell = BuildingManager.Instance.grid.WorldToCell(buildingTransform.position);
-        
+
         Vector3Int targetCell = buildingCell;
-        if (BuildingManager.Instance.GetBuildingAt(buildingCell, out List<Vector3Int> occupiedCells))
-        {
+        if (BuildingManager.Instance.GetBuildingAt(buildingCell, out List<Vector3Int> occupiedCells)) {
             float minDistance = float.MaxValue;
-            foreach (Vector3Int cell in occupiedCells)
-            {
+            foreach (Vector3Int cell in occupiedCells) {
                 float distance = Vector3.Distance(transform.position, BuildingManager.Instance.grid.GetCellCenterWorld(cell));
-                if (distance < minDistance)
-                {
+                if (distance < minDistance) {
                     minDistance = distance;
                     targetCell = cell;
                 }
@@ -396,20 +386,16 @@ public class Unit_Drone : UnitBase
         Vector3Int relativePosition = targetCell - unitCell;
         Vector2 targetDirection = Vector2.zero;
 
-        if (relativePosition.x > 0)
-        {
+        if (relativePosition.x > 0) {
             targetDirection = Vector2.right;
         }
-        else if (relativePosition.x < 0)
-        {
+        else if (relativePosition.x < 0) {
             targetDirection = Vector2.left;
         }
-        else if (relativePosition.y > 0)
-        {
+        else if (relativePosition.y > 0) {
             targetDirection = Vector2.up;
         }
-        else if (relativePosition.y < 0)
-        {
+        else if (relativePosition.y < 0) {
             targetDirection = Vector2.down;
         }
 
@@ -429,15 +415,14 @@ public class Unit_Drone : UnitBase
             if (movement.IsMoving) {
                 movement.StopMovement();
             }
-            
-            if (TryGetComponent(out UnitSpriteController spriteController))
-            {
+
+            if (TryGetComponent(out UnitSpriteController spriteController)) {
                 spriteController.SetTargetTransform(_currentProcessor.transform);
             }
-            
+
             _currentProcessor.ProcessRecipeWork(CurrentRecipeTask, Time.deltaTime * processingSpeed);
-            
-            if (CurrentRecipeTask == null || (!CurrentRecipeTask.isProcessing && CurrentRecipeTask.assignedDrone == null)) {
+
+            if (CurrentRecipeTask == null || !CurrentRecipeTask.isProcessing && CurrentRecipeTask.assignedDrone == null) {
                 return;
             }
         }
@@ -448,7 +433,7 @@ public class Unit_Drone : UnitBase
                 Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
                 bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
                 if (hasPath) {
-                    float distanceToTarget = movement.FinalTargetPosition != default 
+                    float distanceToTarget = movement.FinalTargetPosition != default
                         ? Vector3.Distance(transform.position, movement.FinalTargetPosition)
                         : 0f;
                 }
@@ -466,7 +451,7 @@ public class Unit_Drone : UnitBase
             _currentState = DroneState.Idle;
             return;
         }
-        
+
         Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
         movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
 
@@ -495,13 +480,13 @@ public class Unit_Drone : UnitBase
     {
         Vector3 interactionPos = processor.AssignInteractionCell(this);
         bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
-        
+
         if (!hasPath) {
             SetTask_Idle();
             Debug.Log($"[Drone:{name}] Process start FAILED: cannot path to processor '{processor.name}' for {recipeTask.recipeData.resourceType}");
             return;
         }
-        
+
         _currentState = DroneState.Processing;
         CurrentRecipeTask = recipeTask;
     }
