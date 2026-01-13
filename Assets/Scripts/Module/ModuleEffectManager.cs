@@ -5,14 +5,10 @@ using UnityEngine.SceneManagement;
 
 public class ModuleEffectManager : MonoBehaviour
 {
-    private readonly Dictionary<ModuleStatType, float> _activeStatModifiers = new Dictionary<ModuleStatType, float>();
+    private readonly Dictionary<ModuleStatType, float> _activeStatModifiers = new ();
     public static ModuleEffectManager Instance { get; private set; }
 
-    public IReadOnlyDictionary<ModuleStatType, float> ActiveStatModifiers {
-        get {
-            return _activeStatModifiers;
-        }
-    }
+    public IReadOnlyDictionary<ModuleStatType, float> ActiveStatModifiers => _activeStatModifiers;
 
     private void Awake()
     {
@@ -156,35 +152,35 @@ public class ModuleEffectManager : MonoBehaviour
     private void ApplyModifiersToExistingObjects()
     {
         foreach (BaseStorage storage in FindObjectsByType<BaseStorage>(FindObjectsSortMode.None)) {
-            if (storage.TryGetComponent<StatModifierReceiver_Storage>(out StatModifierReceiver_Storage receiver)) {
+            if (storage.TryGetComponent(out StatModifierReceiver_Storage receiver)) {
                 receiver.ApplyModifiers();
             }
         }
 
         foreach (UnitBase unit in FindObjectsByType<UnitBase>(FindObjectsSortMode.None)) {
-            if (unit.TryGetComponent<StatModifierReceiver_UnitMovement>(out StatModifierReceiver_UnitMovement receiver)) {
+            if (unit.TryGetComponent(out StatModifierReceiver_UnitMovement receiver)) {
                 receiver.ApplyModifiers();
             }
 
-            if (unit.TryGetComponent<StatModifierReceiver_UnitWorkSpeed>(out StatModifierReceiver_UnitWorkSpeed receiver2)) {
+            if (unit.TryGetComponent(out StatModifierReceiver_UnitWorkSpeed receiver2)) {
                 receiver2.ApplyModifiers();
             }
         }
 
         foreach (Damageable building in FindObjectsByType<Damageable>(FindObjectsSortMode.None)) {
-            if (building.TryGetComponent<StatModifierReceiver_BuildingHP>(out StatModifierReceiver_BuildingHP receiver)) {
+            if (building.TryGetComponent(out StatModifierReceiver_BuildingHP receiver)) {
                 receiver.ApplyModifiers();
             }
         }
 
         foreach (ResourceGenerator generator in FindObjectsByType<ResourceGenerator>(FindObjectsSortMode.None)) {
-            if (generator.TryGetComponent<StatModifierReceiver_ResourceGeneration>(out StatModifierReceiver_ResourceGeneration receiver)) {
+            if (generator.TryGetComponent(out StatModifierReceiver_ResourceGeneration receiver)) {
                 receiver.ApplyModifiers();
             }
         }
 
         foreach (Turret turret in FindObjectsByType<Turret>(FindObjectsSortMode.None)) {
-            if (turret.TryGetComponent<StatModifierReceiver_TurretDamage>(out StatModifierReceiver_TurretDamage receiver)) {
+            if (turret.TryGetComponent(out StatModifierReceiver_TurretDamage receiver)) {
                 receiver.ApplyModifiers();
             }
         }
@@ -202,27 +198,27 @@ public class ModuleEffectManager : MonoBehaviour
     {
         if (obj == null) return;
 
-        if (obj.TryGetComponent<StatModifierReceiver_Storage>(out StatModifierReceiver_Storage storageReceiver)) {
+        if (obj.TryGetComponent(out StatModifierReceiver_Storage storageReceiver)) {
             storageReceiver.ApplyModifiers();
         }
 
-        if (obj.TryGetComponent<StatModifierReceiver_UnitMovement>(out StatModifierReceiver_UnitMovement movementReceiver)) {
+        if (obj.TryGetComponent(out StatModifierReceiver_UnitMovement movementReceiver)) {
             movementReceiver.ApplyModifiers();
         }
 
-        if (obj.TryGetComponent<StatModifierReceiver_UnitWorkSpeed>(out StatModifierReceiver_UnitWorkSpeed workSpeedReceiver)) {
+        if (obj.TryGetComponent(out StatModifierReceiver_UnitWorkSpeed workSpeedReceiver)) {
             workSpeedReceiver.ApplyModifiers();
         }
 
-        if (obj.TryGetComponent<StatModifierReceiver_BuildingHP>(out StatModifierReceiver_BuildingHP hpReceiver)) {
+        if (obj.TryGetComponent(out StatModifierReceiver_BuildingHP hpReceiver)) {
             hpReceiver.ApplyModifiers();
         }
 
-        if (obj.TryGetComponent<StatModifierReceiver_ResourceGeneration>(out StatModifierReceiver_ResourceGeneration genReceiver)) {
+        if (obj.TryGetComponent(out StatModifierReceiver_ResourceGeneration genReceiver)) {
             genReceiver.ApplyModifiers();
         }
 
-        if (obj.TryGetComponent<StatModifierReceiver_TurretDamage>(out StatModifierReceiver_TurretDamage turretReceiver)) {
+        if (obj.TryGetComponent(out StatModifierReceiver_TurretDamage turretReceiver)) {
             turretReceiver.ApplyModifiers();
         }
     }

@@ -28,6 +28,30 @@ public class QuestDetailPanel : MonoBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+        if (QuestDataManager.Instance != null)
+        {
+            QuestDataManager.Instance.OnQuestStateChanged += OnQuestStateChanged;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (QuestDataManager.Instance != null)
+        {
+            QuestDataManager.Instance.OnQuestStateChanged -= OnQuestStateChanged;
+        }
+    }
+
+    private void OnQuestStateChanged(int questId)
+    {
+        if (_currentQuestId == questId)
+        {
+            UpdateButtonVisibility();
+        }
+    }
+
     private void Update()
     {
        if (_currentQuestId != -1 && QuestDataManager.Instance != null)
@@ -36,7 +60,10 @@ public class QuestDetailPanel : MonoBehaviour
             if (questState == QuestState.Active)
             {
                 bool canFinish = QuestDataManager.Instance.CheckQuestCompletion(_currentQuestId);
-                if (canFinish && questActionButton != null && !questActionButton.gameObject.activeSelf)
+                bool shouldShowButton = canFinish;
+                bool isButtonVisible = questActionButton != null && questActionButton.gameObject.activeSelf;
+                
+                if (shouldShowButton != isButtonVisible)
                 {
                     UpdateButtonVisibility();
                 }
@@ -269,7 +296,7 @@ public class QuestDetailPanel : MonoBehaviour
                 bool success = QuestManager.Instance.StartQuest(_currentQuestId);
                 if (success)
                 {
-                    UpdateButtonVisibility();
+                    StartCoroutine(UpdateButtonAfterStateChange());
                 }
             }
         }
@@ -356,6 +383,12 @@ public class QuestDetailPanel : MonoBehaviour
         {
             UpdateButtonVisibility();
         }
+    }
+
+    private IEnumerator UpdateButtonAfterStateChange()
+    {
+        yield return null;
+        UpdateButtonVisibility();
     }
 
     private IEnumerator RebuildAllLayouts()

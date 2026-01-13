@@ -133,12 +133,6 @@ public class ModuleStationUIManager : MonoBehaviour
             moduleDetailPanel.ShowInfo(recipe, _currentStation);
         }
     }
-
-    public void OnModuleCrafted()
-    {
-        // Module crafting is handled by BaseInventorySystem events
-        // No additional action needed here
-    }
     
     private void OnQuestButtonClicked()
     {

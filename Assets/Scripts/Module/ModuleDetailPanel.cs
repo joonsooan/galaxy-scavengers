@@ -127,11 +127,10 @@ public class ModuleDetailPanel : MonoBehaviour
         foreach (ResourceCost ingredient in _currentRecipe.ingredients)
         {
             GameObject cellObj = Instantiate(ingredientCellPrefab, ingredientsParent.transform);
-            ResourceInfoCell cell = cellObj.GetComponent<ResourceInfoCell>();
-            
+            BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
             if (cell != null)
             {
-                cell.SetInfo(ingredient.resourceType, ingredient.amount);
+                cell.SetResource(ingredient.resourceType, ingredient.amount);
             }
         }
     }
@@ -159,7 +158,6 @@ public class ModuleDetailPanel : MonoBehaviour
         
         if (_station.CraftModule(_currentRecipe))
         {
-            _uiManager?.OnModuleCrafted();
             UpdateProduceButton();
             SetupIngredients();
             

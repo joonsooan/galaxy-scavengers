@@ -33,7 +33,6 @@ public class BaseSceneManager : MonoBehaviour
 
     private void Update()
     {
-        // Only close with Escape key, not right-click (right-click is handled by individual panels)
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             CloseUIPanel(_currentPanelIndex);

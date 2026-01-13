@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class QuestManager : MonoBehaviour
@@ -18,8 +16,6 @@ public class QuestManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    // Delegate all operations to QuestDataManager
-    // QuestUIManager listens to QuestDataManager events directly
     public bool StartQuest(int questId)
     {
         return QuestDataManager.Instance != null && QuestDataManager.Instance.StartQuest(questId);
