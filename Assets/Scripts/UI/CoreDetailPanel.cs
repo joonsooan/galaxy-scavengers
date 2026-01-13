@@ -71,4 +71,16 @@ public class CoreDetailPanel : MonoBehaviour
             moduleEffectText.text = "활성화된 모듈 효과가 없습니다.";
         }
     }
+    
+    public void ClearInfo()
+    {
+        if (moduleNameText != null)
+        {
+            moduleNameText.text = "";
+        }
+        if (moduleEffectText != null)
+        {
+            moduleEffectText.text = "";
+        }
+    }
 }

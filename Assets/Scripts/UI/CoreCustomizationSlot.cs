@@ -14,18 +14,11 @@ public class CoreCustomizationSlot : MonoBehaviour
     private CoreCustomizationManager _customizationManager;
     private EventTrigger _eventTrigger;
 
-    private CoreCustomUIManager _uiManager;
-
-    public int SlotIndex { get; private set; }
-
-    public Module CurrentModule { get; private set; }
+    private int SlotIndex { get; set; }
+    private Module CurrentModule { get; set; }
 
     private void Awake()
     {
-        if (slotButton != null) {
-            slotButton.onClick.AddListener(OnSlotButtonClicked);
-        }
-
         SetupRightClickHandler();
     }
 
@@ -51,9 +44,7 @@ public class CoreCustomizationSlot : MonoBehaviour
     {
         SlotIndex = slotIndex;
         _customizationManager = manager;
-        _uiManager = uiManager;
         
-        // Subscribe to unlocked slot count changes
         if (_customizationManager != null) {
             _customizationManager.OnUnlockedSlotCountChanged += OnUnlockedSlotCountChanged;
         }
@@ -70,7 +61,6 @@ public class CoreCustomizationSlot : MonoBehaviour
 
     private void OnUnlockedSlotCountChanged(int unlockedSlotCount)
     {
-        // Update UI when unlocked slot count changes
         UpdateLockUI();
     }
 
@@ -110,23 +100,14 @@ public class CoreCustomizationSlot : MonoBehaviour
             lockIndicator.SetActive(isLocked);
         }
 
-        // Optionally disable slot button when locked
         if (slotButton != null) {
             slotButton.interactable = !isLocked;
-        }
-    }
-
-    private void OnSlotButtonClicked()
-    {
-        if (_uiManager != null) {
-            _uiManager.OnSlotClicked(SlotIndex);
         }
     }
 
     private void OnRightClick()
     {
         if (CurrentModule != null && _customizationManager != null) {
-            // Check if slot is locked before removing
             if (_customizationManager.IsSlotLocked(SlotIndex)) {
                 Debug.LogWarning($"CoreCustomizationSlot: Cannot remove module from slot {SlotIndex} - slot is locked");
                 return;

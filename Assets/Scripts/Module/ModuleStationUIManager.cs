@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ModuleStationUIManager : MonoBehaviour
+public class ModuleStationUIManager : MonoBehaviour, IQuestUIProvider
 {
     [Header("UI References")]
     [SerializeField] private GameObject moduleStationPanel;
@@ -22,12 +22,11 @@ public class ModuleStationUIManager : MonoBehaviour
     [SerializeField] private GameObject questCellPrefab;
     [SerializeField] private QuestDetailPanel questDetailPanel;
     [SerializeField] private QuestProvider questProvider = QuestProvider.NPC_1;
+    [SerializeField] private QuestUIHandler questUIHandler;
     [SerializeField] private List<ModuleGridCell> recipeCells = new ();
 
-    private readonly List<QuestCell> _questCells = new ();
     private ModuleData _currentData;
     private ModuleStation _currentStation;
-    private bool _isQuestMode;
 
     private void Start()
     {
@@ -36,32 +35,22 @@ public class ModuleStationUIManager : MonoBehaviour
 
         closeButton.onClick.RemoveAllListeners();
         closeButton.onClick.AddListener(OnCloseButtonClicked);
-        questButton.onClick.RemoveAllListeners();
-        questButton.onClick.AddListener(OnQuestButtonClicked);
-        shopButton.onClick.RemoveAllListeners();
-        shopButton.onClick.AddListener(OnShopButtonClicked);
-
-        questGridPanel.SetActive(false);
-        questDetailPanel.gameObject.SetActive(false);
+        
+        if (questUIHandler == null)
+        {
+            questUIHandler = gameObject.AddComponent<QuestUIHandler>();
+        }
+        questUIHandler.Initialize(this);
     }
 
     private void OnEnable()
     {
         ModuleStation.OnModuleStationClicked += ShowModuleStationUI;
-        QuestDataManager.Instance.OnQuestStateChanged += OnQuestStateChanged;
     }
 
     private void OnDisable()
     {
         ModuleStation.OnModuleStationClicked -= ShowModuleStationUI;
-        QuestDataManager.Instance.OnQuestStateChanged -= OnQuestStateChanged;
-    }
-    
-    private void OnQuestStateChanged(int questId)
-    {
-        if (_isQuestMode) {
-            LoadQuestCells();
-        }
     }
 
     private void ShowModuleStationUI(ModuleStation station)
@@ -81,7 +70,10 @@ public class ModuleStationUIManager : MonoBehaviour
     {
         moduleStationPanel.SetActive(false);
         moduleDetailPanel.HidePanel();
-        questDetailPanel.gameObject.SetActive(false);
+        if (questUIHandler != null)
+        {
+            questUIHandler.HideQuestUI();
+        }
     }
 
     private void OnCloseButtonClicked()
@@ -134,74 +126,33 @@ public class ModuleStationUIManager : MonoBehaviour
         }
     }
     
-    private void OnQuestButtonClicked()
-    {
-        ShowQuestUI();
-    }
+    public Button GetQuestButton() => questButton;
+    public Button GetShopButton() => shopButton;
+    public GameObject GetQuestGridPanel() => questGridPanel;
+    public RectTransform GetQuestGridParent() => questGridParent;
+    public GameObject GetQuestCellPrefab() => questCellPrefab;
+    public QuestDetailPanel GetQuestDetailPanel() => questDetailPanel;
+    public QuestProvider GetQuestProvider() => questProvider;
+    public GameObject GetShopUIContainer() => recipeGridContainer;
     
-    private void OnShopButtonClicked()
+    public void ShowShopUI()
     {
-        ShowShopUI();
-    }
-    
-    private void ShowQuestUI()
-    {
-        _isQuestMode = true;
-
-        recipeGridContainer.SetActive(false);
-        moduleDetailPanel.HidePanel();
-        questGridPanel.SetActive(true);
-        questDetailPanel.gameObject.SetActive(true);
-        
-        LoadQuestCells();
-    }
-    
-    private void ShowShopUI()
-    {
-        _isQuestMode = false;
-        
-        questGridPanel.SetActive(false);
-        questDetailPanel.ClearQuestInfo();
-        questDetailPanel.gameObject.SetActive(false);
         recipeGridContainer.SetActive(true);
         moduleDetailPanel.ShowPanel();
         LoadAllRecipes();
     }
     
-    private void LoadQuestCells()
+    public void HideShopUI()
     {
-        ClearQuestCells();
-        
-        List<QuestData> currentQuests = QuestDataManager.Instance.GetCurrentQuestsByProvider(questProvider);
-        
-        foreach (QuestData quest in currentQuests) {
-            GameObject cellObject = Instantiate(questCellPrefab, questGridParent);
-            QuestCell questCell = cellObject.GetComponent<QuestCell>();
-            
-            if (questCell != null) {
-                questCell.Initialize(quest, questDetailPanel);
-                _questCells.Add(questCell);
-            }
-            else {
-                Debug.LogWarning($"QuestCell component not found on prefab {questCellPrefab.name}");
-                Destroy(cellObject);
-            }
-        }
+        recipeGridContainer.SetActive(false);
+        moduleDetailPanel.HidePanel();
     }
     
-    private void ClearQuestCells()
+    public void ClearDetailPanel()
     {
-        foreach (QuestCell cell in _questCells) {
-            if (cell != null) {
-                Destroy(cell.gameObject);
-            }
-        }
-        _questCells.Clear();
-        
-        if (questGridParent != null) {
-            foreach (Transform child in questGridParent) {
-                Destroy(child.gameObject);
-            }
+        if (moduleDetailPanel != null)
+        {
+            moduleDetailPanel.ClearInfo();
         }
     }
 }
