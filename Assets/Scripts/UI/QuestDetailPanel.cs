@@ -3,12 +3,13 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class QuestInfoPanel : MonoBehaviour
+public class QuestDetailPanel : MonoBehaviour
 {
-    [SerializeField] private GameObject infoPanel;
     [SerializeField] private TMP_Text questNameText;
     [SerializeField] private TMP_Text questIdText;
     [SerializeField] private TMP_Text questDescriptionText;
+    [SerializeField] private TMP_Text requiredResourceText;
+    [SerializeField] private TMP_Text rewardText;
     [SerializeField] private GameObject requiredResourcesGridContainer;
     [SerializeField] private GameObject rewardGridContainer;
     [SerializeField] private GameObject baseInventoryCellPrefab;
@@ -47,18 +48,36 @@ public class QuestInfoPanel : MonoBehaviour
     {
         if (questData == null) return;
 
-        if (_currentQuestId == questId && infoPanel != null)
+        if (_currentQuestId == questId)
         {
             return;
         }
 
         _currentQuestId = questId;
         questNameText.text = questData.questName;
-        questIdText.text = $"퀘스트 ID : {questId}";
+        questIdText.text = $"퀘스트 ID : {questId:D4}";
         questDescriptionText.text = questData.questInfo;
+        requiredResourceText.text = "필요한 자원";
+        rewardText.text = "보상";
 
         DisplayRequiredResources(questData);
         DisplayQuestRewards(questData);
+        UpdateButtonVisibility();
+        
+        RebuildAllLayouts();
+    }
+    
+    public void ClearQuestInfo()
+    {
+        _currentQuestId = -1;
+        questNameText.text = "";
+        questIdText.text = "";
+        questDescriptionText.text = "";
+        requiredResourceText.text = "";
+        rewardText.text = "";
+
+        ClearRequiredResources();
+        ClearQuestRewards();
         UpdateButtonVisibility();
         
         RebuildAllLayouts();
@@ -94,6 +113,24 @@ public class QuestInfoPanel : MonoBehaviour
             {
                 LayoutRebuilder.ForceRebuildLayoutImmediate(requiredResourcesGridContainer.GetComponent<RectTransform>());
             }
+        }
+    }
+
+    private void ClearRequiredResources()
+    {
+        foreach (Transform child in requiredResourcesGridContainer.transform)
+        {
+            Destroy(child.gameObject);
+        }
+        
+        foreach (Transform child in requiredResourcesGridContainer.transform)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(child.GetComponent<RectTransform>());
+        }
+        
+        if (requiredResourcesGridContainer != null)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(requiredResourcesGridContainer.GetComponent<RectTransform>());
         }
     }
     
@@ -146,6 +183,24 @@ public class QuestInfoPanel : MonoBehaviour
             }
         }
     }
+    
+    private void ClearQuestRewards()
+    {
+        foreach (Transform child in rewardGridContainer.transform)
+        {
+            Destroy(child.gameObject);
+        }
+        
+        foreach (Transform child in rewardGridContainer.transform)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(child.GetComponent<RectTransform>());
+        }
+
+        if (rewardGridContainer != null)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rewardGridContainer.GetComponent<RectTransform>());
+        }
+    }
 
     private void UpdateButtonVisibility()
     {
@@ -192,7 +247,7 @@ public class QuestInfoPanel : MonoBehaviour
             questActionButton.gameObject.SetActive(true);
             if (questActionButtonText != null)
             {
-                questActionButtonText.text = "Finish";
+                questActionButtonText.text = "완료";
             }
         }
         else
@@ -291,11 +346,8 @@ public class QuestInfoPanel : MonoBehaviour
             QuestManager.Instance.FinishQuest(questId);
         }
         
-        if (infoPanel != null)
-        {
-            infoPanel.SetActive(false);
-        }
         _currentQuestId = -1;
+        gameObject.SetActive(false);
     }
 
     public void RefreshQuestState(int questId)
@@ -306,19 +358,11 @@ public class QuestInfoPanel : MonoBehaviour
         }
     }
 
-    private void RebuildAllLayouts()
+    private IEnumerator RebuildAllLayouts()
     {
-        LayoutRebuilder.ForceRebuildLayoutImmediate(questNameText.rectTransform);
-        LayoutRebuilder.ForceRebuildLayoutImmediate(questIdText.rectTransform);
-        LayoutRebuilder.ForceRebuildLayoutImmediate(questDescriptionText.rectTransform);
+        yield return new WaitForEndOfFrame();
+        
         LayoutRebuilder.ForceRebuildLayoutImmediate(requiredResourcesGridContainer.GetComponent<RectTransform>());
         LayoutRebuilder.ForceRebuildLayoutImmediate(rewardGridContainer.GetComponent<RectTransform>());
-        LayoutRebuilder.ForceRebuildLayoutImmediate(infoPanel.GetComponent<RectTransform>());
-    }
-
-    private IEnumerator RebuildLayoutsNextFrame()
-    {
-        yield return null;
-        RebuildAllLayouts();
     }
 }

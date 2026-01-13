@@ -4,11 +4,11 @@ using UnityEngine;
 public class QuestUIManager : MonoBehaviour
 {
     [Header("Quest Info Panel")]
-    [SerializeField] private QuestInfoPanel questInfoPanel;
+    [SerializeField] private QuestDetailPanel questDetailPanel;
     [SerializeField] private GameObject questCellPrefab;
     [SerializeField] private Transform questCellContentParent;
 
-    public void SetQuestInfoPanel(QuestInfoPanel panel) => questInfoPanel = panel;
+    public void SetQuestInfoPanel(QuestDetailPanel panel) => questDetailPanel = panel;
     public void SetQuestCellPrefab(GameObject prefab) => questCellPrefab = prefab;
     public void SetQuestCellContentParent(Transform parent) => questCellContentParent = parent;
 
@@ -61,7 +61,7 @@ public class QuestUIManager : MonoBehaviour
 
     private void InstantiateAvailableQuestCells()
     {
-        if (questCellPrefab == null || questCellContentParent == null || questInfoPanel == null)
+        if (questCellPrefab == null || questCellContentParent == null || questDetailPanel == null)
         {
             return;
         }
@@ -88,7 +88,7 @@ public class QuestUIManager : MonoBehaviour
 
             if (questCell != null)
             {
-                questCell.Initialize(quest, questInfoPanel);
+                questCell.Initialize(quest, questDetailPanel);
                 _instantiatedQuestCells.Add(questCell);
             }
             else
@@ -163,9 +163,9 @@ public class QuestUIManager : MonoBehaviour
     {
         UpdateQuestCellBadge(questId);
         
-        if (questInfoPanel != null)
+        if (questDetailPanel != null)
         {
-            questInfoPanel.RefreshQuestState(questId);
+            questDetailPanel.RefreshQuestState(questId);
         }
     }
 
@@ -174,9 +174,9 @@ public class QuestUIManager : MonoBehaviour
         UpdateQuestCellBadge(questId);
         UpdateAllQuestCellBadges();
         
-        if (questInfoPanel != null)
+        if (questDetailPanel != null)
         {
-            questInfoPanel.RefreshQuestState(questId);
+            questDetailPanel.RefreshQuestState(questId);
         }
     }
 

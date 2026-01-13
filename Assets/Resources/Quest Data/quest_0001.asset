@@ -25,6 +25,7 @@ MonoBehaviour:
   - resourceType: 1
     amount: 50
   questFinishReward:
-    resourceRewards: []
-    moduleRewards:
-    - {fileID: 0}
+    resourceRewards:
+    - resourceType: 6
+      amount: 20
+    moduleRewards: []

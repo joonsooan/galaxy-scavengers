@@ -73,6 +73,12 @@ public class ModuleDetailPanel : MonoBehaviour
         produceButton.gameObject.SetActive(false);
         produceButtonText.text = "";
     }
+
+    public void ShowPanel()
+    {
+        gameObject.SetActive(true);
+        ClearInfo();
+    }
     
     public void HidePanel()
     {

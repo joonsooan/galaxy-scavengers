@@ -9,7 +9,7 @@ public class QuestCell : MonoBehaviour
     [SerializeField] private Button cellButton;
 
     private QuestData _questData;
-    private QuestInfoPanel _questInfoPanel;
+    private QuestDetailPanel _questDetailPanel;
 
     private void Awake()
     {
@@ -19,10 +19,10 @@ public class QuestCell : MonoBehaviour
         }
     }
 
-    public void Initialize(QuestData questData, QuestInfoPanel questInfoPanel)
+    public void Initialize(QuestData questData, QuestDetailPanel questDetailPanel)
     {
         _questData = questData;
-        _questInfoPanel = questInfoPanel;
+        _questDetailPanel = questDetailPanel;
 
         if (questNameText != null && questData != null)
         {
@@ -32,9 +32,9 @@ public class QuestCell : MonoBehaviour
 
     private void OnCellClicked()
     {
-        if (_questData != null && _questInfoPanel != null)
+        if (_questData != null && _questDetailPanel != null)
         {
-            _questInfoPanel.DisplayQuestInfo(_questData, _questData.questId);
+            _questDetailPanel.DisplayQuestInfo(_questData, _questData.questId);
         }
     }
 
