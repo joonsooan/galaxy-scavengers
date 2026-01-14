@@ -14,7 +14,6 @@ public class Unit_Drone : UnitBase
     [SerializeField] private float unloadingTime = 1f;
     [SerializeField] private float assignmentTime = 1f;
     [SerializeField] private UnitMovement movement;
-    [SerializeField] private Sprite droneIcon;
 
     [Header("Hover Animation")]
     [SerializeField] private float hoverHeight = 0.2f;
@@ -22,7 +21,6 @@ public class Unit_Drone : UnitBase
 
     public bool HasCheckedIn { get; private set; }
     public bool IsAssigned => _currentProcessor != null;
-    public Sprite DroneIcon => droneIcon;
     public ActiveRecipe CurrentRecipeTask { get; private set; }
     
     private int _carriedAmount;
