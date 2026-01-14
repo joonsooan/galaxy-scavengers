@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ResourceNode : MonoBehaviour
@@ -41,6 +42,8 @@ public class ResourceNode : MonoBehaviour
         }
         
         DisableAllSpriteRenderers();
+        
+        InitializeResourceNode();
     }
 
     private void Start()
@@ -52,6 +55,11 @@ public class ResourceNode : MonoBehaviour
         
         DisableAllSpriteRenderers();
         
+        InitializeResourceNode();
+    }
+    
+    private void InitializeResourceNode()
+    {
         if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null)
         {
             cellPosition = BuildingManager.Instance.grid.WorldToCell(transform.position);
@@ -59,7 +67,12 @@ public class ResourceNode : MonoBehaviour
         
         if (ResourceManager.Instance != null)
         {
-            ResourceManager.Instance.AddResourceNode(this);
+            List<ResourceNode> allResources = ResourceManager.Instance.GetAllResources();
+            if (!allResources.Contains(this))
+            {
+                ResourceManager.Instance.AddResourceNode(this);
+            }
+            
             ResourceStats stats = ResourceManager.Instance.GetResourceStats(resourceType);
             
             if (stats != null)
