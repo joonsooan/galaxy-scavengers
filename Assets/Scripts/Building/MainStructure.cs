@@ -5,16 +5,45 @@ public class MainStructure : BaseStorage, IClickable
 {
     [Header("Production Settings")]
     [SerializeField] private List<UnitData> producibleUnits;
+    [Header("Aether Capacity")]
+    [SerializeField] private int baseAetherCapacity = 100;
     
     private bool _isProducing;
+    private AetherConsumptionManager _aetherConsumptionManager;
+    
+    public int BaseAetherCapacity => baseAetherCapacity;
 
     protected override void Start()
     {
         base.Start();
         
+        FindAndCacheAetherManager();
+        if (_aetherConsumptionManager != null)
+        {
+            _aetherConsumptionManager.RegisterMainStructure(this);
+        }
+        
         if (GetComponent<BuildingHoverTrigger>() == null)
         {
             gameObject.AddComponent<BuildingHoverTrigger>();
+        }
+    }
+    
+    protected override void OnDisable()
+    {
+        if (_aetherConsumptionManager != null)
+        {
+            _aetherConsumptionManager.UnregisterMainStructure(this);
+        }
+        
+        base.OnDisable();
+    }
+    
+    private void FindAndCacheAetherManager()
+    {
+        if (_aetherConsumptionManager == null)
+        {
+            _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
         }
     }
     

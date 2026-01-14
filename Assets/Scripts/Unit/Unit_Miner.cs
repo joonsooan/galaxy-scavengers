@@ -230,6 +230,23 @@ public class Unit_Miner : UnitBase
         yield return new WaitForSeconds(unloadingTime);
 
         if (_targetStorage != null) {
+            // Check if trying to unload aether and capacity is full
+            bool hasAether = _currentCarryAmounts.ContainsKey(ResourceType.Aether) &&
+                _currentCarryAmounts[ResourceType.Aether] > 0;
+            
+            if (hasAether)
+            {
+                AetherConsumptionManager aetherManager = FindFirstObjectByType<AetherConsumptionManager>();
+                if (aetherManager != null && aetherManager.IsAetherCapacityFull)
+                {
+                    // Don't unload aether if capacity is full
+                    InitializeCarryAmounts();
+                    _targetResourceNode = null;
+                    _targetStorage = null;
+                    currentState = UnitState.Idle;
+                    yield break;
+                }
+            }
             Dictionary<ResourceType, int> resourcesBefore = new Dictionary<ResourceType, int>();
             Dictionary<ResourceType, int> resourcesToUnload = new Dictionary<ResourceType, int>();
 
@@ -419,6 +436,16 @@ public class Unit_Miner : UnitBase
         bool hasAether = _currentCarryAmounts.ContainsKey(ResourceType.Aether) &&
             _currentCarryAmounts[ResourceType.Aether] > 0;
         bool hasNonAether = _currentCarryAmounts.Any(p => p.Key != ResourceType.Aether && p.Value > 0);
+        
+        // If trying to unload aether and capacity is full, don't find storage
+        if (hasAether && !hasNonAether)
+        {
+            AetherConsumptionManager aetherManager = FindFirstObjectByType<AetherConsumptionManager>();
+            if (aetherManager != null && aetherManager.IsAetherCapacityFull)
+            {
+                return new UnloadTarget { distance = float.MaxValue };
+            }
+        }
 
         IEnumerable<IStorage> allStorages = ResourceManager.Instance.GetAllStorages()
             .Where(s => s != null && s.GetTotalCurrentAmount() < s.GetMaxCapacity());

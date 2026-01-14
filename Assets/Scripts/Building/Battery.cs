@@ -1,5 +1,43 @@
+using UnityEngine;
+
 public class Battery : BaseStorage
 {
+    [Header("Aether Capacity")]
+    [SerializeField] private int aetherCapacity = 100;
+    
+    private AetherConsumptionManager _aetherConsumptionManager;
+    
+    public int AetherCapacity => aetherCapacity;
+    
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        
+        FindAndCacheAetherManager();
+        if (_aetherConsumptionManager != null)
+        {
+            _aetherConsumptionManager.RegisterBattery(this);
+        }
+    }
+    
+    protected override void OnDisable()
+    {
+        if (_aetherConsumptionManager != null)
+        {
+            _aetherConsumptionManager.UnregisterBattery(this);
+        }
+        
+        base.OnDisable();
+    }
+    
+    private void FindAndCacheAetherManager()
+    {
+        if (_aetherConsumptionManager == null)
+        {
+            _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
+        }
+    }
+    
     public override bool TryAddResource(ResourceType type, int amount)
     {
         if (type != ResourceType.Aether) return false;

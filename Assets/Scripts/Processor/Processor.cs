@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Processor : Damageable, IClickable
+public class Processor : Damageable, IClickable, IAetherConsumer
 {
     [SerializeField] private ProcessorData processorData;
+    [Header("Aether Consumption")]
+    [SerializeField] private int aetherConsumptionPerSecond = 1;
+    
     private readonly List<ActiveRecipe> _activeRecipes = new ();
 
     private readonly List<Unit_Drone> _assignedDrones = new ();
@@ -17,11 +20,17 @@ public class Processor : Damageable, IClickable
     private int _maxIngredientStorage;
 
     private List<ProcessorRecipe> _recipes;
+    private AetherConsumptionManager _aetherConsumptionManager;
 
     public ProcessorData ProcessorData => processorData;
     public IReadOnlyList<ActiveRecipe> ActiveRecipes => _activeRecipes;
     public IReadOnlyList<Unit_Drone> AssignedDrones => _assignedDrones;
     public bool IsFull => _assignedDrones.Count >= _maxAssignedDrones;
+    
+    // IAetherConsumer implementation
+    public int AetherConsumptionPerSecond => aetherConsumptionPerSecond;
+    private bool _isOperational = true;
+    public bool IsOperational => _isOperational;
 
 
     protected override void Awake()
@@ -51,16 +60,74 @@ public class Processor : Damageable, IClickable
     {
         base.OnEnable();
         BuildingManager.Instance?.RegisterProcessor(this);
+        
+        FindAndCacheAetherManager();
+        if (_aetherConsumptionManager != null)
+        {
+            _aetherConsumptionManager.RegisterConsumer(this);
+        }
     }
 
     protected override void OnDisable()
     {
+        if (_aetherConsumptionManager != null)
+        {
+            _aetherConsumptionManager.UnregisterConsumer(this);
+        }
+        
         base.OnDisable();
         BuildingManager.Instance?.UnregisterProcessor(this);
 
         List<Unit_Drone> dronesToRelease = new List<Unit_Drone>(_assignedDrones);
         foreach (Unit_Drone drone in dronesToRelease) {
             drone.AssignProcessor(null);
+        }
+    }
+    
+    private void FindAndCacheAetherManager()
+    {
+        if (_aetherConsumptionManager == null)
+        {
+            _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
+        }
+    }
+    
+    public void OnAetherUnavailable()
+    {
+        if (_isOperational)
+        {
+            _isOperational = false;
+            // Stop all processing - release drones from recipes
+            foreach (ActiveRecipe recipe in _activeRecipes)
+            {
+                if (recipe.isProcessing && recipe.assignedDrone != null)
+                {
+                    Unit_Drone drone = recipe.assignedDrone;
+                    recipe.assignedDrone = null;
+                    recipe.isProcessing = false;
+                    drone.SetTask_Idle();
+                }
+            }
+        }
+    }
+    
+    public void OnAetherAvailable()
+    {
+        if (!_isOperational)
+        {
+            _isOperational = true;
+            // Resume processing - request tasks for idle drones
+            foreach (Unit_Drone drone in _assignedDrones)
+            {
+                if (drone != null && drone.HasCheckedIn && drone.CurrentRecipeTask == null)
+                {
+                    bool hasPendingRequest = _pendingRequests.Any(r => r.assignedDrone == drone);
+                    if (!hasPendingRequest)
+                    {
+                        RequestTask(drone);
+                    }
+                }
+            }
         }
     }
 
@@ -275,6 +342,18 @@ public class Processor : Damageable, IClickable
 
     public void ProcessRecipeWork(ActiveRecipe recipe, float workAmount)
     {
+        // Don't process if not operational (no aether)
+        if (!_isOperational)
+        {
+            if (recipe.assignedDrone != null)
+            {
+                recipe.assignedDrone.SetTask_Idle();
+            }
+            recipe.assignedDrone = null;
+            recipe.isProcessing = false;
+            return;
+        }
+        
         if (recipe.assignedDrone == null) {
             return;
         }

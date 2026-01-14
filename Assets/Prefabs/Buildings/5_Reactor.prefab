@@ -153,6 +153,7 @@ MonoBehaviour:
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
   processorData: {fileID: 11400000, guid: 66284246a5192cd448e962a43b62691a, type: 2}
+  aetherConsumptionPerSecond: 2
 --- !u!114 &-243382722571625938
 MonoBehaviour:
   m_ObjectHideFlags: 0

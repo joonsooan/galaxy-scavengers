@@ -494,6 +494,13 @@ public class Unit_Drone : UnitBase
             SetTask_Idle();
             return;
         }
+        
+        // Check if processor is operational (has aether)
+        if (_currentProcessor != null && _currentProcessor is IAetherConsumer consumer && !consumer.IsOperational)
+        {
+            SetTask_Idle();
+            return;
+        }
 
         bool isAtProcessor = movement.HasReachedTarget(movement.waypointTolerance);
 

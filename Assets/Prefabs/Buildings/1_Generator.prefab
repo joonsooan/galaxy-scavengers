@@ -153,7 +153,7 @@ MonoBehaviour:
   maxHealth: 50
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
-  generationInterval: 5
+  generationInterval: 2
   resourceAmount: 1
   resourceType: 1
 --- !u!114 &2831755290380365654

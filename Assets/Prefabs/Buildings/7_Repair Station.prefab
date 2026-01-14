@@ -155,6 +155,7 @@ MonoBehaviour:
   healInterval: 30
   healRadius: 5
   healAmount: 10
+  aetherConsumptionPerSecond: 10
 --- !u!114 &-292339499619513248
 MonoBehaviour:
   m_ObjectHideFlags: 0
