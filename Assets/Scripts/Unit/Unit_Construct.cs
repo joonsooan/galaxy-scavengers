@@ -1,4 +1,5 @@
 using System.Collections;
+using DG.Tweening;
 using UnityEngine;
 
 public class Unit_Construct : UnitBase
@@ -16,6 +17,10 @@ public class Unit_Construct : UnitBase
     [SerializeField] private ParticleSystem constructingParticleSystem;
     [SerializeField] private float particleOffsetDistance = 0.5f;
     [SerializeField] private float yOffset;
+
+    [Header("Hover Animation")]
+    [SerializeField] private float hoverHeight = 0.2f;
+    [SerializeField] private float hoverDuration = 1.5f;
 
     private int _carriedAmount;
     private ResourceType _carriedResourceType;
@@ -36,6 +41,9 @@ public class Unit_Construct : UnitBase
 
     private IStorage _targetStorage;
     private Coroutine _unloadingCoroutine;
+    private Tween _hoverTween;
+    private Vector3 _baseHoverLocalPosition;
+    private Transform _spriteTransform;
 
     protected override void Awake()
     {
@@ -50,6 +58,10 @@ public class Unit_Construct : UnitBase
             ConstructionManager.Instance.RegisterConstructDrone(this);
         }
         _spriteController = GetComponentInChildren<UnitSpriteController>();
+        if (_spriteController != null) {
+            _spriteTransform = _spriteController.transform;
+            _baseHoverLocalPosition = _spriteTransform.localPosition;
+        }
     }
 
     private void Update()
@@ -57,6 +69,7 @@ public class Unit_Construct : UnitBase
         UpdateUnitBaseState();
         DecideNextAction();
         UpdateAnimationState();
+        UpdateHoverAnimation();
 
         if (currentState == UnitState.Constructing) {
             UpdateParticlePosition();
@@ -85,6 +98,7 @@ public class Unit_Construct : UnitBase
     private void OnDestroy()
     {
         StopConstructionParticles();
+        StopHover();
     }
 
     private void UpdateUnitBaseState()
@@ -143,6 +157,12 @@ public class Unit_Construct : UnitBase
         if (_spriteController != null) {
             bool isConstructing = currentState == UnitState.Constructing;
             _spriteController.UpdateAnimationState(currentState, isConstructing: isConstructing);
+        }
+
+        bool isLoading = _loadingCoroutine != null;
+        
+        if (isLoading) {
+            return;
         }
 
         if (currentState == UnitState.Moving || currentState == UnitState.ReturningToStorage) {
@@ -204,13 +224,17 @@ public class Unit_Construct : UnitBase
 
     private IEnumerator LoadingResourceCoroutine()
     {
-        movement.ForceStopAllMovement();
-
         if (_targetStorage != null) {
             if (TryGetComponent(out UnitSpriteController spriteController)) {
+                Vector2 direction = (((Component)_targetStorage).transform.position - transform.position).normalized;
+                if (direction.sqrMagnitude > 0.01f) {
+                    spriteController.UpdateSpriteDirection(direction);
+                }
                 spriteController.SetTargetTransform((_targetStorage as Component).transform);
             }
         }
+
+        movement.ForceStopAllMovement();
 
         yield return new WaitForSeconds(loadingTime);
 
@@ -288,8 +312,6 @@ public class Unit_Construct : UnitBase
 
     private IEnumerator UnloadingResourceCoroutine()
     {
-        movement.ForceStopAllMovement();
-
         if (_currentRequest == null || _currentRequest.site == null) {
             StopConstructionParticles();
             _unloadingCoroutine = null;
@@ -308,11 +330,17 @@ public class Unit_Construct : UnitBase
             Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
             Vector3 piecePos = BuildingManager.Instance.grid.GetCellCenterWorld(targetPieceCell);
             if (TryGetComponent(out UnitSpriteController spriteController)) {
+                Vector2 direction = (piecePos - transform.position).normalized;
+                if (direction.sqrMagnitude > 0.01f) {
+                    spriteController.UpdateSpriteDirection(direction);
+                }
                 spriteController.SetTargetPosition(piecePos);
             }
 
             AdjustConstructionDirection(piecePos);
         }
+
+        movement.ForceStopAllMovement();
 
         StartConstructionParticles();
 
@@ -516,6 +544,50 @@ public class Unit_Construct : UnitBase
         Transform particleTransform = constructingParticleSystem.transform;
         Vector3 offsetPosition = transform.position + _currentConstructionDirection * particleOffsetDistance - new Vector3(0, yOffset, 0);
         particleTransform.position = offsetPosition;
+    }
+
+    private void UpdateHoverAnimation()
+    {
+        bool shouldHover = _spriteTransform != null && 
+                          (currentState == UnitState.Idle || currentState == UnitState.Moving);
+        
+        if (shouldHover) {
+            if (_hoverTween == null || !_hoverTween.IsActive()) {
+                StartHover();
+            }
+        }
+        else {
+            if (_hoverTween != null && _hoverTween.IsActive()) {
+                StopHover();
+            }
+        }
+    }
+
+    private void StartHover()
+    {
+        StopHover();
+        if (_spriteTransform == null) return;
+        
+        _baseHoverLocalPosition = _spriteTransform.localPosition;
+        _hoverTween = _spriteTransform.DOLocalMoveY(_baseHoverLocalPosition.y + hoverHeight, hoverDuration)
+            .SetEase(Ease.InOutSine)
+            .SetLoops(-1, LoopType.Yoyo);
+    }
+
+    private void StopHover()
+    {
+        if (_hoverTween != null && _hoverTween.IsActive()) {
+            _hoverTween.Kill();
+            _hoverTween = null;
+        }
+
+        if (_spriteTransform != null) {
+            float currentY = _spriteTransform.localPosition.y;
+            float baseY = _baseHoverLocalPosition.y;
+            if (Mathf.Abs(currentY - baseY) > 0.01f) {
+                _spriteTransform.DOLocalMoveY(baseY, 0.2f).SetEase(Ease.OutQuad);
+            }
+        }
     }
 
     private enum ConstructState

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 
 public class Unit_Scout : UnitBase
@@ -8,6 +9,10 @@ public class Unit_Scout : UnitBase
     [SerializeField] private UnitMovement unitMovement;
     [SerializeField] private float arrivalTolerance = 0.2f;
 
+    [Header("Hover Animation")]
+    [SerializeField] private float hoverHeight = 0.2f;
+    [SerializeField] private float hoverDuration = 1.5f;
+
     private Beacon _assignedBeacon;
     private BeaconWaypointGroup _assignedWaypointGroup;
     private Coroutine _beaconCoroutine;
@@ -15,6 +20,9 @@ public class Unit_Scout : UnitBase
     private bool _isReturningHome;
     private MainStructure _mainStructure;
     private UnitSpriteController _spriteController;
+    private Tween _hoverTween;
+    private Vector3 _baseHoverLocalPosition;
+    private Transform _spriteTransform;
 
     public bool IsAssignedToBeacon {
         get {
@@ -32,6 +40,10 @@ public class Unit_Scout : UnitBase
     {
         _mainStructure = FindFirstObjectByType<MainStructure>();
         _spriteController = GetComponentInChildren<UnitSpriteController>();
+        if (_spriteController != null) {
+            _spriteTransform = _spriteController.transform;
+            _baseHoverLocalPosition = _spriteTransform.localPosition;
+        }
     }
 
     private void Update()
@@ -41,6 +53,7 @@ public class Unit_Scout : UnitBase
         }
 
         UpdateAnimationState();
+        UpdateHoverAnimation();
     }
 
     protected override void OnDisable()
@@ -55,6 +68,8 @@ public class Unit_Scout : UnitBase
 
     private void OnDestroy()
     {
+        StopHover();
+        
         if (BeaconManager.Instance != null) {
             BeaconManager.Instance.OnScoutDestroyed(this);
         }
@@ -364,6 +379,50 @@ public class Unit_Scout : UnitBase
                     _assignedWaypointGroup = null;
                     ReturnHome();
                 }
+            }
+        }
+    }
+
+    private void UpdateHoverAnimation()
+    {
+        bool shouldHover = _spriteTransform != null && 
+                          (currentState == UnitState.Idle || currentState == UnitState.Moving);
+        
+        if (shouldHover) {
+            if (_hoverTween == null || !_hoverTween.IsActive()) {
+                StartHover();
+            }
+        }
+        else {
+            if (_hoverTween != null && _hoverTween.IsActive()) {
+                StopHover();
+            }
+        }
+    }
+
+    private void StartHover()
+    {
+        StopHover();
+        if (_spriteTransform == null) return;
+        
+        _baseHoverLocalPosition = _spriteTransform.localPosition;
+        _hoverTween = _spriteTransform.DOLocalMoveY(_baseHoverLocalPosition.y + hoverHeight, hoverDuration)
+            .SetEase(Ease.InOutSine)
+            .SetLoops(-1, LoopType.Yoyo);
+    }
+
+    private void StopHover()
+    {
+        if (_hoverTween != null && _hoverTween.IsActive()) {
+            _hoverTween.Kill();
+            _hoverTween = null;
+        }
+
+        if (_spriteTransform != null) {
+            float currentY = _spriteTransform.localPosition.y;
+            float baseY = _baseHoverLocalPosition.y;
+            if (Mathf.Abs(currentY - baseY) > 0.01f) {
+                _spriteTransform.DOLocalMoveY(baseY, 0.2f).SetEase(Ease.OutQuad);
             }
         }
     }

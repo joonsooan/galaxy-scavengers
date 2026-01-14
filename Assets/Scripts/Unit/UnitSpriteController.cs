@@ -43,6 +43,11 @@ public class UnitSpriteController : MonoBehaviour
             _animator.speed = 1.0f;
         }
 
+        Unit_Drone parentDrone = GetComponentInParent<Unit_Drone>();
+        if (parentDrone != null) {
+            return;
+        }
+
         bool isMoving = _unitMovement != null && _unitMovement.IsMoving;
 
         if (!isMoving) {
@@ -54,7 +59,7 @@ public class UnitSpriteController : MonoBehaviour
             else if (_targetPosition.HasValue) {
                 targetPos = _targetPosition.Value;
             }
-
+            
             if (targetPos.HasValue) {
                 Vector2 direction = (targetPos.Value - transform.position).normalized;
                 if (direction.sqrMagnitude > 0.01f) {

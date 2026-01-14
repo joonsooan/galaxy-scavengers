@@ -208,11 +208,13 @@ MonoBehaviour:
   currentState: 0
   carryCapacity: 10
   processingSpeed: 1
-  loadingTime: 1
-  unloadingTime: 1
-  assignmentTime: 1
+  loadingTime: 3
+  unloadingTime: 3
+  assignmentTime: 3
   movement: {fileID: 4483249089817793867}
   droneIcon: {fileID: 4992164939788663360, guid: 41d81b85481201c44bb0e26872455946, type: 3}
+  hoverHeight: 0.1
+  hoverDuration: 1
 --- !u!114 &4483249089817793867
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -225,7 +227,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 330c45daea6434b46bc02141d339b613, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 3
+  moveSpeed: 2
   waypointTolerance: 0.1
 --- !u!114 &2105189539104061689
 MonoBehaviour:

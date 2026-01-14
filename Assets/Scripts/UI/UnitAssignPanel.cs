@@ -94,7 +94,7 @@ public class UnitAssignPanel : MonoBehaviour
             .FirstOrDefault(d => !d.IsAssigned);
 
         if (droneToAssign != null) {
-            droneToAssign.AssignProcessor(_targetProcessor, true);
+            droneToAssign.AssignProcessor(_targetProcessor);
 
             _targetCell.SetAssignedDrone(droneToAssign);
 
@@ -105,7 +105,7 @@ public class UnitAssignPanel : MonoBehaviour
     private void OnUnassignDroneClicked()
     {
         if (_currentDrone != null) {
-            _currentDrone.AssignProcessor(null, true);
+            _currentDrone.AssignProcessor(null);
 
             _targetCell.SetAssignedDrone(null);
 

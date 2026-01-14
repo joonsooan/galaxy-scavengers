@@ -114,11 +114,49 @@ public abstract class EnemyUnitBase : UnitBase
             return;
         }
 
+        if (aiState == AIState.Attack) {
+            currentState = UnitState.Attacking;
+        }
+        else if (aiState == AIState.Warning || (unitMovement != null && unitMovement.IsMoving)) {
+            currentState = UnitState.Moving;
+        }
+        else {
+            currentState = UnitState.Idle;
+        }
+
         _spriteController.UpdateAnimationState(currentState);
 
         if (currentState == UnitState.Moving && unitMovement != null) {
             Vector3 moveDir = unitMovement.GetMoveDirection();
             _spriteController.UpdateSpriteDirection(moveDir);
+            _spriteController.ClearTarget();
+        }
+        else if (currentState == UnitState.Attacking) {
+            Vector3 targetPos = Vector3.zero;
+            bool hasTarget = false;
+            
+            if (_targetDamageable != null) {
+                targetPos = _targetDamageable.transform.position;
+                hasTarget = true;
+            }
+            else if (_targetUnit != null) {
+                targetPos = _targetUnit.transform.position;
+                hasTarget = true;
+            }
+            
+            if (hasTarget) {
+                Vector2 direction = (targetPos - transform.position).normalized;
+                _spriteController.UpdateSpriteDirection(direction);
+                if (_targetDamageable != null) {
+                    _spriteController.SetTargetTransform(_targetDamageable.transform);
+                }
+                else if (_targetUnit != null) {
+                    _spriteController.SetTargetTransform(_targetUnit.transform);
+                }
+            }
+        }
+        else if (currentState == UnitState.Idle) {
+            _spriteController.ClearTarget();
         }
     }
 

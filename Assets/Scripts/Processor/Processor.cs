@@ -81,7 +81,6 @@ public class Processor : Damageable, IClickable
     {
         if (!_assignedDrones.Contains(drone) && !IsFull) {
             _assignedDrones.Add(drone);
-            Debug.Log($"[Processor:{name}] Drone '{drone.name}' assigned. Count={_assignedDrones.Count}/{_maxAssignedDrones}. Waiting for check-in before assigning tasks.");
         }
     }
 
@@ -302,7 +301,7 @@ public class Processor : Damageable, IClickable
         int currentQuarter = Mathf.FloorToInt(Mathf.Min(progressPercent, 100f) / 25f);
         int previousQuarter = Mathf.FloorToInt(Mathf.Min(previousPercent, 100f) / 25f);
 
-        // Log when we cross a 25% milestone (25%, 50%, 75%, 100%)
+        // 25% 마다 로그 출력 (25%, 50%, 75%, 100%)
         if (currentQuarter > previousQuarter) {
             Debug.Log($"[Processor:{name}] Processing PROGRESS: {recipe.recipeData.resourceType} - {progressPercent:F1}% ({recipe.processingProgress:F2}/{recipe.recipeData.processingTime:F2}s)");
         }
@@ -345,8 +344,6 @@ public class Processor : Damageable, IClickable
                 return;
             }
         }
-
-        Debug.Log($"[Processor:{name}] No MainStructure storage found. Resource tracked in ResourceManager only. Total: {amountAfter}");
     }
 
     private int GetTotalCurrentIngredients()
@@ -361,15 +358,6 @@ public class Processor : Damageable, IClickable
     
     public Vector3 AssignInteractionCell(Unit_Drone drone)
     {
-        if (drone == null) {
-            return transform.position;
-        }
-        
-        if (BuildingManager.Instance == null || BuildingManager.Instance.grid == null) {
-            Debug.LogWarning($"[Processor:{name}] BuildingManager or Grid is null, falling back to processor position");
-            return transform.position;
-        }
-        
         Vector3Int processorCell = BuildingManager.Instance.grid.WorldToCell(transform.position);
         if (!BuildingManager.Instance.GetBuildingAt(processorCell, out List<Vector3Int> occupiedCells)) {
             occupiedCells = new List<Vector3Int> { processorCell };

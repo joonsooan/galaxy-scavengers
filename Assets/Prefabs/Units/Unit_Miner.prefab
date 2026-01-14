@@ -134,7 +134,6 @@ GameObject:
   - component: {fileID: 8588832122909675608}
   - component: {fileID: 7484730936286571410}
   - component: {fileID: 935294789700323518}
-  - component: {fileID: 8882647708804449670}
   - component: {fileID: 4483249089817793867}
   - component: {fileID: 1616897775811544138}
   - component: {fileID: 1616346714973052341}
@@ -208,7 +207,8 @@ MonoBehaviour:
   flashDuration: 0.3
   currentState: 0
   unitMovement: {fileID: 4483249089817793867}
-  unitMining: {fileID: 8882647708804449670}
+  unloadingTime: 3
+  mineAmountPerAction: 1
   maxCarryAmount: 10
   resourceSearchInterval: 1
   maxSearchRadius: 50
@@ -220,19 +220,6 @@ MonoBehaviour:
   yOffset: 0.2
   vibrationRadius: 0.015
   vibrationSpeed: 10
---- !u!114 &8882647708804449670
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6649466925040614564}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3b447c487e675044fa741bf0ef32e9b3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mineAmountPerAction: 1
 --- !u!114 &4483249089817793867
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -259,7 +246,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4df76de1adfb064e95b506d49b881b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  visionRange: 7.67
+  visionRange: 7.5
   isActive: 1
   hasOffest: 0
   offest: {x: 0.5, y: 0.5, z: 0}

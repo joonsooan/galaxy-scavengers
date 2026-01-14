@@ -11,7 +11,10 @@ public class Unit_Miner : UnitBase
 {
     [Header("References")]
     [SerializeField] private UnitMovement unitMovement;
-    [SerializeField] private UnitMining unitMining;
+
+    [Header("Gathering Stats")]
+    [SerializeField] private float unloadingTime = 1f;
+    public int mineAmountPerAction = 1; // 한번 채굴 시 캐는 양
 
     [Header("Cargo")]
     public int maxCarryAmount = 50;
@@ -40,11 +43,15 @@ public class Unit_Miner : UnitBase
     private WaitForSeconds _searchWait;
     private UnitSpriteController _spriteController;
 
+    private Coroutine _mineCoroutine;
+    private WaitForSeconds _miningDelay;
     private Vector3Int _targetMiningCell;
     private ResourceNode _targetResourceNode;
     private IStorage _targetStorage;
     private Vector3Int _targetUnloadCell;
     private Sequence _vibrationSequence;
+
+    public event Action<ResourceType, int> OnResourceMined;
 
     protected override void Awake()
     {
@@ -186,7 +193,7 @@ public class Unit_Miner : UnitBase
         unitMovement.StopMovement();
 
         AdjustSpriteDirectionForMining();
-        unitMining.StartMining(_targetResourceNode);
+        StartMining(_targetResourceNode);
         StartMiningVibration();
         StartMiningParticles();
     }
@@ -220,7 +227,7 @@ public class Unit_Miner : UnitBase
     private IEnumerator UnloadResourceCoroutine()
     {
         unitMovement.StopMovement();
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(unloadingTime);
 
         if (_targetStorage != null) {
             Dictionary<ResourceType, int> resourcesBefore = new Dictionary<ResourceType, int>();
@@ -491,7 +498,7 @@ public class Unit_Miner : UnitBase
 
     private void HandleTargetLoss()
     {
-        unitMining?.StopMining();
+        StopMining();
         StopMiningVibration();
         StopMiningParticles();
         _targetResourceNode?.Unreserve();
@@ -508,9 +515,7 @@ public class Unit_Miner : UnitBase
 
     private void SubscribeEvents()
     {
-        if (unitMining != null) {
-            unitMining.OnResourceMined += HandleResourceMined;
-        }
+        OnResourceMined += HandleResourceMined;
         ResourceManager.OnNewStorageAdded += HandleNewStorageAdded;
         ResourceManager.OnStorageRemoved += HandleStorageRemoved;
         UnitManager.OnMineableTypesChanged += HandleMineableTypesChanged;
@@ -519,9 +524,7 @@ public class Unit_Miner : UnitBase
 
     private void UnsubscribeEvents()
     {
-        if (unitMining != null) {
-            unitMining.OnResourceMined -= HandleResourceMined;
-        }
+        OnResourceMined -= HandleResourceMined;
         ResourceManager.OnNewStorageAdded -= HandleNewStorageAdded;
         ResourceManager.OnStorageRemoved -= HandleStorageRemoved;
         UnitManager.OnMineableTypesChanged -= HandleMineableTypesChanged;
@@ -536,7 +539,7 @@ public class Unit_Miner : UnitBase
         ShowResourceText(amount);
 
         if (_currentCarryAmounts.Values.Sum() >= maxCarryAmount) {
-            unitMining.StopMining();
+            StopMining();
             StopMiningVibration();
             StopMiningParticles();
             _targetResourceNode?.Unreserve();
@@ -772,6 +775,42 @@ public class Unit_Miner : UnitBase
 
         if (transform != null && _basePosition != Vector3.zero && currentState != UnitState.Mining) {
             transform.DOMove(_basePosition, 0.15f).SetEase(Ease.OutQuad);
+        }
+    }
+
+    private void StartMining(ResourceNode target)
+    {
+        _targetResourceNode = target;
+        
+        _miningDelay = new WaitForSeconds(target.timeToMinePerUnit);
+        
+        if (_mineCoroutine == null) {
+            _mineCoroutine = StartCoroutine(MineResourceCoroutine());
+        }
+    }
+
+    private void StopMining()
+    {
+        if (_mineCoroutine != null) {
+            StopCoroutine(_mineCoroutine);
+            _mineCoroutine = null;
+        }
+    }
+
+    private IEnumerator MineResourceCoroutine()
+    {
+        yield return _miningDelay;
+
+        while (true) {
+            if (_targetResourceNode != null && !_targetResourceNode.IsDepleted) {
+                int minedAmount = _targetResourceNode.Mine(mineAmountPerAction);
+                OnResourceMined?.Invoke(_targetResourceNode.resourceType, minedAmount);
+            }
+            else {
+                StopMining();
+                yield break;
+            }
+            yield return _miningDelay;
         }
     }
 
