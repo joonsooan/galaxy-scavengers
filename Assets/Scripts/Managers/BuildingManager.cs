@@ -33,8 +33,34 @@ public class BuildingManager : MonoBehaviour
             return groundTilemap;
         }
     }
+    
+    public Transform BuildingParentTransform {
+        get {
+            return buildingParentTransform;
+        }
+    }
 
     public static BuildingManager Instance { get; private set; }
+    
+    public static bool IsBuildingProperlyPlaced(Transform buildingTransform)
+    {
+        if (Instance == null) return false;
+        
+        Transform buildingParent = Instance.BuildingParentTransform;
+        if (buildingParent == null) return false;
+        
+        Transform current = buildingTransform;
+        while (current != null)
+        {
+            if (current == buildingParent)
+            {
+                return true;
+            }
+            current = current.parent;
+        }
+        
+        return false;
+    }
 
     private void Awake()
     {

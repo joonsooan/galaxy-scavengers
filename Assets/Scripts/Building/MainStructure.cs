@@ -17,16 +17,26 @@ public class MainStructure : BaseStorage, IClickable
     {
         base.Start();
         
-        FindAndCacheAetherManager();
-        if (_aetherConsumptionManager != null)
+        // Don't register ghost/preview buildings
+        if (IsProperlyPlacedBuilding())
         {
-            _aetherConsumptionManager.RegisterMainStructure(this);
+            FindAndCacheAetherManager();
+            if (_aetherConsumptionManager != null)
+            {
+                _aetherConsumptionManager.RegisterMainStructure(this);
+            }
         }
         
         if (GetComponent<BuildingHoverTrigger>() == null)
         {
             gameObject.AddComponent<BuildingHoverTrigger>();
         }
+    }
+    
+    private bool IsProperlyPlacedBuilding()
+    {
+        if (BuildingManager.Instance == null) return true;
+        return BuildingManager.IsBuildingProperlyPlaced(transform);
     }
     
     protected override void OnDisable()

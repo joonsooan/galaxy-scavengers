@@ -21,9 +21,13 @@ public class ResourceGenerator : Damageable
     {
         base.OnEnable();
         
+        if (!BuildingManager.IsBuildingProperlyPlaced(transform))
+        {
+            return;
+        }
+        
         FindAndCacheAetherManager();
         
-        // Only register if constructed and generates Aether
         if (_aetherConsumptionManager != null && resourceType == ResourceType.Aether && _isConstructed)
         {
             _aetherConsumptionManager.RegisterResourceGenerator(this);
@@ -68,7 +72,12 @@ public class ResourceGenerator : Damageable
     {
         _isConstructed = true;
         
-        // Register with AetherConsumptionManager if this generates Aether
+        if (!BuildingManager.IsBuildingProperlyPlaced(transform))
+        {
+            ActivateComboCard();
+            return;
+        }
+        
         if (resourceType == ResourceType.Aether)
         {
             FindAndCacheAetherManager();

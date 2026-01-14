@@ -13,6 +13,12 @@ public class Storage : BaseStorage
     {
         base.OnEnable();
         
+        // Don't register ghost/preview buildings
+        if (!IsProperlyPlacedBuilding())
+        {
+            return;
+        }
+        
         FindAndCacheAetherManager();
         if (_aetherConsumptionManager != null)
         {
@@ -36,5 +42,10 @@ public class Storage : BaseStorage
         {
             _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
         }
+    }
+    
+    private bool IsProperlyPlacedBuilding()
+    {
+        return BuildingManager.IsBuildingProperlyPlaced(transform);
     }
 }

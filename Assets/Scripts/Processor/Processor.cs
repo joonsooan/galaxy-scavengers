@@ -61,6 +61,11 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         base.OnEnable();
         BuildingManager.Instance?.RegisterProcessor(this);
         
+        if (!BuildingManager.IsBuildingProperlyPlaced(transform))
+        {
+            return;
+        }
+        
         FindAndCacheAetherManager();
         if (_aetherConsumptionManager != null)
         {

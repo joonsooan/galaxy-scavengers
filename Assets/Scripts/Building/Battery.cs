@@ -13,6 +13,11 @@ public class Battery : BaseStorage
     {
         base.OnEnable();
         
+        if (!BuildingManager.IsBuildingProperlyPlaced(transform))
+        {
+            return;
+        }
+        
         FindAndCacheAetherManager();
         if (_aetherConsumptionManager != null)
         {

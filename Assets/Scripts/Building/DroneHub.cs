@@ -64,6 +64,11 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
     {
         base.OnEnable();
         
+        if (!IsProperlyPlacedBuilding())
+        {
+            return;
+        }
+        
         FindAndCacheAetherManager();
         if (_aetherConsumptionManager != null)
         {
@@ -87,6 +92,11 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
         {
             _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
         }
+    }
+    
+    private bool IsProperlyPlacedBuilding()
+    {
+        return BuildingManager.IsBuildingProperlyPlaced(transform);
     }
 
     public int GetCurrentUnitCount(int unitIndex)
