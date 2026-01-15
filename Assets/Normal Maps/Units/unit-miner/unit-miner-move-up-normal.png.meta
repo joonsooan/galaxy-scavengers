@@ -1,49 +1,49 @@
 fileFormatVersion: 2
-guid: 72cc441780d1d7046a35435dddf82bca
+guid: c8372d4b5339f8f4fad83b0877bf7072
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1386006615238218373
-    second: unit-miner-move-down_0
+      213: -6243749167375023410
+    second: unit-miner-move-up-normal_0
   - first:
-      213: -1620873864606553370
-    second: unit-miner-move-down_1
+      213: -202958406382786920
+    second: unit-miner-move-up-normal_1
   - first:
-      213: 4064957217889683939
-    second: unit-miner-move-down_2
+      213: -966439126189104539
+    second: unit-miner-move-up-normal_2
   - first:
-      213: -8968554123090622509
-    second: unit-miner-move-down_3
+      213: -3297617544908684229
+    second: unit-miner-move-up-normal_3
   - first:
-      213: -36597602366229782
-    second: unit-miner-move-down_4
+      213: -2863451780892547899
+    second: unit-miner-move-up-normal_4
   - first:
-      213: -3325809681685636784
-    second: unit-miner-move-down_5
+      213: 4300024585958546752
+    second: unit-miner-move-up-normal_5
   - first:
-      213: -6161831585903438920
-    second: unit-miner-move-down_6
+      213: -6985202797603785053
+    second: unit-miner-move-up-normal_6
   - first:
-      213: 5103960697391842300
-    second: unit-miner-move-down_7
+      213: 5686187751630135779
+    second: unit-miner-move-up-normal_7
   - first:
-      213: 1224098635889947516
-    second: unit-miner-move-down_8
+      213: 8823057367656703952
+    second: unit-miner-move-up-normal_8
   - first:
-      213: -7909240540728981897
-    second: unit-miner-move-down_9
+      213: 6218849277538807924
+    second: unit-miner-move-up-normal_9
   - first:
-      213: -2973680733509877523
-    second: unit-miner-move-down_10
+      213: -8344548021197473226
+    second: unit-miner-move-up-normal_10
   - first:
-      213: 4831744117084153203
-    second: unit-miner-move-down_11
+      213: -3875509616494715013
+    second: unit-miner-move-up-normal_11
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 0
-    sRGBTexture: 1
+    enableMipMap: 1
+    sRGBTexture: 0
     linearTexture: 0
     fadeOut: 0
     borderMipMap: 0
@@ -84,13 +84,13 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 16
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
-  alphaIsTransparency: 1
+  alphaIsTransparency: 0
   spriteTessellationDetail: -1
-  textureType: 8
+  textureType: 1
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 1
@@ -134,7 +134,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -146,265 +146,265 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: unit-miner-move-down_0
+      name: unit-miner-move-up-normal_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 1c353c10c3d2df44192e7bcfe6d05126
-      internalID: -1386006615238218373
+      spriteID: ec288fb863fb959a0800000000000000
+      internalID: -6243749167375023410
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-move-down_1
+      name: unit-miner-move-up-normal_1
       rect:
         serializedVersion: 2
         x: 16
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: ae8c4f71dde50fe4db943712bdc56f09
-      internalID: -1620873864606553370
+      spriteID: 896ef5b9762fe2df0800000000000000
+      internalID: -202958406382786920
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-move-down_2
+      name: unit-miner-move-up-normal_2
       rect:
         serializedVersion: 2
         x: 32
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 31d94ac64f6479c4584012dd4d0ffae1
-      internalID: 4064957217889683939
+      spriteID: 562a5723cb48692f0800000000000000
+      internalID: -966439126189104539
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-move-down_3
+      name: unit-miner-move-up-normal_3
       rect:
         serializedVersion: 2
         x: 48
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 709c4d8cb6378b74a8e77610a8004e5f
-      internalID: -8968554123090622509
+      spriteID: b344f9e70528c32d0800000000000000
+      internalID: -3297617544908684229
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-move-down_4
+      name: unit-miner-move-up-normal_4
       rect:
         serializedVersion: 2
         x: 64
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 6af50b8e5b941ad49b56104071a6c13e
-      internalID: -36597602366229782
+      spriteID: 5c4a078c6c9f248d0800000000000000
+      internalID: -2863451780892547899
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-move-down_5
+      name: unit-miner-move-up-normal_5
       rect:
         serializedVersion: 2
         x: 80
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: bf307cc3aa476a4428d3a95d284cce6d
-      internalID: -3325809681685636784
+      spriteID: 04d51831491ccab30800000000000000
+      internalID: 4300024585958546752
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-move-down_6
+      name: unit-miner-move-up-normal_6
       rect:
         serializedVersion: 2
         x: 96
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 9d54399394903c74ebdc9b70213d02bc
-      internalID: -6161831585903438920
+      spriteID: 3a6f2c490139f0f90800000000000000
+      internalID: -6985202797603785053
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-move-down_7
+      name: unit-miner-move-up-normal_7
       rect:
         serializedVersion: 2
         x: 112
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 698f3b53d88c49045ad9ceb8ea233fee
-      internalID: 5103960697391842300
+      spriteID: 3e1671622a569ee40800000000000000
+      internalID: 5686187751630135779
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-move-down_8
+      name: unit-miner-move-up-normal_8
       rect:
         serializedVersion: 2
         x: 128
         y: 0
         width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 8e5dad9cf123b2c40a44a5a6cb5214aa
-      internalID: 1224098635889947516
+      spriteID: 0d72218edebc17a70800000000000000
+      internalID: 8823057367656703952
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-move-down_9
+      name: unit-miner-move-up-normal_9
       rect:
         serializedVersion: 2
         x: 144
         y: 0
         width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 10c9607882a621645833fb35ae81df84
-      internalID: -7909240540728981897
+      spriteID: 4703563187acd4650800000000000000
+      internalID: 6218849277538807924
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-move-down_10
+      name: unit-miner-move-up-normal_10
       rect:
         serializedVersion: 2
         x: 160
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 3d65bda43024997448fff540032eaf9c
-      internalID: -2973680733509877523
+      spriteID: 63af55939c5323c80800000000000000
+      internalID: -8344548021197473226
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-move-down_11
+      name: unit-miner-move-up-normal_11
       rect:
         serializedVersion: 2
         x: 176
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 1e8b12c277113e14a8fe7d18ae886dde
-      internalID: 4831744117084153203
+      spriteID: b7fd831898c673ac0800000000000000
+      internalID: -3875509616494715013
       vertices: []
       indices: 
       edges: []
@@ -413,30 +413,28 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 40730515a8bc7b74f8e0777ecc9e8e9e
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: 448af7bc3a04539409aca5346c932930, type: 3}
-      name: _NormalMap
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      unit-miner-move-down_0: -1386006615238218373
-      unit-miner-move-down_1: -1620873864606553370
-      unit-miner-move-down_10: -2973680733509877523
-      unit-miner-move-down_11: 4831744117084153203
-      unit-miner-move-down_2: 4064957217889683939
-      unit-miner-move-down_3: -8968554123090622509
-      unit-miner-move-down_4: -36597602366229782
-      unit-miner-move-down_5: -3325809681685636784
-      unit-miner-move-down_6: -6161831585903438920
-      unit-miner-move-down_7: 5103960697391842300
-      unit-miner-move-down_8: 1224098635889947516
-      unit-miner-move-down_9: -7909240540728981897
+      unit-miner-move-up-normal_0: -6243749167375023410
+      unit-miner-move-up-normal_1: -202958406382786920
+      unit-miner-move-up-normal_10: -8344548021197473226
+      unit-miner-move-up-normal_11: -3875509616494715013
+      unit-miner-move-up-normal_2: -966439126189104539
+      unit-miner-move-up-normal_3: -3297617544908684229
+      unit-miner-move-up-normal_4: -2863451780892547899
+      unit-miner-move-up-normal_5: 4300024585958546752
+      unit-miner-move-up-normal_6: -6985202797603785053
+      unit-miner-move-up-normal_7: 5686187751630135779
+      unit-miner-move-up-normal_8: 8823057367656703952
+      unit-miner-move-up-normal_9: 6218849277538807924
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
