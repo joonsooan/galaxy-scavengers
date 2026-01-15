@@ -216,6 +216,15 @@ public class Unit_Construct : UnitBase
         }
 
         if (!movement.IsMoving) {
+            if (_targetStorage != null && _currentRequest != null) {
+                int availableAmount = _targetStorage.GetCurrentResourceAmount(_currentRequest.type);
+                if (availableAmount < _currentRequest.amount) {
+                    _currentRequest?.site?.CancelRequest(_currentRequest);
+                    SetTask_Idle();
+                    return;
+                }
+            }
+            
             if (_loadingCoroutine == null) {
                 _loadingCoroutine = StartCoroutine(LoadingResourceCoroutine());
             }
@@ -239,6 +248,16 @@ public class Unit_Construct : UnitBase
         yield return new WaitForSeconds(loadingTime);
 
         if (_targetStorage == null || _currentRequest == null) {
+            SetTask_Idle();
+            _loadingCoroutine = null;
+            yield break;
+        }
+
+        // Validate again that the storage still has resources before withdrawing
+        int availableAmount = _targetStorage.GetCurrentResourceAmount(_currentRequest.type);
+        if (availableAmount < _currentRequest.amount) {
+            // Storage no longer has enough resources, cancel task
+            _currentRequest?.site?.CancelRequest(_currentRequest);
             SetTask_Idle();
             _loadingCoroutine = null;
             yield break;

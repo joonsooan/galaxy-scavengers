@@ -367,6 +367,16 @@ public class Unit_Drone : UnitBase
         }
 
         if (!movement.IsMoving) {
+            // Validate that the storage still has the required resources before loading
+            if (_targetStorage != null && _currentRequest != null) {
+                int availableAmount = _targetStorage.GetCurrentResourceAmount(_currentRequest.type);
+                if (availableAmount < _currentRequest.amount) {
+                    // Storage no longer has enough resources, cancel task
+                    SetTask_ReturnHome();
+                    return;
+                }
+            }
+            
             if (_loadingCoroutine == null) {
                 _loadingCoroutine = StartCoroutine(LoadingResourceCoroutine());
             }
@@ -386,13 +396,22 @@ public class Unit_Drone : UnitBase
         yield return new WaitForSeconds(loadingTime);
 
         if (_targetStorage != null && _currentRequest != null) {
+            int availableAmount = _targetStorage.GetCurrentResourceAmount(_currentRequest.type);
+            if (availableAmount < _currentRequest.amount) {
+                SetTask_ReturnHome();
+                _loadingCoroutine = null;
+                yield break;
+            }
+            
             if (_targetStorage.TryWithdrawResource(_currentRequest.type, _currentRequest.amount, out int withdrawnAmount)) {
                 if (withdrawnAmount > 0) {
                     _carriedResourceType = _currentRequest.type;
                     _carriedAmount = withdrawnAmount;
+                    
                     Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
-                    movement.ResumeMovement(); // Resume movement before setting new target
+                    movement.ResumeMovement();
                     movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
+                    
                     _currentState = DroneState.DeliveringResource;
                 }
                 else {
