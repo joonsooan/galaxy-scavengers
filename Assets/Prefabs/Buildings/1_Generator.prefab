@@ -156,6 +156,7 @@ MonoBehaviour:
   generationInterval: 2
   resourceAmount: 1
   resourceType: 1
+  resourceImageOffset: {x: 0.5, y: 0.75, z: 0}
 --- !u!114 &2831755290380365654
 MonoBehaviour:
   m_ObjectHideFlags: 0

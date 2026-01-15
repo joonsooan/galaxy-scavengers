@@ -1,12 +1,14 @@
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+using TMPro;
 
 public class FloatingResourceImage : MonoBehaviour
 {
     [SerializeField] private float moveDistance = 1f;
     [SerializeField] private float duration = 1f;
     [SerializeField] private Image resourceImage;
+    [SerializeField] private TMP_Text text;
     
     private RectTransform _rectTransform;
     
@@ -28,15 +30,17 @@ public class FloatingResourceImage : MonoBehaviour
         Color imageColor = Color.white;
         imageColor.a = 1f;
         resourceImage.color = imageColor;
+        text.alpha = 1f;
 
-        Vector2 startPos = _rectTransform.position;
+        Vector2 startPos = transform.position;
 
-        _rectTransform.DOAnchorPosY(startPos.y + moveDistance, duration).SetEase(Ease.OutQuad)
+        transform.DOMoveY(startPos.y + moveDistance, duration).SetEase(Ease.OutQuad)
             .OnComplete(() =>
             {
                 gameObject.SetActive(false);
             });
 
         resourceImage.DOFade(0, duration);
+        text.DOFade(0, duration);
     }
 }

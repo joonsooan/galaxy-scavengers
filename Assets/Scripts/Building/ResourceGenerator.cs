@@ -8,6 +8,9 @@ public class ResourceGenerator : Damageable
     [SerializeField] private int resourceAmount = 1;
     [SerializeField] private ResourceType resourceType;
     
+    [Header("VFX")]
+    [SerializeField] private Vector3 resourceImageOffset = new (0f, 0.5f, 0f);
+    
     private Coroutine _productionCoroutine;
     private bool _isConstructed;
     private AetherConsumptionManager _aetherConsumptionManager;
@@ -112,20 +115,20 @@ public class ResourceGenerator : Damageable
         }
         
         ResourceManager.Instance.AddResource(resourceType, resourceAmount);
-        ShowResourceText(resourceAmount);
+        ShowResourceImage();
     }
     
-    private void ShowResourceText(int amount)
+    private void ShowResourceImage()
     {
-        GameObject textObj = ObjectPooler.Instance.SpawnFromPool(
-            "ResourceText", transform.position, Quaternion.identity);
+        GameObject imageObj = ObjectPooler.Instance.SpawnFromPool(
+            "ResourceImage", transform.position + resourceImageOffset, Quaternion.identity);
 
-        if (textObj != null)
+        if (imageObj != null)
         {
-            FloatingNumText floatingText = textObj.GetComponent<FloatingNumText>();
-            if (floatingText != null)
+            FloatingResourceImage floatingImage = imageObj.GetComponent<FloatingResourceImage>();
+            if (floatingImage != null)
             {
-                floatingText.Play($"+{amount}", Color.white);
+                floatingImage.Play(resourceType);
             }
         }
     }

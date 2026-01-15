@@ -259,7 +259,11 @@ public class Unit_Miner : UnitBase
             }
 
             List<ResourceType> resourceTypesToShow = resourcesToUnload.Keys.ToList();
-            StartCoroutine(ShowResourceImages(resourceTypesToShow));
+            if (_targetStorage != null)
+            {
+                Vector3 storagePosition = ((Component)_targetStorage).transform.position;
+                StartCoroutine(ShowResourceImages(resourceTypesToShow, storagePosition));
+            }
 
             foreach (KeyValuePair<ResourceType, int> pair in resourcesToUnload) {
                 _targetStorage.TryAddResource(pair.Key, pair.Value);
@@ -633,7 +637,7 @@ public class Unit_Miner : UnitBase
         }
     }
 
-    private IEnumerator ShowResourceImages(List<ResourceType> resourceTypes)
+    private IEnumerator ShowResourceImages(List<ResourceType> resourceTypes, Vector3 spawnPosition)
     {
         if (_canvas == null || resourceTypes == null || resourceTypes.Count == 0) yield break;
         Vector3 offset = new Vector3(0f, 0.5f, 0f);
@@ -641,7 +645,7 @@ public class Unit_Miner : UnitBase
         foreach (ResourceType resourceType in resourceTypes)
         {
             GameObject imageObj = ObjectPooler.Instance.SpawnFromPool(
-                "ResourceImage", transform.position + offset, Quaternion.identity);
+                "ResourceImage", spawnPosition + offset, Quaternion.identity);
 
             if (imageObj != null) {
                 FloatingResourceImage floatingImage = imageObj.GetComponent<FloatingResourceImage>();
