@@ -1,61 +1,61 @@
 fileFormatVersion: 2
-guid: f6c4c3eb1d4e9e54097a0cbc2ccef3b0
+guid: 3b20b87ea10798d43acd3023a3575a7e
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3251077265585609623
-    second: unit-miner-idle-up_0
+      213: -5932265281250941504
+    second: unit-miner-idle-down_0
   - first:
-      213: 3163107163843982625
-    second: unit-miner-idle-up_1
+      213: 7918722425774544924
+    second: unit-miner-idle-down_1
   - first:
-      213: -3870340850582380688
-    second: unit-miner-idle-up_2
+      213: -78107285603779587
+    second: unit-miner-idle-down_2
   - first:
-      213: 6299827422347220792
-    second: unit-miner-idle-up_3
+      213: -4470822462467569405
+    second: unit-miner-idle-down_3
   - first:
-      213: -6487956017242126820
-    second: unit-miner-idle-up_4
+      213: -840825621430688294
+    second: unit-miner-idle-down_4
   - first:
-      213: 7846002515619839580
-    second: unit-miner-idle-up_5
+      213: -6012462368446700103
+    second: unit-miner-idle-down_5
   - first:
-      213: -900669889004058492
-    second: unit-miner-idle-up_6
+      213: -630604349870551613
+    second: unit-miner-idle-down_6
   - first:
-      213: 7919635730996166402
-    second: unit-miner-idle-up_7
+      213: -3592117377408318324
+    second: unit-miner-idle-down_7
   - first:
-      213: -1814085676383633357
-    second: unit-miner-idle-up_8
+      213: 7162573592300040034
+    second: unit-miner-idle-down_8
   - first:
-      213: -6962755840591961836
-    second: unit-miner-idle-up_9
+      213: 199759688404098868
+    second: unit-miner-idle-down_9
   - first:
-      213: 3601876396250918953
-    second: unit-miner-idle-up_10
+      213: -184735151095611579
+    second: unit-miner-idle-down_10
   - first:
-      213: 3037150804816791890
-    second: unit-miner-idle-up_11
+      213: 8480579748083329243
+    second: unit-miner-idle-down_11
   - first:
-      213: -813140221389950358
-    second: unit-miner-idle-up_12
+      213: 8380592648295219167
+    second: unit-miner-idle-down_12
   - first:
-      213: 4219224037132228027
-    second: unit-miner-idle-up_13
+      213: 7231365127091332423
+    second: unit-miner-idle-down_13
   - first:
-      213: 5603415509206570554
-    second: unit-miner-idle-up_14
+      213: 6119451360455018447
+    second: unit-miner-idle-down_14
   - first:
-      213: -4706967515222543990
-    second: unit-miner-idle-up_15
+      213: 8100482388610349737
+    second: unit-miner-idle-down_15
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 0
-    sRGBTexture: 1
+    enableMipMap: 1
+    sRGBTexture: 0
     linearTexture: 0
     fadeOut: 0
     borderMipMap: 0
@@ -100,9 +100,9 @@ TextureImporter:
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
-  alphaIsTransparency: 1
+  alphaIsTransparency: 0
   spriteTessellationDetail: -1
-  textureType: 8
+  textureType: 1
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 1
@@ -141,370 +141,357 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: WebGL
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: unit-miner-idle-up_0
+      name: unit-miner-idle-down_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        width: 17
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: a1774b63857194847b04df266d3db47b
-      internalID: -3251077265585609623
+      spriteID: 0c5a7ad382c5cada0800000000000000
+      internalID: -5932265281250941504
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-idle-up_1
+      name: unit-miner-idle-down_1
       rect:
         serializedVersion: 2
         x: 16
-        y: 0
+        y: 15
         width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 0e1425909f23ce34eaf700b31bf77a75
-      internalID: 3163107163843982625
+      spriteID: c18163f4714f4ed60800000000000000
+      internalID: 7918722425774544924
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-idle-up_2
+      name: unit-miner-idle-down_2
       rect:
         serializedVersion: 2
         x: 32
-        y: 0
+        y: 15
         width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: c529159cd336d8d4f92f0255ad7df137
-      internalID: -3870340850582380688
+      spriteID: dfb773b66d18aeef0800000000000000
+      internalID: -78107285603779587
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-idle-up_3
+      name: unit-miner-idle-down_3
       rect:
         serializedVersion: 2
         x: 48
-        y: 0
+        y: 15
         width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 18f7d039f2ce2c345ad429af2ff796f6
-      internalID: 6299827422347220792
+      spriteID: 30988c668a274f1c0800000000000000
+      internalID: -4470822462467569405
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-idle-up_4
+      name: unit-miner-idle-down_4
       rect:
         serializedVersion: 2
         x: 64
-        y: 0
+        y: 15
         width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 229e90e7fcefb304196a06d439fbaf26
-      internalID: -6487956017242126820
+      spriteID: ad5a39c5d89c454f0800000000000000
+      internalID: -840825621430688294
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-idle-up_5
+      name: unit-miner-idle-down_5
       rect:
         serializedVersion: 2
         x: 80
-        y: 0
+        y: 15
         width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 760397f4f453ca7468be54e9c7b094c8
-      internalID: 7846002515619839580
+      spriteID: 9b5a45fc4517f8ca0800000000000000
+      internalID: -6012462368446700103
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-idle-up_6
+      name: unit-miner-idle-down_6
       rect:
         serializedVersion: 2
         x: 96
-        y: 0
+        y: 15
         width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 77660b1ccdb753c4a828bb178acf56fd
-      internalID: -900669889004058492
+      spriteID: 3cd46245fa4af37f0800000000000000
+      internalID: -630604349870551613
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-idle-up_7
+      name: unit-miner-idle-down_7
       rect:
         serializedVersion: 2
         x: 112
-        y: 0
+        y: 15
         width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: a23858f18ad4aec4db76a6f4ce862aab
-      internalID: 7919635730996166402
+      spriteID: c84c110f64c362ec0800000000000000
+      internalID: -3592117377408318324
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-idle-up_8
+      name: unit-miner-idle-down_8
       rect:
         serializedVersion: 2
         x: 128
-        y: 0
+        y: 15
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 73eaaad4bba3767498eca665942e7c62
-      internalID: -1814085676383633357
+      spriteID: 26f23a6bbb2966360800000000000000
+      internalID: 7162573592300040034
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-idle-up_9
+      name: unit-miner-idle-down_9
       rect:
         serializedVersion: 2
         x: 144
-        y: 0
+        y: 15
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: fe12355848555674d906d00c31558add
-      internalID: -6962755840591961836
+      spriteID: 43fd4c3d060b5c200800000000000000
+      internalID: 199759688404098868
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-idle-up_10
+      name: unit-miner-idle-down_10
       rect:
         serializedVersion: 2
         x: 160
-        y: 0
+        y: 15
         width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 8cd2da582c852614db3a64975fdbd263
-      internalID: 3601876396250918953
+      spriteID: 54ffa6ddb50bf6df0800000000000000
+      internalID: -184735151095611579
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-idle-up_11
+      name: unit-miner-idle-down_11
       rect:
         serializedVersion: 2
         x: 176
-        y: 0
+        y: 15
         width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 23d1caa38eff67748a9006bcc0f106dd
-      internalID: 3037150804816791890
+      spriteID: bd8e0ed495211b570800000000000000
+      internalID: 8480579748083329243
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-idle-up_12
+      name: unit-miner-idle-down_12
       rect:
         serializedVersion: 2
         x: 192
-        y: 0
+        y: 15
         width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: cba66a3e498aa0745a2ecc08c68feeb5
-      internalID: -813140221389950358
+      spriteID: fdff2e08c98dd4470800000000000000
+      internalID: 8380592648295219167
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-idle-up_13
+      name: unit-miner-idle-down_13
       rect:
         serializedVersion: 2
         x: 208
-        y: 0
+        y: 15
         width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: a06f1257da4733f4e86cd500cb78dbf3
-      internalID: 4219224037132228027
+      spriteID: 7452d690548fa5460800000000000000
+      internalID: 7231365127091332423
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-idle-up_14
+      name: unit-miner-idle-down_14
       rect:
         serializedVersion: 2
         x: 224
-        y: 0
+        y: 15
         width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: c503f971673207648963bc00ce4a5b14
-      internalID: 5603415509206570554
+      spriteID: fc7c3301798ace450800000000000000
+      internalID: 6119451360455018447
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-miner-idle-up_15
+      name: unit-miner-idle-down_15
       rect:
         serializedVersion: 2
         x: 240
-        y: 0
+        y: 15
         width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 2ee97646052560241b40b3b5d5a7242a
-      internalID: -4706967515222543990
+      spriteID: 9aa7d6270d1ba6070800000000000000
+      internalID: 8100482388610349737
       vertices: []
       indices: 
       edges: []
@@ -513,34 +500,32 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 622f10513eb88324a823f067d2120df3
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: 92d0462bb1a059047b289d2f7ecf6f3a, type: 3}
-      name: _NormalMap
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      unit-miner-idle-up_0: -3251077265585609623
-      unit-miner-idle-up_1: 3163107163843982625
-      unit-miner-idle-up_10: 3601876396250918953
-      unit-miner-idle-up_11: 3037150804816791890
-      unit-miner-idle-up_12: -813140221389950358
-      unit-miner-idle-up_13: 4219224037132228027
-      unit-miner-idle-up_14: 5603415509206570554
-      unit-miner-idle-up_15: -4706967515222543990
-      unit-miner-idle-up_2: -3870340850582380688
-      unit-miner-idle-up_3: 6299827422347220792
-      unit-miner-idle-up_4: -6487956017242126820
-      unit-miner-idle-up_5: 7846002515619839580
-      unit-miner-idle-up_6: -900669889004058492
-      unit-miner-idle-up_7: 7919635730996166402
-      unit-miner-idle-up_8: -1814085676383633357
-      unit-miner-idle-up_9: -6962755840591961836
+      unit-miner-idle-down_0: -5932265281250941504
+      unit-miner-idle-down_1: 7918722425774544924
+      unit-miner-idle-down_10: -184735151095611579
+      unit-miner-idle-down_11: 8480579748083329243
+      unit-miner-idle-down_12: 8380592648295219167
+      unit-miner-idle-down_13: 7231365127091332423
+      unit-miner-idle-down_14: 6119451360455018447
+      unit-miner-idle-down_15: 8100482388610349737
+      unit-miner-idle-down_2: -78107285603779587
+      unit-miner-idle-down_3: -4470822462467569405
+      unit-miner-idle-down_4: -840825621430688294
+      unit-miner-idle-down_5: -6012462368446700103
+      unit-miner-idle-down_6: -630604349870551613
+      unit-miner-idle-down_7: -3592117377408318324
+      unit-miner-idle-down_8: 7162573592300040034
+      unit-miner-idle-down_9: 199759688404098868
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
