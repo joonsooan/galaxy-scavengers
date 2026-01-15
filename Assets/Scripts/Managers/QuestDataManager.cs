@@ -41,12 +41,64 @@ public class QuestDataManager : MonoBehaviour
         LoadQuestsFromResources();
         InitializeQuests();
         
-        ResourceDataManager.OnResourceAmountChanged += CheckQuestCompletion;
+        StartCoroutine(SubscribeToBaseInventoryEvents());
+    }
+
+    private System.Collections.IEnumerator SubscribeToBaseInventoryEvents()
+    {
+        BaseInventoryManager inventoryManager = null;
+        while (inventoryManager == null)
+        {
+            inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+            yield return null;
+        }
+        
+        inventoryManager.OnResourceChanged += OnBaseInventoryResourceChanged;
     }
 
     private void OnDestroy()
     {
-        ResourceDataManager.OnResourceAmountChanged -= CheckQuestCompletion;
+        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (inventoryManager != null)
+        {
+            inventoryManager.OnResourceChanged -= OnBaseInventoryResourceChanged;
+        }
+    }
+    
+    private void OnBaseInventoryResourceChanged(ResourceType resourceType, int amount)
+    {
+        foreach (QuestData quest in _questDataDict.Values)
+        {
+            QuestState currentState = _questStates[quest.questId];
+            
+            if (currentState != QuestState.Active)
+            {
+                continue;
+            }
+
+            bool requiresThisResource = false;
+            if (quest.requiredResources != null)
+            {
+                foreach (ResourceCost cost in quest.requiredResources)
+                {
+                    if (cost.resourceType == resourceType)
+                    {
+                        requiresThisResource = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!requiresThisResource)
+            {
+                continue;
+            }
+
+            if (AreAllQuestRequirementsMet(quest))
+            {
+                CompleteQuest(quest.questId);
+            }
+        }
     }
 
     private void LoadQuestsFromResources()
@@ -136,54 +188,8 @@ public class QuestDataManager : MonoBehaviour
         return true;
     }
 
-    private void CheckQuestCompletion(ResourceType resourceType, int amount)
-    {
-        if (ResourceDataManager.Instance == null)
-        {
-            return;
-        }
-
-        foreach (QuestData quest in _questDataDict.Values)
-        {
-            QuestState currentState = _questStates[quest.questId];
-            
-            if (currentState != QuestState.Active)
-            {
-                continue;
-            }
-
-            bool requiresThisResource = false;
-            if (quest.requiredResources != null)
-            {
-                foreach (ResourceCost cost in quest.requiredResources)
-                {
-                    if (cost.resourceType == resourceType)
-                    {
-                        requiresThisResource = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!requiresThisResource)
-            {
-                continue;
-            }
-
-            if (AreAllQuestRequirementsMet(quest))
-            {
-                CompleteQuest(quest.questId);
-            }
-        }
-    }
-
     private void CheckSingleQuestCompletion(int questId)
     {
-        if (ResourceDataManager.Instance == null)
-        {
-            return;
-        }
-
         if (!_questDataDict.ContainsKey(questId))
         {
             return;
@@ -205,11 +211,7 @@ public class QuestDataManager : MonoBehaviour
 
     private bool AreAllQuestRequirementsMet(QuestData quest)
     {
-        if (ResourceDataManager.Instance == null)
-        {
-            return false;
-        }
-
+        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
         if (quest.requiredResources == null || quest.requiredResources.Length == 0)
         {
             return true;
@@ -217,7 +219,7 @@ public class QuestDataManager : MonoBehaviour
 
         foreach (ResourceCost cost in quest.requiredResources)
         {
-            int currentAmount = ResourceDataManager.Instance.GetResourceAmount(cost.resourceType);
+            int currentAmount = inventoryManager.GetResourceAmount(cost.resourceType);
             if (currentAmount < cost.amount)
             {
                 return false;
@@ -225,6 +227,24 @@ public class QuestDataManager : MonoBehaviour
         }
 
         return true;
+    }
+    
+    public bool CheckQuestCompletion(int questId)
+    {
+        if (!_questDataDict.ContainsKey(questId))
+        {
+            return false;
+        }
+        
+        QuestData quest = _questDataDict[questId];
+        QuestState currentState = _questStates[questId];
+        
+        if (currentState != QuestState.Active)
+        {
+            return false;
+        }
+        
+        return AreAllQuestRequirementsMet(quest);
     }
 
     public bool CompleteQuest(int questId)
@@ -317,6 +337,25 @@ public class QuestDataManager : MonoBehaviour
     {
         return _questDataDict.Values
             .Where(quest => _questStates[quest.questId] == QuestState.Available)
+            .ToList();
+    }
+    
+    public List<QuestData> GetAllQuests()
+    {
+        return new List<QuestData>(_questDataDict.Values);
+    }
+    
+    public List<QuestData> GetQuestsByProvider(QuestProvider provider)
+    {
+        return _questDataDict.Values
+            .Where(quest => quest.questProvider == provider)
+            .ToList();
+    }
+    
+    public List<QuestData> GetCurrentQuestsByProvider(QuestProvider provider)
+    {
+        return _questDataDict.Values
+            .Where(quest => quest.questProvider == provider && _questStates[quest.questId] != QuestState.Locked)
             .ToList();
     }
 

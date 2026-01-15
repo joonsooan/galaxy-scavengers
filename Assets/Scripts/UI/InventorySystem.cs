@@ -37,6 +37,7 @@ public class InventorySystem : MonoBehaviour
     private readonly List<ResourceInfoCellClickable> _resourceInfoCells = new ();
     private GridLayoutGroup _inventoryGrid;
     private RectTransform _resourcePanelContent;
+    private bool _isTransferDisabled;
 
     private void Awake()
     {
@@ -260,6 +261,11 @@ public class InventorySystem : MonoBehaviour
 
     public bool TryAddResourceToInventory(ResourceType type, int amount, bool moveAll = false)
     {
+        if (_isTransferDisabled)
+        {
+            return false;
+        }
+
         if (ResourceManager.Instance == null)
         {
             return false;
@@ -415,16 +421,19 @@ public class InventorySystem : MonoBehaviour
         }
     }
 
-    // Transfer all resources from inventory to base inventory
     public void TransferAllToBaseInventory()
     {
-        if (ResourceTransferManager.Instance == null)
-        {
-            Debug.LogWarning("InventorySystem: ResourceTransferManager not available");
-            return;
-        }
+        ResourceTransferManager.Instance.StoreGameInventoryForTransfer(this);
+    }
 
-        ResourceTransferManager.Instance.TransferGameInventoryToBase(this);
+    public int GetOccupiedCellCount()
+    {
+        return _inventoryCells.Count(cell => !cell.IsEmpty());
+    }
+
+    public void SetTransferEnabled(bool isEnabled)
+    {
+        _isTransferDisabled = !isEnabled;
     }
 }
 

@@ -15,10 +15,7 @@ public class CoreCustomizationManager : MonoBehaviour
     [SerializeField] private int unlockedSlotCount;
 
     public event Action<int, Module> OnModuleSlotChanged;
-    public event Action<int> OnUnlockedSlotCountChanged; // New unlocked slot count
-
-    public IReadOnlyList<Module> SelectedModules => _selectedModules;
-    public int UnlockedSlotCount => unlockedSlotCount;
+    public event Action<int> OnUnlockedSlotCountChanged;
 
     private void Awake()
     {
@@ -275,22 +272,32 @@ public class CoreCustomizationManager : MonoBehaviour
     {
         Dictionary<string, ModuleRecipe> recipeMap = new Dictionary<string, ModuleRecipe>();
 
+        // Load ModuleRecipe ScriptableObjects directly from Resources
+        ModuleRecipe[] allRecipes = Resources.LoadAll<ModuleRecipe>("");
+        foreach (ModuleRecipe recipe in allRecipes) {
+            if (recipe != null && !string.IsNullOrEmpty(recipe.moduleName) && !recipeMap.ContainsKey(recipe.moduleName)) {
+                recipeMap[recipe.moduleName] = recipe;
+            }
+        }
+
+        // Also load from ModuleData (for backward compatibility and module stations)
         ModuleData[] allModuleData = Resources.LoadAll<ModuleData>("");
         foreach (ModuleData moduleData in allModuleData) {
             if (moduleData.Recipes != null) {
                 foreach (ModuleRecipe recipe in moduleData.Recipes) {
-                    if (!recipeMap.ContainsKey(recipe.moduleName)) {
+                    if (recipe != null && !string.IsNullOrEmpty(recipe.moduleName) && !recipeMap.ContainsKey(recipe.moduleName)) {
                         recipeMap[recipe.moduleName] = recipe;
                     }
                 }
             }
         }
 
+        // Also check ModuleStations in the scene
         ModuleStation[] moduleStations = FindObjectsByType<ModuleStation>(FindObjectsSortMode.None);
         foreach (ModuleStation station in moduleStations) {
             if (station.ModuleData != null && station.ModuleData.Recipes != null) {
                 foreach (ModuleRecipe recipe in station.ModuleData.Recipes) {
-                    if (!recipeMap.ContainsKey(recipe.moduleName)) {
+                    if (recipe != null && !string.IsNullOrEmpty(recipe.moduleName) && !recipeMap.ContainsKey(recipe.moduleName)) {
                         recipeMap[recipe.moduleName] = recipe;
                     }
                 }
@@ -334,11 +341,11 @@ public class CoreCustomizationManager : MonoBehaviour
     [System.Serializable]
     private class SelectedModulesData
     {
-        public List<string> moduleNames; // For backward compatibility
-        public List<ModuleSlotData> slotDataList; // New format
+        public List<string> moduleNames;
+        public List<ModuleSlotData> slotDataList;
     }
 
-    [System.Serializable]
+    [Serializable]
     private class ModuleSlotData
     {
         public string moduleName;

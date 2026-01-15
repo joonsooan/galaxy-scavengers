@@ -8,14 +8,53 @@ public class ResourceGenerator : Damageable
     [SerializeField] private int resourceAmount = 1;
     [SerializeField] private ResourceType resourceType;
     
+    [Header("VFX")]
+    [SerializeField] private Vector3 resourceImageOffset = new (0f, 0.5f, 0f);
+    
     private Coroutine _productionCoroutine;
     private bool _isConstructed;
+    private AetherConsumptionManager _aetherConsumptionManager;
+    
+    public float GenerationInterval => generationInterval;
+    public int ResourceAmount => resourceAmount;
+    public ResourceType ResourceType => resourceType;
+    public bool IsConstructed => _isConstructed;
 
     protected override void OnEnable()
     {
         base.OnEnable();
         
+        if (!BuildingManager.IsBuildingProperlyPlaced(transform))
+        {
+            return;
+        }
+        
+        FindAndCacheAetherManager();
+        
+        if (_aetherConsumptionManager != null && resourceType == ResourceType.Aether && _isConstructed)
+        {
+            _aetherConsumptionManager.RegisterResourceGenerator(this);
+        }
+        
         ActivateComboCard();
+    }
+    
+    protected override void OnDisable()
+    {
+        if (_aetherConsumptionManager != null && resourceType == ResourceType.Aether)
+        {
+            _aetherConsumptionManager.UnregisterResourceGenerator(this);
+        }
+        
+        base.OnDisable();
+    }
+    
+    private void FindAndCacheAetherManager()
+    {
+        if (_aetherConsumptionManager == null)
+        {
+            _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
+        }
     }
 
     private void ActivateComboCard()
@@ -35,6 +74,22 @@ public class ResourceGenerator : Damageable
     public void SetConstructed()
     {
         _isConstructed = true;
+        
+        if (!BuildingManager.IsBuildingProperlyPlaced(transform))
+        {
+            ActivateComboCard();
+            return;
+        }
+        
+        if (resourceType == ResourceType.Aether)
+        {
+            FindAndCacheAetherManager();
+            if (_aetherConsumptionManager != null)
+            {
+                _aetherConsumptionManager.RegisterResourceGenerator(this);
+            }
+        }
+        
         ActivateComboCard();
     }
 
@@ -50,21 +105,30 @@ public class ResourceGenerator : Damageable
 
     private void GenerateResource()
     {
+        // Don't generate aether if capacity is full
+        if (resourceType == ResourceType.Aether)
+        {
+            if (_aetherConsumptionManager != null && _aetherConsumptionManager.IsAetherCapacityFull)
+            {
+                return;
+            }
+        }
+        
         ResourceManager.Instance.AddResource(resourceType, resourceAmount);
-        ShowResourceText(resourceAmount);
+        ShowResourceImage();
     }
     
-    private void ShowResourceText(int amount)
+    private void ShowResourceImage()
     {
-        GameObject textObj = ObjectPooler.Instance.SpawnFromPool(
-            "ResourceText", transform.position, Quaternion.identity);
+        GameObject imageObj = ObjectPooler.Instance.SpawnFromPool(
+            "ResourceImage", transform.position + resourceImageOffset, Quaternion.identity);
 
-        if (textObj != null)
+        if (imageObj != null)
         {
-            FloatingNumText floatingText = textObj.GetComponent<FloatingNumText>();
-            if (floatingText != null)
+            FloatingResourceImage floatingImage = imageObj.GetComponent<FloatingResourceImage>();
+            if (floatingImage != null)
             {
-                floatingText.Play($"+{amount}", Color.white);
+                floatingImage.Play(resourceType);
             }
         }
     }

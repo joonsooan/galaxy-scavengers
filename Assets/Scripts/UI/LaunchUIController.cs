@@ -11,6 +11,7 @@ public class LaunchUIController : MonoBehaviour
 
     [Header("Launch Settings")]
     [SerializeField] private float countdownDurationSeconds = 10f;
+    [SerializeField] private int neededAetherPerCell = 10;
 
     private bool _isCountingDown;
     private Coroutine _countdownCoroutine;
@@ -72,6 +73,26 @@ public class LaunchUIController : MonoBehaviour
             return;
         }
 
+        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
+        InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
+
+        int occupiedCells = inventorySystem.GetOccupiedCellCount();
+        int neededAether = neededAetherPerCell * occupiedCells;
+
+        if (ResourceManager.Instance != null)
+        {
+            int currentAether = ResourceManager.Instance.GetResourceAmount(ResourceType.Aether);
+            if (currentAether < neededAether)
+            {
+                Debug.LogWarning($"LaunchUIController: Not enough aether! Need {neededAether}, have {currentAether}");
+                return;
+            }
+
+            ResourceManager.Instance.RemoveResource(ResourceType.Aether, neededAether);
+        }
+
+        inventorySystem.SetTransferEnabled(false);
+
         if (launchPanel != null)
         {
             launchPanel.SetActive(false);
@@ -103,6 +124,16 @@ public class LaunchUIController : MonoBehaviour
         }
 
         UpdateCountdownText(0f);
+
+        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
+        if (mainStructure != null)
+        {
+            InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
+            if (inventorySystem != null)
+            {
+                inventorySystem.TransferAllToBaseInventory();
+            }
+        }
 
         _isCountingDown = false;
         _countdownCoroutine = null;

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -5,6 +6,8 @@ using UnityEngine.SceneManagement;
 public class ResourceTransferManager : MonoBehaviour
 {
     public static ResourceTransferManager Instance { get; private set; }
+
+    private Dictionary<ResourceType, int> _pendingResources = null;
 
     private void Awake()
     {
@@ -19,19 +22,44 @@ public class ResourceTransferManager : MonoBehaviour
         }
     }
 
-    // Transfer all resources from game scene inventory to base inventory
-    public void TransferGameInventoryToBase(InventorySystem gameInventory)
+    private void OnEnable()
     {
-        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
-        if (gameInventory == null || inventoryManager == null)
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "BaseScene")
         {
-            Debug.LogWarning("ResourceTransferManager: Cannot transfer - missing inventory systems");
-            return;
+            StartCoroutine(TransferPendingResourcesWhenReady());
+        }
+    }
+
+    private IEnumerator TransferPendingResourcesWhenReady()
+    {
+        BaseInventoryManager inventoryManager = null;
+        
+        while (inventoryManager == null)
+        {
+            inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+            yield return null;
         }
 
-        // Get all inventory cells from game inventory
-        // We need to access the private cells, so we'll use a public method
-        // For now, we'll create a method in InventorySystem to get all resources
+        yield return null;
+
+        if (_pendingResources != null && _pendingResources.Count > 0)
+        {
+            TransferPendingResources();
+        }
+    }
+
+    public void StoreGameInventoryForTransfer(InventorySystem gameInventory)
+    {
         Dictionary<ResourceType, int> resourcesToTransfer = gameInventory.GetAllResourcesFromInventory();
 
         if (resourcesToTransfer == null || resourcesToTransfer.Count == 0)
@@ -40,8 +68,26 @@ public class ResourceTransferManager : MonoBehaviour
             return;
         }
 
-        // Transfer each resource type to base inventory
-        foreach (var kvp in resourcesToTransfer)
+        _pendingResources = resourcesToTransfer;
+        gameInventory.ClearAllInventoryCells();
+
+        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (inventoryManager != null)
+        {
+            TransferPendingResources();
+        }
+    }
+
+    private void TransferPendingResources()
+    {
+        if (_pendingResources == null || _pendingResources.Count == 0)
+        {
+            return;
+        }
+
+        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        
+        foreach (var kvp in _pendingResources)
         {
             if (kvp.Value > 0)
             {
@@ -49,23 +95,16 @@ public class ResourceTransferManager : MonoBehaviour
             }
         }
 
-        // Clear the game inventory
-        gameInventory.ClearAllInventoryCells();
+        int resourceCount = _pendingResources.Count;
+        _pendingResources = null;
 
-        Debug.Log($"ResourceTransferManager: Transferred {resourcesToTransfer.Count} resource types to base inventory");
-    }
+        Debug.Log($"ResourceTransferManager: Transferred {resourceCount} resource types to base inventory");
 
-    // Transfer specific resource type from game scene to base scene
-    public void TransferResourceTypeToBase(ResourceType type, int amount)
-    {
-        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
-        if (inventoryManager == null)
+        BaseInventorySystem inventorySystem = FindFirstObjectByType<BaseInventorySystem>();
+        if (inventorySystem != null)
         {
-            Debug.LogWarning("ResourceTransferManager: BaseInventoryManager not available");
-            return;
+            inventorySystem.ForceRefreshInventory();
         }
-
-        inventoryManager.AddResource(type, amount);
     }
 }
 

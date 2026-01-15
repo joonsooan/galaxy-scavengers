@@ -111,20 +111,16 @@ public class BaseInventorySystem : MonoBehaviour
 
     private void OnModuleAdded(Module module)
     {
-        // Always refresh when panel is active, or queue refresh for when panel opens
         if (inventoryPanel != null && inventoryPanel.activeSelf) {
             RefreshModulesOnly();
         }
-        // Note: If panel is not active, it will refresh when ToggleInventory is called
     }
 
     private void OnModuleRemoved(Module module)
     {
-        // Always refresh when panel is active, or queue refresh for when panel opens
         if (inventoryPanel != null && inventoryPanel.activeSelf) {
             RefreshModulesOnly();
         }
-        // Note: If panel is not active, it will refresh when ToggleInventory is called
     }
 
     private void HideInventoryPanel()
@@ -168,7 +164,6 @@ public class BaseInventorySystem : MonoBehaviour
             inventoryPanel.SetActive(!isActive);
 
             if (!isActive) {
-                // Panel is being opened - refresh to show current state
                 RefreshInventoryGrid();
             }
         }
@@ -176,15 +171,13 @@ public class BaseInventorySystem : MonoBehaviour
 
     public void ForceRefreshInventory()
     {
-        if (inventoryPanel != null && inventoryPanel.activeSelf) {
+        if (inventoryPanel != null) {
             RefreshInventoryGrid();
         }
     }
 
     private void InitializeModuleGrid()
     {
-        // Modules are now handled in the unified inventory grid
-        // This method is kept for compatibility but does nothing
     }
 
     public GameObject GetInventoryPanel()
@@ -240,7 +233,7 @@ public class BaseInventorySystem : MonoBehaviour
         }
 
         List<int> slotsToRestore = new List<int>(_moduleCellSlots.Keys);
-        slotsToRestore.Sort((a, b) => b.CompareTo(a)); // Restore from highest to lowest to maintain indices
+        slotsToRestore.Sort((a, b) => b.CompareTo(a));
         
         foreach (int slotIndex in slotsToRestore) {
             if (slotIndex < 0 || slotIndex >= _inventoryCells.Count) {
@@ -255,7 +248,6 @@ public class BaseInventorySystem : MonoBehaviour
                 
                 Destroy(moduleCell.gameObject);
                 
-                // Create new BaseInventoryCell at the same position
                 GameObject cellObj = Instantiate(baseInventoryCellPrefab, parent);
                 cellObj.transform.SetSiblingIndex(siblingIndex);
                 BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
@@ -382,7 +374,7 @@ public class BaseInventorySystem : MonoBehaviour
         UpdateInventoryInfoText();
     }
 
-    public void RefreshInventoryGrid()
+    private void RefreshInventoryGrid()
     {
         RefreshResourcesOnly();
         RefreshModulesOnly();

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ResourceGeneration_1
   m_EditorClassIdentifier: 
   statModifiers:
-  - statType: 4
+  - statType: 5
     modifierValue: 0.2
     statIcon: {fileID: 0}
   effectDescription: "\uBC1C\uC804\uAE30 \uC0DD\uC0B0\uC18D\uB3C4 +20%"

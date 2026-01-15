@@ -22,27 +22,31 @@ MonoBehaviour:
     recipeIcon: {fileID: 9116947346429250140, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
     ingredients:
     - resourceType: 0
-      amount: 5
+      amount: 2
     - resourceType: 1
-      amount: 5
-    processingTime: 10
+      amount: 20
+    processingTime: 5
     produceAmount: 1
     priority: 0
   - resourceType: 7
     recipeIcon: {fileID: -6843591316079228388, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
     ingredients:
     - resourceType: 0
-      amount: 5
+      amount: 2
+    - resourceType: 1
+      amount: 10
     - resourceType: 2
-      amount: 5
-    processingTime: 10
+      amount: 3
+    processingTime: 5
     produceAmount: 1
     priority: 0
   - resourceType: 13
     recipeIcon: {fileID: -5146700307962209370, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
     ingredients:
     - resourceType: 0
-      amount: 5
-    processingTime: 10
+      amount: 3
+    - resourceType: 1
+      amount: 10
+    processingTime: 5
     produceAmount: 1
     priority: 0

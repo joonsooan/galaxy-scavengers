@@ -36,15 +36,21 @@ public class ModuleEffectData : ScriptableObject
     public string GetDescription()
     {
         if (statModifiers == null || statModifiers.Count == 0) {
-            return "No effects";
+            return GetStatName(ModuleStatType.None);
         }
 
         StringBuilder sb = new StringBuilder();
+        bool hasAnyEffect = false;
         foreach (ModuleStatModifier modifier in statModifiers) {
             if (modifier.modifierValue > 0f) {
                 string statName = GetStatName(modifier.statType);
                 sb.AppendLine($"{statName}: +{modifier.modifierValue * 100f:F0}%");
+                hasAnyEffect = true;
             }
+        }
+
+        if (!hasAnyEffect) {
+            return GetStatName(ModuleStatType.None);
         }
 
         return sb.ToString().TrimEnd();
@@ -53,6 +59,7 @@ public class ModuleEffectData : ScriptableObject
     private string GetStatName(ModuleStatType statType)
     {
         return statType switch {
+            ModuleStatType.None => "None",
             ModuleStatType.StorageCapacity => "Storage Capacity",
             ModuleStatType.UnitMoveSpeed => "Unit Move Speed",
             ModuleStatType.UnitWorkSpeed => "Unit Work Speed",

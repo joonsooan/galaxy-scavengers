@@ -1,25 +1,31 @@
 using System.Collections;
-using UnityEngine;
 using DG.Tweening;
+using UnityEngine;
 
 public class Unit_Construct : UnitBase
 {
     private const float RepathInterval = 0.5f;
     private const float TaskRequestCooldown = 1.0f;
-    
+
     [Header("Construct Drone Settings")]
     [SerializeField] public int carryCapacity = 10;
     [SerializeField] private float loadingTime = 1f;
     [SerializeField] private float unloadingTime = 1f;
     [SerializeField] public UnitMovement movement;
-    
+
     [Header("VFX")]
     [SerializeField] private ParticleSystem constructingParticleSystem;
     [SerializeField] private float particleOffsetDistance = 0.5f;
     [SerializeField] private float yOffset;
 
+    [Header("Hover Animation")]
+    [SerializeField] private float hoverHeight = 0.2f;
+    [SerializeField] private float hoverDuration = 1.5f;
+
     private int _carriedAmount;
     private ResourceType _carriedResourceType;
+
+    private Vector3 _currentConstructionDirection;
 
     private ConstructionSite _currentConstructionSite;
     private ConstructionSite.ConstructionRequest _currentRequest;
@@ -31,12 +37,13 @@ public class Unit_Construct : UnitBase
     private float _nextTaskRequestTime;
 
     private Rigidbody2D _rb;
+    private UnitSpriteController _spriteController;
 
     private IStorage _targetStorage;
     private Coroutine _unloadingCoroutine;
-    private UnitSpriteController _spriteController;
-    
-    private Vector3 _currentConstructionDirection;
+    private Tween _hoverTween;
+    private Vector3 _baseHoverLocalPosition;
+    private Transform _spriteTransform;
 
     protected override void Awake()
     {
@@ -45,13 +52,16 @@ public class Unit_Construct : UnitBase
         _rb = GetComponent<Rigidbody2D>();
     }
 
-    private void Start()
+    protected override void Start()
     {
-        if (ConstructionManager.Instance != null && movement != null)
-        {
+        if (ConstructionManager.Instance != null && movement != null) {
             ConstructionManager.Instance.RegisterConstructDrone(this);
         }
-        _spriteController = GetComponent<UnitSpriteController>();
+        _spriteController = GetComponentInChildren<UnitSpriteController>();
+        if (_spriteController != null) {
+            _spriteTransform = _spriteController.transform;
+            _baseHoverLocalPosition = _spriteTransform.localPosition;
+        }
     }
 
     private void Update()
@@ -59,9 +69,9 @@ public class Unit_Construct : UnitBase
         UpdateUnitBaseState();
         DecideNextAction();
         UpdateAnimationState();
-        
-        if (currentState == UnitState.Constructing)
-        {
+        UpdateHoverAnimation();
+
+        if (currentState == UnitState.Constructing) {
             UpdateParticlePosition();
         }
     }
@@ -70,9 +80,8 @@ public class Unit_Construct : UnitBase
     {
         base.OnEnable();
         UnitManager.Instance?.AddUnit(this);
-        
-        if (ConstructionManager.Instance != null)
-        {
+
+        if (ConstructionManager.Instance != null) {
             ConstructionManager.Instance.RegisterConstructDrone(this);
         }
     }
@@ -85,50 +94,44 @@ public class Unit_Construct : UnitBase
         ConstructionManager.Instance?.UnregisterConstructDrone(this);
         ReleaseFromConstruction();
     }
-    
+
     private void OnDestroy()
     {
         StopConstructionParticles();
+        StopHover();
     }
 
     private void UpdateUnitBaseState()
     {
-        switch (_currentState)
-        {
-            case ConstructState.Idle:
+        switch (_currentState) {
+        case ConstructState.Idle:
+            currentState = UnitState.Idle;
+            break;
+        case ConstructState.FetchingResource:
+            // When loading, use Idle state (not Unloading) to prevent animation speed issues
+            if (movement != null && movement.IsMoving) {
+                currentState = UnitState.Moving;
+            }
+            else if (_loadingCoroutine != null) {
+                // Loading from storage - use Idle state
                 currentState = UnitState.Idle;
-                break;
-            case ConstructState.FetchingResource:
-                // When loading, use Idle state (not Unloading) to prevent animation speed issues
-                if (movement != null && movement.IsMoving)
-                {
-                    currentState = UnitState.Moving;
-                }
-                else if (_loadingCoroutine != null)
-                {
-                    // Loading from storage - use Idle state
-                    currentState = UnitState.Idle;
-                }
-                else
-                {
-                    currentState = UnitState.Idle;
-                }
-                break;
-            case ConstructState.DeliveringResource:
-                if (movement != null && movement.IsMoving)
-                {
-                    currentState = UnitState.Moving;
-                }
-                else if (_unloadingCoroutine != null)
-                {
-                    currentState = UnitState.Constructing;
-                }
-                else
-                {
-                    // Waiting at delivery location - use Idle state
-                    currentState = UnitState.Idle;
-                }
-                break;
+            }
+            else {
+                currentState = UnitState.Idle;
+            }
+            break;
+        case ConstructState.DeliveringResource:
+            if (movement != null && movement.IsMoving) {
+                currentState = UnitState.Moving;
+            }
+            else if (_unloadingCoroutine != null) {
+                currentState = UnitState.Constructing;
+            }
+            else {
+                // Waiting at delivery location - use Idle state
+                currentState = UnitState.Idle;
+            }
+            break;
         }
     }
 
@@ -151,44 +154,41 @@ public class Unit_Construct : UnitBase
 
     private void UpdateAnimationState()
     {
-        if (_spriteController != null)
-        {
+        if (_spriteController != null) {
             bool isConstructing = currentState == UnitState.Constructing;
             _spriteController.UpdateAnimationState(currentState, isConstructing: isConstructing);
         }
+
+        bool isLoading = _loadingCoroutine != null;
         
-        if (currentState == UnitState.Moving || currentState == UnitState.ReturningToStorage)
-        {
+        if (isLoading) {
+            return;
+        }
+
+        if (currentState == UnitState.Moving || currentState == UnitState.ReturningToStorage) {
             Vector3 moveDir = movement.GetMoveDirection();
             _spriteController?.UpdateSpriteDirection(moveDir);
             _spriteController?.ClearTarget(); // Clear target when moving
         }
-        else if (currentState == UnitState.Constructing && _currentRequest != null && _currentRequest.site != null)
-        {
-            if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null)
-            {
+        else if (currentState == UnitState.Constructing && _currentRequest != null && _currentRequest.site != null) {
+            if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null) {
                 Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
                 Vector3 piecePos = BuildingManager.Instance.grid.GetCellCenterWorld(targetPieceCell);
                 _spriteController?.SetTargetPosition(piecePos);
             }
         }
-        else if (currentState == UnitState.Unloading && _targetStorage != null)
-        {
+        else if (currentState == UnitState.Unloading && _targetStorage != null) {
             _spriteController?.SetTargetTransform((_targetStorage as Component).transform);
         }
-        else if (currentState == UnitState.Idle)
-        {
-            if (_currentRequest != null && _currentRequest.site != null)
-            {
-                if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null)
-                {
+        else if (currentState == UnitState.Idle) {
+            if (_currentRequest != null && _currentRequest.site != null) {
+                if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null) {
                     Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
                     Vector3 piecePos = BuildingManager.Instance.grid.GetCellCenterWorld(targetPieceCell);
                     _spriteController?.SetTargetPosition(piecePos);
                 }
             }
-            else
-            {
+            else {
                 _spriteController?.ClearTarget();
             }
         }
@@ -201,11 +201,10 @@ public class Unit_Construct : UnitBase
 
     private void UpdateIdle()
     {
-        if (Time.time < _nextTaskRequestTime)
-        {
+        if (Time.time < _nextTaskRequestTime) {
             return;
         }
-        
+
         ConstructionManager.Instance?.RequestTask(this);
     }
 
@@ -217,6 +216,15 @@ public class Unit_Construct : UnitBase
         }
 
         if (!movement.IsMoving) {
+            if (_targetStorage != null && _currentRequest != null) {
+                int availableAmount = _targetStorage.GetCurrentResourceAmount(_currentRequest.type);
+                if (availableAmount < _currentRequest.amount) {
+                    _currentRequest?.site?.CancelRequest(_currentRequest);
+                    SetTask_Idle();
+                    return;
+                }
+            }
+            
             if (_loadingCoroutine == null) {
                 _loadingCoroutine = StartCoroutine(LoadingResourceCoroutine());
             }
@@ -225,49 +233,56 @@ public class Unit_Construct : UnitBase
 
     private IEnumerator LoadingResourceCoroutine()
     {
-        movement.ForceStopAllMovement();
-
-        if (_targetStorage != null)
-        {
-            if (TryGetComponent(out UnitSpriteController spriteController))
-            {
+        if (_targetStorage != null) {
+            if (TryGetComponent(out UnitSpriteController spriteController)) {
+                Vector2 direction = (((Component)_targetStorage).transform.position - transform.position).normalized;
+                if (direction.sqrMagnitude > 0.01f) {
+                    spriteController.UpdateSpriteDirection(direction);
+                }
                 spriteController.SetTargetTransform((_targetStorage as Component).transform);
             }
         }
 
+        movement.ForceStopAllMovement();
+
         yield return new WaitForSeconds(loadingTime);
 
-        if (_targetStorage == null || _currentRequest == null)
-        {
+        if (_targetStorage == null || _currentRequest == null) {
             SetTask_Idle();
             _loadingCoroutine = null;
             yield break;
         }
 
-        if (_targetStorage.TryWithdrawResource(_currentRequest.type, _currentRequest.amount, out int withdrawnAmount) && withdrawnAmount > 0)
-        {
+        // Validate again that the storage still has resources before withdrawing
+        int availableAmount = _targetStorage.GetCurrentResourceAmount(_currentRequest.type);
+        if (availableAmount < _currentRequest.amount) {
+            // Storage no longer has enough resources, cancel task
+            _currentRequest?.site?.CancelRequest(_currentRequest);
+            SetTask_Idle();
+            _loadingCoroutine = null;
+            yield break;
+        }
+
+        if (_targetStorage.TryWithdrawResource(_currentRequest.type, _currentRequest.amount, out int withdrawnAmount) && withdrawnAmount > 0) {
             _carriedResourceType = _currentRequest.type;
             _carriedAmount = withdrawnAmount;
-            
-            if (!CanDepositResource())
-            {
-                if (_targetStorage != null)
-                {
+
+            if (!CanDepositResource()) {
+                if (_targetStorage != null) {
                     _carriedAmount = 0;
                 }
                 SetTask_Idle();
                 _loadingCoroutine = null;
                 yield break;
             }
-            
+
             Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
             Vector3 interactionPos = _currentRequest.site.AssignDeliveryInteractionCell(this, targetPieceCell);
             movement.ResumeMovement();
             movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
             _currentState = ConstructState.DeliveringResource;
         }
-        else
-        {
+        else {
             SetTask_Idle();
         }
 
@@ -285,8 +300,7 @@ public class Unit_Construct : UnitBase
             return;
         }
 
-        if (!CanDepositResource())
-        {
+        if (!CanDepositResource()) {
             SetTask_Idle();
             return;
         }
@@ -294,68 +308,64 @@ public class Unit_Construct : UnitBase
         bool isAtDelivery = IsAtTarget();
 
         if (isAtDelivery) {
-            if (!CanDepositResource())
-            {
+            if (!CanDepositResource()) {
                 SetTask_Idle();
                 return;
             }
-            
+
             _unloadingCoroutine = StartCoroutine(UnloadingResourceCoroutine());
         }
-        else if (ShouldRepath())
-        {
+        else if (ShouldRepath()) {
             TryRepathToDelivery();
         }
     }
-    
+
     private bool CanDepositResource()
     {
-        if (_currentRequest == null || _currentRequest.site == null || _carriedAmount <= 0)
-        {
+        if (_currentRequest == null || _currentRequest.site == null || _carriedAmount <= 0) {
             return false;
         }
-        
+
         return _currentRequest.site.CanDepositResource(_carriedResourceType, this);
     }
 
     private IEnumerator UnloadingResourceCoroutine()
     {
-        movement.ForceStopAllMovement();
-
-        if (_currentRequest == null || _currentRequest.site == null)
-        {
+        if (_currentRequest == null || _currentRequest.site == null) {
             StopConstructionParticles();
             _unloadingCoroutine = null;
             SetTask_Idle();
             yield break;
         }
 
-        if (!CanDepositResource())
-        {
+        if (!CanDepositResource()) {
             StopConstructionParticles();
             _unloadingCoroutine = null;
             SetTask_Idle();
             yield break;
         }
 
-        if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null)
-        {
+        if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null) {
             Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
             Vector3 piecePos = BuildingManager.Instance.grid.GetCellCenterWorld(targetPieceCell);
-            if (TryGetComponent(out UnitSpriteController spriteController))
-            {
+            if (TryGetComponent(out UnitSpriteController spriteController)) {
+                Vector2 direction = (piecePos - transform.position).normalized;
+                if (direction.sqrMagnitude > 0.01f) {
+                    spriteController.UpdateSpriteDirection(direction);
+                }
                 spriteController.SetTargetPosition(piecePos);
             }
-            
+
             AdjustConstructionDirection(piecePos);
         }
+
+        movement.ForceStopAllMovement();
 
         StartConstructionParticles();
 
         yield return new WaitForSeconds(unloadingTime);
-        
-        if (!CanDepositResource())
-        {
+
+        if (!CanDepositResource()) {
             StopConstructionParticles();
             _unloadingCoroutine = null;
             SetTask_Idle();
@@ -372,7 +382,7 @@ public class Unit_Construct : UnitBase
 
             _currentRequest = null;
             _carriedAmount = 0;
-            
+
             site.TryDepositResource(resourceType, resourceAmount, this);
             site.ReleaseDrone(this);
 
@@ -410,8 +420,8 @@ public class Unit_Construct : UnitBase
     private bool IsAtTarget()
     {
         return movement.HasReachedTarget(movement.waypointTolerance + 0.1f) &&
-               !movement.IsMoving &&
-               _rb.linearVelocity.sqrMagnitude < 0.01f;
+            !movement.IsMoving &&
+            _rb.linearVelocity.sqrMagnitude < 0.01f;
     }
 
     private Vector2 CalculateDirection(Vector3Int from, Vector3Int to)
@@ -433,8 +443,7 @@ public class Unit_Construct : UnitBase
 
     private void TryRepathToDelivery()
     {
-        if (_currentRequest == null || _currentRequest.site == null)
-        {
+        if (_currentRequest == null || _currentRequest.site == null) {
             SetTask_Idle();
             return;
         }
@@ -443,12 +452,11 @@ public class Unit_Construct : UnitBase
         Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
         Vector3 interactionPos = _currentRequest.site.AssignDeliveryInteractionCell(this, targetPieceCell);
         bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
-        if (!hasPath)
-        {
+        if (!hasPath) {
             SetTask_Idle();
         }
     }
-    
+
     public void SetTask_FetchResource(ConstructionSite.ConstructionRequest request, ConstructionSite site)
     {
         if (movement == null) {
@@ -461,11 +469,9 @@ public class Unit_Construct : UnitBase
         _currentRequest = request;
         _targetStorage = ResourceManager.Instance.FindClosestStorageWithResource(site.GetPosition(), request.type, 1);
 
-        if (_targetStorage != null)
-        {
+        if (_targetStorage != null) {
             bool hasPath = movement.SetNewTarget(_targetStorage.GetPosition());
-            if (hasPath)
-            {
+            if (hasPath) {
                 _currentState = ConstructState.FetchingResource;
                 return;
             }
@@ -482,7 +488,7 @@ public class Unit_Construct : UnitBase
         ReleaseFromConstruction();
         _currentState = ConstructState.Idle;
     }
-    
+
     public void SetTaskRequestCooldown(float duration)
     {
         _nextTaskRequestTime = Time.time + duration;
@@ -491,15 +497,13 @@ public class Unit_Construct : UnitBase
     private void ReleaseFromConstruction()
     {
         StopConstructionParticles();
-        
-        if (_currentRequest != null)
-        {
+
+        if (_currentRequest != null) {
             _currentRequest.site?.CancelRequest(_currentRequest);
             _currentRequest = null;
         }
 
-        if (_currentConstructionSite != null)
-        {
+        if (_currentConstructionSite != null) {
             _currentConstructionSite.ReleaseDrone(this);
             _currentConstructionSite = null;
         }
@@ -508,7 +512,7 @@ public class Unit_Construct : UnitBase
         _loadingCoroutine = null;
         _unloadingCoroutine = null;
     }
-    
+
     private void AdjustConstructionDirection(Vector3 targetPosition)
     {
         if (BuildingManager.Instance == null || BuildingManager.Instance.grid == null) return;
@@ -534,34 +538,75 @@ public class Unit_Construct : UnitBase
 
         _currentConstructionDirection = targetDirection;
     }
-    
+
     private void StartConstructionParticles()
     {
-        if (constructingParticleSystem != null)
-        {
+        if (constructingParticleSystem != null) {
             UpdateParticlePosition();
-            if (!constructingParticleSystem.isPlaying)
-            {
+            if (!constructingParticleSystem.isPlaying) {
                 constructingParticleSystem.Play();
             }
         }
     }
-    
+
     private void StopConstructionParticles()
     {
-        if (constructingParticleSystem != null && constructingParticleSystem.isPlaying)
-        {
+        if (constructingParticleSystem != null && constructingParticleSystem.isPlaying) {
             constructingParticleSystem.Stop();
         }
     }
-    
+
     private void UpdateParticlePosition()
     {
         if (constructingParticleSystem == null) return;
-        
+
         Transform particleTransform = constructingParticleSystem.transform;
-        Vector3 offsetPosition = transform.position + (_currentConstructionDirection * particleOffsetDistance) - new Vector3(0, yOffset, 0);
+        Vector3 offsetPosition = transform.position + _currentConstructionDirection * particleOffsetDistance - new Vector3(0, yOffset, 0);
         particleTransform.position = offsetPosition;
+    }
+
+    private void UpdateHoverAnimation()
+    {
+        bool shouldHover = _spriteTransform != null && 
+                          (currentState == UnitState.Idle || currentState == UnitState.Moving);
+        
+        if (shouldHover) {
+            if (_hoverTween == null || !_hoverTween.IsActive()) {
+                StartHover();
+            }
+        }
+        else {
+            if (_hoverTween != null && _hoverTween.IsActive()) {
+                StopHover();
+            }
+        }
+    }
+
+    private void StartHover()
+    {
+        StopHover();
+        if (_spriteTransform == null) return;
+        
+        _baseHoverLocalPosition = _spriteTransform.localPosition;
+        _hoverTween = _spriteTransform.DOLocalMoveY(_baseHoverLocalPosition.y + hoverHeight, hoverDuration)
+            .SetEase(Ease.InOutSine)
+            .SetLoops(-1, LoopType.Yoyo);
+    }
+
+    private void StopHover()
+    {
+        if (_hoverTween != null && _hoverTween.IsActive()) {
+            _hoverTween.Kill();
+            _hoverTween = null;
+        }
+
+        if (_spriteTransform != null) {
+            float currentY = _spriteTransform.localPosition.y;
+            float baseY = _baseHoverLocalPosition.y;
+            if (Mathf.Abs(currentY - baseY) > 0.01f) {
+                _spriteTransform.DOLocalMoveY(baseY, 0.2f).SetEase(Ease.OutQuad);
+            }
+        }
     }
 
     private enum ConstructState

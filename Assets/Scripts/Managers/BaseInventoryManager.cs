@@ -81,11 +81,6 @@ public class BaseInventoryManager : MonoBehaviour
         return new Dictionary<ResourceType, int>(_baseInventory);
     }
 
-    public void TransferFromGameInventory(ResourceType type, int amount)
-    {
-        AddResource(type, amount);
-    }
-
     private void SaveResource(ResourceType type)
     {
         string key = BaseInventoryPrefix + type;
@@ -107,7 +102,7 @@ public class BaseInventoryManager : MonoBehaviour
         LoadModules();
     }
 
-    public void SaveAllInventory()
+    private void SaveAllInventory()
     {
         foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
         {
@@ -207,6 +202,17 @@ public class BaseInventoryManager : MonoBehaviour
     {
         Dictionary<string, ModuleRecipe> recipeMap = new Dictionary<string, ModuleRecipe>();
         
+        // Load ModuleRecipe ScriptableObjects directly from Resources
+        ModuleRecipe[] allRecipes = Resources.LoadAll<ModuleRecipe>("");
+        foreach (ModuleRecipe recipe in allRecipes)
+        {
+            if (recipe != null && !string.IsNullOrEmpty(recipe.moduleName) && !recipeMap.ContainsKey(recipe.moduleName))
+            {
+                recipeMap[recipe.moduleName] = recipe;
+            }
+        }
+        
+        // Also load from ModuleData (for backward compatibility and module stations)
         ModuleData[] allModuleData = Resources.LoadAll<ModuleData>("");
         foreach (ModuleData moduleData in allModuleData)
         {
@@ -214,7 +220,7 @@ public class BaseInventoryManager : MonoBehaviour
             {
                 foreach (ModuleRecipe recipe in moduleData.Recipes)
                 {
-                    if (!recipeMap.ContainsKey(recipe.moduleName))
+                    if (recipe != null && !string.IsNullOrEmpty(recipe.moduleName) && !recipeMap.ContainsKey(recipe.moduleName))
                     {
                         recipeMap[recipe.moduleName] = recipe;
                     }
@@ -222,6 +228,7 @@ public class BaseInventoryManager : MonoBehaviour
             }
         }
         
+        // Also check ModuleStations in the scene
         ModuleStation[] moduleStations = FindObjectsByType<ModuleStation>(FindObjectsSortMode.None);
         foreach (ModuleStation station in moduleStations)
         {
@@ -229,7 +236,7 @@ public class BaseInventoryManager : MonoBehaviour
             {
                 foreach (ModuleRecipe recipe in station.ModuleData.Recipes)
                 {
-                    if (!recipeMap.ContainsKey(recipe.moduleName))
+                    if (recipe != null && !string.IsNullOrEmpty(recipe.moduleName) && !recipeMap.ContainsKey(recipe.moduleName))
                     {
                         recipeMap[recipe.moduleName] = recipe;
                     }

@@ -4,23 +4,99 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class DroneHub : Damageable, IClickable
+public class DroneHub : Damageable, IClickable, IAetherConsumer
 {
     [SerializeField] private DroneHubData droneHubData;
+    [Header("Aether Consumption")]
+    [SerializeField] private int aetherConsumptionPerSecond = 1;
 
     private readonly Queue<UnitData> _productionQueue = new ();
     private readonly Dictionary<int, int> _targetUnitCounts = new ();
     private readonly Dictionary<int, int> _producedUnitCounts = new ();
     private bool _isProducing;
+    private bool _isOperational = true;
+    private AetherConsumptionManager _aetherConsumptionManager;
 
     public static event Action<DroneHub> OnDroneHubClicked;
     public static event Action<int, int, int> OnUnitTargetChanged;
 
     public DroneHubData DroneHubData => droneHubData;
+    
+    public int AetherConsumptionPerSecond => aetherConsumptionPerSecond;
+    public bool IsOperational => _isOperational;
 
     public void OnClicked()
     {
         OnDroneHubClicked?.Invoke(this);
+    }
+    
+    public void OnAetherUnavailable()
+    {
+        if (_isOperational)
+        {
+            _isOperational = false;
+            StopProduction();
+        }
+    }
+    
+    public void OnAetherAvailable()
+    {
+        if (!_isOperational)
+        {
+            _isOperational = true;
+            if (!_isProducing && _productionQueue.Count > 0)
+            {
+                StartCoroutine(ProcessProductionQueue());
+            }
+        }
+    }
+    
+    private void StopProduction()
+    {
+        if (_isProducing)
+        {
+            StopCoroutine(ProcessProductionQueue());
+            _isProducing = false;
+        }
+    }
+    
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        
+        if (!IsProperlyPlacedBuilding())
+        {
+            return;
+        }
+        
+        FindAndCacheAetherManager();
+        if (_aetherConsumptionManager != null)
+        {
+            _aetherConsumptionManager.RegisterConsumer(this);
+        }
+    }
+    
+    protected override void OnDisable()
+    {
+        if (_aetherConsumptionManager != null)
+        {
+            _aetherConsumptionManager.UnregisterConsumer(this);
+        }
+        
+        base.OnDisable();
+    }
+    
+    private void FindAndCacheAetherManager()
+    {
+        if (_aetherConsumptionManager == null)
+        {
+            _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
+        }
+    }
+    
+    private bool IsProperlyPlacedBuilding()
+    {
+        return BuildingManager.IsBuildingProperlyPlaced(transform);
     }
 
     public int GetCurrentUnitCount(int unitIndex)
@@ -62,7 +138,7 @@ public class DroneHub : Damageable, IClickable
 
         OnUnitTargetChanged?.Invoke(unitIndex, currentProduced, targetCount);
 
-        if (!_isProducing && _productionQueue.Count > 0)
+        if (!_isProducing && _productionQueue.Count > 0 && _isOperational)
         {
             StartCoroutine(ProcessProductionQueue());
         }
@@ -138,6 +214,12 @@ public class DroneHub : Damageable, IClickable
 
         while (_productionQueue.Count > 0 || HasPendingTargets())
         {
+            if (!_isOperational)
+            {
+                _isProducing = false;
+                yield break;
+            }
+            
             if (_productionQueue.Count == 0)
             {
                 UpdateQueueFromTargets();
@@ -152,6 +234,23 @@ public class DroneHub : Damageable, IClickable
             UnitData unitToProduce = _productionQueue.Dequeue();
 
             yield return new WaitForSeconds(unitToProduce.productionTime);
+            
+            if (!_isOperational)
+            {
+                Queue<UnitData> tempQueue = new Queue<UnitData>();
+                tempQueue.Enqueue(unitToProduce);
+                while (_productionQueue.Count > 0)
+                {
+                    tempQueue.Enqueue(_productionQueue.Dequeue());
+                }
+                _productionQueue.Clear();
+                while (tempQueue.Count > 0)
+                {
+                    _productionQueue.Enqueue(tempQueue.Dequeue());
+                }
+                _isProducing = false;
+                yield break;
+            }
 
             int unitIndex = FindUnitIndex(unitToProduce);
             if (unitIndex >= 0)

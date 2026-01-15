@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,29 +5,55 @@ public class MainStructure : BaseStorage, IClickable
 {
     [Header("Production Settings")]
     [SerializeField] private List<UnitData> producibleUnits;
+    [Header("Aether Capacity")]
+    [SerializeField] private int baseAetherCapacity = 100;
     
     private bool _isProducing;
-    private InventorySystem _inventorySystem;
+    private AetherConsumptionManager _aetherConsumptionManager;
+    
+    public int BaseAetherCapacity => baseAetherCapacity;
 
     protected override void Start()
     {
         base.Start();
-        _inventorySystem = GetComponent<InventorySystem>();
+        
+        // Don't register ghost/preview buildings
+        if (IsProperlyPlacedBuilding())
+        {
+            FindAndCacheAetherManager();
+            if (_aetherConsumptionManager != null)
+            {
+                _aetherConsumptionManager.RegisterMainStructure(this);
+            }
+        }
         
         if (GetComponent<BuildingHoverTrigger>() == null)
         {
             gameObject.AddComponent<BuildingHoverTrigger>();
         }
-        
-        BoxCollider2D[] colliders = GetComponents<BoxCollider2D>();
-        bool hasTriggerCollider = false;
-        foreach (BoxCollider2D collider in colliders)
+    }
+    
+    private bool IsProperlyPlacedBuilding()
+    {
+        if (BuildingManager.Instance == null) return true;
+        return BuildingManager.IsBuildingProperlyPlaced(transform);
+    }
+    
+    protected override void OnDisable()
+    {
+        if (_aetherConsumptionManager != null)
         {
-            if (collider != null && collider.isTrigger)
-            {
-                hasTriggerCollider = true;
-                break;
-            }
+            _aetherConsumptionManager.UnregisterMainStructure(this);
+        }
+        
+        base.OnDisable();
+    }
+    
+    private void FindAndCacheAetherManager()
+    {
+        if (_aetherConsumptionManager == null)
+        {
+            _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
         }
     }
     

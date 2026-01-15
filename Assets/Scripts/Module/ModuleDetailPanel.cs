@@ -22,12 +22,9 @@ public class ModuleDetailPanel : MonoBehaviour
     
     private ModuleRecipe _currentRecipe;
     private ModuleStation _station;
-    private ModuleStationUIManager _uiManager;
     
-    public void Initialize(ModuleStationUIManager uiManager)
+    public void Initialize()
     {
-        _uiManager = uiManager;
-        
         if (produceButton != null)
         {
             produceButton.onClick.RemoveAllListeners();
@@ -46,11 +43,7 @@ public class ModuleDetailPanel : MonoBehaviour
         StartCoroutine(UpdateUI());
         UpdateProduceButton();
         
-        if (requiredResourceText != null)
-        {
-            requiredResourceText.gameObject.SetActive(true);
-        }
-        
+        requiredResourceText.gameObject.SetActive(true);
         gameObject.SetActive(true);
     }
     
@@ -64,43 +57,24 @@ public class ModuleDetailPanel : MonoBehaviour
         _currentRecipe = null;
         _station = null;
         
-        if (moduleNameText != null)
-        {
-            moduleNameText.text = "";
-        }
+       moduleNameText.text = "";
+       moduleDescriptionText.text = "";
+       moduleTypeText.text = "";
+       requiredResourceText.gameObject.SetActive(false);
+       
+       foreach (Transform child in ingredientsParent.gameObject.transform)
+       {
+           Destroy(child.gameObject);
+       }
         
-        if (moduleDescriptionText != null)
-        {
-            moduleDescriptionText.text = "";
-        }
-        
-        if (moduleTypeText != null)
-        {
-            moduleTypeText.text = "";
-        }
-        
-        if (requiredResourceText != null)
-        {
-            requiredResourceText.gameObject.SetActive(false);
-        }
-        
-        if (ingredientsParent != null)
-        {
-            foreach (Transform child in ingredientsParent.gameObject.transform)
-            {
-                Destroy(child.gameObject);
-            }
-        }
-        
-        if (produceButton != null)
-        {
-            produceButton.gameObject.SetActive(false);
-        }
-        
-        if (produceButtonText != null)
-        {
-            produceButtonText.text = "";
-        }
+        produceButton.gameObject.SetActive(false);
+        produceButtonText.text = "";
+    }
+
+    public void ShowPanel()
+    {
+        gameObject.SetActive(true);
+        ClearInfo();
     }
     
     public void HidePanel()
@@ -111,21 +85,10 @@ public class ModuleDetailPanel : MonoBehaviour
     
     private IEnumerator UpdateUI()
     {
-        if (moduleNameText != null)
-        {
-            moduleNameText.text = _currentRecipe.moduleName;
-        }
-        
-        if (moduleDescriptionText != null)
-        {
-            moduleDescriptionText.text = _currentRecipe.moduleDescription;
-        }
-        
-        if (moduleTypeText != null)
-        {
-            string koreanType = GetKoreanModuleType(_currentRecipe.moduleType);
-            moduleTypeText.text = $"타입 : {koreanType}";
-        }
+        moduleNameText.text = _currentRecipe.moduleName;
+        moduleDescriptionText.text = _currentRecipe.moduleDescription;
+        string koreanType = GetKoreanModuleType(_currentRecipe.moduleType);
+        moduleTypeText.text = $"타입 : {koreanType}";
 
         yield return new WaitForEndOfFrame();
         LayoutRebuilder.ForceRebuildLayoutImmediate(resourcePanel);
@@ -161,11 +124,10 @@ public class ModuleDetailPanel : MonoBehaviour
         foreach (ResourceCost ingredient in _currentRecipe.ingredients)
         {
             GameObject cellObj = Instantiate(ingredientCellPrefab, ingredientsParent.transform);
-            ResourceInfoCell cell = cellObj.GetComponent<ResourceInfoCell>();
-            
+            BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
             if (cell != null)
             {
-                cell.SetInfo(ingredient.resourceType, ingredient.amount);
+                cell.SetResource(ingredient.resourceType, ingredient.amount);
             }
         }
     }
@@ -193,7 +155,6 @@ public class ModuleDetailPanel : MonoBehaviour
         
         if (_station.CraftModule(_currentRecipe))
         {
-            _uiManager?.OnModuleCrafted();
             UpdateProduceButton();
             SetupIngredients();
             
@@ -203,7 +164,6 @@ public class ModuleDetailPanel : MonoBehaviour
                 inventorySystem.RefreshModulesOnly();
             }
             
-            // Refresh module selection grid in CoreCustomUIManager when module is produced
             CoreCustomUIManager coreCustomUIManager = FindFirstObjectByType<CoreCustomUIManager>();
             if (coreCustomUIManager != null)
             {

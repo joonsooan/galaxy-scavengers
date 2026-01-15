@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -27,7 +28,6 @@ public class UnitAssignCell : MonoBehaviour
     {
         if (_assignedDrone != null) {
             droneIcon.gameObject.SetActive(true);
-            droneIcon.sprite = _assignedDrone.DroneIcon;
             emptySlotIcon.gameObject.SetActive(false);
         }
         else {
@@ -38,10 +38,23 @@ public class UnitAssignCell : MonoBehaviour
 
     private void OnCellClicked()
     {
-        ProcessorUIManager.Instance.unitAssignPanel.ShowPanel(_processor, this, _assignedDrone);
+        if (_assignedDrone == null) {
+            Unit_Drone droneToAssign = UnitManager.Instance.AllyUnits
+                .OfType<Unit_Drone>()
+                .FirstOrDefault(d => !d.IsAssigned);
+
+            if (droneToAssign != null) {
+                droneToAssign.AssignProcessor(_processor);
+                SetAssignedDrone(droneToAssign);
+            }
+        }
+        else {
+            _assignedDrone.AssignProcessor(null);
+            SetAssignedDrone(null);
+        }
     }
 
-    public void SetAssignedDrone(Unit_Drone drone)
+    private void SetAssignedDrone(Unit_Drone drone)
     {
         _assignedDrone = drone;
         UpdateUI();

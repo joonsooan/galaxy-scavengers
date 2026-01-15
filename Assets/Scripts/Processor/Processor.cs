@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Processor : Damageable, IClickable
+public class Processor : Damageable, IClickable, IAetherConsumer
 {
     [SerializeField] private ProcessorData processorData;
+    [Header("Aether Consumption")]
+    [SerializeField] private int aetherConsumptionPerSecond = 1;
+    
     private readonly List<ActiveRecipe> _activeRecipes = new ();
 
     private readonly List<Unit_Drone> _assignedDrones = new ();
@@ -17,11 +20,17 @@ public class Processor : Damageable, IClickable
     private int _maxIngredientStorage;
 
     private List<ProcessorRecipe> _recipes;
+    private AetherConsumptionManager _aetherConsumptionManager;
 
     public ProcessorData ProcessorData => processorData;
     public IReadOnlyList<ActiveRecipe> ActiveRecipes => _activeRecipes;
     public IReadOnlyList<Unit_Drone> AssignedDrones => _assignedDrones;
     public bool IsFull => _assignedDrones.Count >= _maxAssignedDrones;
+    
+    // IAetherConsumer implementation
+    public int AetherConsumptionPerSecond => aetherConsumptionPerSecond;
+    private bool _isOperational = true;
+    public bool IsOperational => _isOperational;
 
 
     protected override void Awake()
@@ -51,16 +60,79 @@ public class Processor : Damageable, IClickable
     {
         base.OnEnable();
         BuildingManager.Instance?.RegisterProcessor(this);
+        
+        if (!BuildingManager.IsBuildingProperlyPlaced(transform))
+        {
+            return;
+        }
+        
+        FindAndCacheAetherManager();
+        if (_aetherConsumptionManager != null)
+        {
+            _aetherConsumptionManager.RegisterConsumer(this);
+        }
     }
 
     protected override void OnDisable()
     {
+        if (_aetherConsumptionManager != null)
+        {
+            _aetherConsumptionManager.UnregisterConsumer(this);
+        }
+        
         base.OnDisable();
         BuildingManager.Instance?.UnregisterProcessor(this);
 
         List<Unit_Drone> dronesToRelease = new List<Unit_Drone>(_assignedDrones);
         foreach (Unit_Drone drone in dronesToRelease) {
             drone.AssignProcessor(null);
+        }
+    }
+    
+    private void FindAndCacheAetherManager()
+    {
+        if (_aetherConsumptionManager == null)
+        {
+            _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
+        }
+    }
+    
+    public void OnAetherUnavailable()
+    {
+        if (_isOperational)
+        {
+            _isOperational = false;
+            // Stop all processing - release drones from recipes
+            foreach (ActiveRecipe recipe in _activeRecipes)
+            {
+                if (recipe.isProcessing && recipe.assignedDrone != null)
+                {
+                    Unit_Drone drone = recipe.assignedDrone;
+                    recipe.assignedDrone = null;
+                    recipe.isProcessing = false;
+                    drone.SetTask_Idle();
+                }
+            }
+        }
+    }
+    
+    public void OnAetherAvailable()
+    {
+        if (!_isOperational)
+        {
+            _isOperational = true;
+            // Resume processing - request tasks for idle drones
+            foreach (Unit_Drone drone in _assignedDrones)
+            {
+                if (drone != null && drone.HasCheckedIn && drone.CurrentRecipeTask == null)
+                {
+                    bool hasPendingRequest = _pendingRequests.Any(r => r.assignedDrone == drone);
+                    if (!hasPendingRequest)
+                    {
+                        RequestTask(drone);
+                    }
+                }
+            }
         }
     }
 
@@ -81,7 +153,6 @@ public class Processor : Damageable, IClickable
     {
         if (!_assignedDrones.Contains(drone) && !IsFull) {
             _assignedDrones.Add(drone);
-            Debug.Log($"[Processor:{name}] Drone '{drone.name}' assigned. Count={_assignedDrones.Count}/{_maxAssignedDrones}. Waiting for check-in before assigning tasks.");
         }
     }
 
@@ -276,6 +347,18 @@ public class Processor : Damageable, IClickable
 
     public void ProcessRecipeWork(ActiveRecipe recipe, float workAmount)
     {
+        // Don't process if not operational (no aether)
+        if (!_isOperational)
+        {
+            if (recipe.assignedDrone != null)
+            {
+                recipe.assignedDrone.SetTask_Idle();
+            }
+            recipe.assignedDrone = null;
+            recipe.isProcessing = false;
+            return;
+        }
+        
         if (recipe.assignedDrone == null) {
             return;
         }
@@ -302,7 +385,7 @@ public class Processor : Damageable, IClickable
         int currentQuarter = Mathf.FloorToInt(Mathf.Min(progressPercent, 100f) / 25f);
         int previousQuarter = Mathf.FloorToInt(Mathf.Min(previousPercent, 100f) / 25f);
 
-        // Log when we cross a 25% milestone (25%, 50%, 75%, 100%)
+        // 25% 마다 로그 출력 (25%, 50%, 75%, 100%)
         if (currentQuarter > previousQuarter) {
             Debug.Log($"[Processor:{name}] Processing PROGRESS: {recipe.recipeData.resourceType} - {progressPercent:F1}% ({recipe.processingProgress:F2}/{recipe.recipeData.processingTime:F2}s)");
         }
@@ -345,8 +428,6 @@ public class Processor : Damageable, IClickable
                 return;
             }
         }
-
-        Debug.Log($"[Processor:{name}] No MainStructure storage found. Resource tracked in ResourceManager only. Total: {amountAfter}");
     }
 
     private int GetTotalCurrentIngredients()
@@ -361,15 +442,6 @@ public class Processor : Damageable, IClickable
     
     public Vector3 AssignInteractionCell(Unit_Drone drone)
     {
-        if (drone == null) {
-            return transform.position;
-        }
-        
-        if (BuildingManager.Instance == null || BuildingManager.Instance.grid == null) {
-            Debug.LogWarning($"[Processor:{name}] BuildingManager or Grid is null, falling back to processor position");
-            return transform.position;
-        }
-        
         Vector3Int processorCell = BuildingManager.Instance.grid.WorldToCell(transform.position);
         if (!BuildingManager.Instance.GetBuildingAt(processorCell, out List<Vector3Int> occupiedCells)) {
             occupiedCells = new List<Vector3Int> { processorCell };

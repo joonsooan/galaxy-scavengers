@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Storage_1
   m_EditorClassIdentifier: 
   statModifiers:
-  - statType: 0
+  - statType: 1
     modifierValue: 0.2
     statIcon: {fileID: 0}
   effectDescription: "\uC800\uC7A5 \uACF5\uAC04 +20%"

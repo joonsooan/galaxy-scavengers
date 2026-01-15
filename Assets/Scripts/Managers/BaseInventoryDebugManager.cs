@@ -122,7 +122,13 @@ public class BaseInventoryDebugManager : MonoBehaviour
         BaseInventorySystem inventorySystem = FindFirstObjectByType<BaseInventorySystem>();
         if (inventorySystem != null)
         {
-            inventorySystem.RefreshInventoryGrid();
+            inventorySystem.ForceRefreshInventory();
+        }
+        
+        CoreCustomUIManager coreCustomUIManager = FindFirstObjectByType<CoreCustomUIManager>();
+        if (coreCustomUIManager != null)
+        {
+            coreCustomUIManager.RefreshModuleSelectionGrid();
         }
     }
     
@@ -135,7 +141,13 @@ public class BaseInventoryDebugManager : MonoBehaviour
         BaseInventorySystem inventorySystem = FindFirstObjectByType<BaseInventorySystem>();
         if (inventorySystem != null)
         {
-            inventorySystem.RefreshInventoryGrid();
+            inventorySystem.ForceRefreshInventory();
+        }
+        
+        CoreCustomUIManager coreCustomUIManager = FindFirstObjectByType<CoreCustomUIManager>();
+        if (coreCustomUIManager != null)
+        {
+            coreCustomUIManager.RefreshModuleSelectionGrid();
         }
     }
     
@@ -205,6 +217,18 @@ public class BaseInventoryDebugManager : MonoBehaviour
         }
         
         Debug.Log($"BaseInventoryDebugManager: Transferred {transferredCount} resource types ({totalTransferred} total items) from game scene to base inventory");
+        
+        BaseInventorySystem inventorySystem = FindFirstObjectByType<BaseInventorySystem>();
+        if (inventorySystem != null)
+        {
+            inventorySystem.ForceRefreshInventory();
+        }
+        
+        CoreCustomUIManager coreCustomUIManager = FindFirstObjectByType<CoreCustomUIManager>();
+        if (coreCustomUIManager != null)
+        {
+            coreCustomUIManager.RefreshModuleSelectionGrid();
+        }
     }
     
 #if UNITY_EDITOR

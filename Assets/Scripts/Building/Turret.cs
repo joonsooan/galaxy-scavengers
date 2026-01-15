@@ -1,18 +1,25 @@
 using UnityEngine;
 using System.Collections;
 
-public class Turret : Damageable
+public class Turret : Damageable, IAetherConsumer
 {
     [Header("Turret Stats")]
     [SerializeField] private float attackRange = 10f;
     [SerializeField] private float fireInterval = 1f;
     [SerializeField] private int attackDamage = 10;
     [SerializeField] private GameObject bulletPrefab;
+    [Header("Aether Consumption")]
+    [SerializeField] private int aetherConsumptionPerSecond = 1;
 
     private Transform _target;
     private Coroutine _attackCoroutine;
     private WaitForSeconds _findTargetWait;
     private Vector3 _bulletSpawnPosition;
+    private bool _isOperational = true;
+    private AetherConsumptionManager _aetherConsumptionManager;
+    
+    public int AetherConsumptionPerSecond => aetherConsumptionPerSecond;
+    public bool IsOperational => _isOperational;
     
     private void OnDrawGizmosSelected()
     {
@@ -24,6 +31,17 @@ public class Turret : Damageable
     {
         base.OnEnable();
         
+        if (!BuildingManager.IsBuildingProperlyPlaced(transform))
+        {
+            return;
+        }
+        
+        FindAndCacheAetherManager();
+        if (_aetherConsumptionManager != null)
+        {
+            _aetherConsumptionManager.RegisterConsumer(this);
+        }
+        
         _bulletSpawnPosition = transform.position + new Vector3(0.5f, 0.5f, 0f);
         _findTargetWait = new WaitForSeconds(0.2f);
         StartCoroutine(UpdateTargetCoroutine());
@@ -31,14 +49,50 @@ public class Turret : Damageable
 
     protected override void OnDisable()
     {
+        if (_aetherConsumptionManager != null)
+        {
+            _aetherConsumptionManager.UnregisterConsumer(this);
+        }
+        
         base.OnDisable();
         
         StopAllCoroutines();
         _attackCoroutine = null;
     }
+    
+    private void FindAndCacheAetherManager()
+    {
+        if (_aetherConsumptionManager == null)
+        {
+            _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
+        }
+    }
+    
+    public void OnAetherUnavailable()
+    {
+        if (_isOperational)
+        {
+            _isOperational = false;
+            StopAttacking();
+        }
+    }
+    
+    public void OnAetherAvailable()
+    {
+        if (!_isOperational)
+        {
+            _isOperational = true;
+        }
+    }
 
     private void Update()
     {
+        if (!_isOperational)
+        {
+            StopAttacking();
+            return;
+        }
+        
         if (!IsTargetValid())
         {
             _target = null;

@@ -2,15 +2,19 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using DG.Tweening;
+using Random = UnityEngine.Random;
 
 public class Unit_Miner : UnitBase
 {
     [Header("References")]
     [SerializeField] private UnitMovement unitMovement;
-    [SerializeField] private UnitMining unitMining;
+
+    [Header("Gathering Stats")]
+    [SerializeField] private float unloadingTime = 1f;
+    public int mineAmountPerAction = 1; // 한번 채굴 시 캐는 양
 
     [Header("Cargo")]
     public int maxCarryAmount = 50;
@@ -20,31 +24,33 @@ public class Unit_Miner : UnitBase
 
     [Header("VFX")]
     [SerializeField] private string canvasName = "ObjectUI Canvas";
-    [SerializeField] private bool showFloatingText;
+    [SerializeField] private float resourceImageSpawnInterval = 0.5f;
     [SerializeField] private ParticleSystem miningParticleSystem;
     [SerializeField] private float particleOffsetDistance = 0.5f;
     [SerializeField] private float yOffset;
-    
+
     [Header("Mining Animation")]
     [SerializeField] private float vibrationRadius = 0.1f;
     [SerializeField] private float vibrationSpeed = 2f;
 
-    private readonly Dictionary<ResourceType, int> _currentCarryAmounts = new Dictionary<ResourceType, int>();
-    private Canvas _canvas;
-    private Coroutine _findResourceCoroutine;
-    private WaitForSeconds _searchWait;
+    private readonly Dictionary<ResourceType, int> _currentCarryAmounts = new ();
 
+    private Canvas _canvas;
+    private Vector3 _currentMiningDirection;
+    private Coroutine _findResourceCoroutine;
+
+    private Coroutine _mineCoroutine;
+    private WaitForSeconds _miningDelay;
+    private Tween _miningVibrationTween;
+    private WaitForSeconds _searchWait;
+    private Vector3 _spriteBaseLocalPosition;
+    private UnitSpriteController _spriteController;
     private Vector3Int _targetMiningCell;
     private ResourceNode _targetResourceNode;
     private IStorage _targetStorage;
     private Vector3Int _targetUnloadCell;
-    private UnitSpriteController _spriteController;
-    
-    private Vector3 _basePosition;
-    private Tween _miningVibrationTween;
     private Sequence _vibrationSequence;
-    private Vector3 _currentMiningDirection;
-    
+
     protected override void Awake()
     {
         base.Awake();
@@ -53,21 +59,20 @@ public class Unit_Miner : UnitBase
         InitializeCarryAmounts();
     }
 
-    private void Start()
+    protected override void Start()
     {
         mineableResourceTypes = UnitManager.Instance != null
             ? UnitManager.Instance.CurrentMineableTypes.ToArray()
             : (ResourceType[])Enum.GetValues(typeof(ResourceType));
-        _spriteController = unitMovement.GetComponent<UnitSpriteController>(); 
+        _spriteController = GetComponentInChildren<UnitSpriteController>();
     }
 
     private void Update()
     {
         DecideNextAction();
         UpdateAnimationState();
-        
-        if (currentState == UnitState.Mining)
-        {
+
+        if (currentState == UnitState.Mining) {
             UpdateParticlePosition();
         }
     }
@@ -92,6 +97,8 @@ public class Unit_Miner : UnitBase
             _targetResourceNode.Unreserve();
         }
     }
+
+    public event Action<ResourceType, int> OnResourceMined;
 
     private void DecideNextAction()
     {
@@ -118,46 +125,42 @@ public class Unit_Miner : UnitBase
 
     private void UpdateAnimationState()
     {
-        if (_spriteController != null)
-        {
-            // Unit_Miner only needs IsMining state, not IsConstructing
+        if (_spriteController != null) {
             bool isMining = currentState == UnitState.Mining;
-            _spriteController.UpdateAnimationState(currentState, isMining: isMining);
+            _spriteController.UpdateAnimationState(currentState, isMining);
         }
-        if (currentState == UnitState.Moving || currentState == UnitState.ReturningToStorage)
-        {
+        if (currentState == UnitState.Moving || currentState == UnitState.ReturningToStorage) {
             Vector3 moveDir = unitMovement.GetMoveDirection();
             _spriteController?.UpdateSpriteDirection(moveDir);
-            _spriteController?.ClearTarget(); // Clear target when moving
+            _spriteController?.ClearTarget();
         }
-        else if (currentState == UnitState.Mining && _targetResourceNode != null)
-        {
+        else if (currentState == UnitState.Mining && _targetResourceNode != null) {
             _spriteController?.SetTargetTransform(_targetResourceNode.transform);
         }
-        else if (currentState == UnitState.Unloading && _targetStorage != null)
-        {
+        else if (currentState == UnitState.Unloading && _targetStorage != null) {
             _spriteController?.SetTargetTransform(((Component)_targetStorage).transform);
         }
-        else if (currentState == UnitState.Idle)
-        {
-            // Keep facing the last target if available, or clear it
-            if (_targetResourceNode != null)
-            {
+        else if (currentState == UnitState.Idle) {
+            if (_targetResourceNode != null) {
                 _spriteController?.SetTargetTransform(_targetResourceNode.transform);
             }
-            else
-            {
+            else {
                 _spriteController?.ClearTarget();
             }
         }
-        
+
         int currentTotal = _currentCarryAmounts.Values.Sum();
-        _spriteController.UpdateCargoFill(currentTotal, maxCarryAmount);
+        _spriteController?.UpdateCargoFill(currentTotal, maxCarryAmount);
     }
 
     private void OnMoving()
     {
         if (_targetResourceNode == null || _targetResourceNode.IsDepleted) {
+            HandleTargetLoss();
+            return;
+        }
+
+        if (!mineableResourceTypes.Contains(_targetResourceNode.resourceType)) {
             HandleTargetLoss();
             return;
         }
@@ -195,7 +198,7 @@ public class Unit_Miner : UnitBase
         unitMovement.StopMovement();
 
         AdjustSpriteDirectionForMining();
-        unitMining.StartMining(_targetResourceNode);
+        StartMining(_targetResourceNode);
         StartMiningVibration();
         StartMiningParticles();
     }
@@ -229,15 +232,37 @@ public class Unit_Miner : UnitBase
     private IEnumerator UnloadResourceCoroutine()
     {
         unitMovement.StopMovement();
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(unloadingTime);
 
         if (_targetStorage != null) {
+            // Check if trying to unload aether and capacity is full
+            bool hasAether = _currentCarryAmounts.ContainsKey(ResourceType.Aether) &&
+                _currentCarryAmounts[ResourceType.Aether] > 0;
+
+            if (hasAether) {
+                AetherConsumptionManager aetherManager = FindFirstObjectByType<AetherConsumptionManager>();
+                if (aetherManager != null && aetherManager.IsAetherCapacityFull) {
+                    // Don't unload aether if capacity is full
+                    InitializeCarryAmounts();
+                    _targetResourceNode = null;
+                    _targetStorage = null;
+                    currentState = UnitState.Idle;
+                    yield break;
+                }
+            }
             Dictionary<ResourceType, int> resourcesBefore = new Dictionary<ResourceType, int>();
             Dictionary<ResourceType, int> resourcesToUnload = new Dictionary<ResourceType, int>();
 
             foreach (KeyValuePair<ResourceType, int> pair in _currentCarryAmounts.Where(p => p.Value > 0)) {
                 resourcesBefore[pair.Key] = _targetStorage.GetCurrentResourceAmount(pair.Key);
                 resourcesToUnload[pair.Key] = pair.Value;
+            }
+
+            List<ResourceType> resourceTypesToShow = resourcesToUnload.Keys.ToList();
+            if (_targetStorage != null)
+            {
+                Vector3 storagePosition = ((Component)_targetStorage).transform.position;
+                StartCoroutine(ShowResourceImages(resourceTypesToShow, storagePosition));
             }
 
             foreach (KeyValuePair<ResourceType, int> pair in resourcesToUnload) {
@@ -323,9 +348,8 @@ public class Unit_Miner : UnitBase
     private MiningTarget FindClosestMineablePosition()
     {
         MiningTarget bestTarget = new MiningTarget { distance = float.MaxValue };
-        
-        if (BuildingManager.Instance == null || BuildingManager.Instance.grid == null)
-        {
+
+        if (BuildingManager.Instance == null || BuildingManager.Instance.grid == null) {
             return bestTarget;
         }
 
@@ -337,24 +361,21 @@ public class Unit_Miner : UnitBase
             )
             .ToList();
 
-        if (availableResources.Count == 0)
-        {
+        if (availableResources.Count == 0) {
             return bestTarget;
         }
 
         Vector3 unitPosition = transform.position;
         List<(ResourceNode node, float distance)> resourcesWithDistance = new List<(ResourceNode, float)>();
-        
-        foreach (ResourceNode resourceNode in availableResources)
-        {
+
+        foreach (ResourceNode resourceNode in availableResources) {
             Vector3 resourceWorldPos = BuildingManager.Instance.grid.GetCellCenterWorld(resourceNode.cellPosition);
             float distanceToResource = Vector3.Distance(unitPosition, resourceWorldPos);
-            
-            if (distanceToResource > maxSearchRadius)
-            {
+
+            if (distanceToResource > maxSearchRadius) {
                 continue;
             }
-            
+
             resourcesWithDistance.Add((resourceNode, distanceToResource));
         }
 
@@ -363,42 +384,35 @@ public class Unit_Miner : UnitBase
         Vector3Int[] neighborOffsets = { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
         Grid grid = BuildingManager.Instance.grid;
 
-        foreach (var (resourceNode, resourceDistance) in resourcesWithDistance)
-        {
-            if (bestTarget.resourceNode != null && resourceDistance > bestTarget.distance + 2f)
-            {
+        foreach ((ResourceNode resourceNode, float resourceDistance) in resourcesWithDistance) {
+            if (bestTarget.resourceNode != null && resourceDistance > bestTarget.distance + 2f) {
                 break; // All remaining resources are further away
             }
 
-            foreach (Vector3Int offset in neighborOffsets)
-            {
+            foreach (Vector3Int offset in neighborOffsets) {
                 Vector3Int neighborCell = resourceNode.cellPosition + offset;
 
                 Vector3 neighborWorldPos = grid.GetCellCenterWorld(neighborCell);
                 float distanceToNeighbor = Vector3.Distance(unitPosition, neighborWorldPos);
-            
-                if (distanceToNeighbor >= bestTarget.distance)
-                {
+
+                if (distanceToNeighbor >= bestTarget.distance) {
                     continue;
                 }
 
-                if (BuildingManager.Instance.CanPlaceBuilding(neighborCell))
-                {
-                    if (distanceToNeighbor < bestTarget.distance)
-                    {
+                if (BuildingManager.Instance.CanPlaceBuilding(neighborCell)) {
+                    if (distanceToNeighbor < bestTarget.distance) {
                         bestTarget.resourceNode = resourceNode;
                         bestTarget.miningCell = neighborCell;
                         bestTarget.distance = distanceToNeighbor;
-                    
-                        if (distanceToNeighbor < 2f)
-                        {
+
+                        if (distanceToNeighbor < 2f) {
                             return bestTarget;
                         }
                     }
                 }
             }
         }
-        
+
         return bestTarget;
     }
 
@@ -432,6 +446,14 @@ public class Unit_Miner : UnitBase
         bool hasAether = _currentCarryAmounts.ContainsKey(ResourceType.Aether) &&
             _currentCarryAmounts[ResourceType.Aether] > 0;
         bool hasNonAether = _currentCarryAmounts.Any(p => p.Key != ResourceType.Aether && p.Value > 0);
+
+        // If trying to unload aether and capacity is full, don't find storage
+        if (hasAether && !hasNonAether) {
+            AetherConsumptionManager aetherManager = FindFirstObjectByType<AetherConsumptionManager>();
+            if (aetherManager != null && aetherManager.IsAetherCapacityFull) {
+                return new UnloadTarget { distance = float.MaxValue };
+            }
+        }
 
         IEnumerable<IStorage> allStorages = ResourceManager.Instance.GetAllStorages()
             .Where(s => s != null && s.GetTotalCurrentAmount() < s.GetMaxCapacity());
@@ -511,7 +533,7 @@ public class Unit_Miner : UnitBase
 
     private void HandleTargetLoss()
     {
-        unitMining?.StopMining();
+        StopMining();
         StopMiningVibration();
         StopMiningParticles();
         _targetResourceNode?.Unreserve();
@@ -528,9 +550,7 @@ public class Unit_Miner : UnitBase
 
     private void SubscribeEvents()
     {
-        if (unitMining != null) {
-            unitMining.OnResourceMined += HandleResourceMined;
-        }
+        OnResourceMined += HandleResourceMined;
         ResourceManager.OnNewStorageAdded += HandleNewStorageAdded;
         ResourceManager.OnStorageRemoved += HandleStorageRemoved;
         UnitManager.OnMineableTypesChanged += HandleMineableTypesChanged;
@@ -539,9 +559,7 @@ public class Unit_Miner : UnitBase
 
     private void UnsubscribeEvents()
     {
-        if (unitMining != null) {
-            unitMining.OnResourceMined -= HandleResourceMined;
-        }
+        OnResourceMined -= HandleResourceMined;
         ResourceManager.OnNewStorageAdded -= HandleNewStorageAdded;
         ResourceManager.OnStorageRemoved -= HandleStorageRemoved;
         UnitManager.OnMineableTypesChanged -= HandleMineableTypesChanged;
@@ -553,10 +571,9 @@ public class Unit_Miner : UnitBase
         if (currentState != UnitState.Mining) return;
 
         _currentCarryAmounts[type] += amount;
-        ShowResourceText(amount);
 
         if (_currentCarryAmounts.Values.Sum() >= maxCarryAmount) {
-            unitMining.StopMining();
+            StopMining();
             StopMiningVibration();
             StopMiningParticles();
             _targetResourceNode?.Unreserve();
@@ -589,7 +606,17 @@ public class Unit_Miner : UnitBase
 
         if ((currentState == UnitState.Mining || currentState == UnitState.Moving) &&
             _targetResourceNode != null && !mineableResourceTypes.Contains(_targetResourceNode.resourceType)) {
-            HandleTargetLoss();
+            if (currentState == UnitState.Moving) {
+                Vector3 targetPosition = BuildingManager.Instance.grid.GetCellCenterWorld(_targetMiningCell);
+                float distanceToTarget = Vector3.Distance(transform.position, targetPosition);
+
+                if (distanceToTarget > 1.0f) {
+                    HandleTargetLoss();
+                }
+            }
+            else if (currentState == UnitState.Mining) {
+                HandleTargetLoss();
+            }
         }
         else if (currentState == UnitState.Idle) {
             FindAndSetTarget();
@@ -610,18 +637,24 @@ public class Unit_Miner : UnitBase
         }
     }
 
-    private void ShowResourceText(int amount)
+    private IEnumerator ShowResourceImages(List<ResourceType> resourceTypes, Vector3 spawnPosition)
     {
-        if (_canvas == null || !showFloatingText) return;
+        if (_canvas == null || resourceTypes == null || resourceTypes.Count == 0) yield break;
+        Vector3 offset = new Vector3(0f, 0.5f, 0f);
+        
+        foreach (ResourceType resourceType in resourceTypes)
+        {
+            GameObject imageObj = ObjectPooler.Instance.SpawnFromPool(
+                "ResourceImage", spawnPosition + offset, Quaternion.identity);
 
-        GameObject textObj = ObjectPooler.Instance.SpawnFromPool(
-            "ResourceText", transform.position, Quaternion.identity);
-
-        if (textObj != null) {
-            FloatingNumText floatingText = textObj.GetComponent<FloatingNumText>();
-            if (floatingText != null) {
-                floatingText.Play($"+{amount}", Color.white);
+            if (imageObj != null) {
+                FloatingResourceImage floatingImage = imageObj.GetComponent<FloatingResourceImage>();
+                if (floatingImage != null) {
+                    floatingImage.Play(resourceType);
+                }
             }
+
+            yield return new WaitForSeconds(resourceImageSpawnInterval);
         }
     }
 
@@ -698,111 +731,142 @@ public class Unit_Miner : UnitBase
     private void StartMiningVibration()
     {
         StopMiningVibration();
-        
-        _basePosition = transform.position;
-        
+
+        if (_spriteController != null) {
+            _spriteBaseLocalPosition = _spriteController.transform.localPosition;
+        }
+
         CreateNextCircleMotion();
     }
-    
+
     private void CreateNextCircleMotion()
     {
         if (currentState != UnitState.Mining) return;
-        if (_vibrationSequence != null && _vibrationSequence.IsActive())
-        {
+        if (_spriteController == null) return;
+
+        if (_vibrationSequence != null && _vibrationSequence.IsActive()) {
             _vibrationSequence.Kill();
         }
-        
-        Vector3 circleCenter = _basePosition;
-        Vector3 currentPos = transform.position;
-        Vector3 toCenter = circleCenter - currentPos;
-        
+
+        Vector3 circleCenter = _spriteBaseLocalPosition;
+        Vector3 currentLocalPos = _spriteController.transform.localPosition;
+        Vector3 toCenter = circleCenter - currentLocalPos;
+
         float distanceFromCenter = toCenter.magnitude;
-        if (distanceFromCenter > vibrationRadius * 1.5f)
-        {
+        if (distanceFromCenter > vibrationRadius * 1.5f) {
             Vector3 closerPos = circleCenter + toCenter.normalized * (vibrationRadius * 0.8f);
             _vibrationSequence = DOTween.Sequence();
-            _vibrationSequence.Append(transform.DOMove(closerPos, 0.1f).SetEase(Ease.OutQuad));
-            currentPos = closerPos;
+            _vibrationSequence.Append(_spriteController.transform.DOLocalMove(closerPos, 0.1f).SetEase(Ease.OutQuad));
         }
-        else
-        {
+        else {
             _vibrationSequence = DOTween.Sequence();
         }
-        
-        float randomAngle = UnityEngine.Random.Range(0f, 360f) * Mathf.Deg2Rad;
+
+        float randomAngle = Random.Range(0f, 360f) * Mathf.Deg2Rad;
         int circlePoints = 8;
-        float angleStep = (Mathf.PI * 2f) / circlePoints;
+        float angleStep = Mathf.PI * 2f / circlePoints;
         float circleDuration = 1f / vibrationSpeed;
         float pointDuration = circleDuration / circlePoints;
-        
-        for (int i = 0; i <= circlePoints; i++)
-        {
-            float angle = randomAngle + (i * angleStep) + UnityEngine.Random.Range(-0.2f, 0.2f);
-            
+
+        for (int i = 0; i <= circlePoints; i++) {
+            float angle = randomAngle + i * angleStep + Random.Range(-0.2f, 0.2f);
+
             Vector3 offset = new Vector3(
                 Mathf.Cos(angle) * vibrationRadius,
                 Mathf.Sin(angle) * vibrationRadius,
                 0f
             );
-            
-            Vector3 targetPos = circleCenter + offset;
-            _vibrationSequence.Append(transform.DOMove(targetPos, pointDuration).SetEase(Ease.Linear));
+
+            Vector3 targetLocalPos = circleCenter + offset;
+            _vibrationSequence.Append(_spriteController.transform.DOLocalMove(targetLocalPos, pointDuration).SetEase(Ease.Linear));
         }
-        
+
         _vibrationSequence.OnComplete(() => {
-            if (currentState == UnitState.Mining)
-            {
+            if (currentState == UnitState.Mining) {
                 CreateNextCircleMotion();
             }
         });
     }
-    
+
     private void StartMiningParticles()
     {
-        if (miningParticleSystem != null)
-        {
+        if (miningParticleSystem != null) {
             UpdateParticlePosition();
-            if (!miningParticleSystem.isPlaying)
-            {
+            if (!miningParticleSystem.isPlaying) {
                 miningParticleSystem.Play();
             }
         }
     }
-    
+
     private void UpdateParticlePosition()
     {
         if (miningParticleSystem == null) return;
-        
+
         Transform particleTransform = miningParticleSystem.transform;
-        Vector3 offsetPosition = transform.position + (_currentMiningDirection * particleOffsetDistance) - new Vector3(0, yOffset, 0);
+        Vector3 offsetPosition = transform.position + _currentMiningDirection * particleOffsetDistance - new Vector3(0, yOffset, 0);
         particleTransform.position = offsetPosition;
     }
-    
+
     private void StopMiningParticles()
     {
-        if (miningParticleSystem != null && miningParticleSystem.isPlaying)
-        {
+        if (miningParticleSystem != null && miningParticleSystem.isPlaying) {
             miningParticleSystem.Stop();
         }
     }
 
     private void StopMiningVibration()
     {
-        if (_vibrationSequence != null && _vibrationSequence.IsActive())
-        {
+        if (_vibrationSequence != null && _vibrationSequence.IsActive()) {
             _vibrationSequence.Kill();
             _vibrationSequence = null;
         }
-        
-        if (_miningVibrationTween != null && _miningVibrationTween.IsActive())
-        {
+
+        if (_miningVibrationTween != null && _miningVibrationTween.IsActive()) {
             _miningVibrationTween.Kill();
             _miningVibrationTween = null;
         }
-        
-        if (transform != null && _basePosition != Vector3.zero && currentState != UnitState.Mining)
-        {
-            transform.DOMove(_basePosition, 0.15f).SetEase(Ease.OutQuad);
+
+        if (_spriteController != null && currentState == UnitState.Mining) {
+            _spriteController.transform.DOLocalMove(_spriteBaseLocalPosition, 0.15f).SetEase(Ease.OutQuad);
+        }
+        else if (currentState != UnitState.Mining) {
+            _spriteBaseLocalPosition = Vector3.zero;
+        }
+    }
+
+    private void StartMining(ResourceNode target)
+    {
+        _targetResourceNode = target;
+
+        _miningDelay = new WaitForSeconds(target.timeToMinePerUnit);
+
+        if (_mineCoroutine == null) {
+            _mineCoroutine = StartCoroutine(MineResourceCoroutine());
+        }
+    }
+
+    private void StopMining()
+    {
+        if (_mineCoroutine != null) {
+            StopCoroutine(_mineCoroutine);
+            _mineCoroutine = null;
+        }
+    }
+
+    private IEnumerator MineResourceCoroutine()
+    {
+        yield return _miningDelay;
+
+        while (true) {
+            if (_targetResourceNode != null && !_targetResourceNode.IsDepleted) {
+                int minedAmount = _targetResourceNode.Mine(mineAmountPerAction);
+                OnResourceMined?.Invoke(_targetResourceNode.resourceType, minedAmount);
+            }
+            else {
+                StopMining();
+                yield break;
+            }
+            yield return _miningDelay;
         }
     }
 

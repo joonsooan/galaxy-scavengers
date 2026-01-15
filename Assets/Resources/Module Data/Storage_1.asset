@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36da8054e533da44f85efae509af8de5, type: 3}
+  m_Name: Storage_1
+  m_EditorClassIdentifier: 
+  moduleName: "\uCC3D\uACE0 \uD655\uC7A5 \uBAA8\uB4C8 1"
+  moduleDescription: "\uC2DC\uB4DC \uCF54\uC5B4\uC758 \uC800\uC7A5 \uACF5\uAC04\uC744
+    \uC870\uAE08 \uD655\uC7A5\uD569\uB2C8\uB2E4."
+  moduleIcon: {fileID: 1493692167465492477, guid: 72f3e83ef786bd946829eb12203b2d3e, type: 3}
+  ingredients:
+  - resourceType: 5
+    amount: 100
+  - resourceType: 12
+    amount: 50
+  moduleType: 5
+  moduleTier: 1
+  effectData: {fileID: 11400000, guid: 28b79b75bdc34fc498c2d3b54e1293f5, type: 2}

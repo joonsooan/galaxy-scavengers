@@ -33,7 +33,6 @@ public class BaseSceneManager : MonoBehaviour
 
     private void Update()
     {
-        // Only close with Escape key, not right-click (right-click is handled by individual panels)
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             CloseUIPanel(_currentPanelIndex);
@@ -62,7 +61,6 @@ public class BaseSceneManager : MonoBehaviour
                 break;
             case 1:
                 targetPanel = moduleUIPanel;
-                inventoryUIPanel.SetActive(true);
                 break;
             case 2:
                 targetPanel = laboratoryUIPanel;
@@ -96,7 +94,6 @@ public class BaseSceneManager : MonoBehaviour
                 break;
             case 1:
                 targetPanel = moduleUIPanel;
-                inventoryUIPanel.SetActive(false);
                 break;
             case 2:
                 targetPanel = laboratoryUIPanel;

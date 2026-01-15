@@ -1,9 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 
 public class Unit_Drone : UnitBase
 {
+    private const float RepathInterval = 0.5f;
+    
     [Header("Drone Settings")]
     [SerializeField] public int carryCapacity = 10;
     [SerializeField] private float processingSpeed = 1f;
@@ -11,45 +14,45 @@ public class Unit_Drone : UnitBase
     [SerializeField] private float unloadingTime = 1f;
     [SerializeField] private float assignmentTime = 1f;
     [SerializeField] private UnitMovement movement;
-    [SerializeField] private Sprite droneIcon;
 
+    [Header("Hover Animation")]
+    [SerializeField] private float hoverHeight = 0.2f;
+    [SerializeField] private float hoverDuration = 1.5f;
+
+    public bool HasCheckedIn { get; private set; }
+    public bool IsAssigned => _currentProcessor != null;
+    public ActiveRecipe CurrentRecipeTask { get; private set; }
+    
     private int _carriedAmount;
+    private float _nextRepathTime;
+    
     private ResourceType _carriedResourceType;
+    private Processor _currentProcessor;
     private Processor.ResourceRequest _currentRequest;
     private DroneState _currentState = DroneState.Idle;
-
-    private IStorage _targetStorage;
-    private Processor _currentProcessor;
-    public ActiveRecipe CurrentRecipeTask { get; private set; }
-    private bool _hasCheckedIn;
-    
-    private float _nextRepathTime;
-    private const float RepathInterval = 0.5f;
-    
     private Coroutine _loadingCoroutine;
-    private Coroutine _unloadingCoroutine;
     private Coroutine _assignmentCoroutine;
+    
     private UnitSpriteController _spriteController;
-
-    public bool IsAssigned => _currentProcessor != null;
-
-    public bool HasCheckedIn {
-        get {
-            return _hasCheckedIn;
-        }
-    }
-
-    public Sprite DroneIcon {
-        get {
-            return droneIcon;
-        }
-    }
+    private IStorage _targetStorage;
+    private Coroutine _unloadingCoroutine;
+    private Tween _hoverTween;
+    private Vector3 _baseHoverLocalPosition;
+    private Transform _spriteTransform;
 
     protected override void Awake()
     {
         base.Awake();
         movement = GetComponent<UnitMovement>();
-        _spriteController = GetComponent<UnitSpriteController>();
+    }
+
+    protected override void Start()
+    {
+        _spriteController = GetComponentInChildren<UnitSpriteController>();
+        if (_spriteController != null) {
+            _spriteTransform = _spriteController.transform;
+            _baseHoverLocalPosition = _spriteTransform.localPosition;
+        }
     }
 
     private void Update()
@@ -57,6 +60,7 @@ public class Unit_Drone : UnitBase
         UpdateUnitBaseState();
         UpdateAnimationState();
         DecideNextAction();
+        UpdateHoverAnimation();
     }
 
     protected override void OnEnable()
@@ -67,6 +71,7 @@ public class Unit_Drone : UnitBase
 
     protected override void OnDisable()
     {
+        StopHover();
         base.OnDisable();
         UnitManager.Instance?.RemoveUnit(this);
         ReleaseFromProcessor();
@@ -74,15 +79,6 @@ public class Unit_Drone : UnitBase
 
     private void DecideNextAction()
     {
-        // Clear target when moving
-        if (movement != null && movement.IsMoving)
-        {
-            if (TryGetComponent(out UnitSpriteController spriteController))
-            {
-                spriteController.ClearTarget();
-            }
-        }
-        
         switch (_currentState) {
         case DroneState.Idle:
             UpdateIdle();
@@ -105,70 +101,83 @@ public class Unit_Drone : UnitBase
             break;
         }
     }
-    
+
     private void UpdateUnitBaseState()
     {
-        switch (_currentState)
-        {
-            case DroneState.Idle:
-                currentState = UnitState.Idle;
-                break;
-            case DroneState.FetchingResource:
-            case DroneState.DeliveringResource:
-            case DroneState.ReturnHome:
+        switch (_currentState) {
+        case DroneState.Idle:
+            if (movement != null && movement.IsMoving) {
                 currentState = UnitState.Moving;
-                break;
-            case DroneState.Processing:
-                // Processing is a stationary worker state; use Idle for base state
+            }
+            else {
                 currentState = UnitState.Idle;
-                break;
+            }
+            break;
+        case DroneState.FetchingResource:
+        case DroneState.DeliveringResource:
+        case DroneState.ReturnHome:
+            currentState = UnitState.Moving;
+            break;
+        case DroneState.Processing:
+            currentState = UnitState.Idle;
+            break;
         }
     }
-    
+
     private void UpdateAnimationState()
     {
-        if (_spriteController == null || movement == null)
-        {
+        if (_spriteController == null || movement == null) {
             return;
         }
 
         bool isProcessing = _currentState == DroneState.Processing;
+        bool isLoading = _loadingCoroutine != null;
+        bool isUnloading = _unloadingCoroutine != null;
+        
         _spriteController.UpdateAnimationState(currentState, isProcessing: isProcessing);
 
-        if (currentState == UnitState.Moving)
-        {
+        if (isLoading || isUnloading) {
+            return;
+        }
+
+        if (currentState == UnitState.Moving) {
             Vector3 moveDir = movement.GetMoveDirection();
             _spriteController.UpdateSpriteDirection(moveDir);
             _spriteController.ClearTarget();
         }
-        else if (isProcessing && _currentProcessor != null)
-        {
-            _spriteController.SetTargetTransform(_currentProcessor.transform);
-        }
     }
 
-    public void AssignProcessor(Processor processor, bool isManual = false)
+    public void AssignProcessor(Processor processor)
     {
         ReleaseFromProcessor();
 
         _currentProcessor = processor;
-        _hasCheckedIn = false;
+        HasCheckedIn = false;
 
         if (_currentProcessor != null) {
             _currentProcessor.AssignDrone(this);
             _currentState = DroneState.Idle;
-            Debug.Log($"[Drone:{name}] Assigned to processor '{_currentProcessor.name}' (manual:{isManual}). Must check in before receiving tasks.");
+            
+            if (_spriteController != null) {
+                _spriteController.SetTargetTransform(_currentProcessor.transform);
+                Vector2 direction = GetProcessorLookDirection(_currentProcessor);
+                if (direction.sqrMagnitude > 0.01f) {
+                    _spriteController.UpdateSpriteDirection(direction);
+                }
+            }
         }
         else {
             _currentState = DroneState.Idle;
-            Debug.Log($"[Drone:{name}] Unassigned from processor");
         }
+        
+        UpdateUnitBaseState();
+        UpdateAnimationState();
     }
 
     private void ReleaseFromProcessor()
     {
         ReleaseFromRecipeTask();
-        
+
         if (_loadingCoroutine != null) {
             StopCoroutine(_loadingCoroutine);
             _loadingCoroutine = null;
@@ -188,16 +197,99 @@ public class Unit_Drone : UnitBase
                 _currentProcessor.CancelRequest(_currentRequest);
                 _currentRequest = null;
             }
-            Debug.Log($"[Drone:{name}] Released from processor '{_currentProcessor.name}'");
         }
         _currentProcessor = null;
+    }
+    
+    private void LookAtTarget(Vector3 targetPosition)
+    {
+        if (_spriteController == null) return;
+
+        Vector2 direction;
+        
+        if (_currentProcessor != null && 
+            Vector3.Distance(targetPosition, _currentProcessor.transform.position) < 0.1f)
+        {
+            direction = GetProcessorLookDirection(_currentProcessor);
+        }
+        else
+        {
+            direction = (targetPosition - transform.position).normalized;
+        }
+        
+        if (direction.sqrMagnitude > 0.01f)
+        {
+            _spriteController.UpdateSpriteDirection(direction);
+        }
+    }
+    
+    private Vector2 GetProcessorLookDirection(Processor processor)
+    {
+        if (processor == null) return Vector2.zero;
+        
+        Vector3 interactionCellPos = processor.AssignInteractionCell(this);
+        Vector3 processorPos = processor.transform.position;
+        
+        float gridSize = 1f;
+        processorPos.y += 0.5f * gridSize;
+        
+        if (processor.ProcessorData != null && 
+            processor.ProcessorData.ProcessorName != null &&
+            processor.ProcessorData.ProcessorName.Contains("Smelter"))
+        {
+            processorPos.x += 0.5f * gridSize;
+        }
+        
+        Vector3 relativePos = interactionCellPos - processorPos;
+        Vector2 lookDirection;
+        
+        float absX = Mathf.Abs(relativePos.x);
+        float absY = Mathf.Abs(relativePos.y);
+
+        if (absY > 1.25f)
+        {
+            if (absX > absY)
+            {
+                if (relativePos.x > 0)
+                {
+                    lookDirection = Vector2.left;
+                }
+                else
+                {
+                    lookDirection = Vector2.right;
+                }
+            }
+            else
+            {
+                if (relativePos.y > 0)
+                {
+                    lookDirection = Vector2.down;
+                }
+                else
+                {
+                    lookDirection = Vector2.up;
+                }
+            }
+            
+        }
+        else
+        {
+            if (relativePos.x > 0)
+            {
+                lookDirection = Vector2.left;
+            }
+            else
+            {
+                lookDirection = Vector2.right;
+            }
+        }
+        return lookDirection;
     }
 
     private void ReleaseFromRecipeTask()
     {
         if (CurrentRecipeTask != null && _currentProcessor != null) {
             _currentProcessor.ReleaseDroneFromRecipe(this);
-            Debug.Log($"[Drone:{name}] Released from recipe {CurrentRecipeTask.recipeData.resourceType}");
         }
         CurrentRecipeTask = null;
     }
@@ -207,20 +299,20 @@ public class Unit_Drone : UnitBase
         if (_currentProcessor == null)
             return;
 
-        if (!_hasCheckedIn) {
+        if (!HasCheckedIn) {
             if (_assignmentCoroutine != null) {
                 return;
             }
-            
-            bool isAtProcessorForCheckIn = movement.HasReachedTarget(movement.waypointTolerance + 0.1f);
-            
+
+            bool isAtProcessorForCheckIn = movement.HasReachedTarget(movement.waypointTolerance);
+
             if (isAtProcessorForCheckIn) {
                 if (_assignmentCoroutine == null) {
                     _assignmentCoroutine = StartCoroutine(AssignmentCoroutine());
                 }
                 return;
             }
-            
+
             if (!movement.IsMoving) {
                 Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
                 bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
@@ -233,26 +325,26 @@ public class Unit_Drone : UnitBase
             return;
         }
 
-        bool isAtProcessor = movement.HasReachedTarget(movement.waypointTolerance + 0.1f);
-        
+        bool isAtProcessor = movement.HasReachedTarget(movement.waypointTolerance);
+
         if (isAtProcessor) {
             if (!movement.IsMoving) {
                 movement.ForceStopAllMovement();
-                if (TryGetComponent(out UnitSpriteController spriteController))
-                {
-                    spriteController.SetTargetTransform(_currentProcessor.transform);
+                if (_spriteController != null) {
+                    _spriteController.SetTargetTransform(_currentProcessor.transform);
+                    Vector2 direction = GetProcessorLookDirection(_currentProcessor);
+                    if (direction.sqrMagnitude > 0.01f) {
+                        _spriteController.UpdateSpriteDirection(direction);
+                    }
                 }
                 _currentProcessor.RequestTask(this);
             }
         }
         else {
-            if (!movement.IsMoving) {
-                Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
-                bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
-                if (!hasPath) {
-                    _currentProcessor.RequestTask(this);
-                    Debug.Log($"[Drone:{name}] Idle: cannot path to processor '{_currentProcessor.name}', requesting task");
-                }
+            if (!movement.IsMoving)
+            {
+                _currentProcessor.AssignInteractionCell(this);
+                _currentProcessor.RequestTask(this);
             }
         }
     }
@@ -264,36 +356,63 @@ public class Unit_Drone : UnitBase
             return;
         }
 
+        bool isAtStorage = movement.HasReachedTarget(movement.waypointTolerance);
+
+        if (isAtStorage && !movement.IsMoving) {
+            if (_spriteController != null && _targetStorage != null) {
+                Vector3 storagePos = ((Component)_targetStorage).transform.position;
+                LookAtTarget(storagePos);
+                _spriteController.SetTargetTransform(((Component)_targetStorage).transform);
+            }
+        }
+
         if (!movement.IsMoving) {
+            // Validate that the storage still has the required resources before loading
+            if (_targetStorage != null && _currentRequest != null) {
+                int availableAmount = _targetStorage.GetCurrentResourceAmount(_currentRequest.type);
+                if (availableAmount < _currentRequest.amount) {
+                    // Storage no longer has enough resources, cancel task
+                    SetTask_ReturnHome();
+                    return;
+                }
+            }
+            
             if (_loadingCoroutine == null) {
                 _loadingCoroutine = StartCoroutine(LoadingResourceCoroutine());
             }
         }
     }
-    
+
     private IEnumerator LoadingResourceCoroutine()
     {
         movement.ForceStopAllMovement();
         
-        if (_targetStorage != null) {
-            if (TryGetComponent(out UnitSpriteController spriteController))
-            {
-                spriteController.SetTargetTransform(((Component)_targetStorage).transform);
-            }
+        if (_targetStorage != null && _spriteController != null) {
+            Vector3 storagePos = ((Component)_targetStorage).transform.position;
+            LookAtTarget(storagePos);
+            _spriteController.SetTargetTransform(((Component)_targetStorage).transform);
         }
-        
+
         yield return new WaitForSeconds(loadingTime);
-        
+
         if (_targetStorage != null && _currentRequest != null) {
+            int availableAmount = _targetStorage.GetCurrentResourceAmount(_currentRequest.type);
+            if (availableAmount < _currentRequest.amount) {
+                SetTask_ReturnHome();
+                _loadingCoroutine = null;
+                yield break;
+            }
+            
             if (_targetStorage.TryWithdrawResource(_currentRequest.type, _currentRequest.amount, out int withdrawnAmount)) {
                 if (withdrawnAmount > 0) {
                     _carriedResourceType = _currentRequest.type;
                     _carriedAmount = withdrawnAmount;
+                    
                     Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
-                    movement.ResumeMovement(); // Resume movement before setting new target
+                    movement.ResumeMovement();
                     movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
+                    
                     _currentState = DroneState.DeliveringResource;
-                    Debug.Log($"[Drone:{name}] Loaded {withdrawnAmount} {_carriedResourceType} from storage");
                 }
                 else {
                     SetTask_ReturnHome();
@@ -306,114 +425,86 @@ public class Unit_Drone : UnitBase
         else {
             SetTask_ReturnHome();
         }
-        
+
         _loadingCoroutine = null;
     }
 
     private void UpdateDelivering()
     {
+        bool isAtProcessor = movement.HasReachedTarget(movement.waypointTolerance);
+
+        if (isAtProcessor && !movement.IsMoving) {
+            if (_spriteController != null && _currentProcessor != null) {
+                Vector2 direction = GetProcessorLookDirection(_currentProcessor);
+                if (direction.sqrMagnitude > 0.01f) {
+                    _spriteController.UpdateSpriteDirection(direction);
+                }
+                _spriteController.SetTargetTransform(_currentProcessor.transform);
+            }
+        }
+
         if (!movement.IsMoving) {
             if (_unloadingCoroutine == null) {
                 _unloadingCoroutine = StartCoroutine(UnloadingResourceCoroutine());
             }
         }
     }
-    
+
     private IEnumerator UnloadingResourceCoroutine()
     {
         movement.ForceStopAllMovement();
         
-        if (_currentProcessor != null) {
-            if (TryGetComponent(out UnitSpriteController spriteController))
-            {
-                spriteController.SetTargetTransform(_currentProcessor.transform);
+        if (_currentProcessor != null && _spriteController != null) {
+            Vector2 direction = GetProcessorLookDirection(_currentProcessor);
+            if (direction.sqrMagnitude > 0.01f) {
+                _spriteController.UpdateSpriteDirection(direction);
             }
+            _spriteController.SetTargetTransform(_currentProcessor.transform);
         }
-        
+
         yield return new WaitForSeconds(unloadingTime);
-        
+
         if (_currentProcessor != null) {
-            bool deposited = _currentProcessor.TryDepositIngredient(_carriedResourceType, _carriedAmount, this);
+            _currentProcessor.TryDepositIngredient(_carriedResourceType, _carriedAmount, this);
 
             _carriedAmount = 0;
             _currentRequest = null;
             _currentState = DroneState.Idle;
-            
+
             _currentProcessor.RequestTask(this);
         }
         else {
             _currentState = DroneState.Idle;
         }
-        
+
         _unloadingCoroutine = null;
     }
-    
+
     private IEnumerator AssignmentCoroutine()
     {
         movement.ForceStopAllMovement();
         
-        if (_currentProcessor != null) {
-            if (TryGetComponent(out UnitSpriteController spriteController))
-            {
-                spriteController.SetTargetTransform(_currentProcessor.transform);
+        if (_currentProcessor != null && _spriteController != null) {
+            Vector2 direction = GetProcessorLookDirection(_currentProcessor);
+            if (direction.sqrMagnitude > 0.01f) {
+                _spriteController.UpdateSpriteDirection(direction);
             }
+            _spriteController.SetTargetTransform(_currentProcessor.transform);
         }
-        
+        else if (_spriteController != null && movement != null) {
+            Vector3 moveDir = movement.GetMoveDirection();
+            _spriteController.UpdateSpriteDirection(moveDir);
+        }
+
         yield return new WaitForSeconds(assignmentTime);
-        
-        _hasCheckedIn = true;
-        
+
+        HasCheckedIn = true;
+
         if (_currentProcessor != null) {
             _currentProcessor.RequestTask(this);
         }
-        
+
         _assignmentCoroutine = null;
-    }
-    
-    private void AdjustSpriteDirectionToBuilding(Transform buildingTransform)
-    {
-        if (buildingTransform == null || BuildingManager.Instance == null || BuildingManager.Instance.grid == null) return;
-        if (!TryGetComponent<UnitSpriteController>(out var spriteController)) return;
-
-        Vector3Int unitCell = BuildingManager.Instance.grid.WorldToCell(transform.position);
-        Vector3Int buildingCell = BuildingManager.Instance.grid.WorldToCell(buildingTransform.position);
-        
-        Vector3Int targetCell = buildingCell;
-        if (BuildingManager.Instance.GetBuildingAt(buildingCell, out List<Vector3Int> occupiedCells))
-        {
-            float minDistance = float.MaxValue;
-            foreach (Vector3Int cell in occupiedCells)
-            {
-                float distance = Vector3.Distance(transform.position, BuildingManager.Instance.grid.GetCellCenterWorld(cell));
-                if (distance < minDistance)
-                {
-                    minDistance = distance;
-                    targetCell = cell;
-                }
-            }
-        }
-
-        Vector3Int relativePosition = targetCell - unitCell;
-        Vector2 targetDirection = Vector2.zero;
-
-        if (relativePosition.x > 0)
-        {
-            targetDirection = Vector2.right;
-        }
-        else if (relativePosition.x < 0)
-        {
-            targetDirection = Vector2.left;
-        }
-        else if (relativePosition.y > 0)
-        {
-            targetDirection = Vector2.up;
-        }
-        else if (relativePosition.y < 0)
-        {
-            targetDirection = Vector2.down;
-        }
-
-        spriteController.UpdateSpriteDirection(targetDirection);
     }
 
     private void UpdateProcessing()
@@ -422,22 +513,32 @@ public class Unit_Drone : UnitBase
             SetTask_Idle();
             return;
         }
+        
+        // Check if processor is operational (has aether)
+        if (_currentProcessor != null && _currentProcessor is IAetherConsumer consumer && !consumer.IsOperational)
+        {
+            SetTask_Idle();
+            return;
+        }
 
-        bool isAtProcessor = movement.HasReachedTarget(movement.waypointTolerance + 0.1f);
+        bool isAtProcessor = movement.HasReachedTarget(movement.waypointTolerance);
 
         if (isAtProcessor) {
             if (movement.IsMoving) {
                 movement.StopMovement();
             }
-            
-            if (TryGetComponent(out UnitSpriteController spriteController))
-            {
-                spriteController.SetTargetTransform(_currentProcessor.transform);
+
+            if (_spriteController != null && _currentProcessor != null) {
+                _spriteController.SetTargetTransform(_currentProcessor.transform);
+                Vector2 direction = GetProcessorLookDirection(_currentProcessor);
+                if (direction.sqrMagnitude > 0.01f) {
+                    _spriteController.UpdateSpriteDirection(direction);
+                }
             }
             
             _currentProcessor.ProcessRecipeWork(CurrentRecipeTask, Time.deltaTime * processingSpeed);
-            
-            if (CurrentRecipeTask == null || (!CurrentRecipeTask.isProcessing && CurrentRecipeTask.assignedDrone == null)) {
+
+            if (CurrentRecipeTask == null || !CurrentRecipeTask.isProcessing && CurrentRecipeTask.assignedDrone == null) {
                 return;
             }
         }
@@ -447,8 +548,9 @@ public class Unit_Drone : UnitBase
                 _nextRepathTime = Time.time + RepathInterval;
                 Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
                 bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
-                if (hasPath) {
-                    float distanceToTarget = movement.FinalTargetPosition != default 
+                if (hasPath)
+                {
+                    _ = movement.FinalTargetPosition != default
                         ? Vector3.Distance(transform.position, movement.FinalTargetPosition)
                         : 0f;
                 }
@@ -466,7 +568,7 @@ public class Unit_Drone : UnitBase
             _currentState = DroneState.Idle;
             return;
         }
-        
+
         Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
         movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
 
@@ -495,13 +597,13 @@ public class Unit_Drone : UnitBase
     {
         Vector3 interactionPos = processor.AssignInteractionCell(this);
         bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
-        
+
         if (!hasPath) {
             SetTask_Idle();
             Debug.Log($"[Drone:{name}] Process start FAILED: cannot path to processor '{processor.name}' for {recipeTask.recipeData.resourceType}");
             return;
         }
-        
+
         _currentState = DroneState.Processing;
         CurrentRecipeTask = recipeTask;
     }
@@ -525,6 +627,51 @@ public class Unit_Drone : UnitBase
 
         if (stopMovement) {
             movement.StopMovement();
+        }
+    }
+
+    private void UpdateHoverAnimation()
+    {
+        bool shouldHover = _spriteTransform != null && 
+                           _currentState != DroneState.Processing && 
+                          (currentState == UnitState.Idle || currentState == UnitState.Moving);
+        
+        if (shouldHover) {
+            if (_hoverTween == null || !_hoverTween.IsActive()) {
+                StartHover();
+            }
+        }
+        else {
+            if (_hoverTween != null && _hoverTween.IsActive()) {
+                StopHover();
+            }
+        }
+    }
+
+    private void StartHover()
+    {
+        StopHover();
+        if (_spriteTransform == null) return;
+        
+        _baseHoverLocalPosition = _spriteTransform.localPosition;
+        _hoverTween = _spriteTransform.DOLocalMoveY(_baseHoverLocalPosition.y + hoverHeight, hoverDuration)
+            .SetEase(Ease.InOutSine)
+            .SetLoops(-1, LoopType.Yoyo);
+    }
+
+    private void StopHover()
+    {
+        if (_hoverTween != null && _hoverTween.IsActive()) {
+            _hoverTween.Kill();
+            _hoverTween = null;
+        }
+
+        if (_spriteTransform != null) {
+            float currentY = _spriteTransform.localPosition.y;
+            float baseY = _baseHoverLocalPosition.y;
+            if (Mathf.Abs(currentY - baseY) > 0.01f) {
+                _spriteTransform.DOLocalMoveY(baseY, 0.2f).SetEase(Ease.OutQuad);
+            }
         }
     }
 

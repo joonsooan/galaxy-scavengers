@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: TurretDamage_1
   m_EditorClassIdentifier: 
   statModifiers:
-  - statType: 5
+  - statType: 6
     modifierValue: 0.2
     statIcon: {fileID: 0}
   effectDescription: "\uD3EC\uD0D1 \uB370\uBBF8\uC9C0 +20%"

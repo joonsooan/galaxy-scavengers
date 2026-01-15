@@ -7,7 +7,6 @@ public class ProcessorUIManager : MonoBehaviour
     [Header("UI References")]
     public GameObject recipeCellPrefab;
     public Transform contentParent;
-    public UnitAssignPanel unitAssignPanel;
 
     [Header("Display UI")]
     [SerializeField] private TMP_Text processorName;

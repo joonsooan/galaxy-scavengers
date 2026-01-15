@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ModuleStationUIManager : MonoBehaviour
+public class ModuleStationUIManager : MonoBehaviour, IQuestUIProvider
 {
     [Header("UI References")]
     [SerializeField] private GameObject moduleStationPanel;
@@ -13,25 +13,34 @@ public class ModuleStationUIManager : MonoBehaviour
     [SerializeField] private GameObject moduleGridCellPrefab;
     [SerializeField] private ModuleDetailPanel moduleDetailPanel;
     [SerializeField] private Button closeButton;
+    
+    [Header("Quest UI")]
+    [SerializeField] private Button questButton;
+    [SerializeField] private Button shopButton;
+    [SerializeField] private GameObject questGridPanel;
+    [SerializeField] private RectTransform questGridParent;
+    [SerializeField] private GameObject questCellPrefab;
+    [SerializeField] private QuestDetailPanel questDetailPanel;
+    [SerializeField] private QuestProvider questProvider = QuestProvider.NPC_1;
+    [SerializeField] private QuestUIHandler questUIHandler;
+    [SerializeField] private List<ModuleGridCell> recipeCells = new ();
 
-    private readonly List<ModuleGridCell> _recipeCells = new List<ModuleGridCell>();
     private ModuleData _currentData;
     private ModuleStation _currentStation;
 
     private void Start()
     {
-        if (moduleStationPanel != null) {
-            moduleStationPanel.SetActive(false);
-        }
+        moduleStationPanel.SetActive(false);
+        moduleDetailPanel.Initialize();
 
-        if (moduleDetailPanel != null) {
-            moduleDetailPanel.Initialize(this);
+        closeButton.onClick.RemoveAllListeners();
+        closeButton.onClick.AddListener(OnCloseButtonClicked);
+        
+        if (questUIHandler == null)
+        {
+            questUIHandler = gameObject.AddComponent<QuestUIHandler>();
         }
-
-        if (closeButton != null) {
-            closeButton.onClick.RemoveAllListeners();
-            closeButton.onClick.AddListener(OnCloseButtonClicked);
-        }
+        questUIHandler.Initialize(this);
     }
 
     private void OnEnable()
@@ -49,27 +58,21 @@ public class ModuleStationUIManager : MonoBehaviour
         _currentStation = station;
         _currentData = station.ModuleData;
 
-        if (moduleStationPanel != null) {
-            moduleStationPanel.SetActive(true);
-        }
-
-        if (moduleDetailPanel != null) {
-            moduleDetailPanel.gameObject.SetActive(true);
-            moduleDetailPanel.ClearInfo();
-        }
+        moduleStationPanel.SetActive(true);
+        moduleDetailPanel.gameObject.SetActive(true);
+        moduleDetailPanel.ClearInfo();
 
         UpdateStationInfo();
-        LoadAllRecipes();
+        ShowShopUI();
     }
 
     private void HidePanel()
     {
-        if (moduleStationPanel != null) {
-            moduleStationPanel.SetActive(false);
-        }
-
-        if (moduleDetailPanel != null) {
-            moduleDetailPanel.HidePanel();
+        moduleStationPanel.SetActive(false);
+        moduleDetailPanel.HidePanel();
+        if (questUIHandler != null)
+        {
+            questUIHandler.HideQuestUI();
         }
     }
 
@@ -81,14 +84,9 @@ public class ModuleStationUIManager : MonoBehaviour
     private void UpdateStationInfo()
     {
         if (_currentData == null) return;
-
-        if (stationNameText != null) {
-            stationNameText.text = _currentData.StationName;
-        }
-
-        if (stationInfoText != null) {
-            stationInfoText.text = _currentData.StationInfo;
-        }
+        
+        stationNameText.text = _currentData.StationName;
+        stationInfoText.text = _currentData.StationInfo;
     }
 
     private void LoadAllRecipes()
@@ -98,19 +96,14 @@ public class ModuleStationUIManager : MonoBehaviour
         if (_currentData == null || recipeGridContainer == null || moduleGridCellPrefab == null) {
             return;
         }
-
-        GridLayoutGroup gridLayout = recipeGridContainer.GetComponent<GridLayoutGroup>();
-        if (gridLayout == null) {
-            gridLayout = recipeGridContainer.AddComponent<GridLayoutGroup>();
-        }
-
+        
         foreach (ModuleRecipe recipe in _currentData.Recipes) {
             GameObject cellObj = Instantiate(moduleGridCellPrefab, recipeGridContainer.transform);
             ModuleGridCell cell = cellObj.GetComponent<ModuleGridCell>();
 
             if (cell != null) {
                 cell.Initialize(recipe, this);
-                _recipeCells.Add(cell);
+                recipeCells.Add(cell);
             }
         }
     }
@@ -123,7 +116,7 @@ public class ModuleStationUIManager : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        _recipeCells.Clear();
+        recipeCells.Clear();
     }
 
     public void ShowModuleDetail(ModuleRecipe recipe)
@@ -132,10 +125,34 @@ public class ModuleStationUIManager : MonoBehaviour
             moduleDetailPanel.ShowInfo(recipe, _currentStation);
         }
     }
-
-    public void OnModuleCrafted()
+    
+    public Button GetQuestButton() => questButton;
+    public Button GetShopButton() => shopButton;
+    public GameObject GetQuestGridPanel() => questGridPanel;
+    public RectTransform GetQuestGridParent() => questGridParent;
+    public GameObject GetQuestCellPrefab() => questCellPrefab;
+    public QuestDetailPanel GetQuestDetailPanel() => questDetailPanel;
+    public QuestProvider GetQuestProvider() => questProvider;
+    public GameObject GetShopUIContainer() => recipeGridContainer;
+    
+    public void ShowShopUI()
     {
-        // Module crafting is handled by BaseInventorySystem events
-        // No additional action needed here
+        recipeGridContainer.SetActive(true);
+        moduleDetailPanel.ShowPanel();
+        LoadAllRecipes();
+    }
+    
+    public void HideShopUI()
+    {
+        recipeGridContainer.SetActive(false);
+        moduleDetailPanel.HidePanel();
+    }
+    
+    public void ClearDetailPanel()
+    {
+        if (moduleDetailPanel != null)
+        {
+            moduleDetailPanel.ClearInfo();
+        }
     }
 }
