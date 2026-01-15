@@ -24,7 +24,7 @@ public class Unit_Miner : UnitBase
 
     [Header("VFX")]
     [SerializeField] private string canvasName = "ObjectUI Canvas";
-    [SerializeField] private bool showFloatingText;
+    [SerializeField] private float resourceImageSpawnInterval = 0.5f;
     [SerializeField] private ParticleSystem miningParticleSystem;
     [SerializeField] private float particleOffsetDistance = 0.5f;
     [SerializeField] private float yOffset;
@@ -33,9 +33,8 @@ public class Unit_Miner : UnitBase
     [SerializeField] private float vibrationRadius = 0.1f;
     [SerializeField] private float vibrationSpeed = 2f;
 
-    private readonly Dictionary<ResourceType, int> _currentCarryAmounts = new Dictionary<ResourceType, int>();
+    private readonly Dictionary<ResourceType, int> _currentCarryAmounts = new ();
 
-    private Vector3 _basePosition;
     private Canvas _canvas;
     private Vector3 _currentMiningDirection;
     private Coroutine _findResourceCoroutine;
@@ -258,6 +257,9 @@ public class Unit_Miner : UnitBase
                 resourcesBefore[pair.Key] = _targetStorage.GetCurrentResourceAmount(pair.Key);
                 resourcesToUnload[pair.Key] = pair.Value;
             }
+
+            List<ResourceType> resourceTypesToShow = resourcesToUnload.Keys.ToList();
+            StartCoroutine(ShowResourceImages(resourceTypesToShow));
 
             foreach (KeyValuePair<ResourceType, int> pair in resourcesToUnload) {
                 _targetStorage.TryAddResource(pair.Key, pair.Value);
@@ -565,7 +567,6 @@ public class Unit_Miner : UnitBase
         if (currentState != UnitState.Mining) return;
 
         _currentCarryAmounts[type] += amount;
-        ShowResourceText(amount);
 
         if (_currentCarryAmounts.Values.Sum() >= maxCarryAmount) {
             StopMining();
@@ -632,18 +633,24 @@ public class Unit_Miner : UnitBase
         }
     }
 
-    private void ShowResourceText(int amount)
+    private IEnumerator ShowResourceImages(List<ResourceType> resourceTypes)
     {
-        if (_canvas == null || !showFloatingText) return;
+        if (_canvas == null || resourceTypes == null || resourceTypes.Count == 0) yield break;
+        Vector3 offset = new Vector3(0f, 0.5f, 0f);
+        
+        foreach (ResourceType resourceType in resourceTypes)
+        {
+            GameObject imageObj = ObjectPooler.Instance.SpawnFromPool(
+                "ResourceImage", transform.position + offset, Quaternion.identity);
 
-        GameObject textObj = ObjectPooler.Instance.SpawnFromPool(
-            "ResourceText", transform.position, Quaternion.identity);
-
-        if (textObj != null) {
-            FloatingNumText floatingText = textObj.GetComponent<FloatingNumText>();
-            if (floatingText != null) {
-                floatingText.Play($"+{amount}", Color.white);
+            if (imageObj != null) {
+                FloatingResourceImage floatingImage = imageObj.GetComponent<FloatingResourceImage>();
+                if (floatingImage != null) {
+                    floatingImage.Play(resourceType);
+                }
             }
+
+            yield return new WaitForSeconds(resourceImageSpawnInterval);
         }
     }
 
@@ -720,8 +727,6 @@ public class Unit_Miner : UnitBase
     private void StartMiningVibration()
     {
         StopMiningVibration();
-
-        _basePosition = transform.position;
 
         if (_spriteController != null) {
             _spriteBaseLocalPosition = _spriteController.transform.localPosition;
@@ -821,7 +826,6 @@ public class Unit_Miner : UnitBase
             _spriteController.transform.DOLocalMove(_spriteBaseLocalPosition, 0.15f).SetEase(Ease.OutQuad);
         }
         else if (currentState != UnitState.Mining) {
-            _basePosition = Vector3.zero;
             _spriteBaseLocalPosition = Vector3.zero;
         }
     }

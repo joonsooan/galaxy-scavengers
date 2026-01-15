@@ -30449,10 +30449,10 @@ MonoBehaviour:
     size: 20
     prefab: {fileID: 176529985360585926, guid: c122ec1d854b9a04994f510c553243e5, type: 3}
     parent: {fileID: 1824578857}
-  - tag: Enemy_0
-    size: 200
-    prefab: {fileID: 7944764008120523387, guid: 6ef6e727776f20b46a722ca01f6b9153, type: 3}
-    parent: {fileID: 0}
+  - tag: ResourceImage
+    size: 20
+    prefab: {fileID: 1158943498706274819, guid: 687557bf0a5dd404c9e3f25529a09ca8, type: 3}
+    parent: {fileID: 1824578857}
 --- !u!4 &1355668859
 Transform:
   m_ObjectHideFlags: 0
@@ -35712,7 +35712,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1824578857}
   m_Layer: 0
-  m_Name: Text Pool
+  m_Name: ResourceImage Pool
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
