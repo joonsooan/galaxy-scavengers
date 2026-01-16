@@ -1,61 +1,61 @@
 fileFormatVersion: 2
-guid: c9923a3e68a97cd45812a18ce672d1f5
+guid: 78f32ef872347bd4fb7aa8c9d8a251cb
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3198343668435198230
-    second: unit-construct-constructing-left_0
+      213: -6826604175187796235
+    second: unit-construct-idle-right-normal_0
   - first:
-      213: -8917604617051844903
-    second: unit-construct-constructing-left_1
+      213: -1933077351383417497
+    second: unit-construct-idle-right-normal_1
   - first:
-      213: 4621666963026827836
-    second: unit-construct-constructing-left_2
+      213: -8225500830213174891
+    second: unit-construct-idle-right-normal_2
   - first:
-      213: -8392311974467735304
-    second: unit-construct-constructing-left_3
+      213: 3015780477225681820
+    second: unit-construct-idle-right-normal_3
   - first:
-      213: 3609856352424031248
-    second: unit-construct-constructing-left_4
+      213: -3557789842629039321
+    second: unit-construct-idle-right-normal_4
   - first:
-      213: 5077624058372570529
-    second: unit-construct-constructing-left_5
+      213: -2179200514224538227
+    second: unit-construct-idle-right-normal_5
   - first:
-      213: -2309933496677474635
-    second: unit-construct-constructing-left_6
+      213: 6530254741103739932
+    second: unit-construct-idle-right-normal_6
   - first:
-      213: 5207703701091946155
-    second: unit-construct-constructing-left_7
+      213: 5548154637445519107
+    second: unit-construct-idle-right-normal_7
   - first:
-      213: 8279267483056846918
-    second: unit-construct-constructing-left_8
+      213: -1409792768296653074
+    second: unit-construct-idle-right-normal_8
   - first:
-      213: -1488369879141683163
-    second: unit-construct-constructing-left_9
+      213: -7639000310927015277
+    second: unit-construct-idle-right-normal_9
   - first:
-      213: 2070403346942924721
-    second: unit-construct-constructing-left_10
+      213: 7025291587784958695
+    second: unit-construct-idle-right-normal_10
   - first:
-      213: 8579696681150460292
-    second: unit-construct-constructing-left_11
+      213: 2174875815873461301
+    second: unit-construct-idle-right-normal_11
   - first:
-      213: 8955731103567840943
-    second: unit-construct-constructing-left_12
+      213: -638379997431297357
+    second: unit-construct-idle-right-normal_12
   - first:
-      213: -1268431247550633732
-    second: unit-construct-constructing-left_13
+      213: 5569551087350640677
+    second: unit-construct-idle-right-normal_13
   - first:
-      213: -8015669534183756257
-    second: unit-construct-constructing-left_14
+      213: 2413601231648325509
+    second: unit-construct-idle-right-normal_14
   - first:
-      213: -6881354932347196890
-    second: unit-construct-constructing-left_15
+      213: -6394309328058027850
+    second: unit-construct-idle-right-normal_15
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 0
-    sRGBTexture: 1
+    enableMipMap: 1
+    sRGBTexture: 0
     linearTexture: 0
     fadeOut: 0
     borderMipMap: 0
@@ -96,13 +96,13 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 16
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
-  alphaIsTransparency: 1
+  alphaIsTransparency: 0
   spriteTessellationDetail: -1
-  textureType: 8
+  textureType: 1
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 1
@@ -141,370 +141,357 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: WebGL
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 0
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: unit-construct-constructing-left_0
+      name: unit-construct-idle-right-normal_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 16
+        width: 15
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 21c842ea3ec26aa41a38bf709642bfb9
-      internalID: -3198343668435198230
+      spriteID: 5fe9bbbeba70341a0800000000000000
+      internalID: -6826604175187796235
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-construct-constructing-left_1
+      name: unit-construct-idle-right-normal_1
       rect:
         serializedVersion: 2
-        x: 16
+        x: 15
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 7c9113ab2d5e63441a3a030c62edb058
-      internalID: -8917604617051844903
+      spriteID: 76d307b04645c25e0800000000000000
+      internalID: -1933077351383417497
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-construct-constructing-left_2
+      name: unit-construct-idle-right-normal_2
       rect:
         serializedVersion: 2
-        x: 32
+        x: 31
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 8967592d3b6bf38489b684e4e7fc6ac9
-      internalID: 4621666963026827836
+      spriteID: 5998673539629dd80800000000000000
+      internalID: -8225500830213174891
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-construct-constructing-left_3
+      name: unit-construct-idle-right-normal_3
       rect:
         serializedVersion: 2
-        x: 48
+        x: 47
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: d056d5c0e7440414cbc3fd3f10cdb00f
-      internalID: -8392311974467735304
+      spriteID: c934891ad543ad920800000000000000
+      internalID: 3015780477225681820
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-construct-constructing-left_4
+      name: unit-construct-idle-right-normal_4
       rect:
         serializedVersion: 2
-        x: 64
+        x: 63
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: ee457b8041c7e74478289af125dada06
-      internalID: 3609856352424031248
+      spriteID: 72b6a94fcf030aec0800000000000000
+      internalID: -3557789842629039321
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-construct-constructing-left_5
+      name: unit-construct-idle-right-normal_5
       rect:
         serializedVersion: 2
-        x: 80
+        x: 79
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 5aa97dba5c7ccf9429f51cae922d8f2f
-      internalID: 5077624058372570529
+      spriteID: d8d3c4f9dace1c1e0800000000000000
+      internalID: -2179200514224538227
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-construct-constructing-left_6
+      name: unit-construct-idle-right-normal_6
       rect:
         serializedVersion: 2
-        x: 96
+        x: 95
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 4a5af4ba09eb5dc4f807ec18b00c9dd2
-      internalID: -2309933496677474635
+      spriteID: c148c48961020aa50800000000000000
+      internalID: 6530254741103739932
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-construct-constructing-left_7
+      name: unit-construct-idle-right-normal_7
       rect:
         serializedVersion: 2
-        x: 112
+        x: 111
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: aa122f9dae3ed66478cdcffb57c58298
-      internalID: 5207703701091946155
+      spriteID: 30750e35f310ffc40800000000000000
+      internalID: 5548154637445519107
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-construct-constructing-left_8
+      name: unit-construct-idle-right-normal_8
       rect:
         serializedVersion: 2
-        x: 128
+        x: 127
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 177fae318269c504799fe885fb4c3ec0
-      internalID: 8279267483056846918
+      spriteID: eee63c652f86f6ce0800000000000000
+      internalID: -1409792768296653074
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-construct-constructing-left_9
+      name: unit-construct-idle-right-normal_9
       rect:
         serializedVersion: 2
-        x: 144
+        x: 143
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 519e87259a0aa74439817a9c70f4be4e
-      internalID: -1488369879141683163
+      spriteID: 392c81cb0b1dcf590800000000000000
+      internalID: -7639000310927015277
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-construct-constructing-left_10
+      name: unit-construct-idle-right-normal_10
       rect:
         serializedVersion: 2
-        x: 160
+        x: 159
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: dcb24b0cc7144b344ac43436e688506a
-      internalID: 2070403346942924721
+      spriteID: 7e2667d3a79de7160800000000000000
+      internalID: 7025291587784958695
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-construct-constructing-left_11
+      name: unit-construct-idle-right-normal_11
       rect:
         serializedVersion: 2
-        x: 176
+        x: 175
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 8cdd1821088b3e1429e748b79580f45d
-      internalID: 8579696681150460292
+      spriteID: 53cb9b31806be2e10800000000000000
+      internalID: 2174875815873461301
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-construct-constructing-left_12
+      name: unit-construct-idle-right-normal_12
       rect:
         serializedVersion: 2
-        x: 192
+        x: 191
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 937feddc255a68144baa760235e08ddc
-      internalID: 8955731103567840943
+      spriteID: 3ba846d46c40427f0800000000000000
+      internalID: -638379997431297357
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-construct-constructing-left_13
+      name: unit-construct-idle-right-normal_13
       rect:
         serializedVersion: 2
-        x: 208
+        x: 207
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: bca89243d67d65c43ac4c77581a2c3da
-      internalID: -1268431247550633732
+      spriteID: 520fce784350b4d40800000000000000
+      internalID: 5569551087350640677
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-construct-constructing-left_14
+      name: unit-construct-idle-right-normal_14
       rect:
         serializedVersion: 2
-        x: 224
+        x: 223
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: bd3aadca0b9e9b54484086773ba4801d
-      internalID: -8015669534183756257
+      spriteID: 58ff7d94885de7120800000000000000
+      internalID: 2413601231648325509
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-construct-constructing-left_15
+      name: unit-construct-idle-right-normal_15
       rect:
         serializedVersion: 2
-        x: 240
+        x: 239
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 76cef7f712694814ea5daeddfcbf74f3
-      internalID: -6881354932347196890
+      spriteID: 6b0722d6b89d247a0800000000000000
+      internalID: -6394309328058027850
       vertices: []
       indices: 
       edges: []
@@ -513,34 +500,32 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 876d429699a0efd4a9f2479dd55fe604
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: 17aa917fb8f5a4b4db1eaa981ebabb87, type: 3}
-      name: _NormalMap
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      unit-construct-constructing-left_0: -3198343668435198230
-      unit-construct-constructing-left_1: -8917604617051844903
-      unit-construct-constructing-left_10: 2070403346942924721
-      unit-construct-constructing-left_11: 8579696681150460292
-      unit-construct-constructing-left_12: 8955731103567840943
-      unit-construct-constructing-left_13: -1268431247550633732
-      unit-construct-constructing-left_14: -8015669534183756257
-      unit-construct-constructing-left_15: -6881354932347196890
-      unit-construct-constructing-left_2: 4621666963026827836
-      unit-construct-constructing-left_3: -8392311974467735304
-      unit-construct-constructing-left_4: 3609856352424031248
-      unit-construct-constructing-left_5: 5077624058372570529
-      unit-construct-constructing-left_6: -2309933496677474635
-      unit-construct-constructing-left_7: 5207703701091946155
-      unit-construct-constructing-left_8: 8279267483056846918
-      unit-construct-constructing-left_9: -1488369879141683163
+      unit-construct-idle-right-normal_0: -6826604175187796235
+      unit-construct-idle-right-normal_1: -1933077351383417497
+      unit-construct-idle-right-normal_10: 7025291587784958695
+      unit-construct-idle-right-normal_11: 2174875815873461301
+      unit-construct-idle-right-normal_12: -638379997431297357
+      unit-construct-idle-right-normal_13: 5569551087350640677
+      unit-construct-idle-right-normal_14: 2413601231648325509
+      unit-construct-idle-right-normal_15: -6394309328058027850
+      unit-construct-idle-right-normal_2: -8225500830213174891
+      unit-construct-idle-right-normal_3: 3015780477225681820
+      unit-construct-idle-right-normal_4: -3557789842629039321
+      unit-construct-idle-right-normal_5: -2179200514224538227
+      unit-construct-idle-right-normal_6: 6530254741103739932
+      unit-construct-idle-right-normal_7: 5548154637445519107
+      unit-construct-idle-right-normal_8: -1409792768296653074
+      unit-construct-idle-right-normal_9: -7639000310927015277
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

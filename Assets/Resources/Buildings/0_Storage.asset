@@ -16,7 +16,7 @@ MonoBehaviour:
   description: "\uC790\uC6D0\uC744 \uC800\uC7A5\uD560 \uC218 \uC788\uB294 \uCC3D\uACE0\uC785\uB2C8\uB2E4.
     \uC720\uB2DB\uB4E4\uC740 \uAC00\uC7A5 \uAC00\uAE4C\uC6B4 \uC800\uC7A5\uACE0\uB85C
     \uC790\uC6D0\uC744 \uC6B4\uBC18\uD558\uAC70\uB098 \uAEBC\uB0B4\uC11C \uC0AC\uC6A9\uD569\uB2C8\uB2E4."
-  icon: {fileID: -2447318104963349794, guid: 135e80e3fb0b8044a8dfc67e688cb32f, type: 3}
+  icon: {fileID: 4732533060781796412, guid: 7e0ebfdf21cc03f439b21c2b91b14e87, type: 3}
   buildingPrefab: {fileID: 1574451153020646121, guid: bb1d61d0bb9212a43a284a4716380a4b, type: 3}
   buildingTile: {fileID: 11400000, guid: eb52d49e34f0a7349b188d1a0f47dcf8, type: 2}
   buildingType: 0
