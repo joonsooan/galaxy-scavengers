@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 7a155a975e49c6c49af60da0d680e855
+guid: 0c7378c4879d65e438625f9a9a18a6f9
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3881324236535122659
-    second: smelter_0
+      213: 1688704480188365344
+    second: smelter_modified_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,7 +113,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: smelter_0
+      name: smelter_modified_0
       rect:
         serializedVersion: 2
         x: 0
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3ea4ac834db3dd530800000000000000
-      internalID: 3881324236535122659
+      spriteID: 02afc3017cb7f6710800000000000000
+      internalID: 1688704480188365344
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 32491713c64f1d341bb1dd7c43ab6d0d
+    spriteID: 2542fdd8c2451124d8a6d10e3c2ef5ea
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      smelter_0: 3881324236535122659
+      smelter_modified_0: 1688704480188365344
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
