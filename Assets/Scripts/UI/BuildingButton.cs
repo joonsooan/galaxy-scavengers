@@ -27,11 +27,80 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
         InitializeBtn();
     }
+    
+    private void Start()
+    {
+        // Wait for BuildingUnlockManager to initialize
+        if (BuildingUnlockManager.Instance == null)
+        {
+            GameObject unlockManagerObj = new GameObject("BuildingUnlockManager");
+            unlockManagerObj.AddComponent<BuildingUnlockManager>();
+        }
+        
+        UpdateUnlockStatus();
+        
+        // Subscribe to unlock events
+        if (BuildingUnlockManager.Instance != null)
+        {
+            BuildingUnlockManager.Instance.OnBuildingUnlocked += OnBuildingUnlocked;
+        }
+    }
+    
+    private void OnEnable()
+    {
+        // Re-check unlock status when enabled
+        if (BuildingUnlockManager.Instance != null)
+        {
+            UpdateUnlockStatus();
+            BuildingUnlockManager.Instance.OnBuildingUnlocked += OnBuildingUnlocked;
+        }
+    }
+    
+    private void OnDisable()
+    {
+        if (BuildingUnlockManager.Instance != null)
+        {
+            BuildingUnlockManager.Instance.OnBuildingUnlocked -= OnBuildingUnlocked;
+        }
+    }
 
     private void InitializeBtn()
     {
-        icon.sprite = buildingData.icon;
-        btnName.text = buildingData.displayName;
+        if (buildingData == null) return;
+        
+        if (icon != null)
+        {
+            icon.sprite = buildingData.icon;
+        }
+        
+        if (btnName != null)
+        {
+            btnName.text = buildingData.displayName;
+        }
+    }
+    
+    private void UpdateUnlockStatus()
+    {
+        if (buildingData == null)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+        
+        bool isUnlocked = BuildingUnlockManager.Instance != null && 
+                          BuildingUnlockManager.Instance.IsBuildingUnlocked(buildingData);
+        
+        // Hide/show the button based on unlock status
+        gameObject.SetActive(isUnlocked);
+    }
+    
+    private void OnBuildingUnlocked(BuildingData unlockedBuilding)
+    {
+        // If this button's building was unlocked, show it
+        if (unlockedBuilding == buildingData)
+        {
+            UpdateUnlockStatus();
+        }
     }
 
     private void OnButtonClicked()

@@ -212,6 +212,77 @@ public class QuestDetailPanel : MonoBehaviour
                     }
                 }
             }
+            
+            if (questData.questFinishReward.creditReward > 0)
+            {
+                GameObject cellObj = Instantiate(baseInventoryCellPrefab, rewardGridContainer.transform);
+                BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
+                if (cell != null)
+                {
+                    // Display credit reward as a special resource type or custom text
+                    // For now, we'll need to check if there's a way to display custom text
+                    // If BaseInventoryCell supports custom display, use it; otherwise create a text element
+                    TMP_Text creditText = cellObj.GetComponentInChildren<TMP_Text>();
+                    if (creditText != null)
+                    {
+                        creditText.text = $"{questData.questFinishReward.creditReward} Credits";
+                    }
+                }
+            }
+            
+            // Display unlocked buildings
+            if (questData.questFinishReward.unlockedBuildings != null && questData.questFinishReward.unlockedBuildings.Length > 0)
+            {
+                foreach (BuildingData building in questData.questFinishReward.unlockedBuildings)
+                {
+                    if (building == null) continue;
+                    
+                    GameObject cellObj = Instantiate(baseInventoryCellPrefab, rewardGridContainer.transform);
+                    BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
+                    if (cell != null)
+                    {
+                        // Try to set building icon if BaseInventoryCell supports it
+                        Image iconImage = cellObj.GetComponentInChildren<Image>();
+                        if (iconImage != null && building.icon != null)
+                        {
+                            iconImage.sprite = building.icon;
+                        }
+                        
+                        TMP_Text nameText = cellObj.GetComponentInChildren<TMP_Text>();
+                        if (nameText != null)
+                        {
+                            nameText.text = building.displayName;
+                        }
+                    }
+                }
+            }
+            
+            // Display new units
+            if (questData.questFinishReward.newUnits != null && questData.questFinishReward.newUnits.Length > 0)
+            {
+                foreach (UnitData unit in questData.questFinishReward.newUnits)
+                {
+                    if (unit == null) continue;
+                    
+                    GameObject cellObj = Instantiate(baseInventoryCellPrefab, rewardGridContainer.transform);
+                    BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
+                    if (cell != null)
+                    {
+                        // Try to set unit icon if BaseInventoryCell supports it
+                        Image iconImage = cellObj.GetComponentInChildren<Image>();
+                        if (iconImage != null && unit.unitIcon != null)
+                        {
+                            iconImage.sprite = unit.unitIcon;
+                        }
+                        
+                        TMP_Text nameText = cellObj.GetComponentInChildren<TMP_Text>();
+                        if (nameText != null)
+                        {
+                            nameText.text = $"{unit.unitName} (NEW)";
+                        }
+                    }
+                }
+            }
 
             foreach (Transform child in rewardGridContainer.transform)
             {
@@ -370,6 +441,33 @@ public class QuestDetailPanel : MonoBehaviour
                 {
                     Module module = new Module(moduleRecipe);
                     inventoryManager.AddModule(module);
+                }
+            }
+            
+            if (quest.questFinishReward.creditReward > 0)
+            {
+                if (CreditManager.Instance != null)
+                {
+                    CreditManager.Instance.AddCredits(quest.questFinishReward.creditReward);
+                }
+                else
+                {
+                    Debug.LogWarning($"QuestDetailPanel: CreditManager.Instance is null. Cannot award {quest.questFinishReward.creditReward} credits for quest {questId}");
+                }
+            }
+            
+            // Unlock buildings
+            if (quest.questFinishReward.unlockedBuildings != null && quest.questFinishReward.unlockedBuildings.Length > 0)
+            {
+                if (BuildingUnlockManager.Instance == null)
+                {
+                    GameObject unlockManagerObj = new GameObject("BuildingUnlockManager");
+                    unlockManagerObj.AddComponent<BuildingUnlockManager>();
+                }
+                
+                if (BuildingUnlockManager.Instance != null)
+                {
+                    BuildingUnlockManager.Instance.UnlockBuildings(quest.questFinishReward.unlockedBuildings);
                 }
             }
             

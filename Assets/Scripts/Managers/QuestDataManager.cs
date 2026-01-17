@@ -22,6 +22,10 @@ public class QuestDataManager : MonoBehaviour
     private readonly Dictionary<int, QuestState> _questStates = new ();
     private readonly HashSet<int> _completedQuestIds = new ();
     private readonly HashSet<int> _activeQuestIds = new ();
+    
+    [Header("Test Settings")]
+    [Tooltip("If true, all active quests will be completable regardless of requirements")]
+    [SerializeField] private bool testMode = false;
 
     public event Action<int> OnQuestStateChanged;
 
@@ -42,6 +46,13 @@ public class QuestDataManager : MonoBehaviour
         InitializeQuests();
         
         StartCoroutine(SubscribeToBaseInventoryEvents());
+        
+        // Initialize QuestTracker if not already initialized
+        if (FindFirstObjectByType<QuestTracker>() == null)
+        {
+            GameObject questTrackerObj = new GameObject("QuestTracker");
+            questTrackerObj.AddComponent<QuestTracker>();
+        }
     }
 
     private System.Collections.IEnumerator SubscribeToBaseInventoryEvents()
@@ -129,7 +140,10 @@ public class QuestDataManager : MonoBehaviour
 
             _questDataDict[quest.questId] = quest;
             
-            if (quest.previousQuestId == -1)
+            // Check if quest has prerequisites
+            bool hasPrerequisites = quest.previousQuestIds != null && quest.previousQuestIds.Length > 0;
+            
+            if (!hasPrerequisites)
             {
                 _questStates[quest.questId] = QuestState.Available;
             }
@@ -156,11 +170,16 @@ public class QuestDataManager : MonoBehaviour
         }
 
         QuestData quest = _questDataDict[questId];
-        if (quest.previousQuestId != -1)
+        
+        // Check multiple prerequisites
+        if (quest.previousQuestIds != null && quest.previousQuestIds.Length > 0)
         {
-            if (!_completedQuestIds.Contains(quest.previousQuestId))
+            foreach (int prerequisiteId in quest.previousQuestIds)
             {
-                return false;
+                if (!_completedQuestIds.Contains(prerequisiteId))
+                {
+                    return false;
+                }
             }
         }
 
@@ -212,17 +231,29 @@ public class QuestDataManager : MonoBehaviour
     private bool AreAllQuestRequirementsMet(QuestData quest)
     {
         BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
-        if (quest.requiredResources == null || quest.requiredResources.Length == 0)
+        
+        // Check resource requirements
+        if (quest.requiredResources != null && quest.requiredResources.Length > 0)
         {
-            return true;
-        }
-
-        foreach (ResourceCost cost in quest.requiredResources)
-        {
-            int currentAmount = inventoryManager.GetResourceAmount(cost.resourceType);
-            if (currentAmount < cost.amount)
+            foreach (ResourceCost cost in quest.requiredResources)
             {
-                return false;
+                int currentAmount = inventoryManager.GetResourceAmount(cost.resourceType);
+                if (currentAmount < cost.amount)
+                {
+                    return false;
+                }
+            }
+        }
+        
+        // Check quest tracking requirements
+        if (quest.questCheckRequirements != null && quest.questCheckRequirements.Length > 0)
+        {
+            foreach (QuestCheckData checkData in quest.questCheckRequirements)
+            {
+                if (!checkData.IsRequirementMet())
+                {
+                    return false;
+                }
             }
         }
 
@@ -244,7 +275,73 @@ public class QuestDataManager : MonoBehaviour
             return false;
         }
         
+        // In test mode, all active quests are completable
+        if (testMode)
+        {
+            return true;
+        }
+        
         return AreAllQuestRequirementsMet(quest);
+    }
+    
+    public void SetTestMode(bool enabled)
+    {
+        testMode = enabled;
+        Debug.Log($"QuestDataManager: Test mode {(enabled ? "enabled" : "disabled")}. All active quests are {(enabled ? "completable" : "requirement-based")}.");
+    }
+    
+    public void ResetAllQuestProgress()
+    {
+        _questStates.Clear();
+        _completedQuestIds.Clear();
+        _activeQuestIds.Clear();
+        
+        // Reset quest check data progress
+        foreach (QuestData quest in _questDataDict.Values)
+        {
+            if (quest == null) continue;
+            
+            if (quest.questCheckRequirements != null)
+            {
+                foreach (QuestCheckData checkData in quest.questCheckRequirements)
+                {
+                    checkData.ResetProgress();
+                }
+            }
+        }
+        
+        // Reset QuestTracker if it exists
+        QuestTracker questTracker = FindFirstObjectByType<QuestTracker>();
+        if (questTracker != null)
+        {
+            questTracker.ResetAllQuestProgress();
+        }
+        
+        // Re-initialize all quests to their default states
+        foreach (QuestData quest in _questDataDict.Values)
+        {
+            if (quest == null) continue;
+            
+            // Check if quest has prerequisites
+            bool hasPrerequisites = quest.previousQuestIds != null && quest.previousQuestIds.Length > 0;
+            
+            if (!hasPrerequisites)
+            {
+                _questStates[quest.questId] = QuestState.Available;
+            }
+            else
+            {
+                _questStates[quest.questId] = QuestState.Locked;
+            }
+        }
+        
+        // Notify all quests that their state changed
+        foreach (int questId in _questStates.Keys)
+        {
+            OnQuestStateChanged?.Invoke(questId);
+        }
+        
+        Debug.Log("QuestDataManager: All quest progress has been reset.");
     }
 
     public bool CompleteQuest(int questId)
@@ -296,8 +393,28 @@ public class QuestDataManager : MonoBehaviour
     {
         foreach (QuestData quest in _questDataDict.Values)
         {
-            if (quest.previousQuestId == completedQuestId && 
-                _questStates[quest.questId] == QuestState.Locked)
+            if (_questStates[quest.questId] != QuestState.Locked)
+            {
+                continue;
+            }
+            
+            // Check multiple prerequisites
+            bool shouldUnlock = false;
+            if (quest.previousQuestIds != null && quest.previousQuestIds.Length > 0)
+            {
+                bool allPrerequisitesMet = true;
+                foreach (int prerequisiteId in quest.previousQuestIds)
+                {
+                    if (!_completedQuestIds.Contains(prerequisiteId))
+                    {
+                        allPrerequisitesMet = false;
+                        break;
+                    }
+                }
+                shouldUnlock = allPrerequisitesMet;
+            }
+            
+            if (shouldUnlock)
             {
                 _questStates[quest.questId] = QuestState.Available;
                 OnQuestStateChanged?.Invoke(quest.questId);

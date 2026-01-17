@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +7,7 @@ using UnityEngine.SceneManagement;
 public class ResourceTransferManager : MonoBehaviour
 {
     public static ResourceTransferManager Instance { get; private set; }
+    public static event Action OnResourceTransferCompleted;
 
     private Dictionary<ResourceType, int> _pendingResources = null;
 
@@ -105,6 +107,16 @@ public class ResourceTransferManager : MonoBehaviour
         {
             inventorySystem.ForceRefreshInventory();
         }
+        
+        // Check if modules are placed on core
+        if (CoreCustomizationManager.Instance != null)
+        {
+            List<Module> activeModules = CoreCustomizationManager.Instance.GetActiveModules();
+            // The module placement event is already fired by CoreCustomizationManager when modules are set
+            // Here we just fire the resource transfer completion event
+        }
+        
+        OnResourceTransferCompleted?.Invoke();
     }
 }
 

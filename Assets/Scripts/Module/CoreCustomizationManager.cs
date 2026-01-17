@@ -16,6 +16,7 @@ public class CoreCustomizationManager : MonoBehaviour
 
     public event Action<int, Module> OnModuleSlotChanged;
     public event Action<int> OnUnlockedSlotCountChanged;
+    public static event Action<Module, int> OnModulePlacedOnCore;
 
     private void Awake()
     {
@@ -74,6 +75,11 @@ public class CoreCustomizationManager : MonoBehaviour
         _selectedModules[slotIndex] = module;
         SaveSelectedModules();
         OnModuleSlotChanged?.Invoke(slotIndex, module);
+        
+        if (module != null)
+        {
+            OnModulePlacedOnCore?.Invoke(module, slotIndex);
+        }
     }
 
     public Module GetModuleInSlot(int slotIndex)

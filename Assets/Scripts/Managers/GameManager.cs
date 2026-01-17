@@ -169,6 +169,14 @@ public class GameManager : MonoBehaviour
 
         RegisterPrePlacedMainStructure();
         RegisterPrePlacedBuildings();
+        
+        // Spawn starting units after MainStructure is registered
+        yield return null;
+        StartingUnitsManager startingUnitsManager = FindFirstObjectByType<StartingUnitsManager>();
+        if (startingUnitsManager != null)
+        {
+            startingUnitsManager.SpawnStartingUnits();
+        }
 
         MapObjectSpawner proceduralSpawner = FindFirstObjectByType<MapObjectSpawner>();
         if (proceduralSpawner != null) {

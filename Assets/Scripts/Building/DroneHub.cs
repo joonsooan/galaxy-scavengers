@@ -19,6 +19,7 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
 
     public static event Action<DroneHub> OnDroneHubClicked;
     public static event Action<int, int, int> OnUnitTargetChanged;
+    public static event Action<UnitData> OnUnitProduced;
 
     public DroneHubData DroneHubData => droneHubData;
     
@@ -263,6 +264,8 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
             }
 
             Instantiate(unitToProduce.unitPrefab, transform.position, Quaternion.identity, UnitManager.Instance.unitParent);
+            
+            OnUnitProduced?.Invoke(unitToProduce);
         }
 
         _isProducing = false;
