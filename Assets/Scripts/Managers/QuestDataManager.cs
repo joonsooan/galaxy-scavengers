@@ -45,6 +45,7 @@ public class QuestDataManager : MonoBehaviour
     {
         LoadQuestsFromResources();
         InitializeQuests();
+        LoadQuestProgress();
         
         StartCoroutine(SubscribeToBaseInventoryEvents());
         
@@ -55,7 +56,23 @@ public class QuestDataManager : MonoBehaviour
             questTrackerObj.AddComponent<QuestTracker>();
         }
     }
-
+    
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        if (pauseStatus)
+        {
+            SaveQuestProgress();
+        }
+    }
+    
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        if (!hasFocus)
+        {
+            SaveQuestProgress();
+        }
+    }
+    
     private System.Collections.IEnumerator SubscribeToBaseInventoryEvents()
     {
         BaseInventoryManager inventoryManager = null;
@@ -70,6 +87,8 @@ public class QuestDataManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        SaveQuestProgress();
+        
         BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
         if (inventoryManager != null)
         {
@@ -118,12 +137,14 @@ public class QuestDataManager : MonoBehaviour
                 // Transition from Active to Completable
                 _questStates[quest.questId] = QuestState.Completable;
                 OnQuestStateChanged?.Invoke(quest.questId);
+                SaveQuestProgress();
             }
             else if (currentState == QuestState.Completable && !requirementsMet)
             {
                 // Transition from Completable back to Active
                 _questStates[quest.questId] = QuestState.Active;
                 OnQuestStateChanged?.Invoke(quest.questId);
+                SaveQuestProgress();
             }
         }
     }
@@ -247,6 +268,7 @@ public class QuestDataManager : MonoBehaviour
         _questStates[questId] = QuestState.Active;
         
         OnQuestStateChanged?.Invoke(questId);
+        SaveQuestProgress();
 
         if (_questDataDict.ContainsKey(questId))
         {
@@ -283,6 +305,7 @@ public class QuestDataManager : MonoBehaviour
             // Transition to Completable state instead of completing directly
             _questStates[questId] = QuestState.Completable;
             OnQuestStateChanged?.Invoke(questId);
+            SaveQuestProgress();
         }
     }
 
@@ -360,6 +383,9 @@ public class QuestDataManager : MonoBehaviour
         _completedQuestIds.Clear();
         _activeQuestIds.Clear();
         
+        // Clear saved progress from PlayerPrefs
+        ClearSavedQuestProgress();
+        
         // Reset quest check data progress
         foreach (QuestData quest in _questDataDict.Values)
         {
@@ -379,6 +405,12 @@ public class QuestDataManager : MonoBehaviour
         if (questTracker != null)
         {
             questTracker.ResetAllQuestProgress();
+        }
+        
+        QuestUIHandler questUIHandler = FindFirstObjectByType<QuestUIHandler>();
+        if (questUIHandler != null)
+        {
+            questUIHandler.ClearQuestProgress();
         }
         
         // Re-initialize all quests to their default states
@@ -408,6 +440,116 @@ public class QuestDataManager : MonoBehaviour
         
         Debug.Log("QuestDataManager: All quest progress has been reset.");
     }
+    
+    private void SaveQuestProgress()
+    {
+        foreach (var kvp in _questStates)
+        {
+            string key = $"QuestState_{kvp.Key}";
+            PlayerPrefs.SetInt(key, (int)kvp.Value);
+        }
+        
+        string activeIds = string.Join(",", _activeQuestIds);
+        PlayerPrefs.SetString("QuestActiveIds", activeIds);
+        
+        string completedIds = string.Join(",", _completedQuestIds);
+        PlayerPrefs.SetString("QuestCompletedIds", completedIds);
+        
+        PlayerPrefs.Save();
+    }
+    
+    private void LoadQuestProgress()
+    {
+        foreach (QuestData quest in _questDataDict.Values)
+        {
+            if (quest == null) continue;
+            
+            string stateKey = $"QuestState_{quest.questId}";
+            if (PlayerPrefs.HasKey(stateKey))
+            {
+                int savedState = PlayerPrefs.GetInt(stateKey);
+                _questStates[quest.questId] = (QuestState)savedState;
+                
+                if (_questStates[quest.questId] == QuestState.Active || 
+                    _questStates[quest.questId] == QuestState.Completable)
+                {
+                    _activeQuestIds.Add(quest.questId);
+                }
+                
+                if (_questStates[quest.questId] == QuestState.Completed)
+                {
+                    _completedQuestIds.Add(quest.questId);
+                }
+            }
+        }
+        
+        if (PlayerPrefs.HasKey("QuestActiveIds"))
+        {
+            string activeIds = PlayerPrefs.GetString("QuestActiveIds");
+            if (!string.IsNullOrEmpty(activeIds))
+            {
+                string[] ids = activeIds.Split(',');
+                foreach (string idStr in ids)
+                {
+                    if (int.TryParse(idStr, out int questId))
+                    {
+                        _activeQuestIds.Add(questId);
+                    }
+                }
+            }
+        }
+        
+        if (PlayerPrefs.HasKey("QuestCompletedIds"))
+        {
+            string completedIds = PlayerPrefs.GetString("QuestCompletedIds");
+            if (!string.IsNullOrEmpty(completedIds))
+            {
+                string[] ids = completedIds.Split(',');
+                foreach (string idStr in ids)
+                {
+                    if (int.TryParse(idStr, out int questId))
+                    {
+                        _completedQuestIds.Add(questId);
+                    }
+                }
+            }
+        }
+        
+        foreach (int completedId in _completedQuestIds)
+        {
+            UnlockDependentQuests(completedId);
+        }
+        
+        foreach (int questId in _questStates.Keys)
+        {
+            OnQuestStateChanged?.Invoke(questId);
+        }
+    }
+    
+    private void ClearSavedQuestProgress()
+    {
+        foreach (QuestData quest in _questDataDict.Values)
+        {
+            if (quest == null) continue;
+            string stateKey = $"QuestState_{quest.questId}";
+            if (PlayerPrefs.HasKey(stateKey))
+            {
+                PlayerPrefs.DeleteKey(stateKey);
+            }
+        }
+        
+        if (PlayerPrefs.HasKey("QuestActiveIds"))
+        {
+            PlayerPrefs.DeleteKey("QuestActiveIds");
+        }
+        
+        if (PlayerPrefs.HasKey("QuestCompletedIds"))
+        {
+            PlayerPrefs.DeleteKey("QuestCompletedIds");
+        }
+        
+        PlayerPrefs.Save();
+    }
 
     public bool CompleteQuest(int questId)
     {
@@ -429,6 +571,7 @@ public class QuestDataManager : MonoBehaviour
         _completedQuestIds.Add(questId);
         _activeQuestIds.Remove(questId);
         OnQuestStateChanged?.Invoke(questId);
+        SaveQuestProgress();
 
         return true;
     }
@@ -492,6 +635,7 @@ public class QuestDataManager : MonoBehaviour
             {
                 _questStates[quest.questId] = QuestState.Available;
                 OnQuestStateChanged?.Invoke(quest.questId);
+                SaveQuestProgress();
             }
         }
     }

@@ -24,10 +24,28 @@ public class QuestTracker : MonoBehaviour
     private void Start()
     {
         SubscribeToEvents();
+        LoadQuestCheckProgress();
+    }
+    
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        if (pauseStatus)
+        {
+            SaveQuestCheckProgress();
+        }
+    }
+    
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        if (!hasFocus)
+        {
+            SaveQuestCheckProgress();
+        }
     }
     
     private void OnDestroy()
     {
+        SaveQuestCheckProgress();
         UnsubscribeFromEvents();
     }
     
@@ -250,6 +268,8 @@ public class QuestTracker : MonoBehaviour
         {
             checkData.isCompleted = true;
         }
+        
+        SaveQuestCheckProgress();
     }
     
     public int GetQuestProgress(int questId, QuestCheckData checkData)
@@ -264,6 +284,8 @@ public class QuestTracker : MonoBehaviour
     public void ResetAllQuestProgress()
     {
         _questProgress.Clear();
+        
+        ClearSavedQuestCheckProgress();
         
         // Reset all quest check data progress
         if (QuestDataManager.Instance != null)
@@ -280,5 +302,106 @@ public class QuestTracker : MonoBehaviour
         }
         
         Debug.Log("QuestTracker: All quest tracking progress has been reset.");
+    }
+    
+    private void SaveQuestCheckProgress()
+    {
+        if (QuestDataManager.Instance == null) return;
+        
+        foreach (var questKvp in _questProgress)
+        {
+            int questId = questKvp.Key;
+            QuestData quest = QuestDataManager.Instance.GetQuestData(questId);
+            if (quest == null || quest.questCheckRequirements == null) continue;
+            
+            for (int i = 0; i < quest.questCheckRequirements.Length; i++)
+            {
+                QuestCheckData checkData = quest.questCheckRequirements[i];
+                if (checkData == null) continue;
+                
+                string progressKey = $"QuestCheckProgress_{questId}_{i}";
+                string completedKey = $"QuestCheckCompleted_{questId}_{i}";
+                
+                if (_questProgress[questId].ContainsKey(checkData))
+                {
+                    PlayerPrefs.SetInt(progressKey, _questProgress[questId][checkData]);
+                    PlayerPrefs.SetInt(completedKey, checkData.isCompleted ? 1 : 0);
+                }
+            }
+        }
+        
+        PlayerPrefs.Save();
+    }
+    
+    private void LoadQuestCheckProgress()
+    {
+        if (QuestDataManager.Instance == null) return;
+        
+        foreach (QuestData quest in QuestDataManager.Instance.GetAllQuests())
+        {
+            if (quest == null || quest.questCheckRequirements == null) continue;
+            
+            int questId = quest.questId;
+            
+            QuestState state = QuestDataManager.Instance.GetQuestState(questId);
+            if (state != QuestState.Active && state != QuestState.Completable) continue;
+            
+            if (!_questProgress.ContainsKey(questId))
+            {
+                _questProgress[questId] = new Dictionary<QuestCheckData, int>();
+            }
+            
+            for (int i = 0; i < quest.questCheckRequirements.Length; i++)
+            {
+                QuestCheckData checkData = quest.questCheckRequirements[i];
+                if (checkData == null) continue;
+                
+                string progressKey = $"QuestCheckProgress_{questId}_{i}";
+                string completedKey = $"QuestCheckCompleted_{questId}_{i}";
+                
+                if (PlayerPrefs.HasKey(progressKey))
+                {
+                    int savedCount = PlayerPrefs.GetInt(progressKey);
+                    _questProgress[questId][checkData] = savedCount;
+                    checkData.currentCount = savedCount;
+                }
+                
+                if (PlayerPrefs.HasKey(completedKey))
+                {
+                    int savedCompleted = PlayerPrefs.GetInt(completedKey);
+                    checkData.isCompleted = savedCompleted == 1;
+                }
+            }
+        }
+    }
+    
+    private void ClearSavedQuestCheckProgress()
+    {
+        if (QuestDataManager.Instance == null) return;
+        
+        foreach (QuestData quest in QuestDataManager.Instance.GetAllQuests())
+        {
+            if (quest == null || quest.questCheckRequirements == null) continue;
+            
+            int questId = quest.questId;
+            
+            for (int i = 0; i < quest.questCheckRequirements.Length; i++)
+            {
+                string progressKey = $"QuestCheckProgress_{questId}_{i}";
+                string completedKey = $"QuestCheckCompleted_{questId}_{i}";
+                
+                if (PlayerPrefs.HasKey(progressKey))
+                {
+                    PlayerPrefs.DeleteKey(progressKey);
+                }
+                
+                if (PlayerPrefs.HasKey(completedKey))
+                {
+                    PlayerPrefs.DeleteKey(completedKey);
+                }
+            }
+        }
+        
+        PlayerPrefs.Save();
     }
 }

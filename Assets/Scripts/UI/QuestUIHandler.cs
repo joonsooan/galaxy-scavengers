@@ -41,8 +41,30 @@ public class QuestUIHandler : MonoBehaviour
 
     private void OnEnable()
     {
+        LoadQuestProgress();
         StartCoroutine(SubscribeToQuestDataManagerWhenReady());
         StartCoroutine(SubscribeToBaseInventoryWhenReady());
+    }
+    
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        if (pauseStatus)
+        {
+            SaveQuestProgress();
+        }
+    }
+    
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        if (!hasFocus)
+        {
+            SaveQuestProgress();
+        }
+    }
+    
+    private void OnDestroy()
+    {
+        SaveQuestProgress();
     }
     
     private IEnumerator SubscribeToQuestDataManagerWhenReady()
@@ -115,12 +137,14 @@ public class QuestUIHandler : MonoBehaviour
     public void OnQuestViewed(int questId)
     {
         _viewedQuestIds.Add(questId);
+        SaveQuestProgress();
         RequestIndicatorUpdate();
     }
     
     public void OnQuestFinished(int questId)
     {
         _finishedQuestIds.Add(questId);
+        SaveQuestProgress();
         
         if (_isQuestMode)
         {
@@ -398,5 +422,69 @@ public class QuestUIHandler : MonoBehaviour
     {
         yield return new WaitForSeconds(0.1f);
         RequestIndicatorUpdate();
+    }
+    
+    private void SaveQuestProgress()
+    {
+        string viewedIds = string.Join(",", _viewedQuestIds);
+        PlayerPrefs.SetString("QuestViewedIds", viewedIds);
+        
+        string finishedIds = string.Join(",", _finishedQuestIds);
+        PlayerPrefs.SetString("QuestFinishedIds", finishedIds);
+        
+        PlayerPrefs.Save();
+    }
+    
+    private void LoadQuestProgress()
+    {
+        if (PlayerPrefs.HasKey("QuestViewedIds"))
+        {
+            string viewedIds = PlayerPrefs.GetString("QuestViewedIds");
+            if (!string.IsNullOrEmpty(viewedIds))
+            {
+                string[] ids = viewedIds.Split(',');
+                foreach (string idStr in ids)
+                {
+                    if (int.TryParse(idStr, out int questId))
+                    {
+                        _viewedQuestIds.Add(questId);
+                    }
+                }
+            }
+        }
+        
+        if (PlayerPrefs.HasKey("QuestFinishedIds"))
+        {
+            string finishedIds = PlayerPrefs.GetString("QuestFinishedIds");
+            if (!string.IsNullOrEmpty(finishedIds))
+            {
+                string[] ids = finishedIds.Split(',');
+                foreach (string idStr in ids)
+                {
+                    if (int.TryParse(idStr, out int questId))
+                    {
+                        _finishedQuestIds.Add(questId);
+                    }
+                }
+            }
+        }
+    }
+    
+    public void ClearQuestProgress()
+    {
+        _viewedQuestIds.Clear();
+        _finishedQuestIds.Clear();
+        
+        if (PlayerPrefs.HasKey("QuestViewedIds"))
+        {
+            PlayerPrefs.DeleteKey("QuestViewedIds");
+        }
+        
+        if (PlayerPrefs.HasKey("QuestFinishedIds"))
+        {
+            PlayerPrefs.DeleteKey("QuestFinishedIds");
+        }
+        
+        PlayerPrefs.Save();
     }
 }
