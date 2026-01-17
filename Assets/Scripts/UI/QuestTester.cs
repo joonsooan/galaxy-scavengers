@@ -10,29 +10,45 @@ public class QuestTester : MonoBehaviour
     [Tooltip("If true, all active quests will be completable regardless of requirements")]
     [SerializeField] private bool questTestMode = false;
     
+    private static QuestTester _instance;
+    
+    public static bool IsTestModeEnabled
+    {
+        get
+        {
+            if (_instance != null)
+            {
+                return _instance.questTestMode;
+            }
+            return false;
+        }
+    }
+    
     private void Awake()
     {
+        if (_instance != null && _instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        _instance = this;
+        
         if (resetQuestProgressButton != null)
         {
             resetQuestProgressButton.onClick.AddListener(OnResetQuestProgressClicked);
         }
     }
     
-    private void Start()
+    private void OnDestroy()
     {
-        // Update QuestDataManager test mode
-        if (QuestDataManager.Instance != null)
+        if (_instance == this)
         {
-            QuestDataManager.Instance.SetTestMode(questTestMode);
+            _instance = null;
         }
-    }
-    
-    private void OnValidate()
-    {
-        // Update test mode when changed in inspector
-        if (QuestDataManager.Instance != null)
+        
+        if (resetQuestProgressButton != null)
         {
-            QuestDataManager.Instance.SetTestMode(questTestMode);
+            resetQuestProgressButton.onClick.RemoveListener(OnResetQuestProgressClicked);
         }
     }
     
@@ -50,23 +66,12 @@ public class QuestTester : MonoBehaviour
         }
         
         QuestDataManager.Instance.ResetAllQuestProgress();
-        Debug.Log("QuestTester: Quest progress has been reset.");
+        
+        Debug.Log("QuestTester: Quest progress and all PlayerPrefs have been reset.");
     }
     
     public void SetTestMode(bool enabled)
     {
         questTestMode = enabled;
-        if (QuestDataManager.Instance != null)
-        {
-            QuestDataManager.Instance.SetTestMode(enabled);
-        }
-    }
-    
-    private void OnDestroy()
-    {
-        if (resetQuestProgressButton != null)
-        {
-            resetQuestProgressButton.onClick.RemoveListener(OnResetQuestProgressClicked);
-        }
     }
 }

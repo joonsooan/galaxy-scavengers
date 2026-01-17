@@ -23,10 +23,6 @@ public class QuestDataManager : MonoBehaviour
     private readonly Dictionary<int, QuestState> _questStates = new ();
     private readonly HashSet<int> _completedQuestIds = new ();
     private readonly HashSet<int> _activeQuestIds = new ();
-    
-    [Header("Test Settings")]
-    [Tooltip("If true, all active quests will be completable regardless of requirements")]
-    [SerializeField] private bool testMode = false;
 
     public event Action<int> OnQuestStateChanged;
 
@@ -362,19 +358,12 @@ public class QuestDataManager : MonoBehaviour
             return false;
         }
         
-        // In test mode, all active quests are completable
-        if (testMode)
+        if (QuestTester.IsTestModeEnabled)
         {
             return true;
         }
         
         return AreAllQuestRequirementsMet(quest);
-    }
-    
-    public void SetTestMode(bool enabled)
-    {
-        testMode = enabled;
-        Debug.Log($"QuestDataManager: Test mode {(enabled ? "enabled" : "disabled")}. All active quests are {(enabled ? "completable" : "requirement-based")}.");
     }
     
     public void ResetAllQuestProgress()
@@ -400,7 +389,6 @@ public class QuestDataManager : MonoBehaviour
             }
         }
         
-        // Reset QuestTracker if it exists
         QuestTracker questTracker = FindFirstObjectByType<QuestTracker>();
         if (questTracker != null)
         {
@@ -438,7 +426,9 @@ public class QuestDataManager : MonoBehaviour
             OnQuestStateChanged?.Invoke(questId);
         }
         
-        Debug.Log("QuestDataManager: All quest progress has been reset.");
+        PlayerPrefs.Save();
+        
+        Debug.Log("QuestDataManager: All quest progress and PlayerPrefs have been reset.");
     }
     
     private void SaveQuestProgress()
