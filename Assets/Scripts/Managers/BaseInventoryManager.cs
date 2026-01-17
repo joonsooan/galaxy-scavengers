@@ -114,9 +114,15 @@ public class BaseInventoryManager : MonoBehaviour
     {
         foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
         {
+            int previousAmount = _baseInventory.GetValueOrDefault(type, 0);
             _baseInventory[type] = 0;
             string key = BaseInventoryPrefix + type;
             PlayerPrefs.DeleteKey(key);
+            
+            if (previousAmount > 0)
+            {
+                OnResourceChanged?.Invoke(type, 0);
+            }
         }
         
         _baseModules.Clear();
@@ -171,7 +177,7 @@ public class BaseInventoryManager : MonoBehaviour
         string modulesKey = BaseInventoryPrefix + "Modules";
         if (!PlayerPrefs.HasKey(modulesKey))
         {
-            Debug.Log("BaseInventoryManager: 저장된 모듈이 없습니다.");
+            // Debug.Log("BaseInventoryManager: 저장된 모듈이 없습니다.");
             return;
         }
         

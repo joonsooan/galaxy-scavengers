@@ -14,4 +14,5 @@ public interface IQuestUIProvider
     void ShowShopUI();
     void HideShopUI();
     void ClearDetailPanel();
+    GameObject GetNewQuestIndicator();
 }

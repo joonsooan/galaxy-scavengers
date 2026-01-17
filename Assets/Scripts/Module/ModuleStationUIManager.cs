@@ -23,6 +23,7 @@ public class ModuleStationUIManager : MonoBehaviour, IQuestUIProvider
     [SerializeField] private QuestDetailPanel questDetailPanel;
     [SerializeField] private QuestProvider questProvider = QuestProvider.NPC_1;
     [SerializeField] private QuestUIHandler questUIHandler;
+    [SerializeField] private GameObject newQuestIndicator;
     [SerializeField] private List<ModuleGridCell> recipeCells = new ();
 
     private ModuleData _currentData;
@@ -155,4 +156,6 @@ public class ModuleStationUIManager : MonoBehaviour, IQuestUIProvider
             moduleDetailPanel.ClearInfo();
         }
     }
+    
+    public GameObject GetNewQuestIndicator() => newQuestIndicator;
 }

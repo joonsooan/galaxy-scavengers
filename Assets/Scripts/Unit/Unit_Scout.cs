@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
@@ -23,6 +24,8 @@ public class Unit_Scout : UnitBase
     private Tween _hoverTween;
     private Vector3 _baseHoverLocalPosition;
     private Transform _spriteTransform;
+    
+    public static event Action<Vector3> OnScoutEnteredLocation;
 
     public bool IsAssignedToBeacon {
         get {
@@ -171,12 +174,17 @@ public class Unit_Scout : UnitBase
 
     private void OnArrivedAtTarget()
     {
+        Vector3 currentPosition = transform.position;
+        
         if (_isReturningHome) {
             currentState = UnitState.Idle;
             _isReturningHome = false;
             ClearAssignments();
             return;
         }
+
+        // Fire event when scout enters a location
+        OnScoutEnteredLocation?.Invoke(currentPosition);
 
         if (_assignedBeacon != null) {
             if (_beaconCoroutine != null) {

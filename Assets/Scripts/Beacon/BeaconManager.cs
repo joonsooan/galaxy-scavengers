@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -5,6 +6,7 @@ using UnityEngine;
 public class BeaconManager : MonoBehaviour
 {
     public static BeaconManager Instance { get; private set; }
+    public static event Action<Beacon> OnBeaconPlacedForScout;
     
     [Header("Beacon Settings")]
     [SerializeField] private GameObject beaconPrefab;
@@ -161,6 +163,7 @@ public class BeaconManager : MonoBehaviour
         {
             closestScout.AssignToBeacon(beacon);
             beacon.AssignUnit(closestScout);
+            OnBeaconPlacedForScout?.Invoke(beacon);
         }
     }
     

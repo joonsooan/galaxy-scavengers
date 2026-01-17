@@ -209,6 +209,7 @@ public class BuildingManager : MonoBehaviour
     }
 
     public static event Action<Vector3Int> OnTilemapChanged;
+    public static event Action<BuildingData> OnBuildingConstructed;
 
     private void CacheMapGenerator()
     {
@@ -464,6 +465,8 @@ public class BuildingManager : MonoBehaviour
         }
 
         HandleBuildingLogic(newPieceObject, data);
+        
+        OnBuildingConstructed?.Invoke(data);
     }
 
     private void CheckForBuildings(Vector3Int placedPos)
@@ -560,6 +563,8 @@ public class BuildingManager : MonoBehaviour
         }
 
         Debug.Log($"Building '{data.displayName}' Created");
+        
+        OnBuildingConstructed?.Invoke(data);
     }
 
     private void HandleBuildingLogic(GameObject obj, BuildingData data)
