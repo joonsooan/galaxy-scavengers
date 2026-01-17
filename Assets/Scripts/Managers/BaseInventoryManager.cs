@@ -171,7 +171,7 @@ public class BaseInventoryManager : MonoBehaviour
         string modulesKey = BaseInventoryPrefix + "Modules";
         if (!PlayerPrefs.HasKey(modulesKey))
         {
-            Debug.Log("BaseInventoryManager: 저장된 모듈이 없습니다.");
+            // Debug.Log("BaseInventoryManager: 저장된 모듈이 없습니다.");
             return;
         }
         

@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 898dc1efeda45414a8149ac16673e46f, type: 3}
   m_Name: quest_0006
   m_EditorClassIdentifier: 
-  questId: 4
+  questId: 6
   questProvider: 0
-  previousQuestId: 2
+  previousQuestIds: 02000000
   questName: "\uBB3C\uC790 \uBCF4\uAE09 - 1"
   questInfo: "\uD568\uC120\uC758 \uC815\uC0C1\uC801\uC778 \uC791\uB3D9\uC744 \uC704\uD574
     \uC774\uACF3\uC800\uACF3\uC5D0\uC11C \uC5D4\uC9C0\uB2C8\uC5B4\uB4E4\uC774 \uD544\uC694\uD55C
@@ -29,6 +29,10 @@ MonoBehaviour:
     amount: 100
   - resourceType: 2
     amount: 50
+  questCheckRequirements: []
   questFinishReward:
     resourceRewards: []
     moduleRewards: []
+    creditReward: 100
+    unlockedBuildings: []
+    newUnits: []

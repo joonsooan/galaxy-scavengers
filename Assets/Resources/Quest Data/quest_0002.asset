@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   questId: 2
   questProvider: 0
-  previousQuestId: 1
+  previousQuestIds: 01000000
   questName: "\uC548\uC815\uC801 \uC5D0\uB108\uC9C0\uC6D0 \uD655\uBCF4"
   questInfo: "\uD568\uC120\uC758 \uAE34\uAE09 \uC218\uB9AC\uB97C \uB9C8\uCCD0 \uB2F9\uC7A5\uC758
     \uC704\uAE30\uB294 \uC9C0\uB098\uAC14\uC9C0\uB9CC, \uD604\uC7AC \uC791\uB3D9
@@ -28,6 +28,12 @@ MonoBehaviour:
   requiredResources:
   - resourceType: 1
     amount: 40
+  questCheckRequirements: []
   questFinishReward:
     resourceRewards: []
     moduleRewards: []
+    creditReward: 20
+    unlockedBuildings:
+    - {fileID: 11400000, guid: cc2ff3c9faf0e9142800037ebb18e402, type: 2}
+    newUnits:
+    - {fileID: 11400000, guid: 543df46f7aaa53f46be1a1b5736522f1, type: 2}

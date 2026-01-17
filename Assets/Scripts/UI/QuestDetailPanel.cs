@@ -95,6 +95,12 @@ public class QuestDetailPanel : MonoBehaviour
         }
 
         _currentQuestId = questId;
+        
+        QuestUIHandler handler = FindFirstObjectByType<QuestUIHandler>();
+        if (handler != null)
+        {
+            handler.OnQuestViewed(questId);
+        }
         questNameText.text = questData.questName;
         questIdText.text = $"퀘스트 ID : {questId:D4}";
         questDescriptionText.text = questData.questInfo;
@@ -408,6 +414,12 @@ public class QuestDetailPanel : MonoBehaviour
     
     private void FinishQuestAndGiveRewards(int questId)
     {
+        QuestUIHandler handler = FindFirstObjectByType<QuestUIHandler>();
+        if (handler != null)
+        {
+            handler.OnQuestFinished(questId);
+        }
+        
         QuestData quest = QuestDataManager.Instance.GetQuestData(questId);
         if (quest == null) return;
         

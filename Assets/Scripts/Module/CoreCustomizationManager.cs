@@ -230,7 +230,7 @@ public class CoreCustomizationManager : MonoBehaviour
                 // Recreate module from recipe if not found in inventory
                 Module recreatedModule = new Module(recipe);
                 _selectedModules[i] = recreatedModule;
-                Debug.Log($"CoreCustomizationManager: Recreated module '{slotData.moduleName}' for slot {i} from recipe");
+                // Debug.Log($"CoreCustomizationManager: Recreated module '{slotData.moduleName}' for slot {i} from recipe");
             } else {
                 _selectedModules[i] = null;
                 Debug.LogWarning($"CoreCustomizationManager: Could not find recipe for module '{slotData.moduleName}' in slot {i}");

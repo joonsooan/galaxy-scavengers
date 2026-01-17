@@ -27,6 +27,7 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
     [SerializeField] private QuestDetailPanel questDetailPanel;
     [SerializeField] private QuestProvider questProvider = QuestProvider.NPC_2;
     [SerializeField] private QuestUIHandler questUIHandler;
+    [SerializeField] private GameObject newQuestIndicator;
 
     [SerializeField] private List<ModuleInventoryCell> moduleSelectionCells = new ();
 
@@ -345,4 +346,6 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
             coreDetailPanel.ClearInfo();
         }
     }
+    
+    public GameObject GetNewQuestIndicator() => newQuestIndicator;
 }

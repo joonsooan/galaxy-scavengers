@@ -88,7 +88,7 @@ public class QuestUIManager : MonoBehaviour
 
             if (questCell != null)
             {
-                questCell.Initialize(quest, questDetailPanel);
+                questCell.Initialize(quest, questDetailPanel, false);
                 _instantiatedQuestCells.Add(questCell);
             }
             else

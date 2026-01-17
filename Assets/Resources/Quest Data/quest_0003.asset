@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   questId: 3
   questProvider: 0
-  previousQuestId: 1
+  previousQuestIds: 01000000
   questName: "\uBBF8\uAC1C\uCC99 \uC9C0\uC5ED \uD0D0\uC0AC"
   questInfo: "\uC815\uCC30 \uC720\uB2DB\uC740 \uBE60\uB974\uAC8C \uC774\uB3D9\uD558\uBA70
     \uC2DC\uC57C\uB97C \uBC1D\uD788\uACE0, \uC790\uC6D0\uC744 \uCC3E\uAC70\uB098
@@ -22,6 +22,15 @@ MonoBehaviour:
     \uC218\uD589\uD569\uB2C8\uB2E4.\n\uD604\uC7A5\uC5D0\uC11C \uC5B4\uB5BB\uAC8C
     \uD65C\uC57D\uD558\uB294\uC9C0 \uC9C1\uC811 \uD655\uC778\uD574\uBCF4\uC8E0."
   requiredResources: []
+  questCheckRequirements:
+  - checkType: 4
+    targetId: 
+    requiredCount: 0
+    targetLocation: {x: 0, y: 0, z: 0}
+    locationTolerance: 0
   questFinishReward:
     resourceRewards: []
     moduleRewards: []
+    creditReward: 30
+    unlockedBuildings: []
+    newUnits: []

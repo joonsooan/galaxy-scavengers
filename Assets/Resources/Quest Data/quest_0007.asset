@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 898dc1efeda45414a8149ac16673e46f, type: 3}
   m_Name: quest_0007
   m_EditorClassIdentifier: 
-  questId: 4
+  questId: 7
   questProvider: 0
-  previousQuestId: 4
+  previousQuestIds: 0400000005000000
   questName: "\uCD08\uB300\uBC1B\uC9C0 \uC54A\uC740 \uC190\uB2D8"
   questInfo: "\uD568\uC120 \uB808\uC774\uB354\uAC00 \uC9C0\uC0C1\uC5D0\uC11C \uC815\uCCB4\uBD88\uBA85\uC758
     \uC9C4\uB3D9\uC744 \uD3EC\uCC29\uD588\uC2B5\uB2C8\uB2E4. \uC548\uC804\uD55C \uC790\uC6D0
@@ -23,6 +23,16 @@ MonoBehaviour:
     \uD30C\uC545\uD558\uB7EC \uCD9C\uBC1C\uD574\uBD05\uC2DC\uB2E4. \uD639\uC2DC \uBAA8\uB97C
     \uC704\uD611\uC5D0 \uB300\uBE44\uD574 \uD3EC\uD0D1 \uC124\uACC4\uB3C4\uB97C \uC900\uBE44\uD588\uC2B5\uB2C8\uB2E4."
   requiredResources: []
+  questCheckRequirements:
+  - checkType: 4
+    targetId: 
+    requiredCount: 0
+    targetLocation: {x: 0, y: 0, z: 0}
+    locationTolerance: 0
   questFinishReward:
     resourceRewards: []
     moduleRewards: []
+    creditReward: 50
+    unlockedBuildings:
+    - {fileID: 11400000, guid: 7e0cba9babd5ff943a0430a1c03c5e58, type: 2}
+    newUnits: []

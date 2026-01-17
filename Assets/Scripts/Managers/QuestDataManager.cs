@@ -141,7 +141,8 @@ public class QuestDataManager : MonoBehaviour
             _questDataDict[quest.questId] = quest;
             
             // Check if quest has prerequisites
-            bool hasPrerequisites = quest.previousQuestIds != null && quest.previousQuestIds.Length > 0;
+            // -1 means no prerequisites (first quest, always available)
+            bool hasPrerequisites = HasRealPrerequisites(quest.previousQuestIds);
             
             if (!hasPrerequisites)
             {
@@ -154,6 +155,34 @@ public class QuestDataManager : MonoBehaviour
         }
     }
 
+    private bool HasRealPrerequisites(int[] previousQuestIds)
+    {
+        // -1 means no prerequisites (first quest, always available)
+        if (previousQuestIds == null || previousQuestIds.Length == 0)
+        {
+            return false;
+        }
+        
+        // If array contains -1, it means no prerequisites
+        if (previousQuestIds.Contains(-1))
+        {
+            return false;
+        }
+        
+        // Check if all entries are -1 (Unity serializes empty arrays as containing -1)
+        bool allMinusOne = true;
+        foreach (int id in previousQuestIds)
+        {
+            if (id != -1)
+            {
+                allMinusOne = false;
+                break;
+            }
+        }
+        
+        return !allMinusOne;
+    }
+    
     private bool CanStartQuest(int questId)
     {
         if (!_questDataDict.ContainsKey(questId))
@@ -172,10 +201,14 @@ public class QuestDataManager : MonoBehaviour
         QuestData quest = _questDataDict[questId];
         
         // Check multiple prerequisites
-        if (quest.previousQuestIds != null && quest.previousQuestIds.Length > 0)
+        // -1 means no prerequisites (skip check)
+        if (HasRealPrerequisites(quest.previousQuestIds))
         {
             foreach (int prerequisiteId in quest.previousQuestIds)
             {
+                // Skip -1 entries
+                if (prerequisiteId == -1) continue;
+                
                 if (!_completedQuestIds.Contains(prerequisiteId))
                 {
                     return false;
@@ -323,7 +356,8 @@ public class QuestDataManager : MonoBehaviour
             if (quest == null) continue;
             
             // Check if quest has prerequisites
-            bool hasPrerequisites = quest.previousQuestIds != null && quest.previousQuestIds.Length > 0;
+            // -1 means no prerequisites (first quest, always available)
+            bool hasPrerequisites = HasRealPrerequisites(quest.previousQuestIds);
             
             if (!hasPrerequisites)
             {
@@ -399,12 +433,16 @@ public class QuestDataManager : MonoBehaviour
             }
             
             // Check multiple prerequisites
+            // -1 means no prerequisites (skip check)
             bool shouldUnlock = false;
-            if (quest.previousQuestIds != null && quest.previousQuestIds.Length > 0)
+            if (HasRealPrerequisites(quest.previousQuestIds))
             {
                 bool allPrerequisitesMet = true;
                 foreach (int prerequisiteId in quest.previousQuestIds)
                 {
+                    // Skip -1 entries
+                    if (prerequisiteId == -1) continue;
+                    
                     if (!_completedQuestIds.Contains(prerequisiteId))
                     {
                         allPrerequisitesMet = false;
@@ -412,6 +450,11 @@ public class QuestDataManager : MonoBehaviour
                     }
                 }
                 shouldUnlock = allPrerequisitesMet;
+            }
+            else
+            {
+                // No prerequisites means it should already be available (handled in InitializeQuests)
+                shouldUnlock = false;
             }
             
             if (shouldUnlock)
@@ -471,9 +514,27 @@ public class QuestDataManager : MonoBehaviour
     
     public List<QuestData> GetCurrentQuestsByProvider(QuestProvider provider)
     {
-        return _questDataDict.Values
-            .Where(quest => quest.questProvider == provider && _questStates[quest.questId] != QuestState.Locked)
+        var matchingProviderQuests = _questDataDict.Values
+            .Where(quest => quest.questProvider == provider)
             .ToList();
+        
+        var unlockedQuests = matchingProviderQuests
+            .Where(quest => 
+                _questStates.ContainsKey(quest.questId) && 
+                _questStates[quest.questId] != QuestState.Locked)
+            .ToList();
+        
+        if (unlockedQuests.Count == 0 && matchingProviderQuests.Count > 0)
+        {
+            // Debug.LogWarning($"QuestDataManager: Found {matchingProviderQuests.Count} quest(s) for provider {provider}, but all are locked. Quest states:");
+            foreach (var quest in matchingProviderQuests)
+            {
+                QuestState state = _questStates.ContainsKey(quest.questId) ? _questStates[quest.questId] : QuestState.Locked;
+                // Debug.Log($"  Quest {quest.questId} ({quest.questName}): State={state}");
+            }
+        }
+        
+        return unlockedQuests;
     }
 
     public HashSet<int> GetCompletedQuestIds()

@@ -963,6 +963,81 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 136940242}
   m_CullTransparentMesh: 1
+--- !u!1 &175055979
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 175055980}
+  - component: {fileID: 175055982}
+  - component: {fileID: 175055981}
+  m_Layer: 5
+  m_Name: Image
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &175055980
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 175055979}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 977564249}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 1, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 8, y: 8}
+  m_SizeDelta: {x: 32, y: 32}
+  m_Pivot: {x: 1, y: 1}
+--- !u!114 &175055981
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 175055979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 0, b: 0, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &175055982
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 175055979}
+  m_CullTransparentMesh: 1
 --- !u!1 &176706778
 GameObject:
   m_ObjectHideFlags: 0
@@ -3767,7 +3842,7 @@ MonoBehaviour:
   m_wordSpacing: 0
   m_lineSpacing: 20
   m_lineSpacingMax: 0
-  m_paragraphSpacing: 0
+  m_paragraphSpacing: 100
   m_charWidthMaxAdj: 0
   m_TextWrappingMode: 1
   m_wordWrappingRatios: 0.4
@@ -5241,8 +5316,6 @@ GameObject:
   - component: {fileID: 670148662}
   - component: {fileID: 670148664}
   - component: {fileID: 670148663}
-  - component: {fileID: 670148665}
-  - component: {fileID: 670148666}
   m_Layer: 0
   m_Name: _BaseSceneManager
   m_TagString: Untagged
@@ -5325,65 +5398,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 043b1ca9a554c2345bd5fae666735309, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &670148665
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 670148660}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d06ea3673d49884e8e2bc60f74c220a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  moduleStationPanel: {fileID: 1578248362}
-  stationNameText: {fileID: 1802657510}
-  stationInfoText: {fileID: 557758095}
-  recipeGridContainer: {fileID: 1250932339}
-  moduleGridCellPrefab: {fileID: 3842191235755297668, guid: 212cc6356ff0c2a40b4fb2779b9c11d8, type: 3}
-  moduleDetailPanel: {fileID: 1391150705}
-  closeButton: {fileID: 558168351}
-  questButton: {fileID: 1592519865}
-  shopButton: {fileID: 1640147110}
-  questGridPanel: {fileID: 122338890}
-  questGridParent: {fileID: 441203460}
-  questCellPrefab: {fileID: 8886172208372129132, guid: c5b8f6229c1aa904b88ac940426139a7, type: 3}
-  questDetailPanel: {fileID: 804888628}
-  questProvider: 1
-  questUIHandler: {fileID: 0}
-  recipeCells: []
---- !u!114 &670148666
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 670148660}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 29b85e031e6fec74db57fa09caf8e0dd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  coreCustomPanel: {fileID: 1837140246}
-  slotComponents:
-  - {fileID: 675643638}
-  - {fileID: 1463161462}
-  - {fileID: 21508381}
-  closeButton: {fileID: 1547312981}
-  moduleSelectionPanel: {fileID: 2582065}
-  moduleSelectionGridContainer: {fileID: 297182957}
-  moduleSelectionCellPrefab: {fileID: 3842191235755297668, guid: a995a3330f05eb34d97459368bfa0e79, type: 3}
-  coreDetailPanel: {fileID: 1687734527}
-  questButton: {fileID: 1558302625}
-  shopButton: {fileID: 1621201772}
-  questGridPanel: {fileID: 2052541769}
-  questGridParent: {fileID: 1901250953}
-  questCellPrefab: {fileID: 8886172208372129132, guid: c5b8f6229c1aa904b88ac940426139a7, type: 3}
-  questDetailPanel: {fileID: 846795941}
-  questProvider: 0
-  questUIHandler: {fileID: 0}
-  moduleSelectionCells: []
 --- !u!1001 &675643636
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6901,7 +6915,7 @@ MonoBehaviour:
   m_wordSpacing: 0
   m_lineSpacing: 20
   m_lineSpacingMax: 0
-  m_paragraphSpacing: 0
+  m_paragraphSpacing: 100
   m_charWidthMaxAdj: 0
   m_TextWrappingMode: 1
   m_wordWrappingRatios: 0.4
@@ -7551,6 +7565,7 @@ GameObject:
   - component: {fileID: 977564250}
   - component: {fileID: 977564252}
   - component: {fileID: 977564253}
+  - component: {fileID: 977564254}
   m_Layer: 5
   m_Name: Module Panel
   m_TagString: Untagged
@@ -7571,6 +7586,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1232597501}
+  - {fileID: 175055980}
   m_Father: {fileID: 84744746}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -7685,6 +7701,35 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moduleData: {fileID: 11400000, guid: 6477e45aca081d2479b8d665eb9563c6, type: 2}
+--- !u!114 &977564254
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 977564248}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d06ea3673d49884e8e2bc60f74c220a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moduleStationPanel: {fileID: 1578248362}
+  stationNameText: {fileID: 1802657510}
+  stationInfoText: {fileID: 557758095}
+  recipeGridContainer: {fileID: 1250932339}
+  moduleGridCellPrefab: {fileID: 3842191235755297668, guid: 212cc6356ff0c2a40b4fb2779b9c11d8, type: 3}
+  moduleDetailPanel: {fileID: 1391150705}
+  closeButton: {fileID: 558168351}
+  questButton: {fileID: 1592519865}
+  shopButton: {fileID: 1640147110}
+  questGridPanel: {fileID: 122338890}
+  questGridParent: {fileID: 441203460}
+  questCellPrefab: {fileID: 8886172208372129132, guid: c5b8f6229c1aa904b88ac940426139a7, type: 3}
+  questDetailPanel: {fileID: 804888628}
+  questProvider: 1
+  questUIHandler: {fileID: 0}
+  newQuestIndicator: {fileID: 175055979}
+  recipeCells: []
 --- !u!1 &1001279498
 GameObject:
   m_ObjectHideFlags: 0
@@ -9840,6 +9885,81 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1425314651}
   m_CullTransparentMesh: 1
+--- !u!1 &1446991257
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1446991258}
+  - component: {fileID: 1446991260}
+  - component: {fileID: 1446991259}
+  m_Layer: 5
+  m_Name: Image
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &1446991258
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1446991257}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1622637269}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 1, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 8, y: 8}
+  m_SizeDelta: {x: 32, y: 32}
+  m_Pivot: {x: 1, y: 1}
+--- !u!114 &1446991259
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1446991257}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 0, b: 0, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 0}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1446991260
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1446991257}
+  m_CullTransparentMesh: 1
 --- !u!1 &1456102857
 GameObject:
   m_ObjectHideFlags: 0
@@ -11178,6 +11298,7 @@ GameObject:
   - component: {fileID: 1622637271}
   - component: {fileID: 1622637270}
   - component: {fileID: 1622637272}
+  - component: {fileID: 1622637273}
   m_Layer: 5
   m_Name: Core Launch Panel
   m_TagString: Untagged
@@ -11198,6 +11319,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1374889167}
+  - {fileID: 1446991258}
   m_Father: {fileID: 84744746}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -11287,6 +11409,38 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &1622637273
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1622637268}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29b85e031e6fec74db57fa09caf8e0dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  coreCustomPanel: {fileID: 1837140246}
+  slotComponents:
+  - {fileID: 675643638}
+  - {fileID: 1463161462}
+  - {fileID: 21508381}
+  closeButton: {fileID: 1547312981}
+  moduleSelectionPanel: {fileID: 2582065}
+  moduleSelectionGridContainer: {fileID: 297182957}
+  moduleSelectionCellPrefab: {fileID: 3842191235755297668, guid: a995a3330f05eb34d97459368bfa0e79, type: 3}
+  coreDetailPanel: {fileID: 1687734527}
+  questButton: {fileID: 1558302625}
+  shopButton: {fileID: 1621201772}
+  questGridPanel: {fileID: 2052541769}
+  questGridParent: {fileID: 1901250953}
+  questCellPrefab: {fileID: 8886172208372129132, guid: c5b8f6229c1aa904b88ac940426139a7, type: 3}
+  questDetailPanel: {fileID: 846795941}
+  questProvider: 0
+  questUIHandler: {fileID: 0}
+  newQuestIndicator: {fileID: 1446991257}
+  moduleSelectionCells: []
 --- !u!1 &1623798672
 GameObject:
   m_ObjectHideFlags: 0

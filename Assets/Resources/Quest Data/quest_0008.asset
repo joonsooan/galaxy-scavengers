@@ -12,17 +12,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 898dc1efeda45414a8149ac16673e46f, type: 3}
   m_Name: quest_0008
   m_EditorClassIdentifier: 
-  questId: 4
+  questId: 8
   questProvider: 0
-  previousQuestId: 2
-  questName: "\uAE30\uCD08 \uAC74\uC124 - 1"
-  questInfo: "\uC804\uB825 \uD750\uB984\uC744 \uC7AC\uC870\uC815\uD55C \uACB0\uACFC
-    \uC7A0\uB4E4\uC5B4 \uC788\uB358 \uAC74\uC124 \uC720\uB2DB\uC774 \uC7AC\uC791\uB3D9\uD558\uAE30
-    \uC2DC\uC791\uD588\uB124\uC694.\n\uC774 \uCE5C\uAD6C\uB3C4 \uC9C0\uC0C1\uC5D0
-    \uB0B4\uB824\uAC00 \uB178\uB3D9\uC744 \uC990\uAE30\uACE0 \uC2F6\uC740 \uBAA8\uC591\uC785\uB2C8\uB2E4.
-    \uC624\uB79C\uB9CC\uC5D0 \uAD00\uC808\uB3C4 \uD480 \uACB8 \uD560 \uC77C\uC744
-    \uC8FC\uB3C4\uB85D \uD558\uC8E0."
-  requiredResources: []
+  previousQuestIds: 0400000005000000
+  questName: "\uC790\uC6D0 \uAC00\uACF5 - 1"
+  questInfo: "\uAE30\uCD08 \uC790\uC6D0\uC740 \uADF8 \uC790\uCCB4\uB85C\uB3C4 \uC4F8\uBAA8\uAC00
+    \uC788\uC9C0\uB9CC, \uC774\uB97C \uAC00\uACF5\uD558\uC5EC \uB354 \uB9CE\uC740
+    \uC6A9\uB3C4\uB85C \uC0AC\uC6A9\uD560 \uC218\uB3C4 \uC788\uC2B5\uB2C8\uB2E4.\n\uC81C\uB828\uC18C\uB97C
+    \uC124\uCE58\uD558\uACE0 \uAC00\uACF5 \uC720\uB2DB\uC744 \uBC30\uC815\uD558\uC5EC
+    \uAE30\uCD08\uC801\uC778 \uC218\uC900\uC758 \uC790\uC6D0\uC744 \uAC00\uACF5\uD574\uBD05\uC2DC\uB2E4.
+    \n\uC790\uC6D0\uC744 \uAC00\uACF5\uD558\uB294 \uC2DC\uC124\uC740 \uC5D0\uD14C\uB974\uB97C
+    \uC18C\uBAA8\uD558\uC5EC \uC791\uB3D9\uD558\uAE30 \uB54C\uBB38\uC5D0, \uC790\uC6D0\uC774
+    \uACE0\uAC08\uB418\uC9C0 \uC54A\uB3C4\uB85D \uC8FC\uC758\uD574\uC8FC\uC138\uC694."
+  requiredResources:
+  - resourceType: 4
+    amount: 10
+  - resourceType: 5
+    amount: 10
+  questCheckRequirements: []
   questFinishReward:
     resourceRewards: []
     moduleRewards: []
+    creditReward: 40
+    unlockedBuildings:
+    - {fileID: 11400000, guid: 105b0eb49997d264ba71f5f4cf6bb34d, type: 2}
+    - {fileID: 11400000, guid: 21dd7ed4e169193438e4310a2427b362, type: 2}
+    newUnits: []
