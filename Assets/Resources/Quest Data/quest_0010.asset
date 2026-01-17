@@ -26,7 +26,12 @@ MonoBehaviour:
   requiredResources:
   - resourceType: 3
     amount: 10
-  questCheckRequirements: []
+  questCheckRequirements:
+  - checkType: 0
+    targetId: 
+    requiredCount: 0
+    targetLocation: {x: 0, y: 0, z: 0}
+    locationTolerance: 0
   questFinishReward:
     resourceRewards: []
     moduleRewards: []

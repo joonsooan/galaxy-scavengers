@@ -6189,6 +6189,7 @@ MonoBehaviour:
   moduleInventoryCellPrefab: {fileID: 3842191235755297668, guid: 8cde97c2151af5648a313d92198fbeee, type: 3}
   questActionButton: {fileID: 1118947688}
   questActionButtonText: {fileID: 1934059581}
+  questUIHandler: {fileID: 977564255}
 --- !u!114 &804888629
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6652,6 +6653,7 @@ MonoBehaviour:
   moduleInventoryCellPrefab: {fileID: 3842191235755297668, guid: 8cde97c2151af5648a313d92198fbeee, type: 3}
   questActionButton: {fileID: 604237594}
   questActionButtonText: {fileID: 1753163782}
+  questUIHandler: {fileID: 1622637274}
 --- !u!114 &846795942
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7566,6 +7568,7 @@ GameObject:
   - component: {fileID: 977564252}
   - component: {fileID: 977564253}
   - component: {fileID: 977564254}
+  - component: {fileID: 977564255}
   m_Layer: 5
   m_Name: Module Panel
   m_TagString: Untagged
@@ -7727,9 +7730,21 @@ MonoBehaviour:
   questCellPrefab: {fileID: 8886172208372129132, guid: c5b8f6229c1aa904b88ac940426139a7, type: 3}
   questDetailPanel: {fileID: 804888628}
   questProvider: 1
-  questUIHandler: {fileID: 0}
+  questUIHandler: {fileID: 977564255}
   newQuestIndicator: {fileID: 175055979}
   recipeCells: []
+--- !u!114 &977564255
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 977564248}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bdb117d3fedb3e34ba9930cefc253c11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1001279498
 GameObject:
   m_ObjectHideFlags: 0
@@ -9509,7 +9524,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Content: {fileID: 1901250953}
-  m_Horizontal: 1
+  m_Horizontal: 0
   m_Vertical: 1
   m_MovementType: 1
   m_Elasticity: 0.1
@@ -11299,6 +11314,7 @@ GameObject:
   - component: {fileID: 1622637270}
   - component: {fileID: 1622637272}
   - component: {fileID: 1622637273}
+  - component: {fileID: 1622637274}
   m_Layer: 5
   m_Name: Core Launch Panel
   m_TagString: Untagged
@@ -11438,9 +11454,21 @@ MonoBehaviour:
   questCellPrefab: {fileID: 8886172208372129132, guid: c5b8f6229c1aa904b88ac940426139a7, type: 3}
   questDetailPanel: {fileID: 846795941}
   questProvider: 0
-  questUIHandler: {fileID: 0}
+  questUIHandler: {fileID: 1622637274}
   newQuestIndicator: {fileID: 1446991257}
   moduleSelectionCells: []
+--- !u!114 &1622637274
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1622637268}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bdb117d3fedb3e34ba9930cefc253c11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1623798672
 GameObject:
   m_ObjectHideFlags: 0
@@ -11943,7 +11971,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Content: {fileID: 441203460}
-  m_Horizontal: 1
+  m_Horizontal: 0
   m_Vertical: 1
   m_MovementType: 1
   m_Elasticity: 0.1

@@ -8,6 +8,7 @@ public enum QuestState
     Locked,     // Quest is locked (prerequisite not met)
     Available,  // Quest is available to be picked up
     Active,     // Quest is currently active
+    Completable, // Quest is active and all requirements are met
     Completed   // Quest has been completed
 }
 
@@ -82,7 +83,8 @@ public class QuestDataManager : MonoBehaviour
         {
             QuestState currentState = _questStates[quest.questId];
             
-            if (currentState != QuestState.Active)
+            // Only check Active and Completable quests
+            if (currentState != QuestState.Active && currentState != QuestState.Completable)
             {
                 continue;
             }
@@ -100,14 +102,28 @@ public class QuestDataManager : MonoBehaviour
                 }
             }
 
-            if (!requiresThisResource)
+            // Also check quest check requirements that might be affected by resource changes
+            bool hasQuestCheckRequirements = quest.questCheckRequirements != null && quest.questCheckRequirements.Length > 0;
+
+            if (!requiresThisResource && !hasQuestCheckRequirements)
             {
                 continue;
             }
 
-            if (AreAllQuestRequirementsMet(quest))
+            bool requirementsMet = AreAllQuestRequirementsMet(quest);
+
+            // Handle state transitions
+            if (currentState == QuestState.Active && requirementsMet)
             {
-                CompleteQuest(quest.questId);
+                // Transition from Active to Completable
+                _questStates[quest.questId] = QuestState.Completable;
+                OnQuestStateChanged?.Invoke(quest.questId);
+            }
+            else if (currentState == QuestState.Completable && !requirementsMet)
+            {
+                // Transition from Completable back to Active
+                _questStates[quest.questId] = QuestState.Active;
+                OnQuestStateChanged?.Invoke(quest.questId);
             }
         }
     }
@@ -250,6 +266,13 @@ public class QuestDataManager : MonoBehaviour
         QuestData quest = _questDataDict[questId];
         QuestState currentState = _questStates[questId];
 
+        if (currentState == QuestState.Completable)
+        {
+            // Completable quests already have all requirements met, but don't auto-complete
+            // They wait for user to click the complete button
+            return;
+        }
+
         if (currentState != QuestState.Active)
         {
             return;
@@ -257,7 +280,9 @@ public class QuestDataManager : MonoBehaviour
 
         if (AreAllQuestRequirementsMet(quest))
         {
-            CompleteQuest(questId);
+            // Transition to Completable state instead of completing directly
+            _questStates[questId] = QuestState.Completable;
+            OnQuestStateChanged?.Invoke(questId);
         }
     }
 
@@ -302,6 +327,12 @@ public class QuestDataManager : MonoBehaviour
         
         QuestData quest = _questDataDict[questId];
         QuestState currentState = _questStates[questId];
+        
+        // Completable state means requirements are already met
+        if (currentState == QuestState.Completable)
+        {
+            return true;
+        }
         
         if (currentState != QuestState.Active)
         {
@@ -388,9 +419,9 @@ public class QuestDataManager : MonoBehaviour
 
         QuestState currentState = _questStates[questId];
         
-        if (currentState != QuestState.Active)
+        if (currentState != QuestState.Active && currentState != QuestState.Completable)
         {
-            Debug.LogWarning($"Quest {questId} is {currentState} and cannot be completed. Quest must be Active.");
+            Debug.LogWarning($"Quest {questId} is {currentState} and cannot be completed. Quest must be Active or Completable.");
             return false;
         }
 

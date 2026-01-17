@@ -16,8 +16,14 @@ public class QuestDetailPanel : MonoBehaviour
     [SerializeField] private GameObject moduleInventoryCellPrefab;
     [SerializeField] private Button questActionButton;
     [SerializeField] private TMP_Text questActionButtonText;
+    [SerializeField] private QuestUIHandler questUIHandler;
 
     private int _currentQuestId = -1;
+
+    public void SetQuestUIHandler(QuestUIHandler handler)
+    {
+        questUIHandler = handler;
+    }
 
     private void Awake()
     {
@@ -34,6 +40,12 @@ public class QuestDetailPanel : MonoBehaviour
         {
             QuestDataManager.Instance.OnQuestStateChanged += OnQuestStateChanged;
         }
+        
+        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (inventoryManager != null)
+        {
+            inventoryManager.OnResourceChanged += OnInventoryResourceChanged;
+        }
     }
 
     private void OnDisable()
@@ -41,6 +53,20 @@ public class QuestDetailPanel : MonoBehaviour
         if (QuestDataManager.Instance != null)
         {
             QuestDataManager.Instance.OnQuestStateChanged -= OnQuestStateChanged;
+        }
+        
+        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (inventoryManager != null)
+        {
+            inventoryManager.OnResourceChanged -= OnInventoryResourceChanged;
+        }
+    }
+    
+    private void OnInventoryResourceChanged(ResourceType type, int amount)
+    {
+        if (_currentQuestId != -1)
+        {
+            UpdateButtonVisibility();
         }
     }
 
@@ -65,22 +91,6 @@ public class QuestDetailPanel : MonoBehaviour
                 
                 ClearQuestInfo();
                 return;
-            }
-        }
-        
-        if (_currentQuestId != -1 && QuestDataManager.Instance != null)
-        {
-            QuestState questState = QuestDataManager.Instance.GetQuestState(_currentQuestId);
-            if (questState == QuestState.Active)
-            {
-                bool canFinish = QuestDataManager.Instance.CheckQuestCompletion(_currentQuestId);
-                bool shouldShowButton = canFinish;
-                bool isButtonVisible = questActionButton != null && questActionButton.gameObject.activeSelf;
-                
-                if (shouldShowButton != isButtonVisible)
-                {
-                    UpdateButtonVisibility();
-                }
             }
         }
     }
@@ -360,6 +370,15 @@ public class QuestDetailPanel : MonoBehaviour
                 questActionButton.gameObject.SetActive(false);
             }
         }
+        else if (questState == QuestState.Completable)
+        {
+            // Completable quests are ready to complete
+            questActionButton.gameObject.SetActive(true);
+            if (questActionButtonText != null)
+            {
+                questActionButtonText.text = "완료";
+            }
+        }
         else if (questState == QuestState.Completed)
         {
             questActionButton.gameObject.SetActive(true);
@@ -406,6 +425,18 @@ public class QuestDetailPanel : MonoBehaviour
                 }
             }
         }
+        else if (questState == QuestState.Completable)
+        {
+            // Completable quests are ready to complete
+            if (QuestManager.Instance != null)
+            {
+                bool completed = QuestManager.Instance.CompleteQuest(_currentQuestId);
+                if (completed)
+                {
+                    FinishQuestAndGiveRewards(_currentQuestId);
+                }
+            }
+        }
         else if (questState == QuestState.Completed)
         {
             FinishQuestAndGiveRewards(_currentQuestId);
@@ -414,10 +445,9 @@ public class QuestDetailPanel : MonoBehaviour
     
     private void FinishQuestAndGiveRewards(int questId)
     {
-        QuestUIHandler handler = FindFirstObjectByType<QuestUIHandler>();
-        if (handler != null)
+        if (questUIHandler != null)
         {
-            handler.OnQuestFinished(questId);
+            questUIHandler.OnQuestFinished(questId);
         }
         
         QuestData quest = QuestDataManager.Instance.GetQuestData(questId);

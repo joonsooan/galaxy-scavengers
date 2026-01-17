@@ -67,12 +67,14 @@ public class QuestTracker : MonoBehaviour
         
         QuestState state = QuestDataManager.Instance.GetQuestState(questId);
         
-        if (state == QuestState.Active)
+        // Initialize tracking for Active and Completable quests
+        if (state == QuestState.Active || state == QuestState.Completable)
         {
             InitializeQuestTracking(questId);
         }
-        else if (state != QuestState.Active)
+        else
         {
+            // Clear tracking for all other states
             ClearQuestTracking(questId);
         }
     }

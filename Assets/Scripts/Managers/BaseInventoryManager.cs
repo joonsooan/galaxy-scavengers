@@ -114,9 +114,15 @@ public class BaseInventoryManager : MonoBehaviour
     {
         foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
         {
+            int previousAmount = _baseInventory.GetValueOrDefault(type, 0);
             _baseInventory[type] = 0;
             string key = BaseInventoryPrefix + type;
             PlayerPrefs.DeleteKey(key);
+            
+            if (previousAmount > 0)
+            {
+                OnResourceChanged?.Invoke(type, 0);
+            }
         }
         
         _baseModules.Clear();

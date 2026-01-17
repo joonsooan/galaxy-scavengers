@@ -7,10 +7,12 @@ public class QuestCell : MonoBehaviour
     [Header("UI References")]
     [SerializeField] private TMP_Text questNameText;
     [SerializeField] private Button cellButton;
-    [SerializeField] private GameObject newQuestIcon;
+    [SerializeField] private GameObject configureIcon;
 
     private QuestData _questData;
     private QuestDetailPanel _questDetailPanel;
+    private QuestUIHandler _questUIHandler;
+    private bool _isNew;
 
     private void Awake()
     {
@@ -19,55 +21,104 @@ public class QuestCell : MonoBehaviour
             cellButton.onClick.AddListener(OnCellClicked);
         }
     }
+    
+    private void OnEnable()
+    {
+        SubscribeToResourceChanges();
+        RefreshIcon();
+    }
+    
+    private void OnDisable()
+    {
+        UnsubscribeFromResourceChanges();
+    }
+    
+    private void SubscribeToResourceChanges()
+    {
+        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (inventoryManager != null)
+        {
+            inventoryManager.OnResourceChanged += OnBaseInventoryResourceChanged;
+        }
+    }
+    
+    private void UnsubscribeFromResourceChanges()
+    {
+        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (inventoryManager != null)
+        {
+            inventoryManager.OnResourceChanged -= OnBaseInventoryResourceChanged;
+        }
+    }
+    
+    private void OnBaseInventoryResourceChanged(ResourceType resourceType, int amount)
+    {
+        if (_questData != null)
+        {
+            CheckAndUpdateCompletability();
+            
+            if (_questUIHandler != null)
+            {
+                _questUIHandler.OnResourceChangedForIndicator();
+            }
+        }
+    }
+    
+    public void CheckAndUpdateCompletability()
+    {
+        if (_questData == null || QuestDataManager.Instance == null) return;
+        
+        UpdateConfigureIcon(_isNew, _questData);
+    }
 
-    public void Initialize(QuestData questData, QuestDetailPanel questDetailPanel, bool isNew)
+    public void Initialize(QuestData questData, QuestDetailPanel questDetailPanel, bool isNew, QuestUIHandler questUIHandler = null)
     {
         _questData = questData;
         _questDetailPanel = questDetailPanel;
+        _questUIHandler = questUIHandler;
+        _isNew = isNew;
 
         if (questNameText != null && questData != null)
         {
             questNameText.text = questData.questName;
         }
         
-        UpdateNewQuestIcon(isNew, questData);
+        UpdateConfigureIcon(isNew, questData);
+        
+        SubscribeToResourceChanges();
     }
     
-    private void UpdateNewQuestIcon(bool isNew, QuestData questData)
+    private void UpdateConfigureIcon(bool isNew, QuestData questData)
     {
-        if (newQuestIcon == null || questData == null) return;
+        if (configureIcon == null || questData == null) return;
         
         if (QuestDataManager.Instance == null)
         {
-            newQuestIcon.SetActive(false);
+            configureIcon.SetActive(false);
             return;
         }
         
-        QuestState state = QuestDataManager.Instance.GetQuestState(questData.questId);
+        QuestState questState = QuestDataManager.Instance.GetQuestState(questData.questId);
+        bool shouldShow;
         
-        bool shouldShow = false;
-        
-        if (isNew)
+        if (questState == QuestState.Available || questState == QuestState.Completable)
         {
             shouldShow = true;
         }
         else
         {
-            if (state == QuestState.Active)
-            {
-                bool isCompletable = QuestDataManager.Instance.CheckQuestCompletion(questData.questId);
-                shouldShow = isCompletable;
-            }
+            shouldShow = false;
         }
         
-        newQuestIcon.SetActive(shouldShow);
+        configureIcon.SetActive(shouldShow);
     }
-    
-    public void MarkAsViewed()
+
+    private void MarkAsViewed()
     {
         if (_questData != null)
         {
-            UpdateNewQuestIcon(false, _questData);
+            _isNew = false;
+            UpdateConfigureIcon(false, _questData);
         }
     }
 
@@ -79,10 +130,9 @@ public class QuestCell : MonoBehaviour
             
             MarkAsViewed();
             
-            QuestUIHandler handler = FindFirstObjectByType<QuestUIHandler>();
-            if (handler != null)
+            if (_questUIHandler != null)
             {
-                handler.OnQuestViewed(_questData.questId);
+                _questUIHandler.OnQuestViewed(_questData.questId);
             }
         }
     }
@@ -90,6 +140,11 @@ public class QuestCell : MonoBehaviour
     public QuestData GetQuestData()
     {
         return _questData;
+    }
+
+    private void RefreshIcon()
+    {
+        CheckAndUpdateCompletability();
     }
 }
 

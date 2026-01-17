@@ -12,6 +12,8 @@ public class QuestUIHandler : MonoBehaviour
     
     private readonly HashSet<int> _viewedQuestIds = new ();
     private readonly HashSet<int> _finishedQuestIds = new ();
+    
+    private bool _indicatorUpdatePending = false;
 
     public void Initialize(IQuestUIProvider uiProvider)
     {
@@ -30,12 +32,17 @@ public class QuestUIHandler : MonoBehaviour
         questGridPanel.SetActive(false);
         
         QuestDetailPanel questDetailPanel = _uiProvider.GetQuestDetailPanel();
-        questDetailPanel.gameObject.SetActive(false);
+        if (questDetailPanel != null)
+        {
+            questDetailPanel.SetQuestUIHandler(this);
+            questDetailPanel.gameObject.SetActive(false);
+        }
     }
 
     private void OnEnable()
     {
         StartCoroutine(SubscribeToQuestDataManagerWhenReady());
+        StartCoroutine(SubscribeToBaseInventoryWhenReady());
     }
     
     private IEnumerator SubscribeToQuestDataManagerWhenReady()
@@ -47,12 +54,30 @@ public class QuestUIHandler : MonoBehaviour
         
         QuestDataManager.Instance.OnQuestStateChanged += OnQuestStateChanged;
     }
+    
+    private IEnumerator SubscribeToBaseInventoryWhenReady()
+    {
+        BaseInventoryManager inventoryManager = null;
+        while (inventoryManager == null)
+        {
+            inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+            yield return null;
+        }
+        
+        inventoryManager.OnResourceChanged += OnBaseInventoryResourceChanged;
+    }
 
     private void OnDisable()
     {
         if (QuestDataManager.Instance != null)
         {
             QuestDataManager.Instance.OnQuestStateChanged -= OnQuestStateChanged;
+        }
+        
+        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (inventoryManager != null)
+        {
+            inventoryManager.OnResourceChanged -= OnBaseInventoryResourceChanged;
         }
     }
     
@@ -63,22 +88,71 @@ public class QuestUIHandler : MonoBehaviour
             LoadQuestCells();
         }
         
-        UpdateNewQuestIndicator();
+        RequestIndicatorUpdate();
+    }
+    
+    private void OnBaseInventoryResourceChanged(ResourceType resourceType, int amount)
+    {
+        if (_isQuestMode)
+        {
+            foreach (QuestCell cell in _questCells)
+            {
+                if (cell != null && cell.GetQuestData() != null)
+                {
+                    cell.CheckAndUpdateCompletability();
+                }
+            }
+        }
+        
+        RequestIndicatorUpdate();
+    }
+    
+    public void OnResourceChangedForIndicator()
+    {
+        RequestIndicatorUpdate();
     }
     
     public void OnQuestViewed(int questId)
     {
         _viewedQuestIds.Add(questId);
-        UpdateNewQuestIndicator();
+        RequestIndicatorUpdate();
     }
     
     public void OnQuestFinished(int questId)
     {
         _finishedQuestIds.Add(questId);
+        
         if (_isQuestMode)
         {
+            for (int i = _questCells.Count - 1; i >= 0; i--)
+            {
+                QuestCell cell = _questCells[i];
+                if (cell != null && cell.GetQuestData() != null && cell.GetQuestData().questId == questId)
+                {
+                    Destroy(cell.gameObject);
+                    _questCells.RemoveAt(i);
+                }
+            }
+            
             LoadQuestCells();
         }
+        
+        RequestIndicatorUpdate();
+    }
+    
+    private void RequestIndicatorUpdate()
+    {
+        if (!_indicatorUpdatePending)
+        {
+            _indicatorUpdatePending = true;
+            StartCoroutine(UpdateIndicatorDelayed());
+        }
+    }
+    
+    private IEnumerator UpdateIndicatorDelayed()
+    {
+        yield return null;
+        _indicatorUpdatePending = false;
         UpdateNewQuestIndicator();
     }
     
@@ -113,7 +187,7 @@ public class QuestUIHandler : MonoBehaviour
         questDetailPanel.gameObject.SetActive(true);
         
         StartCoroutine(LoadQuestCellsWhenReady());
-        UpdateNewQuestIndicator();
+        RequestIndicatorUpdate();
     }
     
     private IEnumerator LoadQuestCellsWhenReady()
@@ -186,7 +260,8 @@ public class QuestUIHandler : MonoBehaviour
         
         List<QuestData> currentQuests = QuestDataManager.Instance.GetCurrentQuestsByProvider(questProvider);
         
-        if (currentQuests != null && currentQuests.Count > 0)
+        // Filter out finished quests - this must happen before checking if list is empty
+        if (currentQuests != null)
         {
             currentQuests = currentQuests.Where(quest => !_finishedQuestIds.Contains(quest.questId)).ToList();
         }
@@ -209,6 +284,12 @@ public class QuestUIHandler : MonoBehaviour
         
         foreach (QuestData quest in currentQuests)
         {
+            // Double-check: never create cells for finished quests
+            if (_finishedQuestIds.Contains(quest.questId))
+            {
+                continue;
+            }
+            
             GameObject cellObject = Instantiate(questCellPrefab, questGridParent);
             QuestCell questCell = cellObject.GetComponent<QuestCell>();
             
@@ -216,7 +297,7 @@ public class QuestUIHandler : MonoBehaviour
             {
                 bool isNew = !_viewedQuestIds.Contains(quest.questId);
                 
-                questCell.Initialize(quest, questDetailPanel, isNew);
+                questCell.Initialize(quest, questDetailPanel, isNew, this);
                 _questCells.Add(questCell);
             }
             else
@@ -226,7 +307,7 @@ public class QuestUIHandler : MonoBehaviour
             }
         }
         
-        UpdateNewQuestIndicator();
+        RequestIndicatorUpdate();
     }
     
     private void ClearQuestCells()
@@ -279,11 +360,17 @@ public class QuestUIHandler : MonoBehaviour
                 QuestState state = QuestDataManager.Instance.GetQuestState(quest.questId);
                 if (state == QuestState.Locked) return false;
                 
-                if (state == QuestState.Active)
+                // Show indicator for Completable quests (regardless of checked status)
+                if (state == QuestState.Completable)
                 {
-                    bool isCompletable = QuestDataManager.Instance.CheckQuestCompletion(quest.questId);
+                    return true;
+                }
+                
+                // Show indicator for Available quests (if unchecked)
+                if (state == QuestState.Available)
+                {
                     bool isUnchecked = !_viewedQuestIds.Contains(quest.questId);
-                    return isCompletable && isUnchecked;
+                    return isUnchecked;
                 }
                 
                 return false;
@@ -310,6 +397,6 @@ public class QuestUIHandler : MonoBehaviour
     private IEnumerator UpdateIndicatorAfterInit()
     {
         yield return new WaitForSeconds(0.1f);
-        UpdateNewQuestIndicator();
+        RequestIndicatorUpdate();
     }
 }
