@@ -380,8 +380,8 @@ MonoBehaviour:
   switchSettingsMigration: 1
   HasSourceProject: 1
   HasPlatforms: 1
-  sourceProjectPath: ../../FMOD projects/fmod-asterisk/fmod-asterisk.fspro
-  sourceBankPath: ../../FMOD projects/fmod-asterisk/Build
+  sourceProjectPath: Assets/FMOD/asterisk-fmod/asterisk-fmod.fspro
+  sourceBankPath: Assets/FMOD/asterisk-fmod/Build
   sourceBankPathUnformatted: 
   BankRefreshCooldown: 5
   ShowBankRefreshWindow: 1
