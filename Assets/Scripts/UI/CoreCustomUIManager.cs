@@ -348,4 +348,6 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
     }
     
     public GameObject GetNewQuestIndicator() => newQuestIndicator;
+    
+    public string GetUIName() => "Core Custom UI";
 }

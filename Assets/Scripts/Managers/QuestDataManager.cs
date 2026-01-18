@@ -395,10 +395,14 @@ public class QuestDataManager : MonoBehaviour
             questTracker.ResetAllQuestProgress();
         }
         
-        QuestUIHandler questUIHandler = FindFirstObjectByType<QuestUIHandler>();
-        if (questUIHandler != null)
+        // Clear quest progress from all QuestUIHandler instances (there may be multiple - one for each UI provider)
+        QuestUIHandler[] questUIHandlers = FindObjectsByType<QuestUIHandler>(FindObjectsSortMode.None);
+        foreach (QuestUIHandler questUIHandler in questUIHandlers)
         {
-            questUIHandler.ClearQuestProgress();
+            if (questUIHandler != null)
+            {
+                questUIHandler.ClearQuestProgress();
+            }
         }
         
         // Re-initialize all quests to their default states
@@ -688,16 +692,6 @@ public class QuestDataManager : MonoBehaviour
                 _questStates.ContainsKey(quest.questId) && 
                 _questStates[quest.questId] != QuestState.Locked)
             .ToList();
-        
-        if (unlockedQuests.Count == 0 && matchingProviderQuests.Count > 0)
-        {
-            // Debug.LogWarning($"QuestDataManager: Found {matchingProviderQuests.Count} quest(s) for provider {provider}, but all are locked. Quest states:");
-            foreach (var quest in matchingProviderQuests)
-            {
-                QuestState state = _questStates.ContainsKey(quest.questId) ? _questStates[quest.questId] : QuestState.Locked;
-                // Debug.Log($"  Quest {quest.questId} ({quest.questName}): State={state}");
-            }
-        }
         
         return unlockedQuests;
     }

@@ -158,4 +158,6 @@ public class ModuleStationUIManager : MonoBehaviour, IQuestUIProvider
     }
     
     public GameObject GetNewQuestIndicator() => newQuestIndicator;
+    
+    public string GetUIName() => "Module Station UI";
 }

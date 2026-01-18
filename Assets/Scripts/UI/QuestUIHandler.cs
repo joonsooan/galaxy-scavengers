@@ -292,19 +292,8 @@ public class QuestUIHandler : MonoBehaviour
         
         if (currentQuests == null || currentQuests.Count == 0)
         {
-            List<QuestData> allQuests = QuestDataManager.Instance.GetAllQuests();
-            // Debug.LogWarning($"QuestUIHandler: No quests found for provider {questProvider}. Total quests in system: {allQuests.Count}");
-            
-            foreach (QuestData quest in allQuests)
-            {
-                QuestState state = QuestDataManager.Instance.GetQuestState(quest.questId);
-                // Debug.Log($"  Quest {quest.questId} ({quest.questName}): Provider={quest.questProvider}, State={state}");
-            }
-            
             return;
         }
-        
-        // Debug.Log($"QuestUIHandler: Loading {currentQuests.Count} quest(s) for provider {questProvider}");
         
         foreach (QuestData quest in currentQuests)
         {
