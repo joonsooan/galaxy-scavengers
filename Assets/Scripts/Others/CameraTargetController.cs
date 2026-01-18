@@ -148,11 +148,6 @@ public class CameraTargetController : MonoBehaviour
 
     private void HandlePlayerInput()
     {
-        if (GameManager.Instance != null && GameManager.Instance.IsPaused) {
-            _direction = Vector3.zero;
-            return;
-        }
-
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveY = Input.GetAxisRaw("Vertical");
 

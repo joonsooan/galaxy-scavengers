@@ -395,22 +395,8 @@ public class QuestUIHandler : MonoBehaviour
                 if (_finishedQuestIds.Contains(quest.questId)) return false;
                 
                 QuestState state = QuestDataManager.Instance.GetQuestState(quest.questId);
-                if (state == QuestState.Locked) return false;
                 
-                // Show indicator for Completable quests (regardless of checked status)
-                if (state == QuestState.Completable)
-                {
-                    return true;
-                }
-                
-                // Show indicator for Available quests (if unchecked)
-                if (state == QuestState.Available)
-                {
-                    bool isUnchecked = !_viewedQuestIds.Contains(quest.questId);
-                    return isUnchecked;
-                }
-                
-                return false;
+                return state == QuestState.Available || state == QuestState.Completable;
             }).ToList();
         }
         

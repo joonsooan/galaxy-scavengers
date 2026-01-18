@@ -17,8 +17,14 @@ public class GameManager : MonoBehaviour
     private DisplayableData _activeCardData;
 
     private bool _isPaused;
+    private float _savedTimeScale = 1f;
     public static GameManager Instance { get; private set; }
     public bool IsPaused => _isPaused;
+    
+    public float GetTimeScale()
+    {
+        return _isPaused ? _savedTimeScale : Time.timeScale;
+    }
 
     private void Awake()
     {
@@ -54,12 +60,24 @@ public class GameManager : MonoBehaviour
             TogglePause();
         }
 
-        if (_isPaused) return;
+        if (Input.GetKeyDown(KeyCode.Alpha1)) {
+            _savedTimeScale = 1f;
+            if (!_isPaused) Time.timeScale = 1f;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2)) {
+            _savedTimeScale = 2f;
+            if (!_isPaused) Time.timeScale = 2f;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3)) {
+            _savedTimeScale = 3f;
+            if (!_isPaused) Time.timeScale = 3f;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha4)) {
+            _savedTimeScale = 4f;
+            if (!_isPaused) Time.timeScale = 4f;
+        }
 
-        if (Input.GetKeyDown(KeyCode.Alpha1)) Time.timeScale = 1;
-        else if (Input.GetKeyDown(KeyCode.Alpha2)) Time.timeScale = 2;
-        else if (Input.GetKeyDown(KeyCode.Alpha3)) Time.timeScale = 3;
-        else if (Input.GetKeyDown(KeyCode.Alpha4)) Time.timeScale = 4;
+        if (_isPaused) return;
 
         if (Input.GetKeyDown(KeyCode.F))
         {
@@ -77,7 +95,14 @@ public class GameManager : MonoBehaviour
     private void TogglePause()
     {
         _isPaused = !_isPaused;
-        Time.timeScale = _isPaused ? 0f : 1f;
+        
+        if (_isPaused) {
+            _savedTimeScale = Time.timeScale;
+            Time.timeScale = 0f;
+        }
+        else {
+            Time.timeScale = _savedTimeScale;
+        }
 
         if (pausePanel != null) {
             pausePanel.SetActive(_isPaused);
@@ -126,11 +151,13 @@ public class GameManager : MonoBehaviour
     {
         if (scene.name == "GameScene") {
             _isPaused = false;
+            _savedTimeScale = 1f;
             Time.timeScale = 1f;
             InitializeGameScene();
         }
         if (scene.name == "LightTestScene") {
             _isPaused = false;
+            _savedTimeScale = 1f;
             Time.timeScale = 1f;
             
             StartCoroutine(DelayedInitialization());
