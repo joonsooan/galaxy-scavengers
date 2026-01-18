@@ -138,7 +138,11 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
             StartCoroutine(RefreshOnPanelShown());
         }
         
-        if (questUIHandler != null)
+        if (newQuestIndicator != null && newQuestIndicator.activeSelf && questUIHandler != null)
+        {
+            questUIHandler.ShowQuestUI();
+        }
+        else if (questUIHandler != null)
         {
             questUIHandler.ShowShopUI();
         }

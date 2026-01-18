@@ -64,7 +64,19 @@ public class ModuleStationUIManager : MonoBehaviour, IQuestUIProvider
         moduleDetailPanel.ClearInfo();
 
         UpdateStationInfo();
-        ShowShopUI();
+        
+        if (newQuestIndicator != null && newQuestIndicator.activeSelf && questUIHandler != null)
+        {
+            questUIHandler.ShowQuestUI();
+        }
+        else if (questUIHandler != null)
+        {
+            questUIHandler.ShowShopUI();
+        }
+        else
+        {
+            ShowShopUI();
+        }
     }
 
     private void HidePanel()

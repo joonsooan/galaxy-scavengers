@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour
 
     private bool _isPaused;
     public static GameManager Instance { get; private set; }
+    public bool IsPaused => _isPaused;
 
     private void Awake()
     {

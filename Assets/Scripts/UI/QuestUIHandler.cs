@@ -190,7 +190,7 @@ public class QuestUIHandler : MonoBehaviour
         ShowShopUI();
     }
 
-    private void ShowQuestUI()
+    public void ShowQuestUI()
     {
         if (_uiProvider == null) return;
         
@@ -209,6 +209,8 @@ public class QuestUIHandler : MonoBehaviour
         QuestDetailPanel questDetailPanel = _uiProvider.GetQuestDetailPanel();
         questDetailPanel.ClearQuestInfo();
         questDetailPanel.gameObject.SetActive(true);
+        
+        UpdateButtonStates(showQuest: true);
         
         StartCoroutine(LoadQuestCellsWhenReady());
         RequestIndicatorUpdate();
@@ -245,6 +247,28 @@ public class QuestUIHandler : MonoBehaviour
         
         // Clear detail panel when switching to shop UI
         _uiProvider.ClearDetailPanel();
+        
+        UpdateButtonStates(showQuest: false);
+    }
+    
+    private void UpdateButtonStates(bool showQuest)
+    {
+        if (_uiProvider == null) return;
+        
+        Button questButton = _uiProvider.GetQuestButton();
+        Button shopButton = _uiProvider.GetShopButton();
+        
+        if (questButton != null && shopButton != null)
+        {
+            if (showQuest)
+            {
+                questButton.Select();
+            }
+            else
+            {
+                shopButton.Select();
+            }
+        }
     }
     
     private void LoadQuestCells()
