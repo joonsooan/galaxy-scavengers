@@ -392,8 +392,20 @@ public class Unit_Drone : UnitBase
             LookAtTarget(storagePos);
             _spriteController.SetTargetTransform(((Component)_targetStorage).transform);
         }
-
-        yield return new WaitForSeconds(loadingTime);
+        
+        // Show progress bar during loading
+        ShowProgressBar();
+        float elapsedTime = 0f;
+        
+        while (elapsedTime < loadingTime)
+        {
+            elapsedTime += Time.deltaTime;
+            float progress = elapsedTime / loadingTime;
+            UpdateProgressBar(progress);
+            yield return null;
+        }
+        
+        HideProgressBar();
 
         if (_targetStorage != null && _currentRequest != null) {
             int availableAmount = _targetStorage.GetCurrentResourceAmount(_currentRequest.type);
@@ -536,11 +548,28 @@ public class Unit_Drone : UnitBase
                 }
             }
             
+            // Show progress bar during processing
+            if (CurrentRecipeTask != null && CurrentRecipeTask.isProcessing)
+            {
+                ShowProgressBar();
+                float progress = CurrentRecipeTask.processingProgress;
+                UpdateProgressBar(progress);
+            }
+            else
+            {
+                HideProgressBar();
+            }
+            
             _currentProcessor.ProcessRecipeWork(CurrentRecipeTask, Time.deltaTime * processingSpeed);
 
             if (CurrentRecipeTask == null || !CurrentRecipeTask.isProcessing && CurrentRecipeTask.assignedDrone == null) {
+                HideProgressBar();
                 return;
             }
+        }
+        else
+        {
+            HideProgressBar();
         }
 
         if (!movement.IsMoving && !isAtProcessor) {

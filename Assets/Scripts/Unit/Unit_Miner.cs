@@ -232,7 +232,20 @@ public class Unit_Miner : UnitBase
     private IEnumerator UnloadResourceCoroutine()
     {
         unitMovement.StopMovement();
-        yield return new WaitForSeconds(unloadingTime);
+        
+        // Show progress bar during unloading
+        ShowProgressBar();
+        float elapsedTime = 0f;
+        
+        while (elapsedTime < unloadingTime)
+        {
+            elapsedTime += Time.deltaTime;
+            float progress = elapsedTime / unloadingTime;
+            UpdateProgressBar(progress);
+            yield return null;
+        }
+        
+        HideProgressBar();
 
         if (_targetStorage != null) {
             // Check if trying to unload aether and capacity is full

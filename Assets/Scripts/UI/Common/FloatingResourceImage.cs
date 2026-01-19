@@ -19,7 +19,28 @@ public class FloatingResourceImage : MonoBehaviour
 
     public void Play(ResourceType resourceType)
     {
-        if (_rectTransform == null || resourceImage == null) return;
+        // Kill any existing tweens to prevent conflicts
+        transform.DOKill();
+        if (resourceImage != null)
+        {
+            resourceImage.DOKill();
+        }
+        if (text != null)
+        {
+            text.DOKill();
+        }
+        
+        // Null checks
+        if (_rectTransform == null)
+        {
+            _rectTransform = GetComponent<RectTransform>();
+        }
+        
+        if (_rectTransform == null || resourceImage == null || text == null) 
+        {
+            gameObject.SetActive(false);
+            return;
+        }
 
         Sprite resourceIcon = ResourceManager.Instance?.GetResourceIcon(resourceType);
         if (resourceIcon != null)
@@ -37,10 +58,19 @@ public class FloatingResourceImage : MonoBehaviour
         transform.DOMoveY(startPos.y + moveDistance, duration).SetEase(Ease.OutQuad)
             .OnComplete(() =>
             {
-                gameObject.SetActive(false);
+                if (gameObject != null)
+                {
+                    gameObject.SetActive(false);
+                }
             });
 
-        resourceImage.DOFade(0, duration);
-        text.DOFade(0, duration);
+        if (resourceImage != null)
+        {
+            resourceImage.DOFade(0, duration);
+        }
+        if (text != null)
+        {
+            text.DOFade(0, duration);
+        }
     }
 }

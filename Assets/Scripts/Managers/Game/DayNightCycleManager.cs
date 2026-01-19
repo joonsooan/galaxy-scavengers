@@ -33,6 +33,15 @@ public class DayNightCycleManager : MonoBehaviour
     [SerializeField] private List<TimeProfile> timeProfiles = new List<TimeProfile>();
 
     public static DayNightCycleManager Instance { get; private set; }
+    
+    [Header("Night Attack Settings")]
+    [SerializeField] private int numberOfEnemiesToActivate = 3;
+    
+    public static event Action OnNightStarted;
+    public static event Action OnDayStarted;
+    
+    private bool _wasDay = true;
+    private bool _hasTriggeredNightAttack = false;
 
     private void Awake()
     {
@@ -57,6 +66,37 @@ public class DayNightCycleManager : MonoBehaviour
 
         UpdateAmbientLight();
         UpdateVolumeBlending();
+        CheckDayNightTransition();
+    }
+    
+    private void CheckDayNightTransition()
+    {
+        bool isCurrentlyDay = IsDay();
+        
+        // Check if transitioned from day to night
+        if (_wasDay && !isCurrentlyDay)
+        {
+            OnNightStarted?.Invoke();
+            _hasTriggeredNightAttack = false;
+        }
+        // Check if transitioned from night to day
+        else if (!_wasDay && isCurrentlyDay)
+        {
+            OnDayStarted?.Invoke();
+            _hasTriggeredNightAttack = false;
+        }
+        
+        _wasDay = isCurrentlyDay;
+    }
+    
+    public void SetNumberOfEnemiesToActivate(int count)
+    {
+        numberOfEnemiesToActivate = count;
+    }
+    
+    public int GetNumberOfEnemiesToActivate()
+    {
+        return numberOfEnemiesToActivate;
     }
 
     private void UpdateAmbientLight()

@@ -81,6 +81,8 @@ MonoBehaviour:
   unitType: 0
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
+  progressBarPrefab: {fileID: 5648413654597824292, guid: 0e7c462c413987749bca6d734a5a807f, type: 3}
+  progressBarYOffset: 1.5
   currentState: 0
   unitMovement: {fileID: 4483249089817793867}
   arrivalTolerance: 0.2

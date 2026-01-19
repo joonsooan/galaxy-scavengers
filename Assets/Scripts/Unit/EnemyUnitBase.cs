@@ -89,6 +89,29 @@ public abstract class EnemyUnitBase : UnitBase
         _homeRadius = hRadius;
         _territoryRadius = tRadius;
     }
+    
+    public void ActivateInfiniteAttackState()
+    {
+        if (!_isInInfiniteAttackState)
+        {
+            _isInInfiniteAttackState = true;
+            EnterAttackState();
+        }
+    }
+    
+    public void DeactivateInfiniteAttackState()
+    {
+        if (_isInInfiniteAttackState)
+        {
+            _isInInfiniteAttackState = false;
+            ReturnToIdle();
+        }
+    }
+    
+    public bool IsInInfiniteAttackState()
+    {
+        return _isInInfiniteAttackState;
+    }
 
     private void UpdateStateLogic()
     {

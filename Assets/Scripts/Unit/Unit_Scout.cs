@@ -69,7 +69,7 @@ public class Unit_Scout : UnitBase
         }
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         StopHover();
         
@@ -210,8 +210,21 @@ public class Unit_Scout : UnitBase
     {
         currentState = UnitState.Idle;
         unitMovement?.StopMovement();
-
-        yield return new WaitForSeconds(beacon.StayInterval);
+        
+        // Show progress bar while staying at beacon
+        ShowProgressBar();
+        float elapsedTime = 0f;
+        float stayInterval = beacon.StayInterval;
+        
+        while (elapsedTime < stayInterval)
+        {
+            elapsedTime += Time.deltaTime;
+            float progress = elapsedTime / stayInterval;
+            UpdateProgressBar(progress);
+            yield return null;
+        }
+        
+        HideProgressBar();
 
         if (BeaconManager.Instance != null) {
             Beacon availableBeacon = BeaconManager.Instance.FindAvailableBeacon();
@@ -242,8 +255,21 @@ public class Unit_Scout : UnitBase
     {
         currentState = UnitState.Idle;
         unitMovement?.StopMovement();
-
-        yield return new WaitForSeconds(waypoint.StayInterval);
+        
+        // Show progress bar while staying at waypoint
+        ShowProgressBar();
+        float elapsedTime = 0f;
+        float stayInterval = waypoint.StayInterval;
+        
+        while (elapsedTime < stayInterval)
+        {
+            elapsedTime += Time.deltaTime;
+            float progress = elapsedTime / stayInterval;
+            UpdateProgressBar(progress);
+            yield return null;
+        }
+        
+        HideProgressBar();
 
         if (waypoint != null) {
             waypoint.UnassignUnit();

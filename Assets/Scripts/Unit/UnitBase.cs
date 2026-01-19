@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public abstract class UnitBase : MonoBehaviour
 {
@@ -29,10 +30,15 @@ public abstract class UnitBase : MonoBehaviour
     [SerializeField] private Color flashColor = Color.red;
     [SerializeField] private float flashDuration = 0.3f;
 
+    [Header("Progress Bar")]
+    [SerializeField] private GameObject progressBarPrefab;
+    [SerializeField] private float progressBarYOffset = 1.5f;
+
     public UnitState currentState;
     private Coroutine _flashCoroutine;
     private Color _originalColor;
     private SpriteRenderer _sr;
+    protected UnitProgressBar _progressBar;
 
     protected virtual void Awake()
     {
@@ -61,8 +67,46 @@ public abstract class UnitBase : MonoBehaviour
         if (UnitManager.Instance != null) {
             UnitManager.Instance.RemoveUnit(this);
         }
+        
+        HideProgressBar();
     }
+    
+    protected virtual void OnDestroy()
+    {
+        HideProgressBar();
+    }
+    
+    protected void ShowProgressBar()
+    {
+        if (_progressBar != null) return;
 
+        GameObject barObj = Instantiate(progressBarPrefab);
+        _progressBar = barObj.GetComponent<UnitProgressBar>();
+        _progressBar.Initialize(transform);
+    }
+    
+    protected void HideProgressBar()
+    {
+        if (_progressBar != null)
+        {
+            _progressBar.Destroy();
+            _progressBar = null;
+        }
+    }
+    
+    protected void UpdateProgressBar(float progress)
+    {
+        if (_progressBar == null)
+        {
+            ShowProgressBar();
+        }
+        
+        if (_progressBar != null)
+        {
+            _progressBar.SetProgress(progress);
+        }
+    }
+    
     public virtual void TakeDamage(float damage)
     {
         currentHealth -= damage;
