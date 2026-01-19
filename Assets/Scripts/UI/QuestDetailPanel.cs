@@ -23,10 +23,27 @@ public class QuestDetailPanel : MonoBehaviour
     [SerializeField] private QuestUIHandler questUIHandler;
 
     private int _currentQuestId = -1;
+    private bool _isGameSceneMode = false;
 
     public void SetQuestUIHandler(QuestUIHandler handler)
     {
         questUIHandler = handler;
+    }
+    
+    public void SetGameSceneMode(bool isGameSceneMode)
+    {
+        _isGameSceneMode = isGameSceneMode;
+        
+        if (_isGameSceneMode)
+        {
+            if (questIdText != null) questIdText.gameObject.SetActive(false);
+            if (questDescriptionText != null) questDescriptionText.gameObject.SetActive(false);
+        }
+        else
+        {
+            if (questIdText != null) questIdText.gameObject.SetActive(true);
+            if (questDescriptionText != null) questDescriptionText.gameObject.SetActive(true);
+        }
     }
 
     private void Awake()
@@ -50,6 +67,11 @@ public class QuestDetailPanel : MonoBehaviour
         {
             inventoryManager.OnResourceChanged += OnInventoryResourceChanged;
         }
+        
+        if (_isGameSceneMode)
+        {
+            ClearQuestInfo();
+        }
     }
 
     private void OnDisable()
@@ -63,6 +85,11 @@ public class QuestDetailPanel : MonoBehaviour
         if (inventoryManager != null)
         {
             inventoryManager.OnResourceChanged -= OnInventoryResourceChanged;
+        }
+        
+        if (_isGameSceneMode)
+        {
+            ClearQuestInfo();
         }
     }
     
@@ -115,11 +142,29 @@ public class QuestDetailPanel : MonoBehaviour
         {
             handler.OnQuestViewed(questId);
         }
-        questNameText.text = questData.questName;
-        questIdText.text = $"퀘스트 ID : {questId:D4}";
-        questDescriptionText.text = questData.questInfo;
+        if (questNameText != null)
+        {
+            questNameText.text = questData.questName;
+            questNameText.gameObject.SetActive(true);
+        }
+        if (questIdText != null && !_isGameSceneMode)
+        {
+            questIdText.text = $"퀘스트 ID : {questId:D4}";
+        }
+        if (questDescriptionText != null && !_isGameSceneMode)
+        {
+            questDescriptionText.text = questData.questInfo;
+        }
         UpdateRequiredResourceText(questData);
-        rewardText.text = "보상";
+        if (requiredResourceText != null)
+        {
+            requiredResourceText.gameObject.SetActive(true);
+        }
+        if (rewardText != null)
+        {
+            rewardText.text = "보상";
+            rewardText.gameObject.SetActive(true);
+        }
 
         DisplayRequiredResources(questData);
         DisplayQuestRewards(questData);
@@ -131,11 +176,29 @@ public class QuestDetailPanel : MonoBehaviour
     public void ClearQuestInfo()
     {
         _currentQuestId = -1;
-        questNameText.text = "";
-        questIdText.text = "";
-        questDescriptionText.text = "";
-        if (requiredResourceText != null) requiredResourceText.text = "";
-        rewardText.text = "";
+        if (questNameText != null)
+        {
+            questNameText.text = "";
+            questNameText.gameObject.SetActive(false);
+        }
+        if (questIdText != null && !_isGameSceneMode)
+        {
+            questIdText.text = "";
+        }
+        if (questDescriptionText != null && !_isGameSceneMode)
+        {
+            questDescriptionText.text = "";
+        }
+        if (requiredResourceText != null)
+        {
+            requiredResourceText.text = "";
+            requiredResourceText.gameObject.SetActive(false);
+        }
+        if (rewardText != null)
+        {
+            rewardText.text = "";
+            rewardText.gameObject.SetActive(false);
+        }
 
         ClearRequiredResources();
         ClearQuestRewards();
@@ -246,9 +309,16 @@ public class QuestDetailPanel : MonoBehaviour
             {
                 GameObject cellObj = Instantiate(baseInventoryCellPrefab, requiredResourcesGridContainer.transform);
                 BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
+                cellObj.GetComponent<Button>().interactable = false;
+                
                 if (cell != null)
                 {
                     cell.SetResource(cost.resourceType, cost.amount);
+                }
+                else
+                {
+                    InventoryCell inventoryCell =  cellObj.GetComponent<InventoryCell>();
+                    inventoryCell.SetResource(cost.resourceType, cost.amount);
                 }
             }
         }

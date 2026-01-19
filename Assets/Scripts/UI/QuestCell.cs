@@ -141,6 +141,20 @@ public class QuestCell : MonoBehaviour
                 _questUIHandler.OnQuestViewed(_questData.questId);
             }
         }
+        
+        if (cellButton != null && UnityEngine.EventSystems.EventSystem.current != null)
+        {
+            StartCoroutine(SelectButtonAfterFrame());
+        }
+    }
+    
+    private System.Collections.IEnumerator SelectButtonAfterFrame()
+    {
+        yield return null;
+        if (cellButton != null && UnityEngine.EventSystems.EventSystem.current != null)
+        {
+            UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(cellButton.gameObject);
+        }
     }
 
     public QuestData GetQuestData()

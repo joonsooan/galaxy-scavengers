@@ -23,7 +23,15 @@ public class CreditManager : MonoBehaviour
     
     private void Start()
     {
-        _currentCredits = 0;
+        if (PlayerPrefs.HasKey("CurrentCredits"))
+        {
+            _currentCredits = PlayerPrefs.GetInt("CurrentCredits");
+            OnCreditsChanged?.Invoke(_currentCredits);
+        }
+        else
+        {
+            _currentCredits = 0;
+        }
     }
     
     public void AddCredits(int amount)
@@ -31,6 +39,7 @@ public class CreditManager : MonoBehaviour
         if (amount <= 0) return;
         
         _currentCredits += amount;
+        SaveCredits();
         OnCreditsChanged?.Invoke(_currentCredits);
         
         Debug.Log($"CreditManager: Added {amount} credits. Total: {_currentCredits}");
@@ -47,6 +56,7 @@ public class CreditManager : MonoBehaviour
         }
         
         _currentCredits -= amount;
+        SaveCredits();
         OnCreditsChanged?.Invoke(_currentCredits);
         
         Debug.Log($"CreditManager: Spent {amount} credits. Remaining: {_currentCredits}");
@@ -56,5 +66,11 @@ public class CreditManager : MonoBehaviour
     public int GetCredits()
     {
         return _currentCredits;
+    }
+    
+    private void SaveCredits()
+    {
+        PlayerPrefs.SetInt("CurrentCredits", _currentCredits);
+        PlayerPrefs.Save();
     }
 }

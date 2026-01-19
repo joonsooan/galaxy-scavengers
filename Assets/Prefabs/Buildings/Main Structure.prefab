@@ -146,38 +146,38 @@ MonoBehaviour:
   inventoryGridContainer: {fileID: 0}
   currentResourcePanel: {fileID: 0}
   sortButton: {fileID: 0}
-  inventoryCellPrefab: {fileID: 3842191235755297668, guid: 79b3efe314470124eb00454f0b0f98c4, type: 3}
-  resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: 3bcedb5ddd3f4124da52d7ef7cd2bd2e, type: 3}
-  inventoryWidth: 5
+  inventoryCellPrefab: {fileID: 3842191235755297668, guid: 0c93dfd6b41a96d4489a92b302206a7f, type: 3}
+  resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: 25b8419de43c1984fb45df6c7a910ba5, type: 3}
+  inventoryWidth: 4
   inventoryHeight: 5
   defaultMaxStackAmount: 100
   customMaxStackAmounts:
   - resourceType: 0
-    maxStackAmount: 100
+    maxStackAmount: 200
   - resourceType: 1
-    maxStackAmount: 50
+    maxStackAmount: 100
   - resourceType: 2
-    maxStackAmount: 50
+    maxStackAmount: 100
   - resourceType: 3
-    maxStackAmount: 20
+    maxStackAmount: 100
   - resourceType: 4
-    maxStackAmount: 20
+    maxStackAmount: 100
   - resourceType: 5
-    maxStackAmount: 20
+    maxStackAmount: 50
   - resourceType: 6
-    maxStackAmount: 20
+    maxStackAmount: 50
   - resourceType: 7
-    maxStackAmount: 20
+    maxStackAmount: 50
   - resourceType: 8
-    maxStackAmount: 20
+    maxStackAmount: 50
   - resourceType: 9
-    maxStackAmount: 20
+    maxStackAmount: 50
   - resourceType: 10
-    maxStackAmount: 20
+    maxStackAmount: 50
   - resourceType: 11
-    maxStackAmount: 20
+    maxStackAmount: 50
   - resourceType: 12
-    maxStackAmount: 20
+    maxStackAmount: 50
   - resourceType: 13
     maxStackAmount: 50
 --- !u!61 &-2104743701757568428
@@ -238,7 +238,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00cc167c3a83a00479cf54bfd89aaa29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  buildingData: {fileID: 0}
+  buildingData: {fileID: 11400000, guid: 3ed9fe33af7f6a14991abdbd3238ac98, type: 2}
 --- !u!114 &-2937795073857346507
 MonoBehaviour:
   m_ObjectHideFlags: 0

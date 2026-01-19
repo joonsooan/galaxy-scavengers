@@ -92,9 +92,18 @@ public class BaseInventoryCell : MonoBehaviour, IPointerClickHandler, IBaseInven
             }
         }
         
+        if (ResourceManager.Instance != null)
+        {
+            Sprite icon = ResourceManager.Instance.GetResourceIcon(_resourceType);
+            if (icon != null)
+            {
+                return icon;
+            }
+        }
+        
         if (_amount > 0)
         {
-            Debug.LogWarning($"BaseInventoryCell: No icon found for resource type {_resourceType}. Make sure BaseResourceDataManager has resource icons assigned.");
+            Debug.LogWarning($"BaseInventoryCell: No icon found for resource type {_resourceType}. Make sure BaseResourceDataManager or ResourceManager has resource icons assigned.");
         }
         
         return null;
