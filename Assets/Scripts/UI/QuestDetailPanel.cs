@@ -541,6 +541,23 @@ public class QuestDetailPanel : MonoBehaviour
 
         QuestState questState = QuestDataManager.Instance.GetQuestState(_currentQuestId);
         
+        FMODUIButton fmodButton = questActionButton.GetComponent<FMODUIButton>();
+        if (fmodButton != null)
+        {
+            if (questState == QuestState.Available)
+            {
+                fmodButton.SetClickState("Quest Accept");
+            }
+            else if (questState == QuestState.Completable)
+            {
+                fmodButton.SetClickState("Quest Clear");
+            }
+            else
+            {
+                fmodButton.SetClickState("Default");
+            }
+        }
+        
         if (questState == QuestState.Available)
         {
             questActionButton.gameObject.SetActive(true);
