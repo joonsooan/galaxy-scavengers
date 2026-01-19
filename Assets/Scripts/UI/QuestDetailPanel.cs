@@ -309,7 +309,6 @@ public class QuestDetailPanel : MonoBehaviour
             {
                 GameObject cellObj = Instantiate(baseInventoryCellPrefab, requiredResourcesGridContainer.transform);
                 BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
-                cellObj.GetComponent<Button>().interactable = false;
                 
                 if (cell != null)
                 {
@@ -319,6 +318,7 @@ public class QuestDetailPanel : MonoBehaviour
                 {
                     InventoryCell inventoryCell =  cellObj.GetComponent<InventoryCell>();
                     inventoryCell.SetResource(cost.resourceType, cost.amount);
+                    inventoryCell.GetComponent<Button>().interactable = false;
                 }
             }
         }

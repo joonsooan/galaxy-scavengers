@@ -1,7 +1,9 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public enum QuestState
 {
@@ -43,7 +45,7 @@ public class QuestDataManager : MonoBehaviour
         InitializeQuests();
         LoadQuestProgress();
         
-        StartCoroutine(SubscribeToBaseInventoryEvents());
+        StartCoroutine(SubscribeToInventoryEvents());
         
         // Initialize QuestTracker if not already initialized
         if (FindFirstObjectByType<QuestTracker>() == null)
@@ -69,30 +71,76 @@ public class QuestDataManager : MonoBehaviour
         }
     }
     
-    private System.Collections.IEnumerator SubscribeToBaseInventoryEvents()
+    private BaseInventoryManager _baseInventoryManager;
+    private InventorySystem _inventorySystem;
+    
+    private void OnEnable()
     {
-        BaseInventoryManager inventoryManager = null;
-        while (inventoryManager == null)
-        {
-            inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
-            yield return null;
-        }
-        
-        inventoryManager.OnResourceChanged += OnBaseInventoryResourceChanged;
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
-
-    private void OnDestroy()
+    
+    private void OnDisable()
     {
-        SaveQuestProgress();
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+        UnsubscribeFromInventoryEvents();
+    }
+    
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        _baseInventoryManager = null;
+        _inventorySystem = null;
+        UnsubscribeFromInventoryEvents();
+        StartCoroutine(SubscribeToInventoryEvents());
+    }
+    
+    private System.Collections.IEnumerator SubscribeToInventoryEvents()
+    {
+        string sceneName = SceneManager.GetActiveScene().name;
         
-        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
-        if (inventoryManager != null)
+        if (sceneName == "BaseScene")
         {
-            inventoryManager.OnResourceChanged -= OnBaseInventoryResourceChanged;
+            while (_baseInventoryManager == null)
+            {
+                _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+                yield return null;
+            }
+            _baseInventoryManager.OnResourceChanged += OnInventoryResourceChanged;
+        }
+        else if (sceneName == "GameScene")
+        {
+            while (_inventorySystem == null)
+            {
+                _inventorySystem = FindFirstObjectByType<InventorySystem>();
+                yield return null;
+            }
+            StartCoroutine(PeriodicallyCheckInventoryResources());
         }
     }
     
-    private void OnBaseInventoryResourceChanged(ResourceType resourceType, int amount)
+    private void UnsubscribeFromInventoryEvents()
+    {
+        if (_baseInventoryManager != null)
+        {
+            _baseInventoryManager.OnResourceChanged -= OnInventoryResourceChanged;
+        }
+    }
+    
+    private System.Collections.IEnumerator PeriodicallyCheckInventoryResources()
+    {
+        while (_inventorySystem != null && SceneManager.GetActiveScene().name == "GameScene")
+        {
+            yield return new WaitForSeconds(0.5f);
+            CheckAllActiveQuests();
+        }
+    }
+    
+    private void OnDestroy()
+    {
+        SaveQuestProgress();
+        UnsubscribeFromInventoryEvents();
+    }
+    
+    private void OnInventoryResourceChanged(ResourceType resourceType, int amount)
     {
         foreach (QuestData quest in _questDataDict.Values)
         {
@@ -307,14 +355,53 @@ public class QuestDataManager : MonoBehaviour
 
     private bool AreAllQuestRequirementsMet(QuestData quest)
     {
-        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        string sceneName = SceneManager.GetActiveScene().name;
+        Dictionary<ResourceType, int> inventoryResources = null;
+        
+        if (sceneName == "BaseScene")
+        {
+            if (_baseInventoryManager == null)
+            {
+                _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+            }
+            
+            if (_baseInventoryManager == null)
+            {
+                return false;
+            }
+            
+            inventoryResources = _baseInventoryManager.GetAllResources();
+        }
+        else if (sceneName == "GameScene")
+        {
+            if (_inventorySystem == null)
+            {
+                _inventorySystem = FindFirstObjectByType<InventorySystem>();
+            }
+            
+            if (_inventorySystem == null)
+            {
+                return false;
+            }
+            
+            inventoryResources = _inventorySystem.GetAllResourcesFromInventory();
+        }
+        else
+        {
+            return false;
+        }
+        
+        if (inventoryResources == null)
+        {
+            return false;
+        }
         
         // Check resource requirements
         if (quest.requiredResources != null && quest.requiredResources.Length > 0)
         {
             foreach (ResourceCost cost in quest.requiredResources)
             {
-                int currentAmount = inventoryManager.GetResourceAmount(cost.resourceType);
+                inventoryResources.TryGetValue(cost.resourceType, out int currentAmount);
                 if (currentAmount < cost.amount)
                 {
                     return false;
@@ -335,6 +422,38 @@ public class QuestDataManager : MonoBehaviour
         }
 
         return true;
+    }
+    
+    private void CheckAllActiveQuests()
+    {
+        foreach (QuestData quest in _questDataDict.Values)
+        {
+            QuestState currentState = _questStates[quest.questId];
+            
+            if (currentState != QuestState.Active && currentState != QuestState.Completable)
+            {
+                continue;
+            }
+            
+            if (AreAllQuestRequirementsMet(quest))
+            {
+                if (currentState == QuestState.Active)
+                {
+                    _questStates[quest.questId] = QuestState.Completable;
+                    OnQuestStateChanged?.Invoke(quest.questId);
+                    SaveQuestProgress();
+                }
+            }
+            else
+            {
+                if (currentState == QuestState.Completable)
+                {
+                    _questStates[quest.questId] = QuestState.Active;
+                    OnQuestStateChanged?.Invoke(quest.questId);
+                    SaveQuestProgress();
+                }
+            }
+        }
     }
     
     public bool CheckQuestCompletion(int questId)

@@ -144,29 +144,25 @@ public class ResourceUIManager : MonoBehaviour
 
     private void UpdateResourceUI(ResourceType type)
     {
-        if (!IsUIConnected()) return;
-
         GameObject resourcePanel = GetResourcePanel(type);
-        if (resourcePanel != null) {
-            ResourceDataManager dataManager = ResourceDataManager.Instance;
-            if (dataManager == null) return;
-            
-            int amount = dataManager.GetResourceAmount(type);
-            
-            TMP_Text resourceText = resourcePanel.GetComponentInChildren<TMP_Text>();
-            if (resourceText != null) {
-                resourceText.text = amount.ToString();
-            }
-            
-            bool shouldShow = amount > 0;
-            resourcePanel.SetActive(shouldShow);
+        if (resourcePanel == null) return;
+
+        ResourceDataManager dataManager = ResourceDataManager.Instance;
+        if (dataManager == null) return;
+        
+        int amount = dataManager.GetResourceAmount(type);
+        
+        TMP_Text resourceText = resourcePanel.GetComponentInChildren<TMP_Text>();
+        if (resourceText != null) {
+            resourceText.text = amount.ToString();
         }
+        
+        bool shouldShow = amount > 0;
+        resourcePanel.SetActive(shouldShow);
     }
 
     private void UpdateAllResourceUI()
     {
-        if (!IsUIConnected()) return;
-
         UpdateResourceUI(ResourceType.Ferrite);
         UpdateResourceUI(ResourceType.Aether);
         UpdateResourceUI(ResourceType.Biomass);
@@ -191,11 +187,6 @@ public class ResourceUIManager : MonoBehaviour
         UpdateResourceUI(ResourceType.SeekerMissile);
         UpdateResourceUI(ResourceType.NexusData);
         UpdateResourceUI(ResourceType.NeuralMatrix);
-    }
-
-    private bool IsUIConnected()
-    {
-        return ferritePanel != null && aetherPanel != null && biomassPanel != null && cryoCrystalPanel != null;
     }
 
     private GameObject GetResourcePanel(ResourceType type)
