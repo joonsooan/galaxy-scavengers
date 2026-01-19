@@ -6,6 +6,7 @@ public class QuestCell : MonoBehaviour
 {
     [Header("UI References")]
     [SerializeField] private TMP_Text questNameText;
+    [SerializeField] private TMP_Text questIdText;
     [SerializeField] private Button cellButton;
     [SerializeField] private GameObject configureIcon;
 
@@ -81,6 +82,11 @@ public class QuestCell : MonoBehaviour
         if (questNameText != null && questData != null)
         {
             questNameText.text = questData.questName;
+        }
+        
+        if (questIdText != null && questData != null)
+        {
+            questIdText.text = $"#{questData.questId:D4}";
         }
         
         UpdateConfigureIcon(isNew, questData);

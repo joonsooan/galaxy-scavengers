@@ -14,6 +14,11 @@ public class QuestCheckData
     [Tooltip("For multiple constructions/productions")]
     public int requiredCount = 1;
     
+    [Header("Display Text")]
+    [Tooltip("Custom text to display in QuestDetailPanel for non-resource requirements")]
+    [TextArea(2, 4)]
+    public string displayText;
+    
     [Header("Location (for ScoutEnteredLocation)")]
     [Tooltip("Target location for scout location checks")]
     public Vector3 targetLocation;

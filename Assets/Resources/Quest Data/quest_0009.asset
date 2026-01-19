@@ -28,6 +28,7 @@ MonoBehaviour:
   - checkType: 1
     targetId: "\uBC1C\uC804\uAE30"
     requiredCount: 3
+    displayText: "\uBC1C\uC804\uAE30 3\uAC1C \uAC74\uC124"
     targetLocation: {x: 0, y: 0, z: 0}
     locationTolerance: 0
   questFinishReward:

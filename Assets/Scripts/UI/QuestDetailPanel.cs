@@ -14,6 +14,10 @@ public class QuestDetailPanel : MonoBehaviour
     [SerializeField] private GameObject rewardGridContainer;
     [SerializeField] private GameObject baseInventoryCellPrefab;
     [SerializeField] private GameObject moduleInventoryCellPrefab;
+    [SerializeField] private GameObject creditRewardCellPrefab;
+    [SerializeField] private GameObject buildingRewardCellPrefab;
+    [SerializeField] private GameObject unitRewardCellPrefab;
+    [SerializeField] private GameObject requirementTextPrefab;
     [SerializeField] private Button questActionButton;
     [SerializeField] private TMP_Text questActionButtonText;
     [SerializeField] private QuestUIHandler questUIHandler;
@@ -114,7 +118,7 @@ public class QuestDetailPanel : MonoBehaviour
         questNameText.text = questData.questName;
         questIdText.text = $"퀘스트 ID : {questId:D4}";
         questDescriptionText.text = questData.questInfo;
-        requiredResourceText.text = "필요한 자원";
+        UpdateRequiredResourceText(questData);
         rewardText.text = "보상";
 
         DisplayRequiredResources(questData);
@@ -130,7 +134,7 @@ public class QuestDetailPanel : MonoBehaviour
         questNameText.text = "";
         questIdText.text = "";
         questDescriptionText.text = "";
-        requiredResourceText.text = "";
+        if (requiredResourceText != null) requiredResourceText.text = "";
         rewardText.text = "";
 
         ClearRequiredResources();
@@ -140,6 +144,57 @@ public class QuestDetailPanel : MonoBehaviour
         RebuildAllLayouts();
     }
 
+    private void UpdateRequiredResourceText(QuestData questData)
+    {
+        if (requiredResourceText == null) return;
+        
+        bool hasNonResourceRequirements = false;
+        QuestCheckType? primaryCheckType = null;
+        
+        if (questData.questCheckRequirements != null && questData.questCheckRequirements.Length > 0)
+        {
+            foreach (QuestCheckData checkData in questData.questCheckRequirements)
+            {
+                if (checkData.checkType != QuestCheckType.ResourceRequirement)
+                {
+                    hasNonResourceRequirements = true;
+                    if (primaryCheckType == null)
+                    {
+                        primaryCheckType = checkData.checkType;
+                    }
+                    break;
+                }
+            }
+        }
+        
+        if (hasNonResourceRequirements && primaryCheckType.HasValue)
+        {
+            requiredResourceText.text = GetRequirementTextForCheckType(primaryCheckType.Value);
+        }
+        else if (questData.requiredResources != null && questData.requiredResources.Length > 0)
+        {
+            requiredResourceText.text = "필요한 자원";
+        }
+        else
+        {
+            requiredResourceText.text = "요구사항";
+        }
+    }
+    
+    private string GetRequirementTextForCheckType(QuestCheckType checkType)
+    {
+        return checkType switch
+        {
+            QuestCheckType.ResourceRequirement => "자원 요구사항",
+            QuestCheckType.BuildingConstructed => "건설 요구사항",
+            QuestCheckType.UnitProduced => "생산 요구사항",
+            QuestCheckType.BeaconPlacedForScout => "탐사 요구사항",
+            QuestCheckType.ScoutEnteredLocation => "탐사 요구사항",
+            QuestCheckType.ModulePlacedOnCore => "모듈 요구사항",
+            _ => "요구사항"
+        };
+    }
+
     private void DisplayRequiredResources(QuestData questData)
     {
         if (requiredResourcesGridContainer == null || baseInventoryCellPrefab == null) return;
@@ -147,6 +202,42 @@ public class QuestDetailPanel : MonoBehaviour
         foreach (Transform child in requiredResourcesGridContainer.transform)
         {
             Destroy(child.gameObject);
+        }
+
+        if (questData.questCheckRequirements != null && questData.questCheckRequirements.Length > 0)
+        {
+            foreach (QuestCheckData checkData in questData.questCheckRequirements)
+            {
+                if (checkData.checkType == QuestCheckType.BuildingConstructed ||
+                    checkData.checkType == QuestCheckType.UnitProduced ||
+                    checkData.checkType == QuestCheckType.BeaconPlacedForScout ||
+                    checkData.checkType == QuestCheckType.ScoutEnteredLocation ||
+                    checkData.checkType == QuestCheckType.ModulePlacedOnCore)
+                {
+                    if (!string.IsNullOrEmpty(checkData.displayText))
+                    {
+                        if (requirementTextPrefab != null)
+                        {
+                            GameObject textObj = Instantiate(requirementTextPrefab, requiredResourcesGridContainer.transform);
+                            TMP_Text textComponent = textObj.GetComponent<TMP_Text>();
+                            if (textComponent != null)
+                            {
+                                textComponent.text = checkData.displayText;
+                            }
+                        }
+                        else
+                        {
+                            GameObject textObj = new GameObject("RequirementText");
+                            textObj.transform.SetParent(requiredResourcesGridContainer.transform);
+                            RectTransform rectTransform = textObj.AddComponent<RectTransform>();
+                            rectTransform.sizeDelta = new Vector2(200, 30);
+                            TMP_Text textComponent = textObj.AddComponent<TMPro.TextMeshProUGUI>();
+                            textComponent.text = checkData.displayText;
+                            textComponent.fontSize = 14;
+                        }
+                    }
+                }
+            }
         }
 
         if (questData.requiredResources != null && questData.requiredResources.Length > 0)
@@ -160,16 +251,16 @@ public class QuestDetailPanel : MonoBehaviour
                     cell.SetResource(cost.resourceType, cost.amount);
                 }
             }
+        }
 
-            foreach (Transform child in requiredResourcesGridContainer.transform)
-            {
-                LayoutRebuilder.ForceRebuildLayoutImmediate(child.GetComponent<RectTransform>());
-            }
+        foreach (Transform child in requiredResourcesGridContainer.transform)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(child.GetComponent<RectTransform>());
+        }
 
-            if (requiredResourcesGridContainer != null)
-            {
-                LayoutRebuilder.ForceRebuildLayoutImmediate(requiredResourcesGridContainer.GetComponent<RectTransform>());
-            }
+        if (requiredResourcesGridContainer != null)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(requiredResourcesGridContainer.GetComponent<RectTransform>());
         }
     }
 
@@ -231,70 +322,104 @@ public class QuestDetailPanel : MonoBehaviour
             
             if (questData.questFinishReward.creditReward > 0)
             {
-                GameObject cellObj = Instantiate(baseInventoryCellPrefab, rewardGridContainer.transform);
-                BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
-                if (cell != null)
+                if (creditRewardCellPrefab != null)
                 {
-                    // Display credit reward as a special resource type or custom text
-                    // For now, we'll need to check if there's a way to display custom text
-                    // If BaseInventoryCell supports custom display, use it; otherwise create a text element
-                    TMP_Text creditText = cellObj.GetComponentInChildren<TMP_Text>();
-                    if (creditText != null)
+                    GameObject cellObj = Instantiate(creditRewardCellPrefab, rewardGridContainer.transform);
+                    CreditRewardCell cell = cellObj.GetComponent<CreditRewardCell>();
+                    if (cell != null)
                     {
-                        creditText.text = $"{questData.questFinishReward.creditReward} Credits";
+                        cell.SetCreditAmount(questData.questFinishReward.creditReward);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"QuestDetailPanel: CreditRewardCell component not found on prefab {creditRewardCellPrefab.name}");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("QuestDetailPanel: creditRewardCellPrefab is not assigned, using fallback");
+                    GameObject cellObj = Instantiate(baseInventoryCellPrefab, rewardGridContainer.transform);
+                    BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
+                    if (cell != null)
+                    {
+                        TMP_Text creditText = cellObj.GetComponentInChildren<TMP_Text>();
+                        if (creditText != null)
+                        {
+                            creditText.text = $"{questData.questFinishReward.creditReward} Credits";
+                        }
                     }
                 }
             }
             
-            // Display unlocked buildings
             if (questData.questFinishReward.unlockedBuildings != null && questData.questFinishReward.unlockedBuildings.Length > 0)
             {
                 foreach (BuildingData building in questData.questFinishReward.unlockedBuildings)
                 {
                     if (building == null) continue;
                     
-                    GameObject cellObj = Instantiate(baseInventoryCellPrefab, rewardGridContainer.transform);
-                    BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
-                    if (cell != null)
+                    if (buildingRewardCellPrefab != null)
                     {
-                        // Try to set building icon if BaseInventoryCell supports it
-                        Image iconImage = cellObj.GetComponentInChildren<Image>();
-                        if (iconImage != null && building.icon != null)
+                        GameObject cellObj = Instantiate(buildingRewardCellPrefab, rewardGridContainer.transform);
+                        BuildingRewardCell cell = cellObj.GetComponent<BuildingRewardCell>();
+                        if (cell != null)
                         {
-                            iconImage.sprite = building.icon;
+                            cell.SetBuildingData(building);
                         }
-                        
-                        TMP_Text nameText = cellObj.GetComponentInChildren<TMP_Text>();
-                        if (nameText != null)
+                    }
+                    else
+                    {
+                        GameObject cellObj = Instantiate(baseInventoryCellPrefab, rewardGridContainer.transform);
+                        BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
+                        if (cell != null)
                         {
-                            nameText.text = building.displayName;
+                            Image iconImage = cellObj.GetComponentInChildren<Image>();
+                            if (iconImage != null && building.icon != null)
+                            {
+                                iconImage.sprite = building.icon;
+                            }
+                            
+                            TMP_Text nameText = cellObj.GetComponentInChildren<TMP_Text>();
+                            if (nameText != null)
+                            {
+                                nameText.text = building.displayName;
+                            }
                         }
                     }
                 }
             }
             
-            // Display new units
             if (questData.questFinishReward.newUnits != null && questData.questFinishReward.newUnits.Length > 0)
             {
                 foreach (UnitData unit in questData.questFinishReward.newUnits)
                 {
                     if (unit == null) continue;
                     
-                    GameObject cellObj = Instantiate(baseInventoryCellPrefab, rewardGridContainer.transform);
-                    BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
-                    if (cell != null)
+                    if (unitRewardCellPrefab != null)
                     {
-                        // Try to set unit icon if BaseInventoryCell supports it
-                        Image iconImage = cellObj.GetComponentInChildren<Image>();
-                        if (iconImage != null && unit.unitIcon != null)
+                        GameObject cellObj = Instantiate(unitRewardCellPrefab, rewardGridContainer.transform);
+                        UnitRewardCell cell = cellObj.GetComponent<UnitRewardCell>();
+                        if (cell != null)
                         {
-                            iconImage.sprite = unit.unitIcon;
+                            cell.SetUnitData(unit);
                         }
-                        
-                        TMP_Text nameText = cellObj.GetComponentInChildren<TMP_Text>();
-                        if (nameText != null)
+                    }
+                    else
+                    {
+                        GameObject cellObj = Instantiate(baseInventoryCellPrefab, rewardGridContainer.transform);
+                        BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
+                        if (cell != null)
                         {
-                            nameText.text = $"{unit.unitName} (NEW)";
+                            Image iconImage = cellObj.GetComponentInChildren<Image>();
+                            if (iconImage != null && unit.unitIcon != null)
+                            {
+                                iconImage.sprite = unit.unitIcon;
+                            }
+                            
+                            TMP_Text nameText = cellObj.GetComponentInChildren<TMP_Text>();
+                            if (nameText != null)
+                            {
+                                nameText.text = $"{unit.unitName} (NEW)";
+                            }
                         }
                     }
                 }

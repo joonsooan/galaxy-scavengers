@@ -27,6 +27,7 @@ MonoBehaviour:
   - checkType: 1
     targetId: 
     requiredCount: 5
+    displayText: "\uC544\uBB34 \uAC74\uBB3C 5\uAC1C \uAC74\uC124"
     targetLocation: {x: 0, y: 0, z: 0}
     locationTolerance: 0
   questFinishReward:
