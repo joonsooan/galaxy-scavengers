@@ -13,6 +13,7 @@ public class LaunchUIController : MonoBehaviour
     [Header("Launch Settings")]
     [SerializeField] private float countdownDurationSeconds = 10f;
     [SerializeField] private int neededAetherPerCell = 10;
+    [SerializeField] private int freeLaunchCells = 0;
     [SerializeField] private float launchCompleteDisplayDuration = 2f;
 
     private bool _isCountingDown;
@@ -79,7 +80,8 @@ public class LaunchUIController : MonoBehaviour
         InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
 
         int occupiedCells = inventorySystem.GetOccupiedCellCount();
-        int neededAether = neededAetherPerCell * occupiedCells;
+        int cellsRequiringAether = Mathf.Max(0, occupiedCells - freeLaunchCells);
+        int neededAether = neededAetherPerCell * cellsRequiringAether;
 
         if (ResourceManager.Instance != null)
         {
@@ -90,7 +92,10 @@ public class LaunchUIController : MonoBehaviour
                 return;
             }
 
-            ResourceManager.Instance.RemoveResource(ResourceType.Aether, neededAether);
+            if (neededAether > 0)
+            {
+                ResourceManager.Instance.RemoveResource(ResourceType.Aether, neededAether);
+            }
         }
 
         inventorySystem.SetTransferEnabled(false);

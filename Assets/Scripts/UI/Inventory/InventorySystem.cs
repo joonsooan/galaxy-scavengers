@@ -21,6 +21,7 @@ public class InventorySystem : MonoBehaviour
     [Header("Inventory Settings")]
     [SerializeField] private int inventoryWidth = 5;
     [SerializeField] private int inventoryHeight = 5;
+    [SerializeField] private int baseCellCount = 25;
     [SerializeField] private int defaultMaxStackAmount = 100;
     [SerializeField] private List<ResourceStackData> customMaxStackAmounts = new ();
 
@@ -130,7 +131,7 @@ public class InventorySystem : MonoBehaviour
             return;
         }
 
-        int totalSlots = inventoryWidth * inventoryHeight;
+        int totalSlots = baseCellCount;
         for (int i = 0; i < totalSlots; i++)
         {
             GameObject cellObj = Instantiate(inventoryCellPrefab, inventoryGridContainer.transform);

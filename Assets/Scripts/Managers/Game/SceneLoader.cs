@@ -139,11 +139,6 @@ public class SceneLoader : MonoBehaviour
     {
         _isLoading = true;
 
-        if (LoadingUIManager.Instance != null)
-        {
-            LoadingUIManager.Instance.ShowLoadingScreen();
-        }
-
         yield return null;
 
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
@@ -164,11 +159,6 @@ public class SceneLoader : MonoBehaviour
         }
 
         yield return new WaitForSeconds(0.1f);
-        
-        if (LoadingUIManager.Instance != null)
-        {
-            LoadingUIManager.Instance.HideLoadingScreen();
-        }
 
         _isLoading = false;
     }

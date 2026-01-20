@@ -151,6 +151,7 @@ MonoBehaviour:
   resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: 25b8419de43c1984fb45df6c7a910ba5, type: 3}
   inventoryWidth: 4
   inventoryHeight: 5
+  baseCellCount: 4
   defaultMaxStackAmount: 100
   customMaxStackAmounts:
   - resourceType: 0

@@ -8104,7 +8104,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 11.25
+  orthographic size: 662.501
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -8129,7 +8129,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0.5, z: -40}
+  m_LocalPosition: {x: 0.5, y: 0.5, z: -20}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -23894,7 +23894,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 20, y: 0}
-  m_SizeDelta: {x: 20, y: 0}
+  m_SizeDelta: {x: 20, y: 6}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &788684147
 MonoBehaviour:
@@ -30716,7 +30716,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1300553940
 RectTransform:
   m_ObjectHideFlags: 0
@@ -31349,7 +31349,7 @@ RectTransform:
   m_Father: {fileID: 1783936214}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -33948,6 +33948,7 @@ MonoBehaviour:
   launchCompleteUI: {fileID: 0}
   countdownDurationSeconds: 10
   neededAetherPerCell: 100
+  freeLaunchCells: 2
   launchCompleteDisplayDuration: 2
 --- !u!114 &1538527380
 MonoBehaviour:
@@ -39132,7 +39133,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2037369538
 RectTransform:
   m_ObjectHideFlags: 0
