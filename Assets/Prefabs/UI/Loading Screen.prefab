@@ -5155,7 +5155,7 @@ MonoBehaviour:
   fadeOutDuration: 1
   contentFadeOutDuration: 0.5
   resumeDelay: 1
-  imageEntryDelay: 0
+  imageEntryDelay: 0.5
   imageEntryDuration: 1
   imageExitDuration: 1
   postInitWaitDuration: 1

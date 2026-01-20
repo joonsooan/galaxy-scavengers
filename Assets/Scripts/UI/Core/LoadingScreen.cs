@@ -328,10 +328,8 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
         {
             yield return null;
         }
-        
-        yield return new WaitForSecondsRealtime(postInitWaitDuration);
 
-        if (Time.timeScale > 0f) Time.timeScale = 0f;
+        yield return new WaitForSecondsRealtime(postInitWaitDuration);
 
         if (loadingImage != null)
         {
@@ -397,8 +395,6 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
         }
 
         yield return new WaitForSecondsRealtime(resumeDelay);
-
-        Time.timeScale = 1f;
         
         gameObject.SetActive(false); 
     }

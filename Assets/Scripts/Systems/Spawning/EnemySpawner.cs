@@ -1,6 +1,8 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Systems.Jobs;
 
 [System.Serializable]
 public class EnemySpawnData
@@ -10,62 +12,122 @@ public class EnemySpawnData
     public float spawnProbability = 50f;
 }
 
-public class EnemySpawner : MonoBehaviour
-{
-    [SerializeField] private List<EnemySpawnData> enemyPrefabs = new ();
-    [SerializeField] private int minEnemiesPerHole = 5;
-    [SerializeField] private int maxEnemiesPerHole = 7;
-    [SerializeField] private float spawnRadiusOffset = 1f;
-
-    public void SpawnEnemies()
+    public class EnemySpawner : MonoBehaviour
     {
-        MapGenerator mapGenerator = GameManager.Instance.mapGenerator;
-        IReadOnlyList<Vector2Int> holes = mapGenerator.EnemySpawnHolePositions;
-        if (holes == null || holes.Count == 0)
-        {
-            return;
-        }
-        
-        Grid grid = BuildingManager.Instance.grid;
-        
-        for (int i = 0; i < holes.Count; i++)
-        {
-            Vector2Int holePos = holes[i];
-            Vector3 center = mapGenerator.GetEnemySpawnHoleWorldPosition(holePos);
-            (float homeRadius, float territoryRadius) = mapGenerator.GetHoleRadiusValues(holePos);
-            
-            if (homeRadius <= 0f || territoryRadius <= 0f)
-            {
-                continue;
-            }
+        [SerializeField] private List<EnemySpawnData> enemyPrefabs = new ();
+        [SerializeField] private int minEnemiesPerHole = 5;
+        [SerializeField] private int maxEnemiesPerHole = 7;
+        [SerializeField] private float spawnRadiusOffset = 1f;
 
-            int enemiesPerHole = Random.Range(minEnemiesPerHole, maxEnemiesPerHole);
-            
-            for (int j = 0; j < enemiesPerHole; j++)
+        public void SpawnEnemies()
+        {
+            MapGenerator mapGenerator = GameManager.Instance.mapGenerator;
+            IReadOnlyList<Vector2Int> holes = mapGenerator.EnemySpawnHolePositions;
+            if (holes == null || holes.Count == 0)
             {
-                GameObject selectedPrefab = SelectEnemyPrefab();
-                if (selectedPrefab == null)
+                return;
+            }
+            
+            Grid grid = BuildingManager.Instance.grid;
+            
+            for (int i = 0; i < holes.Count; i++)
+            {
+                Vector2Int holePos = holes[i];
+                Vector3 center = mapGenerator.GetEnemySpawnHoleWorldPosition(holePos);
+                (float homeRadius, float territoryRadius) = mapGenerator.GetHoleRadiusValues(holePos);
+                
+                if (homeRadius <= 0f || territoryRadius <= 0f)
                 {
                     continue;
                 }
+
+                int enemiesPerHole = Random.Range(minEnemiesPerHole, maxEnemiesPerHole);
                 
-                Vector3 spawnPos = FindValidSpawnPosition(center, spawnRadiusOffset, grid);
-                if (spawnPos != Vector3.zero && center != Vector3.zero)
+                for (int j = 0; j < enemiesPerHole; j++)
                 {
-                    string poolTag = GetPoolTagFromPrefab(selectedPrefab);
-                    GameObject enemy = ObjectPooler.Instance.SpawnFromPool(poolTag, spawnPos, Quaternion.identity);
-                    if (enemy != null)
+                    GameObject selectedPrefab = SelectEnemyPrefab();
+                    if (selectedPrefab == null)
                     {
-                        EnemyUnitBase enemyScript = enemy.GetComponent<EnemyUnitBase>();
-                        if (enemyScript != null)
+                        continue;
+                    }
+                    
+                    Vector3 spawnPos = FindValidSpawnPosition(center, spawnRadiusOffset, grid);
+                    if (spawnPos != Vector3.zero && center != Vector3.zero)
+                    {
+                        string poolTag = GetPoolTagFromPrefab(selectedPrefab);
+                        GameObject enemy = ObjectPooler.Instance.SpawnFromPool(poolTag, spawnPos, Quaternion.identity);
+                        if (enemy != null)
                         {
-                            enemyScript.SetTerritoryCenter(center, homeRadius, territoryRadius);
+                            EnemyUnitBase enemyScript = enemy.GetComponent<EnemyUnitBase>();
+                            if (enemyScript != null)
+                            {
+                                enemyScript.SetTerritoryCenter(center, homeRadius, territoryRadius);
+                            }
                         }
                     }
                 }
             }
         }
-    }
+
+        public IEnumerator SpawnEnemiesAsync(IInitializationProgress progress = null)
+        {
+            MapGenerator mapGenerator = GameManager.Instance.mapGenerator;
+            IReadOnlyList<Vector2Int> holes = mapGenerator.EnemySpawnHolePositions;
+            if (holes == null || holes.Count == 0)
+            {
+                yield break;
+            }
+            
+            Grid grid = BuildingManager.Instance.grid;
+            int totalHoles = holes.Count;
+
+            for (int i = 0; i < totalHoles; i++)
+            {
+                Vector2Int holePos = holes[i];
+                Vector3 center = mapGenerator.GetEnemySpawnHoleWorldPosition(holePos);
+                (float homeRadius, float territoryRadius) = mapGenerator.GetHoleRadiusValues(holePos);
+                
+                if (homeRadius > 0f && territoryRadius > 0f)
+                {
+                    int enemiesPerHole = Random.Range(minEnemiesPerHole, maxEnemiesPerHole);
+                    
+                    for (int j = 0; j < enemiesPerHole; j++)
+                    {
+                        GameObject selectedPrefab = SelectEnemyPrefab();
+                        if (selectedPrefab == null)
+                        {
+                            continue;
+                        }
+                        
+                        Vector3 spawnPos = FindValidSpawnPosition(center, spawnRadiusOffset, grid);
+                        if (spawnPos != Vector3.zero && center != Vector3.zero)
+                        {
+                            string poolTag = GetPoolTagFromPrefab(selectedPrefab);
+                            GameObject enemy = ObjectPooler.Instance.SpawnFromPool(poolTag, spawnPos, Quaternion.identity);
+                            if (enemy != null)
+                            {
+                                EnemyUnitBase enemyScript = enemy.GetComponent<EnemyUnitBase>();
+                                if (enemyScript != null)
+                                {
+                                    enemyScript.SetTerritoryCenter(center, homeRadius, territoryRadius);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (progress != null)
+                {
+                    float holeProgress = (i + 1f) / totalHoles;
+                    progress.UpdateProgress(holeProgress, "적대적 생명체 탐색 중...");
+                }
+
+                if (i % 2 == 0)
+                {
+                    yield return null;
+                }
+            }
+        }
     
     private GameObject SelectEnemyPrefab()
     {

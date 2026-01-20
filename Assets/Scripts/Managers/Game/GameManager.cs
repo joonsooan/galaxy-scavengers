@@ -204,6 +204,8 @@ public class GameManager : MonoBehaviour
             }
         }
         
+        yield return new WaitForSeconds(0.5f);
+        
         IInitializationProgress progress = GetInitializationProgress();
         yield return StartCoroutine(InitializeGameSceneAsync(progress));
     }
@@ -401,9 +403,22 @@ public class GameManager : MonoBehaviour
             mapGenerator.GenerateEnemyTerritoryRadiusValues();
         }
         
-        foreach (EnemySpawner enemySpawner in FindObjectsByType<EnemySpawner>(FindObjectsSortMode.None))
+        EnemySpawner[] enemySpawners = FindObjectsByType<EnemySpawner>(FindObjectsSortMode.None);
+        if (progress != null)
         {
-            enemySpawner.SpawnEnemies();
+            foreach (EnemySpawner enemySpawner in enemySpawners)
+            {
+                if (enemySpawner == null) continue;
+                yield return StartCoroutine(enemySpawner.SpawnEnemiesAsync(progress));
+            }
+        }
+        else
+        {
+            foreach (EnemySpawner enemySpawner in enemySpawners)
+            {
+                if (enemySpawner == null) continue;
+                enemySpawner.SpawnEnemies();
+            }
         }
         
         if (mapGenerator != null)
