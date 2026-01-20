@@ -85,6 +85,9 @@ public class SceneLoader : MonoBehaviour
         }
 
         yield return StartCoroutine(WaitForGameSceneInitialization());
+        
+        // Freeze gameplay while loading screen is fading out and for an additional delay
+        Time.timeScale = 0f;
 
         // Wait for fade to complete and then wait additional delay
         if (LoadingUIManager.Instance != null)
@@ -115,11 +118,15 @@ public class SceneLoader : MonoBehaviour
         
         if (GameManager.Instance != null)
         {
+            GameManager.IsGameplayReady = true;
             foreach (Unit_Miner unit in FindObjectsByType<Unit_Miner>(FindObjectsSortMode.None))
             {
                 unit.TryStartActions();
             }
         }
+        
+        // Resume gameplay after loading screen has disappeared and delay has passed
+        Time.timeScale = 1f;
     }
     
     private IEnumerator LoadSceneAsync(string sceneName)

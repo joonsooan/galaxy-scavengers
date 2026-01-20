@@ -27,6 +27,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
     public bool IsPaused => _isPaused;
     public bool IsGameSceneInitialized => _isGameSceneInitialized;
+    public static bool IsGameplayReady { get; set; } = true;
     
     public float GetTimeScale()
     {
@@ -161,6 +162,7 @@ public class GameManager : MonoBehaviour
             _savedTimeScale = 1f;
             Time.timeScale = 1f;
             _isGameSceneInitialized = false;
+            IsGameplayReady = false;
             InitializeGameScene();
         }
         if (scene.name == "LightTestScene") {
@@ -240,7 +242,10 @@ public class GameManager : MonoBehaviour
         // Step 3: Wait for Fog of War
         yield return StartCoroutine(WaitForFogOfWarInitializationAsync(progress));
         
-        UpdateEnemyVisibility();
+        if (FogOfWarManager.Instance != null)
+        {
+            FogOfWarManager.Instance.RefreshFogOfWar();
+        }
         
         if (progress != null)
         {
@@ -292,7 +297,10 @@ public class GameManager : MonoBehaviour
         
         yield return StartCoroutine(WaitForFogOfWarInitialization());
         
-        UpdateEnemyVisibility();
+        if (FogOfWarManager.Instance != null)
+        {
+            FogOfWarManager.Instance.RefreshFogOfWar();
+        }
         
         _isGameSceneInitialized = true;
         OnGameSceneInitialized?.Invoke();
@@ -498,6 +506,12 @@ public class GameManager : MonoBehaviour
                             Vector3Int anchorCell = cellPos - new Vector3Int(1, 1, 0);
                             BuildingManager.Instance.RegisterMainStructure(anchorCell, new Vector2Int(3, 3));
                         }
+                    }
+                    
+                    // Ensure MainStructure is always registered as a valid enemy target
+                    if (TargetManager.Instance != null)
+                    {
+                        TargetManager.Instance.RegisterTarget(mainStructure);
                     }
                 }
             }

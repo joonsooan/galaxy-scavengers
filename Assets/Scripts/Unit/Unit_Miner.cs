@@ -105,6 +105,9 @@ public class Unit_Miner : UnitBase
         switch (currentState) {
         case UnitState.Idle:
             if (_findResourceCoroutine == null) {
+                if (GameManager.Instance != null && SceneManager.GetActiveScene().name == "GameScene" && !GameManager.IsGameplayReady) {
+                    return;
+                }
                 TryStartActions();
             }
             break;

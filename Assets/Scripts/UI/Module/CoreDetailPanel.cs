@@ -76,7 +76,7 @@ public class CoreDetailPanel : MonoBehaviour
     {
         if (moduleNameText != null)
         {
-            moduleNameText.text = "";
+            moduleNameText.text = "장착된 모듈이 없습니다.";
         }
         if (moduleEffectText != null)
         {

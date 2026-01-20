@@ -20,15 +20,21 @@ public class BaseSceneManager : MonoBehaviour
     [SerializeField] private GameObject coreLaunchUIPanel;
     
     private int _currentPanelIndex = -1;
+    private BaseInventorySystem _baseInventorySystem;
 
     private void Awake()
     {
-        inventoryButton.onClick.AddListener(() => OpenUIPanel(0));
+        inventoryButton.onClick.AddListener(ToggleInventoryPanel);
         moduleButton.onClick.AddListener(() => OpenUIPanel(1));
         laboratoryButton.onClick.AddListener(() => OpenUIPanel(2));
         farmButton.onClick.AddListener(() => OpenUIPanel(3));
         mapButton.onClick.AddListener(() => OpenUIPanel(4));
         coreLaunchButton.onClick.AddListener(() => OpenUIPanel(5));
+    }
+    
+    private void Start()
+    {
+        _baseInventorySystem = FindFirstObjectByType<BaseInventorySystem>();
     }
 
     private void Update()
@@ -36,6 +42,47 @@ public class BaseSceneManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             CloseUIPanel(_currentPanelIndex);
+        }
+        
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            ToggleInventoryPanel();
+        }
+    }
+    
+    private void ToggleInventoryPanel()
+    {
+        if (_baseInventorySystem != null)
+        {
+            GameObject inventoryPanel = _baseInventorySystem.GetInventoryPanel();
+            if (inventoryPanel != null)
+            {
+                bool isActive = inventoryPanel.activeSelf;
+                if (isActive)
+                {
+                    _baseInventorySystem.ToggleInventory();
+                    _currentPanelIndex = -1;
+                }
+                else
+                {
+                    _baseInventorySystem.ToggleInventory();
+                    _currentPanelIndex = 0;
+                }
+            }
+        }
+        else if (inventoryUIPanel != null)
+        {
+            bool isActive = inventoryUIPanel.activeSelf;
+            if (isActive)
+            {
+                inventoryUIPanel.SetActive(false);
+                _currentPanelIndex = -1;
+            }
+            else
+            {
+                inventoryUIPanel.SetActive(true);
+                _currentPanelIndex = 0;
+            }
         }
     }
 

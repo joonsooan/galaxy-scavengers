@@ -48,6 +48,10 @@ public abstract class UnitBase : MonoBehaviour
     protected virtual void Start()
     {
         _sr = GetComponentInChildren<SpriteRenderer>();
+        if (_sr != null)
+        {
+            _originalColor = _sr.color;
+        }
     }
 
     protected virtual void OnEnable()
@@ -132,8 +136,8 @@ public abstract class UnitBase : MonoBehaviour
     {
         if (_sr == null) yield break;
 
-        _sr.material.color = flashColor;
+        _sr.color = flashColor;
         yield return new WaitForSeconds(flashDuration);
-        _sr.material.color = _originalColor;
+        _sr.color = _originalColor;
     }
 }

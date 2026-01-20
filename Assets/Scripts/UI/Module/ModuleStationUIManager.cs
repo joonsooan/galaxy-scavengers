@@ -24,6 +24,8 @@ public class ModuleStationUIManager : MonoBehaviour, IQuestUIProvider
     [SerializeField] private QuestProvider questProvider = QuestProvider.NPC_1;
     [SerializeField] private QuestUIHandler questUIHandler;
     [SerializeField] private GameObject newQuestIndicator;
+    [SerializeField] private GameObject questBlockPanel;
+    [SerializeField] private int unlockQuestId = -1;
     [SerializeField] private List<ModuleGridCell> recipeCells = new ();
 
     private ModuleData _currentData;
@@ -47,11 +49,13 @@ public class ModuleStationUIManager : MonoBehaviour, IQuestUIProvider
     private void OnEnable()
     {
         ModuleStation.OnModuleStationClicked += ShowModuleStationUI;
+        SubscribeToQuestEvents();
     }
 
     private void OnDisable()
     {
         ModuleStation.OnModuleStationClicked -= ShowModuleStationUI;
+        UnsubscribeFromQuestEvents();
     }
 
     private void ShowModuleStationUI(ModuleStation station)
@@ -172,4 +176,51 @@ public class ModuleStationUIManager : MonoBehaviour, IQuestUIProvider
     public GameObject GetNewQuestIndicator() => newQuestIndicator;
     
     public string GetUIName() => "Module Station UI";
+
+    private void SubscribeToQuestEvents()
+    {
+        if (QuestDataManager.Instance != null && unlockQuestId >= 0)
+        {
+            QuestDataManager.Instance.OnQuestStateChanged -= OnQuestStateChangedForBlocker;
+            QuestDataManager.Instance.OnQuestStateChanged += OnQuestStateChangedForBlocker;
+            UpdateQuestBlockPanel();
+        }
+        else if (questBlockPanel != null && unlockQuestId >= 0)
+        {
+            questBlockPanel.SetActive(true);
+        }
+    }
+
+    private void UnsubscribeFromQuestEvents()
+    {
+        if (QuestDataManager.Instance != null && unlockQuestId >= 0)
+        {
+            QuestDataManager.Instance.OnQuestStateChanged -= OnQuestStateChangedForBlocker;
+        }
+    }
+
+    private void OnQuestStateChangedForBlocker(int questId)
+    {
+        if (questId == unlockQuestId)
+        {
+            UpdateQuestBlockPanel();
+        }
+    }
+
+    private void UpdateQuestBlockPanel()
+    {
+        if (questBlockPanel == null || unlockQuestId < 0)
+        {
+            return;
+        }
+
+        if (QuestDataManager.Instance == null)
+        {
+            questBlockPanel.SetActive(true);
+            return;
+        }
+
+        bool isCompleted = QuestDataManager.Instance.IsQuestCompleted(unlockQuestId);
+        questBlockPanel.SetActive(!isCompleted);
+    }
 }

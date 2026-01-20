@@ -113,7 +113,12 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
             loadingImage.transform.localPosition = _initialImagePosition;
             loadingImage.transform.localRotation = Quaternion.identity;
         }
-        if (loadingParticles != null) loadingParticles.Stop();
+        if (loadingParticles != null)
+        {
+            var main = loadingParticles.main;
+            main.useUnscaledTime = true;
+            loadingParticles.Stop();
+        }
         
         _currentProgress = 0f;
         _currentStage = "";
