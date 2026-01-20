@@ -3,6 +3,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
+using Systems.Jobs;
 
 public class GameManager : MonoBehaviour
 {
@@ -183,9 +184,72 @@ public class GameManager : MonoBehaviour
             pausePanel.SetActive(false);
         }
 
-        mapGenerator?.GenerateMap();
-
-        StartCoroutine(DelayedInitialization());
+        // Get progress tracker from LoadingScreen
+        IInitializationProgress progress = GetInitializationProgress();
+        
+        StartCoroutine(InitializeGameSceneAsync(progress));
+    }
+    
+    private IInitializationProgress GetInitializationProgress()
+    {
+        if (LoadingUIManager.Instance != null)
+        {
+            return LoadingUIManager.Instance.GetProgressTracker();
+        }
+        return null;
+    }
+    
+    private IEnumerator InitializeGameSceneAsync(IInitializationProgress progress = null)
+    {
+        yield return null;
+        
+        // Step 1: Generate Map (40% of total progress)
+        if (mapGenerator != null)
+        {
+            yield return StartCoroutine(mapGenerator.GenerateMapAsync(new ProgressTracker(progress, 0.0f, 0.4f)));
+        }
+        
+        CameraTargetController cameraController = FindFirstObjectByType<CameraTargetController>();
+        if (cameraController != null)
+        {
+            cameraController.RefreshMapBounds();
+        }
+        
+        yield return StartCoroutine(InitializeSpawnersAndUnitsAsync(new ProgressTracker(progress, 0.4f, 0.3f)));
+        
+        // Step 3: Wait for Fog of War (30% of total progress)
+        yield return StartCoroutine(WaitForFogOfWarInitializationAsync(new ProgressTracker(progress, 0.7f, 0.3f)));
+        
+        UpdateEnemyVisibility();
+        
+        if (progress != null)
+            progress.UpdateProgress(1.0f, "초기화 완료");
+        
+        _isGameSceneInitialized = true;
+        OnGameSceneInitialized?.Invoke();
+    }
+    
+    private class ProgressTracker : IInitializationProgress
+    {
+        private readonly IInitializationProgress _parent;
+        private readonly float _startProgress;
+        private readonly float _progressRange;
+        
+        public ProgressTracker(IInitializationProgress parent, float startProgress, float progressRange)
+        {
+            _parent = parent;
+            _startProgress = startProgress;
+            _progressRange = progressRange;
+        }
+        
+        public void UpdateProgress(float progress, string stage)
+        {
+            if (_parent != null)
+            {
+                float mappedProgress = _startProgress + (progress * _progressRange);
+                _parent.UpdateProgress(mappedProgress, stage);
+            }
+        }
     }
 
     private IEnumerator DelayedInitialization()
@@ -200,6 +264,22 @@ public class GameManager : MonoBehaviour
         
         _isGameSceneInitialized = true;
         OnGameSceneInitialized?.Invoke();
+    }
+    
+    private IEnumerator WaitForFogOfWarInitializationAsync(IInitializationProgress progress = null)
+    {
+        if (FogOfWarManager.Instance != null)
+        {
+            IInitializationProgress fogProgress = progress;
+            FogOfWarManager.Instance.StartFogInitializationWithProgress(fogProgress);
+        }
+        
+        while (FogOfWarManager.Instance == null || !FogOfWarManager.Instance.IsInitialized)
+        {
+            yield return null;
+        }
+        
+        yield return null;
     }
     
     private IEnumerator WaitForFogOfWarInitialization()
@@ -259,6 +339,71 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private IEnumerator InitializeSpawnersAndUnitsAsync(IInitializationProgress progress = null)
+    {
+        if (progress != null)
+            progress.UpdateProgress(0.0f, "건물 스폰 중...");
+        
+        foreach (BuildingSpawner spawner in FindObjectsByType<BuildingSpawner>(FindObjectsSortMode.None)) {
+            spawner.SpawnBuildings();
+            if (spawner.BuildingTilemap != null) spawner.BuildingTilemap.gameObject.SetActive(false);
+        }
+
+        RegisterPrePlacedMainStructure();
+        RegisterPrePlacedBuildings();
+        
+        // Spawn starting units after MainStructure is registered
+        yield return null;
+        
+        if (progress != null)
+            progress.UpdateProgress(0.1f, "시작 유닛 스폰 중...");
+        
+        StartingUnitsManager startingUnitsManager = FindFirstObjectByType<StartingUnitsManager>();
+        if (startingUnitsManager != null)
+        {
+            startingUnitsManager.SpawnStartingUnits();
+        }
+
+        if (progress != null)
+            progress.UpdateProgress(0.2f, "자원 스폰 중...");
+        
+        MapObjectSpawner proceduralSpawner = FindFirstObjectByType<MapObjectSpawner>();
+        if (proceduralSpawner != null) {
+            yield return StartCoroutine(proceduralSpawner.SpawnResourcesAsync(progress));
+        }
+
+        yield return null;
+        yield return null;
+        
+        if (progress != null)
+            progress.UpdateProgress(0.8f, "적 영역 생성 중...");
+        
+        if (mapGenerator != null)
+        {
+            mapGenerator.GenerateEnemyTerritoryRadiusValues();
+        }
+        
+        foreach (EnemySpawner enemySpawner in FindObjectsByType<EnemySpawner>(FindObjectsSortMode.None))
+        {
+            enemySpawner.SpawnEnemies();
+        }
+        
+        if (mapGenerator != null)
+        {
+            mapGenerator.DrawEnemyTerritoryTiles();
+        }
+
+        if (progress != null)
+            progress.UpdateProgress(0.9f, "유닛 초기화 중...");
+
+        foreach (Unit_Miner unit in FindObjectsByType<Unit_Miner>(FindObjectsSortMode.None)) {
+            unit.TryStartActions();
+        }
+        
+        if (progress != null)
+            progress.UpdateProgress(1.0f, "스폰 완료");
+    }
+    
     private IEnumerator InitializeSpawnersAndUnits()
     {
         foreach (BuildingSpawner spawner in FindObjectsByType<BuildingSpawner>(FindObjectsSortMode.None)) {

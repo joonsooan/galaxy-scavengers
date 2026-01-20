@@ -2,8 +2,9 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+using Systems.Jobs;
 
-public class LoadingScreen : MonoBehaviour
+public class LoadingScreen : MonoBehaviour, IInitializationProgress
 {
     [Header("UI Elements")]
     [SerializeField] private Image backgroundImage;
@@ -11,6 +12,11 @@ public class LoadingScreen : MonoBehaviour
     [SerializeField] private GameObject loadingIndicator;
     [SerializeField] private Image loadingImage;
     [SerializeField] private ParticleSystem loadingParticles;
+    
+    [Header("Progress UI Elements")]
+    [SerializeField] private TMPro.TextMeshProUGUI progressText;
+    [SerializeField] private Image progressBarFill;
+    [SerializeField] private GameObject progressBarContainer;
 
     [Header("Settings")]
     [SerializeField] private string loadingTextString = "로딩 중...";
@@ -30,6 +36,9 @@ public class LoadingScreen : MonoBehaviour
     private Tween _shakePositionTween;
     private Tween _shakeRotationTween;
     private Coroutine _particleStartCoroutine;
+    
+    private float _currentProgress = 0f;
+    private string _currentStage = "";
 
     private void Awake()
     {
@@ -53,6 +62,16 @@ public class LoadingScreen : MonoBehaviour
         if (loadingIndicator != null) loadingIndicator.SetActive(true);
         if (loadingImage != null) loadingImage.color = Color.white;
         if (loadingParticles != null) loadingParticles.Stop();
+        
+        // Initialize progress UI
+        _currentProgress = 0f;
+        _currentStage = "";
+        UpdateProgressUI();
+        
+        if (progressBarContainer != null)
+        {
+            progressBarContainer.SetActive(true);
+        }
     }
 
     private void StartEffects()
@@ -163,5 +182,42 @@ public class LoadingScreen : MonoBehaviour
         Time.timeScale = 1f;
         
         gameObject.SetActive(false); 
+    }
+    
+    public void UpdateProgress(float progress, string stage)
+    {
+        _currentProgress = Mathf.Clamp01(progress);
+        _currentStage = stage;
+        
+        UpdateProgressUI();
+    }
+    
+    private void UpdateProgressUI()
+    {
+        // Update progress text
+        if (progressText != null)
+        {
+            int percentage = Mathf.RoundToInt(_currentProgress * 100f);
+            if (!string.IsNullOrEmpty(_currentStage))
+            {
+                progressText.text = $"{_currentStage}\n{percentage}%";
+            }
+            else
+            {
+                progressText.text = $"{percentage}%";
+            }
+        }
+        
+        // Update progress bar
+        if (progressBarFill != null)
+        {
+            progressBarFill.fillAmount = _currentProgress;
+        }
+        
+        // Update loading text with stage if provided
+        if (loadingText != null && !string.IsNullOrEmpty(_currentStage))
+        {
+            loadingText.text = _currentStage;
+        }
     }
 }

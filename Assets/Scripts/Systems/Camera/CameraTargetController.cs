@@ -96,10 +96,22 @@ public class CameraTargetController : MonoBehaviour
             groundTilemap.CompressBounds();
             BoundsInt cellBounds = groundTilemap.cellBounds;
 
+            if (cellBounds.size.x == 0 || cellBounds.size.y == 0) {
+                _hasBounds = false;
+                return;
+            }
+
             if (groundTilemap.layoutGrid != null) {
                 Grid grid = groundTilemap.layoutGrid;
+                Vector3 cellSize = grid.cellSize;
+                
                 Vector3 worldMin = grid.CellToWorld(new Vector3Int(cellBounds.xMin, cellBounds.yMin, 0));
+                worldMin.x -= cellSize.x * 0.5f;
+                worldMin.y -= cellSize.y * 0.5f;
+                
                 Vector3 worldMax = grid.CellToWorld(new Vector3Int(cellBounds.xMax - 1, cellBounds.yMax - 1, 0));
+                worldMax.x += cellSize.x * 0.5f;
+                worldMax.y += cellSize.y * 0.5f;
 
                 _mapBounds = new Bounds {
                     min = worldMin,
@@ -109,6 +121,11 @@ public class CameraTargetController : MonoBehaviour
                 _hasBounds = true;
             }
         }
+    }
+    
+    public void RefreshMapBounds()
+    {
+        InitializeMapBounds();
     }
 
     private void ClampTargetPosition()

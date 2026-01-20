@@ -1,7 +1,9 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using Systems.Jobs;
 
 public enum FogOfWarState
 {
@@ -102,15 +104,23 @@ public class FogOfWarManager : MonoBehaviour
         _initializer?.SetReferences(fogTilemap, groundTilemap, _cachedMapGenerator);
         _visualUpdater = new FogOfWarVisualUpdater(fogTilemap, fogTile, fullyVisibleColor, partlyVisibleColor, invisibleColor, groundTilemap, _cachedMapGenerator);
 
-        StartCoroutine(DelayedFogInitialization());
+        StartCoroutine(DelayedFogInitialization(null));
         RegisterAllExistingVisionProviders();
         InvokeRepeating(nameof(CleanupNullProviders), 5f, 5f);
     }
     
-    private System.Collections.IEnumerator DelayedFogInitialization()
+    public void StartFogInitializationWithProgress(IInitializationProgress progress)
+    {
+        StartCoroutine(DelayedFogInitialization(progress));
+    }
+    
+    private System.Collections.IEnumerator DelayedFogInitialization(IInitializationProgress progress = null)
     {
         yield return new WaitForEndOfFrame();
         yield return new WaitForEndOfFrame();
+        
+        if (progress != null)
+            progress.UpdateProgress(0.0f, "맵 생성 완료 대기 중...");
         
         while (_cachedMapGenerator != null && 
                ((_cachedMapGenerator.GroundTilemap != null && _cachedMapGenerator.GroundTilemap.cellBounds.size.x == 0) ||
@@ -121,7 +131,16 @@ public class FogOfWarManager : MonoBehaviour
         
         yield return new WaitForEndOfFrame();
         
-        InitializeFogOfWar();
+        if (_initializer != null)
+        {
+            _initializer.SetCoroutineRunner(this);
+            yield return StartCoroutine(_initializer.InitializeFogOfWarAsync(_tileVisibility, progress));
+        }
+        else
+        {
+            InitializeFogOfWar();
+        }
+        
         _fogInitialized = true;
         
         UpdateVisibility();

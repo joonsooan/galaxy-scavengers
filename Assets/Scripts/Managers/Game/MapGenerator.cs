@@ -1,6 +1,10 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using Unity.Collections;
+using Unity.Jobs;
+using Systems.Jobs;
 
 public enum GradientMode
 {
@@ -98,6 +102,11 @@ public class MapGenerator : MonoBehaviour
     
     private readonly List<Vector2Int> _enemySpawnHolePositions = new ();
     private readonly Dictionary<Vector2Int, (float homeRadius, float territoryRadius)> _holeRadiusValues = new ();
+    
+    // Job System NativeArrays (disposed after use)
+    private NativeArray<float> _nativeNoiseMap;
+    private NativeArray<float> _nativeGradientMap;
+    private NativeArray<byte> _nativeTileTypes;
 
     public Vector3 GetEnemySpawnHoleWorldPosition(Vector2Int holePosition)
     {
@@ -194,8 +203,209 @@ public class MapGenerator : MonoBehaviour
         return null;
     }
 
+    public IEnumerator GenerateMapAsync(IInitializationProgress progress = null)
+    {
+        CalculateMapDimensions();
+        
+        if (progress != null)
+            progress.UpdateProgress(0.05f, "맵 생성 준비 중...");
+
+        if (randomSeed)
+        {
+            seed = Random.Range(int.MinValue, int.MaxValue);
+        }
+        
+        int totalSize = width * height;
+        Vector3Int mapOrigin = new Vector3Int(-_mapCenterXOffset, -_mapCenterYOffset, 0);
+        BoundsInt mapBounds = new BoundsInt(mapOrigin, new Vector3Int(width, height, 1));
+        
+        // Allocate NativeArrays
+        _nativeNoiseMap = new NativeArray<float>(totalSize, Allocator.TempJob);
+        _nativeGradientMap = useGradientMap ? new NativeArray<float>(totalSize, Allocator.TempJob) : default;
+        _nativeTileTypes = new NativeArray<byte>(totalSize, Allocator.TempJob);
+        
+        // Step 1: Generate Noise Map (if needed)
+        if (useProceduralTerrain)
+        {
+            if (progress != null)
+                progress.UpdateProgress(0.1f, "노이즈 맵 생성 중...");
+            
+            System.Random prng = new System.Random(seed);
+            float offsetX = prng.Next(-100000, 100000) + noiseOffset.x;
+            float offsetY = prng.Next(-100000, 100000) + noiseOffset.y;
+            
+            var noiseJob = new GenerateNoiseMapJob
+            {
+                noiseMap = _nativeNoiseMap,
+                width = width,
+                height = height,
+                noiseScale = noiseScale,
+                offsetX = offsetX,
+                offsetY = offsetY
+            };
+            
+            JobHandle noiseHandle = noiseJob.Schedule(totalSize, 64);
+            
+            // Wait for job completion
+            while (!noiseHandle.IsCompleted)
+            {
+                yield return null;
+            }
+            noiseHandle.Complete();
+            
+            // Convert back to managed array for backwards compatibility
+            _noiseMap = new float[width, height];
+            for (int i = 0; i < totalSize; i++)
+            {
+                int x = i % width;
+                int y = i / width;
+                _noiseMap[x, y] = _nativeNoiseMap[i];
+            }
+        }
+        
+        // Step 2: Generate Gradient Map (if needed)
+        if (useGradientMap && gradientMode == GradientMode.Procedural)
+        {
+            if (progress != null)
+                progress.UpdateProgress(0.2f, "그라디언트 맵 생성 중...");
+            
+            var gradientJob = new GenerateGradientMapJob
+            {
+                gradientMap = _nativeGradientMap,
+                width = width,
+                height = height,
+                gradientCenter = gradientCenter,
+                falloffExponent = falloffExponent
+            };
+            
+            JobHandle gradientHandle = gradientJob.Schedule(totalSize, 64);
+            
+            while (!gradientHandle.IsCompleted)
+            {
+                yield return null;
+            }
+            gradientHandle.Complete();
+            
+            // Convert back to managed array
+            _gradientMap = new float[width, height];
+            for (int i = 0; i < totalSize; i++)
+            {
+                int x = i % width;
+                int y = i / width;
+                _gradientMap[x, y] = _nativeGradientMap[i];
+            }
+        }
+        else if (useGradientMap && gradientMode == GradientMode.Texture && gradientTexture != null)
+        {
+            // Texture mode - still needs to be on main thread for texture access
+            GenerateGradientMap();
+        }
+        
+        // Step 3: Calculate Terrain Tiles
+        if (progress != null)
+            progress.UpdateProgress(0.4f, "지형 타일 계산 중...");
+        
+        var tileJob = new CalculateTerrainTilesJob
+        {
+            noiseMap = useProceduralTerrain ? _nativeNoiseMap : default,
+            gradientMap = useGradientMap ? _nativeGradientMap : default,
+            tileTypes = _nativeTileTypes,
+            width = width,
+            height = height,
+            lowWallThreshold = lowWallThreshold,
+            highWallThreshold = highWallThreshold,
+            useGradientMap = useGradientMap,
+            gradientStrength = gradientStrength
+        };
+        
+        JobHandle tileHandle = tileJob.Schedule(totalSize, 64);
+        
+        while (!tileHandle.IsCompleted)
+        {
+            yield return null;
+        }
+        tileHandle.Complete();
+        
+        // Step 4: Apply tiles to Unity Tilemap (main thread only)
+        if (progress != null)
+            progress.UpdateProgress(0.6f, "타일맵에 적용 중...");
+        
+        TileBase[] groundTiles = new TileBase[totalSize];
+        TileBase[] lowWallTiles = new TileBase[totalSize];
+        TileBase[] highWallTiles = new TileBase[totalSize];
+        
+        for (int i = 0; i < totalSize; i++)
+        {
+            byte tileType = _nativeTileTypes[i];
+            
+            groundTiles[i] = groundTile;
+            
+            switch (tileType)
+            {
+                case 0: // ground
+                    lowWallTiles[i] = null;
+                    highWallTiles[i] = null;
+                    break;
+                case 1: // lowWall
+                    lowWallTiles[i] = lowWallTile;
+                    highWallTiles[i] = null;
+                    break;
+                case 2: // highWall
+                    lowWallTiles[i] = lowWallTile;
+                    highWallTiles[i] = highWallTile;
+                    break;
+                case 3: // borderWall
+                    lowWallTiles[i] = wallTile;
+                    highWallTiles[i] = null;
+                    break;
+            }
+        }
+        
+        if (groundTilemap != null) groundTilemap.SetTilesBlock(mapBounds, groundTiles);
+        if (lowWallTilemap != null) lowWallTilemap.SetTilesBlock(mapBounds, lowWallTiles);
+        if (highWallTilemap != null) highWallTilemap.SetTilesBlock(mapBounds, highWallTiles);
+        
+        // Step 5: Polish map (Unity API calls - main thread only)
+        if (progress != null)
+            progress.UpdateProgress(0.75f, "맵 다듬기 중...");
+        
+        yield return StartCoroutine(PolishMapAsync(progress));
+        
+        CopyTilesToBuildingManagerGroundTilemap(mapBounds);
+        
+        if (groundTilemap != null) groundTilemap.CompressBounds();
+        if (lowWallTilemap != null) lowWallTilemap.CompressBounds();
+        if (highWallTilemap != null) highWallTilemap.CompressBounds();
+        
+        // Cleanup NativeArrays
+        if (_nativeNoiseMap.IsCreated) _nativeNoiseMap.Dispose();
+        if (_nativeGradientMap.IsCreated) _nativeGradientMap.Dispose();
+        if (_nativeTileTypes.IsCreated) _nativeTileTypes.Dispose();
+        
+        if (progress != null)
+            progress.UpdateProgress(1.0f, "맵 생성 완료");
+        
+        if (FogOfWarManager.Instance != null)
+        {
+            FogOfWarManager.Instance.RefreshFogOfWar();
+        }
+    }
+    
+    private IEnumerator PolishMapAsync(IInitializationProgress progress = null)
+    {
+        if (enableCenterCircle) PunchCenterCircle();
+        if (fillDisconnectedAreas) FillDisconnectedAreas();
+        if (enableEnemySpawnHoles) PunchEnemySpawnHoles();
+        if (fillDisconnectedAreas) FillDisconnectedAreas();
+        ConnectWallsToBorders();
+        
+        yield return null;
+    }
+
     public void GenerateMap()
     {
+        // Keep old synchronous implementation for backwards compatibility
+        // New code should use GenerateMapAsync() instead
         CalculateMapDimensions();
 
         if (randomSeed)

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using Random = UnityEngine.Random;
+using Systems.Jobs;
 
 [Serializable]
 public class ResourceSpawnSettings
@@ -143,9 +144,12 @@ public class MapObjectSpawner : MonoBehaviour
         _circleGenerator.Initialize(mapSize.x, mapSize.y, Vector2Int.zero);
     }
     
-    public void SpawnResources()
+    public IEnumerator SpawnResourcesAsync(IInitializationProgress progress = null)
     {
         Vector2Int mapSize = mapGenerator.MapSize;
+        
+        if (progress != null)
+            progress.UpdateProgress(0.05f, "자원 스폰 준비 중...");
         
         if (_circleGenerator == null)
         {
@@ -169,6 +173,9 @@ public class MapObjectSpawner : MonoBehaviour
         
         try
         {
+            if (progress != null)
+                progress.UpdateProgress(0.15f, "자원 서클 생성 중...");
+            
             List<ResourceCircle> resourceCircles = _circleGenerator.GenerateResourceCircles();
             List<ResourceCircle> startingAreaCircles = _circleGenerator.GenerateStartingAreaCircles();
             
@@ -176,14 +183,22 @@ public class MapObjectSpawner : MonoBehaviour
             
             _cachedResourceCircles = new List<ResourceCircle>(resourceCircles);
             
-            SpawnResourcesInCircles(resourceCircles);
+            if (progress != null)
+                progress.UpdateProgress(0.3f, "자원 위치 계산 중...");
+            
+            yield return StartCoroutine(SpawnResourcesInCirclesAsync(resourceCircles, progress));
+            
+            if (progress != null)
+                progress.UpdateProgress(0.9f, "자원 등록 중...");
+            
             RegisterBufferedResources();
             
             _tileManager.InitializeRuleTiles();
             
             OnAllObjectsSpawned.Invoke();
             
-            // Debug.Log($"Spawned {_pendingResourceNodes.Count} resource nodes. Created {resourceCircles.Count} resource circles.");
+            if (progress != null)
+                progress.UpdateProgress(1.0f, "자원 스폰 완료");
         }
         finally
         {
@@ -194,6 +209,100 @@ public class MapObjectSpawner : MonoBehaviour
                 FogOfWarManager.SetSuppressVisibilityEvents(false);
                 
                 StartCoroutine(DeferredFogRefresh());
+            }
+        }
+    }
+    
+    public void SpawnResources()
+    {
+        StartCoroutine(SpawnResourcesSyncInternal());
+    }
+    
+    private IEnumerator SpawnResourcesSyncInternal()
+    {
+        yield return StartCoroutine(SpawnResourcesAsync(null));
+    }
+    
+    private IEnumerator SpawnResourcesInCirclesAsync(List<ResourceCircle> resourceCircles, IInitializationProgress progress = null)
+    {
+        List<float> divisionRadii = _circleGenerator.GetDivisionRadii();
+        List<float> sectorPowerValues = _circleGenerator.GetSectorPowerValues();
+        Vector2Int mapCenter = Vector2Int.zero;
+        
+        int totalCircles = resourceCircles.Count;
+        int processedCircles = 0;
+        const int circlesPerFrame = 5; // Process 5 circles per frame to avoid blocking
+        
+        foreach (var circle in resourceCircles)
+        {
+            ResourceSpawnSettings settings = resourceSettings.Find(s => s.resourceType == circle.resourceType);
+            if (settings == null || settings.resourcePrefab == null || settings.resourceRuleTile == null)
+            {
+                processedCircles++;
+                continue;
+            }
+            
+            float distanceFromCenter = Vector2.Distance(circle.center, mapCenter);
+            int sectorIndex = 0;
+            for (int i = 0; i < divisionRadii.Count - 1; i++)
+            {
+                if (distanceFromCenter >= divisionRadii[i] && distanceFromCenter < divisionRadii[i + 1])
+                {
+                    sectorIndex = i;
+                    break;
+                }
+            }
+            
+            if (sectorIndex >= sectorPowerValues.Count) sectorIndex = sectorPowerValues.Count - 1;
+            float powerValue = sectorPowerValues[sectorIndex];
+            
+            int richness = Mathf.RoundToInt(settings.baseRichness * powerValue);
+            
+            int radiusInt = Mathf.CeilToInt(circle.radius);
+            int minX = circle.center.x - radiusInt;
+            int maxX = circle.center.x + radiusInt;
+            int minY = circle.center.y - radiusInt;
+            int maxY = circle.center.y + radiusInt;
+            
+            List<Vector3Int> validPositions = new List<Vector3Int>();
+            
+            for (int x = minX; x <= maxX; x++)
+            {
+                for (int y = minY; y <= maxY; y++)
+                {
+                    float distanceFromCircleCenter = Vector2.Distance(new Vector2(x, y), circle.center);
+                    if (distanceFromCircleCenter > circle.radius) continue;
+                    
+                    Vector3Int cellPos = new Vector3Int(x, y, 0);
+                    
+                    if (!IsValidSpawnPosition(cellPos)) continue;
+                    
+                    validPositions.Add(cellPos);
+                }
+            }
+            
+            if (validPositions.Count > maxResourcesPerCircle)
+            {
+                ShuffleList(validPositions);
+                validPositions = validPositions.GetRange(0, maxResourcesPerCircle);
+            }
+            
+            foreach (var cellPos in validPositions)
+            {
+                SpawnResourceAtPosition(cellPos, settings, richness);
+            }
+            
+            processedCircles++;
+            
+            // Yield every few circles to avoid blocking
+            if (processedCircles % circlesPerFrame == 0)
+            {
+                if (progress != null)
+                {
+                    float progressValue = 0.3f + (0.6f * (float)processedCircles / totalCircles);
+                    progress.UpdateProgress(progressValue, $"자원 스폰 중... ({processedCircles}/{totalCircles})");
+                }
+                yield return null;
             }
         }
     }

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using Systems.Jobs;
 
 public class FogOfWarInitializer
 {
@@ -32,6 +33,173 @@ public class FogOfWarInitializer
         _fogTilemap = fogTilemap;
         _groundTilemap = groundTilemap;
         _cachedMapGenerator = mapGenerator;
+    }
+    
+    public IEnumerator InitializeFogOfWarAsync(Dictionary<Vector3Int, FogOfWarState> tileVisibility, IInitializationProgress progress = null)
+    {
+        if (progress != null)
+            progress.UpdateProgress(0.05f, "안개 초기화 준비 중...");
+        
+        List<Tilemap> terrainTilemaps = CollectTerrainTilemaps();
+        
+        if (terrainTilemaps.Count == 0 || _fogTilemap == null || _fogTile == null)
+        {
+            if (progress != null)
+                progress.UpdateProgress(1.0f, "안개 초기화 완료");
+            yield break;
+        }
+        
+        if (progress != null)
+            progress.UpdateProgress(0.2f, "타일 위치 수집 중...");
+        
+        HashSet<Vector3Int> allTilePositions = CollectAllTilePositions(terrainTilemaps, tileVisibility);
+        
+        if (progress != null)
+            progress.UpdateProgress(0.4f, $"타일 위치 수집 완료: {allTilePositions.Count}개");
+        
+        // Yield to avoid blocking
+        yield return null;
+        
+        if (allTilePositions.Count > 0)
+        {
+            TilemapRenderer renderer = _fogTilemap.GetComponent<TilemapRenderer>();
+            bool wasEnabled = renderer != null && renderer.enabled;
+            
+            if (renderer != null)
+            {
+                renderer.enabled = false;
+            }
+            
+            if (progress != null)
+                progress.UpdateProgress(0.5f, "안개 타일 배치 중...");
+            
+            // Break up tile placement into chunks to avoid blocking
+            yield return PlaceFogTilesAsync(allTilePositions, progress);
+            
+            if (renderer != null)
+            {
+                renderer.enabled = wasEnabled;
+            }
+        }
+        
+        if (progress != null)
+            progress.UpdateProgress(0.9f, "안개 타일맵 압축 중...");
+        
+        _fogTilemap.CompressBounds();
+        
+        if (progress != null)
+            progress.UpdateProgress(1.0f, "안개 초기화 완료");
+    }
+    
+    private MonoBehaviour _coroutineRunner;
+    
+    public void SetCoroutineRunner(MonoBehaviour runner)
+    {
+        _coroutineRunner = runner;
+    }
+    
+    private Coroutine StartCoroutineOnRunner(IEnumerator coroutine)
+    {
+        if (_coroutineRunner == null && _manager != null)
+        {
+            _coroutineRunner = _manager;
+        }
+        
+        if (_coroutineRunner != null)
+        {
+            return _coroutineRunner.StartCoroutine(coroutine);
+        }
+        
+        return null;
+    }
+    
+    private IEnumerator PlaceFogTilesAsync(HashSet<Vector3Int> allTilePositions, IInitializationProgress progress = null)
+    {
+        int minX = int.MaxValue, minY = int.MaxValue;
+        int maxX = int.MinValue, maxY = int.MinValue;
+        
+        foreach (Vector3Int pos in allTilePositions)
+        {
+            minX = Mathf.Min(minX, pos.x);
+            minY = Mathf.Min(minY, pos.y);
+            maxX = Mathf.Max(maxX, pos.x);
+            maxY = Mathf.Max(maxY, pos.y);
+        }
+        
+        BoundsInt fogBounds = new BoundsInt(minX, minY, 0, maxX - minX + 1, maxY - minY + 1, 1);
+        TileBase[] fogTiles = new TileBase[fogBounds.size.x * fogBounds.size.y];
+        
+        int totalPositions = fogBounds.size.x * fogBounds.size.y;
+        int processedPositions = 0;
+        const int positionsPerFrame = 1000; // Process 1000 positions per frame
+        
+        foreach (Vector3Int pos in fogBounds.allPositionsWithin)
+        {
+            int index = (pos.x - minX) + (pos.y - minY) * fogBounds.size.x;
+            if (allTilePositions.Contains(pos))
+            {
+                fogTiles[index] = _fogTile;
+            }
+            else
+            {
+                fogTiles[index] = null;
+            }
+            
+            processedPositions++;
+            
+            if (processedPositions % positionsPerFrame == 0)
+            {
+                if (progress != null)
+                {
+                    float progressValue = 0.5f + (0.3f * (float)processedPositions / totalPositions);
+                    progress.UpdateProgress(progressValue, $"안개 타일 배치 중... ({processedPositions}/{totalPositions})");
+                }
+                yield return null;
+            }
+        }
+        
+        _fogTilemap.SetTilesBlock(fogBounds, fogTiles);
+        
+        if (progress != null)
+            progress.UpdateProgress(0.75f, "안개 색상 설정 중...");
+        
+        // Batch set colors in chunks
+        List<Vector3Int> positionsList = new List<Vector3Int>(allTilePositions);
+        const int colorsPerFrame = 500;
+        
+        for (int i = 0; i < positionsList.Count; i += colorsPerFrame)
+        {
+            int endIndex = Mathf.Min(i + colorsPerFrame, positionsList.Count);
+            
+            for (int j = i; j < endIndex; j++)
+            {
+                _fogTilemap.SetColor(positionsList[j], _invisibleColor);
+            }
+            
+            if (i % (colorsPerFrame * 5) == 0)
+            {
+                yield return null;
+            }
+        }
+        
+        if (progress != null)
+            progress.UpdateProgress(0.85f, "안개 타일 새로고침 중...");
+        
+        // Refresh tiles in chunks
+        for (int i = 0; i < positionsList.Count; i += colorsPerFrame)
+        {
+            int endIndex = Mathf.Min(i + colorsPerFrame, positionsList.Count);
+            
+            for (int j = i; j < endIndex; j++)
+            {
+                _fogTilemap.RefreshTile(positionsList[j]);
+            }
+            
+            if (i % (colorsPerFrame * 5) == 0)
+            {
+                yield return null;
+            }
+        }
     }
     
     public void InitializeFogOfWar(Dictionary<Vector3Int, FogOfWarState> tileVisibility)

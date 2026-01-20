@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using Systems.Jobs;
 
 public class LoadingUIManager : MonoBehaviour
 {
@@ -12,6 +13,19 @@ public class LoadingUIManager : MonoBehaviour
     
     private GameObject _currentLoadingScreen;
     private Canvas _loadingCanvas;
+    
+    public IInitializationProgress GetProgressTracker()
+    {
+        if (_currentLoadingScreen != null)
+        {
+            LoadingScreen loadingScreen = _currentLoadingScreen.GetComponent<LoadingScreen>();
+            if (loadingScreen != null && loadingScreen is Systems.Jobs.IInitializationProgress)
+            {
+                return loadingScreen as Systems.Jobs.IInitializationProgress;
+            }
+        }
+        return null;
+    }
 
     private void Awake()
     {
