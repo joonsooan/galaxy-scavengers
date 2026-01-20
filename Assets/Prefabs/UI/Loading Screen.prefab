@@ -291,8 +291,8 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 1
-      minScalar: 0.5
+      scalar: 50
+      minScalar: 40
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -755,7 +755,7 @@ ParticleSystem:
     sphericalDirectionAmount: 0
     randomPositionAmount: 0
     radius:
-      value: 0.5
+      value: 100
       mode: 0
       spread: 0
       speed:
@@ -5141,7 +5141,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   backgroundImage: {fileID: 6119645445911168379}
   loadingText: {fileID: 8676754554312722543}
-  loadingIndicator: {fileID: 0}
   loadingImage: {fileID: 7122229769533406684}
   loadingParticles: {fileID: 2518815341981756597}
   progressText: {fileID: 0}
@@ -5153,11 +5152,12 @@ MonoBehaviour:
   imageShakeStrength: 3
   imageShakeDuration: 0.25
   shakeVibrato: 20
-  fadeOutDuration: 2
+  fadeOutDuration: 1
   contentFadeOutDuration: 0.5
   resumeDelay: 1
+  imageEntryDelay: 0
   imageEntryDuration: 1
-  imageExitDuration: 1.5
+  imageExitDuration: 1
   postInitWaitDuration: 1
-  imageExitDelay: 2
-  maxShakeStrengthMultiplier: 3
+  imageExitDelay: 1.5
+  maxShakeStrengthMultiplier: 5

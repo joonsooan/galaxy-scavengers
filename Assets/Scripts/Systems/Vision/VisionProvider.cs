@@ -194,6 +194,14 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
         isActive = active;
     }
     
+    public void ForceUpdateAffectedTiles()
+    {
+        if (_grid != null && FogOfWarManager.Instance != null && _isRegistered)
+        {
+            UpdateAffectedTiles();
+        }
+    }
+    
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.cyan;

@@ -178,7 +178,6 @@ namespace Systems.Jobs
             int centerIndex = centerX + centerY * width;
             byte centerTileType = tileTypes[centerIndex];
             
-            // IsTerrainTile: type 1, 2, or 3
             bool isTerrain = centerTileType >= 1 && centerTileType <= 3;
             
             if (!isTerrain)
@@ -187,35 +186,77 @@ namespace Systems.Jobs
                 connectedToCenter[centerIndex] = true;
             }
             
-            int[] dx = { 1, -1, 0, 0 };
-            int[] dy = { 0, 0, 1, -1 };
-            
             while (queue.Count > 0)
             {
                 int current = queue.Dequeue();
                 int x = current % width;
                 int y = current / width;
                 
-                for (int i = 0; i < 4; i++)
+                int nx = x + 1;
+                int ny = y;
+                if (nx >= 1 && nx < width - 1 && ny >= 1 && ny < height - 1)
                 {
-                    int nx = x + dx[i];
-                    int ny = y + dy[i];
-                    
-                    if (nx < 1 || nx >= width - 1 || ny < 1 || ny >= height - 1)
-                        continue;
-                    
                     int neighborIndex = nx + ny * width;
-                    
-                    if (connectedToCenter[neighborIndex])
-                        continue;
-                    
-                    byte neighborTileType = tileTypes[neighborIndex];
-                    bool isNeighborTerrain = neighborTileType >= 1 && neighborTileType <= 3;
-                    
-                    if (!isNeighborTerrain)
+                    if (!connectedToCenter[neighborIndex])
                     {
-                        connectedToCenter[neighborIndex] = true;
-                        queue.Enqueue(neighborIndex);
+                        byte neighborTileType = tileTypes[neighborIndex];
+                        bool isNeighborTerrain = neighborTileType >= 1 && neighborTileType <= 3;
+                        if (!isNeighborTerrain)
+                        {
+                            connectedToCenter[neighborIndex] = true;
+                            queue.Enqueue(neighborIndex);
+                        }
+                    }
+                }
+                
+                nx = x - 1;
+                ny = y;
+                if (nx >= 1 && nx < width - 1 && ny >= 1 && ny < height - 1)
+                {
+                    int neighborIndex = nx + ny * width;
+                    if (!connectedToCenter[neighborIndex])
+                    {
+                        byte neighborTileType = tileTypes[neighborIndex];
+                        bool isNeighborTerrain = neighborTileType >= 1 && neighborTileType <= 3;
+                        if (!isNeighborTerrain)
+                        {
+                            connectedToCenter[neighborIndex] = true;
+                            queue.Enqueue(neighborIndex);
+                        }
+                    }
+                }
+                
+                nx = x;
+                ny = y + 1;
+                if (nx >= 1 && nx < width - 1 && ny >= 1 && ny < height - 1)
+                {
+                    int neighborIndex = nx + ny * width;
+                    if (!connectedToCenter[neighborIndex])
+                    {
+                        byte neighborTileType = tileTypes[neighborIndex];
+                        bool isNeighborTerrain = neighborTileType >= 1 && neighborTileType <= 3;
+                        if (!isNeighborTerrain)
+                        {
+                            connectedToCenter[neighborIndex] = true;
+                            queue.Enqueue(neighborIndex);
+                        }
+                    }
+                }
+                
+                nx = x;
+                ny = y - 1;
+                if (nx >= 1 && nx < width - 1 && ny >= 1 && ny < height - 1)
+                {
+                    int neighborIndex = nx + ny * width;
+                    if (!connectedToCenter[neighborIndex])
+                    {
+                        byte neighborTileType = tileTypes[neighborIndex];
+                        bool isNeighborTerrain = neighborTileType >= 1 && neighborTileType <= 3;
+                        if (!isNeighborTerrain)
+                        {
+                            connectedToCenter[neighborIndex] = true;
+                            queue.Enqueue(neighborIndex);
+                        }
                     }
                 }
             }

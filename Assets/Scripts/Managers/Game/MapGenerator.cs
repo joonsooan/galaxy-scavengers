@@ -103,7 +103,6 @@ public class MapGenerator : MonoBehaviour
     private readonly List<Vector2Int> _enemySpawnHolePositions = new ();
     private readonly Dictionary<Vector2Int, (float homeRadius, float territoryRadius)> _holeRadiusValues = new ();
     
-    // Job System NativeArrays (disposed after use)
     private NativeArray<float> _nativeNoiseMap;
     private NativeArray<float> _nativeGradientMap;
     private NativeArray<byte> _nativeTileTypes;
@@ -222,12 +221,10 @@ public class MapGenerator : MonoBehaviour
         Vector3Int mapOrigin = new Vector3Int(-_mapCenterXOffset, -_mapCenterYOffset, 0);
         BoundsInt mapBounds = new BoundsInt(mapOrigin, new Vector3Int(width, height, 1));
         
-        // Allocate NativeArrays
-        _nativeNoiseMap = new NativeArray<float>(totalSize, Allocator.TempJob);
-        _nativeGradientMap = useGradientMap ? new NativeArray<float>(totalSize, Allocator.TempJob) : default;
-        _nativeTileTypes = new NativeArray<byte>(totalSize, Allocator.TempJob);
+        _nativeNoiseMap = new NativeArray<float>(totalSize, Allocator.Persistent);
+        _nativeGradientMap = useGradientMap ? new NativeArray<float>(totalSize, Allocator.Persistent) : default;
+        _nativeTileTypes = new NativeArray<byte>(totalSize, Allocator.Persistent);
         
-        // Step 1: Generate Noise Map (if needed)
         if (useProceduralTerrain)
         {
             System.Random prng = new System.Random(seed);
@@ -246,24 +243,33 @@ public class MapGenerator : MonoBehaviour
             
             JobHandle noiseHandle = noiseJob.Schedule(totalSize, 64);
             
-            // Wait for job completion
             while (!noiseHandle.IsCompleted)
             {
                 yield return null;
             }
             noiseHandle.Complete();
             
-            // Convert back to managed array for backwards compatibility
             _noiseMap = new float[width, height];
-            for (int i = 0; i < totalSize; i++)
+            const int itemsPerFrame = 5000;
+            for (int i = 0; i < totalSize; i += itemsPerFrame)
             {
-                int x = i % width;
-                int y = i / width;
-                _noiseMap[x, y] = _nativeNoiseMap[i];
+                int endIndex = Mathf.Min(i + itemsPerFrame, totalSize);
+                for (int j = i; j < endIndex; j++)
+                {
+                    int x = j % width;
+                    int y = j / width;
+                    _noiseMap[x, y] = _nativeNoiseMap[j];
+                }
+                yield return null;
+            }
+            
+            if (_nativeNoiseMap.IsCreated)
+            {
+                _nativeNoiseMap.Dispose();
+                _nativeNoiseMap = default;
             }
         }
         
-        // Step 2: Generate Gradient Map (if needed)
         if (useGradientMap && gradientMode == GradientMode.Procedural)
         {
             var gradientJob = new GenerateGradientMapJob
@@ -283,22 +289,65 @@ public class MapGenerator : MonoBehaviour
             }
             gradientHandle.Complete();
             
-            // Convert back to managed array
             _gradientMap = new float[width, height];
-            for (int i = 0; i < totalSize; i++)
+            const int itemsPerFrame = 5000;
+            for (int i = 0; i < totalSize; i += itemsPerFrame)
             {
-                int x = i % width;
-                int y = i / width;
-                _gradientMap[x, y] = _nativeGradientMap[i];
+                int endIndex = Mathf.Min(i + itemsPerFrame, totalSize);
+                for (int j = i; j < endIndex; j++)
+                {
+                    int x = j % width;
+                    int y = j / width;
+                    _gradientMap[x, y] = _nativeGradientMap[j];
+                }
+                yield return null;
+            }
+            
+            if (_nativeGradientMap.IsCreated)
+            {
+                _nativeGradientMap.Dispose();
+                _nativeGradientMap = default;
             }
         }
         else if (useGradientMap && gradientMode == GradientMode.Texture && gradientTexture != null)
         {
-            // Texture mode - still needs to be on main thread for texture access
             GenerateGradientMap();
         }
         
-        // Step 3: Calculate Terrain Tiles
+        if (useProceduralTerrain && _noiseMap != null)
+        {
+            _nativeNoiseMap = new NativeArray<float>(totalSize, Allocator.Persistent);
+            const int itemsPerFrame = 5000;
+            for (int i = 0; i < totalSize; i += itemsPerFrame)
+            {
+                int endIndex = Mathf.Min(i + itemsPerFrame, totalSize);
+                for (int j = i; j < endIndex; j++)
+                {
+                    int x = j % width;
+                    int y = j / width;
+                    _nativeNoiseMap[j] = _noiseMap[x, y];
+                }
+                yield return null;
+            }
+        }
+        
+        if (useGradientMap && _gradientMap != null)
+        {
+            _nativeGradientMap = new NativeArray<float>(totalSize, Allocator.Persistent);
+            const int itemsPerFrame = 5000;
+            for (int i = 0; i < totalSize; i += itemsPerFrame)
+            {
+                int endIndex = Mathf.Min(i + itemsPerFrame, totalSize);
+                for (int j = i; j < endIndex; j++)
+                {
+                    int x = j % width;
+                    int y = j / width;
+                    _nativeGradientMap[j] = _gradientMap[x, y];
+                }
+                yield return null;
+            }
+        }
+        
         var tileJob = new CalculateTerrainTilesJob
         {
             noiseMap = useProceduralTerrain ? _nativeNoiseMap : default,
@@ -320,43 +369,64 @@ public class MapGenerator : MonoBehaviour
         }
         tileHandle.Complete();
         
-        // Step 4: Apply tiles to Unity Tilemap (main thread only)
+        if (_nativeNoiseMap.IsCreated)
+        {
+            _nativeNoiseMap.Dispose();
+            _nativeNoiseMap = default;
+        }
+        if (_nativeGradientMap.IsCreated)
+        {
+            _nativeGradientMap.Dispose();
+            _nativeGradientMap = default;
+        }
+        
         TileBase[] groundTiles = new TileBase[totalSize];
         TileBase[] lowWallTiles = new TileBase[totalSize];
         TileBase[] highWallTiles = new TileBase[totalSize];
         
-        for (int i = 0; i < totalSize; i++)
+        const int tilesPerFrame = 5000;
+        for (int i = 0; i < totalSize; i += tilesPerFrame)
         {
-            byte tileType = _nativeTileTypes[i];
-            
-            groundTiles[i] = groundTile;
-            
-            switch (tileType)
+            int endIndex = Mathf.Min(i + tilesPerFrame, totalSize);
+            for (int j = i; j < endIndex; j++)
             {
-                case 0: // ground
-                    lowWallTiles[i] = null;
-                    highWallTiles[i] = null;
-                    break;
-                case 1: // lowWall
-                    lowWallTiles[i] = lowWallTile;
-                    highWallTiles[i] = null;
-                    break;
-                case 2: // highWall
-                    lowWallTiles[i] = lowWallTile;
-                    highWallTiles[i] = highWallTile;
-                    break;
-                case 3: // borderWall
-                    lowWallTiles[i] = wallTile;
-                    highWallTiles[i] = null;
-                    break;
+                byte tileType = _nativeTileTypes[j];
+                
+                groundTiles[j] = groundTile;
+                
+                switch (tileType)
+                {
+                    case 0:
+                        lowWallTiles[j] = null;
+                        highWallTiles[j] = null;
+                        break;
+                    case 1:
+                        lowWallTiles[j] = lowWallTile;
+                        highWallTiles[j] = null;
+                        break;
+                    case 2:
+                        lowWallTiles[j] = lowWallTile;
+                        highWallTiles[j] = highWallTile;
+                        break;
+                    case 3:
+                        lowWallTiles[j] = wallTile;
+                        highWallTiles[j] = null;
+                        break;
+                }
             }
+            yield return null;
         }
         
         if (groundTilemap != null) groundTilemap.SetTilesBlock(mapBounds, groundTiles);
         if (lowWallTilemap != null) lowWallTilemap.SetTilesBlock(mapBounds, lowWallTiles);
         if (highWallTilemap != null) highWallTilemap.SetTilesBlock(mapBounds, highWallTiles);
         
-        // Step 5: Polish map (Unity API calls - main thread only)
+        if (_nativeTileTypes.IsCreated)
+        {
+            _nativeTileTypes.Dispose();
+            _nativeTileTypes = default;
+        }
+        
         yield return StartCoroutine(PolishMapAsync(progress));
         
         CopyTilesToBuildingManagerGroundTilemap(mapBounds);
@@ -365,10 +435,7 @@ public class MapGenerator : MonoBehaviour
         if (lowWallTilemap != null) lowWallTilemap.CompressBounds();
         if (highWallTilemap != null) highWallTilemap.CompressBounds();
         
-        // Cleanup NativeArrays
-        if (_nativeNoiseMap.IsCreated) _nativeNoiseMap.Dispose();
-        if (_nativeGradientMap.IsCreated) _nativeGradientMap.Dispose();
-        if (_nativeTileTypes.IsCreated) _nativeTileTypes.Dispose();
+        DisposeAllNativeArrays();
         
         if (FogOfWarManager.Instance != null)
         {
@@ -376,21 +443,32 @@ public class MapGenerator : MonoBehaviour
         }
     }
     
+    [Header("Map Generation Performance")]
+    [SerializeField] private int polishOperationsPerFrame = 1000;
+    
     private IEnumerator PolishMapAsync(IInitializationProgress progress = null)
     {
-        if (enableCenterCircle) PunchCenterCircle();
-        if (fillDisconnectedAreas) FillDisconnectedAreas();
-        if (enableEnemySpawnHoles) PunchEnemySpawnHoles();
-        if (fillDisconnectedAreas) FillDisconnectedAreas();
-        ConnectWallsToBorders();
-        
-        yield return null;
+        if (enableCenterCircle)
+        {
+            yield return StartCoroutine(PunchCenterCircleAsync());
+        }
+        if (fillDisconnectedAreas)
+        {
+            yield return StartCoroutine(FillDisconnectedAreasAsync());
+        }
+        if (enableEnemySpawnHoles)
+        {
+            yield return StartCoroutine(PunchEnemySpawnHolesAsync());
+        }
+        if (fillDisconnectedAreas)
+        {
+            yield return StartCoroutine(FillDisconnectedAreasAsync());
+        }
+        yield return StartCoroutine(ConnectWallsToBordersAsync());
     }
 
     public void GenerateMap()
     {
-        // Keep old synchronous implementation for backwards compatibility
-        // New code should use GenerateMapAsync() instead
         CalculateMapDimensions();
 
         if (randomSeed)
@@ -556,6 +634,60 @@ public class MapGenerator : MonoBehaviour
             }
         }
     }
+    
+    private IEnumerator PunchCenterCircleAsync()
+    {
+        int centerX = width / 2;
+        int centerY = height / 2;
+        
+        float transitionStartRatio = 0.7f;
+        float transitionEnd = centerCircleRadius;
+        float transitionStart = centerCircleRadius * transitionStartRatio;
+        
+        int processed = 0;
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                if (x == 0 || x == width - 1 || y == 0 || y == height - 1)
+                    continue;
+                
+                float distance = Mathf.Sqrt((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY));
+                
+                if (distance <= centerCircleRadius)
+                {
+                    Vector3Int cellPos = new Vector3Int(x - _mapCenterXOffset, y - _mapCenterYOffset, 0);
+                    
+                    if (distance <= transitionStart)
+                    {
+                        SetGroundTile(cellPos, groundTile);
+                    }
+                    else
+                    {
+                        TileBase originalTile = GetTileForPosition(x, y);
+                        float transitionFactor = (distance - transitionStart) / (transitionEnd - transitionStart);
+                        TileBase transitionTile = GetTileForSmoothTransition(x, y, transitionFactor, originalTile);
+                        
+                        if (IsTerrainTile(transitionTile))
+                        {
+                            SetWallTile(cellPos, transitionTile);
+                        }
+                        else
+                        {
+                            SetGroundTile(cellPos, transitionTile);
+                        }
+                    }
+                }
+                
+                processed++;
+                if (processed >= polishOperationsPerFrame)
+                {
+                    processed = 0;
+                    yield return null;
+                }
+            }
+        }
+    }
 
     private void FillDisconnectedAreas()
     {
@@ -626,6 +758,92 @@ public class MapGenerator : MonoBehaviour
             }
         }
     }
+    
+    private IEnumerator FillDisconnectedAreasAsync()
+    {
+        bool[,] connectedToCenter = new bool[width, height];
+        
+        int centerX = width / 2;
+        int centerY = height / 2;
+        
+        Queue<Vector2Int> queue = new Queue<Vector2Int>();
+        
+        Vector3Int centerCellPos = new Vector3Int(centerX - _mapCenterXOffset, centerY - _mapCenterYOffset, 0);
+        TileBase centerTile = GetTileAtPosition(centerCellPos);
+        
+        if (!IsTerrainTile(centerTile))
+        {
+            queue.Enqueue(new Vector2Int(centerX, centerY));
+            connectedToCenter[centerX, centerY] = true;
+        }
+        
+        int processed = 0;
+        while (queue.Count > 0)
+        {
+            Vector2Int current = queue.Dequeue();
+            int x = current.x;
+            int y = current.y;
+            
+            Vector2Int[] neighbors = {
+                new (x + 1, y),
+                new (x - 1, y),
+                new (x, y + 1),
+                new (x, y - 1)
+            };
+            
+            foreach (Vector2Int neighbor in neighbors)
+            {
+                int nx = neighbor.x;
+                int ny = neighbor.y;
+                
+                if (nx < 1 || nx >= width - 1 || ny < 1 || ny >= height - 1)
+                    continue;
+                
+                if (connectedToCenter[nx, ny])
+                    continue;
+                
+                Vector3Int neighborCellPos = new Vector3Int(nx - _mapCenterXOffset, ny - _mapCenterYOffset, 0);
+                TileBase neighborTile = GetTileAtPosition(neighborCellPos);
+                
+                if (!IsTerrainTile(neighborTile))
+                {
+                    connectedToCenter[nx, ny] = true;
+                    queue.Enqueue(neighbor);
+                }
+            }
+            
+            processed++;
+            if (processed >= polishOperationsPerFrame)
+            {
+                processed = 0;
+                yield return null;
+            }
+        }
+        
+        processed = 0;
+        for (int x = 1; x < width - 1; x++)
+        {
+            for (int y = 1; y < height - 1; y++)
+            {
+                Vector3Int cellPos = new Vector3Int(x - _mapCenterXOffset, y - _mapCenterYOffset, 0);
+                
+                if (!connectedToCenter[x, y])
+                {
+                    if (!IsTerrainCell(cellPos))
+                    {
+                        SetWallTile(cellPos, lowWallTile != null ? lowWallTile : wallTile);
+                    }
+                }
+                
+                processed++;
+                if (processed >= polishOperationsPerFrame)
+                {
+                    processed = 0;
+                    yield return null;
+                }
+            }
+        }
+    }
 
     private void PunchEnemySpawnHoles()
     {
@@ -640,7 +858,6 @@ public class MapGenerator : MonoBehaviour
         List<float> divisionRadii = mapObjectSpawner.GetDivisionRadii();
         if (divisionRadii == null || divisionRadii.Count < 2)
         {
-            Debug.LogWarning("[MapGenerator] MapObjectSpawner concentric circles not initialized. Enemy spawn holes may not work correctly.");
             return;
         }
         
@@ -675,6 +892,61 @@ public class MapGenerator : MonoBehaviour
             {
                 _enemySpawnHolePositions.Add(validHolePos.Value);
                 PunchHoleWithThreshold(validHolePos.Value.x, validHolePos.Value.y, enemySpawnPunchHoleRadius);
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+    
+    private IEnumerator PunchEnemySpawnHolesAsync()
+    {
+        _enemySpawnHolePositions.Clear();
+        
+        MapObjectSpawner mapObjectSpawner = FindFirstObjectByType<MapObjectSpawner>();
+        if (mapObjectSpawner == null)
+        {
+            yield break;
+        }
+        
+        List<float> divisionRadii = mapObjectSpawner.GetDivisionRadii();
+        if (divisionRadii == null || divisionRadii.Count < 2)
+        {
+            yield break;
+        }
+        
+        int centerX = width / 2;
+        int centerY = height / 2;
+        
+        int startIndex = Mathf.Clamp(enemySpawnHoleStartCircleIndex, 0, divisionRadii.Count - 2);
+        
+        for (int sectorIndex = startIndex; sectorIndex < divisionRadii.Count - 1; sectorIndex++)
+        {
+            float minRadius = divisionRadii[sectorIndex];
+            float maxRadius = divisionRadii[sectorIndex + 1];
+            
+            for (int holeIndex = 0; holeIndex < enemySpawnHolesPerSector; holeIndex++)
+            {
+                Vector2Int? validHolePos = FindValidHolePosition(centerX, centerY, minRadius, maxRadius, enemySpawnPunchHoleRadius);
+                if (validHolePos.HasValue)
+                {
+                    _enemySpawnHolePositions.Add(validHolePos.Value);
+                    yield return StartCoroutine(PunchHoleWithThresholdAsync(validHolePos.Value.x, validHolePos.Value.y, enemySpawnPunchHoleRadius));
+                }
+            }
+        }
+        
+        while (_enemySpawnHolePositions.Count < enemySpawnHoleMinimalAmount && divisionRadii.Count > 1)
+        {
+            float minRadius = divisionRadii[startIndex];
+            float maxRadius = divisionRadii[divisionRadii.Count - 1];
+            
+            Vector2Int? validHolePos = FindValidHolePosition(centerX, centerY, minRadius, maxRadius, enemySpawnPunchHoleRadius);
+            if (validHolePos.HasValue)
+            {
+                _enemySpawnHolePositions.Add(validHolePos.Value);
+                yield return StartCoroutine(PunchHoleWithThresholdAsync(validHolePos.Value.x, validHolePos.Value.y, enemySpawnPunchHoleRadius));
             }
             else
             {
@@ -802,6 +1074,75 @@ public class MapGenerator : MonoBehaviour
             }
         }
     }
+    
+    private IEnumerator ConnectWallsToBordersAsync()
+    {
+        int processed = 0;
+        for (int y = 0; y < height; y++)
+        {
+            int innerX = 1;
+            Vector3Int innerPos = new Vector3Int(innerX - _mapCenterXOffset, y - _mapCenterYOffset, 0);
+            if (GetTileAtPosition(innerPos) == highWallTile)
+            {
+                Vector3Int borderPos = new Vector3Int(-_mapCenterXOffset, y - _mapCenterYOffset, 0);
+                SetWallTile(borderPos, highWallTile);
+            }
+            processed++;
+            if (processed >= polishOperationsPerFrame)
+            {
+                processed = 0;
+                yield return null;
+            }
+        }
+        for (int y = 0; y < height; y++)
+        {
+            int innerX = width - 2;
+            Vector3Int innerPos = new Vector3Int(innerX - _mapCenterXOffset, y - _mapCenterYOffset, 0);
+            if (GetTileAtPosition(innerPos) == highWallTile)
+            {
+                Vector3Int borderPos = new Vector3Int((width - 1) - _mapCenterXOffset, y - _mapCenterYOffset, 0);
+                SetWallTile(borderPos, highWallTile);
+            }
+            processed++;
+            if (processed >= polishOperationsPerFrame)
+            {
+                processed = 0;
+                yield return null;
+            }
+        }
+        for (int x = 0; x < width; x++)
+        {
+            int innerY = 1;
+            Vector3Int innerPos = new Vector3Int(x - _mapCenterXOffset, innerY - _mapCenterYOffset, 0);
+            if (GetTileAtPosition(innerPos) == highWallTile)
+            {
+                Vector3Int borderPos = new Vector3Int(x - _mapCenterXOffset, -_mapCenterYOffset, 0);
+                SetWallTile(borderPos, highWallTile);
+            }
+            processed++;
+            if (processed >= polishOperationsPerFrame)
+            {
+                processed = 0;
+                yield return null;
+            }
+        }
+        for (int x = 0; x < width; x++)
+        {
+            int innerY = height - 2;
+            Vector3Int innerPos = new Vector3Int(x - _mapCenterXOffset, innerY - _mapCenterYOffset, 0);
+            if (GetTileAtPosition(innerPos) == highWallTile)
+            {
+                Vector3Int borderPos = new Vector3Int(x - _mapCenterXOffset, (height - 1) - _mapCenterYOffset, 0);
+                SetWallTile(borderPos, highWallTile);
+            }
+            processed++;
+            if (processed >= polishOperationsPerFrame)
+            {
+                processed = 0;
+                yield return null;
+            }
+        }
+    }
 
     private void PunchHoleWithThreshold(int centerX, int centerY, float radius)
     {
@@ -845,6 +1186,69 @@ public class MapGenerator : MonoBehaviour
                     {
                         SetWallTile(cellPos, lowWallTile != null ? lowWallTile : groundTile);
                     }
+                }
+            }
+        }
+    }
+    
+    private IEnumerator PunchHoleWithThresholdAsync(int centerX, int centerY, float radius)
+    {
+        int radiusInt = Mathf.CeilToInt(radius);
+        int processed = 0;
+        for (int x = centerX - radiusInt; x <= centerX + radiusInt; x++)
+        {
+            for (int y = centerY - radiusInt; y <= centerY + radiusInt; y++)
+            {
+                if (x < 1 || x >= width - 1 || y < 1 || y >= height - 1)
+                    continue;
+                
+                float distance = Mathf.Sqrt((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY));
+                
+                if (distance <= radius)
+                {
+                    Vector3Int cellPos = new Vector3Int(x - _mapCenterXOffset, y - _mapCenterYOffset, 0);
+                    SetGroundTile(cellPos, groundTile);
+                }
+                
+                processed++;
+                if (processed >= polishOperationsPerFrame)
+                {
+                    processed = 0;
+                    yield return null;
+                }
+            }
+        }
+        
+        float edgeTolerance = 1.5f;
+        float edgeMin = radius - edgeTolerance;
+        float edgeMax = radius + edgeTolerance;
+        
+        processed = 0;
+        for (int x = centerX - radiusInt - 1; x <= centerX + radiusInt + 1; x++)
+        {
+            for (int y = centerY - radiusInt - 1; y <= centerY + radiusInt + 1; y++)
+            {
+                if (x < 1 || x >= width - 1 || y < 1 || y >= height - 1)
+                    continue;
+                
+                float distance = Mathf.Sqrt((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY));
+                
+                if (distance >= edgeMin && distance <= edgeMax)
+                {
+                    Vector3Int cellPos = new Vector3Int(x - _mapCenterXOffset, y - _mapCenterYOffset, 0);
+                    TileBase tile = GetTileAtPosition(cellPos);
+                    
+                    if (tile == highWallTile)
+                    {
+                        SetWallTile(cellPos, lowWallTile != null ? lowWallTile : groundTile);
+                    }
+                }
+                
+                processed++;
+                if (processed >= polishOperationsPerFrame)
+                {
+                    processed = 0;
+                    yield return null;
                 }
             }
         }
@@ -1167,6 +1571,30 @@ public class MapGenerator : MonoBehaviour
         if (groundTilemap != null)
         {
             groundTilemap.RefreshAllTiles();
+        }
+    }
+    
+    private void OnDestroy()
+    {
+        DisposeAllNativeArrays();
+    }
+    
+    private void DisposeAllNativeArrays()
+    {
+        if (_nativeNoiseMap.IsCreated)
+        {
+            _nativeNoiseMap.Dispose();
+            _nativeNoiseMap = default;
+        }
+        if (_nativeGradientMap.IsCreated)
+        {
+            _nativeGradientMap.Dispose();
+            _nativeGradientMap = default;
+        }
+        if (_nativeTileTypes.IsCreated)
+        {
+            _nativeTileTypes.Dispose();
+            _nativeTileTypes = default;
         }
     }
     

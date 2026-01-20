@@ -184,10 +184,28 @@ public class GameManager : MonoBehaviour
             pausePanel.SetActive(false);
         }
 
-        // Get progress tracker from LoadingScreen
-        IInitializationProgress progress = GetInitializationProgress();
+        StartCoroutine(WaitForEntryAnimationAndInitialize());
+    }
+    
+    private IEnumerator WaitForEntryAnimationAndInitialize()
+    {
+        while (LoadingUIManager.Instance == null)
+        {
+            yield return null;
+        }
         
-        StartCoroutine(InitializeGameSceneAsync(progress));
+        LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
+        while (loadingScreen == null || !loadingScreen.IsEntryAnimationComplete)
+        {
+            yield return null;
+            if (LoadingUIManager.Instance != null)
+            {
+                loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
+            }
+        }
+        
+        IInitializationProgress progress = GetInitializationProgress();
+        yield return StartCoroutine(InitializeGameSceneAsync(progress));
     }
     
     private IInitializationProgress GetInitializationProgress()

@@ -110,18 +110,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2897003580866124395}
     m_Modifications:
-    - target: {fileID: 2518815341981756597, guid: e53eb0d33bb4c4347b0d9b79c73e76c4, type: 3}
-      propertyPath: ShapeModule.radius.value
-      value: 100
-      objectReference: {fileID: 0}
-    - target: {fileID: 2518815341981756597, guid: e53eb0d33bb4c4347b0d9b79c73e76c4, type: 3}
-      propertyPath: InitialModule.startSize.scalar
-      value: 50
-      objectReference: {fileID: 0}
-    - target: {fileID: 2518815341981756597, guid: e53eb0d33bb4c4347b0d9b79c73e76c4, type: 3}
-      propertyPath: InitialModule.startSize.minScalar
-      value: 40
-      objectReference: {fileID: 0}
     - target: {fileID: 3227036900004198545, guid: e53eb0d33bb4c4347b0d9b79c73e76c4, type: 3}
       propertyPath: m_SortingLayer
       value: 5

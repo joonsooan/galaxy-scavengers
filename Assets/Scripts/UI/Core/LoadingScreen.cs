@@ -3,18 +3,18 @@ using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using Systems.Jobs;
+using TMPro;
 
 public class LoadingScreen : MonoBehaviour, IInitializationProgress
 {
     [Header("UI Elements")]
     [SerializeField] private Image backgroundImage;
-    [SerializeField] private TMPro.TextMeshProUGUI loadingText;
-    [SerializeField] private GameObject loadingIndicator;
+    [SerializeField] private TextMeshProUGUI loadingText;
     [SerializeField] private Image loadingImage;
     [SerializeField] private ParticleSystem loadingParticles;
     
     [Header("Progress UI Elements")]
-    [SerializeField] private TMPro.TextMeshProUGUI progressText;
+    [SerializeField] private TextMeshProUGUI progressText;
     [SerializeField] private Image progressBarFill;
     [SerializeField] private GameObject progressBarContainer;
 
@@ -34,6 +34,7 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
     [SerializeField] private float resumeDelay = 0.5f;
     
     [Header("Animation Settings")]
+    [SerializeField] private float imageEntryDelay;
     [SerializeField] private float imageEntryDuration = 0.8f;
     [SerializeField] private float imageExitDuration = 1.0f;
     [SerializeField] private float postInitWaitDuration = 1.0f;
@@ -46,20 +47,41 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
     private Tween _imageEntryTween;
     private Tween _imageExitTween;
     
-    private float _currentProgress = 0f;
+    private float _currentProgress;
     private string _currentStage = "";
     private Vector3 _initialImagePosition;
     private Vector3 _centerImagePosition;
-    private bool _isInitializationComplete = false;
+    private bool _isInitializationComplete;
+    private float _currentShakeStrength;
+    private Tween _shakeStrengthTween;
+    private bool _hasStartedEntryAnimation;
+    private bool _isEntryAnimationComplete;
+    
+    public bool IsEntryAnimationComplete => _isEntryAnimationComplete;
 
     private void Awake()
     {
         InitializeUI();
+        _hasStartedEntryAnimation = false;
     }
 
     private void OnEnable()
     {
-        StartEntryAnimation();
+        _hasStartedEntryAnimation = false;
+        StartCoroutine(StartEntryAnimationAfterSceneLoad());
+    }
+    
+    private IEnumerator StartEntryAnimationAfterSceneLoad()
+    {
+        yield return null;
+        yield return null;
+        
+        if (!_hasStartedEntryAnimation)
+        {
+            InitializeUI();
+            StartEntryAnimation();
+            _hasStartedEntryAnimation = true;
+        }
     }
 
     private void OnDisable()
@@ -71,7 +93,6 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
     {
         if (backgroundImage != null) backgroundImage.color = backgroundColor;
         if (loadingText != null) loadingText.text = loadingTextString;
-        if (loadingIndicator != null) loadingIndicator.SetActive(true);
         if (loadingImage != null) 
         {
             loadingImage.color = Color.white;
@@ -90,10 +111,10 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
                 _initialImagePosition = _centerImagePosition + Vector3.up * (Screen.height / 2f + 200f);
             }
             loadingImage.transform.localPosition = _initialImagePosition;
+            loadingImage.transform.localRotation = Quaternion.identity;
         }
         if (loadingParticles != null) loadingParticles.Stop();
         
-        // Initialize progress UI
         _currentProgress = 0f;
         _currentStage = "";
         UpdateProgressUI();
@@ -104,6 +125,7 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
         }
         
         _isInitializationComplete = false;
+        _isEntryAnimationComplete = false;
     }
 
     private void StartEntryAnimation()
@@ -111,26 +133,100 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
         if (loadingImage != null)
         {
             _imageEntryTween?.Kill();
-            loadingImage.transform.localPosition = _initialImagePosition;
-            _imageEntryTween = loadingImage.transform.DOLocalMove(_centerImagePosition, imageEntryDuration)
+            
+            RectTransform imageRect = loadingImage.GetComponent<RectTransform>();
+            Canvas canvas = GetComponentInParent<Canvas>();
+            
+            if (canvas != null && canvas.rootCanvas != null)
+            {
+                RectTransform canvasRect = canvas.rootCanvas.GetComponent<RectTransform>();
+                _centerImagePosition = Vector3.zero;
+                
+                float canvasHeight = canvasRect.rect.height;
+                _initialImagePosition = Vector3.up * (canvasHeight / 2f + 200f);
+            }
+            else
+            {
+                _centerImagePosition = Vector3.zero;
+                _initialImagePosition = Vector3.up * (Screen.height / 2f + 200f);
+            }
+            
+            if (imageRect != null)
+            {
+                imageRect.anchoredPosition = new Vector2(0, _initialImagePosition.y);
+            }
+            else
+            {
+                loadingImage.transform.localPosition = _initialImagePosition;
+            }
+            
+            if (imageEntryDelay > 0f)
+            {
+                StartCoroutine(StartEntryAnimationDelayed());
+            }
+            else
+            {
+                StartEntryAnimationInternal();
+            }
+        }
+    }
+    
+    private IEnumerator StartEntryAnimationDelayed()
+    {
+        yield return new WaitForSeconds(imageEntryDelay);
+        StartEntryAnimationInternal();
+    }
+    
+    private void StartEntryAnimationInternal()
+    {
+        if (loadingImage == null) return;
+        
+        _isEntryAnimationComplete = false;
+        
+        RectTransform imageRect = loadingImage.GetComponent<RectTransform>();
+        Canvas canvas = GetComponentInParent<Canvas>();
+        
+        if (canvas != null && canvas.rootCanvas != null)
+        {
+            _centerImagePosition = Vector3.zero;
+        }
+        else
+        {
+            _centerImagePosition = Vector3.zero;
+        }
+        
+        StartImageShake();
+        
+        if (imageRect != null)
+        {
+            _imageEntryTween = imageRect.DOAnchorPos(Vector2.zero, imageEntryDuration)
                 .SetEase(Ease.OutQuad)
+                .SetUpdate(true)
                 .OnComplete(() => {
-                    StartImageShake();
+                    _isEntryAnimationComplete = true;
                     if (loadingParticles != null)
                     {
                         if (_particleStartCoroutine != null) StopCoroutine(_particleStartCoroutine);
                         _particleStartCoroutine = StartCoroutine(StartParticlesDelayed());
                     }
-                    
-                    OnImageReachedCenter();
+                });
+        }
+        else
+        {
+            _imageEntryTween = loadingImage.transform.DOLocalMove(_centerImagePosition, imageEntryDuration)
+                .SetEase(Ease.OutQuad)
+                .SetUpdate(true)
+                .OnComplete(() => {
+                    _isEntryAnimationComplete = true;
+                    if (loadingParticles != null)
+                    {
+                        if (_particleStartCoroutine != null) StopCoroutine(_particleStartCoroutine);
+                        _particleStartCoroutine = StartCoroutine(StartParticlesDelayed());
+                    }
                 });
         }
     }
     
-    private void OnImageReachedCenter()
-    {
-    }
-
     private void StopEffects()
     {
         if (_shakePositionTween != null && _shakePositionTween.IsActive())
@@ -156,6 +252,12 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
             _imageExitTween.Kill();
         }
         _imageExitTween = null;
+        
+        if (_shakeStrengthTween != null && _shakeStrengthTween.IsActive())
+        {
+            _shakeStrengthTween.Kill();
+        }
+        _shakeStrengthTween = null;
 
         if (_particleStartCoroutine != null)
         {
@@ -168,9 +270,9 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
             loadingParticles.Stop();
         }
     
+        // Don't reset position - let it stay where it is (at exit position)
         if (loadingImage != null)
         {
-            loadingImage.transform.localPosition = _centerImagePosition;
             loadingImage.transform.localRotation = Quaternion.identity;
         }
     }
@@ -198,6 +300,8 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
     private void DoContinuousShake(float strength)
     {
         if (loadingImage == null || loadingImage.gameObject == null) return;
+        
+        _currentShakeStrength = strength;
 
         _shakePositionTween = loadingImage.transform.DOShakePosition(
                 imageShakeDuration, 
@@ -208,7 +312,8 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
                 false 
             )
             .SetLink(loadingImage.gameObject)
-            .OnComplete(() => DoContinuousShake(strength));
+            .SetUpdate(true)
+            .OnComplete(() => DoContinuousShake(_currentShakeStrength));
     }
 
     private IEnumerator StartParticlesDelayed()
@@ -219,7 +324,6 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
 
     public IEnumerator FadeOutSequence()
     {
-        // Wait for initialization to complete (1 second after completion)
         while (!_isInitializationComplete)
         {
             yield return null;
@@ -229,26 +333,6 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
 
         if (Time.timeScale > 0f) Time.timeScale = 0f;
 
-        // Hide progress text
-        if (progressText != null)
-        {
-            progressText.DOFade(0f, contentFadeOutDuration).SetUpdate(true);
-        }
-        if (loadingText != null)
-        {
-            loadingText.DOFade(0f, contentFadeOutDuration).SetUpdate(true);
-        }
-
-        if (loadingIndicator != null)
-        {
-            CanvasGroup indicatorGroup = loadingIndicator.GetComponent<CanvasGroup>();
-            if (indicatorGroup == null) indicatorGroup = loadingIndicator.AddComponent<CanvasGroup>();
-            indicatorGroup.DOFade(0f, contentFadeOutDuration).SetUpdate(true);
-        }
-
-        yield return new WaitForSecondsRealtime(contentFadeOutDuration);
-
-        // Move image down with increasing shake strength
         if (loadingImage != null)
         {
             RectTransform rectTransform = loadingImage.GetComponent<RectTransform>();
@@ -264,32 +348,49 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
             float currentShakeStrength = imageShakeStrength;
             float targetShakeStrength = imageShakeStrength * maxShakeStrengthMultiplier;
             
-            // Create shake strength tween that increases over time
             float shakeTweenTime = 0f;
-            Tween shakeStrengthTween = DOTween.To(() => shakeTweenTime, x => shakeTweenTime = x, 1f, imageExitDuration)
+            _shakeStrengthTween?.Kill();
+            _shakeStrengthTween = DOTween.To(() => shakeTweenTime, x => shakeTweenTime = x, 1f, imageExitDuration)
+                .SetUpdate(true)
                 .OnUpdate(() => {
                     float strength = Mathf.Lerp(currentShakeStrength, targetShakeStrength, shakeTweenTime);
-                    // Update shake strength dynamically
-                    _shakePositionTween?.Kill();
+                    _currentShakeStrength = strength;
+                    if (_shakePositionTween != null && _shakePositionTween.IsActive())
+                    {
+                        _shakePositionTween.Kill();
+                    }
                     DoContinuousShake(strength);
                 });
             
-            // Move image down with Ease In
             _imageExitTween?.Kill();
             _imageExitTween = loadingImage.transform.DOLocalMove(exitPosition, imageExitDuration)
                 .SetEase(Ease.InQuad)
-                .SetUpdate(true)
-                .OnComplete(() => {
-                    StopEffects();
-                });
-            
-            yield return _imageExitTween.WaitForCompletion();
-            shakeStrengthTween?.Kill();
+                .SetUpdate(true);
         }
+
+        if (progressText != null)
+        {
+            progressText.DOFade(0f, contentFadeOutDuration).SetUpdate(true);
+        }
+        if (loadingText != null)
+        {
+            loadingText.DOFade(0f, contentFadeOutDuration).SetUpdate(true);
+        }
+
+        yield return new WaitForSecondsRealtime(contentFadeOutDuration);
+
+        if (_imageExitTween != null && _imageExitTween.IsActive())
+        {
+            yield return _imageExitTween.WaitForCompletion();
+        }
+        if (_shakeStrengthTween != null && _shakeStrengthTween.IsActive())
+        {
+            _shakeStrengthTween.Kill();
+        }
+        _shakeStrengthTween = null;
 
         yield return new WaitForSecondsRealtime(imageExitDelay);
 
-        // Fade out background
         if (backgroundImage != null)
         {
             yield return backgroundImage.DOFade(0f, fadeOutDuration).SetUpdate(true).WaitForCompletion();
@@ -317,7 +418,6 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
     
     private void UpdateProgressUI()
     {
-        // Update progress text (message only, no percentage)
         if (progressText != null)
         {
             if (!string.IsNullOrEmpty(_currentStage))
@@ -330,13 +430,11 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
             }
         }
         
-        // Update progress bar
         if (progressBarFill != null)
         {
             progressBarFill.fillAmount = _currentProgress;
         }
         
-        // Update loading text with stage if provided
         if (loadingText != null && !string.IsNullOrEmpty(_currentStage))
         {
             loadingText.text = _currentStage;
