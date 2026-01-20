@@ -118,6 +118,20 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
         _currentProgress = 0f;
         _currentStage = "";
         UpdateProgressUI();
+
+        LoadingStagePanelAnimator stageAnimator = GetComponentInChildren<LoadingStagePanelAnimator>(true);
+        if (stageAnimator != null)
+        {
+            RectTransform[] rects = GetComponentsInChildren<RectTransform>(true);
+            foreach (RectTransform rt in rects)
+            {
+                if (rt != null && rt.name == "_Parent")
+                {
+                    stageAnimator.SetPanelParent(rt);
+                    break;
+                }
+            }
+        }
         
         if (progressBarContainer != null)
         {
@@ -196,6 +210,12 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
         }
         
         StartImageShake();
+
+        if (loadingParticles != null)
+        {
+            if (_particleStartCoroutine != null) StopCoroutine(_particleStartCoroutine);
+            _particleStartCoroutine = StartCoroutine(StartParticlesDelayed());
+        }
         
         if (imageRect != null)
         {
@@ -204,11 +224,6 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
                 .SetUpdate(true)
                 .OnComplete(() => {
                     _isEntryAnimationComplete = true;
-                    if (loadingParticles != null)
-                    {
-                        if (_particleStartCoroutine != null) StopCoroutine(_particleStartCoroutine);
-                        _particleStartCoroutine = StartCoroutine(StartParticlesDelayed());
-                    }
                 });
         }
         else
@@ -218,11 +233,6 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
                 .SetUpdate(true)
                 .OnComplete(() => {
                     _isEntryAnimationComplete = true;
-                    if (loadingParticles != null)
-                    {
-                        if (_particleStartCoroutine != null) StopCoroutine(_particleStartCoroutine);
-                        _particleStartCoroutine = StartCoroutine(StartParticlesDelayed());
-                    }
                 });
         }
     }
@@ -342,7 +352,7 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
                     ? canvas.rootCanvas.GetComponent<RectTransform>().rect.height 
                     : Screen.height;
             }
-            Vector3 exitPosition = _centerImagePosition + Vector3.down * (canvasHeight / 2f + 200f);
+            Vector3 exitPosition = _centerImagePosition + Vector3.down * (canvasHeight / 2f + 400f);
             float currentShakeStrength = imageShakeStrength;
             float targetShakeStrength = imageShakeStrength * maxShakeStrengthMultiplier;
             
@@ -360,6 +370,17 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
                     DoContinuousShake(strength);
                 });
             
+            LoadingStagePanelAnimator stageAnimator = GetComponentInChildren<LoadingStagePanelAnimator>(true);
+            if (stageAnimator != null)
+            {
+                CanvasGroup[] groups = stageAnimator.GetComponentsInChildren<CanvasGroup>(true);
+                foreach (CanvasGroup group in groups)
+                {
+                    if (group == null) continue;
+                    group.DOFade(0f, imageExitDuration).SetUpdate(true);
+                }
+            }
+
             _imageExitTween?.Kill();
             _imageExitTween = loadingImage.transform.DOLocalMove(exitPosition, imageExitDuration)
                 .SetEase(Ease.InQuad)
@@ -408,6 +429,11 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
     {
         _currentProgress = Mathf.Clamp01(progress);
         _currentStage = stage;
+        
+        if (!string.IsNullOrEmpty(_currentStage))
+        {
+            LoadingStagePanelAnimator.InvokeLoadingStageChanged(_currentStage);
+        }
         
         UpdateProgressUI();
     }

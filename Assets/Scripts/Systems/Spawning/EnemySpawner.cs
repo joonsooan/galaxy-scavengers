@@ -80,6 +80,8 @@ public class EnemySpawnData
             
             Grid grid = BuildingManager.Instance.grid;
             int totalHoles = holes.Count;
+            
+            progress.UpdateProgress(0.0f, "적대적 생명체 탐색 중...");
 
             for (int i = 0; i < totalHoles; i++)
             {
@@ -115,13 +117,7 @@ public class EnemySpawnData
                         }
                     }
                 }
-
-                if (progress != null)
-                {
-                    float holeProgress = (i + 1f) / totalHoles;
-                    progress.UpdateProgress(holeProgress, "적대적 생명체 탐색 중...");
-                }
-
+                
                 if (i % 2 == 0)
                 {
                     yield return null;
