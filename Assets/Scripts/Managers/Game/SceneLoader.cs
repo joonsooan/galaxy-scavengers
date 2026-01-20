@@ -37,7 +37,16 @@ public class SceneLoader : MonoBehaviour
     public void LoadBaseScene()
     {
         if (_isLoading) return;
-        StartCoroutine(LoadSceneAsync(baseSceneName));
+        
+        string currentScene = SceneManager.GetActiveScene().name;
+        if (currentScene == titleSceneName)
+        {
+            SceneManager.LoadScene(baseSceneName);
+        }
+        else
+        {
+            StartCoroutine(LoadSceneAsync(baseSceneName));
+        }
     }
 
     public void LoadGameScene()
@@ -76,11 +85,9 @@ public class SceneLoader : MonoBehaviour
 
         yield return StartCoroutine(WaitForGameSceneInitialization());
 
-        yield return new WaitForSeconds(gameScenePostInitDelay);
-
         if (LoadingUIManager.Instance != null)
         {
-            LoadingUIManager.Instance.HideLoadingScreen();
+            LoadingUIManager.Instance.HideLoadingScreenWithFade();
         }
 
         _isLoading = false;
