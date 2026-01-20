@@ -18,6 +18,9 @@ public class VisibilityController : MonoBehaviour
     private bool _wasVisible = true;
     private bool _isSubscribed;
     private Vector3Int _lastRegisteredCell = new (int.MaxValue, int.MaxValue, int.MaxValue);
+    private Vector3Int _lastCheckedCell = new (int.MaxValue, int.MaxValue, int.MaxValue);
+    private const float UpdateInterval = 0.1f;
+    private float _nextUpdateTime;
     
     private void Awake()
     {
@@ -35,6 +38,9 @@ public class VisibilityController : MonoBehaviour
             return;
         }
         
+        _lastCheckedCell = GetCurrentCell();
+        _nextUpdateTime = Time.time + UpdateInterval;
+        
         SubscribeToEvent();
         RegisterWithFogOfWar();
         UpdateVisibility();
@@ -50,6 +56,22 @@ public class VisibilityController : MonoBehaviour
     {
         UnregisterFromFogOfWar();
         UnsubscribeFromEvent();
+    }
+    
+    private void Update()
+    {
+        if (Time.time >= _nextUpdateTime)
+        {
+            _nextUpdateTime = Time.time + UpdateInterval;
+            
+            Vector3Int currentCell = GetCurrentCell();
+            if (currentCell != _lastCheckedCell)
+            {
+                _lastCheckedCell = currentCell;
+                RegisterWithFogOfWar();
+                UpdateVisibility();
+            }
+        }
     }
     
     private void SubscribeToEvent()
