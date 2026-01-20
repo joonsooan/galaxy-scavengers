@@ -119,9 +119,6 @@ public class FogOfWarManager : MonoBehaviour
         yield return new WaitForEndOfFrame();
         yield return new WaitForEndOfFrame();
         
-        if (progress != null)
-            progress.UpdateProgress(0.0f, "맵 생성 완료 대기 중...");
-        
         while (_cachedMapGenerator != null && 
                ((_cachedMapGenerator.GroundTilemap != null && _cachedMapGenerator.GroundTilemap.cellBounds.size.x == 0) ||
                 (_cachedMapGenerator.WallTilemap != null && _cachedMapGenerator.WallTilemap.cellBounds.size.x == 0)))

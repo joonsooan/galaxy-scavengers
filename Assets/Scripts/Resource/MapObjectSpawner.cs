@@ -149,7 +149,10 @@ public class MapObjectSpawner : MonoBehaviour
         Vector2Int mapSize = mapGenerator.MapSize;
         
         if (progress != null)
-            progress.UpdateProgress(0.05f, "자원 스폰 준비 중...");
+        {
+            progress.UpdateProgress(0.0f, "희귀 광물 반응 탐지 중...");
+            yield return new WaitForSeconds(1.0f);
+        }
         
         if (_circleGenerator == null)
         {
@@ -173,9 +176,6 @@ public class MapObjectSpawner : MonoBehaviour
         
         try
         {
-            if (progress != null)
-                progress.UpdateProgress(0.15f, "자원 서클 생성 중...");
-            
             List<ResourceCircle> resourceCircles = _circleGenerator.GenerateResourceCircles();
             List<ResourceCircle> startingAreaCircles = _circleGenerator.GenerateStartingAreaCircles();
             
@@ -183,22 +183,13 @@ public class MapObjectSpawner : MonoBehaviour
             
             _cachedResourceCircles = new List<ResourceCircle>(resourceCircles);
             
-            if (progress != null)
-                progress.UpdateProgress(0.3f, "자원 위치 계산 중...");
-            
             yield return StartCoroutine(SpawnResourcesInCirclesAsync(resourceCircles, progress));
-            
-            if (progress != null)
-                progress.UpdateProgress(0.9f, "자원 등록 중...");
             
             RegisterBufferedResources();
             
             _tileManager.InitializeRuleTiles();
             
             OnAllObjectsSpawned.Invoke();
-            
-            if (progress != null)
-                progress.UpdateProgress(1.0f, "자원 스폰 완료");
         }
         finally
         {
@@ -297,11 +288,6 @@ public class MapObjectSpawner : MonoBehaviour
             // Yield every few circles to avoid blocking
             if (processedCircles % circlesPerFrame == 0)
             {
-                if (progress != null)
-                {
-                    float progressValue = 0.3f + (0.6f * (float)processedCircles / totalCircles);
-                    progress.UpdateProgress(progressValue, $"자원 스폰 중... ({processedCircles}/{totalCircles})");
-                }
                 yield return null;
             }
         }

@@ -48,6 +48,7 @@ MonoBehaviour:
   titleSceneName: TitleScene
   baseSceneName: BaseScene
   gameSceneName: GameScene
+  gameScenePostInitDelay: 1
 --- !u!114 &5978680509315379117
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -60,5 +61,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aebc84c5cfee86b4a906aa92b893fc11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  loadingScreenPrefab: {fileID: 0}
-  loadingCanvasPrefab: {fileID: 0}
+  loadingScreenPrefab: {fileID: 8740857451738434286, guid: e53eb0d33bb4c4347b0d9b79c73e76c4, type: 3}
+  loadingCanvasPrefab: {fileID: 2879613676231131217, guid: e4650c0a8e119f14d8c41bb1ce1edc7e, type: 3}

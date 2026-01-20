@@ -12,6 +12,7 @@ public class SceneLoader : MonoBehaviour
     
     [Header("Game Scene Loading Settings")]
     [SerializeField] private float gameScenePostInitDelay = 1f;
+    [SerializeField] private float gameScenePostFadeDelay = 1f;
     
     private bool _isLoading = false;
     
@@ -85,9 +86,10 @@ public class SceneLoader : MonoBehaviour
 
         yield return StartCoroutine(WaitForGameSceneInitialization());
 
+        // Wait for fade to complete and then wait additional delay
         if (LoadingUIManager.Instance != null)
         {
-            LoadingUIManager.Instance.HideLoadingScreenWithFade();
+            yield return StartCoroutine(WaitForFadeCompleteAndDelay());
         }
 
         _isLoading = false;
@@ -98,6 +100,25 @@ public class SceneLoader : MonoBehaviour
         while (GameManager.Instance == null || !GameManager.Instance.IsGameSceneInitialized)
         {
             yield return null;
+        }
+    }
+    
+    private IEnumerator WaitForFadeCompleteAndDelay()
+    {
+        if (LoadingUIManager.Instance != null)
+        {
+            // Wait for fade sequence to complete
+            yield return LoadingUIManager.Instance.HideLoadingScreenWithFadeAsync();
+        }
+        
+        yield return new WaitForSecondsRealtime(gameScenePostFadeDelay);
+        
+        if (GameManager.Instance != null)
+        {
+            foreach (Unit_Miner unit in FindObjectsByType<Unit_Miner>(FindObjectsSortMode.None))
+            {
+                unit.TryStartActions();
+            }
         }
     }
     

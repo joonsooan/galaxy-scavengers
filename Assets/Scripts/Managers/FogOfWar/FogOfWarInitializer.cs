@@ -38,24 +38,19 @@ public class FogOfWarInitializer
     public IEnumerator InitializeFogOfWarAsync(Dictionary<Vector3Int, FogOfWarState> tileVisibility, IInitializationProgress progress = null)
     {
         if (progress != null)
-            progress.UpdateProgress(0.05f, "안개 초기화 준비 중...");
+        {
+            progress.UpdateProgress(0.0f, "대기 농도 및 가시거리 분석 중...");
+            yield return new WaitForSeconds(1.0f);
+        }
         
         List<Tilemap> terrainTilemaps = CollectTerrainTilemaps();
         
         if (terrainTilemaps.Count == 0 || _fogTilemap == null || _fogTile == null)
         {
-            if (progress != null)
-                progress.UpdateProgress(1.0f, "안개 초기화 완료");
             yield break;
         }
         
-        if (progress != null)
-            progress.UpdateProgress(0.2f, "타일 위치 수집 중...");
-        
         HashSet<Vector3Int> allTilePositions = CollectAllTilePositions(terrainTilemaps, tileVisibility);
-        
-        if (progress != null)
-            progress.UpdateProgress(0.4f, $"타일 위치 수집 완료: {allTilePositions.Count}개");
         
         // Yield to avoid blocking
         yield return null;
@@ -70,9 +65,6 @@ public class FogOfWarInitializer
                 renderer.enabled = false;
             }
             
-            if (progress != null)
-                progress.UpdateProgress(0.5f, "안개 타일 배치 중...");
-            
             // Break up tile placement into chunks to avoid blocking
             yield return PlaceFogTilesAsync(allTilePositions, progress);
             
@@ -82,13 +74,7 @@ public class FogOfWarInitializer
             }
         }
         
-        if (progress != null)
-            progress.UpdateProgress(0.9f, "안개 타일맵 압축 중...");
-        
         _fogTilemap.CompressBounds();
-        
-        if (progress != null)
-            progress.UpdateProgress(1.0f, "안개 초기화 완료");
     }
     
     private MonoBehaviour _coroutineRunner;
@@ -149,19 +135,11 @@ public class FogOfWarInitializer
             
             if (processedPositions % positionsPerFrame == 0)
             {
-                if (progress != null)
-                {
-                    float progressValue = 0.5f + (0.3f * (float)processedPositions / totalPositions);
-                    progress.UpdateProgress(progressValue, $"안개 타일 배치 중... ({processedPositions}/{totalPositions})");
-                }
                 yield return null;
             }
         }
         
         _fogTilemap.SetTilesBlock(fogBounds, fogTiles);
-        
-        if (progress != null)
-            progress.UpdateProgress(0.75f, "안개 색상 설정 중...");
         
         // Batch set colors in chunks
         List<Vector3Int> positionsList = new List<Vector3Int>(allTilePositions);
@@ -181,9 +159,6 @@ public class FogOfWarInitializer
                 yield return null;
             }
         }
-        
-        if (progress != null)
-            progress.UpdateProgress(0.85f, "안개 타일 새로고침 중...");
         
         // Refresh tiles in chunks
         for (int i = 0; i < positionsList.Count; i += colorsPerFrame)

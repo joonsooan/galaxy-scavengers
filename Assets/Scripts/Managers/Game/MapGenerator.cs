@@ -208,7 +208,10 @@ public class MapGenerator : MonoBehaviour
         CalculateMapDimensions();
         
         if (progress != null)
-            progress.UpdateProgress(0.05f, "맵 생성 준비 중...");
+        {
+            progress.UpdateProgress(0.0f, "지표면 고도 데이터 동기화 중...");
+            yield return new WaitForSeconds(1.0f);
+        }
 
         if (randomSeed)
         {
@@ -227,9 +230,6 @@ public class MapGenerator : MonoBehaviour
         // Step 1: Generate Noise Map (if needed)
         if (useProceduralTerrain)
         {
-            if (progress != null)
-                progress.UpdateProgress(0.1f, "노이즈 맵 생성 중...");
-            
             System.Random prng = new System.Random(seed);
             float offsetX = prng.Next(-100000, 100000) + noiseOffset.x;
             float offsetY = prng.Next(-100000, 100000) + noiseOffset.y;
@@ -266,9 +266,6 @@ public class MapGenerator : MonoBehaviour
         // Step 2: Generate Gradient Map (if needed)
         if (useGradientMap && gradientMode == GradientMode.Procedural)
         {
-            if (progress != null)
-                progress.UpdateProgress(0.2f, "그라디언트 맵 생성 중...");
-            
             var gradientJob = new GenerateGradientMapJob
             {
                 gradientMap = _nativeGradientMap,
@@ -302,9 +299,6 @@ public class MapGenerator : MonoBehaviour
         }
         
         // Step 3: Calculate Terrain Tiles
-        if (progress != null)
-            progress.UpdateProgress(0.4f, "지형 타일 계산 중...");
-        
         var tileJob = new CalculateTerrainTilesJob
         {
             noiseMap = useProceduralTerrain ? _nativeNoiseMap : default,
@@ -327,9 +321,6 @@ public class MapGenerator : MonoBehaviour
         tileHandle.Complete();
         
         // Step 4: Apply tiles to Unity Tilemap (main thread only)
-        if (progress != null)
-            progress.UpdateProgress(0.6f, "타일맵에 적용 중...");
-        
         TileBase[] groundTiles = new TileBase[totalSize];
         TileBase[] lowWallTiles = new TileBase[totalSize];
         TileBase[] highWallTiles = new TileBase[totalSize];
@@ -366,9 +357,6 @@ public class MapGenerator : MonoBehaviour
         if (highWallTilemap != null) highWallTilemap.SetTilesBlock(mapBounds, highWallTiles);
         
         // Step 5: Polish map (Unity API calls - main thread only)
-        if (progress != null)
-            progress.UpdateProgress(0.75f, "맵 다듬기 중...");
-        
         yield return StartCoroutine(PolishMapAsync(progress));
         
         CopyTilesToBuildingManagerGroundTilemap(mapBounds);
@@ -381,9 +369,6 @@ public class MapGenerator : MonoBehaviour
         if (_nativeNoiseMap.IsCreated) _nativeNoiseMap.Dispose();
         if (_nativeGradientMap.IsCreated) _nativeGradientMap.Dispose();
         if (_nativeTileTypes.IsCreated) _nativeTileTypes.Dispose();
-        
-        if (progress != null)
-            progress.UpdateProgress(1.0f, "맵 생성 완료");
         
         if (FogOfWarManager.Instance != null)
         {
