@@ -26,6 +26,32 @@ public class BuildingUnlockManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
     
+    private void Start()
+    {
+        LoadUnlockedBuildings();
+    }
+    
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        if (pauseStatus)
+        {
+            SaveUnlockedBuildings();
+        }
+    }
+    
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        if (!hasFocus)
+        {
+            SaveUnlockedBuildings();
+        }
+    }
+    
+    private void OnDestroy()
+    {
+        SaveUnlockedBuildings();
+    }
+    
     private void OnValidate()
     {
         UpdateUnlockedBuildingsList();
@@ -46,6 +72,7 @@ public class BuildingUnlockManager : MonoBehaviour
             _unlockedBuildings.Add(building);
             UpdateUnlockedBuildingsList();
             OnBuildingUnlocked?.Invoke(building);
+            SaveUnlockedBuildings();
             Debug.Log($"BuildingUnlockManager: Unlocked building '{building.displayName}'");
         }
     }
@@ -101,5 +128,73 @@ public class BuildingUnlockManager : MonoBehaviour
             UnlockBuilding(building);
         }
         Debug.Log($"BuildingUnlockManager: Unlocked all {allBuildings.Length} buildings (Debug mode)");
+    }
+    
+    public void LockAllBuildings()
+    {
+        _unlockedBuildings.Clear();
+        UpdateUnlockedBuildingsList();
+        ClearSavedUnlockedBuildings();
+        Debug.Log("BuildingUnlockManager: All buildings have been locked.");
+    }
+    
+    private void SaveUnlockedBuildings()
+    {
+        List<string> unlockedBuildingNames = new List<string>();
+        foreach (BuildingData building in _unlockedBuildings)
+        {
+            if (building != null)
+            {
+                // Use name as unique identifier (ScriptableObject asset name)
+                unlockedBuildingNames.Add(building.name);
+            }
+        }
+        
+        string savedData = string.Join(",", unlockedBuildingNames);
+        PlayerPrefs.SetString("UnlockedBuildings", savedData);
+        PlayerPrefs.Save();
+    }
+    
+    private void LoadUnlockedBuildings()
+    {
+        if (!PlayerPrefs.HasKey("UnlockedBuildings"))
+        {
+            return;
+        }
+        
+        string savedData = PlayerPrefs.GetString("UnlockedBuildings");
+        if (string.IsNullOrEmpty(savedData))
+        {
+            return;
+        }
+        
+        string[] buildingNames = savedData.Split(',');
+        BuildingData[] allBuildings = Resources.LoadAll<BuildingData>("Buildings");
+        
+        foreach (string buildingName in buildingNames)
+        {
+            if (string.IsNullOrEmpty(buildingName))
+            {
+                continue;
+            }
+            
+            // Find building by name
+            BuildingData building = System.Array.Find(allBuildings, b => b != null && b.name == buildingName);
+            if (building != null)
+            {
+                _unlockedBuildings.Add(building);
+            }
+        }
+        
+        UpdateUnlockedBuildingsList();
+    }
+    
+    private void ClearSavedUnlockedBuildings()
+    {
+        if (PlayerPrefs.HasKey("UnlockedBuildings"))
+        {
+            PlayerPrefs.DeleteKey("UnlockedBuildings");
+            PlayerPrefs.Save();
+        }
     }
 }
