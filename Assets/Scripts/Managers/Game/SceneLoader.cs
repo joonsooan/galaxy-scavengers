@@ -116,6 +116,12 @@ public class SceneLoader : MonoBehaviour
         
         yield return new WaitForSecondsRealtime(gameScenePostFadeDelay);
         
+        // Spawn units after loading screen is complete
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.SpawnUnitsAfterLoading();
+        }
+        
         if (GameManager.Instance != null)
         {
             GameManager.IsGameplayReady = true;

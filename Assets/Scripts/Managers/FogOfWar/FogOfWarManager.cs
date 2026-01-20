@@ -130,17 +130,28 @@ public class FogOfWarManager : MonoBehaviour
             _initializer.SetCoroutineRunner(this);
             yield return StartCoroutine(_initializer.InitializeFogOfWarAsync(_tileVisibility, progress));
         }
-        else {
-            InitializeFogOfWar();
-        }
 
+        _isInitializing = false;
         IsInitialized = true;
 
-        UpdateVisibility();
+        ForceRebuildProviderTiles();
+        StartCoroutine(UpdateVisibilityCoroutine());
         UpdateAllVisibilityControllers();
 
         if (MapObjectSpawner.Instance != null) {
             MapObjectSpawner.Instance.UpdateResourceTileVisibility();
+        }
+    }
+
+    private void ForceRebuildProviderTiles()
+    {
+        _providerAffectedTiles.Clear();
+        foreach (IVisionProvider provider in _visionProviders) {
+            if (provider != null && provider.CheckIsActive()) {
+                if (provider is VisionProvider vp) {
+                    vp.ForceUpdateAffectedTiles();
+                }
+            }
         }
     }
 
@@ -179,7 +190,7 @@ public class FogOfWarManager : MonoBehaviour
             }
 
             if (!(provider is VisionProvider)) {
-                UpdateVisibility();
+                StartCoroutine(UpdateVisibilityCoroutine());
             }
         }
     }
@@ -316,17 +327,17 @@ public class FogOfWarManager : MonoBehaviour
         }
 
         if (removed > 0 || keysToRemove.Count > 0) {
-            UpdateVisibility();
+            StartCoroutine(UpdateVisibilityCoroutine());
         }
     }
 
-    private void UpdateVisibility()
+    private IEnumerator UpdateVisibilityCoroutine()
     {
         if (!IsInitialized || _isInitializing) {
-            return;
+            yield break;
         }
 
-        if (grid == null) return;
+        if (grid == null) yield break;
 
         HashSet<Vector3Int> tilesToCheck = new HashSet<Vector3Int>();
 
@@ -334,14 +345,34 @@ public class FogOfWarManager : MonoBehaviour
             tilesToCheck.Add(exploredTile);
         }
 
-        Dictionary<IVisionProvider, HashSet<Vector3Int>> newAffectedTiles = _visibilityCalculator.CalculateVisionProviderTiles(_visionProviders);
+        Dictionary<IVisionProvider, HashSet<Vector3Int>> newAffectedTiles = new Dictionary<IVisionProvider, HashSet<Vector3Int>>();
 
-        HashSet<Vector3Int> allNewVisibleTiles = new HashSet<Vector3Int>();
+        foreach (IVisionProvider provider in _visionProviders) {
+            if (provider == null || !provider.CheckIsActive()) continue;
+
+            try {
+                Vector3 worldPos = provider.GetPosition();
+                float visionRange = provider.GetVisionRange();
+
+                if (visionRange <= 0) continue;
+
+                Vector3Int centerCell = grid.WorldToCell(worldPos);
+                int rangeInCells = Mathf.CeilToInt(visionRange);
+
+                HashSet<Vector3Int> affectedTiles = _visibilityCalculator.CalculateAffectedTiles(centerCell, worldPos, visionRange, rangeInCells);
+                newAffectedTiles[provider] = affectedTiles;
+            }
+            catch (Exception e) {
+                Debug.LogWarning($"[FogOfWarManager] Error processing vision provider {provider.GetType().Name}: {e.Message}");
+            }
+
+            yield return null;
+        }
+
         foreach (KeyValuePair<IVisionProvider, HashSet<Vector3Int>> kvp in newAffectedTiles) {
             if (kvp.Key != null && kvp.Value != null) {
                 foreach (Vector3Int tile in kvp.Value) {
                     tilesToCheck.Add(tile);
-                    allNewVisibleTiles.Add(tile);
                 }
             }
         }
@@ -356,6 +387,9 @@ public class FogOfWarManager : MonoBehaviour
 
         foreach (Vector3Int visibleTile in _currentlyVisibleTiles) {
             tilesToCheck.Add(visibleTile);
+            if (!_exploredTiles.Contains(visibleTile)) {
+                _exploredTiles.Add(visibleTile);
+            }
         }
 
         _providerAffectedTiles = newAffectedTiles;
@@ -385,6 +419,7 @@ public class FogOfWarManager : MonoBehaviour
 
         _currentlyVisibleTiles = newCurrentlyVisibleTiles;
     }
+
 
     private void UpdateFogVisual(Vector3Int cell, FogOfWarState state)
     {
@@ -472,7 +507,7 @@ public class FogOfWarManager : MonoBehaviour
             }
         }
 
-        UpdateVisibility();
+        StartCoroutine(UpdateVisibilityCoroutine());
 
         if (MapObjectSpawner.Instance != null) {
             MapObjectSpawner.Instance.UpdateResourceTileVisibility();

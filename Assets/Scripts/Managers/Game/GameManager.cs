@@ -389,15 +389,6 @@ public class GameManager : MonoBehaviour
         RegisterPrePlacedMainStructure();
         RegisterPrePlacedBuildings();
         
-        // Spawn starting units after MainStructure is registered
-        yield return null;
-        
-        StartingUnitsManager startingUnitsManager = FindFirstObjectByType<StartingUnitsManager>();
-        if (startingUnitsManager != null)
-        {
-            startingUnitsManager.SpawnStartingUnits();
-        }
-        
         MapObjectSpawner proceduralSpawner = FindFirstObjectByType<MapObjectSpawner>();
         if (proceduralSpawner != null) {
             yield return StartCoroutine(proceduralSpawner.SpawnResourcesAsync(progress));
@@ -411,6 +402,7 @@ public class GameManager : MonoBehaviour
             mapGenerator.GenerateEnemyTerritoryRadiusValues();
         }
         
+        // Spawn enemy units during loading (keep existing behavior)
         EnemySpawner[] enemySpawners = FindObjectsByType<EnemySpawner>(FindObjectsSortMode.None);
         if (progress != null)
         {
@@ -444,14 +436,6 @@ public class GameManager : MonoBehaviour
 
         RegisterPrePlacedMainStructure();
         RegisterPrePlacedBuildings();
-        
-        // Spawn starting units after MainStructure is registered
-        yield return null;
-        StartingUnitsManager startingUnitsManager = FindFirstObjectByType<StartingUnitsManager>();
-        if (startingUnitsManager != null)
-        {
-            startingUnitsManager.SpawnStartingUnits();
-        }
 
         MapObjectSpawner proceduralSpawner = FindFirstObjectByType<MapObjectSpawner>();
         if (proceduralSpawner != null) {
@@ -466,18 +450,16 @@ public class GameManager : MonoBehaviour
             mapGenerator.GenerateEnemyTerritoryRadiusValues();
         }
         
+        // Spawn enemy units during loading (keep existing behavior)
         foreach (EnemySpawner enemySpawner in FindObjectsByType<EnemySpawner>(FindObjectsSortMode.None))
         {
+            if (enemySpawner == null) continue;
             enemySpawner.SpawnEnemies();
         }
         
         if (mapGenerator != null)
         {
             mapGenerator.DrawEnemyTerritoryTiles();
-        }
-
-        foreach (Unit_Miner unit in FindObjectsByType<Unit_Miner>(FindObjectsSortMode.None)) {
-            unit.TryStartActions();
         }
     }
 
@@ -533,6 +515,16 @@ public class GameManager : MonoBehaviour
             }
 
             BuildingManager.Instance.RegisterPrePlacedBuilding(buildingPiece);
+        }
+    }
+    
+    public void SpawnUnitsAfterLoading()
+    {
+        // Spawn starting units after MainStructure is registered
+        StartingUnitsManager startingUnitsManager = FindFirstObjectByType<StartingUnitsManager>();
+        if (startingUnitsManager != null)
+        {
+            startingUnitsManager.SpawnStartingUnits();
         }
     }
 }
