@@ -14288,10 +14288,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: _CoreCustomizationManager
       objectReference: {fileID: 0}
-    - target: {fileID: 7240787173698043072, guid: 02743f411c9856a47bb44372fdc4613f, type: 3}
-      propertyPath: unlockedSlotCount
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 8784280426499135706, guid: 02743f411c9856a47bb44372fdc4613f, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
