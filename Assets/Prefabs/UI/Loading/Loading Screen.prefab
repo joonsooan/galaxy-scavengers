@@ -5191,7 +5191,6 @@ MonoBehaviour:
   loadingText: {fileID: 8676754554312722543}
   loadingImage: {fileID: 7122229769533406684}
   loadingParticles: {fileID: 2518815341981756597}
-  starParticles: {fileID: 0}
   progressText: {fileID: 0}
   progressBarFill: {fileID: 0}
   progressBarContainer: {fileID: 0}
@@ -5208,8 +5207,8 @@ MonoBehaviour:
   imageEntryDuration: 1
   imageExitDuration: 1
   postInitWaitDuration: 1
-  imageExitDelay: 1.5
-  maxShakeStrengthMultiplier: 5
+  imageExitDelay: 1
+  maxShakeStrengthMultiplier: 10
 --- !u!114 &4486388738195986149
 MonoBehaviour:
   m_ObjectHideFlags: 0

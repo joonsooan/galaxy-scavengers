@@ -68,6 +68,14 @@ public class CreditManager : MonoBehaviour
         return _currentCredits;
     }
     
+    public void ResetCredits()
+    {
+        _currentCredits = 0;
+        SaveCredits();
+        OnCreditsChanged?.Invoke(_currentCredits);
+        Debug.Log("CreditManager: Credits reset to 0");
+    }
+    
     private void SaveCredits()
     {
         PlayerPrefs.SetInt("CurrentCredits", _currentCredits);

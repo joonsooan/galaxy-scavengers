@@ -89,7 +89,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   heartbeatDuration: 0.8
-  scaleUpAmount: 1.3
+  scaleUpAmount: 1.5
   scaleDownAmount: 0.9
-  scaleUp2Amount: 1.15
+  scaleUp2Amount: 1.25
   heartbeatEase: 6

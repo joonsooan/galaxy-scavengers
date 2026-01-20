@@ -4287,7 +4287,7 @@ MonoBehaviour:
   minEnemyTerritoryRadius: 6
   maxEnemyTerritoryRadius: 8
   drawEnemyTerritoryTiles: 1
-  polishOperationsPerFrame: 500
+  polishOperationsPerFrame: 200
 --- !u!114 &313771329
 MonoBehaviour:
   m_ObjectHideFlags: 0
