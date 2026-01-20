@@ -26,7 +26,7 @@ public class NightAttackManager : MonoBehaviour
     
     private void HandleDayStarted()
     {
-        DeactivateAllInfiniteAttackStates();
+        // DeactivateAllInfiniteAttackStates();
     }
     
     private void ActivateRandomEnemies()

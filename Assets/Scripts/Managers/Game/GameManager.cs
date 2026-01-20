@@ -1,4 +1,5 @@
 using System.Collections;
+using System;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -14,12 +15,17 @@ public class GameManager : MonoBehaviour
 
     [HideInInspector] public UnityEvent<DisplayableData> onStartDrag;
     [HideInInspector] public UnityEvent onEndDrag;
+    
+    public static event Action OnGameSceneInitialized;
+    
     private DisplayableData _activeCardData;
 
     private bool _isPaused;
     private float _savedTimeScale = 1f;
+    private bool _isGameSceneInitialized = false;
     public static GameManager Instance { get; private set; }
     public bool IsPaused => _isPaused;
+    public bool IsGameSceneInitialized => _isGameSceneInitialized;
     
     public float GetTimeScale()
     {
@@ -153,6 +159,7 @@ public class GameManager : MonoBehaviour
             _isPaused = false;
             _savedTimeScale = 1f;
             Time.timeScale = 1f;
+            _isGameSceneInitialized = false;
             InitializeGameScene();
         }
         if (scene.name == "LightTestScene") {
@@ -186,6 +193,70 @@ public class GameManager : MonoBehaviour
         yield return null;
 
         yield return StartCoroutine(InitializeSpawnersAndUnits());
+        
+        yield return StartCoroutine(WaitForFogOfWarInitialization());
+        
+        UpdateEnemyVisibility();
+        
+        _isGameSceneInitialized = true;
+        OnGameSceneInitialized?.Invoke();
+    }
+    
+    private IEnumerator WaitForFogOfWarInitialization()
+    {
+        while (FogOfWarManager.Instance == null || !FogOfWarManager.Instance.IsInitialized)
+        {
+            yield return null;
+        }
+        
+        yield return null;
+    }
+    
+    private void UpdateEnemyVisibility()
+    {
+        if (FogOfWarManager.Instance == null || !FogOfWarManager.Instance.IsInitialized)
+        {
+            return;
+        }
+        
+        if (UnitManager.Instance != null && UnitManager.Instance.EnemyUnits != null)
+        {
+            foreach (UnitBase enemyUnit in UnitManager.Instance.EnemyUnits)
+            {
+                if (enemyUnit != null)
+                {
+                    VisibilityController controller = enemyUnit.GetComponent<VisibilityController>();
+                    if (controller == null)
+                    {
+                        controller = enemyUnit.GetComponentInChildren<VisibilityController>();
+                    }
+                    
+                    if (controller != null)
+                    {
+                        controller.ForceUpdateVisibility();
+                    }
+                }
+            }
+        }
+        
+        VisibilityController[] allVisibilityControllers = FindObjectsByType<VisibilityController>(FindObjectsSortMode.None);
+        
+        foreach (VisibilityController controller in allVisibilityControllers)
+        {
+            if (controller != null)
+            {
+                EnemyUnitBase enemyUnit = controller.GetComponent<EnemyUnitBase>();
+                if (enemyUnit == null)
+                {
+                    enemyUnit = controller.GetComponentInParent<EnemyUnitBase>();
+                }
+                
+                if (enemyUnit != null)
+                {
+                    controller.ForceUpdateVisibility();
+                }
+            }
+        }
     }
 
     private IEnumerator InitializeSpawnersAndUnits()

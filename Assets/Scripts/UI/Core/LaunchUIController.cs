@@ -8,10 +8,12 @@ public class LaunchUIController : MonoBehaviour
     [SerializeField] private GameObject launchPanel;
     [SerializeField] private GameObject countdownPanel;
     [SerializeField] private TMP_Text countdownText;
+    [SerializeField] private LaunchCompleteUI launchCompleteUI;
 
     [Header("Launch Settings")]
     [SerializeField] private float countdownDurationSeconds = 10f;
     [SerializeField] private int neededAetherPerCell = 10;
+    [SerializeField] private float launchCompleteDisplayDuration = 2f;
 
     private bool _isCountingDown;
     private Coroutine _countdownCoroutine;
@@ -125,6 +127,11 @@ public class LaunchUIController : MonoBehaviour
 
         UpdateCountdownText(0f);
 
+        if (countdownPanel != null)
+        {
+            countdownPanel.SetActive(false);
+        }
+
         MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
         if (mainStructure != null)
         {
@@ -133,6 +140,12 @@ public class LaunchUIController : MonoBehaviour
             {
                 inventorySystem.TransferAllToBaseInventory();
             }
+        }
+
+        if (launchCompleteUI != null)
+        {
+            launchCompleteUI.Show();
+            yield return new WaitForSeconds(launchCompleteDisplayDuration);
         }
 
         _isCountingDown = false;
