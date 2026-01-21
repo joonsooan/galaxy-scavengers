@@ -32,13 +32,12 @@ public abstract class UnitBase : MonoBehaviour
 
     [Header("Progress Bar")]
     [SerializeField] private GameObject progressBarPrefab;
-    [SerializeField] private float progressBarYOffset = 1.5f;
 
     public UnitState currentState;
     private Coroutine _flashCoroutine;
     private Color _originalColor;
     private SpriteRenderer _sr;
-    protected UnitProgressBar _progressBar;
+    protected UnitProgressBar progressBar;
 
     protected virtual void Awake()
     {
@@ -82,32 +81,32 @@ public abstract class UnitBase : MonoBehaviour
     
     protected void ShowProgressBar()
     {
-        if (_progressBar != null) return;
+        if (progressBar != null) return;
 
         GameObject barObj = Instantiate(progressBarPrefab);
-        _progressBar = barObj.GetComponent<UnitProgressBar>();
-        _progressBar.Initialize(transform);
+        progressBar = barObj.GetComponent<UnitProgressBar>();
+        progressBar.Initialize(transform);
     }
     
     protected void HideProgressBar()
     {
-        if (_progressBar != null)
+        if (progressBar != null)
         {
-            _progressBar.Destroy();
-            _progressBar = null;
+            progressBar.Destroy();
+            progressBar = null;
         }
     }
     
     protected void UpdateProgressBar(float progress)
     {
-        if (_progressBar == null)
+        if (progressBar == null)
         {
             ShowProgressBar();
         }
         
-        if (_progressBar != null)
+        if (progressBar != null)
         {
-            _progressBar.SetProgress(progress);
+            progressBar.SetProgress(progress);
         }
     }
     

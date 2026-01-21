@@ -52,6 +52,15 @@ public class AreaBuildingDestroyer : MonoBehaviour
     
     private void HandleRightClickDrag()
     {
+        if (IsLoadingScreenActive())
+        {
+            if (_isDragging)
+            {
+                CancelDrag();
+            }
+            return;
+        }
+
         if (GameManager.Instance != null && GameManager.Instance.IsDragging())
         {
             if (_isDragging)
@@ -390,6 +399,22 @@ public class AreaBuildingDestroyer : MonoBehaviour
                 beacon.DestroyBeacon();
             }
         }
+    }
+
+    private bool IsLoadingScreenActive()
+    {
+        if (LoadingUIManager.Instance == null)
+        {
+            return false;
+        }
+
+        LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
+        if (loadingScreen == null)
+        {
+            return false;
+        }
+
+        return loadingScreen.gameObject.activeSelf;
     }
     
     private void OnDisable()

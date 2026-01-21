@@ -151,7 +151,7 @@ public class MapObjectSpawner : MonoBehaviour
         if (progress != null)
         {
             progress.UpdateProgress(0.0f, "희귀 광물 반응 탐지 중...");
-            yield return new WaitForSeconds(1.0f);
+            yield return new WaitForSeconds(0.5f);
         }
         
         if (_circleGenerator == null)

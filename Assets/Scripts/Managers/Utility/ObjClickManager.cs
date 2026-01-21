@@ -16,6 +16,8 @@ public class ObjClickManager : MonoBehaviour
     {
         if (mainCamera == null) return;
 
+        if (IsLoadingScreenActive()) return;
+
         if (Input.GetMouseButtonDown(0)) {
             HandleClick();
         }
@@ -93,5 +95,21 @@ public class ObjClickManager : MonoBehaviour
                 }
             }
         }
+    }
+
+    private bool IsLoadingScreenActive()
+    {
+        if (LoadingUIManager.Instance == null)
+        {
+            return false;
+        }
+
+        LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
+        if (loadingScreen == null)
+        {
+            return false;
+        }
+
+        return loadingScreen.gameObject.activeSelf;
     }
 }

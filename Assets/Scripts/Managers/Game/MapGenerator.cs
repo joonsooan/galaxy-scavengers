@@ -209,8 +209,10 @@ public class MapGenerator : MonoBehaviour
         if (progress != null)
         {
             progress.UpdateProgress(0.0f, "지표면 고도 데이터 동기화 중...");
-            yield return new WaitForSeconds(1.0f);
+            yield return new WaitForSeconds(0.5f);
         }
+
+        
 
         if (randomSeed)
         {

@@ -7,11 +7,12 @@ using UnityEngine.Rendering.Universal;
 [ExecuteAlways]
 public class DayNightCycleManager : MonoBehaviour
 {
-    // 1 in-game hour = 40 real seconds
-    private const float RealSecondsPerInGameHour = 2;
     [Header("Time Settings")]
+    [SerializeField] private float RealSecondsPerInGameHour = 2;
     [Range(0f, 24f)]
     [SerializeField] private float currentTime = 12f;
+    [Range(0f, 24f)]
+    [SerializeField] private float gameStartTime = 12f;
     [SerializeField] private bool autoAdvanceTime = true;
 
     [Header("Day/Night Settings")]
@@ -34,9 +35,6 @@ public class DayNightCycleManager : MonoBehaviour
 
     public static DayNightCycleManager Instance { get; private set; }
     
-    [Header("Night Attack Settings")]
-    [SerializeField] private int numberOfEnemiesToActivate = 3;
-    
     public static event Action OnNightStarted;
     public static event Action OnDayStarted;
     
@@ -51,6 +49,41 @@ public class DayNightCycleManager : MonoBehaviour
         else if (Instance != this) {
             Destroy(gameObject);
         }
+    }
+
+    private void Start()
+    {
+        autoAdvanceTime = false;
+        currentTime = gameStartTime;
+        
+        StartCoroutine(WaitForLoadingComplete());
+    }
+
+    private System.Collections.IEnumerator WaitForLoadingComplete()
+    {
+        while (IsLoadingScreenActive())
+        {
+            yield return null;
+        }
+
+        autoAdvanceTime = true;
+        currentTime = gameStartTime;
+    }
+
+    private bool IsLoadingScreenActive()
+    {
+        if (LoadingUIManager.Instance == null)
+        {
+            return false;
+        }
+
+        LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
+        if (loadingScreen == null)
+        {
+            return false;
+        }
+
+        return loadingScreen.gameObject.activeSelf;
     }
 
     private void Update()
@@ -87,16 +120,6 @@ public class DayNightCycleManager : MonoBehaviour
         }
         
         _wasDay = isCurrentlyDay;
-    }
-    
-    public void SetNumberOfEnemiesToActivate(int count)
-    {
-        numberOfEnemiesToActivate = count;
-    }
-    
-    public int GetNumberOfEnemiesToActivate()
-    {
-        return numberOfEnemiesToActivate;
     }
 
     private void UpdateAmbientLight()

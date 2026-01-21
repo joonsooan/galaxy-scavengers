@@ -165,6 +165,12 @@ public class CameraTargetController : MonoBehaviour
 
     private void HandlePlayerInput()
     {
+        if (IsLoadingScreenActive())
+        {
+            _direction = Vector3.zero;
+            return;
+        }
+
         float moveX = Input.GetAxisRaw("Horizontal");
         float moveY = Input.GetAxisRaw("Vertical");
 
@@ -192,6 +198,11 @@ public class CameraTargetController : MonoBehaviour
 
     private void HandleMovement()
     {
+        if (IsLoadingScreenActive())
+        {
+            return;
+        }
+
         Vector3 mousePanDirection = Vector3.zero;
 
         if (_isEdgePanEnable) {
@@ -248,6 +259,11 @@ public class CameraTargetController : MonoBehaviour
 
     private void HandleZoom()
     {
+        if (IsLoadingScreenActive())
+        {
+            return;
+        }
+
         float scroll = Input.GetAxisRaw("Mouse ScrollWheel");
         if (scroll == 0 || _pixelPerfCam == null) return;
 
@@ -328,5 +344,21 @@ public class CameraTargetController : MonoBehaviour
         }
 
         ClampTargetPosition();
+    }
+
+    private bool IsLoadingScreenActive()
+    {
+        if (LoadingUIManager.Instance == null)
+        {
+            return false;
+        }
+
+        LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
+        if (loadingScreen == null)
+        {
+            return false;
+        }
+
+        return loadingScreen.gameObject.activeSelf;
     }
 }

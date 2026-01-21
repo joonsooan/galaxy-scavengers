@@ -64,6 +64,8 @@ public class GameManager : MonoBehaviour
     {
         if (SceneManager.GetActiveScene().name != "GameScene") return;
 
+        if (IsLoadingScreenActive()) return;
+
         if (Input.GetKeyDown(KeyCode.Space)) {
             TogglePause();
         }
@@ -93,10 +95,6 @@ public class GameManager : MonoBehaviour
             {
                 FogOfWarManager.Instance.ToggleFogVisibility();
             }
-        }
-
-        if (Input.GetKeyDown(KeyCode.Escape)) {
-            Application.Quit();
         }
     }
 
@@ -250,7 +248,7 @@ public class GameManager : MonoBehaviour
         if (progress != null)
         {
             progress.UpdateProgress(0.0f, "착륙 좌표 고정 중...");
-            yield return new WaitForSeconds(1.0f);
+            yield return new WaitForSeconds(0.5f);
         }
         
         _isGameSceneInitialized = true;
@@ -262,29 +260,6 @@ public class GameManager : MonoBehaviour
             if (loadingScreen != null)
             {
                 loadingScreen.SetInitializationComplete();
-            }
-        }
-    }
-    
-    private class ProgressTracker : IInitializationProgress
-    {
-        private readonly IInitializationProgress _parent;
-        private readonly float _startProgress;
-        private readonly float _progressRange;
-        
-        public ProgressTracker(IInitializationProgress parent, float startProgress, float progressRange)
-        {
-            _parent = parent;
-            _startProgress = startProgress;
-            _progressRange = progressRange;
-        }
-        
-        public void UpdateProgress(float progress, string stage)
-        {
-            if (_parent != null)
-            {
-                float mappedProgress = _startProgress + (progress * _progressRange);
-                _parent.UpdateProgress(mappedProgress, stage);
             }
         }
     }
@@ -332,53 +307,6 @@ public class GameManager : MonoBehaviour
         yield return null;
     }
     
-    private void UpdateEnemyVisibility()
-    {
-        if (FogOfWarManager.Instance == null || !FogOfWarManager.Instance.IsInitialized)
-        {
-            return;
-        }
-        
-        if (UnitManager.Instance != null && UnitManager.Instance.EnemyUnits != null)
-        {
-            foreach (UnitBase enemyUnit in UnitManager.Instance.EnemyUnits)
-            {
-                if (enemyUnit != null)
-                {
-                    VisibilityController controller = enemyUnit.GetComponent<VisibilityController>();
-                    if (controller == null)
-                    {
-                        controller = enemyUnit.GetComponentInChildren<VisibilityController>();
-                    }
-                    
-                    if (controller != null)
-                    {
-                        controller.ForceUpdateVisibility();
-                    }
-                }
-            }
-        }
-        
-        VisibilityController[] allVisibilityControllers = FindObjectsByType<VisibilityController>(FindObjectsSortMode.None);
-        
-        foreach (VisibilityController controller in allVisibilityControllers)
-        {
-            if (controller != null)
-            {
-                EnemyUnitBase enemyUnit = controller.GetComponent<EnemyUnitBase>();
-                if (enemyUnit == null)
-                {
-                    enemyUnit = controller.GetComponentInParent<EnemyUnitBase>();
-                }
-                
-                if (enemyUnit != null)
-                {
-                    controller.ForceUpdateVisibility();
-                }
-            }
-        }
-    }
-
     private IEnumerator InitializeSpawnersAndUnitsAsync(IInitializationProgress progress = null)
     {
         foreach (BuildingSpawner spawner in FindObjectsByType<BuildingSpawner>(FindObjectsSortMode.None)) {
@@ -526,5 +454,21 @@ public class GameManager : MonoBehaviour
         {
             startingUnitsManager.SpawnStartingUnits();
         }
+    }
+
+    private bool IsLoadingScreenActive()
+    {
+        if (LoadingUIManager.Instance == null)
+        {
+            return false;
+        }
+
+        LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
+        if (loadingScreen == null)
+        {
+            return false;
+        }
+
+        return loadingScreen.gameObject.activeSelf;
     }
 }

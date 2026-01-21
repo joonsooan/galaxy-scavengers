@@ -549,13 +549,11 @@ public class QuestDataManager : MonoBehaviour
             OnQuestStateChanged?.Invoke(questId);
         }
         
-        // Lock all buildings
         if (BuildingUnlockManager.Instance != null)
         {
             BuildingUnlockManager.Instance.LockAllBuildings();
+            PlayerPrefs.Save();
         }
-        
-        PlayerPrefs.Save();
         
         Debug.Log("QuestDataManager: All quest progress and PlayerPrefs have been reset.");
     }

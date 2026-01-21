@@ -367,9 +367,9 @@ RectTransform:
   - {fileID: 148378026}
   m_Father: {fileID: 2010602833}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 90, y: -119}
   m_SizeDelta: {x: 180, y: 25}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &17142002
@@ -911,7 +911,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6394633008670263868, guid: 806f789314b112144a29aaceb14c86ea, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6747580247900824398, guid: 806f789314b112144a29aaceb14c86ea, type: 3}
       propertyPath: m_Pivot.x
@@ -1516,6 +1516,7 @@ GameObject:
   - component: {fileID: 53596319}
   - component: {fileID: 53596321}
   - component: {fileID: 53596318}
+  - component: {fileID: 53596322}
   m_Layer: 5
   m_Name: Quest Panel
   m_TagString: Untagged
@@ -1644,6 +1645,32 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &53596322
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 53596316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f773253efb55a164ba538a657419fd8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverSound:
+    Guid:
+      Data1: 199913248
+      Data2: 1202326804
+      Data3: -537020530
+      Data4: 1684792045
+    Path: event:/SFX_UIHover
+  clickSound:
+    Guid:
+      Data1: -345895807
+      Data2: 1210214295
+      Data3: -73339495
+      Data4: 1624008095
+    Path: event:/SFX_UIClick
 --- !u!1 &59790003
 GameObject:
   m_ObjectHideFlags: 0
@@ -2352,7 +2379,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c90e03b4b8f687648b584f96455ef6ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  RealSecondsPerInGameHour: 15
   currentTime: 6
+  gameStartTime: 6
   autoAdvanceTime: 1
   dayStartPercent: 15
   nightStartPercent: 85
@@ -2393,7 +2422,6 @@ MonoBehaviour:
   timeProfiles:
   - timeOfDay: 0
     profile: {fileID: 11400000, guid: a01775295b850054da57762cd3fb5c7a, type: 2}
-  numberOfEnemiesToActivate: 3
 --- !u!4 &100804181
 Transform:
   m_ObjectHideFlags: 0
@@ -4287,7 +4315,7 @@ MonoBehaviour:
   minEnemyTerritoryRadius: 6
   maxEnemyTerritoryRadius: 8
   drawEnemyTerritoryTiles: 1
-  polishOperationsPerFrame: 200
+  polishOperationsPerFrame: 5000
 --- !u!114 &313771329
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4408,9 +4436,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 2010602833}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 90, y: -32}
   m_SizeDelta: {x: 180, y: 44}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &318614857
@@ -6442,9 +6470,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 2010602833}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 90, y: -4}
   m_SizeDelta: {x: 180, y: 24}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &428971322
@@ -8104,7 +8132,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 662.501
+  orthographic size: 11.25
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -8129,7 +8157,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0.5, z: -40}
+  m_LocalPosition: {x: 0.5, y: 0.5, z: -20}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -21680,6 +21708,7 @@ GameObject:
   - component: {fileID: 664278393}
   - component: {fileID: 664278392}
   - component: {fileID: 664278391}
+  - component: {fileID: 664278394}
   m_Layer: 5
   m_Name: Base Building Btn
   m_TagString: Untagged
@@ -21789,6 +21818,32 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 664278389}
   m_CullTransparentMesh: 1
+--- !u!114 &664278394
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 664278389}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f773253efb55a164ba538a657419fd8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverSound:
+    Guid:
+      Data1: 199913248
+      Data2: 1202326804
+      Data3: -537020530
+      Data4: 1684792045
+    Path: event:/SFX_UIHover
+  clickSound:
+    Guid:
+      Data1: -345895807
+      Data2: 1210214295
+      Data3: -73339495
+      Data4: 1624008095
+    Path: event:/SFX_UIClick
 --- !u!1 &668126145
 GameObject:
   m_ObjectHideFlags: 0
@@ -25955,9 +26010,9 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 2010602833}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 90, y: -80}
   m_SizeDelta: {x: 180, y: 10}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &948155492
@@ -33436,6 +33491,7 @@ GameObject:
   - component: {fileID: 1495220789}
   - component: {fileID: 1495220788}
   - component: {fileID: 1495220787}
+  - component: {fileID: 1495220790}
   m_Layer: 5
   m_Name: Resource Stats Btn
   m_TagString: Untagged
@@ -33545,6 +33601,32 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1495220785}
   m_CullTransparentMesh: 1
+--- !u!114 &1495220790
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1495220785}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f773253efb55a164ba538a657419fd8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverSound:
+    Guid:
+      Data1: 199913248
+      Data2: 1202326804
+      Data3: -537020530
+      Data4: 1684792045
+    Path: event:/SFX_UIHover
+  clickSound:
+    Guid:
+      Data1: -345895807
+      Data2: 1210214295
+      Data3: -73339495
+      Data4: 1624008095
+    Path: event:/SFX_UIClick
 --- !u!1 &1512528153
 GameObject:
   m_ObjectHideFlags: 0
@@ -34003,7 +34085,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ef83ea8e49dd044caca28653f378ef5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ferritePanel: {fileID: 1089803132}
+  ferritePanel: {fileID: 2119646177}
   aetherPanel: {fileID: 524463979}
   biomassPanel: {fileID: 482755040}
   cryoCrystalPanel: {fileID: 727194034}
@@ -34551,6 +34633,7 @@ GameObject:
   - component: {fileID: 1581555308}
   - component: {fileID: 1581555307}
   - component: {fileID: 1581555306}
+  - component: {fileID: 1581555309}
   m_Layer: 5
   m_Name: Processor Btn
   m_TagString: Untagged
@@ -34660,6 +34743,32 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1581555304}
   m_CullTransparentMesh: 1
+--- !u!114 &1581555309
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1581555304}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f773253efb55a164ba538a657419fd8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverSound:
+    Guid:
+      Data1: 199913248
+      Data2: 1202326804
+      Data3: -537020530
+      Data4: 1684792045
+    Path: event:/SFX_UIHover
+  clickSound:
+    Guid:
+      Data1: -345895807
+      Data2: 1210214295
+      Data3: -73339495
+      Data4: 1624008095
+    Path: event:/SFX_UIClick
 --- !u!1001 &1602071781
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -38445,8 +38554,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 163725887cf43a3418506d1a895ccbed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ferriteInitialAmount: 200
-  aetherInitialAmount: 200
+  ferriteInitialAmount: 0
+  aetherInitialAmount: 0
   biomassInitialAmount: 0
   cryoCrystalInitialAmount: 0
   alloyPlateInitialAmount: 0
@@ -38878,7 +38987,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2010602833
 RectTransform:
   m_ObjectHideFlags: 0
@@ -38900,7 +39009,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 180, y: 0}
+  m_SizeDelta: {x: 180, y: 123}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2010602834
 MonoBehaviour:
@@ -39133,7 +39242,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2037369538
 RectTransform:
   m_ObjectHideFlags: 0

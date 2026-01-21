@@ -50,7 +50,7 @@ public class QuestCheckData
                 
             case QuestCheckType.ScoutEnteredLocation:
             case QuestCheckType.ModulePlacedOnCore:
-                return isCompleted;
+                return currentCount >= requiredCount;
                 
             default:
                 return false;

@@ -5206,8 +5206,8 @@ MonoBehaviour:
   imageEntryDelay: 0.5
   imageEntryDuration: 1
   imageExitDuration: 1
-  postInitWaitDuration: 2
-  imageExitDelay: 1
+  postInitWaitDuration: 1
+  imageExitDelay: 0.5
   maxShakeStrengthMultiplier: 10
 --- !u!114 &4486388738195986149
 MonoBehaviour:

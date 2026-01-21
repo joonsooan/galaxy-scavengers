@@ -69,17 +69,22 @@ public class NotifierIcon : MonoBehaviour
         _heartbeatSequence = DOTween.Sequence();
         
         _heartbeatSequence.Append(targetTransform.DOScale(_originalScale * scaleUpAmount, heartbeatDuration * 0.25f)
-            .SetEase(Ease.OutQuad));
+            .SetEase(Ease.OutQuad)
+            .SetUpdate(true));
         
         _heartbeatSequence.Append(targetTransform.DOScale(_originalScale * scaleDownAmount, heartbeatDuration * 0.15f)
-            .SetEase(Ease.InQuad));
+            .SetEase(Ease.InQuad)
+            .SetUpdate(true));
         
         _heartbeatSequence.Append(targetTransform.DOScale(_originalScale * scaleUp2Amount, heartbeatDuration * 0.2f)
-            .SetEase(Ease.OutQuad));
+            .SetEase(Ease.OutQuad)
+            .SetUpdate(true));
         
         _heartbeatSequence.Append(targetTransform.DOScale(_originalScale, heartbeatDuration * 0.4f)
-            .SetEase(heartbeatEase));
+            .SetEase(heartbeatEase)
+            .SetUpdate(true));
         
+        _heartbeatSequence.SetUpdate(true);
         _heartbeatSequence.SetLoops(-1, LoopType.Restart);
     }
     

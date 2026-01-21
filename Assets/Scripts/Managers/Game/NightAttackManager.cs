@@ -26,7 +26,7 @@ public class NightAttackManager : MonoBehaviour
     
     private void HandleDayStarted()
     {
-        // DeactivateAllInfiniteAttackStates();
+        DeactivateAllInfiniteAttackStates();
     }
     
     private void ActivateRandomEnemies()
@@ -47,15 +47,7 @@ public class NightAttackManager : MonoBehaviour
             return;
         }
         
-        // Get number of enemies to activate from DayNightCycleManager if available
-        int countToActivate = numberOfEnemiesToActivate;
-        if (DayNightCycleManager.Instance != null)
-        {
-            countToActivate = DayNightCycleManager.Instance.GetNumberOfEnemiesToActivate();
-        }
-        
-        // Randomly select enemies
-        int actualCount = Mathf.Min(countToActivate, enemyUnits.Count);
+        int actualCount = Mathf.Min(numberOfEnemiesToActivate, enemyUnits.Count);
         List<EnemyUnitBase> selectedEnemies = new List<EnemyUnitBase>();
         
         for (int i = 0; i < actualCount; i++)

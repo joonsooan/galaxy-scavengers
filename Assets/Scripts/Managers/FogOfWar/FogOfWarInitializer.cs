@@ -40,7 +40,7 @@ public class FogOfWarInitializer
         if (progress != null)
         {
             progress.UpdateProgress(0.0f, "대기 농도 및 가시거리 분석 중...");
-            yield return new WaitForSeconds(1.0f);
+            yield return new WaitForSeconds(0.5f);
         }
         
         List<Tilemap> terrainTilemaps = CollectTerrainTilemaps();
