@@ -6315,6 +6315,42 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4542445489244174802, guid: 0af39824d77bc2a488e8d3714734af0e, type: 3}
+      propertyPath: questUnitMappings.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4542445489244174802, guid: 0af39824d77bc2a488e8d3714734af0e, type: 3}
+      propertyPath: questUnitMappings.Array.data[3].count
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4542445489244174802, guid: 0af39824d77bc2a488e8d3714734af0e, type: 3}
+      propertyPath: questUnitMappings.Array.data[1].questId
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4542445489244174802, guid: 0af39824d77bc2a488e8d3714734af0e, type: 3}
+      propertyPath: questUnitMappings.Array.data[2].questId
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4542445489244174802, guid: 0af39824d77bc2a488e8d3714734af0e, type: 3}
+      propertyPath: questUnitMappings.Array.data[3].questId
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4542445489244174802, guid: 0af39824d77bc2a488e8d3714734af0e, type: 3}
+      propertyPath: questUnitMappings.Array.data[1].unitData
+      value: 
+      objectReference: {fileID: 11400000, guid: 7f1e06c487ddfa34e96efc7d462bea37, type: 2}
+    - target: {fileID: 4542445489244174802, guid: 0af39824d77bc2a488e8d3714734af0e, type: 3}
+      propertyPath: questUnitMappings.Array.data[2].unitData
+      value: 
+      objectReference: {fileID: 11400000, guid: 543df46f7aaa53f46be1a1b5736522f1, type: 2}
+    - target: {fileID: 4542445489244174802, guid: 0af39824d77bc2a488e8d3714734af0e, type: 3}
+      propertyPath: questUnitMappings.Array.data[3].unitData
+      value: 
+      objectReference: {fileID: 11400000, guid: 0d0432b37cfad674db1cbd7f8d7abe1c, type: 2}
+    - target: {fileID: 4542445489244174802, guid: 0af39824d77bc2a488e8d3714734af0e, type: 3}
+      propertyPath: questUnitMappings.Array.data[3].spawnRadius
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 6942864755438468164, guid: 0af39824d77bc2a488e8d3714734af0e, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
