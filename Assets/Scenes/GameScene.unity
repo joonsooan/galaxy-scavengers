@@ -20,7 +20,7 @@ RenderSettings:
   m_FogDensity: 0.01
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 1, g: 1, b: 1, a: 1}
+  m_AmbientSkyColor: {r: 0.9999733, g: 0.99997413, b: 0.99997556, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
@@ -2454,9 +2454,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c90e03b4b8f687648b584f96455ef6ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RealSecondsPerInGameHour: 5
-  currentTime: 12
-  gameStartTime: 14.9
+  RealSecondsPerInGameHour: 15
+  currentTime: 6
+  gameStartTime: 6
   autoAdvanceTime: 1
   dayStartPercent: 15
   nightStartPercent: 85
@@ -21524,7 +21524,7 @@ MonoBehaviour:
   m_LightType: 4
   m_BlendStyleIndex: 0
   m_FalloffIntensity: 0.5
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.9999733, g: 0.99997413, b: 0.99997556, a: 1}
   m_Intensity: 1
   m_LightVolumeIntensity: 1
   m_LightVolumeEnabled: 0

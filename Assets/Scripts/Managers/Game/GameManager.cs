@@ -62,7 +62,7 @@ public class GameManager : MonoBehaviour
 
     private void HandleGameInput()
     {
-        if (SceneManager.GetActiveScene().name != "GameScene") return;
+        if (!_isGameSceneInitialized) return;
 
         if (!IsGameplayReady) return;
 
@@ -254,10 +254,10 @@ public class GameManager : MonoBehaviour
             progress.UpdateProgress(0.0f, "착륙 좌표 고정 중...");
             yield return new WaitForSeconds(0.5f);
         }
-        
+
         _isGameSceneInitialized = true;
         OnGameSceneInitialized?.Invoke();
-        
+
         if (LoadingUIManager.Instance != null)
         {
             LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
@@ -266,6 +266,8 @@ public class GameManager : MonoBehaviour
                 loadingScreen.SetInitializationComplete();
             }
         }
+
+        IsGameplayReady = true;
     }
 
     private IEnumerator DelayedInitialization()
