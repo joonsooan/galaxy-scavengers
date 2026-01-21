@@ -59,7 +59,7 @@ public class Unit_Miner : UnitBase
         InitializeCarryAmounts();
     }
 
-    protected override void Start()
+    protected void Start()
     {
         mineableResourceTypes = UnitManager.Instance != null
             ? UnitManager.Instance.CurrentMineableTypes.ToArray()

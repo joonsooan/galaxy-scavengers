@@ -64,6 +64,8 @@ public class GameManager : MonoBehaviour
     {
         if (SceneManager.GetActiveScene().name != "GameScene") return;
 
+        if (!IsGameplayReady) return;
+
         if (IsLoadingScreenActive()) return;
 
         if (Input.GetKeyDown(KeyCode.Space)) {
@@ -89,6 +91,7 @@ public class GameManager : MonoBehaviour
 
         if (_isPaused) return;
 
+#if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.F))
         {
             if (FogOfWarManager.Instance != null)
@@ -96,6 +99,7 @@ public class GameManager : MonoBehaviour
                 FogOfWarManager.Instance.ToggleFogVisibility();
             }
         }
+#endif
     }
 
     private void TogglePause()

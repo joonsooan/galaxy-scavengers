@@ -102,9 +102,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91a7db1b63962ef47860d527505bc46e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 50
+  maxHealth: 100
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
+  currentHealth: 0
 --- !u!114 &-2250877402167082711
 MonoBehaviour:
   m_ObjectHideFlags: 0

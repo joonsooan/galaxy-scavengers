@@ -152,6 +152,7 @@ MonoBehaviour:
   maxHealth: 100
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
+  currentHealth: 0
   droneHubData: {fileID: 11400000, guid: 5d08ea5a0927c3a4c96a5b782a641802, type: 2}
   aetherConsumptionPerSecond: 5
 --- !u!114 &-1230124184689666094

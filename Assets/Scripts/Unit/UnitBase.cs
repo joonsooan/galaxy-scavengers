@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-public abstract class UnitBase : MonoBehaviour
+public abstract class UnitBase : Damageable
 {
     public enum UnitState
     {
@@ -21,40 +21,19 @@ public abstract class UnitBase : MonoBehaviour
         Enemy
     }
 
-    [Header("Unit Stats")]
-    public float maxHealth;
-    public float currentHealth;
+    [Header("Unit Settings")]
     public UnitType unitType;
-
-    [Header("Feedback Settings")]
-    [SerializeField] private Color flashColor = Color.red;
-    [SerializeField] private float flashDuration = 0.3f;
 
     [Header("Progress Bar")]
     [SerializeField] private GameObject progressBarPrefab;
 
     public UnitState currentState;
-    private Coroutine _flashCoroutine;
-    private Color _originalColor;
-    private SpriteRenderer _sr;
     protected UnitProgressBar progressBar;
 
-    protected virtual void Awake()
+    protected override void OnEnable()
     {
-        currentHealth = maxHealth;
-    }
+        base.OnEnable();
 
-    protected virtual void Start()
-    {
-        _sr = GetComponentInChildren<SpriteRenderer>();
-        if (_sr != null)
-        {
-            _originalColor = _sr.color;
-        }
-    }
-
-    protected virtual void OnEnable()
-    {
         if (UnitManager.Instance != null) {
             UnitManager.Instance.AddUnit(this);
         }
@@ -65,13 +44,15 @@ public abstract class UnitBase : MonoBehaviour
         }
     }
 
-    protected virtual void OnDisable()
+    protected override void OnDisable()
     {
         if (UnitManager.Instance != null) {
             UnitManager.Instance.RemoveUnit(this);
         }
         
         HideProgressBar();
+
+        base.OnDisable();
     }
     
     protected virtual void OnDestroy()
@@ -108,35 +89,5 @@ public abstract class UnitBase : MonoBehaviour
         {
             progressBar.SetProgress(progress);
         }
-    }
-    
-    public virtual void TakeDamage(float damage)
-    {
-        currentHealth -= damage;
-
-        if (_flashCoroutine != null) {
-            StopCoroutine(_flashCoroutine);
-        }
-        _flashCoroutine = StartCoroutine(FlashEffect());
-
-        if (currentHealth <= 0) {
-            Destroy(gameObject);
-        }
-    }
-
-    public void Heal(float amount)
-    {
-        if (currentHealth >= maxHealth) return;
-
-        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
-    }
-
-    private IEnumerator FlashEffect()
-    {
-        if (_sr == null) yield break;
-
-        _sr.color = flashColor;
-        yield return new WaitForSeconds(flashDuration);
-        _sr.color = _originalColor;
     }
 }

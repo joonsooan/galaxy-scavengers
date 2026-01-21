@@ -12,12 +12,9 @@ public abstract class Damageable : MonoBehaviour, ICombo
 
     public int MaxHealth => maxHealth;
     public int CurrentHealth => currentHealth;
+
+    public int currentHealth;
     
-    protected int currentHealth;
-    
-    /// <summary>
-    /// Sets the maximum health (used by module effects)
-    /// </summary>
     public virtual void SetMaxHealth(int newMaxHealth)
     {
         float healthRatio = maxHealth > 0 ? (float)currentHealth / maxHealth : 1f;
@@ -31,11 +28,12 @@ public abstract class Damageable : MonoBehaviour, ICombo
 
     protected virtual void Awake()
     {
-        _sr = GetComponent<SpriteRenderer>(); 
-        if (_sr != null)
+        _sr = GetComponentInChildren<SpriteRenderer>();
+        if (_sr == null)
         {
-            _originalColor = _sr.material.color;
+            _sr = GetComponent<SpriteRenderer>();
         }
+        _originalColor = _sr.color;
     }
     
     protected virtual void OnEnable()
@@ -81,10 +79,10 @@ public abstract class Damageable : MonoBehaviour, ICombo
     {
         if (_sr == null) yield break;
 
-        _sr.material.color = flashColor;
+        _sr.color = flashColor;
 
         yield return new WaitForSeconds(flashDuration);
 
-        _sr.material.color = _originalColor;
+        _sr.color = _originalColor;
     }
 }

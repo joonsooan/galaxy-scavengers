@@ -39,7 +39,7 @@ public class Unit_Scout : UnitBase
         unitMovement = GetComponent<UnitMovement>();
     }
 
-    protected override void Start()
+    protected void Start()
     {
         _mainStructure = FindFirstObjectByType<MainStructure>();
         _spriteController = GetComponentInChildren<UnitSpriteController>();

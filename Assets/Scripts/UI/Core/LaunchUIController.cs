@@ -1,11 +1,13 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LaunchUIController : MonoBehaviour
 {
     [Header("UI References")]
     [SerializeField] private GameObject launchPanel;
+    [SerializeField] private GameObject requiredAetherPanel;
     [SerializeField] private GameObject countdownPanel;
     [SerializeField] private TMP_Text countdownText;
     [SerializeField] private TMP_Text neededAetherText;
@@ -31,6 +33,8 @@ public class LaunchUIController : MonoBehaviour
         {
             countdownPanel.SetActive(false);
         }
+
+        UpdateNeededAetherText();
     }
 
     public void ShowLaunchPanel()
@@ -60,6 +64,8 @@ public class LaunchUIController : MonoBehaviour
         {
             countdownPanel.SetActive(false);
         }
+
+        UpdateNeededAetherText();
     }
 
     public void OnCancelLaunch()
@@ -158,6 +164,35 @@ public class LaunchUIController : MonoBehaviour
         _countdownCoroutine = null;
 
         SceneLoader.Instance.LoadBaseScene();
+    }
+
+    private void UpdateNeededAetherText()
+    {
+        if (neededAetherText == null)
+        {
+            return;
+        }
+
+        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
+        if (mainStructure == null)
+        {
+            neededAetherText.text = "0";
+            return;
+        }
+
+        InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
+        if (inventorySystem == null)
+        {
+            neededAetherText.text = "0";
+            return;
+        }
+
+        int occupiedCells = inventorySystem.GetOccupiedCellCount();
+        int cellsRequiringAether = Mathf.Max(0, occupiedCells - freeLaunchCells);
+        int neededAether = neededAetherPerCell * cellsRequiringAether;
+
+        neededAetherText.text = neededAether.ToString();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(requiredAetherPanel.GetComponent<RectTransform>());
     }
 
     private void UpdateCountdownText(float remainingSeconds)

@@ -52,7 +52,7 @@ public class Unit_Construct : UnitBase
         _rb = GetComponent<Rigidbody2D>();
     }
 
-    protected override void Start()
+    protected void Start()
     {
         if (ConstructionManager.Instance != null && movement != null) {
             ConstructionManager.Instance.RegisterConstructDrone(this);

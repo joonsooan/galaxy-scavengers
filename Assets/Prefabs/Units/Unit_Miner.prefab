@@ -200,13 +200,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af4372ae670c63e4782659217dd6001e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 10000
+  maxHealth: 1000
   currentHealth: 0
   unitType: 0
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
   progressBarPrefab: {fileID: 5648413654597824292, guid: 0e7c462c413987749bca6d734a5a807f, type: 3}
-  progressBarYOffset: 1.5
   currentState: 0
   unitMovement: {fileID: 4483249089817793867}
   unloadingTime: 3

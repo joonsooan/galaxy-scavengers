@@ -165,6 +165,12 @@ public class CameraTargetController : MonoBehaviour
 
     private void HandlePlayerInput()
     {
+        if (GameManager.Instance != null && !GameManager.IsGameplayReady)
+        {
+            _direction = Vector3.zero;
+            return;
+        }
+
         if (IsLoadingScreenActive())
         {
             _direction = Vector3.zero;
@@ -198,6 +204,11 @@ public class CameraTargetController : MonoBehaviour
 
     private void HandleMovement()
     {
+        if (GameManager.Instance != null && !GameManager.IsGameplayReady)
+        {
+            return;
+        }
+
         if (IsLoadingScreenActive())
         {
             return;
@@ -259,6 +270,11 @@ public class CameraTargetController : MonoBehaviour
 
     private void HandleZoom()
     {
+        if (GameManager.Instance != null && !GameManager.IsGameplayReady)
+        {
+            return;
+        }
+
         if (IsLoadingScreenActive())
         {
             return;

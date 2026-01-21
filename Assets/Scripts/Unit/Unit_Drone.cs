@@ -46,7 +46,7 @@ public class Unit_Drone : UnitBase
         movement = GetComponent<UnitMovement>();
     }
 
-    protected override void Start()
+    protected void Start()
     {
         _spriteController = GetComponentInChildren<UnitSpriteController>();
         if (_spriteController != null) {

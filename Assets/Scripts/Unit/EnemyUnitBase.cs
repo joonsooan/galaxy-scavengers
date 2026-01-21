@@ -55,7 +55,7 @@ public abstract class EnemyUnitBase : UnitBase
         _isInInfiniteAttackState = false;
     }
 
-    protected override void Start()
+    protected void Start()
     {
         SetNewRoamInterval();
         _spriteController = GetComponentInChildren<UnitSpriteController>();
@@ -73,7 +73,7 @@ public abstract class EnemyUnitBase : UnitBase
         Gizmos.DrawWireSphere(transform.position, attackRange);
     }
 
-    public override void TakeDamage(float damage)
+    public override void TakeDamage(int damage)
     {
         base.TakeDamage(damage);
 
@@ -327,55 +327,65 @@ public abstract class EnemyUnitBase : UnitBase
 
         bool isMovingTarget = currentUnit != null;
 
-        if (distanceToTarget > attackRange) {
-            if (!_isInInfiniteAttackState) {
-                EnterWarningState();
-                return;
-            }
-
-            if (isMovingTarget) {
-                bool isTimeForUpdate = Time.time - _lastMoveToTargetTime >= MinMoveUpdateInterval;
-                bool hasTargetMovedEnough = Vector3.Distance(targetPos, _lastTargetPos) > minTargetMoveDistance;
-
-                if (isTimeForUpdate && (hasTargetMovedEnough || unitMovement != null && !unitMovement.IsMoving)) {
-                    _lastMoveToTargetTime = Time.time;
-                    _lastTargetPos = targetPos;
-                    MoveToCurrentTarget();
-                }
-            }
-            else if (!_isInInfiniteAttackState) {
-                EnterWarningState();
-            }
-            return;
-        }
-
-        if (unitMovement != null) {
-            unitMovement.StopMovement();
-        }
-
-        if (currentBuilding != null) {
-            if (currentBuilding.CurrentHealth <= 0) {
-                _targetDamageable = null;
+            if (distanceToTarget > attackRange) {
                 if (!_isInInfiniteAttackState) {
+                    EnterWarningState();
+                    return;
+                }
+
+                if (isMovingTarget) {
+                    bool isTimeForUpdate = Time.time - _lastMoveToTargetTime >= MinMoveUpdateInterval;
+                    bool hasTargetMovedEnough = Vector3.Distance(targetPos, _lastTargetPos) > minTargetMoveDistance;
+
+                    if (isTimeForUpdate && (hasTargetMovedEnough || unitMovement != null && !unitMovement.IsMoving)) {
+                        _lastMoveToTargetTime = Time.time;
+                        _lastTargetPos = targetPos;
+                        MoveToCurrentTarget();
+                    }
+                }
+                else if (!_isInInfiniteAttackState) {
                     EnterWarningState();
                 }
                 return;
             }
-        }
-        else if (currentUnit != null) {
-            if (currentUnit.currentHealth <= 0) {
-                _targetUnit = null;
-                if (!_isInInfiniteAttackState) {
-                    EnterWarningState();
+
+            if (unitMovement != null) {
+                unitMovement.StopMovement();
+            }
+
+            if (currentBuilding != null) {
+                if (currentBuilding.CurrentHealth <= 0) {
+                    _targetDamageable = null;
+                    if (!_isInInfiniteAttackState) {
+                        EnterWarningState();
+                    }
+                    return;
                 }
-                return;
+            }
+            else if (currentUnit != null) {
+                Damageable unitDamageable = currentUnit.GetComponent<Damageable>();
+                if (unitDamageable != null) {
+                    if (unitDamageable.CurrentHealth <= 0) {
+                        _targetUnit = null;
+                        if (!_isInInfiniteAttackState) {
+                            EnterWarningState();
+                        }
+                        return;
+                    }
+                }
+                else if (currentUnit.CurrentHealth <= 0) {
+                    _targetUnit = null;
+                    if (!_isInInfiniteAttackState) {
+                        EnterWarningState();
+                    }
+                    return;
+                }
+            }
+
+            if (_attackCoroutine == null) {
+                _attackCoroutine = StartCoroutine(AttackCoroutine());
             }
         }
-
-        if (_attackCoroutine == null) {
-            _attackCoroutine = StartCoroutine(AttackCoroutine());
-        }
-    }
 
     protected void EnterAttackState()
     {
@@ -569,7 +579,7 @@ public abstract class EnemyUnitBase : UnitBase
 
         if (UnitManager.Instance != null && UnitManager.Instance.AllyUnits != null && UnitManager.Instance.AllyUnits.Count > 0) {
             foreach (UnitBase unit in UnitManager.Instance.AllyUnits) {
-                if (unit == null || unit.currentHealth <= 0) continue;
+                if (unit == null || unit.CurrentHealth <= 0) continue;
 
                 float dist = Vector3.Distance(transform.position, unit.transform.position);
                 if (dist < bestDistance) {
@@ -632,16 +642,32 @@ public abstract class EnemyUnitBase : UnitBase
                 }
             }
             else if (currentUnit != null) {
-                if (currentUnit.currentHealth > 0) {
-                    currentUnit.TakeDamage(attackDamage);
-                }
-
-                if (currentUnit.currentHealth <= 0f) {
-                    _targetUnit = null;
-                    if (!_isInInfiniteAttackState) {
-                        EnterWarningState();
+                Damageable unitDamageable = currentUnit.GetComponent<Damageable>();
+                if (unitDamageable != null) {
+                    if (unitDamageable.CurrentHealth > 0) {
+                        unitDamageable.TakeDamage(attackDamage);
                     }
-                    yield break;
+
+                    if (unitDamageable.CurrentHealth <= 0) {
+                        _targetUnit = null;
+                        if (!_isInInfiniteAttackState) {
+                            EnterWarningState();
+                        }
+                        yield break;
+                    }
+                }
+                else {
+                    if (currentUnit.currentHealth > 0) {
+                        currentUnit.TakeDamage(attackDamage);
+                    }
+
+                    if (currentUnit.currentHealth <= 0f) {
+                        _targetUnit = null;
+                        if (!_isInInfiniteAttackState) {
+                            EnterWarningState();
+                        }
+                        yield break;
+                    }
                 }
             }
 
