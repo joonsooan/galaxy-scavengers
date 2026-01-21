@@ -635,6 +635,24 @@ public class QuestDataManager : MonoBehaviour
         foreach (int completedId in _completedQuestIds)
         {
             UnlockDependentQuests(completedId);
+            
+            if (_questDataDict.ContainsKey(completedId))
+            {
+                QuestData quest = _questDataDict[completedId];
+                if (quest != null && quest.questFinishReward != null && quest.questFinishReward.unlockedBuildings != null && quest.questFinishReward.unlockedBuildings.Length > 0)
+                {
+                    if (BuildingUnlockManager.Instance == null)
+                    {
+                        GameObject unlockManagerObj = new GameObject("BuildingUnlockManager");
+                        unlockManagerObj.AddComponent<BuildingUnlockManager>();
+                    }
+                    
+                    if (BuildingUnlockManager.Instance != null)
+                    {
+                        BuildingUnlockManager.Instance.UnlockBuildings(quest.questFinishReward.unlockedBuildings);
+                    }
+                }
+            }
         }
         
         foreach (int questId in _questStates.Keys)
@@ -689,6 +707,21 @@ public class QuestDataManager : MonoBehaviour
         _activeQuestIds.Remove(questId);
         OnQuestStateChanged?.Invoke(questId);
         SaveQuestProgress();
+
+        QuestData quest = _questDataDict[questId];
+        if (quest != null && quest.questFinishReward != null && quest.questFinishReward.unlockedBuildings != null && quest.questFinishReward.unlockedBuildings.Length > 0)
+        {
+            if (BuildingUnlockManager.Instance == null)
+            {
+                GameObject unlockManagerObj = new GameObject("BuildingUnlockManager");
+                unlockManagerObj.AddComponent<BuildingUnlockManager>();
+            }
+            
+            if (BuildingUnlockManager.Instance != null)
+            {
+                BuildingUnlockManager.Instance.UnlockBuildings(quest.questFinishReward.unlockedBuildings);
+            }
+        }
 
         return true;
     }
