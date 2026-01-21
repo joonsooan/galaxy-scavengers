@@ -3074,8 +3074,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -868.00006, y: 20}
-  m_SizeDelta: {x: 200, y: 60}
+  m_AnchoredPosition: {x: -258.00024, y: 20}
+  m_SizeDelta: {x: 100, y: 32}
   m_Pivot: {x: 1, y: 0}
 --- !u!114 &426520045
 MonoBehaviour:
@@ -5265,7 +5265,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uC790\uC6D0 \uCD94\uAC00"
+  m_text: "\uC790\uC6D0 \uCD08\uAE30\uD654"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1f55a221e169b4b41adc70f72323c1d6, type: 2}
   m_sharedMaterial: {fileID: -731586743875455862, guid: 1f55a221e169b4b41adc70f72323c1d6, type: 2}
@@ -5292,8 +5292,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 12
+  m_fontSizeBase: 12
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -5407,8 +5407,8 @@ MonoBehaviour:
   debugPanel: {fileID: 0}
   toggleDebugPanelButton: {fileID: 64477681}
   transferFromGameButton: {fileID: 0}
-  setTestResourcesButton: {fileID: 426520045}
-  clearAllResourcesButton: {fileID: 1826970562}
+  setTestResourcesButton: {fileID: 1826970562}
+  clearAllResourcesButton: {fileID: 426520045}
   testFerrite: 100
   testAether: 100
   testBiomass: 100
@@ -5743,8 +5743,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -668.0001, y: 20}
-  m_SizeDelta: {x: 200, y: 60}
+  m_AnchoredPosition: {x: -150.00037, y: 20}
+  m_SizeDelta: {x: 100, y: 32}
   m_Pivot: {x: 1, y: 0}
 --- !u!114 &858497691
 MonoBehaviour:
@@ -6317,40 +6317,36 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4542445489244174802, guid: 0af39824d77bc2a488e8d3714734af0e, type: 3}
       propertyPath: questUnitMappings.Array.size
-      value: 3
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4542445489244174802, guid: 0af39824d77bc2a488e8d3714734af0e, type: 3}
+      propertyPath: startingUnits.Array.data[0].count
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4542445489244174802, guid: 0af39824d77bc2a488e8d3714734af0e, type: 3}
       propertyPath: questUnitMappings.Array.data[3].count
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4542445489244174802, guid: 0af39824d77bc2a488e8d3714734af0e, type: 3}
-      propertyPath: questUnitMappings.Array.data[1].questId
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 4542445489244174802, guid: 0af39824d77bc2a488e8d3714734af0e, type: 3}
       propertyPath: questUnitMappings.Array.data[2].questId
-      value: 5
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4542445489244174802, guid: 0af39824d77bc2a488e8d3714734af0e, type: 3}
       propertyPath: questUnitMappings.Array.data[3].questId
-      value: 2
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 4542445489244174802, guid: 0af39824d77bc2a488e8d3714734af0e, type: 3}
       propertyPath: questUnitMappings.Array.data[1].unitData
       value: 
-      objectReference: {fileID: 11400000, guid: 543df46f7aaa53f46be1a1b5736522f1, type: 2}
+      objectReference: {fileID: 11400000, guid: 7f1e06c487ddfa34e96efc7d462bea37, type: 2}
     - target: {fileID: 4542445489244174802, guid: 0af39824d77bc2a488e8d3714734af0e, type: 3}
       propertyPath: questUnitMappings.Array.data[2].unitData
       value: 
-      objectReference: {fileID: 11400000, guid: 0d0432b37cfad674db1cbd7f8d7abe1c, type: 2}
+      objectReference: {fileID: 11400000, guid: 543df46f7aaa53f46be1a1b5736522f1, type: 2}
     - target: {fileID: 4542445489244174802, guid: 0af39824d77bc2a488e8d3714734af0e, type: 3}
       propertyPath: questUnitMappings.Array.data[3].unitData
       value: 
-      objectReference: {fileID: 11400000, guid: 7f1e06c487ddfa34e96efc7d462bea37, type: 2}
-    - target: {fileID: 4542445489244174802, guid: 0af39824d77bc2a488e8d3714734af0e, type: 3}
-      propertyPath: startingUnits.Array.data[0].spawnInterval
-      value: 0
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 11400000, guid: 0d0432b37cfad674db1cbd7f8d7abe1c, type: 2}
     - target: {fileID: 4542445489244174802, guid: 0af39824d77bc2a488e8d3714734af0e, type: 3}
       propertyPath: questUnitMappings.Array.data[3].spawnRadius
       value: 4
@@ -7279,11 +7275,11 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 84744746}
-  - {fileID: 1668603245}
-  - {fileID: 64477680}
   - {fileID: 858497690}
   - {fileID: 426520044}
   - {fileID: 1826970561}
+  - {fileID: 1668603245}
+  - {fileID: 64477680}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -11441,7 +11437,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1826970561
 RectTransform:
   m_ObjectHideFlags: 0
@@ -12789,8 +12785,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 12
+  m_fontSizeBase: 12
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -13485,7 +13481,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uC790\uC6D0 \uCD08\uAE30\uD654"
+  m_text: "\uC790\uC6D0 \uCD94\uAC00"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1f55a221e169b4b41adc70f72323c1d6, type: 2}
   m_sharedMaterial: {fileID: -731586743875455862, guid: 1f55a221e169b4b41adc70f72323c1d6, type: 2}

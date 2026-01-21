@@ -198,8 +198,6 @@ public class MapObjectSpawner : MonoBehaviour
             if (FogOfWarManager.Instance != null)
             {
                 FogOfWarManager.SetSuppressVisibilityEvents(false);
-                
-                StartCoroutine(DeferredFogRefresh());
             }
         }
     }
@@ -494,17 +492,6 @@ public class MapObjectSpawner : MonoBehaviour
             Vector3 newPoint = center + new Vector3(Mathf.Cos(angle) * radius, Mathf.Sin(angle) * radius, 0);
             Gizmos.DrawLine(prevPoint, newPoint);
             prevPoint = newPoint;
-        }
-    }
-    
-    private IEnumerator DeferredFogRefresh()
-    {
-        yield return null;
-        yield return null;
-        
-        if (FogOfWarManager.Instance != null)
-        {
-            FogOfWarManager.Instance.RefreshFogOfWar();
         }
     }
     

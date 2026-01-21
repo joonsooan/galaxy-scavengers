@@ -86,4 +86,22 @@ public class UnitManager : MonoBehaviour
         }
         OnUnitCountChanged?.Invoke(unit);
     }
+
+    public void RemoveAllUnits()
+    {
+        List<UnitBase> allUnits = new List<UnitBase>();
+        allUnits.AddRange(_allyUnits);
+        allUnits.AddRange(_enemyUnits);
+
+        foreach (UnitBase unit in allUnits)
+        {
+            if (unit != null && unit.gameObject != null)
+            {
+                Destroy(unit.gameObject);
+            }
+        }
+
+        _allyUnits.Clear();
+        _enemyUnits.Clear();
+    }
 }

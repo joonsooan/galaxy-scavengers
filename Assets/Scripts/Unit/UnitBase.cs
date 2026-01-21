@@ -1,6 +1,4 @@
-using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 
 public abstract class UnitBase : Damageable
 {
@@ -38,9 +36,9 @@ public abstract class UnitBase : Damageable
             UnitManager.Instance.AddUnit(this);
         }
 
-        if (unitType == UnitType.Ally && GetComponent<VisionProvider>() == null) {
-            VisionProvider visionProvider = gameObject.AddComponent<VisionProvider>();
-            visionProvider.SetVisionRange(3f);
+        VisionProvider visionProvider = GetComponent<VisionProvider>();
+        if (visionProvider != null && FogOfWarManager.Instance != null && FogOfWarManager.Instance.IsInitialized) {
+            visionProvider.ForceUpdateAffectedTiles();
         }
     }
 
@@ -49,17 +47,17 @@ public abstract class UnitBase : Damageable
         if (UnitManager.Instance != null) {
             UnitManager.Instance.RemoveUnit(this);
         }
-        
+
         HideProgressBar();
 
         base.OnDisable();
     }
-    
+
     protected virtual void OnDestroy()
     {
         HideProgressBar();
     }
-    
+
     protected void ShowProgressBar()
     {
         if (progressBar != null) return;
@@ -68,25 +66,22 @@ public abstract class UnitBase : Damageable
         progressBar = barObj.GetComponent<UnitProgressBar>();
         progressBar.Initialize(transform);
     }
-    
+
     protected void HideProgressBar()
     {
-        if (progressBar != null)
-        {
+        if (progressBar != null) {
             progressBar.Destroy();
             progressBar = null;
         }
     }
-    
+
     protected void UpdateProgressBar(float progress)
     {
-        if (progressBar == null)
-        {
+        if (progressBar == null) {
             ShowProgressBar();
         }
-        
-        if (progressBar != null)
-        {
+
+        if (progressBar != null) {
             progressBar.SetProgress(progress);
         }
     }

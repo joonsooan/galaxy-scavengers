@@ -40,6 +40,15 @@ public class SceneLoader : MonoBehaviour
         if (_isLoading) return;
         
         string currentScene = SceneManager.GetActiveScene().name;
+        
+        if (currentScene == gameSceneName)
+        {
+            if (UnitManager.Instance != null)
+            {
+                UnitManager.Instance.RemoveAllUnits();
+            }
+        }
+        
         if (currentScene == titleSceneName)
         {
             SceneManager.LoadScene(baseSceneName);

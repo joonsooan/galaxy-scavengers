@@ -244,11 +244,6 @@ public class GameManager : MonoBehaviour
         // Step 3: Wait for Fog of War
         yield return StartCoroutine(WaitForFogOfWarInitializationAsync(progress));
         
-        if (FogOfWarManager.Instance != null)
-        {
-            FogOfWarManager.Instance.RefreshFogOfWar();
-        }
-        
         if (progress != null)
         {
             progress.UpdateProgress(0.0f, "착륙 좌표 고정 중...");

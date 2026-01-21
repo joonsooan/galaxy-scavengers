@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Systems.Jobs;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEngine.SceneManagement;
 
 public enum FogOfWarState
 {
@@ -39,6 +40,7 @@ public class FogOfWarManager : MonoBehaviour
     private FogOfWarInitializer _initializer;
 
     private bool _isInitializing;
+    private bool _isVisibilityUpdateRunning;
     private Dictionary<IVisionProvider, HashSet<Vector3Int>> _providerAffectedTiles = new Dictionary<IVisionProvider, HashSet<Vector3Int>>();
     private bool _respectFog = true;
     private FogOfWarVisibilityCalculator _visibilityCalculator;
@@ -84,8 +86,13 @@ public class FogOfWarManager : MonoBehaviour
 
         _initializer?.SetReferences(fogTilemap, groundTilemap, _cachedMapGenerator);
         _visualUpdater = new FogOfWarVisualUpdater(fogTilemap, fogTile, fullyVisibleColor, partlyVisibleColor, invisibleColor, groundTilemap, _cachedMapGenerator);
+        
+        string currentSceneName = SceneManager.GetActiveScene().name;
+        if (currentSceneName != "GameScene")
+        {
+            StartCoroutine(DelayedFogInitialization());
+        }
 
-        StartCoroutine(DelayedFogInitialization());
         RegisterAllExistingVisionProviders();
         InvokeRepeating(nameof(CleanupNullProviders), 5f, 5f);
     }
@@ -110,6 +117,7 @@ public class FogOfWarManager : MonoBehaviour
 
     public void StartFogInitializationWithProgress(IInitializationProgress progress)
     {
+        Debug.Log("[FogOfWar] StartFogInitializationWithProgress");
         StartCoroutine(DelayedFogInitialization(progress));
     }
 
@@ -133,6 +141,8 @@ public class FogOfWarManager : MonoBehaviour
 
         _isInitializing = false;
         IsInitialized = true;
+
+        Debug.Log("[FogOfWar] DelayedFogInitialization complete, calling ForceRebuildProviderTiles and UpdateVisibilityCoroutine");
 
         ForceRebuildProviderTiles();
         StartCoroutine(UpdateVisibilityCoroutine());
@@ -334,10 +344,21 @@ public class FogOfWarManager : MonoBehaviour
     private IEnumerator UpdateVisibilityCoroutine()
     {
         if (!IsInitialized || _isInitializing) {
+            Debug.Log("[FogOfWar] UpdateVisibilityCoroutine skipped (not initialized or initializing)");
             yield break;
         }
 
         if (grid == null) yield break;
+
+        Debug.Log("[FogOfWar] UpdateVisibilityCoroutine started");
+
+        if (_isVisibilityUpdateRunning)
+        {
+            Debug.Log("[FogOfWar] UpdateVisibilityCoroutine request ignored; already running");
+            yield break;
+        }
+
+        _isVisibilityUpdateRunning = true;
 
         HashSet<Vector3Int> tilesToCheck = new HashSet<Vector3Int>();
 
@@ -418,6 +439,10 @@ public class FogOfWarManager : MonoBehaviour
         }
 
         _currentlyVisibleTiles = newCurrentlyVisibleTiles;
+
+        _isVisibilityUpdateRunning = false;
+
+        Debug.Log("[FogOfWar] UpdateVisibilityCoroutine finished");
     }
 
 
@@ -492,12 +517,16 @@ public class FogOfWarManager : MonoBehaviour
     public void RefreshFogOfWar()
     {
         if (!IsInitialized) {
+            Debug.Log("[FogOfWar] RefreshFogOfWar called but not initialized, calling InitializeFogOfWar");
             return;
         }
 
         if (_tileVisibility.Count == 0) {
+            Debug.Log("[FogOfWar] RefreshFogOfWar found empty visibility, calling InitializeFogOfWar");
             InitializeFogOfWar();
         }
+
+        Debug.Log("[FogOfWar] RefreshFogOfWar starting provider updates and visibility coroutine");
 
         foreach (IVisionProvider provider in _visionProviders) {
             if (provider == null) continue;
