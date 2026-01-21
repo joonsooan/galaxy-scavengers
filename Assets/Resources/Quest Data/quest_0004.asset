@@ -36,5 +36,4 @@ MonoBehaviour:
     creditReward: 50
     unlockedBuildings:
     - {fileID: 11400000, guid: 11e719e49df1f8041a2512a4d0c060ce, type: 2}
-    - {fileID: 11400000, guid: 6a375b82248aff4438a80132fb46c2a5, type: 2}
     newUnits: []

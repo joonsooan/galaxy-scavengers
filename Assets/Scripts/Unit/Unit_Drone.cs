@@ -82,6 +82,14 @@ public class Unit_Drone : UnitBase
         switch (_currentState) {
         case DroneState.Idle:
             UpdateIdle();
+            if (!IsAssigned)
+            {
+                GameAlertUIManager.Instance?.SetAlertActive(GameAlertType.DroneNoResource, true);
+            }
+            else
+            {
+                GameAlertUIManager.Instance?.SetAlertActive(GameAlertType.DroneNoResource, false);
+            }
             break;
 
         case DroneState.FetchingResource:

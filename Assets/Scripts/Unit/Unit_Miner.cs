@@ -110,6 +110,14 @@ public class Unit_Miner : UnitBase
                 }
                 TryStartActions();
             }
+            if (_findResourceCoroutine == null)
+            {
+                GameAlertUIManager.Instance?.SetAlertActive(GameAlertType.MinerNoResource, true);
+            }
+            else
+            {
+                GameAlertUIManager.Instance?.SetAlertActive(GameAlertType.MinerNoResource, false);
+            }
             break;
 
         case UnitState.Moving:

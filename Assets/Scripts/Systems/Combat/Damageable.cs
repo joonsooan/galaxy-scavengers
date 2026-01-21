@@ -14,6 +14,10 @@ public abstract class Damageable : MonoBehaviour, ICombo
     public int CurrentHealth => currentHealth;
 
     public int currentHealth;
+
+    protected virtual void OnDamageTaken(int damage)
+    {
+    }
     
     public virtual void SetMaxHealth(int newMaxHealth)
     {
@@ -50,6 +54,7 @@ public abstract class Damageable : MonoBehaviour, ICombo
     public virtual void TakeDamage(int damage)
     {
         currentHealth -= damage;
+        OnDamageTaken(damage);
         
         if (_flashCoroutine != null)
         {

@@ -38,6 +38,7 @@ MonoBehaviour:
     resourceRewards: []
     moduleRewards: []
     creditReward: 30
-    unlockedBuildings: []
+    unlockedBuildings:
+    - {fileID: 11400000, guid: 6a375b82248aff4438a80132fb46c2a5, type: 2}
     newUnits:
     - {fileID: 11400000, guid: 33e410bcf8e6ad44f99960dadd48b50b, type: 2}
