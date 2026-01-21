@@ -157,31 +157,29 @@ public class StartingUnitsManager : MonoBehaviour
             return;
         }
 
+        StartCoroutine(SpawnAllUnitsSequentially(centerPosition));
+    }
+
+    private IEnumerator SpawnAllUnitsSequentially(Vector3 centerPosition)
+    {
         foreach (StartingUnitConfig config in _allStartingUnits) {
             if (config == null || config.unitData == null || config.count <= 0) {
                 continue;
             }
 
-            StartCoroutine(SpawnUnitsWithInterval(config, centerPosition));
-        }
-    }
+            for (int i = 0; i < config.count; i++) {
+                Vector3 spawnPosition = GetSpawnPositionAroundMainStructure(centerPosition, config.spawnRadius);
 
-    private IEnumerator SpawnUnitsWithInterval(StartingUnitConfig config, Vector3 centerPosition)
-    {
-        for (int i = 0; i < config.count; i++) {
-            Vector3 spawnPosition = GetSpawnPositionAroundMainStructure(centerPosition, config.spawnRadius);
-
-            if (spawnPosition != Vector3.zero) {
-                GameObject unitPrefab = config.unitData.unitPrefab;
-                if (unitPrefab != null) {
-                    Instantiate(unitPrefab, spawnPosition, Quaternion.identity, UnitManager.Instance.unitParent);
+                if (spawnPosition != Vector3.zero) {
+                    GameObject unitPrefab = config.unitData.unitPrefab;
+                    if (unitPrefab != null) {
+                        Instantiate(unitPrefab, spawnPosition, Quaternion.identity, UnitManager.Instance.unitParent);
+                    }
+                    else {
+                        Debug.LogWarning($"StartingUnitsManager: Unit prefab is null for {config.unitData.unitName}");
+                    }
                 }
-                else {
-                    Debug.LogWarning($"StartingUnitsManager: Unit prefab is null for {config.unitData.unitName}");
-                }
-            }
 
-            if (i < config.count - 1) {
                 yield return new WaitForSeconds(config.spawnInterval);
             }
         }
