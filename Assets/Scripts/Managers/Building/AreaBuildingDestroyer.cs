@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using FMODUnity;
 
 public class AreaBuildingDestroyer : MonoBehaviour
 {
@@ -8,8 +9,12 @@ public class AreaBuildingDestroyer : MonoBehaviour
     [SerializeField] private Camera mainCamera;
     [SerializeField] private Tilemap selectionTilemap;
     [SerializeField] private TileBase selectionTile;
+    [Header("Audio")]
+    [SerializeField] private EventReference dragSound;
+    [SerializeField] private float dragSoundCooldown = 0.1f;
 
     private Grid _grid;
+    private float _lastDragSoundTime;
     private BuildingManager _buildingManager;
     private bool _isDragging;
     private bool _hasMoved;
@@ -102,6 +107,8 @@ public class AreaBuildingDestroyer : MonoBehaviour
         _wasJustFinishedAreaDrag = false;
         _selectedCells.Clear();
         _previouslySelectedCells.Clear();
+
+        PlayDragSound();
     }
     
     private void UpdateDrag()
@@ -124,6 +131,7 @@ public class AreaBuildingDestroyer : MonoBehaviour
             if (_hasMoved)
             {
                 UpdateSelectionVisual();
+                PlayDragSound();
             }
         }
     }
@@ -423,6 +431,23 @@ public class AreaBuildingDestroyer : MonoBehaviour
         {
             CancelDrag();
         }
+    }
+
+    private void PlayDragSound()
+    {
+        if (dragSound.IsNull)
+        {
+            return;
+        }
+
+        float currentTime = Time.time;
+        if (currentTime - _lastDragSoundTime < dragSoundCooldown)
+        {
+            return;
+        }
+
+        _lastDragSoundTime = currentTime;
+        RuntimeManager.PlayOneShot(dragSound);
     }
 }
 

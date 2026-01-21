@@ -52,6 +52,9 @@ TagManager:
   - name: Particles
     uniqueID: 3934607671
     locked: 0
+  - name: Dragging
+    uniqueID: 2308239201
+    locked: 0
   - name: Fog
     uniqueID: 2127151825
     locked: 0

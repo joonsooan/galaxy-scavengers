@@ -8,6 +8,7 @@ public class LaunchUIController : MonoBehaviour
     [SerializeField] private GameObject launchPanel;
     [SerializeField] private GameObject countdownPanel;
     [SerializeField] private TMP_Text countdownText;
+    [SerializeField] private TMP_Text neededAetherText;
     [SerializeField] private LaunchCompleteUI launchCompleteUI;
 
     [Header("Launch Settings")]
