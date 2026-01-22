@@ -39,6 +39,7 @@ public class Unit_Drone : UnitBase
     private Tween _hoverTween;
     private Vector3 _baseHoverLocalPosition;
     private Transform _spriteTransform;
+    private bool _noResourceAlertActive;
 
     protected override void Awake()
     {
@@ -71,6 +72,11 @@ public class Unit_Drone : UnitBase
 
     protected override void OnDisable()
     {
+        if (_noResourceAlertActive)
+        {
+            GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.DroneNoResource);
+            _noResourceAlertActive = false;
+        }
         StopHover();
         base.OnDisable();
         UnitManager.Instance?.RemoveUnit(this);
@@ -82,13 +88,16 @@ public class Unit_Drone : UnitBase
         switch (_currentState) {
         case DroneState.Idle:
             UpdateIdle();
-            if (!IsAssigned)
+            bool shouldShowAlert = !IsAssigned;
+            if (shouldShowAlert && !_noResourceAlertActive)
             {
-                GameAlertUIManager.Instance?.SetAlertActive(GameAlertType.DroneNoResource, true);
+                GameAlertUIManager.Instance?.RegisterAlert(GameAlertType.DroneNoResource);
+                _noResourceAlertActive = true;
             }
-            else
+            else if (!shouldShowAlert && _noResourceAlertActive)
             {
-                GameAlertUIManager.Instance?.SetAlertActive(GameAlertType.DroneNoResource, false);
+                GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.DroneNoResource);
+                _noResourceAlertActive = false;
             }
             break;
 

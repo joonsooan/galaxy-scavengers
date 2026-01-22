@@ -44,6 +44,7 @@ public class Unit_Miner : UnitBase
     private Tween _miningVibrationTween;
     private WaitForSeconds _searchWait;
     private Vector3 _spriteBaseLocalPosition;
+    private bool _noResourceAlertActive;
     private UnitSpriteController _spriteController;
     private Vector3Int _targetMiningCell;
     private ResourceNode _targetResourceNode;
@@ -91,6 +92,11 @@ public class Unit_Miner : UnitBase
 
     private void OnDestroy()
     {
+        if (_noResourceAlertActive)
+        {
+            GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.MinerNoResource);
+            _noResourceAlertActive = false;
+        }
         StopMiningVibration();
         StopMiningParticles();
         if (_targetResourceNode != null && _targetResourceNode.IsReserved && _targetResourceNode.GetReservedUnit() == this) {
@@ -110,13 +116,16 @@ public class Unit_Miner : UnitBase
                 }
                 TryStartActions();
             }
-            if (_findResourceCoroutine == null)
+            bool shouldShowAlert = _findResourceCoroutine == null;
+            if (shouldShowAlert && !_noResourceAlertActive)
             {
-                GameAlertUIManager.Instance?.SetAlertActive(GameAlertType.MinerNoResource, true);
+                GameAlertUIManager.Instance?.RegisterAlert(GameAlertType.MinerNoResource);
+                _noResourceAlertActive = true;
             }
-            else
+            else if (!shouldShowAlert && _noResourceAlertActive)
             {
-                GameAlertUIManager.Instance?.SetAlertActive(GameAlertType.MinerNoResource, false);
+                GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.MinerNoResource);
+                _noResourceAlertActive = false;
             }
             break;
 
