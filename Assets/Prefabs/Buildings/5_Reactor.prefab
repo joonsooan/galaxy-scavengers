@@ -154,7 +154,7 @@ MonoBehaviour:
   flashDuration: 0.3
   currentHealth: 0
   processorData: {fileID: 11400000, guid: 66284246a5192cd448e962a43b62691a, type: 2}
-  aetherConsumptionPerSecond: 2
+  aetherConsumptionPerSecond: 0
 --- !u!114 &-243382722571625938
 MonoBehaviour:
   m_ObjectHideFlags: 0

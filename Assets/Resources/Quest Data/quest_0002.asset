@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   questId: 2
   questProvider: 0
-  previousQuestIds: 01000000
+  previousQuestIds: 00000000
   questName: "\uC548\uC815\uC801 \uC5D0\uB108\uC9C0\uC6D0 \uD655\uBCF4"
   questInfo: "\uD568\uC120\uC758 \uAE34\uAE09 \uC218\uB9AC\uB97C \uB9C8\uCCD0 \uB2F9\uC7A5\uC758
     \uC704\uAE30\uB294 \uC9C0\uB098\uAC14\uC9C0\uB9CC, \uD604\uC7AC \uC791\uB3D9
@@ -32,6 +32,7 @@ MonoBehaviour:
   - checkType: 0
     targetId: 
     requiredCount: 0
+    displayText: 
     targetLocation: {x: 0, y: 0, z: 0}
     locationTolerance: 0
   questFinishReward:

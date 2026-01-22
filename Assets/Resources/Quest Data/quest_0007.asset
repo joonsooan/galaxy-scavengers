@@ -29,8 +29,8 @@ MonoBehaviour:
     requiredCount: 0
     displayText: "\uC815\uCC30 \uC720\uB2DB\uC744 \uC774\uB3D9\uC2DC\uCF1C \uC9C4\uB3D9\uC758
       \uADFC\uC6D0\uC9C0 \uD30C\uC545"
-    targetLocation: {x: 0, y: 0, z: 0}
-    locationTolerance: 10
+    targetLocation: {x: 10, y: 0, z: 0}
+    locationTolerance: 50
   questFinishReward:
     resourceRewards: []
     moduleRewards: []
