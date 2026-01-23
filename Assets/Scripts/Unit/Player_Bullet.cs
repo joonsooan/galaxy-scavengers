@@ -32,19 +32,15 @@ public class Player_Bullet : MonoBehaviour
         {
             _rb.linearVelocity = _direction * speed;
         }
-        
-        CancelInvoke();
-        Invoke(nameof(Deactivate), lifeTime);
     }
 
     void OnEnable()
     {
+        Invoke(nameof(Deactivate), lifeTime);
     }
 
-    void FixedUpdate()
+    void Update()
     {
-        if (_rb == null) return;
-
         if (_grid != null)
         {
             Vector3Int currentCell = _grid.WorldToCell(transform.position);
@@ -59,6 +55,11 @@ public class Player_Bullet : MonoBehaviour
                 }
             }
         }
+    }
+
+    void FixedUpdate()
+    {
+        if (_rb == null) return;
 
         if (_rb.linearVelocity.sqrMagnitude < 0.01f)
         {
@@ -80,6 +81,7 @@ public class Player_Bullet : MonoBehaviour
     {
         CancelInvoke();
         
+        _direction = Vector2.zero;
         if (_rb != null)
         {
             _rb.linearVelocity = Vector2.zero;

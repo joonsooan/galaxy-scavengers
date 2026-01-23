@@ -21,7 +21,7 @@ public class Unit_Player : UnitBase
     [SerializeField] private float laserWidth = 0.1f;
     [SerializeField] private ParticleSystem miningParticleSystem;
     [SerializeField] private float particleOffsetDistance = 0.5f;
-    [SerializeField] private float yOffset = 0f;
+    [SerializeField] private float yOffset;
 
     private ResourceNode _targetResourceNode;
     private Coroutine _mineCoroutine;
@@ -31,7 +31,6 @@ public class Unit_Player : UnitBase
     private Grid _grid;
     private UnitSpriteController _spriteController;
     private LineRenderer _laserRenderer;
-    private Vector3 _currentMiningDirection;
 
     protected override void Awake()
     {
@@ -105,14 +104,46 @@ public class Unit_Player : UnitBase
                 
                 if (distanceToClick <= interactionRange)
                 {
-                    TryMineResource(mouseWorldPos);
+                    ResourceNode clickedResource = GetResourceAtPosition(mouseWorldPos);
+                    if (clickedResource != null)
+                    {
+                        TryMineResource(mouseWorldPos);
+                    }
                 }
-                else
+            }
+        }
+        else if (Input.GetMouseButton(0))
+        {
+            if (currentState != UnitState.Mining)
+            {
+                Vector3 mouseWorldPos = GetMouseWorldPosition();
+                if (mouseWorldPos != Vector3.zero)
                 {
                     TryFireBullet(mouseWorldPos);
                 }
             }
         }
+    }
+
+    private ResourceNode GetResourceAtPosition(Vector3 position)
+    {
+        if (_grid == null) return null;
+
+        Vector3Int clickCell = _grid.WorldToCell(position);
+        List<ResourceNode> allResources = ResourceManager.Instance.GetAllResources();
+        
+        foreach (ResourceNode resource in allResources)
+        {
+            if (resource == null || resource.IsDepleted || !resource.gameObject.activeInHierarchy)
+                continue;
+
+            if (resource.cellPosition == clickCell)
+            {
+                return resource;
+            }
+        }
+
+        return null;
     }
 
     private Vector3 GetMouseWorldPosition()
@@ -129,24 +160,7 @@ public class Unit_Player : UnitBase
 
     private void TryMineResource(Vector3 clickPosition)
     {
-        if (_grid == null) return;
-
-        Vector3Int clickCell = _grid.WorldToCell(clickPosition);
-        List<ResourceNode> allResources = ResourceManager.Instance.GetAllResources();
-        
-        ResourceNode clickedResource = null;
-
-        foreach (ResourceNode resource in allResources)
-        {
-            if (resource == null || resource.IsDepleted || !resource.gameObject.activeInHierarchy)
-                continue;
-
-            if (resource.cellPosition == clickCell)
-            {
-                clickedResource = resource;
-                break;
-            }
-        }
+        ResourceNode clickedResource = GetResourceAtPosition(clickPosition);
 
         if (clickedResource != null)
         {
@@ -208,9 +222,18 @@ public class Unit_Player : UnitBase
             {
                 if (_targetResourceNode != null && _targetResourceNode.IsDepleted)
                 {
-                    TryMineAdjacentResource(_targetResourceNode.cellPosition);
+                    Vector3Int depletedCell = _targetResourceNode.cellPosition;
+                    yield return null;
+                    bool foundAdjacent = TryMineAdjacentResource(depletedCell);
+                    if (!foundAdjacent)
+                    {
+                        StopMining();
+                    }
                 }
-                StopMining();
+                else
+                {
+                    StopMining();
+                }
                 yield break;
             }
 
@@ -231,15 +254,15 @@ public class Unit_Player : UnitBase
         }
     }
 
-    private void TryMineAdjacentResource(Vector3Int depletedCell)
+    private bool TryMineAdjacentResource(Vector3Int depletedCell)
     {
-        if (_grid == null) return;
+        if (_grid == null) return false;
 
         Vector3Int[] neighborOffsets = {
-            new Vector3Int(1, 0, 0),
-            new Vector3Int(-1, 0, 0),
-            new Vector3Int(0, 1, 0),
-            new Vector3Int(0, -1, 0)
+            new (1, 0, 0),
+            new (-1, 0, 0),
+            new (0, 1, 0),
+            new (0, -1, 0)
         };
 
         List<ResourceNode> allResources = ResourceManager.Instance.GetAllResources();
@@ -270,8 +293,12 @@ public class Unit_Player : UnitBase
         if (closestAdjacentResource != null)
         {
             _targetResourceNode = closestAdjacentResource;
+            _mineCoroutine = null;
             StartMining();
+            return true;
         }
+
+        return false;
     }
 
     private void CheckMiningRange()
@@ -313,7 +340,7 @@ public class Unit_Player : UnitBase
         Vector2 fireDirection = (targetPosition - transform.position).normalized;
         Vector3 spawnPosition = transform.position + (Vector3)fireDirection * 0.5f;
 
-        GameObject bulletObj = ObjectPooler.Instance.SpawnFromPool("TurretBullet", spawnPosition, Quaternion.identity);
+        GameObject bulletObj = ObjectPooler.Instance.SpawnFromPool("PlayerBullet", spawnPosition, Quaternion.identity);
 
         if (bulletObj != null)
         {
@@ -400,9 +427,6 @@ public class Unit_Player : UnitBase
         
         if (currentState == UnitState.Mining && _targetResourceNode != null)
         {
-            Vector3 direction = (_targetResourceNode.transform.position - transform.position).normalized;
-            _currentMiningDirection = direction;
-            
             Transform particleTransform = miningParticleSystem.transform;
             Vector3 offsetPosition = _targetResourceNode.transform.position - new Vector3(0, yOffset, 0);
             particleTransform.position = offsetPosition;
