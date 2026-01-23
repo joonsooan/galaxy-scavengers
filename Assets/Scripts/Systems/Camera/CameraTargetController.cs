@@ -177,13 +177,22 @@ public class CameraTargetController : MonoBehaviour
             return;
         }
 
-        float moveX = Input.GetAxisRaw("Horizontal");
-        float moveY = Input.GetAxisRaw("Vertical");
+        bool hasPlayerUnit = followTarget != null && followTarget.GetComponent<Unit_Player>() != null;
 
-        if (moveX != 0f || moveY != 0f) {
-            _direction = new Vector3(moveX, moveY, 0).normalized;
+        if (!hasPlayerUnit)
+        {
+            float moveX = Input.GetAxisRaw("Horizontal");
+            float moveY = Input.GetAxisRaw("Vertical");
+
+            if (moveX != 0f || moveY != 0f) {
+                _direction = new Vector3(moveX, moveY, 0).normalized;
+            }
+            else {
+                _direction = Vector3.zero;
+            }
         }
-        else {
+        else
+        {
             _direction = Vector3.zero;
         }
 
@@ -229,21 +238,35 @@ public class CameraTargetController : MonoBehaviour
             mousePanDirection.Normalize();
         }
 
+        bool hasPlayerUnit = followTarget != null && followTarget.GetComponent<Unit_Player>() != null;
+
         Vector3 finalDirection = Vector3.zero;
         float currentPanSpeed = 0f;
         bool hasInput = false;
 
-        if (_direction != Vector3.zero) {
-            finalDirection = _direction;
-            currentPanSpeed = panSpeed;
-            hasInput = true;
-            _isManualMode = true;
+        if (!hasPlayerUnit)
+        {
+            if (_direction != Vector3.zero) {
+                finalDirection = _direction;
+                currentPanSpeed = panSpeed;
+                hasInput = true;
+                _isManualMode = true;
+            }
+            else if (mousePanDirection != Vector3.zero) {
+                finalDirection = mousePanDirection;
+                currentPanSpeed = edgePanSpeed;
+                hasInput = true;
+                _isManualMode = true;
+            }
         }
-        else if (mousePanDirection != Vector3.zero) {
-            finalDirection = mousePanDirection;
-            currentPanSpeed = edgePanSpeed;
-            hasInput = true;
-            _isManualMode = true;
+        else
+        {
+            if (mousePanDirection != Vector3.zero) {
+                finalDirection = mousePanDirection;
+                currentPanSpeed = edgePanSpeed;
+                hasInput = true;
+                _isManualMode = true;
+            }
         }
 
         if (hasInput) {

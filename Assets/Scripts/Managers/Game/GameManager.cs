@@ -122,7 +122,10 @@ public class GameManager : MonoBehaviour
     public void GameOver()
     {
         Time.timeScale = 1;
-        SceneLoader.Instance.LoadBaseScene();
+        if (SceneLoader.Instance != null)
+        {
+            SceneLoader.Instance.LoadBaseScene();
+        }
     }
 
     public void StartDrag(DisplayableData data)
