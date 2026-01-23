@@ -36,7 +36,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
-  m_Children: []
+  m_Children:
+  - {fileID: 4056660664595074895}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &6865986198788389803
@@ -106,13 +107,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2aab36819f981474b8f2f84b64e92e6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
+  maxHealth: 2000
   flashColor: {r: 1, g: 0, b: 0, a: 1}
-  flashDuration: 0.3
+  flashDuration: 0.2
   maxStorageAmount: 1000
-  producibleUnits:
-  - {fileID: 11400000, guid: 7f1e06c487ddfa34e96efc7d462bea37, type: 2}
-  - {fileID: 11400000, guid: 0d0432b37cfad674db1cbd7f8d7abe1c, type: 2}
+  producibleUnits: []
   baseAetherCapacity: 500
 --- !u!114 &1036474081810028208
 MonoBehaviour:
@@ -146,38 +145,39 @@ MonoBehaviour:
   inventoryGridContainer: {fileID: 0}
   currentResourcePanel: {fileID: 0}
   sortButton: {fileID: 0}
-  inventoryCellPrefab: {fileID: 3842191235755297668, guid: 79b3efe314470124eb00454f0b0f98c4, type: 3}
-  resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: 3bcedb5ddd3f4124da52d7ef7cd2bd2e, type: 3}
-  inventoryWidth: 5
+  inventoryCellPrefab: {fileID: 3842191235755297668, guid: 0c93dfd6b41a96d4489a92b302206a7f, type: 3}
+  resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: 25b8419de43c1984fb45df6c7a910ba5, type: 3}
+  inventoryWidth: 4
   inventoryHeight: 5
+  baseCellCount: 4
   defaultMaxStackAmount: 100
   customMaxStackAmounts:
   - resourceType: 0
-    maxStackAmount: 100
+    maxStackAmount: 200
   - resourceType: 1
-    maxStackAmount: 50
+    maxStackAmount: 100
   - resourceType: 2
-    maxStackAmount: 50
+    maxStackAmount: 100
   - resourceType: 3
-    maxStackAmount: 20
+    maxStackAmount: 100
   - resourceType: 4
-    maxStackAmount: 20
+    maxStackAmount: 100
   - resourceType: 5
-    maxStackAmount: 20
+    maxStackAmount: 50
   - resourceType: 6
-    maxStackAmount: 20
+    maxStackAmount: 50
   - resourceType: 7
-    maxStackAmount: 20
+    maxStackAmount: 50
   - resourceType: 8
-    maxStackAmount: 20
+    maxStackAmount: 50
   - resourceType: 9
-    maxStackAmount: 20
+    maxStackAmount: 50
   - resourceType: 10
-    maxStackAmount: 20
+    maxStackAmount: 50
   - resourceType: 11
-    maxStackAmount: 20
+    maxStackAmount: 50
   - resourceType: 12
-    maxStackAmount: 20
+    maxStackAmount: 50
   - resourceType: 13
     maxStackAmount: 50
 --- !u!61 &-2104743701757568428
@@ -238,7 +238,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00cc167c3a83a00479cf54bfd89aaa29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  buildingData: {fileID: 0}
+  buildingData: {fileID: 11400000, guid: 3ed9fe33af7f6a14991abdbd3238ac98, type: 2}
 --- !u!114 &-2937795073857346507
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -263,3 +263,124 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1569e9822679a2e44beb718c5445e9f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &3469235518718451695
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4056660664595074895}
+  - component: {fileID: 458030507050285458}
+  - component: {fileID: 7909728293307129498}
+  m_Layer: 0
+  m_Name: Point Light
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4056660664595074895
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3469235518718451695}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4183704755259827819}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!108 &458030507050285458
+Light:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3469235518718451695}
+  m_Enabled: 1
+  serializedVersion: 11
+  m_Type: 2
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Intensity: 1
+  m_Range: 12.5
+  m_SpotAngle: 30
+  m_InnerSpotAngle: 21.80208
+  m_CookieSize: 10
+  m_Shadows:
+    m_Type: 0
+    m_Resolution: -1
+    m_CustomResolution: -1
+    m_Strength: 1
+    m_Bias: 0.05
+    m_NormalBias: 0.4
+    m_NearPlane: 0.2
+    m_CullingMatrixOverride:
+      e00: 1
+      e01: 0
+      e02: 0
+      e03: 0
+      e10: 0
+      e11: 1
+      e12: 0
+      e13: 0
+      e20: 0
+      e21: 0
+      e22: 1
+      e23: 0
+      e30: 0
+      e31: 0
+      e32: 0
+      e33: 1
+    m_UseCullingMatrixOverride: 0
+  m_Cookie: {fileID: 0}
+  m_DrawHalo: 0
+  m_Flare: {fileID: 0}
+  m_RenderMode: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingLayerMask: 1
+  m_Lightmapping: 4
+  m_LightShadowCasterMode: 0
+  m_AreaSize: {x: 1, y: 1}
+  m_BounceIntensity: 1
+  m_ColorTemperature: 6570
+  m_UseColorTemperature: 0
+  m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_UseBoundingSphereOverride: 0
+  m_UseViewFrustumForShadowCasterCull: 1
+  m_ForceVisible: 0
+  m_ShadowRadius: 0
+  m_ShadowAngle: 0
+  m_LightUnit: 1
+  m_LuxAtDistance: 1
+  m_EnableSpotReflector: 1
+--- !u!114 &7909728293307129498
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3469235518718451695}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Version: 3
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_LightLayerMask: 1
+  m_RenderingLayers: 1
+  m_CustomShadowLayers: 0
+  m_ShadowLayerMask: 1
+  m_ShadowRenderingLayers: 1
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0

@@ -1,0 +1,357 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
+{
+    [Header("UI References")]
+    [SerializeField] private GameObject coreCustomPanel;
+    [SerializeField] private CoreCustomizationSlot[] slotComponents;
+    [SerializeField] private Button closeButton;
+
+    [Header("Module Selection Panel")]
+    [SerializeField] private GameObject moduleSelectionPanel;
+    [SerializeField] private Transform moduleSelectionGridContainer;
+    [SerializeField] private GameObject moduleSelectionCellPrefab;
+
+    [Header("Core Detail Panel")]
+    [SerializeField] private CoreDetailPanel coreDetailPanel;
+    
+    [Header("Quest UI")]
+    [SerializeField] private Button questButton;
+    [SerializeField] private Button shopButton;
+    [SerializeField] private GameObject questGridPanel;
+    [SerializeField] private RectTransform questGridParent;
+    [SerializeField] private GameObject questCellPrefab;
+    [SerializeField] private QuestDetailPanel questDetailPanel;
+    [SerializeField] private QuestProvider questProvider = QuestProvider.NPC_2;
+    [SerializeField] private QuestUIHandler questUIHandler;
+    [SerializeField] private GameObject newQuestIndicator;
+
+    [SerializeField] private List<ModuleInventoryCell> moduleSelectionCells = new ();
+
+    private CoreCustomizationManager _customizationManager;
+    private BaseInventoryManager _inventoryManager;
+    private BaseInventorySystem _baseInventorySystem;
+
+    private void Start()
+    {
+        FindManagers();
+        InitializeUI();
+        SubscribeToEvents();
+        InitializeSlots();
+        StartCoroutine(WaitForModulesAndRefreshSlots());
+    }
+
+    private void FindManagers()
+    {
+        _customizationManager = FindFirstObjectByType<CoreCustomizationManager>();
+        _inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        _baseInventorySystem = FindFirstObjectByType<BaseInventorySystem>();
+    }
+
+    private void InitializeUI()
+    {
+        if (coreCustomPanel != null) {
+            coreCustomPanel.SetActive(false);
+        }
+
+        if (closeButton != null) {
+            closeButton.onClick.RemoveAllListeners();
+            closeButton.onClick.AddListener(OnCloseButtonClicked);
+        }
+        
+        if (questUIHandler == null)
+        {
+            questUIHandler = gameObject.AddComponent<QuestUIHandler>();
+        }
+        questUIHandler.Initialize(this);
+    }
+
+    private void OnEnable()
+    {
+        SubscribeToEvents();
+    }
+
+    private void SubscribeToEvents()
+    {
+        if (_customizationManager != null) {
+            _customizationManager.OnModuleSlotChanged -= OnModuleSlotChanged;
+            _customizationManager.OnModuleSlotChanged += OnModuleSlotChanged;
+        }
+
+        if (_inventoryManager != null) {
+            _inventoryManager.OnModuleAdded -= OnModuleInventoryChanged;
+            _inventoryManager.OnModuleRemoved -= OnModuleInventoryChanged;
+            _inventoryManager.OnModuleAdded += OnModuleInventoryChanged;
+            _inventoryManager.OnModuleRemoved += OnModuleInventoryChanged;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (_customizationManager != null) {
+            _customizationManager.OnModuleSlotChanged -= OnModuleSlotChanged;
+        }
+
+        if (_inventoryManager != null) {
+            _inventoryManager.OnModuleAdded -= OnModuleInventoryChanged;
+            _inventoryManager.OnModuleRemoved -= OnModuleInventoryChanged;
+        }
+    }
+
+    private IEnumerator WaitForModulesAndRefreshSlots()
+    {
+        if (_customizationManager == null) {
+            yield break;
+        }
+
+        yield return new WaitForSeconds(0.1f);
+
+        yield return new WaitUntil(() => {
+            BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+            return inventoryManager != null;
+        });
+
+        yield return new WaitForSeconds(0.1f);
+
+        RefreshSlots();
+        RefreshModuleSelectionGrid();
+    }
+
+    private void InitializeSlots()
+    {
+        if (slotComponents == null || _customizationManager == null) return;
+
+        for (int i = 0; i < slotComponents.Length; i++) {
+            if (slotComponents[i] != null) {
+                slotComponents[i].Initialize(i, _customizationManager, this);
+            }
+        }
+    }
+
+    public void ShowPanel()
+    {
+        if (coreCustomPanel != null) {
+            coreCustomPanel.SetActive(true);
+            StartCoroutine(RefreshOnPanelShown());
+        }
+        
+        if (newQuestIndicator != null && newQuestIndicator.activeSelf && questUIHandler != null)
+        {
+            questUIHandler.ShowQuestUI();
+        }
+        else if (questUIHandler != null)
+        {
+            questUIHandler.ShowShopUI();
+        }
+        else
+        {
+            ShowShopUI();
+        }
+    }
+
+    private IEnumerator RefreshOnPanelShown()
+    {
+        yield return null;
+        
+        if (_inventoryManager == null || _customizationManager == null) {
+            FindManagers();
+        }
+        
+        RefreshModuleSelectionGrid();
+        RefreshSlots();
+        
+        if (coreDetailPanel != null) {
+            coreDetailPanel.UpdateModuleEffects();
+        }
+    }
+
+    public bool IsPanelOpen()
+    {
+        return coreCustomPanel != null && coreCustomPanel.activeSelf;
+    }
+
+    private void HidePanel()
+    {
+        if (coreCustomPanel != null) {
+            coreCustomPanel.SetActive(false);
+        }
+    }
+
+    private void OnCloseButtonClicked()
+    {
+        HidePanel();
+    }
+
+    public void RefreshModuleSelectionGrid()
+    {
+        ClearModuleSelectionGrid();
+
+        if (_inventoryManager == null || _customizationManager == null) {
+            FindManagers();
+        }
+
+        List<Module> allModules = _inventoryManager.GetAllModules();
+        if (allModules == null) {
+            allModules = new List<Module>();
+        }
+
+        HashSet<string> moduleIdsInSlots = new HashSet<string>();
+        for (int i = 0; i < 3; i++) {
+            Module slotModule = _customizationManager.GetModuleInSlot(i);
+            if (slotModule != null && !string.IsNullOrEmpty(slotModule.moduleId)) {
+                moduleIdsInSlots.Add(slotModule.moduleId);
+            }
+        }
+
+        foreach (Module module in allModules) {
+            if (module == null) continue;
+
+            bool isInSlot = !string.IsNullOrEmpty(module.moduleId) && moduleIdsInSlots.Contains(module.moduleId);
+            if (isInSlot) {
+                continue;
+            }
+
+            CreateModuleCell(module);
+        }
+    }
+
+    private void CreateModuleCell(Module module)
+    {
+        if (moduleSelectionGridContainer == null || moduleSelectionCellPrefab == null) {
+            return;
+        }
+
+        GameObject cellObj = Instantiate(moduleSelectionCellPrefab, moduleSelectionGridContainer);
+        ModuleInventoryCell cell = cellObj.GetComponent<ModuleInventoryCell>();
+        if (cell != null) {
+            cell.Initialize(this);
+            cell.SetModule(module);
+            moduleSelectionCells.Add(cell);
+        }
+    }
+
+    private void ClearModuleSelectionGrid()
+    {
+        if (moduleSelectionGridContainer == null) return;
+
+        foreach (Transform child in moduleSelectionGridContainer) {
+            Destroy(child.gameObject);
+        }
+
+        moduleSelectionCells.Clear();
+    }
+
+    public void OnModuleCellClicked(Module module)
+    {
+        if (_customizationManager == null || _inventoryManager == null) {
+            FindManagers();
+        }
+        
+        int targetSlotIndex = FindEmptyUnlockedSlot();
+        if (targetSlotIndex < 0) {
+            Debug.LogWarning("CoreCustomUIManager: No empty, unlocked slot available for module placement");
+            return;
+        }
+
+        if (!_inventoryManager.RemoveModule(module)) {
+            Debug.LogWarning($"CoreCustomUIManager: 인벤토리에서 모듈 '{module.moduleName}'을 제거할 수 없습니다.");
+            return;
+        }
+
+        _customizationManager.SetModuleInSlot(targetSlotIndex, module);
+        
+        if (_baseInventorySystem != null) {
+            _baseInventorySystem.ForceRefreshInventory();
+        }
+
+        RefreshSlots();
+        RefreshModuleSelectionGrid();
+    }
+
+    private int FindEmptyUnlockedSlot()
+    {
+        for (int i = 0; i < 3; i++) {
+            if (!_customizationManager.IsSlotLocked(i) && _customizationManager.GetModuleInSlot(i) == null) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private void OnModuleSlotChanged(int slotIndex, Module module)
+    {
+        RefreshSlots();
+
+        if (IsPanelOpen()) {
+            StartCoroutine(RefreshModuleSelectionGridDelayed());
+        }
+
+        coreDetailPanel.UpdateModuleEffects();
+        _baseInventorySystem.ForceRefreshInventory();
+    }
+
+    private void OnModuleInventoryChanged(Module module)
+    {
+        if (IsPanelOpen()) {
+            StartCoroutine(RefreshModuleSelectionGridDelayed());
+        }
+    }
+
+    private IEnumerator RefreshModuleSelectionGridDelayed()
+    {
+        yield return null;
+        RefreshModuleSelectionGrid();
+    }
+
+    private void RefreshSlots()
+    {
+        if (slotComponents == null) return;
+
+        foreach (CoreCustomizationSlot slot in slotComponents) {
+            if (slot != null) {
+                slot.RefreshSlot();
+            }
+        }
+    }
+    
+    public Button GetQuestButton() => questButton;
+    public Button GetShopButton() => shopButton;
+    public GameObject GetQuestGridPanel() => questGridPanel;
+    public RectTransform GetQuestGridParent() => questGridParent;
+    public GameObject GetQuestCellPrefab() => questCellPrefab;
+    public QuestDetailPanel GetQuestDetailPanel() => questDetailPanel;
+    public QuestProvider GetQuestProvider() => questProvider;
+    public GameObject GetShopUIContainer() => moduleSelectionPanel;
+    
+    public void ShowShopUI()
+    {
+        if (moduleSelectionPanel != null)
+        {
+            moduleSelectionPanel.SetActive(true);
+        }
+        RefreshModuleSelectionGrid();
+    }
+    
+    public void HideShopUI()
+    {
+        if (moduleSelectionPanel != null)
+        {
+            moduleSelectionPanel.SetActive(false);
+        }
+    }
+    
+    public void ClearDetailPanel()
+    {
+        if (coreDetailPanel != null)
+        {
+            coreDetailPanel.ClearInfo();
+        }
+    }
+    
+    public GameObject GetNewQuestIndicator() => newQuestIndicator;
+    
+    public string GetUIName() => "Core Custom UI";
+}

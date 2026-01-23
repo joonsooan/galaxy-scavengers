@@ -102,13 +102,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cf89cb9805b4004599893bc2ee8363c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 50
+  maxHealth: 100
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
+  currentHealth: 0
   attackRange: 10
   fireInterval: 1
   attackDamage: 4
   bulletPrefab: {fileID: 3852804536807886205, guid: c773192e621cee54cb0e65277df6f731, type: 3}
+  aetherConsumptionPerSecond: 0
 --- !u!114 &7205248449290787444
 MonoBehaviour:
   m_ObjectHideFlags: 0

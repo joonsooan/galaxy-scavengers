@@ -200,11 +200,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9fb78aa4bea4a2faf1ea4c14cca6134, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 10000
+  maxHealth: 1000
   currentHealth: 0
   unitType: 0
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
+  progressBarPrefab: {fileID: 5648413654597824292, guid: 0e7c462c413987749bca6d734a5a807f, type: 3}
   currentState: 0
   carryCapacity: 10
   processingSpeed: 1
@@ -212,7 +213,6 @@ MonoBehaviour:
   unloadingTime: 3
   assignmentTime: 3
   movement: {fileID: 4483249089817793867}
-  droneIcon: {fileID: 4992164939788663360, guid: 41d81b85481201c44bb0e26872455946, type: 3}
   hoverHeight: 0.1
   hoverDuration: 1
 --- !u!114 &4483249089817793867

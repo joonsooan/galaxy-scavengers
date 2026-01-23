@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using Random = UnityEngine.Random;
+using Systems.Jobs;
 
 [Serializable]
 public class ResourceSpawnSettings
@@ -143,9 +144,15 @@ public class MapObjectSpawner : MonoBehaviour
         _circleGenerator.Initialize(mapSize.x, mapSize.y, Vector2Int.zero);
     }
     
-    public void SpawnResources()
+    public IEnumerator SpawnResourcesAsync(IInitializationProgress progress = null)
     {
         Vector2Int mapSize = mapGenerator.MapSize;
+        
+        if (progress != null)
+        {
+            progress.UpdateProgress(0.0f, "희귀 광물 반응 탐지 중...");
+            yield return new WaitForSeconds(0.5f);
+        }
         
         if (_circleGenerator == null)
         {
@@ -176,14 +183,13 @@ public class MapObjectSpawner : MonoBehaviour
             
             _cachedResourceCircles = new List<ResourceCircle>(resourceCircles);
             
-            SpawnResourcesInCircles(resourceCircles);
+            yield return StartCoroutine(SpawnResourcesInCirclesAsync(resourceCircles, progress));
+            
             RegisterBufferedResources();
             
             _tileManager.InitializeRuleTiles();
             
             OnAllObjectsSpawned.Invoke();
-            
-            // Debug.Log($"Spawned {_pendingResourceNodes.Count} resource nodes. Created {resourceCircles.Count} resource circles.");
         }
         finally
         {
@@ -192,8 +198,95 @@ public class MapObjectSpawner : MonoBehaviour
             if (FogOfWarManager.Instance != null)
             {
                 FogOfWarManager.SetSuppressVisibilityEvents(false);
-                
-                StartCoroutine(DeferredFogRefresh());
+            }
+        }
+    }
+    
+    public void SpawnResources()
+    {
+        StartCoroutine(SpawnResourcesSyncInternal());
+    }
+    
+    private IEnumerator SpawnResourcesSyncInternal()
+    {
+        yield return StartCoroutine(SpawnResourcesAsync(null));
+    }
+    
+    private IEnumerator SpawnResourcesInCirclesAsync(List<ResourceCircle> resourceCircles, IInitializationProgress progress = null)
+    {
+        List<float> divisionRadii = _circleGenerator.GetDivisionRadii();
+        List<float> sectorPowerValues = _circleGenerator.GetSectorPowerValues();
+        Vector2Int mapCenter = Vector2Int.zero;
+        
+        int totalCircles = resourceCircles.Count;
+        int processedCircles = 0;
+        const int circlesPerFrame = 5; // Process 5 circles per frame to avoid blocking
+        
+        foreach (var circle in resourceCircles)
+        {
+            ResourceSpawnSettings settings = resourceSettings.Find(s => s.resourceType == circle.resourceType);
+            if (settings == null || settings.resourcePrefab == null || settings.resourceRuleTile == null)
+            {
+                processedCircles++;
+                continue;
+            }
+            
+            float distanceFromCenter = Vector2.Distance(circle.center, mapCenter);
+            int sectorIndex = 0;
+            for (int i = 0; i < divisionRadii.Count - 1; i++)
+            {
+                if (distanceFromCenter >= divisionRadii[i] && distanceFromCenter < divisionRadii[i + 1])
+                {
+                    sectorIndex = i;
+                    break;
+                }
+            }
+            
+            if (sectorIndex >= sectorPowerValues.Count) sectorIndex = sectorPowerValues.Count - 1;
+            float powerValue = sectorPowerValues[sectorIndex];
+            
+            int richness = Mathf.RoundToInt(settings.baseRichness * powerValue);
+            
+            int radiusInt = Mathf.CeilToInt(circle.radius);
+            int minX = circle.center.x - radiusInt;
+            int maxX = circle.center.x + radiusInt;
+            int minY = circle.center.y - radiusInt;
+            int maxY = circle.center.y + radiusInt;
+            
+            List<Vector3Int> validPositions = new List<Vector3Int>();
+            
+            for (int x = minX; x <= maxX; x++)
+            {
+                for (int y = minY; y <= maxY; y++)
+                {
+                    float distanceFromCircleCenter = Vector2.Distance(new Vector2(x, y), circle.center);
+                    if (distanceFromCircleCenter > circle.radius) continue;
+                    
+                    Vector3Int cellPos = new Vector3Int(x, y, 0);
+                    
+                    if (!IsValidSpawnPosition(cellPos)) continue;
+                    
+                    validPositions.Add(cellPos);
+                }
+            }
+            
+            if (validPositions.Count > maxResourcesPerCircle)
+            {
+                ShuffleList(validPositions);
+                validPositions = validPositions.GetRange(0, maxResourcesPerCircle);
+            }
+            
+            foreach (var cellPos in validPositions)
+            {
+                SpawnResourceAtPosition(cellPos, settings, richness);
+            }
+            
+            processedCircles++;
+            
+            // Yield every few circles to avoid blocking
+            if (processedCircles % circlesPerFrame == 0)
+            {
+                yield return null;
             }
         }
     }
@@ -399,17 +492,6 @@ public class MapObjectSpawner : MonoBehaviour
             Vector3 newPoint = center + new Vector3(Mathf.Cos(angle) * radius, Mathf.Sin(angle) * radius, 0);
             Gizmos.DrawLine(prevPoint, newPoint);
             prevPoint = newPoint;
-        }
-    }
-    
-    private IEnumerator DeferredFogRefresh()
-    {
-        yield return null;
-        yield return null;
-        
-        if (FogOfWarManager.Instance != null)
-        {
-            FogOfWarManager.Instance.RefreshFogOfWar();
         }
     }
     

@@ -49,14 +49,17 @@ TagManager:
   - name: Objects
     uniqueID: 3267852943
     locked: 0
+  - name: Particles
+    uniqueID: 3934607671
+    locked: 0
+  - name: Dragging
+    uniqueID: 2308239201
+    locked: 0
   - name: Fog
     uniqueID: 2127151825
     locked: 0
   - name: UI
     uniqueID: 562081179
-    locked: 0
-  - name: Particles
-    uniqueID: 3934607671
     locked: 0
   m_RenderingLayers:
   - Default

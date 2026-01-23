@@ -44,6 +44,7 @@ public class Unit_Miner : UnitBase
     private Tween _miningVibrationTween;
     private WaitForSeconds _searchWait;
     private Vector3 _spriteBaseLocalPosition;
+    private bool _noResourceAlertActive;
     private UnitSpriteController _spriteController;
     private Vector3Int _targetMiningCell;
     private ResourceNode _targetResourceNode;
@@ -59,7 +60,7 @@ public class Unit_Miner : UnitBase
         InitializeCarryAmounts();
     }
 
-    protected override void Start()
+    protected void Start()
     {
         mineableResourceTypes = UnitManager.Instance != null
             ? UnitManager.Instance.CurrentMineableTypes.ToArray()
@@ -91,6 +92,11 @@ public class Unit_Miner : UnitBase
 
     private void OnDestroy()
     {
+        if (_noResourceAlertActive)
+        {
+            GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.MinerNoResource);
+            _noResourceAlertActive = false;
+        }
         StopMiningVibration();
         StopMiningParticles();
         if (_targetResourceNode != null && _targetResourceNode.IsReserved && _targetResourceNode.GetReservedUnit() == this) {
@@ -105,7 +111,21 @@ public class Unit_Miner : UnitBase
         switch (currentState) {
         case UnitState.Idle:
             if (_findResourceCoroutine == null) {
+                if (GameManager.Instance != null && SceneManager.GetActiveScene().name == "GameScene" && !GameManager.IsGameplayReady) {
+                    return;
+                }
                 TryStartActions();
+            }
+            bool shouldShowAlert = _findResourceCoroutine == null;
+            if (shouldShowAlert && !_noResourceAlertActive)
+            {
+                GameAlertUIManager.Instance?.RegisterAlert(GameAlertType.MinerNoResource);
+                _noResourceAlertActive = true;
+            }
+            else if (!shouldShowAlert && _noResourceAlertActive)
+            {
+                GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.MinerNoResource);
+                _noResourceAlertActive = false;
             }
             break;
 
@@ -232,7 +252,20 @@ public class Unit_Miner : UnitBase
     private IEnumerator UnloadResourceCoroutine()
     {
         unitMovement.StopMovement();
-        yield return new WaitForSeconds(unloadingTime);
+        
+        // Show progress bar during unloading
+        ShowProgressBar();
+        float elapsedTime = 0f;
+        
+        while (elapsedTime < unloadingTime)
+        {
+            elapsedTime += Time.deltaTime;
+            float progress = elapsedTime / unloadingTime;
+            UpdateProgressBar(progress);
+            yield return null;
+        }
+        
+        HideProgressBar();
 
         if (_targetStorage != null) {
             // Check if trying to unload aether and capacity is full

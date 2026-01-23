@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using Systems.Jobs;
 
 public class FogOfWarInitializer
 {
@@ -32,6 +33,148 @@ public class FogOfWarInitializer
         _fogTilemap = fogTilemap;
         _groundTilemap = groundTilemap;
         _cachedMapGenerator = mapGenerator;
+    }
+    
+    public IEnumerator InitializeFogOfWarAsync(Dictionary<Vector3Int, FogOfWarState> tileVisibility, IInitializationProgress progress = null)
+    {
+        if (progress != null)
+        {
+            progress.UpdateProgress(0.0f, "대기 농도 및 가시거리 분석 중...");
+            yield return new WaitForSeconds(0.5f);
+        }
+        
+        List<Tilemap> terrainTilemaps = CollectTerrainTilemaps();
+        
+        if (terrainTilemaps.Count == 0 || _fogTilemap == null || _fogTile == null)
+        {
+            yield break;
+        }
+        
+        HashSet<Vector3Int> allTilePositions = CollectAllTilePositions(terrainTilemaps, tileVisibility);
+        
+        // Yield to avoid blocking
+        yield return null;
+        
+        if (allTilePositions.Count > 0)
+        {
+            TilemapRenderer renderer = _fogTilemap.GetComponent<TilemapRenderer>();
+            bool wasEnabled = renderer != null && renderer.enabled;
+            
+            if (renderer != null)
+            {
+                renderer.enabled = false;
+            }
+            
+            // Break up tile placement into chunks to avoid blocking
+            yield return PlaceFogTilesAsync(allTilePositions, progress);
+            
+            if (renderer != null)
+            {
+                renderer.enabled = wasEnabled;
+            }
+        }
+        
+        _fogTilemap.CompressBounds();
+    }
+    
+    private MonoBehaviour _coroutineRunner;
+    
+    public void SetCoroutineRunner(MonoBehaviour runner)
+    {
+        _coroutineRunner = runner;
+    }
+    
+    private Coroutine StartCoroutineOnRunner(IEnumerator coroutine)
+    {
+        if (_coroutineRunner == null && _manager != null)
+        {
+            _coroutineRunner = _manager;
+        }
+        
+        if (_coroutineRunner != null)
+        {
+            return _coroutineRunner.StartCoroutine(coroutine);
+        }
+        
+        return null;
+    }
+    
+    private IEnumerator PlaceFogTilesAsync(HashSet<Vector3Int> allTilePositions, IInitializationProgress progress = null)
+    {
+        int minX = int.MaxValue, minY = int.MaxValue;
+        int maxX = int.MinValue, maxY = int.MinValue;
+        
+        foreach (Vector3Int pos in allTilePositions)
+        {
+            minX = Mathf.Min(minX, pos.x);
+            minY = Mathf.Min(minY, pos.y);
+            maxX = Mathf.Max(maxX, pos.x);
+            maxY = Mathf.Max(maxY, pos.y);
+        }
+        
+        BoundsInt fogBounds = new BoundsInt(minX, minY, 0, maxX - minX + 1, maxY - minY + 1, 1);
+        TileBase[] fogTiles = new TileBase[fogBounds.size.x * fogBounds.size.y];
+        
+        int totalPositions = fogBounds.size.x * fogBounds.size.y;
+        int processedPositions = 0;
+        const int positionsPerFrame = 1000; // Process 1000 positions per frame
+        
+        foreach (Vector3Int pos in fogBounds.allPositionsWithin)
+        {
+            int index = (pos.x - minX) + (pos.y - minY) * fogBounds.size.x;
+            if (allTilePositions.Contains(pos))
+            {
+                fogTiles[index] = _fogTile;
+            }
+            else
+            {
+                fogTiles[index] = null;
+            }
+            
+            processedPositions++;
+            
+            if (processedPositions % positionsPerFrame == 0)
+            {
+                yield return null;
+            }
+        }
+        
+        _fogTilemap.SetTilesBlock(fogBounds, fogTiles);
+        
+        // Batch set colors in chunks
+        List<Vector3Int> positionsList = new List<Vector3Int>(allTilePositions);
+        const int colorsPerFrame = 500;
+        
+        for (int i = 0; i < positionsList.Count; i += colorsPerFrame)
+        {
+            int endIndex = Mathf.Min(i + colorsPerFrame, positionsList.Count);
+            
+            for (int j = i; j < endIndex; j++)
+            {
+                _fogTilemap.SetColor(positionsList[j], _invisibleColor);
+            }
+            
+            if (i % (colorsPerFrame * 5) == 0)
+            {
+                yield return null;
+            }
+        }
+        
+        // Refresh tiles in chunks
+        for (int i = 0; i < positionsList.Count; i += colorsPerFrame)
+        {
+            int endIndex = Mathf.Min(i + colorsPerFrame, positionsList.Count);
+            
+            for (int j = i; j < endIndex; j++)
+            {
+                _fogTilemap.RefreshTile(positionsList[j]);
+            }
+            
+            if (i % (colorsPerFrame * 5) == 0)
+            {
+                yield return null;
+            }
+        }
     }
     
     public void InitializeFogOfWar(Dictionary<Vector3Int, FogOfWarState> tileVisibility)

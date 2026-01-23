@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   questId: 3
   questProvider: 0
-  previousQuestIds: 01000000
+  previousQuestIds: 00000000
   questName: "\uBBF8\uAC1C\uCC99 \uC9C0\uC5ED \uD0D0\uC0AC"
   questInfo: "\uC815\uCC30 \uC720\uB2DB\uC740 \uBE60\uB974\uAC8C \uC774\uB3D9\uD558\uBA70
     \uC2DC\uC57C\uB97C \uBC1D\uD788\uACE0, \uC790\uC6D0\uC744 \uCC3E\uAC70\uB098
@@ -25,9 +25,11 @@ MonoBehaviour:
   questCheckRequirements:
   - checkType: 4
     targetId: 
-    requiredCount: 0
-    targetLocation: {x: 0, y: 0, z: 0}
-    locationTolerance: 0
+    requiredCount: 1
+    displayText: "\uC815\uCC30 \uC720\uB2DB\uC744 \uC2DC\uB4DC \uCF54\uC5B4 \uC6B0\uCE21\uC73C\uB85C
+      \uC774\uB3D9"
+    targetLocation: {x: 20, y: 0, z: 0}
+    locationTolerance: 20
   questFinishReward:
     resourceRewards: []
     moduleRewards: []

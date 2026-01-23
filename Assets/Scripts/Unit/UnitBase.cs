@@ -1,7 +1,6 @@
-using System.Collections;
 using UnityEngine;
 
-public abstract class UnitBase : MonoBehaviour
+public abstract class UnitBase : Damageable
 {
     public enum UnitState
     {
@@ -20,76 +19,70 @@ public abstract class UnitBase : MonoBehaviour
         Enemy
     }
 
-    [Header("Unit Stats")]
-    public float maxHealth;
-    public float currentHealth;
+    [Header("Unit Settings")]
     public UnitType unitType;
 
-    [Header("Feedback Settings")]
-    [SerializeField] private Color flashColor = Color.red;
-    [SerializeField] private float flashDuration = 0.3f;
+    [Header("Progress Bar")]
+    [SerializeField] private GameObject progressBarPrefab;
 
     public UnitState currentState;
-    private Coroutine _flashCoroutine;
-    private Color _originalColor;
-    private SpriteRenderer _sr;
+    protected UnitProgressBar progressBar;
 
-    protected virtual void Awake()
+    protected override void OnEnable()
     {
-        currentHealth = maxHealth;
-    }
+        base.OnEnable();
 
-    protected virtual void Start()
-    {
-        _sr = GetComponentInChildren<SpriteRenderer>();
-    }
-
-    protected virtual void OnEnable()
-    {
         if (UnitManager.Instance != null) {
             UnitManager.Instance.AddUnit(this);
         }
 
-        if (unitType == UnitType.Ally && GetComponent<VisionProvider>() == null) {
-            VisionProvider visionProvider = gameObject.AddComponent<VisionProvider>();
-            visionProvider.SetVisionRange(3f);
+        VisionProvider visionProvider = GetComponent<VisionProvider>();
+        if (visionProvider != null && FogOfWarManager.Instance != null && FogOfWarManager.Instance.IsInitialized) {
+            visionProvider.ForceUpdateAffectedTiles();
         }
     }
 
-    protected virtual void OnDisable()
+    protected override void OnDisable()
     {
         if (UnitManager.Instance != null) {
             UnitManager.Instance.RemoveUnit(this);
         }
+
+        HideProgressBar();
+
+        base.OnDisable();
     }
 
-    public virtual void TakeDamage(float damage)
+    protected virtual void OnDestroy()
     {
-        currentHealth -= damage;
+        HideProgressBar();
+    }
 
-        if (_flashCoroutine != null) {
-            StopCoroutine(_flashCoroutine);
+    protected void ShowProgressBar()
+    {
+        if (progressBar != null) return;
+
+        GameObject barObj = Instantiate(progressBarPrefab);
+        progressBar = barObj.GetComponent<UnitProgressBar>();
+        progressBar.Initialize(transform);
+    }
+
+    protected void HideProgressBar()
+    {
+        if (progressBar != null) {
+            progressBar.Destroy();
+            progressBar = null;
         }
-        _flashCoroutine = StartCoroutine(FlashEffect());
+    }
 
-        if (currentHealth <= 0) {
-            Destroy(gameObject);
+    protected void UpdateProgressBar(float progress)
+    {
+        if (progressBar == null) {
+            ShowProgressBar();
         }
-    }
 
-    public void Heal(float amount)
-    {
-        if (currentHealth >= maxHealth) return;
-
-        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
-    }
-
-    private IEnumerator FlashEffect()
-    {
-        if (_sr == null) yield break;
-
-        _sr.material.color = flashColor;
-        yield return new WaitForSeconds(flashDuration);
-        _sr.material.color = _originalColor;
+        if (progressBar != null) {
+            progressBar.SetProgress(progress);
+        }
     }
 }

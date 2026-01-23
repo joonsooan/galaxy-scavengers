@@ -52,7 +52,7 @@ public class Unit_Construct : UnitBase
         _rb = GetComponent<Rigidbody2D>();
     }
 
-    protected override void Start()
+    protected void Start()
     {
         if (ConstructionManager.Instance != null && movement != null) {
             ConstructionManager.Instance.RegisterConstructDrone(this);
@@ -244,8 +244,20 @@ public class Unit_Construct : UnitBase
         }
 
         movement.ForceStopAllMovement();
-
-        yield return new WaitForSeconds(loadingTime);
+        
+        // Show progress bar during loading
+        ShowProgressBar();
+        float elapsedTime = 0f;
+        
+        while (elapsedTime < loadingTime)
+        {
+            elapsedTime += Time.deltaTime;
+            float progress = elapsedTime / loadingTime;
+            UpdateProgressBar(progress);
+            yield return null;
+        }
+        
+        HideProgressBar();
 
         if (_targetStorage == null || _currentRequest == null) {
             SetTask_Idle();
@@ -362,8 +374,20 @@ public class Unit_Construct : UnitBase
         movement.ForceStopAllMovement();
 
         StartConstructionParticles();
-
-        yield return new WaitForSeconds(unloadingTime);
+        
+        // Show progress bar during constructing (unloading)
+        ShowProgressBar();
+        float elapsedTime = 0f;
+        
+        while (elapsedTime < unloadingTime)
+        {
+            elapsedTime += Time.deltaTime;
+            float progress = elapsedTime / unloadingTime;
+            UpdateProgressBar(progress);
+            yield return null;
+        }
+        
+        HideProgressBar();
 
         if (!CanDepositResource()) {
             StopConstructionParticles();

@@ -25,6 +25,11 @@ public class MainStructure : BaseStorage, IClickable
             {
                 _aetherConsumptionManager.RegisterMainStructure(this);
             }
+
+            if (TargetManager.Instance != null)
+            {
+                TargetManager.Instance.RegisterTarget(this);
+            }
         }
         
         if (GetComponent<BuildingHoverTrigger>() == null)

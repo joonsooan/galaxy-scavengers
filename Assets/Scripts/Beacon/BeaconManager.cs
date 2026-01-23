@@ -46,6 +46,8 @@ public class BeaconManager : MonoBehaviour
     private void HandleBeaconInput()
     {
         if (_mainCamera == null || _grid == null) return;
+
+        if (IsLoadingScreenActive()) return;
         
         bool isShiftHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
         
@@ -280,6 +282,22 @@ public class BeaconManager : MonoBehaviour
             }
         }
         return null;
+    }
+
+    private bool IsLoadingScreenActive()
+    {
+        if (LoadingUIManager.Instance == null)
+        {
+            return false;
+        }
+
+        LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
+        if (loadingScreen == null)
+        {
+            return false;
+        }
+
+        return loadingScreen.gameObject.activeSelf;
     }
 }
 
