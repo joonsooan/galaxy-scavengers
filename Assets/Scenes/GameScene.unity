@@ -31828,6 +31828,13 @@ MonoBehaviour:
   temporaryTile: {fileID: 11400000, guid: 1a272a0c37b7bdf48a1ad47ad0cd0fa7, type: 2}
   buildingParentTransform: {fileID: 1482201535}
   resourceParentTransform: {fileID: 956259329}
+  constructionSiteCreateSound:
+    Guid:
+      Data1: 351202756
+      Data2: 1268745534
+      Data3: -891360632
+      Data4: -818067828
+    Path: event:/SFX_ConstructStart
 --- !u!4 &1272048963
 Transform:
   m_ObjectHideFlags: 0
@@ -34642,6 +34649,46 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: pauseSound.Path
+      value: event:/SFX_GamePause
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: resumeSound.Path
+      value: event:/SFX_GameStart
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: pauseSound.Guid.Data1
+      value: -1936566649
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: pauseSound.Guid.Data2
+      value: 1287107820
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: pauseSound.Guid.Data3
+      value: 1616156851
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: pauseSound.Guid.Data4
+      value: 765321994
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: resumeSound.Guid.Data1
+      value: -765664001
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: resumeSound.Guid.Data2
+      value: 1302141166
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: resumeSound.Guid.Data3
+      value: 995189914
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: resumeSound.Guid.Data4
+      value: -85904115
+      objectReference: {fileID: 0}
     - target: {fileID: 8256486884244902839, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

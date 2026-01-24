@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using FMODUnity;
 
 public class BuildingManager : MonoBehaviour
 {
@@ -12,6 +13,8 @@ public class BuildingManager : MonoBehaviour
     [SerializeField] private TileBase temporaryTile;
     [SerializeField] private Transform buildingParentTransform;
     [SerializeField] private Transform resourceParentTransform;
+    [Header("Audio")]
+    [SerializeField] private EventReference constructionSiteCreateSound;
     private readonly Dictionary<BuildingPieceType, TileBase> _buildingPieceTypeToTileCache = new Dictionary<BuildingPieceType, TileBase>();
 
     private readonly Dictionary<Vector3Int, BuildingStructure> _buildingStructuresByAnchor = new Dictionary<Vector3Int, BuildingStructure>();
@@ -348,6 +351,10 @@ public class BuildingManager : MonoBehaviour
         GameObject siteObject = new GameObject($"ConstructionSite_{anchorCellPosition}");
         siteObject.transform.position = worldPosition;
         siteObject.transform.SetParent(buildingParentTransform);
+
+        if (!constructionSiteCreateSound.IsNull) {
+            RuntimeManager.PlayOneShot(constructionSiteCreateSound);
+        }
 
         ConstructionSite site = siteObject.AddComponent<ConstructionSite>();
         site.buildingData = buildingData;

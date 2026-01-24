@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="AudioFile" id="{5df1e125-eec7-431c-bd34-e0572ef6e955}">
+		<property name="assetPath">
+			<value>tools_clank_03-43154_1_2.mp3</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>48</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>0.98399999999999999</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{a7a75309-85f1-4e1f-8f6d-60f7d7d8a7a3}</destination>
+		</relationship>
+	</object>
+</objects>

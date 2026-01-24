@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="AudioFile" id="{e6e1af38-5807-400c-aace-b071fee38cf1}">
+		<property name="assetPath">
+			<value>ratchet-socket-wrench-tool-95253.mp3</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>24</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>1.3440000000000001</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{a7a75309-85f1-4e1f-8f6d-60f7d7d8a7a3}</destination>
+		</relationship>
+	</object>
+</objects>
