@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class Unit_Player : UnitBase
 {
@@ -22,15 +23,15 @@ public class Unit_Player : UnitBase
     [SerializeField] private ParticleSystem miningParticleSystem;
     [SerializeField] private float particleOffsetDistance = 0.5f;
     [SerializeField] private float yOffset;
-
-    private ResourceNode _targetResourceNode;
-    private Coroutine _mineCoroutine;
-    private WaitForSeconds _miningDelay;
+    private Grid _grid;
+    private LineRenderer _laserRenderer;
     private float _lastFireTime;
     private Camera _mainCamera;
-    private Grid _grid;
+    private Coroutine _mineCoroutine;
+    private WaitForSeconds _miningDelay;
     private UnitSpriteController _spriteController;
-    private LineRenderer _laserRenderer;
+
+    private ResourceNode _targetResourceNode;
 
     protected override void Awake()
     {
@@ -39,23 +40,21 @@ public class Unit_Player : UnitBase
         _mainCamera = Camera.main;
         playerMovement = GetComponent<PlayerMovement>();
         _spriteController = GetComponentInChildren<UnitSpriteController>();
-        
+
         CreateLaserRenderer();
+
+        if (cameraController == null) {
+            cameraController = FindFirstObjectByType<CameraTargetController>();
+        }
+
+        if (cameraController != null) {
+            cameraController.followTarget = transform;
+        }
     }
 
     private void Start()
     {
         _grid = BuildingManager.Instance.grid;
-        
-        if (cameraController == null)
-        {
-            cameraController = FindFirstObjectByType<CameraTargetController>();
-        }
-        
-        if (cameraController != null)
-        {
-            cameraController.followTarget = transform;
-        }
     }
 
     private void Update()
@@ -67,26 +66,36 @@ public class Unit_Player : UnitBase
         UpdateParticlePosition();
     }
 
+    private void OnDestroy()
+    {
+        StopMiningParticles();
+
+        if (_laserRenderer != null) {
+            Destroy(_laserRenderer.gameObject);
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, interactionRange);
+    }
+
     private void UpdateSpriteDirection()
     {
-        if (currentState == UnitState.Mining && _targetResourceNode != null)
-        {
-            if (_spriteController != null)
-            {
+        if (currentState == UnitState.Mining && _targetResourceNode != null) {
+            if (_spriteController != null) {
                 Vector2 direction = (_targetResourceNode.transform.position - transform.position).normalized;
                 _spriteController.SetTargetTransform(_targetResourceNode.transform);
-                
-                if (direction.sqrMagnitude > 0.01f)
-                {
+
+                if (direction.sqrMagnitude > 0.01f) {
                     _spriteController.UpdateSpriteDirection(direction);
                 }
             }
         }
-        else if (_spriteController != null && playerMovement != null)
-        {
+        else if (_spriteController != null && playerMovement != null) {
             Vector2 moveDir = playerMovement.GetMoveDirection();
-            if (moveDir.sqrMagnitude > 0.01f)
-            {
+            if (moveDir.sqrMagnitude > 0.01f) {
                 _spriteController.ClearTarget();
                 _spriteController.UpdateSpriteDirection(moveDir);
             }
@@ -95,34 +104,60 @@ public class Unit_Player : UnitBase
 
     private void HandleInput()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
+        if (Input.GetMouseButtonDown(0)) {
+            if (IsPointerOverUI()) {
+                return;
+            }
+
             Vector3 mouseWorldPos = GetMouseWorldPosition();
-            if (mouseWorldPos != Vector3.zero)
-            {
+            if (mouseWorldPos != Vector3.zero) {
                 float distanceToClick = Vector3.Distance(transform.position, mouseWorldPos);
-                
-                if (distanceToClick <= interactionRange)
-                {
+
+                if (distanceToClick <= interactionRange) {
                     ResourceNode clickedResource = GetResourceAtPosition(mouseWorldPos);
-                    if (clickedResource != null)
-                    {
+                    if (clickedResource != null) {
                         TryMineResource(mouseWorldPos);
                     }
                 }
             }
         }
-        else if (Input.GetMouseButton(0))
-        {
-            if (currentState != UnitState.Mining)
-            {
+        else if (Input.GetMouseButton(0)) {
+            if (IsPointerOverUI()) {
+                return;
+            }
+
+            if (currentState != UnitState.Mining) {
                 Vector3 mouseWorldPos = GetMouseWorldPosition();
-                if (mouseWorldPos != Vector3.zero)
-                {
+                if (mouseWorldPos != Vector3.zero) {
                     TryFireBullet(mouseWorldPos);
                 }
             }
         }
+    }
+
+    private bool IsPointerOverUI()
+    {
+        if (EventSystem.current == null) {
+            return false;
+        }
+
+        // Screen Space Overlay에서는 raycast를 사용해야 함
+        PointerEventData pointerData = new PointerEventData(EventSystem.current) {
+            position = Input.mousePosition
+        };
+
+        List<RaycastResult> results =
+            new List<RaycastResult>();
+
+        EventSystem.current.RaycastAll(pointerData, results);
+
+        foreach (RaycastResult result in results) {
+            if (result.gameObject.layer == LayerMask.NameToLayer("UI")) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private ResourceNode GetResourceAtPosition(Vector3 position)
@@ -131,14 +166,12 @@ public class Unit_Player : UnitBase
 
         Vector3Int clickCell = _grid.WorldToCell(position);
         List<ResourceNode> allResources = ResourceManager.Instance.GetAllResources();
-        
-        foreach (ResourceNode resource in allResources)
-        {
+
+        foreach (ResourceNode resource in allResources) {
             if (resource == null || resource.IsDepleted || !resource.gameObject.activeInHierarchy)
                 continue;
 
-            if (resource.cellPosition == clickCell)
-            {
+            if (resource.cellPosition == clickCell) {
                 return resource;
             }
         }
@@ -149,12 +182,12 @@ public class Unit_Player : UnitBase
     private Vector3 GetMouseWorldPosition()
     {
         if (_mainCamera == null) return Vector3.zero;
-        
+
         Vector3 mouseScreenPos = Input.mousePosition;
         mouseScreenPos.z = _mainCamera.transform.position.z * -1f;
         Vector3 mouseWorldPos = _mainCamera.ScreenToWorldPoint(mouseScreenPos);
         mouseWorldPos.z = 0f;
-        
+
         return mouseWorldPos;
     }
 
@@ -162,16 +195,13 @@ public class Unit_Player : UnitBase
     {
         ResourceNode clickedResource = GetResourceAtPosition(clickPosition);
 
-        if (clickedResource != null)
-        {
+        if (clickedResource != null) {
             float distance = Vector3.Distance(transform.position, clickedResource.transform.position);
-            if (distance <= interactionRange)
-            {
-                if (_targetResourceNode != null && _targetResourceNode != clickedResource)
-                {
+            if (distance <= interactionRange) {
+                if (_targetResourceNode != null && _targetResourceNode != clickedResource) {
                     StopMining();
                 }
-                
+
                 _targetResourceNode = clickedResource;
                 StartMining();
             }
@@ -180,34 +210,30 @@ public class Unit_Player : UnitBase
 
     private void StartMining()
     {
-        if (_targetResourceNode == null || _targetResourceNode.IsDepleted)
-        {
+        if (_targetResourceNode == null || _targetResourceNode.IsDepleted) {
             StopMining();
             return;
         }
 
-        if (_mineCoroutine == null)
-        {
+        if (_mineCoroutine == null) {
             _miningDelay = new WaitForSeconds(_targetResourceNode.timeToMinePerUnit);
             _mineCoroutine = StartCoroutine(MineResourceCoroutine());
             currentState = UnitState.Mining;
         }
-        
+
         StartMiningParticles();
     }
 
     private void StopMining()
     {
-        if (_mineCoroutine != null)
-        {
+        if (_mineCoroutine != null) {
             StopCoroutine(_mineCoroutine);
             _mineCoroutine = null;
         }
         currentState = UnitState.Idle;
         StopMiningParticles();
-        
-        if (_spriteController != null)
-        {
+
+        if (_spriteController != null) {
             _spriteController.ClearTarget();
         }
     }
@@ -216,38 +242,35 @@ public class Unit_Player : UnitBase
     {
         yield return _miningDelay;
 
-        while (true)
-        {
-            if (_targetResourceNode == null || _targetResourceNode.IsDepleted)
-            {
-                if (_targetResourceNode != null && _targetResourceNode.IsDepleted)
-                {
+        while (true) {
+            if (_targetResourceNode == null || _targetResourceNode.IsDepleted) {
+                if (_targetResourceNode != null && _targetResourceNode.IsDepleted) {
                     Vector3Int depletedCell = _targetResourceNode.cellPosition;
                     yield return null;
                     bool foundAdjacent = TryMineAdjacentResource(depletedCell);
-                    if (!foundAdjacent)
-                    {
+                    if (!foundAdjacent) {
                         StopMining();
                     }
                 }
-                else
-                {
+                else {
                     StopMining();
                 }
                 yield break;
             }
 
             float distance = Vector3.Distance(transform.position, _targetResourceNode.transform.position);
-            if (distance > interactionRange)
-            {
+            if (distance > interactionRange) {
                 StopMining();
                 yield break;
             }
 
             int minedAmount = _targetResourceNode.Mine(mineAmountPerAction);
-            if (minedAmount > 0)
-            {
+            if (minedAmount > 0) {
                 AddResourceToStorage(_targetResourceNode.resourceType, minedAmount);
+
+                if (TutorialManager.Instance != null) {
+                    TutorialManager.Instance.OnResourceMined(_targetResourceNode.resourceType, minedAmount);
+                }
             }
 
             yield return _miningDelay;
@@ -259,30 +282,23 @@ public class Unit_Player : UnitBase
         if (_grid == null) return false;
 
         Vector3Int[] neighborOffsets = {
-            new (1, 0, 0),
-            new (-1, 0, 0),
-            new (0, 1, 0),
-            new (0, -1, 0)
+            new Vector3Int(1, 0, 0), new Vector3Int(-1, 0, 0), new Vector3Int(0, 1, 0), new Vector3Int(0, -1, 0)
         };
 
         List<ResourceNode> allResources = ResourceManager.Instance.GetAllResources();
         ResourceNode closestAdjacentResource = null;
         float minDistance = float.MaxValue;
 
-        foreach (Vector3Int offset in neighborOffsets)
-        {
+        foreach (Vector3Int offset in neighborOffsets) {
             Vector3Int neighborCell = depletedCell + offset;
-            
-            foreach (ResourceNode resource in allResources)
-            {
+
+            foreach (ResourceNode resource in allResources) {
                 if (resource == null || resource.IsDepleted || !resource.gameObject.activeInHierarchy)
                     continue;
 
-                if (resource.cellPosition == neighborCell)
-                {
+                if (resource.cellPosition == neighborCell) {
                     float distance = Vector3.Distance(transform.position, resource.transform.position);
-                    if (distance <= interactionRange && distance < minDistance)
-                    {
+                    if (distance <= interactionRange && distance < minDistance) {
                         minDistance = distance;
                         closestAdjacentResource = resource;
                     }
@@ -290,8 +306,7 @@ public class Unit_Player : UnitBase
             }
         }
 
-        if (closestAdjacentResource != null)
-        {
+        if (closestAdjacentResource != null) {
             _targetResourceNode = closestAdjacentResource;
             _mineCoroutine = null;
             StartMining();
@@ -303,11 +318,9 @@ public class Unit_Player : UnitBase
 
     private void CheckMiningRange()
     {
-        if (currentState == UnitState.Mining && _targetResourceNode != null)
-        {
+        if (currentState == UnitState.Mining && _targetResourceNode != null) {
             float distance = Vector3.Distance(transform.position, _targetResourceNode.transform.position);
-            if (distance > interactionRange)
-            {
+            if (distance > interactionRange) {
                 StopMining();
             }
         }
@@ -320,10 +333,8 @@ public class Unit_Player : UnitBase
             .OrderBy(s => Vector3.Distance(transform.position, s.GetPosition()))
             .ToList();
 
-        foreach (IStorage storage in allStorages)
-        {
-            if (storage.TryAddResource(type, amount))
-            {
+        foreach (IStorage storage in allStorages) {
+            if (storage.TryAddResource(type, amount)) {
                 break;
             }
         }
@@ -342,20 +353,22 @@ public class Unit_Player : UnitBase
 
         GameObject bulletObj = ObjectPooler.Instance.SpawnFromPool("PlayerBullet", spawnPosition, Quaternion.identity);
 
-        if (bulletObj != null)
-        {
+        if (bulletObj != null) {
             Player_Bullet bulletScript = bulletObj.GetComponent<Player_Bullet>();
-            if (bulletScript == null)
-            {
+            if (bulletScript == null) {
                 bulletScript = bulletObj.AddComponent<Player_Bullet>();
             }
-            
+
             bulletScript.speed = 10f;
             bulletScript.lifeTime = 3f;
             bulletScript.Initialize(attackDamage, fireDirection);
         }
 
         _lastFireTime = Time.time;
+
+        if (TutorialManager.Instance != null) {
+            TutorialManager.Instance.OnBulletFired();
+        }
     }
 
     private void CreateLaserRenderer()
@@ -363,7 +376,7 @@ public class Unit_Player : UnitBase
         GameObject laserObj = new GameObject("MiningLaser");
         laserObj.transform.SetParent(transform);
         laserObj.transform.localPosition = Vector3.zero;
-        
+
         _laserRenderer = laserObj.AddComponent<LineRenderer>();
         _laserRenderer.material = laserMaterial != null ? laserMaterial : CreateDefaultLaserMaterial();
         _laserRenderer.startWidth = laserWidth;
@@ -384,8 +397,7 @@ public class Unit_Player : UnitBase
 
     private void UpdateLaser()
     {
-        if (currentState == UnitState.Mining && _targetResourceNode != null && _laserRenderer != null)
-        {
+        if (currentState == UnitState.Mining && _targetResourceNode != null && _laserRenderer != null) {
             _laserRenderer.enabled = true;
             Vector3 direction = (_targetResourceNode.transform.position - transform.position).normalized;
             Vector3 startPos = transform.position + direction * 0.3f;
@@ -393,16 +405,14 @@ public class Unit_Player : UnitBase
             _laserRenderer.SetPosition(0, startPos);
             _laserRenderer.SetPosition(1, endPos);
         }
-        else if (_laserRenderer != null)
-        {
+        else if (_laserRenderer != null) {
             _laserRenderer.enabled = false;
         }
     }
 
     private void StartMiningParticles()
     {
-        if (miningParticleSystem != null)
-        {
+        if (miningParticleSystem != null) {
             StopMiningParticles();
             UpdateParticlePosition();
             miningParticleSystem.Play();
@@ -411,10 +421,8 @@ public class Unit_Player : UnitBase
 
     private void StopMiningParticles()
     {
-        if (miningParticleSystem != null)
-        {
-            if (miningParticleSystem.isPlaying)
-            {
+        if (miningParticleSystem != null) {
+            if (miningParticleSystem.isPlaying) {
                 miningParticleSystem.Stop();
             }
             miningParticleSystem.Clear();
@@ -424,28 +432,11 @@ public class Unit_Player : UnitBase
     private void UpdateParticlePosition()
     {
         if (miningParticleSystem == null) return;
-        
-        if (currentState == UnitState.Mining && _targetResourceNode != null)
-        {
+
+        if (currentState == UnitState.Mining && _targetResourceNode != null) {
             Transform particleTransform = miningParticleSystem.transform;
             Vector3 offsetPosition = _targetResourceNode.transform.position - new Vector3(0, yOffset, 0);
             particleTransform.position = offsetPosition;
         }
-    }
-
-    private void OnDestroy()
-    {
-        StopMiningParticles();
-        
-        if (_laserRenderer != null)
-        {
-            Destroy(_laserRenderer.gameObject);
-        }
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, interactionRange);
     }
 }

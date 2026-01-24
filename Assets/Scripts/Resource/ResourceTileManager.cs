@@ -134,10 +134,16 @@ public class ResourceTileManager
     {
         if (_resourceTilemap == null || !_resourceTilemap.HasTile(cellPos)) return;
         
+        bool wasVisible = _resourceTilemap.GetColor(cellPos).a > 0.5f;
         bool isVisible = true;
         if (FogOfWarManager.Instance != null && FogOfWarManager.Instance.IsInitialized)
         {
             isVisible = FogOfWarManager.Instance.CanSeeResources(cellPos);
+        }
+        
+        if (!wasVisible && isVisible && TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive())
+        {
+            TutorialManager.Instance.OnResourceBlockRevealed();
         }
         
         Color tileColor = isVisible ? new Color(1f, 1f, 1f, 1f) : new Color(1f, 1f, 1f, 0f);

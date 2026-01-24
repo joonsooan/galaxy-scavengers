@@ -421,6 +421,15 @@ public class Processor : Damageable, IClickable, IAetherConsumer
 
         Debug.Log($"[Processor:{name}] Resource Produced: {recipeData.resourceType}, +{recipeData.produceAmount} (ResourceManager: {amountBefore} -> {amountAfter})");
 
+        if (TutorialManager.Instance != null)
+        {
+            string itemTypeName = recipeData.resourceType.ToString();
+            if (itemTypeName.Contains("Alloy") || itemTypeName.Contains("합금"))
+            {
+                TutorialManager.Instance.OnItemProduced("AlloyPlate");
+            }
+        }
+
         List<IStorage> storages = ResourceManager.Instance.GetAllStorages();
         foreach (IStorage storage in storages) {
             if (storage is MainStructure mainStructure) {

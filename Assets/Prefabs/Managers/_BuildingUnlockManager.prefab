@@ -44,3 +44,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49ac14c624831204eba8c9cfce4343d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  unlockedBuildingsList: []

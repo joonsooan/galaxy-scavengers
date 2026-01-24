@@ -196,19 +196,6 @@ public class CameraTargetController : MonoBehaviour
             _direction = Vector3.zero;
         }
 
-        if (Input.GetKeyDown(KeyCode.H)) {
-            for (int i = 0; i < _zoomLevelPositions.Length; i++) {
-                _zoomLevelPositions[i] = Vector3.zero;
-            }
-            transform.position = Vector3.zero;
-            _currentZoomIndex = 0;
-            UpdateActiveCamera();
-            _isManualMode = false;
-        }
-
-        if (Input.GetKeyDown(KeyCode.E)) {
-            _isEdgePanEnable = !_isEdgePanEnable;
-        }
     }
 
     private void HandleMovement()

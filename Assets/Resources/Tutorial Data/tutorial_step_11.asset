@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c74002d918083e14eb5bcbcc12257fde, type: 3}
+  m_Name: tutorial_step_11
+  m_EditorClassIdentifier: 
+  stepIndex: 11
+  text: "\uC798\uD558\uC168\uC2B5\uB2C8\uB2E4, \uC774\uC81C \uAE30\uBCF8\uC801\uC778
+    \uAC74\uBB3C\uB4E4\uC744 \uD558\uB098\uC529 \uC9C0\uC5B4\uBCF4\uC8E0!\n\uAE30\uCD08
+    \uAC74\uBB3C \uBC84\uD2BC\uC744 \uD074\uB9AD\uD55C \uB2E4\uC74C, \uC800\uC7A5\uACE0
+    \uAC74\uBB3C\uC744 \uC120\uD0DD\uD55C \uD6C4 \uC124\uCE58\uD574\uBCF4\uC138\uC694.\n\uAC74\uBB3C\uC744
+    \uC120\uD0DD\uD558\uBA74 \uAC04\uB2E8\uD55C \uC815\uBCF4\uC640 \uAC74\uC124\uC5D0
+    \uD544\uC694\uD55C \uC790\uC6D0\uC744 \uD655\uC778\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+  stepType: 9
+  duration: 0
+  count: 1
+  resourceType: 0
+  buildingType: Storage
+  unitType: 
+  itemType: 
+  showProgressBar: 1
+  spawnUnits: []
+  grantResources: []

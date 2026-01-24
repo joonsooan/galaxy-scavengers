@@ -33,7 +33,7 @@ public class BuildingManager : MonoBehaviour
             return groundTilemap;
         }
     }
-    
+
     public Transform BuildingParentTransform {
         get {
             return buildingParentTransform;
@@ -41,26 +41,6 @@ public class BuildingManager : MonoBehaviour
     }
 
     public static BuildingManager Instance { get; private set; }
-    
-    public static bool IsBuildingProperlyPlaced(Transform buildingTransform)
-    {
-        if (Instance == null) return false;
-        
-        Transform buildingParent = Instance.BuildingParentTransform;
-        if (buildingParent == null) return false;
-        
-        Transform current = buildingTransform;
-        while (current != null)
-        {
-            if (current == buildingParent)
-            {
-                return true;
-            }
-            current = current.parent;
-        }
-        
-        return false;
-    }
 
     private void Awake()
     {
@@ -86,6 +66,24 @@ public class BuildingManager : MonoBehaviour
         MapObjectSpawner.OnAllObjectsSpawned -= RegisterExistingBuildings;
         ResourceManager.OnResourceNodeAdded -= OnResourceNodeAdded;
         ResourceManager.OnResourceNodeRemoved -= OnResourceNodeRemoved;
+    }
+
+    public static bool IsBuildingProperlyPlaced(Transform buildingTransform)
+    {
+        if (Instance == null) return false;
+
+        Transform buildingParent = Instance.BuildingParentTransform;
+        if (buildingParent == null) return false;
+
+        Transform current = buildingTransform;
+        while (current != null) {
+            if (current == buildingParent) {
+                return true;
+            }
+            current = current.parent;
+        }
+
+        return false;
     }
 
     private void InitializeResourceCache()
@@ -369,6 +367,19 @@ public class BuildingManager : MonoBehaviour
         if (ConstructionManager.Instance != null) {
             ConstructionManager.Instance.RegisterConstructionSite(site);
         }
+
+        if (TutorialManager.Instance != null && buildingData != null) {
+            string buildingTypeName = buildingData.buildingType.ToString();
+            if (buildingTypeName == "Storage") {
+                TutorialManager.Instance.OnBuildingPlaced("Storage");
+            }
+            else if (buildingTypeName == "DroneHub") {
+                TutorialManager.Instance.OnBuildingPlaced("DroneHub");
+            }
+            else if (buildingTypeName == "Smelter") {
+                TutorialManager.Instance.OnBuildingPlaced("Smelter");
+            }
+        }
     }
 
     public void PlaceBuildingPieceAtCell(BuildingData buildingData, Vector3Int pieceCell, Vector3Int anchorCellPosition)
@@ -465,7 +476,7 @@ public class BuildingManager : MonoBehaviour
         }
 
         HandleBuildingLogic(newPieceObject, data);
-        
+
         OnBuildingConstructed?.Invoke(data);
     }
 
@@ -563,7 +574,7 @@ public class BuildingManager : MonoBehaviour
         }
 
         Debug.Log($"Building '{data.displayName}' Created");
-        
+
         OnBuildingConstructed?.Invoke(data);
     }
 
@@ -580,13 +591,10 @@ public class BuildingManager : MonoBehaviour
         dataHolder.SetBuildingData(data);
 
         BoxCollider2D[] triggerColliders = obj.GetComponentsInChildren<BoxCollider2D>();
-        foreach (BoxCollider2D collider in triggerColliders)
-        {
-            if (collider.isTrigger)
-            {
+        foreach (BoxCollider2D collider in triggerColliders) {
+            if (collider.isTrigger) {
                 BuildingHoverTrigger hoverTrigger = collider.GetComponent<BuildingHoverTrigger>();
-                if (hoverTrigger == null)
-                {
+                if (hoverTrigger == null) {
                     collider.gameObject.AddComponent<BuildingHoverTrigger>();
                 }
             }
