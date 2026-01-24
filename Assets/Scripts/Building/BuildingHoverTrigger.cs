@@ -19,7 +19,7 @@ public class BuildingHoverTrigger : MonoBehaviour
 
         _buildingDataHolder = GetComponent<BuildingDataHolder>();
         _storage = GetComponent<IStorage>();
-        _boxColliders = GetComponents<BoxCollider2D>();
+        _boxColliders = GetComponentsInChildren<BoxCollider2D>();
         
         _isInitialized = true;
     }
@@ -76,7 +76,7 @@ public class BuildingHoverTrigger : MonoBehaviour
     {
         if (_boxColliders == null)
         {
-            _boxColliders = GetComponents<BoxCollider2D>();
+            _boxColliders = GetComponentsInChildren<BoxCollider2D>();
         }
 
         foreach (BoxCollider2D boxCollider in _boxColliders)

@@ -1,4 +1,3 @@
-using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,14 +9,6 @@ public class TutorialUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI tutorialText;
     [SerializeField] private Slider progressSlider;
     [SerializeField] private GameObject progressBarContainer;
-    [SerializeField] private Image panelBackgroundImage;
-
-    [Header("Flash Settings")]
-    [SerializeField] private float flashDuration = 0.3f;
-    [SerializeField] private float fadeBackDuration = 0.5f;
-
-    private Color _originalColor;
-    private Coroutine _flashCoroutine;
 
     private void Awake()
     {
@@ -27,14 +18,6 @@ public class TutorialUI : MonoBehaviour
 
         if (progressBarContainer != null) {
             progressBarContainer.SetActive(false);
-        }
-
-        if (panelBackgroundImage == null && tutorialPanel != null) {
-            panelBackgroundImage = tutorialPanel.GetComponent<Image>();
-        }
-
-        if (panelBackgroundImage != null) {
-            _originalColor = panelBackgroundImage.color;
         }
     }
 
@@ -59,35 +42,6 @@ public class TutorialUI : MonoBehaviour
                 progressSlider.value = 0f;
             }
         }
-
-        if (panelBackgroundImage != null) {
-            if (_flashCoroutine != null) {
-                StopCoroutine(_flashCoroutine);
-            }
-            _flashCoroutine = StartCoroutine(FlashPanelCoroutine());
-        }
-    }
-
-    private IEnumerator FlashPanelCoroutine()
-    {
-        if (panelBackgroundImage == null) {
-            yield break;
-        }
-
-        panelBackgroundImage.color = Color.white;
-
-        yield return new WaitForSeconds(flashDuration);
-
-        float elapsedTime = 0f;
-        while (elapsedTime < fadeBackDuration) {
-            elapsedTime += Time.deltaTime;
-            float t = elapsedTime / fadeBackDuration;
-            panelBackgroundImage.color = Color.Lerp(Color.white, _originalColor, t);
-            yield return null;
-        }
-
-        panelBackgroundImage.color = _originalColor;
-        _flashCoroutine = null;
     }
 
     public void UpdateProgress(float progress)

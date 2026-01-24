@@ -626,13 +626,32 @@ public class Unit_Drone : UnitBase
     public void SetTask_FetchResource(Processor.ResourceRequest request, Processor processor)
     {
         _currentRequest = request;
-        _targetStorage = ResourceManager.Instance.FindClosestStorageWithResource(processor.GetPosition(), request.type, 1);
+        _targetStorage = null;
 
-        if (_targetStorage != null) {
-            bool hasPath = movement.SetNewTarget(_targetStorage.GetPosition());
-            if (hasPath) {
-                _currentState = DroneState.FetchingResource;
-                return;
+        if (ResourceManager.Instance != null) {
+            List<IStorage> storages = ResourceManager.Instance.GetAllStorages();
+            if (storages != null && storages.Count > 0) {
+                List<IStorage> candidates = new List<IStorage>();
+                foreach (IStorage storage in storages) {
+                    if (storage == null) continue;
+                    if (storage.GetCurrentResourceAmount(request.type) <= 0) continue;
+                    candidates.Add(storage);
+                }
+
+                if (candidates.Count > 0) {
+                    candidates.Sort((a, b) =>
+                        Vector3.Distance(processor.GetPosition(), a.GetPosition())
+                            .CompareTo(Vector3.Distance(processor.GetPosition(), b.GetPosition())));
+
+                    foreach (IStorage storage in candidates) {
+                        bool hasPath = movement.SetNewTarget(storage.GetPosition());
+                        if (hasPath) {
+                            _targetStorage = storage;
+                            _currentState = DroneState.FetchingResource;
+                            return;
+                        }
+                    }
+                }
             }
         }
 

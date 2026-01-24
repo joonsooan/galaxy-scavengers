@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class Unit_Player : UnitBase
 {
@@ -122,7 +123,7 @@ public class Unit_Player : UnitBase
             }
         }
         else if (Input.GetMouseButton(0)) {
-            if (IsPointerOverUI()) {
+            if (IsPointerOverUI() || IsPointerOverBuilding()) {
                 return;
             }
 
@@ -141,18 +142,62 @@ public class Unit_Player : UnitBase
             return false;
         }
 
-        // Screen Space Overlay에서는 raycast를 사용해야 함
         PointerEventData pointerData = new PointerEventData(EventSystem.current) {
             position = Input.mousePosition
         };
 
-        List<RaycastResult> results =
-            new List<RaycastResult>();
-
+        List<RaycastResult> results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(pointerData, results);
 
         foreach (RaycastResult result in results) {
-            if (result.gameObject.layer == LayerMask.NameToLayer("UI")) {
+            if (result.gameObject != null &&
+                result.gameObject.layer == LayerMask.NameToLayer("UI")) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool IsPointerOverBuilding()
+    {
+        if (_mainCamera == null) {
+            return false;
+        }
+
+        Vector3 worldPoint = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 point = new Vector2(worldPoint.x, worldPoint.y);
+
+        RaycastHit2D[] hits = Physics2D.RaycastAll(point, Vector2.zero);
+        if (hits == null || hits.Length == 0) {
+            return false;
+        }
+
+        foreach (RaycastHit2D hit in hits) {
+            if (hit.collider == null) {
+                continue;
+            }
+
+            if (hit.collider is BoxCollider2D) {
+                if (hit.collider.GetComponent<MainStructure>() != null ||
+                    hit.collider.GetComponent<Processor>() != null ||
+                    hit.collider.GetComponent<DroneHub>() != null) {
+                    return true;
+                }
+            }
+        }
+
+        foreach (RaycastHit2D hit in hits) {
+            if (hit.collider == null || hit.collider.isTrigger) {
+                continue;
+            }
+
+            if (hit.collider.GetComponent<ConstructionSite>() != null) {
+                continue;
+            }
+
+            IClickable clickable = hit.collider.GetComponent<IClickable>();
+            if (clickable != null) {
                 return true;
             }
         }
@@ -328,14 +373,29 @@ public class Unit_Player : UnitBase
 
     private void AddResourceToStorage(ResourceType type, int amount)
     {
+        if (ResourceManager.Instance == null || amount <= 0) {
+            return;
+        }
+
         List<IStorage> allStorages = ResourceManager.Instance.GetAllStorages()
             .Where(s => s != null && s.GetTotalCurrentAmount() < s.GetMaxCapacity())
             .OrderBy(s => Vector3.Distance(transform.position, s.GetPosition()))
             .ToList();
 
+        int remaining = amount;
+
         foreach (IStorage storage in allStorages) {
-            if (storage.TryAddResource(type, amount)) {
+            if (remaining <= 0) {
                 break;
+            }
+
+            int beforeAmount = storage.GetCurrentResourceAmount(type);
+            bool added = storage.TryAddResource(type, remaining);
+            int afterAmount = storage.GetCurrentResourceAmount(type);
+            int actuallyAdded = afterAmount - beforeAmount;
+
+            if (added && actuallyAdded > 0) {
+                remaining -= actuallyAdded;
             }
         }
     }

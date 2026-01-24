@@ -18,7 +18,8 @@ public enum TutorialStepType
     BuildingPlaced,
     BuildingCompleted,
     UnitProduced,
-    ItemProduced
+    ItemProduced,
+    MineableTypesChanged
 }
 
 
@@ -40,7 +41,8 @@ public class TutorialManager : MonoBehaviour
 
     private int _numberKeyPressCount;
     private RectTransform _rect;
-    private bool _resourceBlockRevealed;
+    private int _resourceBlockRevealCount;
+    private int _mineableTypesChangedCount;
     private int _resourceMinedAmount;
     private int _spacebarPressCount;
 
@@ -69,6 +71,16 @@ public class TutorialManager : MonoBehaviour
             InitializeTutorialSteps();
             StartCoroutine(WaitForGameInitialization());
         }
+    }
+
+    private void OnEnable()
+    {
+        UnitManager.OnMineableTypesChanged += OnMineableTypesChanged;
+    }
+
+    private void OnDisable()
+    {
+        UnitManager.OnMineableTypesChanged -= OnMineableTypesChanged;
     }
 
     private bool ShouldStartTutorial()
@@ -105,13 +117,23 @@ public class TutorialManager : MonoBehaviour
     {
         _tutorialSteps = new List<TutorialStepData>();
 
-        if (tutorialStepDataList != null && tutorialStepDataList.Length > 0) {
+        TutorialStepData[] loadedFromResources = Resources.LoadAll<TutorialStepData>("Tutorial Data");
+        if (loadedFromResources != null && loadedFromResources.Length > 0) {
+            foreach (TutorialStepData stepData in loadedFromResources) {
+                if (stepData != null) {
+                    _tutorialSteps.Add(stepData);
+                }
+            }
+        }
+        else if (tutorialStepDataList != null && tutorialStepDataList.Length > 0) {
             foreach (TutorialStepData stepData in tutorialStepDataList) {
                 if (stepData != null) {
                     _tutorialSteps.Add(stepData);
                 }
             }
+        }
 
+        if (_tutorialSteps.Count > 0) {
             _tutorialSteps.Sort((a, b) => a.stepIndex.CompareTo(b.stepIndex));
         }
     }
@@ -170,8 +192,8 @@ public class TutorialManager : MonoBehaviour
                 continue;
             }
 
-            Vector3 offSet = new Vector3(0f, -1.5f, 0f);
-            GameObject unitObj = Instantiate(unitData.unitPrefab, spawnPosition - offSet, Quaternion.identity, UnitManager.Instance.unitParent);
+            Vector3 offSet = new Vector3(0f, -2f, 0f);
+            GameObject unitObj = Instantiate(unitData.unitPrefab, spawnPosition + offSet, Quaternion.identity, UnitManager.Instance.unitParent);
             UnitBase unitBase = unitObj.GetComponent<UnitBase>();
             if (unitBase != null) {
                 unitBase.unitType = UnitBase.UnitType.Ally;
@@ -185,10 +207,36 @@ public class TutorialManager : MonoBehaviour
             return;
         }
 
+        MainStructure mainStructure = null;
+        if (ResourceDataManager.Instance != null) {
+            mainStructure = ResourceDataManager.Instance.GetMainStructure();
+        }
+
         foreach (ResourceCost resourceCost in resources) {
-            if (resourceCost.amount > 0) {
-                ResourceManager.Instance.AddResource(resourceCost.resourceType, resourceCost.amount);
+            if (resourceCost.amount <= 0) {
+                continue;
             }
+
+            int remaining = resourceCost.amount;
+
+            if (mainStructure != null) {
+                int beforeAmount = mainStructure.GetCurrentResourceAmount(resourceCost.resourceType);
+                bool added = mainStructure.TryAddResource(resourceCost.resourceType, remaining);
+                int afterAmount = mainStructure.GetCurrentResourceAmount(resourceCost.resourceType);
+                int addedAmount = afterAmount - beforeAmount;
+
+                if (added && addedAmount > 0) {
+                    remaining -= addedAmount;
+                }
+            }
+
+            if (remaining > 0) {
+                ResourceManager.Instance.AddResource(resourceCost.resourceType, remaining);
+            }
+        }
+
+        if (mainStructure != null) {
+            mainStructure.UpdateStorageUI();
         }
     }
 
@@ -204,7 +252,8 @@ public class TutorialManager : MonoBehaviour
         _buildingCompletedCount = 0;
         _unitProducedCount = 0;
         _itemProducedCount = 0;
-        _resourceBlockRevealed = false;
+        _resourceBlockRevealCount = 0;
+        _mineableTypesChangedCount = 0;
         _lastMouseWheelValue = Input.mouseScrollDelta.y;
     }
 
@@ -286,7 +335,22 @@ public class TutorialManager : MonoBehaviour
                 break;
 
             case TutorialStepType.ResourceBlockRevealed:
-                if (_resourceBlockRevealed) {
+                int targetBlocks = Mathf.Max(1, step.count);
+                if (_tutorialUI != null && step.showProgressBar) {
+                    float progress = Mathf.Clamp01((float)_resourceBlockRevealCount / targetBlocks);
+                    _tutorialUI.UpdateProgress(progress);
+                }
+                if (_resourceBlockRevealCount >= targetBlocks) {
+                    conditionMet = true;
+                }
+                break;
+
+            case TutorialStepType.MineableTypesChanged:
+                if (_tutorialUI != null && step.showProgressBar && step.count > 0) {
+                    float progress = Mathf.Clamp01((float)_mineableTypesChangedCount / step.count);
+                    _tutorialUI.UpdateProgress(progress);
+                }
+                if (step.count > 0 && _mineableTypesChangedCount >= step.count) {
                     conditionMet = true;
                 }
                 break;
@@ -313,6 +377,9 @@ public class TutorialManager : MonoBehaviour
                 break;
 
             case TutorialStepType.UnitProduced:
+                if (_tutorialUI != null && step.showProgressBar && step.count > 0) {
+                    _tutorialUI.UpdateProgress((float)_unitProducedCount / step.count);
+                }
                 if (_unitProducedCount >= step.count) {
                     conditionMet = true;
                 }
@@ -384,7 +451,17 @@ public class TutorialManager : MonoBehaviour
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
         if (currentStep.stepType == TutorialStepType.ResourceBlockRevealed) {
-            _resourceBlockRevealed = true;
+            _resourceBlockRevealCount++;
+        }
+    }
+
+    private void OnMineableTypesChanged(ResourceType[] newTypes)
+    {
+        if (!_isTutorialActive || !_isWaitingForCondition) return;
+
+        TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
+        if (currentStep.stepType == TutorialStepType.MineableTypesChanged) {
+            _mineableTypesChangedCount++;
         }
     }
 
@@ -408,7 +485,8 @@ public class TutorialManager : MonoBehaviour
         if (!_isTutorialActive || !_isWaitingForCondition) return;
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
-        if (currentStep.stepType == TutorialStepType.BuildingCompleted && currentStep.buildingType == buildingType) {
+        if (currentStep.stepType == TutorialStepType.BuildingCompleted &&
+            (string.IsNullOrEmpty(currentStep.buildingType) || currentStep.buildingType == buildingType)) {
             _buildingCompletedCount++;
         }
     }

@@ -228,8 +228,14 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
 
             if (_productionQueue.Count == 0)
             {
-                _isProducing = false;
-                yield break;
+                if (!HasPendingTargets())
+                {
+                    _isProducing = false;
+                    yield break;
+                }
+
+                yield return new WaitForSeconds(1f);
+                continue;
             }
 
             UnitData unitToProduce = _productionQueue.Dequeue();

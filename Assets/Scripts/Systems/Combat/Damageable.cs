@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -9,6 +10,8 @@ public abstract class Damageable : MonoBehaviour, ICombo
     [Header("Feedback Settings")]
     [SerializeField] private Color flashColor = Color.red;
     [SerializeField] private float flashDuration = 0.3f;
+
+    public static event Action<Damageable> OnAnyDamageTaken;
 
     public int MaxHealth => maxHealth;
     public int CurrentHealth => currentHealth;
@@ -55,6 +58,7 @@ public abstract class Damageable : MonoBehaviour, ICombo
     {
         currentHealth -= damage;
         OnDamageTaken(damage);
+        OnAnyDamageTaken?.Invoke(this);
         
         if (_flashCoroutine != null)
         {

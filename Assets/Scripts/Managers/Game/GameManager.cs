@@ -4,15 +4,20 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using Systems.Jobs;
+using FMODUnity;
 
 public class GameManager : MonoBehaviour
 {
     public MapGenerator mapGenerator;
     public UIManager uiManager;
     public CardDragger cardDragger;
-
+    
     [Header("UI Elements")]
     [SerializeField] private GameObject pausePanel;
+    
+    [Header("Audio")]
+    [SerializeField] private EventReference pauseSound;
+    [SerializeField] private EventReference resumeSound;
 
     [HideInInspector] public UnityEvent<DisplayableData> onStartDrag;
     [HideInInspector] public UnityEvent onEndDrag;
@@ -34,6 +39,10 @@ public class GameManager : MonoBehaviour
         return _isPaused ? _savedTimeScale : Time.timeScale;
     }
 
+    private bool _isCombatSpeedLockActive;
+    private float _combatLockTimer;
+    private const float CombatLockDuration = 5f;
+
     private void Awake()
     {
         if (Instance == null) {
@@ -48,16 +57,46 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         HandleGameInput();
+        UpdateCombatSpeedLock();
     }
 
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
+        Damageable.OnAnyDamageTaken += HandleAnyDamageTaken;
     }
 
     private void OnDisable()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
+        Damageable.OnAnyDamageTaken -= HandleAnyDamageTaken;
+    }
+
+    private void HandleAnyDamageTaken(Damageable damageable)
+    {
+        _isCombatSpeedLockActive = true;
+        _combatLockTimer = CombatLockDuration;
+
+        if (!_isPaused && Time.timeScale != 1f)
+        {
+            Time.timeScale = 1f;
+        }
+    }
+
+    private void UpdateCombatSpeedLock()
+    {
+        if (!_isCombatSpeedLockActive) return;
+
+        _combatLockTimer -= Time.unscaledDeltaTime;
+        if (_combatLockTimer <= 0f)
+        {
+            _isCombatSpeedLockActive = false;
+
+            if (!_isPaused)
+            {
+                Time.timeScale = _savedTimeScale;
+            }
+        }
     }
 
     private void HandleGameInput()
@@ -72,21 +111,23 @@ public class GameManager : MonoBehaviour
             TogglePause();
         }
 
+        bool canChangeActualTimeScale = !_isCombatSpeedLockActive && !_isPaused;
+
         if (Input.GetKeyDown(KeyCode.Alpha1)) {
             _savedTimeScale = 1f;
-            if (!_isPaused) Time.timeScale = 1f;
+            if (canChangeActualTimeScale) Time.timeScale = 1f;
         }
         else if (Input.GetKeyDown(KeyCode.Alpha2)) {
             _savedTimeScale = 2f;
-            if (!_isPaused) Time.timeScale = 2f;
+            if (canChangeActualTimeScale) Time.timeScale = 2f;
         }
         else if (Input.GetKeyDown(KeyCode.Alpha3)) {
             _savedTimeScale = 3f;
-            if (!_isPaused) Time.timeScale = 3f;
+            if (canChangeActualTimeScale) Time.timeScale = 3f;
         }
         else if (Input.GetKeyDown(KeyCode.Alpha4)) {
             _savedTimeScale = 4f;
-            if (!_isPaused) Time.timeScale = 4f;
+            if (canChangeActualTimeScale) Time.timeScale = 4f;
         }
 
         if (_isPaused) return;
@@ -109,11 +150,17 @@ public class GameManager : MonoBehaviour
         if (_isPaused) {
             _savedTimeScale = Time.timeScale;
             Time.timeScale = 0f;
+            if (!pauseSound.IsNull) {
+                RuntimeManager.PlayOneShot(pauseSound);
+            }
         }
         else {
             Time.timeScale = _savedTimeScale;
+            if (!resumeSound.IsNull) {
+                RuntimeManager.PlayOneShot(resumeSound);
+            }
         }
-
+        
         if (pausePanel != null) {
             pausePanel.SetActive(_isPaused);
         }

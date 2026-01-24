@@ -10,20 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c74002d918083e14eb5bcbcc12257fde, type: 3}
-  m_Name: tutorial_step_18
+  m_Name: tutorial_step_22
   m_EditorClassIdentifier: 
-  stepIndex: 18
-  text: "\uCC44\uAD74 \uC720\uB2DB\uC774 \uCE98 \uC790\uC6D0\uC758 \uC885\uB958\uB97C
-    \uC9C0\uC815\uD574\uC904 \uC218 \uC788\uC2B5\uB2C8\uB2E4.\n\uC0DD\uC0B0 \uAC74\uBB3C
-    \uBC84\uD2BC \uC544\uB798\uC5D0 \uC788\uB294 \uC790\uC6D0 \uC544\uC774\uCF58\uC744
-    \uD074\uB9AD\uD574 \uC790\uC6D0\uC744 \uD65C\uC131\uD654/\uBE44\uD65C\uC131\uD654\uD574\uBCF4\uC138\uC694!"
-  stepType: 13
+  stepIndex: 22
+  text: "\uC774\uC81C \uAC8C\uC784\uC758 \uAE30\uBCF8\uC801\uC778 \uC2DC\uC2A4\uD15C\uC744
+    \uBAA8\uB450 \uC775\uD788\uC168\uC2B5\uB2C8\uB2E4!"
+  stepType: 0
   duration: 0
-  count: 6
+  count: 1
   resourceType: 0
   buildingType: 
   unitType: 
   itemType: 
-  showProgressBar: 1
+  showProgressBar: 0
   spawnUnits: []
   grantResources: []
