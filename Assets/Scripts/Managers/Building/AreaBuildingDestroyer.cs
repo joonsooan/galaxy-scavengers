@@ -107,8 +107,6 @@ public class AreaBuildingDestroyer : MonoBehaviour
         _wasJustFinishedAreaDrag = false;
         _selectedCells.Clear();
         _previouslySelectedCells.Clear();
-
-        PlayDragSound();
     }
     
     private void UpdateDrag()
