@@ -73,12 +73,36 @@ public class MainStructure : BaseStorage, IClickable
     public void AddResourceToStorageOnly(ResourceType type, int amount)
     {
         int totalAmount = GetTotalCurrentAmount();
-        if (totalAmount >= maxStorageAmount) return;
+        bool wasFull = totalAmount >= maxStorageAmount;
+        
+        if (wasFull) 
+        {
+            if (GameAlertUIManager.Instance != null && !_wasStorageFull)
+            {
+                GameAlertUIManager.Instance.RegisterAlert(GameAlertType.StorageFull);
+            }
+            _wasStorageFull = true;
+            return;
+        }
 
         int canAddAmount = Mathf.Min(amount, maxStorageAmount - totalAmount);
         currentResources[type] += canAddAmount;
         
-        InvokeResourceChanged(type); 
+        InvokeResourceChanged(type);
+        
+        int newTotalAmount = GetTotalCurrentAmount();
+        bool stillFull = newTotalAmount >= maxStorageAmount;
+        
+        if (!wasFull && stillFull && GameAlertUIManager.Instance != null)
+        {
+            GameAlertUIManager.Instance.RegisterAlert(GameAlertType.StorageFull);
+        }
+        else if (_wasStorageFull && !stillFull && GameAlertUIManager.Instance != null)
+        {
+            GameAlertUIManager.Instance.UnregisterAlert(GameAlertType.StorageFull);
+        }
+        
+        _wasStorageFull = stillFull;
     }
     
     public void InitializeStorage(ResourceType type, int amount)

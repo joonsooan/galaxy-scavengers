@@ -7,6 +7,7 @@ public class GameSpeedUI : MonoBehaviour
     [Header("UI References")]
     [SerializeField] private Image pausePlayImage;
     [SerializeField] private TMP_Text speedText;
+    [SerializeField] private Button pausePlayButton;
 
     [Header("Sprites")]
     [SerializeField] private Sprite pauseSprite;
@@ -22,7 +23,32 @@ public class GameSpeedUI : MonoBehaviour
         _lastPausedState = _gameManager != null && _gameManager.IsPaused;
         _lastTimeScale = _gameManager != null ? _gameManager.GetTimeScale() : 1f;
         
+        if (pausePlayButton != null)
+        {
+            pausePlayButton.onClick.AddListener(OnPausePlayButtonClicked);
+            if (pausePlayButton.transition == Selectable.Transition.SpriteSwap)
+            {
+                pausePlayButton.transition = Selectable.Transition.None;
+            }
+        }
+        
         UpdateDisplay();
+    }
+
+    private void OnPausePlayButtonClicked()
+    {
+        if (_gameManager != null)
+        {
+            _gameManager.TogglePause();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (pausePlayButton != null)
+        {
+            pausePlayButton.onClick.RemoveAllListeners();
+        }
     }
 
     private void Update()

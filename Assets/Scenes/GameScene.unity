@@ -5761,6 +5761,13 @@ MonoBehaviour:
   messageString: "\uBC1C\uC0AC\uAC00 \uC131\uACF5\uC801\uC73C\uB85C \uC644\uB8CC\uB418\uC5C8\uC2B5\uB2C8\uB2E4."
   backgroundColor: {r: 0, g: 0, b: 0, a: 0.95}
   autoHideDelay: 3
+  buttonClickSound:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
 --- !u!1 &369040093
 GameObject:
   m_ObjectHideFlags: 0
@@ -26180,6 +26187,7 @@ GameObject:
   - component: {fileID: 870608167}
   - component: {fileID: 870608169}
   - component: {fileID: 870608168}
+  - component: {fileID: 870608170}
   m_Layer: 5
   m_Name: Play & Pause
   m_TagString: Untagged
@@ -26244,6 +26252,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 870608166}
   m_CullTransparentMesh: 1
+--- !u!114 &870608170
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 870608166}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Navigation:
+    m_Mode: 3
+    m_WrapAround: 0
+    m_SelectOnUp: {fileID: 0}
+    m_SelectOnDown: {fileID: 0}
+    m_SelectOnLeft: {fileID: 0}
+    m_SelectOnRight: {fileID: 0}
+  m_Transition: 2
+  m_Colors:
+    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
+    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
+    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+    m_ColorMultiplier: 1
+    m_FadeDuration: 0.1
+  m_SpriteState:
+    m_HighlightedSprite: {fileID: -829692872795631221, guid: fe95ee2ebe85ca345962c63d1d8c0323, type: 3}
+    m_PressedSprite: {fileID: -1689315015050477966, guid: be834a01d1894374ab0d865b63c8837a, type: 3}
+    m_SelectedSprite: {fileID: -829692872795631221, guid: fe95ee2ebe85ca345962c63d1d8c0323, type: 3}
+    m_DisabledSprite: {fileID: -829692872795631221, guid: fe95ee2ebe85ca345962c63d1d8c0323, type: 3}
+  m_AnimationTriggers:
+    m_NormalTrigger: Normal
+    m_HighlightedTrigger: Highlighted
+    m_PressedTrigger: Pressed
+    m_SelectedTrigger: Selected
+    m_DisabledTrigger: Disabled
+  m_Interactable: 1
+  m_TargetGraphic: {fileID: 870608168}
+  m_OnClick:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1001 &877388914
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -28824,6 +28876,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pausePlayImage: {fileID: 870608168}
   speedText: {fileID: 704023448}
+  pausePlayButton: {fileID: 870608170}
   pauseSprite: {fileID: -2098902124, guid: 824af561a984cff48876157824d84459, type: 3}
   playSprite: {fileID: -2113796617615807303, guid: 824af561a984cff48876157824d84459, type: 3}
 --- !u!114 &1029636137
@@ -36311,6 +36364,13 @@ MonoBehaviour:
   storageResourceListParent: {fileID: 1063455837}
   storageAmountText: {fileID: 1709021869}
   storageUIPanelOffset: {x: 150, y: 0}
+  buildingUIClickSound:
+    Guid:
+      Data1: -345895807
+      Data2: 1210214295
+      Data3: -73339495
+      Data4: 1624008095
+    Path: event:/SFX_UIClick
   tipPanel: {fileID: 1035959604}
   tipResourcePanel1: {fileID: 275478616}
   tipResourcePanel2: {fileID: 292796514}
@@ -36355,6 +36415,13 @@ MonoBehaviour:
   neededAetherPerCell: 100
   freeLaunchCells: 2
   launchCompleteDisplayDuration: 2
+  buttonClickSound:
+    Guid:
+      Data1: -345895807
+      Data2: 1210214295
+      Data3: -73339495
+      Data4: 1624008095
+    Path: event:/SFX_UIClick
 --- !u!114 &1538527380
 MonoBehaviour:
   m_ObjectHideFlags: 0

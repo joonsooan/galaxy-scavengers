@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using FMODUnity;
 
 public class LaunchCompleteUI : MonoBehaviour
 {
@@ -14,6 +15,9 @@ public class LaunchCompleteUI : MonoBehaviour
     [SerializeField] private string messageString = "발사가 성공적으로 완료되었습니다.";
     [SerializeField] private Color backgroundColor = new Color(0f, 0f, 0f, 0.95f);
     [SerializeField] private float autoHideDelay = 3f;
+
+    [Header("Audio")]
+    [SerializeField] private EventReference buttonClickSound;
 
     private void Awake()
     {
@@ -61,6 +65,11 @@ public class LaunchCompleteUI : MonoBehaviour
 
     private void OnContinueClicked()
     {
+        if (!buttonClickSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(buttonClickSound);
+        }
+
         Hide();
     }
 

@@ -72,26 +72,60 @@ public abstract class Damageable : MonoBehaviour, ICombo
     }
     
     private bool _isAttackAlertRegistered;
+    private float _lastDamageTime;
+    private Coroutine _attackAlertTimerCoroutine;
+    private const float AttackAlertTimeout = 5f;
     
     private void RegisterAttackAlert()
     {
-        if (GameAlertUIManager.Instance == null || _isAttackAlertRegistered) return;
+        if (GameAlertUIManager.Instance == null) return;
         
-        if (this is UnitBase)
+        _lastDamageTime = Time.time;
+        
+        if (!_isAttackAlertRegistered)
         {
-            GameAlertUIManager.Instance.RegisterAlert(GameAlertType.UnitUnderAttack);
-            _isAttackAlertRegistered = true;
+            if (this is UnitBase)
+            {
+                GameAlertUIManager.Instance.RegisterAlert(GameAlertType.UnitUnderAttack);
+                _isAttackAlertRegistered = true;
+            }
+            else
+            {
+                GameAlertUIManager.Instance.RegisterAlert(GameAlertType.BuildingUnderAttack);
+                _isAttackAlertRegistered = true;
+            }
         }
-        else
+        
+        if (_attackAlertTimerCoroutine != null)
         {
-            GameAlertUIManager.Instance.RegisterAlert(GameAlertType.BuildingUnderAttack);
-            _isAttackAlertRegistered = true;
+            StopCoroutine(_attackAlertTimerCoroutine);
+        }
+        _attackAlertTimerCoroutine = StartCoroutine(AttackAlertTimerCoroutine());
+    }
+    
+    private IEnumerator AttackAlertTimerCoroutine()
+    {
+        while (_isAttackAlertRegistered)
+        {
+            yield return new WaitForSeconds(0.5f);
+            
+            if (Time.time - _lastDamageTime >= AttackAlertTimeout)
+            {
+                UnregisterAttackAlert();
+                yield break;
+            }
         }
     }
     
     private void UnregisterAttackAlert()
     {
         if (GameAlertUIManager.Instance == null || !_isAttackAlertRegistered) return;
+        
+        if (_attackAlertTimerCoroutine != null)
+        {
+            StopCoroutine(_attackAlertTimerCoroutine);
+            _attackAlertTimerCoroutine = null;
+        }
         
         if (this is UnitBase)
         {

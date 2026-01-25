@@ -36,7 +36,7 @@ public class BaseStorage : Damageable, IStorage
         }
     }
     
-    private bool _wasStorageFull;
+    protected bool _wasStorageFull;
     
     public virtual bool TryAddResource(ResourceType type, int amount)
     {

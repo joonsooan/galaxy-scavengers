@@ -49,8 +49,10 @@ public class TutorialManager : MonoBehaviour
     private List<TutorialStepData> _tutorialSteps = new List<TutorialStepData>();
     private TutorialUI _tutorialUI;
     private int _unitProducedCount;
+    private readonly List<UnitBase> _spawnedEnemyUnits = new List<UnitBase>();
 
     private float _wasdInputTime;
+    private bool _lastPausedState;
     public static TutorialManager Instance { get; private set; }
 
     private void Awake()
@@ -263,6 +265,10 @@ public class TutorialManager : MonoBehaviour
         _resourceBlockRevealCount = 0;
         _mineableTypesChangedCount = 0;
         _lastMouseWheelValue = Input.mouseScrollDelta.y;
+        if (GameManager.Instance != null)
+        {
+            _lastPausedState = GameManager.Instance.IsPaused;
+        }
     }
 
     private IEnumerator CheckStepCondition(TutorialStepData step)
@@ -310,7 +316,20 @@ public class TutorialManager : MonoBehaviour
                 break;
 
             case TutorialStepType.SpacebarPress:
-                if (Input.GetKeyDown(KeyCode.Space)) {
+                bool spacebarPressed = Input.GetKeyDown(KeyCode.Space);
+                bool pauseButtonClicked = false;
+                
+                if (GameManager.Instance != null)
+                {
+                    bool currentPausedState = GameManager.Instance.IsPaused;
+                    if (currentPausedState != _lastPausedState)
+                    {
+                        pauseButtonClicked = true;
+                        _lastPausedState = currentPausedState;
+                    }
+                }
+                
+                if (spacebarPressed || pauseButtonClicked) {
                     _spacebarPressCount++;
                     if (_tutorialUI != null && step.showProgressBar) {
                         _tutorialUI.UpdateProgress((float)_spacebarPressCount / step.count);
@@ -539,13 +558,24 @@ public class TutorialManager : MonoBehaviour
         }
     }
     
+    public void RegisterSpawnedEnemy(EnemyUnitBase enemyUnit)
+    {
+        if (enemyUnit == null) return;
+        
+        if (!_spawnedEnemyUnits.Contains(enemyUnit))
+        {
+            _spawnedEnemyUnits.Add(enemyUnit);
+        }
+        
+        if (_isTutorialActive)
+        {
+            enemyUnit.gameObject.SetActive(false);
+        }
+    }
+    
     private void DisableAllEnemyUnits()
     {
-        if (UnitManager.Instance == null) return;
-        
-        List<UnitBase> enemyUnitsCopy = new List<UnitBase>(UnitManager.Instance.EnemyUnits);
-        
-        foreach (UnitBase enemyUnit in enemyUnitsCopy)
+        foreach (UnitBase enemyUnit in _spawnedEnemyUnits)
         {
             if (enemyUnit != null && enemyUnit.gameObject != null)
             {
@@ -556,11 +586,7 @@ public class TutorialManager : MonoBehaviour
     
     private void EnableAllEnemyUnits()
     {
-        if (UnitManager.Instance == null) return;
-        
-        List<UnitBase> enemyUnitsCopy = new List<UnitBase>(UnitManager.Instance.EnemyUnits);
-        
-        foreach (UnitBase enemyUnit in enemyUnitsCopy)
+        foreach (UnitBase enemyUnit in _spawnedEnemyUnits)
         {
             if (enemyUnit != null && enemyUnit.gameObject != null)
             {

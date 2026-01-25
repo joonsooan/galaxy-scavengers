@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using FMODUnity;
 
 public class BaseSceneManager : MonoBehaviour
 {
@@ -11,6 +12,9 @@ public class BaseSceneManager : MonoBehaviour
     [SerializeField] private Button farmButton;
     [SerializeField] private Button mapButton;
     [SerializeField] private Button coreLaunchButton;
+
+    [Header("Audio")]
+    [SerializeField] private EventReference buttonClickSound;
 
     [Header("UI Panels")]
     [SerializeField] private GameObject inventoryUIPanel;
@@ -27,11 +31,19 @@ public class BaseSceneManager : MonoBehaviour
     {
         titleButton.onClick.AddListener(LoadTitle);
         inventoryButton.onClick.AddListener(ToggleInventoryPanel);
-        moduleButton.onClick.AddListener(() => OpenUIPanel(1));
-        laboratoryButton.onClick.AddListener(() => OpenUIPanel(2));
-        farmButton.onClick.AddListener(() => OpenUIPanel(3));
-        mapButton.onClick.AddListener(() => OpenUIPanel(4));
-        coreLaunchButton.onClick.AddListener(() => OpenUIPanel(5));
+        moduleButton.onClick.AddListener(() => { PlayButtonSound(); OpenUIPanel(1); });
+        laboratoryButton.onClick.AddListener(() => { PlayButtonSound(); OpenUIPanel(2); });
+        farmButton.onClick.AddListener(() => { PlayButtonSound(); OpenUIPanel(3); });
+        mapButton.onClick.AddListener(() => { PlayButtonSound(); OpenUIPanel(4); });
+        coreLaunchButton.onClick.AddListener(() => { PlayButtonSound(); OpenUIPanel(5); });
+    }
+
+    private void PlayButtonSound()
+    {
+        if (!buttonClickSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(buttonClickSound);
+        }
     }
 
     private void Start()
