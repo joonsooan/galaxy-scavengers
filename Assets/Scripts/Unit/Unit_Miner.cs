@@ -660,8 +660,11 @@ public class Unit_Miner : UnitBase
                 HandleTargetLoss();
             }
         }
-        else if (currentState == UnitState.Idle) {
-            FindAndSetTarget();
+        
+        if (currentState == UnitState.Idle) {
+            if (_findResourceCoroutine == null) {
+                TryStartActions();
+            }
         }
     }
 

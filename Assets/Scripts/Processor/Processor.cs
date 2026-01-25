@@ -23,6 +23,7 @@ public class Processor : Damageable, IClickable, IAetherConsumer
     private AetherConsumptionManager _aetherConsumptionManager;
     private float _lastTaskCheckTime;
     private const float TaskCheckInterval = 1f;
+    private bool _isInitialized;
 
     public ProcessorData ProcessorData => processorData;
     public IReadOnlyList<ActiveRecipe> ActiveRecipes => _activeRecipes;
@@ -65,6 +66,7 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         
         if (!BuildingManager.IsBuildingProperlyPlaced(transform))
         {
+            _isInitialized = false;
             return;
         }
         
@@ -76,10 +78,13 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         
         ResourceManager.OnResourceAmountChanged += OnResourceAmountChanged;
         _lastTaskCheckTime = Time.time;
+        _isInitialized = true;
     }
     
     private void Update()
     {
+        if (!_isInitialized) return;
+        
         if (Time.time - _lastTaskCheckTime >= TaskCheckInterval)
         {
             _lastTaskCheckTime = Time.time;
@@ -99,6 +104,7 @@ public class Processor : Damageable, IClickable, IAetherConsumer
                 if (!hasPendingRequest)
                 {
                     RequestTask(drone);
+                    break;
                 }
             }
         }
@@ -399,23 +405,13 @@ public class Processor : Damageable, IClickable, IAetherConsumer
             }
             
             CheckAndAssignReadyRecipes();
-            
-            foreach (Unit_Drone drone in _assignedDrones)
-            {
-                if (drone != null && drone.HasCheckedIn && drone.CurrentRecipeTask == null)
-                {
-                    bool hasPendingRequest = _pendingRequests.Any(r => r.assignedDrone == drone);
-                    if (!hasPendingRequest)
-                    {
-                        RequestTask(drone);
-                    }
-                }
-            }
         }
     }
     
     private void CheckAndAssignReadyRecipes()
     {
+        bool assignedRecipe = false;
+        
         foreach (ActiveRecipe recipe in _activeRecipes) {
             if (recipe.assignedDrone == null &&
                 !recipe.isProcessing &&
@@ -430,22 +426,13 @@ public class Processor : Damageable, IClickable, IAetherConsumer
                         if (!hasPendingRequest)
                         {
                             RequestTask(drone);
+                            assignedRecipe = true;
                             break;
                         }
                     }
                 }
-            }
-        }
-        
-        foreach (Unit_Drone drone in _assignedDrones)
-        {
-            if (drone != null && drone.HasCheckedIn && drone.CurrentRecipeTask == null)
-            {
-                bool hasPendingRequest = _pendingRequests.Any(r => r.assignedDrone == drone);
-                if (!hasPendingRequest)
-                {
-                    RequestTask(drone);
-                }
+                
+                if (assignedRecipe) break;
             }
         }
     }

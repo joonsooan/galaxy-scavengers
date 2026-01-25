@@ -94,6 +94,11 @@ public class UIManager : MonoBehaviour
         if (processor == null) return;
 
         HideCurrentIClickableUI();
+        
+        if (buildingInfoPanel != null)
+        {
+            buildingInfoPanel.SetActive(false);
+        }
 
         _activeUIPanel = ActiveUIPanel.Processor;
         DisplayProcessorInfo(processor);
@@ -104,6 +109,11 @@ public class UIManager : MonoBehaviour
         if (droneHub == null) return;
 
         HideCurrentIClickableUI();
+        
+        if (buildingInfoPanel != null)
+        {
+            buildingInfoPanel.SetActive(false);
+        }
 
         _activeUIPanel = ActiveUIPanel.DroneHub;
         DisplayDroneHubInfo(droneHub);

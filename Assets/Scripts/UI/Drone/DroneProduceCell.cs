@@ -29,6 +29,8 @@ public class DroneProduceCell : MonoBehaviour
 
     public void Initialize(UnitData unitData, DroneHub droneHub, int unitIndex)
     {
+        DroneHub.OnUnitTargetChanged -= HandleUnitTargetChanged;
+        
         _droneHub = droneHub;
         _unitIndex = unitIndex;
 

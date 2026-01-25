@@ -27,7 +27,7 @@ MonoBehaviour:
   resourceType: 0
   buildingType: 
   unitType: 
-  itemType: Alloy Plate
+  itemType: AlloyPlate
   showProgressBar: 1
   spawnUnits: []
   grantResources: []
