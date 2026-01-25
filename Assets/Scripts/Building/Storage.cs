@@ -9,11 +9,15 @@ public class Storage : BaseStorage
     
     public int AetherCapacity => aetherCapacity;
     
+    protected override void Start()
+    {
+        base.Start();
+    }
+    
     protected override void OnEnable()
     {
         base.OnEnable();
         
-        // Don't register ghost/preview buildings
         if (!IsProperlyPlacedBuilding())
         {
             return;

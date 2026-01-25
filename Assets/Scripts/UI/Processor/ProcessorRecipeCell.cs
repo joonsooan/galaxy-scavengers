@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using FMODUnity;
 
 public class ProcessorRecipeCell : MonoBehaviour
 {
@@ -11,6 +12,10 @@ public class ProcessorRecipeCell : MonoBehaviour
     [SerializeField] private TMP_Text produceInfoText;
     [SerializeField] private GameObject recipeCellPrefab;
     [SerializeField] private RectTransform contentParent;
+    
+    [Header("Sound Effects")]
+    [SerializeField] private EventReference plusButtonSound;
+    [SerializeField] private EventReference minusButtonSound;
 
     private const int MaxProduceAmount = 999;
     
@@ -21,6 +26,9 @@ public class ProcessorRecipeCell : MonoBehaviour
     private ResourceCost _product;
     private int _currentStorageAmount;
     private int _produceMaxAmount;
+    
+    private float _lastButtonClickTime;
+    private const float ButtonClickCooldown = 0.1f;
     
     public void Initialize(ActiveRecipe activeRecipe)
     {
@@ -139,6 +147,13 @@ public class ProcessorRecipeCell : MonoBehaviour
 
     public void OnPlusBtnClick()
     {
+        float currentTime = Time.unscaledTime;
+        if (currentTime - _lastButtonClickTime < ButtonClickCooldown)
+        {
+            return;
+        }
+        _lastButtonClickTime = currentTime;
+        
         int amountToAdd = GetAmountChange();
         int newAmount = Mathf.Min(_produceMaxAmount + amountToAdd, MaxProduceAmount);
 
@@ -149,10 +164,22 @@ public class ProcessorRecipeCell : MonoBehaviour
             
             _activeRecipe.SetProductionLimit(_produceMaxAmount);
         }
+        
+        if (!plusButtonSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(plusButtonSound);
+        }
     }
 
     public void OnMinusBtnClick()
     {
+        float currentTime = Time.unscaledTime;
+        if (currentTime - _lastButtonClickTime < ButtonClickCooldown)
+        {
+            return;
+        }
+        _lastButtonClickTime = currentTime;
+        
         int amountToSubtract = GetAmountChange();
         int newAmount = Mathf.Max(_produceMaxAmount - amountToSubtract, 0);
 
@@ -162,6 +189,11 @@ public class ProcessorRecipeCell : MonoBehaviour
             UpdateUI();
             
             _activeRecipe.SetProductionLimit(_produceMaxAmount);
+        }
+        
+        if (!minusButtonSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(minusButtonSound);
         }
     }
 }

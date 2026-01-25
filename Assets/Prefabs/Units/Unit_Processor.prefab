@@ -293,10 +293,10 @@ MonoBehaviour:
   progressBarPrefab: {fileID: 5648413654597824292, guid: 0e7c462c413987749bca6d734a5a807f, type: 3}
   currentState: 0
   carryCapacity: 10
-  processingSpeed: 1
+  processingSpeed: 0.5
   loadingTime: 3
   unloadingTime: 3
-  assignmentTime: 3
+  assignmentTime: 1
   movement: {fileID: 4483249089817793867}
   hoverHeight: 0.1
   hoverDuration: 1

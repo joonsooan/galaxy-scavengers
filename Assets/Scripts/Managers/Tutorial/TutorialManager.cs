@@ -142,6 +142,14 @@ public class TutorialManager : MonoBehaviour
     {
         _isTutorialActive = true;
         _currentStepIndex = 0;
+        
+        if (DayNightCycleManager.Instance != null)
+        {
+            DayNightCycleManager.Instance.SetAutoAdvanceTime(false);
+        }
+        
+        DisableAllEnemyUnits();
+        
         NextStep();
     }
 
@@ -386,6 +394,9 @@ public class TutorialManager : MonoBehaviour
                 break;
 
             case TutorialStepType.ItemProduced:
+                if (_tutorialUI != null && step.showProgressBar && step.count > 0) {
+                    _tutorialUI.UpdateProgress((float)_itemProducedCount / step.count);
+                }
                 if (_itemProducedCount >= step.count) {
                     conditionMet = true;
                 }
@@ -516,8 +527,45 @@ public class TutorialManager : MonoBehaviour
         _isTutorialActive = false;
         _isWaitingForCondition = false;
 
+        if (DayNightCycleManager.Instance != null)
+        {
+            DayNightCycleManager.Instance.SetAutoAdvanceTime(true);
+        }
+        
+        EnableAllEnemyUnits();
+
         if (_tutorialUI != null) {
             _tutorialUI.HideTutorial();
+        }
+    }
+    
+    private void DisableAllEnemyUnits()
+    {
+        if (UnitManager.Instance == null) return;
+        
+        List<UnitBase> enemyUnitsCopy = new List<UnitBase>(UnitManager.Instance.EnemyUnits);
+        
+        foreach (UnitBase enemyUnit in enemyUnitsCopy)
+        {
+            if (enemyUnit != null && enemyUnit.gameObject != null)
+            {
+                enemyUnit.gameObject.SetActive(false);
+            }
+        }
+    }
+    
+    private void EnableAllEnemyUnits()
+    {
+        if (UnitManager.Instance == null) return;
+        
+        List<UnitBase> enemyUnitsCopy = new List<UnitBase>(UnitManager.Instance.EnemyUnits);
+        
+        foreach (UnitBase enemyUnit in enemyUnitsCopy)
+        {
+            if (enemyUnit != null && enemyUnit.gameObject != null)
+            {
+                enemyUnit.gameObject.SetActive(true);
+            }
         }
     }
 }

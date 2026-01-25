@@ -958,6 +958,20 @@ MonoBehaviour:
   produceInfoText: {fileID: 8679603106330586555}
   recipeCellPrefab: {fileID: 6155155196410172978, guid: 87d776b852749c2428050baaea9b40b1, type: 3}
   contentParent: {fileID: 5887569130764741186}
+  plusButtonSound:
+    Guid:
+      Data1: -765664001
+      Data2: 1302141166
+      Data3: 995189914
+      Data4: -85904115
+    Path: event:/SFX_GameStart
+  minusButtonSound:
+    Guid:
+      Data1: -1936566649
+      Data2: 1287107820
+      Data3: 1616156851
+      Data4: 765321994
+    Path: event:/SFX_GamePause
 --- !u!1 &6141588514809969945
 GameObject:
   m_ObjectHideFlags: 0

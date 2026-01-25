@@ -121,6 +121,15 @@ public class CardDragger : MonoBehaviour
             _ghostBuildingRenderer.color = ghostColor;
         }
         
+        Collider2D[] colliders = _ghostBuildingInstance.GetComponentsInChildren<Collider2D>(true);
+        foreach (var collider in colliders)
+        {
+            if (collider != null)
+            {
+                collider.enabled = false;
+            }
+        }
+        
         VisionProvider[] visionProviders = _ghostBuildingInstance.GetComponentsInChildren<VisionProvider>(true);
         foreach (var visionProvider in visionProviders)
         {

@@ -36,15 +36,37 @@ public class BaseStorage : Damageable, IStorage
         }
     }
     
+    private bool _wasStorageFull;
+    
     public virtual bool TryAddResource(ResourceType type, int amount)
     {
         int totalAmount = GetTotalCurrentAmount();
-        if (totalAmount >= maxStorageAmount) return false;
+        bool isFull = totalAmount >= maxStorageAmount;
+        
+        if (isFull)
+        {
+            if (!_wasStorageFull && GameAlertUIManager.Instance != null)
+            {
+                GameAlertUIManager.Instance.RegisterAlert(GameAlertType.StorageFull);
+            }
+            _wasStorageFull = true;
+            return false;
+        }
 
         int canAddAmount = Mathf.Min(amount, maxStorageAmount - totalAmount);
         currentResources[type] += canAddAmount;
         
         NotifyResourceChange(type, canAddAmount);
+        
+        int newTotalAmount = GetTotalCurrentAmount();
+        bool stillFull = newTotalAmount >= maxStorageAmount;
+        
+        if (_wasStorageFull && !stillFull && GameAlertUIManager.Instance != null)
+        {
+            GameAlertUIManager.Instance.UnregisterAlert(GameAlertType.StorageFull);
+        }
+        
+        _wasStorageFull = stillFull;
         
         return canAddAmount > 0;
     }

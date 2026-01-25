@@ -192,6 +192,8 @@ MonoBehaviour:
   currentHealth: 0
   droneHubData: {fileID: 11400000, guid: 5d08ea5a0927c3a4c96a5b782a641802, type: 2}
   aetherConsumptionPerSecond: 0
+  progressSliderPrefab: {fileID: 5648413654597824292, guid: 407612af746ee8a46aef9fa702fd0e8f, type: 3}
+  progressSliderOffset: {x: 0, y: 2, z: 0}
 --- !u!114 &-1230124184689666094
 MonoBehaviour:
   m_ObjectHideFlags: 0

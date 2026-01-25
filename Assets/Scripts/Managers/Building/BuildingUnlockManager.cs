@@ -86,7 +86,7 @@ public class BuildingUnlockManager : MonoBehaviour
             UpdateUnlockedBuildingsList();
             OnBuildingUnlocked?.Invoke(building);
             SaveUnlockedBuildings();
-            Debug.Log($"BuildingUnlockManager: Unlocked building '{building.displayName}'");
+            // Debug.Log($"BuildingUnlockManager: Unlocked building '{building.displayName}'");
         }
     }
     
