@@ -18,6 +18,7 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
     private AetherConsumptionManager _aetherConsumptionManager;
     private UnitData _currentProducingUnit;
     private float _currentProductionTime;
+    private bool _isManualQueueProcessing;
     private bool _isProducing;
     private float _productionStartTime;
     private ProductionProgressSlider _progressSlider;
@@ -125,6 +126,8 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
 
     private void OnResourceAmountChanged(ResourceType type, int amount)
     {
+        if (_isManualQueueProcessing) return;
+
         if (!_isProducing && HasPendingTargets() && IsOperational) {
             UpdateQueueFromTargets();
             if (_productionQueue.Count > 0) {
@@ -197,15 +200,21 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
         }
 
         UnitData unitData = droneHubData.ProducibleUnits[unitIndex];
+        _isManualQueueProcessing = true;
 
-        for (int i = 0; i < count; i++) {
-            if (ResourceManager.Instance.SpendResources(unitData.productionCosts)) {
-                _productionQueue.Enqueue(unitData);
+        try {
+            for (int i = 0; i < count; i++) {
+                if (ResourceManager.Instance.SpendResources(unitData.productionCosts)) {
+                    _productionQueue.Enqueue(unitData);
+                }
+                else {
+                    Debug.Log($"Can't produce unit {unitData.unitName}: insufficient resources");
+                    break;
+                }
             }
-            else {
-                Debug.Log($"Can't produce unit {unitData.unitName}: insufficient resources");
-                break;
-            }
+        }
+        finally {
+            _isManualQueueProcessing = false;
         }
     }
 

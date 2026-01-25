@@ -5,35 +5,49 @@ using UnityEngine;
 
 public class Processor : Damageable, IClickable, IAetherConsumer
 {
+    private const float TaskCheckInterval = 1f;
     [SerializeField] private ProcessorData processorData;
     [Header("Aether Consumption")]
     [SerializeField] private int aetherConsumptionPerSecond = 1;
-    
-    private readonly List<ActiveRecipe> _activeRecipes = new ();
 
-    private readonly List<Unit_Drone> _assignedDrones = new ();
-    private readonly Dictionary<ResourceType, int> _currentIngredients = new ();
-    private readonly List<ResourceRequest> _pendingRequests = new ();
-    private readonly Dictionary<Unit_Drone, Vector3Int> _droneInteractionCells = new ();
+    private readonly List<ActiveRecipe> _activeRecipes = new List<ActiveRecipe>();
+
+    private readonly List<Unit_Drone> _assignedDrones = new List<Unit_Drone>();
+    private readonly Dictionary<ResourceType, int> _currentIngredients = new Dictionary<ResourceType, int>();
+    private readonly Dictionary<Unit_Drone, Vector3Int> _droneInteractionCells = new Dictionary<Unit_Drone, Vector3Int>();
+    private readonly List<ResourceRequest> _pendingRequests = new List<ResourceRequest>();
+    private AetherConsumptionManager _aetherConsumptionManager;
+    private bool _isInitialized;
+    private float _lastTaskCheckTime;
 
     private int _maxAssignedDrones;
     private int _maxIngredientStorage;
 
     private List<ProcessorRecipe> _recipes;
-    private AetherConsumptionManager _aetherConsumptionManager;
-    private float _lastTaskCheckTime;
-    private const float TaskCheckInterval = 1f;
-    private bool _isInitialized;
 
-    public ProcessorData ProcessorData => processorData;
-    public IReadOnlyList<ActiveRecipe> ActiveRecipes => _activeRecipes;
-    public IReadOnlyList<Unit_Drone> AssignedDrones => _assignedDrones;
-    public bool IsFull => _assignedDrones.Count >= _maxAssignedDrones;
-    
-    // IAetherConsumer implementation
-    public int AetherConsumptionPerSecond => aetherConsumptionPerSecond;
-    private bool _isOperational = true;
-    public bool IsOperational => _isOperational;
+    public ProcessorData ProcessorData {
+        get {
+            return processorData;
+        }
+    }
+
+    public IReadOnlyList<ActiveRecipe> ActiveRecipes {
+        get {
+            return _activeRecipes;
+        }
+    }
+
+    public IReadOnlyList<Unit_Drone> AssignedDrones {
+        get {
+            return _assignedDrones;
+        }
+    }
+
+    public bool IsFull {
+        get {
+            return _assignedDrones.Count >= _maxAssignedDrones;
+        }
+    }
 
 
     protected override void Awake()
@@ -59,66 +73,44 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         }
     }
 
-    protected override void OnEnable()
-    {
-        base.OnEnable();
-        BuildingManager.Instance?.RegisterProcessor(this);
-        
-        if (!BuildingManager.IsBuildingProperlyPlaced(transform))
-        {
-            _isInitialized = false;
-            return;
-        }
-        
-        FindAndCacheAetherManager();
-        if (_aetherConsumptionManager != null)
-        {
-            _aetherConsumptionManager.RegisterConsumer(this);
-        }
-        
-        ResourceManager.OnResourceAmountChanged += OnResourceAmountChanged;
-        _lastTaskCheckTime = Time.time;
-        _isInitialized = true;
-    }
-    
     private void Update()
     {
         if (!_isInitialized) return;
-        
-        if (Time.time - _lastTaskCheckTime >= TaskCheckInterval)
-        {
+
+        if (Time.time - _lastTaskCheckTime >= TaskCheckInterval) {
             _lastTaskCheckTime = Time.time;
             CheckIdleDronesForTasks();
         }
     }
-    
-    private void CheckIdleDronesForTasks()
+
+    protected override void OnEnable()
     {
-        if (!_isOperational) return;
-        
-        foreach (Unit_Drone drone in _assignedDrones)
-        {
-            if (drone != null && drone.HasCheckedIn && drone.CurrentRecipeTask == null)
-            {
-                bool hasPendingRequest = _pendingRequests.Any(r => r.assignedDrone == drone);
-                if (!hasPendingRequest)
-                {
-                    RequestTask(drone);
-                    break;
-                }
-            }
+        base.OnEnable();
+        BuildingManager.Instance?.RegisterProcessor(this);
+
+        if (!BuildingManager.IsBuildingProperlyPlaced(transform)) {
+            _isInitialized = false;
+            return;
         }
+
+        FindAndCacheAetherManager();
+        if (_aetherConsumptionManager != null) {
+            _aetherConsumptionManager.RegisterConsumer(this);
+        }
+
+        ResourceManager.OnResourceAmountChanged += OnResourceAmountChanged;
+        _lastTaskCheckTime = Time.time;
+        _isInitialized = true;
     }
 
     protected override void OnDisable()
     {
         ResourceManager.OnResourceAmountChanged -= OnResourceAmountChanged;
-        
-        if (_aetherConsumptionManager != null)
-        {
+
+        if (_aetherConsumptionManager != null) {
             _aetherConsumptionManager.UnregisterConsumer(this);
         }
-        
+
         base.OnDisable();
         BuildingManager.Instance?.UnregisterProcessor(this);
 
@@ -127,25 +119,24 @@ public class Processor : Damageable, IClickable, IAetherConsumer
             drone.AssignProcessor(null);
         }
     }
-    
-    private void FindAndCacheAetherManager()
-    {
-        if (_aetherConsumptionManager == null)
-        {
-            _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
+
+    // IAetherConsumer implementation
+    public int AetherConsumptionPerSecond {
+        get {
+            return aetherConsumptionPerSecond;
         }
     }
-    
+
+    public bool IsOperational { get; private set; } = true;
+
     public void OnAetherUnavailable()
     {
-        if (_isOperational)
-        {
-            _isOperational = false;
+        if (IsOperational) {
+            IsOperational = false;
+
             // Stop all processing - release drones from recipes
-            foreach (ActiveRecipe recipe in _activeRecipes)
-            {
-                if (recipe.isProcessing && recipe.assignedDrone != null)
-                {
+            foreach (ActiveRecipe recipe in _activeRecipes) {
+                if (recipe.isProcessing && recipe.assignedDrone != null) {
                     Unit_Drone drone = recipe.assignedDrone;
                     recipe.assignedDrone = null;
                     recipe.isProcessing = false;
@@ -154,20 +145,17 @@ public class Processor : Damageable, IClickable, IAetherConsumer
             }
         }
     }
-    
+
     public void OnAetherAvailable()
     {
-        if (!_isOperational)
-        {
-            _isOperational = true;
+        if (!IsOperational) {
+            IsOperational = true;
+
             // Resume processing - request tasks for idle drones
-            foreach (Unit_Drone drone in _assignedDrones)
-            {
-                if (drone != null && drone.HasCheckedIn && drone.CurrentRecipeTask == null)
-                {
+            foreach (Unit_Drone drone in _assignedDrones) {
+                if (drone != null && drone.HasCheckedIn && drone.CurrentRecipeTask == null) {
                     bool hasPendingRequest = _pendingRequests.Any(r => r.assignedDrone == drone);
-                    if (!hasPendingRequest)
-                    {
+                    if (!hasPendingRequest) {
                         RequestTask(drone);
                     }
                 }
@@ -178,6 +166,28 @@ public class Processor : Damageable, IClickable, IAetherConsumer
     public void OnClicked()
     {
         OnProcessorClicked?.Invoke(this);
+    }
+
+    private void CheckIdleDronesForTasks()
+    {
+        if (!IsOperational) return;
+
+        foreach (Unit_Drone drone in _assignedDrones) {
+            if (drone != null && drone.HasCheckedIn && drone.CurrentRecipeTask == null) {
+                bool hasPendingRequest = _pendingRequests.Any(r => r.assignedDrone == drone);
+                if (!hasPendingRequest) {
+                    RequestTask(drone);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void FindAndCacheAetherManager()
+    {
+        if (_aetherConsumptionManager == null) {
+            _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
+        }
     }
 
     public static event Action<Processor> OnProcessorClicked;
@@ -198,7 +208,7 @@ public class Processor : Damageable, IClickable, IAetherConsumer
     public void ReleaseDrone(Unit_Drone drone)
     {
         _assignedDrones.Remove(drone);
-        
+
         if (_droneInteractionCells.ContainsKey(drone)) {
             _droneInteractionCells.Remove(drone);
         }
@@ -217,62 +227,52 @@ public class Processor : Damageable, IClickable, IAetherConsumer
             return;
         }
 
-        // 0. 이 드론이 이미 레시피 작업에 할당되어 있는지 확인 (처리 중이거나 처리하러 이동 중)
         if (drone.CurrentRecipeTask != null) {
-            // 레시피에 할당되어 있으면 재할당하지 않음 (처리 중이거나 처리하러 이동 중)
-            Debug.Log($"[Processor:{name}] RequestTask: Drone '{drone.name}' already assigned to recipe {drone.CurrentRecipeTask.recipeData.resourceType}, skipping reassignment");
-            return;
+            ActiveRecipe assignedRecipe = _activeRecipes.FirstOrDefault(r => r.assignedDrone == drone && r == drone.CurrentRecipeTask);
+
+            if (assignedRecipe != null && assignedRecipe.assignedDrone == drone) {
+                drone.SetTask_Process(this, assignedRecipe);
+                return;
+            }
+            ReleaseDroneFromRecipe(drone);
+            drone.SetTask_Idle();
         }
 
-        // 0.5. 이 드론이 현재 재료를 운반 중인지 확인 (FetchingResource 또는 DeliveringResource 상태)
         ResourceRequest existingRequest = _pendingRequests.FirstOrDefault(r => r.assignedDrone == drone);
         if (existingRequest != null) {
-            // 드론이 이미 재료를 운반 중이면 재할당하지 않음
-            Debug.Log($"[Processor:{name}] RequestTask: Drone '{drone.name}' already fetching/delivering {existingRequest.type} x{existingRequest.amount}, skipping reassignment");
             return;
         }
 
-        // 1. 재료 운반 작업 찾기
         ResourceRequest newRequest = FindNextIngredientRequest(drone.carryCapacity);
         if (newRequest != null) {
             newRequest.assignedDrone = drone;
             _pendingRequests.Add(newRequest);
             drone.SetTask_FetchResource(newRequest, this);
-            Debug.Log($"[Processor:{name}] RequestTask: Drone '{drone.name}' fetch {newRequest.amount} {newRequest.type}");
             return;
         }
 
-        // 2. 새로운 '처리' 작업 찾기
         foreach (ActiveRecipe recipe in _activeRecipes) {
-            // 이 레시피가 (작업 가능하고) && (담당자가 없고) && (재료가 있고) && (생산 제한에 걸리지 않았는지) 확인
             if (recipe.assignedDrone == null &&
                 !recipe.isProcessing &&
                 HasIngredientsFor(recipe.recipeData) &&
                 PassesProductionCapCheck(recipe)) {
-                // 레시피에 드론 배정 (아직 처리 시작하지 않음 - 드론이 프로세서에 도착하면 시작)
                 recipe.assignedDrone = drone;
                 recipe.processingProgress = 0f;
 
-                Debug.Log($"[Processor:{name}] RequestTask: Assigned recipe {recipe.recipeData.resourceType} to drone '{drone.name}'. Ingredients ready, waiting for drone to arrive.");
                 drone.SetTask_Process(this, recipe);
                 return;
             }
         }
 
-        // 3. 담당자 없는 '진행 중인' 작업 이어받기
-        // (예: 드론이 파괴되었다가 다른 드론이 할당된 경우)
         foreach (ActiveRecipe recipe in _activeRecipes) {
             if (recipe.assignedDrone == null && recipe.isProcessing) {
                 recipe.assignedDrone = drone;
                 drone.SetTask_Process(this, recipe);
-                Debug.Log($"[Processor:{name}] RequestTask: Drone '{drone.name}' picks up ongoing {recipe.recipeData.resourceType}");
                 return;
             }
         }
 
-        // 4. 할 일 없음
         drone.SetTask_Idle();
-        Debug.Log($"[Processor:{name}] RequestTask: No work for Drone '{drone.name}', set Idle");
     }
 
     private bool PassesProductionCapCheck(ActiveRecipe recipe)
@@ -291,7 +291,6 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         int totalInStorage = GetTotalCurrentIngredients();
 
         if (totalOnTheWay + totalInStorage >= _maxIngredientStorage) {
-            Debug.Log($"[Processor:{name}] Ingredient request blocked: storage full ({totalInStorage}+{totalOnTheWay}/{_maxIngredientStorage})");
             return null;
         }
 
@@ -323,7 +322,6 @@ public class Processor : Damageable, IClickable, IAetherConsumer
                     int amountToFetch = Mathf.Min(stillNeeded, droneCapacity, spaceAvailable);
 
                     if (amountToFetch > 0) {
-                        Debug.Log($"[Processor:{name}] Create ingredient request: {ingredient.resourceType} x{amountToFetch} (needed {stillNeeded}, storage {inStorage}, onWay {onTheWay})");
                         return new ResourceRequest { type = ingredient.resourceType, amount = amountToFetch };
                     }
                 }
@@ -337,7 +335,6 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         ResourceRequest request = _pendingRequests.FirstOrDefault(r => r.assignedDrone == drone);
 
         if (request == null || request.type != type) {
-            Debug.Log($"[Processor:{name}] Deposit FAILED from '{drone.name}': no matching request for {type}");
             return false;
         }
 
@@ -347,10 +344,25 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         _currentIngredients[type] += canAddAmount;
         _pendingRequests.Remove(request);
 
-        Debug.Log($"[Processor:{name}] Deposit from '{drone.name}': {type} +{canAddAmount} (requested {amount}). Total now {GetTotalCurrentIngredients()}/{_maxIngredientStorage}");
-
         if (canAddAmount > 0) {
             CheckAndAssignReadyRecipes();
+
+            if (drone != null && drone.HasCheckedIn && drone.CurrentRecipeTask == null) {
+                bool hasPendingRequest = _pendingRequests.Any(r => r.assignedDrone == drone);
+                if (!hasPendingRequest) {
+                    foreach (ActiveRecipe recipe in _activeRecipes) {
+                        if (recipe.assignedDrone == null &&
+                            !recipe.isProcessing &&
+                            HasIngredientsFor(recipe.recipeData) &&
+                            PassesProductionCapCheck(recipe)) {
+                            recipe.assignedDrone = drone;
+                            recipe.processingProgress = 0f;
+                            drone.SetTask_Process(this, recipe);
+                            return canAddAmount > 0;
+                        }
+                    }
+                }
+            }
         }
 
         return canAddAmount > 0;
@@ -376,62 +388,51 @@ public class Processor : Damageable, IClickable, IAetherConsumer
     private void OnResourceAmountChanged(ResourceType type, int amount)
     {
         bool ingredientChanged = false;
-        foreach (ActiveRecipe recipe in _activeRecipes)
-        {
-            foreach (ResourceCost ingredient in recipe.recipeData.ingredients)
-            {
-                if (ingredient.resourceType == type)
-                {
+        foreach (ActiveRecipe recipe in _activeRecipes) {
+            foreach (ResourceCost ingredient in recipe.recipeData.ingredients) {
+                if (ingredient.resourceType == type) {
                     ingredientChanged = true;
                     break;
                 }
             }
             if (ingredientChanged) break;
         }
-        
-        if (ingredientChanged)
-        {
-            foreach (ActiveRecipe recipe in _activeRecipes)
-            {
-                if (recipe.assignedDrone != null && !recipe.isProcessing)
-                {
-                    if (!HasIngredientsFor(recipe.recipeData))
-                    {
+
+        if (ingredientChanged) {
+            foreach (ActiveRecipe recipe in _activeRecipes) {
+                if (recipe.assignedDrone != null && !recipe.isProcessing) {
+                    if (!HasIngredientsFor(recipe.recipeData)) {
                         Unit_Drone drone = recipe.assignedDrone;
                         ReleaseDroneFromRecipe(drone);
                         drone.SetTask_Idle();
                     }
                 }
             }
-            
+
             CheckAndAssignReadyRecipes();
         }
     }
-    
+
     private void CheckAndAssignReadyRecipes()
     {
         bool assignedRecipe = false;
-        
+
         foreach (ActiveRecipe recipe in _activeRecipes) {
             if (recipe.assignedDrone == null &&
                 !recipe.isProcessing &&
                 HasIngredientsFor(recipe.recipeData) &&
                 PassesProductionCapCheck(recipe)) {
-                
-                foreach (Unit_Drone drone in _assignedDrones)
-                {
-                    if (drone != null && drone.HasCheckedIn && drone.CurrentRecipeTask == null)
-                    {
+                foreach (Unit_Drone drone in _assignedDrones) {
+                    if (drone != null && drone.HasCheckedIn && drone.CurrentRecipeTask == null) {
                         bool hasPendingRequest = _pendingRequests.Any(r => r.assignedDrone == drone);
-                        if (!hasPendingRequest)
-                        {
+                        if (!hasPendingRequest) {
                             RequestTask(drone);
                             assignedRecipe = true;
                             break;
                         }
                     }
                 }
-                
+
                 if (assignedRecipe) break;
             }
         }
@@ -440,17 +441,15 @@ public class Processor : Damageable, IClickable, IAetherConsumer
     public void ProcessRecipeWork(ActiveRecipe recipe, float workAmount)
     {
         // Don't process if not operational (no aether)
-        if (!_isOperational)
-        {
-            if (recipe.assignedDrone != null)
-            {
+        if (!IsOperational) {
+            if (recipe.assignedDrone != null) {
                 recipe.assignedDrone.SetTask_Idle();
             }
             recipe.assignedDrone = null;
             recipe.isProcessing = false;
             return;
         }
-        
+
         if (recipe.assignedDrone == null) {
             return;
         }
@@ -465,8 +464,7 @@ public class Processor : Damageable, IClickable, IAetherConsumer
                 Unit_Drone drone = recipe.assignedDrone;
                 recipe.assignedDrone = null;
                 recipe.processingProgress = 0f;
-                if (drone != null)
-                {
+                if (drone != null) {
                     drone.SetTask_Idle();
                 }
                 return;
@@ -482,10 +480,6 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         int currentQuarter = Mathf.FloorToInt(Mathf.Min(progressPercent, 100f) / 25f);
         int previousQuarter = Mathf.FloorToInt(Mathf.Min(previousPercent, 100f) / 25f);
 
-        // 25% 마다 로그 출력 (25%, 50%, 75%, 100%)
-        if (currentQuarter > previousQuarter) {
-            Debug.Log($"[Processor:{name}] Processing PROGRESS: {recipe.recipeData.resourceType} - {progressPercent:F1}% ({recipe.processingProgress:F2}/{recipe.recipeData.processingTime:F2}s)");
-        }
 
         if (recipe.processingProgress >= recipe.recipeData.processingTime) {
             ProduceOutput(recipe.recipeData);
@@ -495,7 +489,9 @@ public class Processor : Damageable, IClickable, IAetherConsumer
             recipe.processingProgress = 0;
             recipe.assignedDrone = null;
 
-            completedDrone.SetTask_Idle();
+            if (completedDrone != null) {
+                completedDrone.SetTask_Idle();
+            }
 
             CheckProductionLimits(recipe);
         }
@@ -506,23 +502,16 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         ActiveRecipe recipe = _activeRecipes.FirstOrDefault(r => r.assignedDrone == drone);
         if (recipe != null) {
             recipe.assignedDrone = null;
-            Debug.Log($"[Processor:{name}] Recipe '{recipe.recipeData.resourceType}' released from Drone '{drone.name}'");
         }
     }
 
     private void ProduceOutput(ProcessorRecipe recipeData)
     {
-        int amountBefore = ResourceManager.Instance.GetResourceAmount(recipeData.resourceType);
         ResourceManager.Instance.AddResource(recipeData.resourceType, recipeData.produceAmount);
-        int amountAfter = ResourceManager.Instance.GetResourceAmount(recipeData.resourceType);
 
-        Debug.Log($"[Processor:{name}] Resource Produced: {recipeData.resourceType}, +{recipeData.produceAmount} (ResourceManager: {amountBefore} -> {amountAfter})");
-
-        if (TutorialManager.Instance != null)
-        {
+        if (TutorialManager.Instance != null) {
             string itemTypeName = recipeData.resourceType.ToString();
-            if (itemTypeName.Contains("Alloy") || itemTypeName.Contains("합금"))
-            {
+            if (itemTypeName.Contains("Alloy") || itemTypeName.Contains("합금")) {
                 TutorialManager.Instance.OnItemProduced("AlloyPlate");
             }
         }
@@ -545,36 +534,36 @@ public class Processor : Damageable, IClickable, IAetherConsumer
     {
         return transform.position;
     }
-    
+
     public Vector3 AssignInteractionCell(Unit_Drone drone)
     {
         Vector3Int processorCell = BuildingManager.Instance.grid.WorldToCell(transform.position);
         if (!BuildingManager.Instance.GetBuildingAt(processorCell, out List<Vector3Int> occupiedCells)) {
             occupiedCells = new List<Vector3Int> { processorCell };
         }
-        
+
         List<Vector3Int> availableCells = GetAvailableInteractionCells(occupiedCells);
-        
+
         if (availableCells.Count == 0) {
             return transform.position;
         }
-        
+
         if (_droneInteractionCells.TryGetValue(drone, out Vector3Int existingCell)) {
             if (availableCells.Contains(existingCell)) {
                 return BuildingManager.Instance.grid.GetCellCenterWorld(existingCell);
             }
         }
-        
+
         Vector3Int bestCell = availableCells[0];
         float minDistance = float.MaxValue;
         Vector3 dronePos = drone.transform.position;
-        
+
         HashSet<Vector3Int> assignedCells = new HashSet<Vector3Int>(_droneInteractionCells.Values);
-        
+
         foreach (Vector3Int cell in availableCells) {
             bool isUnassigned = !assignedCells.Contains(cell);
             float distance = Vector3.Distance(dronePos, BuildingManager.Instance.grid.GetCellCenterWorld(cell));
-            
+
             if (isUnassigned && assignedCells.Contains(bestCell)) {
                 bestCell = cell;
                 minDistance = distance;
@@ -586,42 +575,41 @@ public class Processor : Damageable, IClickable, IAetherConsumer
                 }
             }
         }
-        
+
         _droneInteractionCells[drone] = bestCell;
-        
+
         return BuildingManager.Instance.grid.GetCellCenterWorld(bestCell);
     }
-    
+
     private List<Vector3Int> GetAvailableInteractionCells(List<Vector3Int> occupiedCells)
     {
         HashSet<Vector3Int> interactionCells = new HashSet<Vector3Int>();
         HashSet<Vector3Int> occupiedSet = new HashSet<Vector3Int>(occupiedCells);
-        
+
         Vector3Int[] cardinalOffsets = {
-            new (1, 0, 0), new (-1, 0, 0),
-            new (0, 1, 0), new (0, -1, 0)
+            new Vector3Int(1, 0, 0), new Vector3Int(-1, 0, 0), new Vector3Int(0, 1, 0), new Vector3Int(0, -1, 0)
         };
-        
+
         foreach (Vector3Int occupiedCell in occupiedSet) {
             foreach (Vector3Int offset in cardinalOffsets) {
                 Vector3Int neighbor = occupiedCell + offset;
-                
+
                 if (!occupiedSet.Contains(neighbor) && IsCellWalkable(neighbor)) {
                     interactionCells.Add(neighbor);
                 }
             }
         }
-        
+
         return interactionCells.ToList();
     }
-    
+
     private bool IsCellWalkable(Vector3Int cell)
     {
         if (BuildingManager.Instance == null) {
             return false;
         }
-        return !BuildingManager.Instance.IsResourceTile(cell) && 
-               !BuildingManager.Instance.IsBuildingTile(cell);
+        return !BuildingManager.Instance.IsResourceTile(cell) &&
+            !BuildingManager.Instance.IsBuildingTile(cell);
     }
 
     public void CancelRequest(ResourceRequest request)
@@ -633,34 +621,29 @@ public class Processor : Damageable, IClickable, IAetherConsumer
 
     public void CheckProductionLimits(ActiveRecipe recipe)
     {
-        if (recipe.maxProductionLimit <= 0)
-        {
-            if (recipe.assignedDrone != null)
-            {
+        if (recipe.maxProductionLimit <= 0) {
+            if (recipe.assignedDrone != null) {
                 Unit_Drone drone = recipe.assignedDrone;
                 ReleaseDroneFromRecipe(drone);
                 drone.SetTask_Idle();
             }
             return;
         }
-        
+
         int currentAmount = ResourceManager.Instance.GetResourceAmount(recipe.recipeData.resourceType);
-        if (currentAmount >= recipe.maxProductionLimit)
-        {
-            if (recipe.assignedDrone != null)
-            {
+        if (currentAmount >= recipe.maxProductionLimit) {
+            if (recipe.assignedDrone != null) {
                 Unit_Drone drone = recipe.assignedDrone;
                 ReleaseDroneFromRecipe(drone);
                 drone.SetTask_Idle();
             }
             return;
         }
-        
-        if (recipe.assignedDrone != null)
-        {
+
+        if (recipe.assignedDrone != null) {
             return;
         }
-        
+
         foreach (Unit_Drone drone in _assignedDrones) {
             bool hasPendingRequest = _pendingRequests.Any(r => r.assignedDrone == drone);
             bool isAssignedToRecipe = drone.CurrentRecipeTask != null;

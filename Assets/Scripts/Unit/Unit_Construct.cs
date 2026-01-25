@@ -498,14 +498,24 @@ public class Unit_Construct : UnitBase
                 List<IStorage> candidates = new List<IStorage>();
                 foreach (IStorage storage in storages) {
                     if (storage == null) continue;
-                    if (storage.GetCurrentResourceAmount(request.type) <= 0) continue;
+                    int availableAmount = storage.GetCurrentResourceAmount(request.type);
+                    if (availableAmount <= 0) continue;
                     candidates.Add(storage);
                 }
 
                 if (candidates.Count > 0) {
                     candidates.Sort((a, b) =>
-                        Vector3.Distance(site.GetPosition(), a.GetPosition())
-                            .CompareTo(Vector3.Distance(site.GetPosition(), b.GetPosition())));
+                    {
+                        float distA = Vector3.Distance(site.GetPosition(), a.GetPosition());
+                        float distB = Vector3.Distance(site.GetPosition(), b.GetPosition());
+                        int amountA = a.GetCurrentResourceAmount(request.type);
+                        int amountB = b.GetCurrentResourceAmount(request.type);
+                        
+                        if (amountA >= request.amount && amountB < request.amount) return -1;
+                        if (amountA < request.amount && amountB >= request.amount) return 1;
+                        
+                        return distA.CompareTo(distB);
+                    });
 
                     foreach (IStorage storage in candidates) {
                         bool hasPath = movement.SetNewTarget(storage.GetPosition());

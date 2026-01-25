@@ -28,6 +28,6 @@ MonoBehaviour:
   buildingType: Storage
   unitType: 
   itemType: 
-  showProgressBar: 1
+  showProgressBar: 0
   spawnUnits: []
   grantResources: []

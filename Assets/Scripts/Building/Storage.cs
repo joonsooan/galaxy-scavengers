@@ -12,6 +12,14 @@ public class Storage : BaseStorage
     protected override void Start()
     {
         base.Start();
+        
+        if (IsProperlyPlacedBuilding())
+        {
+            if (GetComponent<BuildingHoverTrigger>() == null)
+            {
+                gameObject.AddComponent<BuildingHoverTrigger>();
+            }
+        }
     }
     
     protected override void OnEnable()
