@@ -108,6 +108,8 @@ public class ResourceGenerator : Damageable
     {
         if (resourceType == ResourceType.Aether)
         {
+            FindAndCacheAetherManager();
+            
             if (_aetherConsumptionManager != null && _aetherConsumptionManager.IsAetherCapacityFull)
             {
                 if (!_wasAetherStorageFull && GameAlertUIManager.Instance != null)

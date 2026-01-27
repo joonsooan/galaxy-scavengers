@@ -330,6 +330,11 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
             if (unitBase != null)
             {
                 unitBase.unitData = unitToProduce;
+                
+                if (NoiseManager.Instance != null && unitBase.unitType == UnitBase.UnitType.Ally)
+                {
+                    NoiseManager.Instance.RegisterUnit(unitBase);
+                }
             }
 
             OnUnitProduced?.Invoke(unitToProduce);

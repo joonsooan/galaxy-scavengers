@@ -28,6 +28,7 @@ public abstract class UnitBase : Damageable
 
     public UnitState currentState;
     protected UnitProgressBar progressBar;
+    private bool _isRegisteredToNoiseManager;
 
     protected override void OnEnable()
     {
@@ -40,11 +41,21 @@ public abstract class UnitBase : Damageable
         if (unitType == UnitType.Ally && NoiseManager.Instance != null)
         {
             NoiseManager.Instance.RegisterUnit(this);
+            _isRegisteredToNoiseManager = true;
         }
 
         VisionProvider visionProvider = GetComponent<VisionProvider>();
         if (visionProvider != null && FogOfWarManager.Instance != null && FogOfWarManager.Instance.IsInitialized) {
             visionProvider.ForceUpdateAffectedTiles();
+        }
+    }
+
+    private void Update()
+    {
+        if (unitType == UnitType.Ally && !_isRegisteredToNoiseManager && unitData != null && NoiseManager.Instance != null)
+        {
+            NoiseManager.Instance.RegisterUnit(this);
+            _isRegisteredToNoiseManager = true;
         }
     }
 

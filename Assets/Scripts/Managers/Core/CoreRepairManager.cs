@@ -254,14 +254,28 @@ public class CoreRepairManager : MonoBehaviour
     {
         if (IsPartRepaired(part)) return string.Empty;
 
-        return part switch
+        CorePartData partData = GetPartData(part);
+        string partLabel = partData != null && !string.IsNullOrEmpty(partData.partName) ? partData.partName : part.ToString();
+
+        if (part == CorePart.Engine)
         {
-            CorePart.Engine => "발사 불가",
-            CorePart.Storage => "인벤토리 공간 감소",
-            CorePart.Barrier => "소음 계수 증가",
-            CorePart.Controller => "최대 인구수 감소",
-            CorePart.Repeater => "생산/건설 속도 감소",
-            _ => string.Empty
-        };
+            return $"{partLabel} 파손 : 시드 코어 발사를 위해 수리 필수";
+        }
+
+        float debuffPercent = partData != null ? Mathf.RoundToInt(partData.debuffValue * 100f) : 0f;
+
+        switch (part)
+        {
+            case CorePart.Barrier:
+                return $"{partLabel} 파손 : 소음계수 {debuffPercent}% 증가";
+            case CorePart.Controller:
+                return $"{partLabel} 파손 : 최대 유닛 제한 {debuffPercent}% 감소";
+            case CorePart.Repeater:
+                return $"{partLabel} 파손 : 건물 생산 속도, 유닛 작업 속도 {debuffPercent}% 감소";
+            case CorePart.Storage:
+                return $"{partLabel} 파손 : 시드 코어 저장 공간 {debuffPercent}% 감소";
+            default:
+                return string.Empty;
+        }
     }
 }

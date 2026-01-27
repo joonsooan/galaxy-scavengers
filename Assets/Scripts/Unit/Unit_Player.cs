@@ -105,6 +105,11 @@ public class Unit_Player : UnitBase
 
     private void HandleInput()
     {
+        if (GameManager.Instance != null && GameManager.Instance.IsDragging())
+        {
+            return;
+        }
+
         if (Input.GetMouseButtonDown(0)) {
             if (IsPointerOverUI()) {
                 return;

@@ -18,6 +18,13 @@ public class NoiseSliderUI : MonoBehaviour
 
     private void OnEnable()
     {
+        if (noiseSlider != null)
+        {
+            noiseSlider.minValue = 0f;
+            noiseSlider.maxValue = 100f;
+            noiseSlider.value = 0f;
+        }
+
         if (NoiseManager.Instance != null)
         {
             NoiseManager.Instance.OnNoiseChanged += UpdateNoiseDisplay;
@@ -42,23 +49,20 @@ public class NoiseSliderUI : MonoBehaviour
 
         if (noiseValueText != null)
         {
-            noiseValueText.text = $"{noisePercentage:F1}%";
+            float clampedNoise = Mathf.Clamp(noisePercentage, 0f, 100f);
+            noiseValueText.text = $"{clampedNoise:F1} / 100";
         }
 
         if (NoiseManager.Instance == null) return;
 
         NoiseManager.NoiseZone zone = NoiseManager.Instance.GetCurrentNoiseZone();
         
+        float t = Mathf.Clamp01(noisePercentage / 100f);
+        Color targetColor = Color.Lerp(safeColor, dangerColor, t);
+
         if (sliderFillImage != null)
         {
-            sliderFillImage.color = zone switch
-            {
-                NoiseManager.NoiseZone.Safe => safeColor,
-                NoiseManager.NoiseZone.Caution => cautionColor,
-                NoiseManager.NoiseZone.Warning => warningColor,
-                NoiseManager.NoiseZone.Danger => dangerColor,
-                _ => safeColor
-            };
+            sliderFillImage.color = targetColor;
         }
 
         if (noiseZoneText != null)
@@ -71,6 +75,7 @@ public class NoiseSliderUI : MonoBehaviour
                 NoiseManager.NoiseZone.Danger => "위험",
                 _ => "안전"
             };
+            noiseZoneText.color = targetColor;
         }
     }
 }
