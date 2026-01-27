@@ -9,12 +9,17 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
     [SerializeField] private bool hasOffest;
     [SerializeField] private Vector3 offest = new Vector3(0.5f, 0.5f, 0f);
     private HashSet<Vector3Int> _currentAffectedTiles = new HashSet<Vector3Int>();
+    private HashSet<Vector3Int> _tempNewTiles = new HashSet<Vector3Int>();
+    private HashSet<Vector3Int> _tempEnteredTiles = new HashSet<Vector3Int>();
+    private HashSet<Vector3Int> _tempExitedTiles = new HashSet<Vector3Int>();
     private Grid _grid;
 
     private bool _isRegistered;
     private Vector3 _lastPosition;
     private float _lastVisionRange;
     private CircleCollider2D _visionCollider;
+    private float _updateInterval = 0.1f;
+    private float _lastUpdateTime;
 
     private void Awake()
     {
@@ -47,7 +52,10 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
     {
         if (_grid == null || FogOfWarManager.Instance == null) return;
 
-        bool positionChanged = Vector3.Distance(transform.position, _lastPosition) > 0.01f;
+        float currentTime = Time.time;
+        if (currentTime - _lastUpdateTime < _updateInterval) return;
+
+        bool positionChanged = Vector3.SqrMagnitude(transform.position - _lastPosition) > 0.1f;
         bool rangeChanged = Mathf.Abs(visionRange - _lastVisionRange) > 0.01f;
 
         if (positionChanged || rangeChanged) {
@@ -56,6 +64,7 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
             }
 
             UpdateAffectedTiles();
+            _lastUpdateTime = currentTime;
 
             _lastPosition = transform.position;
             _lastVisionRange = visionRange;
@@ -112,29 +121,47 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
     {
         if (_grid == null || FogOfWarManager.Instance == null || !_isRegistered) return;
 
-        HashSet<Vector3Int> newAffectedTiles = GetTilesInCollider();
-        HashSet<Vector3Int> enteredTiles = new HashSet<Vector3Int>(newAffectedTiles);
-        enteredTiles.ExceptWith(_currentAffectedTiles);
-
-        HashSet<Vector3Int> exitedTiles = new HashSet<Vector3Int>(_currentAffectedTiles);
-        exitedTiles.ExceptWith(newAffectedTiles);
-
-        if (enteredTiles.Count > 0 || exitedTiles.Count > 0) {
-            FogOfWarManager.Instance.OnVisionProviderTilesChanged(this, enteredTiles, exitedTiles);
+        GetTilesInCollider(_tempNewTiles);
+        
+        _tempEnteredTiles.Clear();
+        foreach (Vector3Int tile in _tempNewTiles)
+        {
+            if (!_currentAffectedTiles.Contains(tile))
+            {
+                _tempEnteredTiles.Add(tile);
+            }
         }
 
-        _currentAffectedTiles = newAffectedTiles;
+        _tempExitedTiles.Clear();
+        foreach (Vector3Int tile in _currentAffectedTiles)
+        {
+            if (!_tempNewTiles.Contains(tile))
+            {
+                _tempExitedTiles.Add(tile);
+            }
+        }
+
+        if (_tempEnteredTiles.Count > 0 || _tempExitedTiles.Count > 0) {
+            FogOfWarManager.Instance.OnVisionProviderTilesChanged(this, _tempEnteredTiles, _tempExitedTiles);
+        }
+
+        _currentAffectedTiles.Clear();
+        foreach (Vector3Int tile in _tempNewTiles)
+        {
+            _currentAffectedTiles.Add(tile);
+        }
     }
 
-    private HashSet<Vector3Int> GetTilesInCollider()
+    private void GetTilesInCollider(HashSet<Vector3Int> outputTiles)
     {
-        HashSet<Vector3Int> tiles = new HashSet<Vector3Int>();
+        outputTiles.Clear();
 
-        if (_visionCollider == null || _grid == null) return tiles;
+        if (_visionCollider == null || _grid == null) return;
 
         Bounds bounds = _visionCollider.bounds;
         Vector3 center = bounds.center;
         float radius = bounds.extents.x;
+        float radiusSquared = radius * radius;
 
         int rangeInCells = Mathf.CeilToInt(radius);
         Vector3Int centerCell = _grid.WorldToCell(center);
@@ -143,15 +170,13 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
             for (int y = -rangeInCells; y <= rangeInCells; y++) {
                 Vector3Int cell = centerCell + new Vector3Int(x, y, 0);
                 Vector3 cellWorldPos = _grid.GetCellCenterWorld(cell);
-                float distance = Vector3.Distance(center, cellWorldPos);
+                float distanceSquared = (center - cellWorldPos).sqrMagnitude;
 
-                if (distance <= radius) {
-                    tiles.Add(cell);
+                if (distanceSquared <= radiusSquared) {
+                    outputTiles.Add(cell);
                 }
             }
         }
-
-        return tiles;
     }
 
     private void RegisterWithFogOfWar()

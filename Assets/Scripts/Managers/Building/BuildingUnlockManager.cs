@@ -29,6 +29,19 @@ public class BuildingUnlockManager : MonoBehaviour
     private void Start()
     {
         LoadUnlockedBuildings();
+        UnlockAllBuildings();
+    }
+
+    private void UnlockAllBuildings()
+    {
+        BuildingData[] allBuildings = Resources.LoadAll<BuildingData>("Buildings");
+        foreach (BuildingData building in allBuildings)
+        {
+            if (building != null)
+            {
+                UnlockBuilding(building);
+            }
+        }
     }
     
     private void OnApplicationPause(bool pauseStatus)
@@ -73,7 +86,7 @@ public class BuildingUnlockManager : MonoBehaviour
             UpdateUnlockedBuildingsList();
             OnBuildingUnlocked?.Invoke(building);
             SaveUnlockedBuildings();
-            Debug.Log($"BuildingUnlockManager: Unlocked building '{building.displayName}'");
+            // Debug.Log($"BuildingUnlockManager: Unlocked building '{building.displayName}'");
         }
     }
     

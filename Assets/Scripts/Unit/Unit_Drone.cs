@@ -6,7 +6,7 @@ using UnityEngine;
 public class Unit_Drone : UnitBase
 {
     private const float RepathInterval = 0.5f;
-    
+
     [Header("Drone Settings")]
     [SerializeField] public int carryCapacity = 10;
     [SerializeField] private float processingSpeed = 1f;
@@ -18,28 +18,34 @@ public class Unit_Drone : UnitBase
     [Header("Hover Animation")]
     [SerializeField] private float hoverHeight = 0.2f;
     [SerializeField] private float hoverDuration = 1.5f;
+    private Coroutine _assignmentCoroutine;
+    private Vector3 _baseHoverLocalPosition;
 
-    public bool HasCheckedIn { get; private set; }
-    public bool IsAssigned => _currentProcessor != null;
-    public ActiveRecipe CurrentRecipeTask { get; private set; }
-    
     private int _carriedAmount;
-    private float _nextRepathTime;
-    
+
     private ResourceType _carriedResourceType;
     private Processor _currentProcessor;
     private Processor.ResourceRequest _currentRequest;
     private DroneState _currentState = DroneState.Idle;
+    private Tween _hoverTween;
     private Coroutine _loadingCoroutine;
-    private Coroutine _assignmentCoroutine;
-    
+    private float _nextRepathTime;
+    private bool _noResourceAlertActive;
+
     private UnitSpriteController _spriteController;
+    private Transform _spriteTransform;
     private IStorage _targetStorage;
     private Coroutine _unloadingCoroutine;
-    private Tween _hoverTween;
-    private Vector3 _baseHoverLocalPosition;
-    private Transform _spriteTransform;
-    private bool _noResourceAlertActive;
+
+    public bool HasCheckedIn { get; private set; }
+
+    public bool IsAssigned {
+        get {
+            return _currentProcessor != null;
+        }
+    }
+
+    public ActiveRecipe CurrentRecipeTask { get; private set; }
 
     protected override void Awake()
     {
@@ -72,8 +78,7 @@ public class Unit_Drone : UnitBase
 
     protected override void OnDisable()
     {
-        if (_noResourceAlertActive)
-        {
+        if (_noResourceAlertActive) {
             GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.DroneNoResource);
             _noResourceAlertActive = false;
         }
@@ -89,13 +94,11 @@ public class Unit_Drone : UnitBase
         case DroneState.Idle:
             UpdateIdle();
             bool shouldShowAlert = !IsAssigned;
-            if (shouldShowAlert && !_noResourceAlertActive)
-            {
+            if (shouldShowAlert && !_noResourceAlertActive) {
                 GameAlertUIManager.Instance?.RegisterAlert(GameAlertType.DroneNoResource);
                 _noResourceAlertActive = true;
             }
-            else if (!shouldShowAlert && _noResourceAlertActive)
-            {
+            else if (!shouldShowAlert && _noResourceAlertActive) {
                 GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.DroneNoResource);
                 _noResourceAlertActive = false;
             }
@@ -150,7 +153,7 @@ public class Unit_Drone : UnitBase
         bool isProcessing = _currentState == DroneState.Processing;
         bool isLoading = _loadingCoroutine != null;
         bool isUnloading = _unloadingCoroutine != null;
-        
+
         _spriteController.UpdateAnimationState(currentState, isProcessing: isProcessing);
 
         if (isLoading || isUnloading) {
@@ -174,7 +177,7 @@ public class Unit_Drone : UnitBase
         if (_currentProcessor != null) {
             _currentProcessor.AssignDrone(this);
             _currentState = DroneState.Idle;
-            
+
             if (_spriteController != null) {
                 _spriteController.SetTargetTransform(_currentProcessor.transform);
                 Vector2 direction = GetProcessorLookDirection(_currentProcessor);
@@ -186,7 +189,7 @@ public class Unit_Drone : UnitBase
         else {
             _currentState = DroneState.Idle;
         }
-        
+
         UpdateUnitBaseState();
         UpdateAnimationState();
     }
@@ -217,86 +220,71 @@ public class Unit_Drone : UnitBase
         }
         _currentProcessor = null;
     }
-    
+
     private void LookAtTarget(Vector3 targetPosition)
     {
         if (_spriteController == null) return;
 
         Vector2 direction;
-        
-        if (_currentProcessor != null && 
-            Vector3.Distance(targetPosition, _currentProcessor.transform.position) < 0.1f)
-        {
+
+        if (_currentProcessor != null &&
+            Vector3.Distance(targetPosition, _currentProcessor.transform.position) < 0.1f) {
             direction = GetProcessorLookDirection(_currentProcessor);
         }
-        else
-        {
+        else {
             direction = (targetPosition - transform.position).normalized;
         }
-        
-        if (direction.sqrMagnitude > 0.01f)
-        {
+
+        if (direction.sqrMagnitude > 0.01f) {
             _spriteController.UpdateSpriteDirection(direction);
         }
     }
-    
+
     private Vector2 GetProcessorLookDirection(Processor processor)
     {
         if (processor == null) return Vector2.zero;
-        
+
         Vector3 interactionCellPos = processor.AssignInteractionCell(this);
         Vector3 processorPos = processor.transform.position;
-        
+
         float gridSize = 1f;
         processorPos.y += 0.5f * gridSize;
-        
-        if (processor.ProcessorData != null && 
+
+        if (processor.ProcessorData != null &&
             processor.ProcessorData.ProcessorName != null &&
-            processor.ProcessorData.ProcessorName.Contains("Smelter"))
-        {
+            processor.ProcessorData.ProcessorName.Contains("Smelter")) {
             processorPos.x += 0.5f * gridSize;
         }
-        
+
         Vector3 relativePos = interactionCellPos - processorPos;
         Vector2 lookDirection;
-        
+
         float absX = Mathf.Abs(relativePos.x);
         float absY = Mathf.Abs(relativePos.y);
 
-        if (absY > 1.25f)
-        {
-            if (absX > absY)
-            {
-                if (relativePos.x > 0)
-                {
+        if (absY > 1.25f) {
+            if (absX > absY) {
+                if (relativePos.x > 0) {
                     lookDirection = Vector2.left;
                 }
-                else
-                {
+                else {
                     lookDirection = Vector2.right;
                 }
             }
-            else
-            {
-                if (relativePos.y > 0)
-                {
+            else {
+                if (relativePos.y > 0) {
                     lookDirection = Vector2.down;
                 }
-                else
-                {
+                else {
                     lookDirection = Vector2.up;
                 }
             }
-            
         }
-        else
-        {
-            if (relativePos.x > 0)
-            {
+        else {
+            if (relativePos.x > 0) {
                 lookDirection = Vector2.left;
             }
-            else
-            {
+            else {
                 lookDirection = Vector2.right;
             }
         }
@@ -358,8 +346,7 @@ public class Unit_Drone : UnitBase
             }
         }
         else {
-            if (!movement.IsMoving)
-            {
+            if (!movement.IsMoving) {
                 _currentProcessor.AssignInteractionCell(this);
                 _currentProcessor.RequestTask(this);
             }
@@ -393,7 +380,7 @@ public class Unit_Drone : UnitBase
                     return;
                 }
             }
-            
+
             if (_loadingCoroutine == null) {
                 _loadingCoroutine = StartCoroutine(LoadingResourceCoroutine());
             }
@@ -403,25 +390,24 @@ public class Unit_Drone : UnitBase
     private IEnumerator LoadingResourceCoroutine()
     {
         movement.ForceStopAllMovement();
-        
+
         if (_targetStorage != null && _spriteController != null) {
             Vector3 storagePos = ((Component)_targetStorage).transform.position;
             LookAtTarget(storagePos);
             _spriteController.SetTargetTransform(((Component)_targetStorage).transform);
         }
-        
+
         // Show progress bar during loading
         ShowProgressBar();
         float elapsedTime = 0f;
-        
-        while (elapsedTime < loadingTime)
-        {
+
+        while (elapsedTime < loadingTime) {
             elapsedTime += Time.deltaTime;
             float progress = elapsedTime / loadingTime;
             UpdateProgressBar(progress);
             yield return null;
         }
-        
+
         HideProgressBar();
 
         if (_targetStorage != null && _currentRequest != null) {
@@ -431,16 +417,16 @@ public class Unit_Drone : UnitBase
                 _loadingCoroutine = null;
                 yield break;
             }
-            
+
             if (_targetStorage.TryWithdrawResource(_currentRequest.type, _currentRequest.amount, out int withdrawnAmount)) {
                 if (withdrawnAmount > 0) {
                     _carriedResourceType = _currentRequest.type;
                     _carriedAmount = withdrawnAmount;
-                    
+
                     Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
                     movement.ResumeMovement();
                     movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
-                    
+
                     _currentState = DroneState.DeliveringResource;
                 }
                 else {
@@ -482,7 +468,7 @@ public class Unit_Drone : UnitBase
     private IEnumerator UnloadingResourceCoroutine()
     {
         movement.ForceStopAllMovement();
-        
+
         if (_currentProcessor != null && _spriteController != null) {
             Vector2 direction = GetProcessorLookDirection(_currentProcessor);
             if (direction.sqrMagnitude > 0.01f) {
@@ -492,18 +478,24 @@ public class Unit_Drone : UnitBase
         }
 
         yield return new WaitForSeconds(unloadingTime);
+        bool taskAssigned = false;
 
         if (_currentProcessor != null) {
             _currentProcessor.TryDepositIngredient(_carriedResourceType, _carriedAmount, this);
 
-            _carriedAmount = 0;
-            _currentRequest = null;
-            _currentState = DroneState.Idle;
-
-            _currentProcessor.RequestTask(this);
+            if (_currentState == DroneState.Processing) {
+                taskAssigned = true;
+            }
         }
-        else {
+
+        _carriedAmount = 0;
+        _currentRequest = null;
+
+        if (!taskAssigned) {
             _currentState = DroneState.Idle;
+            if (_currentProcessor != null) {
+                _currentProcessor.RequestTask(this);
+            }
         }
 
         _unloadingCoroutine = null;
@@ -512,7 +504,7 @@ public class Unit_Drone : UnitBase
     private IEnumerator AssignmentCoroutine()
     {
         movement.ForceStopAllMovement();
-        
+
         if (_currentProcessor != null && _spriteController != null) {
             Vector2 direction = GetProcessorLookDirection(_currentProcessor);
             if (direction.sqrMagnitude > 0.01f) {
@@ -542,10 +534,9 @@ public class Unit_Drone : UnitBase
             SetTask_Idle();
             return;
         }
-        
+
         // Check if processor is operational (has aether)
-        if (_currentProcessor != null && _currentProcessor is IAetherConsumer consumer && !consumer.IsOperational)
-        {
+        if (_currentProcessor != null && _currentProcessor is IAetherConsumer consumer && !consumer.IsOperational) {
             SetTask_Idle();
             return;
         }
@@ -564,28 +555,27 @@ public class Unit_Drone : UnitBase
                     _spriteController.UpdateSpriteDirection(direction);
                 }
             }
-            
+
             // Show progress bar during processing
-            if (CurrentRecipeTask != null && CurrentRecipeTask.isProcessing)
-            {
+            if (CurrentRecipeTask != null && CurrentRecipeTask.isProcessing) {
                 ShowProgressBar();
                 float progress = CurrentRecipeTask.processingProgress;
                 UpdateProgressBar(progress);
             }
-            else
-            {
+            else {
                 HideProgressBar();
             }
-            
-            _currentProcessor.ProcessRecipeWork(CurrentRecipeTask, Time.deltaTime * processingSpeed);
 
-            if (CurrentRecipeTask == null || !CurrentRecipeTask.isProcessing && CurrentRecipeTask.assignedDrone == null) {
+            if (_currentProcessor != null && CurrentRecipeTask != null) {
+                _currentProcessor.ProcessRecipeWork(CurrentRecipeTask, Time.deltaTime * processingSpeed);
+            }
+
+            if (CurrentRecipeTask == null || CurrentRecipeTask != null && !CurrentRecipeTask.isProcessing && CurrentRecipeTask.assignedDrone == null) {
                 HideProgressBar();
                 return;
             }
         }
-        else
-        {
+        else {
             HideProgressBar();
         }
 
@@ -594,8 +584,7 @@ public class Unit_Drone : UnitBase
                 _nextRepathTime = Time.time + RepathInterval;
                 Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
                 bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
-                if (hasPath)
-                {
+                if (hasPath) {
                     _ = movement.FinalTargetPosition != default
                         ? Vector3.Distance(transform.position, movement.FinalTargetPosition)
                         : 0f;
@@ -626,13 +615,41 @@ public class Unit_Drone : UnitBase
     public void SetTask_FetchResource(Processor.ResourceRequest request, Processor processor)
     {
         _currentRequest = request;
-        _targetStorage = ResourceManager.Instance.FindClosestStorageWithResource(processor.GetPosition(), request.type, 1);
+        _targetStorage = null;
 
-        if (_targetStorage != null) {
-            bool hasPath = movement.SetNewTarget(_targetStorage.GetPosition());
-            if (hasPath) {
-                _currentState = DroneState.FetchingResource;
-                return;
+        if (ResourceManager.Instance != null) {
+            List<IStorage> storages = ResourceManager.Instance.GetAllStorages();
+            if (storages != null && storages.Count > 0) {
+                List<IStorage> candidates = new List<IStorage>();
+                foreach (IStorage storage in storages) {
+                    if (storage == null) continue;
+                    int availableAmount = storage.GetCurrentResourceAmount(request.type);
+                    if (availableAmount <= 0) continue;
+                    candidates.Add(storage);
+                }
+
+                if (candidates.Count > 0) {
+                    candidates.Sort((a, b) => {
+                        float distA = Vector3.Distance(processor.GetPosition(), a.GetPosition());
+                        float distB = Vector3.Distance(processor.GetPosition(), b.GetPosition());
+                        int amountA = a.GetCurrentResourceAmount(request.type);
+                        int amountB = b.GetCurrentResourceAmount(request.type);
+
+                        if (amountA >= request.amount && amountB < request.amount) return -1;
+                        if (amountA < request.amount && amountB >= request.amount) return 1;
+
+                        return distA.CompareTo(distB);
+                    });
+
+                    foreach (IStorage storage in candidates) {
+                        bool hasPath = movement.SetNewTarget(storage.GetPosition());
+                        if (hasPath) {
+                            _targetStorage = storage;
+                            _currentState = DroneState.FetchingResource;
+                            return;
+                        }
+                    }
+                }
             }
         }
 
@@ -641,12 +658,19 @@ public class Unit_Drone : UnitBase
 
     public void SetTask_Process(Processor processor, ActiveRecipe recipeTask)
     {
+        if (recipeTask == null) {
+            SetTask_Idle();
+            return;
+        }
+
         Vector3 interactionPos = processor.AssignInteractionCell(this);
         bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
 
         if (!hasPath) {
+            if (processor != null) {
+                processor.ReleaseDroneFromRecipe(this);
+            }
             SetTask_Idle();
-            Debug.Log($"[Drone:{name}] Process start FAILED: cannot path to processor '{processor.name}' for {recipeTask.recipeData.resourceType}");
             return;
         }
 
@@ -678,10 +702,10 @@ public class Unit_Drone : UnitBase
 
     private void UpdateHoverAnimation()
     {
-        bool shouldHover = _spriteTransform != null && 
-                           _currentState != DroneState.Processing && 
-                          (currentState == UnitState.Idle || currentState == UnitState.Moving);
-        
+        bool shouldHover = _spriteTransform != null &&
+            _currentState != DroneState.Processing &&
+            (currentState == UnitState.Idle || currentState == UnitState.Moving);
+
         if (shouldHover) {
             if (_hoverTween == null || !_hoverTween.IsActive()) {
                 StartHover();
@@ -698,7 +722,7 @@ public class Unit_Drone : UnitBase
     {
         StopHover();
         if (_spriteTransform == null) return;
-        
+
         _baseHoverLocalPosition = _spriteTransform.localPosition;
         _hoverTween = _spriteTransform.DOLocalMoveY(_baseHoverLocalPosition.y + hoverHeight, hoverDuration)
             .SetEase(Ease.InOutSine)

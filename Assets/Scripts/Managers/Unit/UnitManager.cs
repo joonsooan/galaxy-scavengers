@@ -66,6 +66,10 @@ public class UnitManager : MonoBehaviour
         if (unit.unitType == UnitBase.UnitType.Enemy && !_enemyUnits.Contains(unit))
         {
             _enemyUnits.Add(unit);
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive())
+            {
+                unit.gameObject.SetActive(false);
+            }
         }
         else if (unit.unitType == UnitBase.UnitType.Ally && !_allyUnits.Contains(unit))
         {

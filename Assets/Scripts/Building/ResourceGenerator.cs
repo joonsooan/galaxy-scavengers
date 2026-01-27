@@ -14,6 +14,7 @@ public class ResourceGenerator : Damageable
     private Coroutine _productionCoroutine;
     private bool _isConstructed;
     private AetherConsumptionManager _aetherConsumptionManager;
+    private bool _wasAetherStorageFull;
     
     public float GenerationInterval => generationInterval;
     public int ResourceAmount => resourceAmount;
@@ -105,13 +106,23 @@ public class ResourceGenerator : Damageable
 
     private void GenerateResource()
     {
-        // Don't generate aether if capacity is full
         if (resourceType == ResourceType.Aether)
         {
             if (_aetherConsumptionManager != null && _aetherConsumptionManager.IsAetherCapacityFull)
             {
+                if (!_wasAetherStorageFull && GameAlertUIManager.Instance != null)
+                {
+                    GameAlertUIManager.Instance.RegisterAlert(GameAlertType.AetherStorageFull);
+                }
+                _wasAetherStorageFull = true;
                 return;
             }
+            
+            if (_wasAetherStorageFull && GameAlertUIManager.Instance != null)
+            {
+                GameAlertUIManager.Instance.UnregisterAlert(GameAlertType.AetherStorageFull);
+            }
+            _wasAetherStorageFull = false;
         }
         
         ResourceManager.Instance.AddResource(resourceType, resourceAmount);

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using FMODUnity;
 
 [DefaultExecutionOrder(-100)]
 public class UIManager : MonoBehaviour
@@ -24,6 +25,9 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject storageResourceListParent;
     [SerializeField] private TMP_Text storageAmountText;
     [SerializeField] private Vector2 storageUIPanelOffset = new Vector2(100f, 0f);
+
+    [Header("Audio")]
+    [SerializeField] private EventReference buildingUIClickSound;
 
     [Header("Tips Reference")]
     [SerializeField] private GameObject tipPanel;
@@ -94,6 +98,11 @@ public class UIManager : MonoBehaviour
         if (processor == null) return;
 
         HideCurrentIClickableUI();
+        
+        if (buildingInfoPanel != null)
+        {
+            buildingInfoPanel.SetActive(false);
+        }
 
         _activeUIPanel = ActiveUIPanel.Processor;
         DisplayProcessorInfo(processor);
@@ -104,6 +113,11 @@ public class UIManager : MonoBehaviour
         if (droneHub == null) return;
 
         HideCurrentIClickableUI();
+        
+        if (buildingInfoPanel != null)
+        {
+            buildingInfoPanel.SetActive(false);
+        }
 
         _activeUIPanel = ActiveUIPanel.DroneHub;
         DisplayDroneHubInfo(droneHub);
@@ -262,6 +276,12 @@ public class UIManager : MonoBehaviour
     private void DisplayProcessorInfo(Processor processor)
     {
         if (processor == null || processorInfoPanel == null) return;
+        
+        if (!buildingUIClickSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(buildingUIClickSound);
+        }
+        
         processorInfoPanel.gameObject.SetActive(true);
         ProcessorUIManager.Instance.ShowProcessorUI(processor);
     }
@@ -297,6 +317,12 @@ public class UIManager : MonoBehaviour
     private void DisplayDroneHubInfo(DroneHub droneHub)
     {
         if (droneHub == null || droneHubInfoPanel == null) return;
+        
+        if (!buildingUIClickSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(buildingUIClickSound);
+        }
+        
         droneHubInfoPanel.gameObject.SetActive(true);
         DroneProduceUIManager.Instance.ShowDroneHubUI(droneHub);
     }

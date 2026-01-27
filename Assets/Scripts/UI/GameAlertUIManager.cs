@@ -5,7 +5,9 @@ public enum GameAlertType
     MinerNoResource,
     UnitUnderAttack,
     BuildingUnderAttack,
-    DroneNoResource
+    DroneNoResource,
+    StorageFull,
+    AetherStorageFull
 }
 
 public class GameAlertUIManager : MonoBehaviour
@@ -16,11 +18,15 @@ public class GameAlertUIManager : MonoBehaviour
     [SerializeField] private GameObject unitUnderAttackCell;
     [SerializeField] private GameObject buildingUnderAttackCell;
     [SerializeField] private GameObject droneNoResourceCell;
+    [SerializeField] private GameObject storageFullCell;
+    [SerializeField] private GameObject aetherStorageFullCell;
 
     private int _minerNoResourceCount;
     private int _unitUnderAttackCount;
     private int _buildingUnderAttackCount;
     private int _droneNoResourceCount;
+    private int _storageFullCount;
+    private int _aetherStorageFullCount;
 
     private void Awake()
     {
@@ -51,6 +57,12 @@ public class GameAlertUIManager : MonoBehaviour
             case GameAlertType.DroneNoResource:
                 _droneNoResourceCount++;
                 break;
+            case GameAlertType.StorageFull:
+                _storageFullCount++;
+                break;
+            case GameAlertType.AetherStorageFull:
+                _aetherStorageFullCount++;
+                break;
         }
 
         UpdateAlertState(type);
@@ -71,6 +83,12 @@ public class GameAlertUIManager : MonoBehaviour
                 break;
             case GameAlertType.DroneNoResource:
                 _droneNoResourceCount = Mathf.Max(0, _droneNoResourceCount - 1);
+                break;
+            case GameAlertType.StorageFull:
+                _storageFullCount = Mathf.Max(0, _storageFullCount - 1);
+                break;
+            case GameAlertType.AetherStorageFull:
+                _aetherStorageFullCount = Mathf.Max(0, _aetherStorageFullCount - 1);
                 break;
         }
 
@@ -95,6 +113,12 @@ public class GameAlertUIManager : MonoBehaviour
             case GameAlertType.DroneNoResource:
                 if (droneNoResourceCell != null) droneNoResourceCell.SetActive(active);
                 break;
+            case GameAlertType.StorageFull:
+                if (storageFullCell != null) storageFullCell.SetActive(active);
+                break;
+            case GameAlertType.AetherStorageFull:
+                if (aetherStorageFullCell != null) aetherStorageFullCell.SetActive(active);
+                break;
         }
     }
 
@@ -114,6 +138,12 @@ public class GameAlertUIManager : MonoBehaviour
             case GameAlertType.DroneNoResource:
                 if (droneNoResourceCell != null) droneNoResourceCell.SetActive(_droneNoResourceCount > 0);
                 break;
+            case GameAlertType.StorageFull:
+                if (storageFullCell != null) storageFullCell.SetActive(_storageFullCount > 0);
+                break;
+            case GameAlertType.AetherStorageFull:
+                if (aetherStorageFullCell != null) aetherStorageFullCell.SetActive(_aetherStorageFullCount > 0);
+                break;
         }
     }
 
@@ -123,6 +153,8 @@ public class GameAlertUIManager : MonoBehaviour
         if (unitUnderAttackCell != null) unitUnderAttackCell.SetActive(false);
         if (buildingUnderAttackCell != null) buildingUnderAttackCell.SetActive(false);
         if (droneNoResourceCell != null) droneNoResourceCell.SetActive(false);
+        if (storageFullCell != null) storageFullCell.SetActive(false);
+        if (aetherStorageFullCell != null) aetherStorageFullCell.SetActive(false);
     }
 }
 

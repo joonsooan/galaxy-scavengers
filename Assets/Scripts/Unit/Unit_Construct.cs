@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
@@ -21,6 +22,7 @@ public class Unit_Construct : UnitBase
     [Header("Hover Animation")]
     [SerializeField] private float hoverHeight = 0.2f;
     [SerializeField] private float hoverDuration = 1.5f;
+    private Vector3 _baseHoverLocalPosition;
 
     private int _carriedAmount;
     private ResourceType _carriedResourceType;
@@ -30,6 +32,7 @@ public class Unit_Construct : UnitBase
     private ConstructionSite _currentConstructionSite;
     private ConstructionSite.ConstructionRequest _currentRequest;
     private ConstructState _currentState = ConstructState.Idle;
+    private Tween _hoverTween;
 
     private Coroutine _loadingCoroutine;
 
@@ -38,12 +41,10 @@ public class Unit_Construct : UnitBase
 
     private Rigidbody2D _rb;
     private UnitSpriteController _spriteController;
+    private Transform _spriteTransform;
 
     private IStorage _targetStorage;
     private Coroutine _unloadingCoroutine;
-    private Tween _hoverTween;
-    private Vector3 _baseHoverLocalPosition;
-    private Transform _spriteTransform;
 
     protected override void Awake()
     {
@@ -160,7 +161,7 @@ public class Unit_Construct : UnitBase
         }
 
         bool isLoading = _loadingCoroutine != null;
-        
+
         if (isLoading) {
             return;
         }
@@ -224,7 +225,7 @@ public class Unit_Construct : UnitBase
                     return;
                 }
             }
-            
+
             if (_loadingCoroutine == null) {
                 _loadingCoroutine = StartCoroutine(LoadingResourceCoroutine());
             }
@@ -244,19 +245,18 @@ public class Unit_Construct : UnitBase
         }
 
         movement.ForceStopAllMovement();
-        
+
         // Show progress bar during loading
         ShowProgressBar();
         float elapsedTime = 0f;
-        
-        while (elapsedTime < loadingTime)
-        {
+
+        while (elapsedTime < loadingTime) {
             elapsedTime += Time.deltaTime;
             float progress = elapsedTime / loadingTime;
             UpdateProgressBar(progress);
             yield return null;
         }
-        
+
         HideProgressBar();
 
         if (_targetStorage == null || _currentRequest == null) {
@@ -374,19 +374,18 @@ public class Unit_Construct : UnitBase
         movement.ForceStopAllMovement();
 
         StartConstructionParticles();
-        
+
         // Show progress bar during constructing (unloading)
         ShowProgressBar();
         float elapsedTime = 0f;
-        
-        while (elapsedTime < unloadingTime)
-        {
+
+        while (elapsedTime < unloadingTime) {
             elapsedTime += Time.deltaTime;
             float progress = elapsedTime / unloadingTime;
             UpdateProgressBar(progress);
             yield return null;
         }
-        
+
         HideProgressBar();
 
         if (!CanDepositResource()) {
@@ -491,13 +490,42 @@ public class Unit_Construct : UnitBase
         }
 
         _currentRequest = request;
-        _targetStorage = ResourceManager.Instance.FindClosestStorageWithResource(site.GetPosition(), request.type, 1);
+        _targetStorage = null;
 
-        if (_targetStorage != null) {
-            bool hasPath = movement.SetNewTarget(_targetStorage.GetPosition());
-            if (hasPath) {
-                _currentState = ConstructState.FetchingResource;
-                return;
+        if (ResourceManager.Instance != null) {
+            List<IStorage> storages = ResourceManager.Instance.GetAllStorages();
+            if (storages != null && storages.Count > 0) {
+                List<IStorage> candidates = new List<IStorage>();
+                foreach (IStorage storage in storages) {
+                    if (storage == null) continue;
+                    int availableAmount = storage.GetCurrentResourceAmount(request.type);
+                    if (availableAmount <= 0) continue;
+                    candidates.Add(storage);
+                }
+
+                if (candidates.Count > 0) {
+                    candidates.Sort((a, b) =>
+                    {
+                        float distA = Vector3.Distance(site.GetPosition(), a.GetPosition());
+                        float distB = Vector3.Distance(site.GetPosition(), b.GetPosition());
+                        int amountA = a.GetCurrentResourceAmount(request.type);
+                        int amountB = b.GetCurrentResourceAmount(request.type);
+                        
+                        if (amountA >= request.amount && amountB < request.amount) return -1;
+                        if (amountA < request.amount && amountB >= request.amount) return 1;
+                        
+                        return distA.CompareTo(distB);
+                    });
+
+                    foreach (IStorage storage in candidates) {
+                        bool hasPath = movement.SetNewTarget(storage.GetPosition());
+                        if (hasPath) {
+                            _targetStorage = storage;
+                            _currentState = ConstructState.FetchingResource;
+                            return;
+                        }
+                    }
+                }
             }
         }
 
@@ -591,9 +619,9 @@ public class Unit_Construct : UnitBase
 
     private void UpdateHoverAnimation()
     {
-        bool shouldHover = _spriteTransform != null && 
-                          (currentState == UnitState.Idle || currentState == UnitState.Moving);
-        
+        bool shouldHover = _spriteTransform != null &&
+            (currentState == UnitState.Idle || currentState == UnitState.Moving);
+
         if (shouldHover) {
             if (_hoverTween == null || !_hoverTween.IsActive()) {
                 StartHover();
@@ -610,7 +638,7 @@ public class Unit_Construct : UnitBase
     {
         StopHover();
         if (_spriteTransform == null) return;
-        
+
         _baseHoverLocalPosition = _spriteTransform.localPosition;
         _hoverTween = _spriteTransform.DOLocalMoveY(_baseHoverLocalPosition.y + hoverHeight, hoverDuration)
             .SetEase(Ease.InOutSine)

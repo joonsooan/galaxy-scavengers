@@ -2,6 +2,7 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using FMODUnity;
 
 public class LaunchUIController : MonoBehaviour
 {
@@ -18,6 +19,9 @@ public class LaunchUIController : MonoBehaviour
     [SerializeField] private int neededAetherPerCell = 10;
     [SerializeField] private int freeLaunchCells = 0;
     [SerializeField] private float launchCompleteDisplayDuration = 2f;
+
+    [Header("Audio")]
+    [SerializeField] private EventReference buttonClickSound;
 
     private bool _isCountingDown;
     private Coroutine _countdownCoroutine;
@@ -70,6 +74,11 @@ public class LaunchUIController : MonoBehaviour
 
     public void OnCancelLaunch()
     {
+        if (!buttonClickSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(buttonClickSound);
+        }
+
         if (launchPanel != null)
         {
             launchPanel.SetActive(false);
@@ -81,6 +90,11 @@ public class LaunchUIController : MonoBehaviour
         if (_isCountingDown)
         {
             return;
+        }
+
+        if (!buttonClickSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(buttonClickSound);
         }
 
         MainStructure mainStructure = FindFirstObjectByType<MainStructure>();

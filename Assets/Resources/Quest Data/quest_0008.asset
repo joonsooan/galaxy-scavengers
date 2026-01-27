@@ -33,13 +33,12 @@ MonoBehaviour:
   - checkType: 0
     targetId: 
     requiredCount: 0
+    displayText: 
     targetLocation: {x: 0, y: 0, z: 0}
     locationTolerance: 0
   questFinishReward:
     resourceRewards: []
     moduleRewards: []
     creditReward: 40
-    unlockedBuildings:
-    - {fileID: 11400000, guid: 105b0eb49997d264ba71f5f4cf6bb34d, type: 2}
-    - {fileID: 11400000, guid: 21dd7ed4e169193438e4310a2427b362, type: 2}
+    unlockedBuildings: []
     newUnits: []

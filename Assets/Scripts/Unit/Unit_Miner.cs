@@ -88,6 +88,11 @@ public class Unit_Miner : UnitBase
     {
         base.OnDisable();
         UnsubscribeEvents();
+        if (_noResourceAlertActive)
+        {
+            GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.MinerNoResource);
+            _noResourceAlertActive = false;
+        }
     }
 
     private void OnDestroy()
@@ -115,17 +120,6 @@ public class Unit_Miner : UnitBase
                     return;
                 }
                 TryStartActions();
-            }
-            bool shouldShowAlert = _findResourceCoroutine == null;
-            if (shouldShowAlert && !_noResourceAlertActive)
-            {
-                GameAlertUIManager.Instance?.RegisterAlert(GameAlertType.MinerNoResource);
-                _noResourceAlertActive = true;
-            }
-            else if (!shouldShowAlert && _noResourceAlertActive)
-            {
-                GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.MinerNoResource);
-                _noResourceAlertActive = false;
             }
             break;
 
@@ -342,6 +336,11 @@ public class Unit_Miner : UnitBase
     private void FindAndSetTarget()
     {
         if (_currentCarryAmounts.Values.Sum() > 0) {
+            if (_noResourceAlertActive)
+            {
+                GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.MinerNoResource);
+                _noResourceAlertActive = false;
+            }
             GoToStorage();
             return;
         }
@@ -359,6 +358,11 @@ public class Unit_Miner : UnitBase
             if (_targetResourceNode.Reserve(this)) {
                 if (unitMovement.SetNewTarget(BuildingManager.Instance.grid.GetCellCenterWorld(_targetMiningCell))) {
                     currentState = UnitState.Moving;
+                    if (_noResourceAlertActive)
+                    {
+                        GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.MinerNoResource);
+                        _noResourceAlertActive = false;
+                    }
                 }
                 else {
                     _targetResourceNode.Unreserve();
@@ -375,6 +379,11 @@ public class Unit_Miner : UnitBase
             _targetResourceNode?.Unreserve();
             _targetResourceNode = null;
             currentState = UnitState.Idle;
+            if (!_noResourceAlertActive)
+            {
+                GameAlertUIManager.Instance?.RegisterAlert(GameAlertType.MinerNoResource);
+                _noResourceAlertActive = true;
+            }
         }
     }
 
@@ -651,8 +660,11 @@ public class Unit_Miner : UnitBase
                 HandleTargetLoss();
             }
         }
-        else if (currentState == UnitState.Idle) {
-            FindAndSetTarget();
+        
+        if (currentState == UnitState.Idle) {
+            if (_findResourceCoroutine == null) {
+                TryStartActions();
+            }
         }
     }
 

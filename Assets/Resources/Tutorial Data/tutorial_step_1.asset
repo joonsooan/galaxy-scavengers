@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c74002d918083e14eb5bcbcc12257fde, type: 3}
+  m_Name: tutorial_step_1
+  m_EditorClassIdentifier: 
+  stepIndex: 1
+  text: "Galaxy Scavengers\uC758 \uC138\uACC4\uC5D0 \uC624\uC2E0 \uAC83\uC744 \uD658\uC601\uD569\uB2C8\uB2E4!\n\uD654\uBA74\uC744
+    \uD074\uB9AD\uD574\uBCF4\uC138\uC694!"
+  stepType: 0
+  duration: 0
+  count: 1
+  resourceType: 0
+  buildingType: 
+  unitType: 
+  itemType: 
+  showProgressBar: 0
+  spawnUnits: []
+  grantResources: []

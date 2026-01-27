@@ -5,6 +5,7 @@ public abstract class EnemyUnitBase : UnitBase
 {
     private const float MinMoveUpdateInterval = 0.5f;
     private const float InfiniteAttackTargetUpdateInterval = 0.5f;
+    private const float TerritoryCheckInterval = 0.5f;
 
     [Header("Zones")]
     [SerializeField] protected float warningStatePersist = 5f;
@@ -31,6 +32,7 @@ public abstract class EnemyUnitBase : UnitBase
     private bool _lastActionWasMove;
     private float _lastInfiniteAttackTargetUpdateTime;
     private float _lastMoveToTargetTime;
+    private float _lastTerritoryCheckTime;
     private Vector3 _lastTargetPos;
     private float _outOfTerritoryTimer;
     private float _roamTimer;
@@ -118,7 +120,11 @@ public abstract class EnemyUnitBase : UnitBase
         switch (aiState) {
         case AIState.Idle:
             HandleIdle();
-            CheckForTerritoryEntry();
+            if (Time.time - _lastTerritoryCheckTime >= TerritoryCheckInterval)
+            {
+                CheckForTerritoryEntry();
+                _lastTerritoryCheckTime = Time.time;
+            }
             break;
 
         case AIState.Warning:
@@ -215,19 +221,59 @@ public abstract class EnemyUnitBase : UnitBase
 
     private void CheckForTerritoryEntry()
     {
-        Damageable targetBuilding = FindClosestDamageableInTerritory();
-        UnitBase targetUnit = FindClosestAllyInTerritory();
+        if (TargetManager.Instance == null || UnitManager.Instance == null) return;
 
-        if (targetBuilding != null) {
-            _targetDamageable = targetBuilding;
+        float territoryRadiusSquared = _territoryRadius * _territoryRadius;
+        Damageable bestBuilding = null;
+        UnitBase bestUnit = null;
+        float bestBuildingDist = float.MaxValue;
+        float bestUnitDist = float.MaxValue;
+
+        if (TargetManager.Instance.AllTargets.Count > 0)
+        {
+            foreach (Damageable target in TargetManager.Instance.AllTargets)
+            {
+                if (target == null) continue;
+                if (target.GetComponent<UnitBase>() != null) continue;
+
+                Vector3 targetPos = target.transform.position;
+                float distFromSpawnSquared = (targetPos - _spawnPosition).sqrMagnitude;
+                
+                if (distFromSpawnSquared <= territoryRadiusSquared && distFromSpawnSquared < bestBuildingDist)
+                {
+                    bestBuildingDist = distFromSpawnSquared;
+                    bestBuilding = target;
+                }
+            }
+        }
+
+        if (UnitManager.Instance.AllyUnits != null && UnitManager.Instance.AllyUnits.Count > 0)
+        {
+            foreach (UnitBase unit in UnitManager.Instance.AllyUnits)
+            {
+                if (unit == null) continue;
+                
+                Vector3 unitPos = unit.transform.position;
+                float distFromSpawnSquared = (unitPos - _spawnPosition).sqrMagnitude;
+                
+                if (distFromSpawnSquared <= territoryRadiusSquared && distFromSpawnSquared < bestUnitDist)
+                {
+                    bestUnitDist = distFromSpawnSquared;
+                    bestUnit = unit;
+                }
+            }
+        }
+
+        if (bestBuilding != null) {
+            _targetDamageable = bestBuilding;
             _targetUnit = null;
             EnterWarningState();
             return;
         }
 
-        if (targetUnit != null) {
+        if (bestUnit != null) {
             _targetDamageable = null;
-            _targetUnit = targetUnit;
+            _targetUnit = bestUnit;
             EnterWarningState();
         }
     }

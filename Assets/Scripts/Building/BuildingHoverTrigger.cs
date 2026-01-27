@@ -7,6 +7,7 @@ public class BuildingHoverTrigger : MonoBehaviour
     private bool _isInitialized;
 
     private BoxCollider2D[] _boxColliders;
+    private CapsuleCollider2D[] _capsuleColliders;
 
     private void Awake()
     {
@@ -19,7 +20,8 @@ public class BuildingHoverTrigger : MonoBehaviour
 
         _buildingDataHolder = GetComponent<BuildingDataHolder>();
         _storage = GetComponent<IStorage>();
-        _boxColliders = GetComponents<BoxCollider2D>();
+        _boxColliders = GetComponentsInChildren<BoxCollider2D>();
+        _capsuleColliders = GetComponentsInChildren<CapsuleCollider2D>();
         
         _isInitialized = true;
     }
@@ -28,12 +30,29 @@ public class BuildingHoverTrigger : MonoBehaviour
     {
         if (other.CompareTag("MouseHoverDetector"))
         {
-            if (!IsTouchingAnyBoxCollider(other))
-            {
-                return; 
-            }
-
             Initialize();
+            
+            bool shouldTrigger = false;
+            
+            if (_storage != null)
+            {
+                if (IsTouchingCapsuleCollider(other))
+                {
+                    shouldTrigger = true;
+                }
+            }
+            else
+            {
+                if (IsTouchingAnyCollider(other))
+                {
+                    shouldTrigger = true;
+                }
+            }
+            
+            if (!shouldTrigger)
+            {
+                return;
+            }
             
             if (BuildingHoverManager.Instance != null)
             {
@@ -53,7 +72,24 @@ public class BuildingHoverTrigger : MonoBehaviour
     {
         if (other.CompareTag("MouseHoverDetector"))
         {
-            if (IsTouchingAnyBoxCollider(other))
+            bool shouldKeepActive = false;
+            
+            if (_storage != null)
+            {
+                if (IsTouchingCapsuleCollider(other))
+                {
+                    shouldKeepActive = true;
+                }
+            }
+            else
+            {
+                if (IsTouchingAnyCollider(other))
+                {
+                    shouldKeepActive = true;
+                }
+            }
+            
+            if (shouldKeepActive)
             {
                 return;
             }
@@ -72,20 +108,54 @@ public class BuildingHoverTrigger : MonoBehaviour
         }
     }
 
-    private bool IsTouchingAnyBoxCollider(Collider2D other)
+    private bool IsTouchingCapsuleCollider(Collider2D other)
+    {
+        if (_capsuleColliders == null)
+        {
+            _capsuleColliders = GetComponentsInChildren<CapsuleCollider2D>();
+        }
+        
+        foreach (CapsuleCollider2D capsuleCollider in _capsuleColliders)
+        {
+            if (capsuleCollider != null && capsuleCollider.enabled && capsuleCollider.isTrigger)
+            {
+                if (capsuleCollider.IsTouching(other))
+                {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    private bool IsTouchingAnyCollider(Collider2D other)
     {
         if (_boxColliders == null)
         {
-            _boxColliders = GetComponents<BoxCollider2D>();
+            _boxColliders = GetComponentsInChildren<BoxCollider2D>();
         }
 
+        Vector2 otherPosition = other.bounds.center;
+        
         foreach (BoxCollider2D boxCollider in _boxColliders)
         {
-            if (boxCollider != null && boxCollider.enabled && boxCollider.isTrigger)
+            if (boxCollider != null && boxCollider.enabled)
             {
-                if (boxCollider.IsTouching(other))
+                if (boxCollider.isTrigger)
                 {
-                    return true;
+                    if (boxCollider.IsTouching(other))
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    Bounds boxBounds = boxCollider.bounds;
+                    if (boxBounds.Contains(otherPosition))
+                    {
+                        return true;
+                    }
                 }
             }
         }

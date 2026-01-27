@@ -298,6 +298,11 @@ public class DayNightCycleManager : MonoBehaviour
 
         return GetCurrentPeriodProgress() * GetNightMaxTime();
     }
+    
+    public void SetAutoAdvanceTime(bool enable)
+    {
+        autoAdvanceTime = enable;
+    }
 
     [Serializable]
     public class TimeProfile

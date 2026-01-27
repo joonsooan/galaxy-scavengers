@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using FMODUnity;
 
 public class CardDragger : MonoBehaviour
 {
@@ -118,6 +119,15 @@ public class CardDragger : MonoBehaviour
             Color ghostColor = _ghostBuildingRenderer.color;
             ghostColor.a = 0.5f;
             _ghostBuildingRenderer.color = ghostColor;
+        }
+        
+        Collider2D[] colliders = _ghostBuildingInstance.GetComponentsInChildren<Collider2D>(true);
+        foreach (var collider in colliders)
+        {
+            if (collider != null)
+            {
+                collider.enabled = false;
+            }
         }
         
         VisionProvider[] visionProviders = _ghostBuildingInstance.GetComponentsInChildren<VisionProvider>(true);

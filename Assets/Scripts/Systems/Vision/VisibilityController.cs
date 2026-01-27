@@ -222,6 +222,20 @@ public class VisibilityController : MonoBehaviour
             if (_wasVisible != shouldBeVisible)
             {
                 SetVisible(shouldBeVisible);
+                
+                if (shouldBeVisible && !_wasVisible && visibilityType == VisibilityType.Resource)
+                {
+                    ResourceNode resourceNode = GetComponent<ResourceNode>();
+                    if (resourceNode == null)
+                    {
+                        resourceNode = GetComponentInParent<ResourceNode>();
+                    }
+                    
+                    if (resourceNode != null && TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive())
+                    {
+                        TutorialManager.Instance.OnResourceBlockRevealed();
+                    }
+                }
             }
         }
         catch (System.Exception)

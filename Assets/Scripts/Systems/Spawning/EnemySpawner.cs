@@ -56,6 +56,10 @@ public class EnemySpawner : MonoBehaviour
                         EnemyUnitBase enemyScript = enemy.GetComponent<EnemyUnitBase>();
                         if (enemyScript != null) {
                             enemyScript.SetTerritoryCenter(center, homeRadius, territoryRadius);
+                            if (TutorialManager.Instance != null)
+                            {
+                                TutorialManager.Instance.RegisterSpawnedEnemy(enemyScript);
+                            }
                         }
                     }
                 }
@@ -93,14 +97,18 @@ public class EnemySpawner : MonoBehaviour
 
                     Vector3 spawnPos = FindValidSpawnPosition(center, spawnRadiusOffset, grid);
                     if (spawnPos != Vector3.zero && center != Vector3.zero) {
-                        string poolTag = GetPoolTagFromPrefab(selectedPrefab);
-                        GameObject enemy = ObjectPooler.Instance.SpawnFromPool(poolTag, spawnPos, Quaternion.identity);
-                        if (enemy != null) {
-                            EnemyUnitBase enemyScript = enemy.GetComponent<EnemyUnitBase>();
-                            if (enemyScript != null) {
-                                enemyScript.SetTerritoryCenter(center, homeRadius, territoryRadius);
+                    string poolTag = GetPoolTagFromPrefab(selectedPrefab);
+                    GameObject enemy = ObjectPooler.Instance.SpawnFromPool(poolTag, spawnPos, Quaternion.identity);
+                    if (enemy != null) {
+                        EnemyUnitBase enemyScript = enemy.GetComponent<EnemyUnitBase>();
+                        if (enemyScript != null) {
+                            enemyScript.SetTerritoryCenter(center, homeRadius, territoryRadius);
+                            if (TutorialManager.Instance != null)
+                            {
+                                TutorialManager.Instance.RegisterSpawnedEnemy(enemyScript);
                             }
                         }
+                    }
                     }
                 }
             }

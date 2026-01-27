@@ -1,12 +1,14 @@
-using System.Collections;
 using System;
+using System.Collections;
+using FMODUnity;
+using Systems.Jobs;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
-using Systems.Jobs;
 
 public class GameManager : MonoBehaviour
 {
+    private const float CombatLockDuration = 5f;
     public MapGenerator mapGenerator;
     public UIManager uiManager;
     public CardDragger cardDragger;
@@ -14,25 +16,25 @@ public class GameManager : MonoBehaviour
     [Header("UI Elements")]
     [SerializeField] private GameObject pausePanel;
 
+    [Header("Audio")]
+    [SerializeField] private EventReference pauseSound;
+    [SerializeField] private EventReference resumeSound;
+
     [HideInInspector] public UnityEvent<DisplayableData> onStartDrag;
     [HideInInspector] public UnityEvent onEndDrag;
-    
-    public static event Action OnGameSceneInitialized;
-    
-    private DisplayableData _activeCardData;
 
-    private bool _isPaused;
+    private DisplayableData _activeCardData;
+    private float _combatLockTimer;
+
+    private bool _isCombatSpeedLockActive;
+
     private float _savedTimeScale = 1f;
-    private bool _isGameSceneInitialized = false;
     public static GameManager Instance { get; private set; }
-    public bool IsPaused => _isPaused;
-    public bool IsGameSceneInitialized => _isGameSceneInitialized;
+    public bool IsPaused { get; private set; }
+
+    public bool IsGameSceneInitialized { get; private set; }
+
     public static bool IsGameplayReady { get; set; } = true;
-    
-    public float GetTimeScale()
-    {
-        return _isPaused ? _savedTimeScale : Time.timeScale;
-    }
 
     private void Awake()
     {
@@ -48,21 +50,55 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         HandleGameInput();
+        UpdateCombatSpeedLock();
     }
 
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
+        Damageable.OnAnyDamageTaken += HandleAnyDamageTaken;
     }
 
     private void OnDisable()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
+        Damageable.OnAnyDamageTaken -= HandleAnyDamageTaken;
+    }
+
+    public static event Action OnGameSceneInitialized;
+
+    public float GetTimeScale()
+    {
+        return IsPaused ? _savedTimeScale : Time.timeScale;
+    }
+
+    private void HandleAnyDamageTaken(Damageable damageable)
+    {
+        _isCombatSpeedLockActive = true;
+        _combatLockTimer = CombatLockDuration;
+
+        if (!IsPaused && Time.timeScale != 1f) {
+            Time.timeScale = 1f;
+        }
+    }
+
+    private void UpdateCombatSpeedLock()
+    {
+        if (!_isCombatSpeedLockActive) return;
+
+        _combatLockTimer -= Time.unscaledDeltaTime;
+        if (_combatLockTimer <= 0f) {
+            _isCombatSpeedLockActive = false;
+
+            if (!IsPaused) {
+                Time.timeScale = _savedTimeScale;
+            }
+        }
     }
 
     private void HandleGameInput()
     {
-        if (!_isGameSceneInitialized) return;
+        if (!IsGameSceneInitialized) return;
 
         if (!IsGameplayReady) return;
 
@@ -72,57 +108,61 @@ public class GameManager : MonoBehaviour
             TogglePause();
         }
 
+        bool canChangeActualTimeScale = !_isCombatSpeedLockActive && !IsPaused;
+
         if (Input.GetKeyDown(KeyCode.Alpha1)) {
             _savedTimeScale = 1f;
-            if (!_isPaused) Time.timeScale = 1f;
+            if (canChangeActualTimeScale) Time.timeScale = 1f;
         }
         else if (Input.GetKeyDown(KeyCode.Alpha2)) {
             _savedTimeScale = 2f;
-            if (!_isPaused) Time.timeScale = 2f;
+            if (canChangeActualTimeScale) Time.timeScale = 2f;
         }
         else if (Input.GetKeyDown(KeyCode.Alpha3)) {
             _savedTimeScale = 3f;
-            if (!_isPaused) Time.timeScale = 3f;
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha4)) {
-            _savedTimeScale = 4f;
-            if (!_isPaused) Time.timeScale = 4f;
+            if (canChangeActualTimeScale) Time.timeScale = 3f;
         }
 
-        if (_isPaused) return;
+        if (IsPaused) return;
 
 #if UNITY_EDITOR
-        if (Input.GetKeyDown(KeyCode.F))
-        {
-            if (FogOfWarManager.Instance != null)
-            {
+        if (Input.GetKeyDown(KeyCode.F)) {
+            if (FogOfWarManager.Instance != null) {
                 FogOfWarManager.Instance.ToggleFogVisibility();
             }
         }
 #endif
     }
 
-    private void TogglePause()
+    public void TogglePause()
     {
-        _isPaused = !_isPaused;
-        
-        if (_isPaused) {
+        IsPaused = !IsPaused;
+
+        if (IsPaused) {
             _savedTimeScale = Time.timeScale;
             Time.timeScale = 0f;
+            if (!pauseSound.IsNull) {
+                RuntimeManager.PlayOneShot(pauseSound);
+            }
         }
         else {
             Time.timeScale = _savedTimeScale;
+            if (!resumeSound.IsNull) {
+                RuntimeManager.PlayOneShot(resumeSound);
+            }
         }
 
         if (pausePanel != null) {
-            pausePanel.SetActive(_isPaused);
+            pausePanel.SetActive(IsPaused);
         }
     }
 
     public void GameOver()
     {
         Time.timeScale = 1;
-        SceneLoader.Instance.LoadBaseScene();
+        if (SceneLoader.Instance != null) {
+            SceneLoader.Instance.LoadBaseScene();
+        }
     }
 
     public void StartDrag(DisplayableData data)
@@ -139,7 +179,7 @@ public class GameManager : MonoBehaviour
         if (uiManager != null) {
             uiManager.UnpinAndHideAllPanels();
         }
-        
+
         if (cardDragger != null) {
             cardDragger.EndDrag();
         }
@@ -160,18 +200,18 @@ public class GameManager : MonoBehaviour
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         if (scene.name == "GameScene") {
-            _isPaused = false;
+            IsPaused = false;
             _savedTimeScale = 1f;
             Time.timeScale = 1f;
-            _isGameSceneInitialized = false;
+            IsGameSceneInitialized = false;
             IsGameplayReady = false;
             InitializeGameScene();
         }
         if (scene.name == "LightTestScene") {
-            _isPaused = false;
+            IsPaused = false;
             _savedTimeScale = 1f;
             Time.timeScale = 1f;
-            
+
             StartCoroutine(DelayedInitialization());
         }
     }
@@ -190,74 +230,65 @@ public class GameManager : MonoBehaviour
 
         StartCoroutine(WaitForEntryAnimationAndInitialize());
     }
-    
+
     private IEnumerator WaitForEntryAnimationAndInitialize()
     {
-        while (LoadingUIManager.Instance == null)
-        {
+        while (LoadingUIManager.Instance == null) {
             yield return null;
         }
-        
+
         LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
-        while (loadingScreen == null || !loadingScreen.IsEntryAnimationComplete)
-        {
+        while (loadingScreen == null || !loadingScreen.IsEntryAnimationComplete) {
             yield return null;
-            if (LoadingUIManager.Instance != null)
-            {
+            if (LoadingUIManager.Instance != null) {
                 loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
             }
         }
-        
+
         yield return new WaitForSeconds(0.5f);
-        
+
         IInitializationProgress progress = GetInitializationProgress();
         yield return StartCoroutine(InitializeGameSceneAsync(progress));
     }
-    
+
     private IInitializationProgress GetInitializationProgress()
     {
-        if (LoadingUIManager.Instance != null)
-        {
+        if (LoadingUIManager.Instance != null) {
             return LoadingUIManager.Instance.GetProgressTracker();
         }
         return null;
     }
-    
+
     private IEnumerator InitializeGameSceneAsync(IInitializationProgress progress = null)
     {
         yield return null;
-        
+
         // Step 1: Generate Map
-        if (mapGenerator != null)
-        {
+        if (mapGenerator != null) {
             yield return StartCoroutine(mapGenerator.GenerateMapAsync(progress));
         }
-        
+
         CameraTargetController cameraController = FindFirstObjectByType<CameraTargetController>();
-        if (cameraController != null)
-        {
+        if (cameraController != null) {
             cameraController.RefreshMapBounds();
         }
-        
+
         yield return StartCoroutine(InitializeSpawnersAndUnitsAsync(progress));
-        
+
         // Step 3: Wait for Fog of War
         yield return StartCoroutine(WaitForFogOfWarInitializationAsync(progress));
-        
-        if (progress != null)
-        {
+
+        if (progress != null) {
             progress.UpdateProgress(0.0f, "착륙 좌표 고정 중...");
             yield return new WaitForSeconds(0.5f);
         }
 
-        _isGameSceneInitialized = true;
+        IsGameSceneInitialized = true;
         OnGameSceneInitialized?.Invoke();
 
-        if (LoadingUIManager.Instance != null)
-        {
+        if (LoadingUIManager.Instance != null) {
             LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
-            if (loadingScreen != null)
-            {
+            if (loadingScreen != null) {
                 loadingScreen.SetInitializationComplete();
             }
         }
@@ -270,44 +301,40 @@ public class GameManager : MonoBehaviour
         yield return null;
 
         yield return StartCoroutine(InitializeSpawnersAndUnits());
-        
+
         yield return StartCoroutine(WaitForFogOfWarInitialization());
-        
-        if (FogOfWarManager.Instance != null)
-        {
+
+        if (FogOfWarManager.Instance != null) {
             FogOfWarManager.Instance.RefreshFogOfWar();
         }
-        
-        _isGameSceneInitialized = true;
+
+        IsGameSceneInitialized = true;
         OnGameSceneInitialized?.Invoke();
     }
-    
+
     private IEnumerator WaitForFogOfWarInitializationAsync(IInitializationProgress progress = null)
     {
-        if (FogOfWarManager.Instance != null)
-        {
+        if (FogOfWarManager.Instance != null) {
             IInitializationProgress fogProgress = progress;
             FogOfWarManager.Instance.StartFogInitializationWithProgress(fogProgress);
         }
-        
-        while (FogOfWarManager.Instance == null || !FogOfWarManager.Instance.IsInitialized)
-        {
+
+        while (FogOfWarManager.Instance == null || !FogOfWarManager.Instance.IsInitialized) {
             yield return null;
         }
-        
+
         yield return null;
     }
-    
+
     private IEnumerator WaitForFogOfWarInitialization()
     {
-        while (FogOfWarManager.Instance == null || !FogOfWarManager.Instance.IsInitialized)
-        {
+        while (FogOfWarManager.Instance == null || !FogOfWarManager.Instance.IsInitialized) {
             yield return null;
         }
-        
+
         yield return null;
     }
-    
+
     private IEnumerator InitializeSpawnersAndUnitsAsync(IInitializationProgress progress = null)
     {
         foreach (BuildingSpawner spawner in FindObjectsByType<BuildingSpawner>(FindObjectsSortMode.None)) {
@@ -317,7 +344,7 @@ public class GameManager : MonoBehaviour
 
         RegisterPrePlacedMainStructure();
         RegisterPrePlacedBuildings();
-        
+
         MapObjectSpawner proceduralSpawner = FindFirstObjectByType<MapObjectSpawner>();
         if (proceduralSpawner != null) {
             yield return StartCoroutine(proceduralSpawner.SpawnResourcesAsync(progress));
@@ -325,37 +352,31 @@ public class GameManager : MonoBehaviour
 
         yield return null;
         yield return null;
-        
-        if (mapGenerator != null)
-        {
+
+        if (mapGenerator != null) {
             mapGenerator.GenerateEnemyTerritoryRadiusValues();
         }
-        
+
         // Spawn enemy units during loading (keep existing behavior)
         EnemySpawner[] enemySpawners = FindObjectsByType<EnemySpawner>(FindObjectsSortMode.None);
-        if (progress != null)
-        {
-            foreach (EnemySpawner enemySpawner in enemySpawners)
-            {
+        if (progress != null) {
+            foreach (EnemySpawner enemySpawner in enemySpawners) {
                 if (enemySpawner == null) continue;
                 yield return StartCoroutine(enemySpawner.SpawnEnemiesAsync(progress));
             }
         }
-        else
-        {
-            foreach (EnemySpawner enemySpawner in enemySpawners)
-            {
+        else {
+            foreach (EnemySpawner enemySpawner in enemySpawners) {
                 if (enemySpawner == null) continue;
                 enemySpawner.SpawnEnemies();
             }
         }
-        
-        if (mapGenerator != null)
-        {
+
+        if (mapGenerator != null) {
             mapGenerator.DrawEnemyTerritoryTiles();
         }
     }
-    
+
     private IEnumerator InitializeSpawnersAndUnits()
     {
         foreach (BuildingSpawner spawner in FindObjectsByType<BuildingSpawner>(FindObjectsSortMode.None)) {
@@ -373,21 +394,18 @@ public class GameManager : MonoBehaviour
 
         yield return null;
         yield return null;
-        
-        if (mapGenerator != null)
-        {
+
+        if (mapGenerator != null) {
             mapGenerator.GenerateEnemyTerritoryRadiusValues();
         }
-        
+
         // Spawn enemy units during loading (keep existing behavior)
-        foreach (EnemySpawner enemySpawner in FindObjectsByType<EnemySpawner>(FindObjectsSortMode.None))
-        {
+        foreach (EnemySpawner enemySpawner in FindObjectsByType<EnemySpawner>(FindObjectsSortMode.None)) {
             if (enemySpawner == null) continue;
             enemySpawner.SpawnEnemies();
         }
-        
-        if (mapGenerator != null)
-        {
+
+        if (mapGenerator != null) {
             mapGenerator.DrawEnemyTerritoryTiles();
         }
     }
@@ -418,10 +436,9 @@ public class GameManager : MonoBehaviour
                             BuildingManager.Instance.RegisterMainStructure(anchorCell, new Vector2Int(3, 3));
                         }
                     }
-                    
+
                     // Ensure MainStructure is always registered as a valid enemy target
-                    if (TargetManager.Instance != null)
-                    {
+                    if (TargetManager.Instance != null) {
                         TargetManager.Instance.RegisterTarget(mainStructure);
                     }
                 }
@@ -446,27 +463,24 @@ public class GameManager : MonoBehaviour
             BuildingManager.Instance.RegisterPrePlacedBuilding(buildingPiece);
         }
     }
-    
+
     public void SpawnUnitsAfterLoading()
     {
         // Spawn starting units after MainStructure is registered
         StartingUnitsManager startingUnitsManager = FindFirstObjectByType<StartingUnitsManager>();
-        if (startingUnitsManager != null)
-        {
+        if (startingUnitsManager != null) {
             startingUnitsManager.SpawnStartingUnits();
         }
     }
 
     private bool IsLoadingScreenActive()
     {
-        if (LoadingUIManager.Instance == null)
-        {
+        if (LoadingUIManager.Instance == null) {
             return false;
         }
 
         LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
-        if (loadingScreen == null)
-        {
+        if (loadingScreen == null) {
             return false;
         }
 
