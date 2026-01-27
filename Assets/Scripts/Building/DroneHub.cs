@@ -73,6 +73,19 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
         base.OnDisable();
     }
 
+    private float GetProductionSpeedMultiplier()
+    {
+        if (CoreRepairManager.Instance != null && !CoreRepairManager.Instance.IsPartRepaired(CorePart.Repeater))
+        {
+            CorePartData repeaterData = CoreRepairManager.Instance.GetPartData(CorePart.Repeater);
+            if (repeaterData != null)
+            {
+                return 1f - repeaterData.debuffValue;
+            }
+        }
+        return 1f;
+    }
+
     public int AetherConsumptionPerSecond {
         get {
             return aetherConsumptionPerSecond;
@@ -275,9 +288,11 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
             UnitData unitToProduce = _productionQueue.Dequeue();
             _currentProducingUnit = unitToProduce;
             _productionStartTime = Time.time;
-            _currentProductionTime = unitToProduce.productionTime;
+            
+            float productionSpeedMultiplier = GetProductionSpeedMultiplier();
+            _currentProductionTime = unitToProduce.productionTime / productionSpeedMultiplier;
 
-            yield return new WaitForSeconds(unitToProduce.productionTime);
+            yield return new WaitForSeconds(_currentProductionTime);
 
             _currentProducingUnit = null;
 
@@ -304,7 +319,18 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
                 OnUnitTargetChanged?.Invoke(unitIndex, currentCount + 1, targetCount);
             }
 
-            Instantiate(unitToProduce.unitPrefab, transform.position, Quaternion.identity, UnitManager.Instance.unitParent);
+            if (UnitManager.Instance != null && !UnitManager.Instance.CanSpawnUnit())
+            {
+                _productionQueue.Enqueue(unitToProduce);
+                continue;
+            }
+
+            GameObject unitObj = Instantiate(unitToProduce.unitPrefab, transform.position, Quaternion.identity, UnitManager.Instance.unitParent);
+            UnitBase unitBase = unitObj.GetComponent<UnitBase>();
+            if (unitBase != null)
+            {
+                unitBase.unitData = unitToProduce;
+            }
 
             OnUnitProduced?.Invoke(unitToProduce);
 

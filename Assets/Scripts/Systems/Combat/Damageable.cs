@@ -36,11 +36,21 @@ public abstract class Damageable : MonoBehaviour, ICombo
     {
         currentHealth = maxHealth;
         TargetManager.Instance?.RegisterTarget(this);
+        
+        if (this is UnitBase == false && NoiseManager.Instance != null)
+        {
+            NoiseManager.Instance.RegisterBuilding(this);
+        }
     }
 
     protected virtual void OnDisable()
     {
         TargetManager.Instance?.UnregisterTarget(this);
+        
+        if (this is UnitBase == false && NoiseManager.Instance != null)
+        {
+            NoiseManager.Instance.UnregisterBuilding(this);
+        }
     }
 
     public int MaxHealth {

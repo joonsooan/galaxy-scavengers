@@ -436,5 +436,30 @@ public class InventorySystem : MonoBehaviour
     {
         _isTransferDisabled = !isEnabled;
     }
+
+    public int GetTotalCellCount()
+    {
+        return _inventoryCells.Count;
+    }
+
+    public void SetMaxUsableCells(int maxCells)
+    {
+        int currentTotal = _inventoryCells.Count;
+        maxCells = Mathf.Clamp(maxCells, 1, currentTotal);
+
+        for (int i = 0; i < _inventoryCells.Count; i++)
+        {
+            bool shouldBeActive = i < maxCells;
+            if (_inventoryCells[i] != null && _inventoryCells[i].gameObject != null)
+            {
+                _inventoryCells[i].gameObject.SetActive(shouldBeActive);
+            }
+        }
+    }
+
+    public int GetMaxUsableCells()
+    {
+        return _inventoryCells.Count(cell => cell != null && cell.gameObject != null && cell.gameObject.activeSelf);
+    }
 }
 

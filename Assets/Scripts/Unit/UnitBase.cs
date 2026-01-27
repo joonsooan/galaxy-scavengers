@@ -21,6 +21,7 @@ public abstract class UnitBase : Damageable
 
     [Header("Unit Settings")]
     public UnitType unitType;
+    public UnitData unitData;
 
     [Header("Progress Bar")]
     [SerializeField] private GameObject progressBarPrefab;
@@ -36,6 +37,11 @@ public abstract class UnitBase : Damageable
             UnitManager.Instance.AddUnit(this);
         }
 
+        if (unitType == UnitType.Ally && NoiseManager.Instance != null)
+        {
+            NoiseManager.Instance.RegisterUnit(this);
+        }
+
         VisionProvider visionProvider = GetComponent<VisionProvider>();
         if (visionProvider != null && FogOfWarManager.Instance != null && FogOfWarManager.Instance.IsInitialized) {
             visionProvider.ForceUpdateAffectedTiles();
@@ -46,6 +52,11 @@ public abstract class UnitBase : Damageable
     {
         if (UnitManager.Instance != null) {
             UnitManager.Instance.RemoveUnit(this);
+        }
+
+        if (unitType == UnitType.Ally && NoiseManager.Instance != null)
+        {
+            NoiseManager.Instance.UnregisterUnit(this);
         }
 
         HideProgressBar();

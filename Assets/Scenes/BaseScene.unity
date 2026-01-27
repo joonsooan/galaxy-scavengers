@@ -4798,6 +4798,13 @@ MonoBehaviour:
   farmButton: {fileID: 2140019047}
   mapButton: {fileID: 1456102861}
   coreLaunchButton: {fileID: 1622637272}
+  buttonClickSound:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
   inventoryUIPanel: {fileID: 1518650514}
   moduleUIPanel: {fileID: 1578248362}
   laboratoryUIPanel: {fileID: 0}

@@ -187,6 +187,22 @@ public class QuestDataManager : MonoBehaviour
         }
     }
 
+    public void RegisterRuntimeQuest(QuestData questData)
+    {
+        if (questData == null) return;
+
+        if (!allQuests.Contains(questData))
+        {
+            allQuests.Add(questData);
+        }
+
+        if (!_questDataDict.ContainsKey(questData.questId))
+        {
+            _questDataDict[questData.questId] = questData;
+            _questStates[questData.questId] = QuestState.Available;
+        }
+    }
+
     private void InitializeQuests()
     {
         _questDataDict.Clear();

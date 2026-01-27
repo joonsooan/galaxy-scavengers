@@ -12,6 +12,9 @@ public class EnemySpawnData
     public GameObject enemyPrefab;
     [Range(0f, 100f)]
     public float spawnProbability = 50f;
+    [Header("Wave Budget")]
+    [Tooltip("Cost of this enemy unit in wave budget system")]
+    public int cost = 10;
 }
 
 public class EnemySpawner : MonoBehaviour
@@ -20,6 +23,174 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] private int minEnemiesPerHole = 5;
     [SerializeField] private int maxEnemiesPerHole = 7;
     [SerializeField] private float spawnRadiusOffset = 1f;
+
+    [Header("Wave Budget Settings")]
+    [SerializeField] private float basePoints = 50f;
+    [SerializeField] private float noiseAlpha = 1f;
+    [SerializeField] private float timeBeta = 0.1f;
+    [SerializeField] private float noise100TriggerDuration = 10f;
+    [SerializeField] private float noise100WaveCooldown = 30f;
+
+    private float _noise100StartTime = -1f;
+    private float _lastNoise100WaveTime = -1f;
+    private bool _isWaveFromNoise100 = false;
+
+    private void Start()
+    {
+        if (DayNightCycleManager.Instance != null)
+        {
+            DayNightCycleManager.OnNightStarted += OnNightStarted;
+        }
+
+        if (NoiseManager.Instance != null)
+        {
+            NoiseManager.Instance.OnNoiseChanged += OnNoiseChanged;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (DayNightCycleManager.Instance != null)
+        {
+            DayNightCycleManager.OnNightStarted -= OnNightStarted;
+        }
+
+        if (NoiseManager.Instance != null)
+        {
+            NoiseManager.Instance.OnNoiseChanged -= OnNoiseChanged;
+        }
+    }
+
+    private void OnNightStarted()
+    {
+        if (NoiseManager.Instance == null) return;
+
+        float noisePercentage = NoiseManager.Instance.NoisePercentage;
+        if (noisePercentage < 100f)
+        {
+            SpawnWaveFromBudget();
+        }
+    }
+
+    private void OnNoiseChanged(float noisePercentage)
+    {
+        if (noisePercentage >= 100f)
+        {
+            if (_noise100StartTime < 0f)
+            {
+                _noise100StartTime = Time.time;
+            }
+
+            float timeAt100 = Time.time - _noise100StartTime;
+            float timeSinceLastWave = _lastNoise100WaveTime < 0f ? float.MaxValue : Time.time - _lastNoise100WaveTime;
+
+            if (timeAt100 >= noise100TriggerDuration && timeSinceLastWave >= noise100WaveCooldown)
+            {
+                _isWaveFromNoise100 = true;
+                SpawnWaveFromBudget();
+                _lastNoise100WaveTime = Time.time;
+            }
+        }
+        else
+        {
+            _noise100StartTime = -1f;
+        }
+    }
+
+    private float CalculateWaveBudget()
+    {
+        if (NoiseManager.Instance == null) return basePoints;
+
+        float noise = NoiseManager.Instance.NoisePercentage;
+        float time = DayNightCycleManager.Instance != null ? DayNightCycleManager.Instance.GetTime() / 60f : 0f;
+
+        return (basePoints + (noise * noiseAlpha)) * (1f + (time * timeBeta));
+    }
+
+    private void SpawnWaveFromBudget()
+    {
+        float budget = CalculateWaveBudget();
+        List<EnemySpawnData> validEnemies = enemyPrefabs
+            .Where(e => e != null && e.enemyPrefab != null && e.cost > 0)
+            .OrderBy(e => e.cost)
+            .ToList();
+
+        if (validEnemies.Count == 0) return;
+
+        List<(EnemySpawnData data, Vector2Int holePos)> spawnList = new List<(EnemySpawnData, Vector2Int)>();
+        MapGenerator mapGenerator = GameManager.Instance.mapGenerator;
+        if (mapGenerator == null) return;
+
+        IReadOnlyList<Vector2Int> holes = mapGenerator.EnemySpawnHolePositions;
+        if (holes == null || holes.Count == 0) return;
+
+        List<Vector2Int> selectedHoles = new List<Vector2Int>();
+        int holesToSelect = Mathf.Max(1, Mathf.RoundToInt(holes.Count * 0.5f));
+        List<Vector2Int> availableHoles = new List<Vector2Int>(holes);
+
+        for (int i = 0; i < holesToSelect && availableHoles.Count > 0; i++)
+        {
+            int randomIndex = Random.Range(0, availableHoles.Count);
+            selectedHoles.Add(availableHoles[randomIndex]);
+            availableHoles.RemoveAt(randomIndex);
+        }
+
+        float remainingBudget = budget;
+        Grid grid = BuildingManager.Instance.grid;
+
+        while (remainingBudget > 0f && selectedHoles.Count > 0)
+        {
+            EnemySpawnData selectedEnemy = null;
+            foreach (EnemySpawnData enemy in validEnemies)
+            {
+                if (enemy.cost <= remainingBudget)
+                {
+                    selectedEnemy = enemy;
+                    break;
+                }
+            }
+
+            if (selectedEnemy == null) break;
+
+            int holeIndex = Random.Range(0, selectedHoles.Count);
+            Vector2Int holePos = selectedHoles[holeIndex];
+            spawnList.Add((selectedEnemy, holePos));
+            remainingBudget -= selectedEnemy.cost;
+        }
+
+        foreach (var spawn in spawnList)
+        {
+            Vector3 center = mapGenerator.GetEnemySpawnHoleWorldPosition(spawn.holePos);
+            (float homeRadius, float territoryRadius) = mapGenerator.GetHoleRadiusValues(spawn.holePos);
+
+            if (homeRadius <= 0f || territoryRadius <= 0f) continue;
+
+            Vector3 spawnPos = FindValidSpawnPosition(center, spawnRadiusOffset, grid);
+            if (spawnPos != Vector3.zero && center != Vector3.zero)
+            {
+                string poolTag = GetPoolTagFromPrefab(spawn.data.enemyPrefab);
+                GameObject enemy = ObjectPooler.Instance.SpawnFromPool(poolTag, spawnPos, Quaternion.identity);
+                if (enemy != null)
+                {
+                    EnemyUnitBase enemyScript = enemy.GetComponent<EnemyUnitBase>();
+                    if (enemyScript != null)
+                    {
+                        enemyScript.SetTerritoryCenter(center, homeRadius, territoryRadius);
+                        if (_isWaveFromNoise100)
+                        {
+                            enemyScript.ActivateInfiniteAttackState();
+                        }
+                        if (TutorialManager.Instance != null)
+                        {
+                            TutorialManager.Instance.RegisterSpawnedEnemy(enemyScript);
+                        }
+                    }
+                }
+            }
+        }
+
+        _isWaveFromNoise100 = false;
+    }
 
     public void SpawnEnemies()
     {

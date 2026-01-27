@@ -27,6 +27,11 @@ public class BuildingData : DisplayableData
     public BuildingType buildingType;
     public List<BuildingPiece> recipe;
 
+    [Header("Noise Coefficient")]
+    [Tooltip("Noise coefficient value for this building (0-100)")]
+    [Range(0f, 100f)]
+    public float noiseCoefficient = 0f;
+
     [System.Serializable]
     public class BuildingPiece
     {

@@ -11,4 +11,9 @@ public class UnitData : ScriptableObject
     [Header("Production Costs")]
     public float productionTime = 3f;
     public ResourceCost[] productionCosts;
+
+    [Header("Noise Coefficient")]
+    [Tooltip("Noise coefficient value for this unit (0-100)")]
+    [Range(0f, 100f)]
+    public float noiseCoefficient = 0f;
 }

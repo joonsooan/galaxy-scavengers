@@ -97,6 +97,12 @@ public class LaunchUIController : MonoBehaviour
             RuntimeManager.PlayOneShot(buttonClickSound);
         }
 
+        if (CoreRepairManager.Instance != null && !CoreRepairManager.Instance.IsPartRepaired(CorePart.Engine))
+        {
+            Debug.LogWarning("LaunchUIController: Engine is not repaired! Cannot launch.");
+            return;
+        }
+
         MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
         InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
 

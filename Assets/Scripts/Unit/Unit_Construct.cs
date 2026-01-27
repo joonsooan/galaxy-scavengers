@@ -379,9 +379,12 @@ public class Unit_Construct : UnitBase
         ShowProgressBar();
         float elapsedTime = 0f;
 
-        while (elapsedTime < unloadingTime) {
+        float constructionSpeedMultiplier = GetConstructionSpeedMultiplier();
+        float adjustedUnloadingTime = unloadingTime / constructionSpeedMultiplier;
+        
+        while (elapsedTime < adjustedUnloadingTime) {
             elapsedTime += Time.deltaTime;
-            float progress = elapsedTime / unloadingTime;
+            float progress = elapsedTime / adjustedUnloadingTime;
             UpdateProgressBar(progress);
             yield return null;
         }
@@ -544,6 +547,19 @@ public class Unit_Construct : UnitBase
     public void SetTaskRequestCooldown(float duration)
     {
         _nextTaskRequestTime = Time.time + duration;
+    }
+
+    private float GetConstructionSpeedMultiplier()
+    {
+        if (CoreRepairManager.Instance != null && !CoreRepairManager.Instance.IsPartRepaired(CorePart.Repeater))
+        {
+            CorePartData repeaterData = CoreRepairManager.Instance.GetPartData(CorePart.Repeater);
+            if (repeaterData != null)
+            {
+                return 1f - repeaterData.debuffValue;
+            }
+        }
+        return 1f;
     }
 
     private void ReleaseFromConstruction()

@@ -283,6 +283,11 @@ public class GameManager : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
         }
 
+        if (CoreRepairManager.Instance != null)
+        {
+            CoreRepairManager.Instance.InitializeLanding();
+        }
+
         IsGameSceneInitialized = true;
         OnGameSceneInitialized?.Invoke();
 
