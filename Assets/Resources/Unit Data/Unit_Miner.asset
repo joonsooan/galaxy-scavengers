@@ -21,4 +21,4 @@ MonoBehaviour:
     amount: 100
   - resourceType: 1
     amount: 50
-  noiseCoefficient: 1
+  noiseCoefficient: 0.5

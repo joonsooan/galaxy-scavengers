@@ -76,7 +76,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1027114353
-  m_SortingLayer: 2
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_Sprite: {fileID: -4285660500280345620, guid: 30f01861364baa14a97fcbce326e83db, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -290,11 +290,12 @@ MonoBehaviour:
   flashDuration: 0.3
   currentHealth: 0
   unitType: 0
+  unitData: {fileID: 0}
   progressBarPrefab: {fileID: 5648413654597824292, guid: 0e7c462c413987749bca6d734a5a807f, type: 3}
   currentState: 0
   carryCapacity: 10000
-  loadingTime: 3
-  unloadingTime: 3
+  loadingTime: 2
+  unloadingTime: 2
   movement: {fileID: 4483249089817793867}
   constructingParticleSystem: {fileID: 2654175848666590096}
   particleOffsetDistance: 0.75
