@@ -49,6 +49,7 @@ MonoBehaviour:
   baseSceneName: BaseScene
   gameSceneName: GameScene
   gameScenePostInitDelay: 1
+  gameScenePostFadeDelay: 1
 --- !u!114 &5978680509315379117
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -62,4 +63,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   loadingScreenPrefab: {fileID: 8740857451738434286, guid: e53eb0d33bb4c4347b0d9b79c73e76c4, type: 3}
-  loadingCanvasPrefab: {fileID: 2879613676231131217, guid: e4650c0a8e119f14d8c41bb1ce1edc7e, type: 3}
+  loadingStartSound:
+    Guid:
+      Data1: 1870534150
+      Data2: 1281061976
+      Data3: -817715557
+      Data4: -466499267
+    Path: event:/SFX_LoadingEnter

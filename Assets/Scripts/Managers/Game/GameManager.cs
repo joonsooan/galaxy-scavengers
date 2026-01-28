@@ -210,6 +210,9 @@ public class GameManager : MonoBehaviour
             Time.timeScale = 1f;
             IsGameSceneInitialized = false;
             IsGameplayReady = false;
+            if (BgmManager.Instance != null) {
+                // BgmManager.Instance.PlayGameBgm();
+            }
             InitializeGameScene();
         }
         if (scene.name == "LightTestScene") {
@@ -288,8 +291,7 @@ public class GameManager : MonoBehaviour
             yield return new WaitForSeconds(0.5f);
         }
 
-        if (CoreRepairManager.Instance != null)
-        {
+        if (CoreRepairManager.Instance != null) {
             CoreRepairManager.Instance.InitializeLanding();
         }
 

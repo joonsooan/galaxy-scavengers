@@ -4805,7 +4805,7 @@ ParticleSystemRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 562081179
-  m_SortingLayer: 6
+  m_SortingLayer: 8
   m_SortingOrder: 1
   m_RenderMode: 0
   m_MeshDistribution: 0
@@ -5203,12 +5203,26 @@ MonoBehaviour:
   fadeOutDuration: 1
   contentFadeOutDuration: 0.5
   resumeDelay: 0
-  imageEntryDelay: 0.5
+  imageEntryDelay: 1
   imageEntryDuration: 1
   imageExitDuration: 1
-  postInitWaitDuration: 1
-  imageExitDelay: 0.5
-  maxShakeStrengthMultiplier: 10
+  postInitWaitDuration: 2
+  imageExitDelay: 1
+  maxShakeStrengthMultiplier: 20
+  loadingEnterSound:
+    Guid:
+      Data1: 1870534150
+      Data2: 1281061976
+      Data3: -817715557
+      Data4: -466499267
+    Path: event:/SFX_LoadingEnter
+  loadingHideSound:
+    Guid:
+      Data1: 1870534150
+      Data2: 1281061976
+      Data3: -817715557
+      Data4: -466499267
+    Path: event:/SFX_LoadingEnter
 --- !u!114 &4486388738195986149
 MonoBehaviour:
   m_ObjectHideFlags: 0

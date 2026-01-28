@@ -45,6 +45,9 @@ public class Unit_Construct : UnitBase
 
     private IStorage _targetStorage;
     private Coroutine _unloadingCoroutine;
+    private List<IStorage> _storageRoute;
+    private int _storageRouteIndex;
+    private int _remainingRequestAmount;
 
     protected override void Awake()
     {
@@ -217,15 +220,6 @@ public class Unit_Construct : UnitBase
         }
 
         if (!movement.IsMoving) {
-            if (_targetStorage != null && _currentRequest != null) {
-                int availableAmount = _targetStorage.GetCurrentResourceAmount(_currentRequest.type);
-                if (availableAmount < _currentRequest.amount) {
-                    _currentRequest?.site?.CancelRequest(_currentRequest);
-                    SetTask_Idle();
-                    return;
-                }
-            }
-
             if (_loadingCoroutine == null) {
                 _loadingCoroutine = StartCoroutine(LoadingResourceCoroutine());
             }
@@ -265,37 +259,76 @@ public class Unit_Construct : UnitBase
             yield break;
         }
 
-        // Validate again that the storage still has resources before withdrawing
-        int availableAmount = _targetStorage.GetCurrentResourceAmount(_currentRequest.type);
-        if (availableAmount < _currentRequest.amount) {
-            // Storage no longer has enough resources, cancel task
-            _currentRequest?.site?.CancelRequest(_currentRequest);
-            SetTask_Idle();
-            _loadingCoroutine = null;
-            yield break;
-        }
-
-        if (_targetStorage.TryWithdrawResource(_currentRequest.type, _currentRequest.amount, out int withdrawnAmount) && withdrawnAmount > 0) {
-            _carriedResourceType = _currentRequest.type;
-            _carriedAmount = withdrawnAmount;
-
-            if (!CanDepositResource()) {
-                if (_targetStorage != null) {
-                    _carriedAmount = 0;
+        if (_remainingRequestAmount > 0) {
+            int availableAmount = _targetStorage.GetCurrentResourceAmount(_currentRequest.type);
+            if (availableAmount > 0) {
+                int amountToWithdraw = Mathf.Min(_remainingRequestAmount, availableAmount);
+                if (_targetStorage.TryWithdrawResource(_currentRequest.type, amountToWithdraw, out int withdrawnAmount) && withdrawnAmount > 0) {
+                    _carriedResourceType = _currentRequest.type;
+                    _carriedAmount += withdrawnAmount;
+                    _remainingRequestAmount -= withdrawnAmount;
                 }
-                SetTask_Idle();
-                _loadingCoroutine = null;
-                yield break;
             }
 
-            Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
-            Vector3 interactionPos = _currentRequest.site.AssignDeliveryInteractionCell(this, targetPieceCell);
-            movement.ResumeMovement();
-            movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
-            _currentState = ConstructState.DeliveringResource;
+            if (_remainingRequestAmount > 0) {
+                bool movedToNext = false;
+                if (_storageRoute != null && _storageRoute.Count > 0) {
+                    for (int i = _storageRouteIndex + 1; i < _storageRoute.Count; i++) {
+                        IStorage nextStorage = _storageRoute[i];
+                        if (nextStorage == null) continue;
+                        int nextAvailable = nextStorage.GetCurrentResourceAmount(_currentRequest.type);
+                        if (nextAvailable <= 0) continue;
+                        bool hasPath = movement.SetNewTarget(nextStorage.GetPosition());
+                        if (!hasPath) continue;
+                        _storageRouteIndex = i;
+                        _targetStorage = nextStorage;
+                        _currentState = ConstructState.FetchingResource;
+                        movement.ResumeMovement();
+                        movedToNext = true;
+                        break;
+                    }
+                }
+
+                if (!movedToNext) {
+                    if (_carriedAmount > 0 && CanDepositResource()) {
+                        Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
+                        Vector3 interactionPos = _currentRequest.site.AssignDeliveryInteractionCell(this, targetPieceCell);
+                        movement.ResumeMovement();
+                        movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
+                        _currentState = ConstructState.DeliveringResource;
+                    }
+                    else {
+                        _currentRequest?.site?.CancelRequest(_currentRequest);
+                        SetTask_Idle();
+                    }
+                }
+            }
+            else {
+                if (_carriedAmount > 0 && CanDepositResource()) {
+                    Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
+                    Vector3 interactionPos = _currentRequest.site.AssignDeliveryInteractionCell(this, targetPieceCell);
+                    movement.ResumeMovement();
+                    movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
+                    _currentState = ConstructState.DeliveringResource;
+                }
+                else {
+                    _currentRequest?.site?.CancelRequest(_currentRequest);
+                    SetTask_Idle();
+                }
+            }
         }
         else {
-            SetTask_Idle();
+            if (_carriedAmount > 0 && CanDepositResource()) {
+                Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
+                Vector3 interactionPos = _currentRequest.site.AssignDeliveryInteractionCell(this, targetPieceCell);
+                movement.ResumeMovement();
+                movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
+                _currentState = ConstructState.DeliveringResource;
+            }
+            else {
+                _currentRequest?.site?.CancelRequest(_currentRequest);
+                SetTask_Idle();
+            }
         }
 
         _loadingCoroutine = null;
@@ -494,38 +527,54 @@ public class Unit_Construct : UnitBase
 
         _currentRequest = request;
         _targetStorage = null;
+        _storageRoute = null;
+        _storageRouteIndex = 0;
+        _remainingRequestAmount = request != null ? request.amount : 0;
 
-        if (ResourceManager.Instance != null) {
+        if (ResourceManager.Instance != null && request != null && site != null && _remainingRequestAmount > 0) {
             List<IStorage> storages = ResourceManager.Instance.GetAllStorages();
             if (storages != null && storages.Count > 0) {
                 List<IStorage> candidates = new List<IStorage>();
+                int totalAvailable = 0;
                 foreach (IStorage storage in storages) {
                     if (storage == null) continue;
                     int availableAmount = storage.GetCurrentResourceAmount(request.type);
                     if (availableAmount <= 0) continue;
+                    totalAvailable += availableAmount;
                     candidates.Add(storage);
                 }
 
-                if (candidates.Count > 0) {
+                if (candidates.Count > 0 && totalAvailable >= request.amount) {
                     candidates.Sort((a, b) =>
                     {
                         float distA = Vector3.Distance(site.GetPosition(), a.GetPosition());
                         float distB = Vector3.Distance(site.GetPosition(), b.GetPosition());
-                        int amountA = a.GetCurrentResourceAmount(request.type);
-                        int amountB = b.GetCurrentResourceAmount(request.type);
-                        
-                        if (amountA >= request.amount && amountB < request.amount) return -1;
-                        if (amountA < request.amount && amountB >= request.amount) return 1;
-                        
                         return distA.CompareTo(distB);
                     });
 
+                    List<IStorage> route = new List<IStorage>();
+                    int remaining = request.amount;
                     foreach (IStorage storage in candidates) {
-                        bool hasPath = movement.SetNewTarget(storage.GetPosition());
-                        if (hasPath) {
-                            _targetStorage = storage;
-                            _currentState = ConstructState.FetchingResource;
-                            return;
+                        int availableAmount = storage.GetCurrentResourceAmount(request.type);
+                        if (availableAmount <= 0) continue;
+                        route.Add(storage);
+                        remaining -= availableAmount;
+                        if (remaining <= 0) {
+                            break;
+                        }
+                    }
+
+                    if (route.Count > 0) {
+                        for (int i = 0; i < route.Count; i++) {
+                            IStorage storage = route[i];
+                            bool hasPath = movement.SetNewTarget(storage.GetPosition());
+                            if (hasPath) {
+                                _storageRoute = route;
+                                _storageRouteIndex = i;
+                                _targetStorage = storage;
+                                _currentState = ConstructState.FetchingResource;
+                                return;
+                            }
                         }
                     }
                 }

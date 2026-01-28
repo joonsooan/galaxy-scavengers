@@ -311,11 +311,13 @@ public class FogOfWarInitializer
             BoundsInt bounds = terrainTilemap.cellBounds;
             foreach (Vector3Int pos in bounds.allPositionsWithin)
             {
-                if (terrainTilemap.HasTile(pos))
+                if (!terrainTilemap.HasTile(pos))
                 {
-                    allTilePositions.Add(pos);
-                    tileVisibility[pos] = FogOfWarState.Invisible;
+                    continue;
                 }
+
+                allTilePositions.Add(pos);
+                tileVisibility[pos] = FogOfWarState.Invisible;
             }
         }
         

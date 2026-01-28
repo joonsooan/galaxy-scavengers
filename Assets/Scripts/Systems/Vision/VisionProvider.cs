@@ -13,6 +13,7 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
     private HashSet<Vector3Int> _tempEnteredTiles = new HashSet<Vector3Int>();
     private HashSet<Vector3Int> _tempExitedTiles = new HashSet<Vector3Int>();
     private Grid _grid;
+    private MapGenerator _mapGenerator;
 
     private bool _isRegistered;
     private Vector3 _lastPosition;
@@ -37,6 +38,8 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
         if (_grid == null) {
             _grid = FindFirstObjectByType<Grid>();
         }
+
+        _mapGenerator = FindFirstObjectByType<MapGenerator>();
     }
 
     private void Start()
@@ -172,11 +175,67 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
                 Vector3 cellWorldPos = _grid.GetCellCenterWorld(cell);
                 float distanceSquared = (center - cellWorldPos).sqrMagnitude;
 
-                if (distanceSquared <= radiusSquared) {
+                if (distanceSquared > radiusSquared) {
+                    continue;
+                }
+
+                if (_mapGenerator != null) {
+                    bool isTerrainCell = _mapGenerator.IsTerrainCell(cell);
+                    if (isTerrainCell) {
+                        outputTiles.Add(cell);
+                    }
+                    else {
+                        if (!HasLineOfSight(centerCell, cell)) {
+                            continue;
+                        }
+                        outputTiles.Add(cell);
+                    }
+                }
+                else {
                     outputTiles.Add(cell);
                 }
             }
         }
+    }
+
+    private bool HasLineOfSight(Vector3Int origin, Vector3Int target)
+    {
+        if (_mapGenerator == null) {
+            return true;
+        }
+
+        int x0 = origin.x;
+        int y0 = origin.y;
+        int x1 = target.x;
+        int y1 = target.y;
+
+        int dx = Mathf.Abs(x1 - x0);
+        int dy = Mathf.Abs(y1 - y0);
+
+        int sx = x0 < x1 ? 1 : -1;
+        int sy = y0 < y1 ? 1 : -1;
+
+        int err = dx - dy;
+
+        Vector3Int current = origin;
+
+        while (true) {
+            if (current.x == x1 && current.y == y1) {
+                break;
+            }
+
+            int e2 = 2 * err;
+            if (e2 > -dy) {
+                err -= dy;
+                current.x += sx;
+            }
+            if (e2 < dx) {
+                err += dx;
+                current.y += sy;
+            }
+        }
+
+        return true;
     }
 
     private void RegisterWithFogOfWar()

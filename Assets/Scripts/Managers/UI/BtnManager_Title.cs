@@ -17,6 +17,11 @@ public class BtnManager_Title : MonoBehaviour
         {
             quitButton.onClick.AddListener(QuitGame);
         }
+
+        if (BgmManager.Instance != null)
+        {
+            BgmManager.Instance.PlayTitleBgm();
+        }
     }
 
     private void OnDestroy()

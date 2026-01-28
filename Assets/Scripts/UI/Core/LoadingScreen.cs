@@ -1,9 +1,10 @@
 using System.Collections;
-using UnityEngine;
-using UnityEngine.UI;
 using DG.Tweening;
+using FMODUnity;
 using Systems.Jobs;
 using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class LoadingScreen : MonoBehaviour, IInitializationProgress
 {
@@ -40,6 +41,10 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
     [SerializeField] private float postInitWaitDuration = 1.0f;
     [SerializeField] private float imageExitDelay = 2.0f;
     [SerializeField] private float maxShakeStrengthMultiplier = 3.0f;
+
+    [Header("Audio")]
+    [SerializeField] private EventReference loadingEnterSound;
+    [SerializeField] private EventReference loadingHideSound;
     
     private Tween _shakePositionTween;
     private Tween _shakeRotationTween;
@@ -227,6 +232,12 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
             _imageEntryTween = imageRect.DOAnchorPos(Vector2.zero, imageEntryDuration)
                 .SetEase(Ease.OutQuad)
                 .SetUpdate(true)
+                .OnStart(() => {
+                    if (!loadingEnterSound.IsNull)
+                    {
+                        RuntimeManager.PlayOneShot(loadingEnterSound);
+                    }
+                })
                 .OnComplete(() => {
                     _isEntryAnimationComplete = true;
                 });
@@ -236,6 +247,12 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
             _imageEntryTween = loadingImage.transform.DOLocalMove(_centerImagePosition, imageEntryDuration)
                 .SetEase(Ease.OutQuad)
                 .SetUpdate(true)
+                .OnStart(() => {
+                    if (!loadingEnterSound.IsNull)
+                    {
+                        RuntimeManager.PlayOneShot(loadingEnterSound);
+                    }
+                })
                 .OnComplete(() => {
                     _isEntryAnimationComplete = true;
                 });
@@ -345,6 +362,11 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
         }
 
         yield return new WaitForSecondsRealtime(postInitWaitDuration);
+
+        if (!loadingHideSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(loadingHideSound);
+        }
 
         if (loadingImage != null)
         {
