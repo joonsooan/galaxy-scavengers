@@ -131,6 +131,11 @@ public class GameManager : MonoBehaviour
                 FogOfWarManager.Instance.ToggleFogVisibility();
             }
         }
+        if (Input.GetKeyDown(KeyCode.T)) {
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive()) {
+                TutorialManager.Instance.SkipAllTutorials();
+            }
+        }
 #endif
     }
 

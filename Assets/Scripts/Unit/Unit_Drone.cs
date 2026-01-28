@@ -477,7 +477,17 @@ public class Unit_Drone : UnitBase
             _spriteController.SetTargetTransform(_currentProcessor.transform);
         }
 
-        yield return new WaitForSeconds(unloadingTime);
+        ShowProgressBar();
+        float elapsedTime = 0f;
+
+        while (elapsedTime < unloadingTime) {
+            elapsedTime += Time.deltaTime;
+            float progress = unloadingTime > 0f ? elapsedTime / unloadingTime : 1f;
+            UpdateProgressBar(progress);
+            yield return null;
+        }
+
+        HideProgressBar();
         bool taskAssigned = false;
 
         if (_currentProcessor != null) {
@@ -535,7 +545,6 @@ public class Unit_Drone : UnitBase
             return;
         }
 
-        // Check if processor is operational (has aether)
         if (_currentProcessor != null && _currentProcessor is IAetherConsumer consumer && !consumer.IsOperational) {
             SetTask_Idle();
             return;
@@ -556,13 +565,14 @@ public class Unit_Drone : UnitBase
                 }
             }
 
-            // Show progress bar during processing
             if (CurrentRecipeTask != null && CurrentRecipeTask.isProcessing) {
                 ShowProgressBar();
-                float progress = CurrentRecipeTask.processingProgress;
-                UpdateProgressBar(progress);
-            }
-            else {
+                float normalizedProgress = 0f;
+                if (CurrentRecipeTask.recipeData != null && CurrentRecipeTask.recipeData.processingTime > 0f) {
+                    normalizedProgress = CurrentRecipeTask.processingProgress / CurrentRecipeTask.recipeData.processingTime;
+                }
+                UpdateProgressBar(normalizedProgress);
+            } else {
                 HideProgressBar();
             }
 
@@ -681,6 +691,7 @@ public class Unit_Drone : UnitBase
     public void SetTask_Idle()
     {
         ReleaseFromRecipeTask();
+        HideProgressBar();
         _currentState = DroneState.Idle;
     }
 

@@ -558,6 +558,29 @@ public class TutorialManager : MonoBehaviour
         }
     }
     
+    public void SkipAllTutorials()
+    {
+        _isTutorialActive = false;
+        _isWaitingForCondition = false;
+        StopAllCoroutines();
+        
+        if (DayNightCycleManager.Instance != null)
+        {
+            DayNightCycleManager.Instance.SetAutoAdvanceTime(true);
+        }
+        
+        EnableAllEnemyUnits();
+        
+        if (_tutorialUI != null) {
+            _tutorialUI.HideTutorial();
+        }
+        
+        if (QuestManager.Instance != null)
+        {
+            QuestManager.Instance.CompleteQuest(firstQuestId);
+        }
+    }
+    
     public void RegisterSpawnedEnemy(EnemyUnitBase enemyUnit)
     {
         if (enemyUnit == null) return;
