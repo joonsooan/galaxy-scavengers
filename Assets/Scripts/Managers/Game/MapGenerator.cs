@@ -27,6 +27,7 @@ public class MapGenerator : MonoBehaviour
     
     [Header("Tiles")]
     [SerializeField] private TileBase groundTile;
+    [SerializeField] private TileBase lowGroundTile;
     [SerializeField] private TileBase lowWallTile;
     [SerializeField] private TileBase highWallTile;
     [SerializeField] private TileBase wallTile;
@@ -60,6 +61,9 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private float falloffExponent = 2f;
     
     [Header("Terrain Thresholds")]
+    [Range(0f, 1f)]
+    [SerializeField] private float terrainThreshold = 0.3f;
+    
     [Range(0f, 1f)]
     [SerializeField] private float lowWallThreshold = 0.5f;
     
@@ -147,6 +151,19 @@ public class MapGenerator : MonoBehaviour
     {
         if (groundTilemap != null)
         {
+            if (tile == groundTile)
+            {
+                int x = cellPosition.x + _mapCenterXOffset;
+                int y = cellPosition.y + _mapCenterYOffset;
+                if (x >= 0 && x < width && y >= 0 && y < height)
+                {
+                    float noiseVal = GetNoiseValueAt(x, y);
+                    if (noiseVal < terrainThreshold)
+                    {
+                        tile = lowGroundTile != null ? lowGroundTile : groundTile;
+                    }
+                }
+            }
             groundTilemap.SetTile(cellPosition, tile);
         }
         
@@ -394,7 +411,18 @@ public class MapGenerator : MonoBehaviour
             {
                 byte tileType = _nativeTileTypes[j];
                 
-                groundTiles[j] = groundTile;
+                int x = j % width;
+                int y = j / width;
+                float noiseVal = GetNoiseValueAt(x, y);
+                
+                if (noiseVal < terrainThreshold)
+                {
+                    groundTiles[j] = lowGroundTile != null ? lowGroundTile : groundTile;
+                }
+                else
+                {
+                    groundTiles[j] = groundTile;
+                }
                 
                 switch (tileType)
                 {
@@ -501,15 +529,22 @@ public class MapGenerator : MonoBehaviour
             {
                 int index = x + y * width;
                 
-                groundTiles[index] = groundTile;
+                float noiseVal = GetNoiseValueAt(x, y);
+                if (noiseVal < terrainThreshold)
+                {
+                    groundTiles[index] = lowGroundTile != null ? lowGroundTile : groundTile;
+                }
+                else
+                {
+                    groundTiles[index] = groundTile;
+                }
+                
                 bool isBorder = x == 0 || x == width - 1 || y == 0 || y == height - 1;
                 if (isBorder)
                 {
                     lowWallTiles[index] = wallTile;
                     continue;
                 }
-                
-                float noiseVal = GetNoiseValueAt(x, y);
 
                 if (noiseVal >= lowWallThreshold)
                 {
