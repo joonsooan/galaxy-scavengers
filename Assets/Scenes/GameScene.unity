@@ -5075,16 +5075,17 @@ MonoBehaviour:
   grassTiles: {fileID: 11400000, guid: 5d0a6d4cdefc57f42b43b02d3054b9bd, type: 2}
   rockTiles: {fileID: 11400000, guid: 1ec3f44df09085b4dae19189d76df61f, type: 2}
   debrisTiles: {fileID: 11400000, guid: d3aab818b48a48741a327a5ce420679a, type: 2}
+  autoRegenerateDecorationsInPlayMode: 0
   useMapNoiseForDecorations: 1
-  densityScale: 5
+  densityScale: 10
   typeScale: 20
   densityOffset: {x: 0, y: 0}
   typeOffset: {x: 0, y: 0}
-  densityThreshold: 0.1
-  grassyThreshold: 0.4
-  rockyThreshold: 0.5
-  grassSpawnChance: 0.5
-  rockSpawnChance: 0.4
+  densityThreshold: 0.5
+  grassyThreshold: 0.1
+  rockyThreshold: 0.4
+  grassSpawnChance: 0.4
+  rockSpawnChance: 0.2
   debrisSpawnChanceInRocky: 0.01
   debrisSpawnChanceInGrassy: 0.01
   polishOperationsPerFrame: 5000
@@ -9393,7 +9394,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 662.501
+  orthographic size: 11.25
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2

@@ -102,6 +102,7 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private TileBase grassTiles;
     [SerializeField] private TileBase rockTiles;
     [SerializeField] private TileBase debrisTiles;
+    [SerializeField] private bool autoRegenerateDecorationsInPlayMode = false;
     [SerializeField] private bool useMapNoiseForDecorations = false;
     [SerializeField] private float densityScale = 50f;
     [SerializeField] private float typeScale = 100f;
@@ -153,6 +154,12 @@ public class MapGenerator : MonoBehaviour
             return radiusValues;
         }
         return (0f, 0f);
+    }
+
+    public void SetFixedSeed(int value)
+    {
+        randomSeed = false;
+        seed = value;
     }
 
     public void GenerateEnemyTerritoryRadiusValues()
@@ -742,6 +749,21 @@ public class MapGenerator : MonoBehaviour
         decorationTilemap.SetTilesBlock(mapBounds, decorationTiles);
     }
 
+    public void RegenerateDecorations()
+    {
+        if (decorationTilemap == null)
+        {
+            return;
+        }
+
+        Vector3Int mapOrigin = new Vector3Int(-_mapCenterXOffset, -_mapCenterYOffset, 0);
+        BoundsInt mapBounds = new BoundsInt(mapOrigin, new Vector3Int(width, height, 1));
+        TileBase[] clearTiles = new TileBase[width * height];
+        decorationTilemap.SetTilesBlock(mapBounds, clearTiles);
+
+        GenerateNaturalDecorations();
+    }
+
     private IEnumerator GenerateNaturalDecorationsAsync(IInitializationProgress progress = null)
     {
         if (decorationTilemap == null)
@@ -886,6 +908,15 @@ public class MapGenerator : MonoBehaviour
 
         decorationTilemap.SetTilesBlock(mapBounds, decorationTiles);
     }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        if (!Application.isPlaying) return;
+        if (!autoRegenerateDecorationsInPlayMode) return;
+        RegenerateDecorations();
+    }
+#endif
 
     private TileBase GetTileForSmoothTransition(int x, int y, float transitionFactor, TileBase originalTile)
     {
