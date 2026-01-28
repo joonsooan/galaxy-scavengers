@@ -50,7 +50,7 @@ public class NoiseSliderUI : MonoBehaviour
         if (noiseValueText != null)
         {
             float clampedNoise = Mathf.Clamp(noisePercentage, 0f, 100f);
-            noiseValueText.text = $"{clampedNoise:F1} / 100";
+            noiseValueText.text = $"{clampedNoise:F1} / 100.0";
         }
 
         if (NoiseManager.Instance == null) return;

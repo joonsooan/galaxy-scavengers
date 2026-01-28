@@ -1,19 +1,19 @@
 fileFormatVersion: 2
-guid: d7bf4fe2fba05cf4090d0bd17fc569c5
+guid: 15ccd3070a0376f429023ff1f05ad4b2
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3470993534072313514
-    second: ground_low_tiles_0
+      213: 1761157917377289134
+    second: ground_tiles_low_0
   - first:
-      213: -938126729511767039
-    second: ground_low_tiles_1
+      213: 4042122272000257523
+    second: ground_tiles_low_1
   - first:
-      213: -7911210241463642206
-    second: ground_low_tiles_2
+      213: 6320874593022660263
+    second: ground_tiles_low_2
   - first:
-      213: -6546715396507034830
-    second: ground_low_tiles_3
+      213: 8601094088711936233
+    second: ground_tiles_low_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -105,24 +105,11 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: WebGL
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: ground_low_tiles_0
+      name: ground_tiles_low_0
       rect:
         serializedVersion: 2
         x: 0
@@ -137,14 +124,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 65921f755cd84dfc0800000000000000
-      internalID: -3470993534072313514
+      spriteID: eabd3aa7bc3e07810800000000000000
+      internalID: 1761157917377289134
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ground_low_tiles_1
+      name: ground_tiles_low_1
       rect:
         serializedVersion: 2
         x: 17
@@ -159,14 +146,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 104f62db5ba1bf2f0800000000000000
-      internalID: -938126729511767039
+      spriteID: 3fd25415ac0881830800000000000000
+      internalID: 4042122272000257523
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ground_low_tiles_2
+      name: ground_tiles_low_2
       rect:
         serializedVersion: 2
         x: 34
@@ -181,14 +168,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2a79026633cb53290800000000000000
-      internalID: -7911210241463642206
+      spriteID: 7ae48e2f3f148b750800000000000000
+      internalID: 6320874593022660263
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ground_low_tiles_3
+      name: ground_tiles_low_3
       rect:
         serializedVersion: 2
         x: 51
@@ -203,8 +190,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 23b1e9968056525a0800000000000000
-      internalID: -6546715396507034830
+      spriteID: 9e8136dc0893d5770800000000000000
+      internalID: 8601094088711936233
       vertices: []
       indices: 
       edges: []
@@ -213,7 +200,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: dce70dbd2d2c0784cb987c5102207853
+    spriteID: d38eafc1f5d999545a3346c6214d1670
     internalID: 0
     vertices: []
     indices: 
@@ -223,10 +210,10 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      ground_low_tiles_0: -3470993534072313514
-      ground_low_tiles_1: -938126729511767039
-      ground_low_tiles_2: -7911210241463642206
-      ground_low_tiles_3: -6546715396507034830
+      ground_tiles_low_0: 1761157917377289134
+      ground_tiles_low_1: 4042122272000257523
+      ground_tiles_low_2: 6320874593022660263
+      ground_tiles_low_3: 8601094088711936233
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -10,25 +10,25 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9d1514134bc4fbd41bb739b1b9a49231, type: 3}
-  m_Name: ground-basic
+  m_Name: props-rocks
   m_EditorClassIdentifier: 
-  m_DefaultSprite: {fileID: -8922166342787202985, guid: ed0ad58c93015f74faf91789765ccff4, type: 3}
+  m_DefaultSprite: {fileID: 210103673, guid: d0b255b65dcf0f54d81e9cea1b6dad04, type: 3}
   m_DefaultGameObject: {fileID: 0}
   m_DefaultColliderType: 1
   m_TilingRules:
   - m_Id: 0
     m_Sprites:
-    - {fileID: -9205980483787862885, guid: ed0ad58c93015f74faf91789765ccff4, type: 3}
-    - {fileID: -2836822536050358539, guid: ed0ad58c93015f74faf91789765ccff4, type: 3}
-    - {fileID: -8922166342787202985, guid: ed0ad58c93015f74faf91789765ccff4, type: 3}
-    - {fileID: 5129788722007358300, guid: ed0ad58c93015f74faf91789765ccff4, type: 3}
+    - {fileID: -8439231984249525529, guid: d0b255b65dcf0f54d81e9cea1b6dad04, type: 3}
+    - {fileID: -3861102454209432455, guid: d0b255b65dcf0f54d81e9cea1b6dad04, type: 3}
+    - {fileID: 145524060, guid: d0b255b65dcf0f54d81e9cea1b6dad04, type: 3}
+    - {fileID: 210103673, guid: d0b255b65dcf0f54d81e9cea1b6dad04, type: 3}
     m_GameObject: {fileID: 0}
     m_MinAnimationSpeed: 1
     m_MaxAnimationSpeed: 1
-    m_PerlinScale: 0.5
+    m_PerlinScale: 0.25
     m_Output: 1
     m_ColliderType: 1
-    m_RandomTransform: 5
+    m_RandomTransform: 2
     m_Neighbors: 
     m_NeighborPositions:
     - {x: -1, y: 1, z: 0}
