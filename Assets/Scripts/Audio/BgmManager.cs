@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using FMOD.Studio;
 using FMODUnity;
 using UnityEngine;
@@ -8,16 +10,24 @@ public class BgmManager : MonoBehaviour
 {
     [SerializeField] private EventReference titleBgm;
     [SerializeField] private EventReference baseBgm;
-    [SerializeField] private EventReference gameBgm;
+    [SerializeField] private EventReference[] gameBgms;
     [SerializeField] private EventReference loadingBgm;
     [SerializeField] private float defaultFadeOutTime = 0.5f;
     [SerializeField] private float defaultFadeInTime = 1.0f;
+    [Header("Game BGM Settings")]
+    [SerializeField] private float gameBgmFadeInTime = 1.0f;
+    [SerializeField] private float gameBgmFadeOutTime = 1.0f;
+    [SerializeField] private float gameBgmCooldownTime = 30f;
 
     private EventInstance _currentInstance;
     private EventInstance _loadingInstance;
     private bool _hasInstance;
     private bool _hasLoadingInstance;
     private EventReference _currentBgm;
+    private EventReference _lastGameBgm;
+    private Coroutine _gameBgmCooldownCoroutine;
+    private Coroutine _playGameBgmCoroutine;
+    private bool _isGameBgmCooldownActive;
     public static BgmManager Instance { get; private set; }
 
     private void Awake()
@@ -51,7 +61,111 @@ public class BgmManager : MonoBehaviour
 
     public void PlayGameBgm()
     {
-        PlayBgm(gameBgm);
+        if (gameBgms == null || gameBgms.Length == 0)
+        {
+            return;
+        }
+
+        if (_isGameBgmCooldownActive)
+        {
+            return;
+        }
+
+        if (_gameBgmCooldownCoroutine != null)
+        {
+            StopCoroutine(_gameBgmCooldownCoroutine);
+        }
+
+        List<EventReference> availableBgms = new List<EventReference>();
+        foreach (EventReference bgm in gameBgms)
+        {
+            if (!bgm.IsNull && (!_lastGameBgm.IsNull && bgm.Guid != _lastGameBgm.Guid || _lastGameBgm.IsNull))
+            {
+                availableBgms.Add(bgm);
+            }
+        }
+
+        if (availableBgms.Count == 0)
+        {
+            availableBgms.AddRange(gameBgms.Where(bgm => !bgm.IsNull));
+        }
+
+        if (availableBgms.Count == 0)
+        {
+            return;
+        }
+
+        EventReference selectedBgm = availableBgms[Random.Range(0, availableBgms.Count)];
+        _lastGameBgm = selectedBgm;
+
+        if (_playGameBgmCoroutine != null)
+        {
+            StopCoroutine(_playGameBgmCoroutine);
+        }
+        _playGameBgmCoroutine = StartCoroutine(PlayGameBgmWithFade(selectedBgm));
+    }
+
+    private IEnumerator PlayGameBgmWithFade(EventReference bgm)
+    {
+        if (_hasInstance)
+        {
+            yield return StartCoroutine(FadeOutBgm(gameBgmFadeOutTime));
+        }
+
+        _currentBgm = bgm;
+        _currentInstance = RuntimeManager.CreateInstance(bgm);
+        _hasInstance = true;
+        _currentInstance.setVolume(0f);
+        _currentInstance.start();
+
+        yield return StartCoroutine(FadeInGameBgm(gameBgmFadeInTime));
+
+        _playGameBgmCoroutine = null;
+        _gameBgmCooldownCoroutine = StartCoroutine(GameBgmCooldown());
+    }
+
+    private IEnumerator FadeInGameBgm(float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration && _hasInstance)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float volume = Mathf.Clamp01(elapsed / duration);
+            _currentInstance.setVolume(volume);
+            yield return null;
+        }
+
+        if (_hasInstance)
+        {
+            _currentInstance.setVolume(1f);
+        }
+    }
+
+    private IEnumerator GameBgmCooldown()
+    {
+        _isGameBgmCooldownActive = true;
+
+        while (_hasInstance)
+        {
+            PLAYBACK_STATE state;
+            _currentInstance.getPlaybackState(out state);
+            if (state == PLAYBACK_STATE.STOPPED || state == PLAYBACK_STATE.STOPPING)
+            {
+                break;
+            }
+            yield return null;
+        }
+
+        if (_hasInstance && gameBgmFadeOutTime > 0f)
+        {
+            yield return StartCoroutine(FadeOutBgm(gameBgmFadeOutTime));
+        }
+
+        yield return new WaitForSecondsRealtime(gameBgmCooldownTime);
+
+        _isGameBgmCooldownActive = false;
+
+        PlayGameBgm();
     }
 
     public void PlayBgm(EventReference bgm, float fadeOutTime = -1f)
@@ -69,6 +183,8 @@ public class BgmManager : MonoBehaviour
         {
             return;
         }
+
+        StopGameBgmCooldown();
 
         float fadeTime = fadeOutTime >= 0f ? fadeOutTime : defaultFadeOutTime;
         if (stopCurrent) {
@@ -167,6 +283,8 @@ public class BgmManager : MonoBehaviour
 
     public void StopBgm(float fadeOutTime)
     {
+        StopGameBgmCooldown();
+
         if (fadeOutTime < 0f) {
             fadeOutTime = defaultFadeOutTime;
         }
@@ -206,6 +324,8 @@ public class BgmManager : MonoBehaviour
             return;
         }
 
+        StopGameBgmCooldown();
+
         try {
             _currentInstance.stop(immediate ? STOP_MODE.IMMEDIATE : STOP_MODE.ALLOWFADEOUT);
             _currentInstance.release();
@@ -214,5 +334,20 @@ public class BgmManager : MonoBehaviour
             _hasInstance = false;
             _currentBgm = default;
         }
+    }
+
+    private void StopGameBgmCooldown()
+    {
+        if (_playGameBgmCoroutine != null)
+        {
+            StopCoroutine(_playGameBgmCoroutine);
+            _playGameBgmCoroutine = null;
+        }
+        if (_gameBgmCooldownCoroutine != null)
+        {
+            StopCoroutine(_gameBgmCooldownCoroutine);
+            _gameBgmCooldownCoroutine = null;
+        }
+        _isGameBgmCooldownActive = false;
     }
 }

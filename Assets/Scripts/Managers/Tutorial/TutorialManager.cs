@@ -278,13 +278,13 @@ public class TutorialManager : MonoBehaviour
 
             switch (step.stepType) {
             case TutorialStepType.Click:
-                if (Input.GetMouseButtonDown(0) && IsClickingGameWorld()) {
+                if (Input.GetMouseButtonUp(0) && IsClickingGameWorld()) {
                     conditionMet = true;
                 }
                 break;
 
             case TutorialStepType.RightClick:
-                if (Input.GetMouseButtonDown(1) && IsClickingGameWorld()) {
+                if (Input.GetMouseButtonUp(1) && IsClickingGameWorld()) {
                     conditionMet = true;
                 }
                 break;
