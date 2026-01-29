@@ -21,6 +21,7 @@ public class MapGenerator : MonoBehaviour
     
     [Header("Tilemaps")]
     [SerializeField] private Tilemap groundTilemap;
+    [SerializeField] private Tilemap lowGroundTilemap;
     [SerializeField] private Tilemap lowWallTilemap;
     [SerializeField] private Tilemap highWallTilemap;
     [SerializeField] private Grid grid;
@@ -181,22 +182,28 @@ public class MapGenerator : MonoBehaviour
 
     private void SetGroundTile(Vector3Int cellPosition, TileBase tile)
     {
-        if (groundTilemap != null)
+        int x = cellPosition.x + _mapCenterXOffset;
+        int y = cellPosition.y + _mapCenterYOffset;
+        bool isLowGround = false;
+        
+        if (tile == groundTile && x >= 0 && x < width && y >= 0 && y < height)
         {
-            if (tile == groundTile)
+            float noiseVal = GetNoiseValueAt(x, y);
+            if (noiseVal < terrainThreshold)
             {
-                int x = cellPosition.x + _mapCenterXOffset;
-                int y = cellPosition.y + _mapCenterYOffset;
-                if (x >= 0 && x < width && y >= 0 && y < height)
-                {
-                    float noiseVal = GetNoiseValueAt(x, y);
-                    if (noiseVal < terrainThreshold)
-                    {
-                        tile = lowGroundTile != null ? lowGroundTile : groundTile;
-                    }
-                }
+                isLowGround = true;
             }
-            groundTilemap.SetTile(cellPosition, tile);
+        }
+        
+        if (groundTilemap != null) groundTilemap.SetTile(cellPosition, tile);
+        
+        if (isLowGround && lowGroundTile != null)
+        {
+            if (lowGroundTilemap != null) lowGroundTilemap.SetTile(cellPosition, lowGroundTile);
+        }
+        else
+        {
+            if (lowGroundTilemap != null) lowGroundTilemap.SetTile(cellPosition, null);
         }
         
         if (lowWallTilemap != null) lowWallTilemap.SetTile(cellPosition, null);
@@ -432,6 +439,7 @@ public class MapGenerator : MonoBehaviour
         }
         
         TileBase[] groundTiles = new TileBase[totalSize];
+        TileBase[] lowGroundTiles = new TileBase[totalSize];
         TileBase[] lowWallTiles = new TileBase[totalSize];
         TileBase[] highWallTiles = new TileBase[totalSize];
         
@@ -447,13 +455,15 @@ public class MapGenerator : MonoBehaviour
                 int y = j / width;
                 float noiseVal = GetNoiseValueAt(x, y);
                 
+                groundTiles[j] = groundTile;
+                
                 if (noiseVal < terrainThreshold)
                 {
-                    groundTiles[j] = lowGroundTile != null ? lowGroundTile : groundTile;
+                    lowGroundTiles[j] = lowGroundTile != null ? lowGroundTile : null;
                 }
                 else
                 {
-                    groundTiles[j] = groundTile;
+                    lowGroundTiles[j] = null;
                 }
                 
                 switch (tileType)
@@ -491,6 +501,7 @@ public class MapGenerator : MonoBehaviour
             );
             
             TileBase[] groundChunk = new TileBase[width * chunkHeight];
+            TileBase[] lowGroundChunk = new TileBase[width * chunkHeight];
             TileBase[] lowWallChunk = new TileBase[width * chunkHeight];
             TileBase[] highWallChunk = new TileBase[width * chunkHeight];
             
@@ -502,12 +513,16 @@ public class MapGenerator : MonoBehaviour
                     int chunkIndex = x + (y - startRow) * width;
                     
                     groundChunk[chunkIndex] = groundTiles[arrayIndex];
+                    lowGroundChunk[chunkIndex] = lowGroundTiles[arrayIndex];
                     lowWallChunk[chunkIndex] = lowWallTiles[arrayIndex];
                     highWallChunk[chunkIndex] = highWallTiles[arrayIndex];
                 }
             }
             
             if (groundTilemap != null) groundTilemap.SetTilesBlock(chunkBounds, groundChunk);
+            yield return null;
+            
+            if (lowGroundTilemap != null) lowGroundTilemap.SetTilesBlock(chunkBounds, lowGroundChunk);
             yield return null;
             
             if (lowWallTilemap != null) lowWallTilemap.SetTilesBlock(chunkBounds, lowWallChunk);
@@ -528,6 +543,7 @@ public class MapGenerator : MonoBehaviour
         yield return StartCoroutine(CopyTilesToBuildingManagerGroundTilemapAsync(mapBounds));
         
         if (groundTilemap != null) groundTilemap.CompressBounds();
+        if (lowGroundTilemap != null) lowGroundTilemap.CompressBounds();
         if (lowWallTilemap != null) lowWallTilemap.CompressBounds();
         if (highWallTilemap != null) highWallTilemap.CompressBounds();
         
@@ -588,6 +604,7 @@ public class MapGenerator : MonoBehaviour
         BoundsInt mapBounds = new BoundsInt(mapOrigin, new Vector3Int(width, height, 1));
         
         TileBase[] groundTiles = new TileBase[width * height];
+        TileBase[] lowGroundTiles = new TileBase[width * height];
         TileBase[] lowWallTiles = new TileBase[width * height];
         TileBase[] highWallTiles = new TileBase[width * height];
         
@@ -598,13 +615,15 @@ public class MapGenerator : MonoBehaviour
                 int index = x + y * width;
                 
                 float noiseVal = GetNoiseValueAt(x, y);
+                groundTiles[index] = groundTile;
+                
                 if (noiseVal < terrainThreshold)
                 {
-                    groundTiles[index] = lowGroundTile != null ? lowGroundTile : groundTile;
+                    lowGroundTiles[index] = lowGroundTile != null ? lowGroundTile : null;
                 }
                 else
                 {
-                    groundTiles[index] = groundTile;
+                    lowGroundTiles[index] = null;
                 }
                 
                 bool isBorder = x == 0 || x == width - 1 || y == 0 || y == height - 1;
@@ -635,6 +654,7 @@ public class MapGenerator : MonoBehaviour
         }
         
         if (groundTilemap != null) groundTilemap.SetTilesBlock(mapBounds, groundTiles);
+        if (lowGroundTilemap != null) lowGroundTilemap.SetTilesBlock(mapBounds, lowGroundTiles);
         if (lowWallTilemap != null) lowWallTilemap.SetTilesBlock(mapBounds, lowWallTiles);
         if (highWallTilemap != null) highWallTilemap.SetTilesBlock(mapBounds, highWallTiles);
         
@@ -642,6 +662,7 @@ public class MapGenerator : MonoBehaviour
         CopyTilesToBuildingManagerGroundTilemap(mapBounds);
         
         if (groundTilemap != null) groundTilemap.CompressBounds();
+        if (lowGroundTilemap != null) lowGroundTilemap.CompressBounds();
         if (lowWallTilemap != null) lowWallTilemap.CompressBounds();
         if (highWallTilemap != null) highWallTilemap.CompressBounds();
         
@@ -702,14 +723,18 @@ public class MapGenerator : MonoBehaviour
                 Vector3Int cellPos = new Vector3Int(x - _mapCenterXOffset, y - _mapCenterYOffset, 0);
                 int index = x + y * width;
 
-                if (groundTilemap == null || !groundTilemap.HasTile(cellPos))
+                bool hasGround = groundTilemap != null && groundTilemap.HasTile(cellPos);
+                bool hasLowGround = lowGroundTilemap != null && lowGroundTilemap.HasTile(cellPos);
+                
+                if (!hasGround && !hasLowGround)
                 {
                     decorationTiles[index] = null;
                     continue;
                 }
 
-                TileBase groundTileAtPos = groundTilemap.GetTile(cellPos);
-                bool isValidGround = groundTileAtPos == groundTile || groundTileAtPos == lowGroundTile;
+                TileBase groundTileAtPos = hasGround ? groundTilemap.GetTile(cellPos) : null;
+                TileBase lowGroundTileAtPos = hasLowGround ? lowGroundTilemap.GetTile(cellPos) : null;
+                bool isValidGround = groundTileAtPos == groundTile || lowGroundTileAtPos == lowGroundTile;
                 if (!isValidGround)
                 {
                     decorationTiles[index] = null;
@@ -740,7 +765,7 @@ public class MapGenerator : MonoBehaviour
                     densityNoise = Mathf.PerlinNoise(densitySampleX, densitySampleY);
                 }
 
-                bool isLowGround = groundTileAtPos == lowGroundTile;
+                bool isLowGround = lowGroundTileAtPos == lowGroundTile;
                 float effectiveDensityThreshold = isLowGround ? densityThreshold * 0.5f : densityThreshold;
 
                 if (densityNoise < effectiveDensityThreshold)
@@ -825,7 +850,10 @@ public class MapGenerator : MonoBehaviour
                 Vector3Int cellPos = new Vector3Int(x - _mapCenterXOffset, y - _mapCenterYOffset, 0);
                 int index = x + y * width;
 
-                if (groundTilemap == null || !groundTilemap.HasTile(cellPos))
+                bool hasGround = groundTilemap != null && groundTilemap.HasTile(cellPos);
+                bool hasLowGround = lowGroundTilemap != null && lowGroundTilemap.HasTile(cellPos);
+                
+                if (!hasGround && !hasLowGround)
                 {
                     decorationTiles[index] = null;
                     processed++;
@@ -837,8 +865,9 @@ public class MapGenerator : MonoBehaviour
                     continue;
                 }
 
-                TileBase groundTileAtPos = groundTilemap.GetTile(cellPos);
-                bool isValidGround = groundTileAtPos == groundTile || groundTileAtPos == lowGroundTile;
+                TileBase groundTileAtPos = hasGround ? groundTilemap.GetTile(cellPos) : null;
+                TileBase lowGroundTileAtPos = hasLowGround ? lowGroundTilemap.GetTile(cellPos) : null;
+                bool isValidGround = groundTileAtPos == groundTile || lowGroundTileAtPos == lowGroundTile;
                 if (!isValidGround)
                 {
                     decorationTiles[index] = null;
@@ -887,7 +916,7 @@ public class MapGenerator : MonoBehaviour
                     densityNoise = Mathf.PerlinNoise(densitySampleX, densitySampleY);
                 }
 
-                bool isLowGround = groundTileAtPos == lowGroundTile;
+                bool isLowGround = lowGroundTileAtPos == lowGroundTile;
                 float effectiveDensityThreshold = isLowGround ? densityThreshold * 0.5f : densityThreshold;
 
                 if (densityNoise < effectiveDensityThreshold)
@@ -1988,7 +2017,7 @@ public class MapGenerator : MonoBehaviour
             return;
         }
         
-        if (groundTilemap == null || grid == null)
+        if (lowGroundTilemap == null || grid == null)
         {
             return;
         }
@@ -2031,9 +2060,9 @@ public class MapGenerator : MonoBehaviour
                     
                     if (distance <= _enemyHomeRadius)
                     {
-                        if (groundTilemap.HasTile(cell))
+                        if (lowGroundTilemap.HasTile(cell))
                         {
-                            groundTilemap.SetTile(cell, enemyHomeTile);
+                            lowGroundTilemap.SetTile(cell, enemyHomeTile);
                             homeTileCells.Add(cell);
                         }
                     }
@@ -2059,12 +2088,12 @@ public class MapGenerator : MonoBehaviour
                     
                     if (distance <= _enemyTerritoryRadius && distance > _enemyHomeRadius)
                     {
-                        if (groundTilemap.HasTile(cell))
+                        if (lowGroundTilemap.HasTile(cell))
                         {
-                            TileBase existingTile = groundTilemap.GetTile(cell);
+                            TileBase existingTile = lowGroundTilemap.GetTile(cell);
                             if (existingTile != enemyHomeTile)
                             {
-                                groundTilemap.SetTile(cell, enemyTerritoryTile);
+                                lowGroundTilemap.SetTile(cell, enemyTerritoryTile);
                             }
                         }
                     }
@@ -2134,9 +2163,9 @@ public class MapGenerator : MonoBehaviour
             }
         }
         
-        if (groundTilemap != null)
+        if (lowGroundTilemap != null)
         {
-            groundTilemap.RefreshAllTiles();
+            lowGroundTilemap.RefreshAllTiles();
         }
     }
     
