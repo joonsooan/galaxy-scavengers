@@ -104,9 +104,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 11
+        y: 8
         width: 16
-        height: 4
+        height: 8
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 1, y: 1, z: 1, w: 1}
@@ -117,6 +117,28 @@ TextureImporter:
       bones: []
       spriteID: 207ed0b289ecc4280800000000000000
       internalID: -9057637597596227838
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: progress-slider-grad_1
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 1
+        width: 14
+        height: 6
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8d7041a4d65b560459d7ae86f8c5a58f
+      internalID: 484048443
       vertices: []
       indices: 
       edges: []
@@ -136,6 +158,7 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       progress-slider-grad_0: -9057637597596227838
+      progress-slider-grad_1: 484048443
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
