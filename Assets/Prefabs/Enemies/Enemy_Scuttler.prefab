@@ -77,7 +77,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1027114353
-  m_SortingLayer: 2
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_Sprite: {fileID: 7962006566985748972, guid: 859b940e204652540967c972bd4fb216, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -133,7 +133,7 @@ SortingGroup:
   m_GameObject: {fileID: 3603918506773212901}
   m_Enabled: 1
   m_SortingLayerID: -1027114353
-  m_SortingLayer: 2
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_SortAtRoot: 0
 --- !u!1 &7944764008120523387
@@ -235,7 +235,7 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 1
+  m_Radius: 0.5
 --- !u!114 &3132766170232860239
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -276,10 +276,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 50
-  currentHealth: 0
-  unitType: 1
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
+  currentHealth: 0
+  unitType: 1
+  unitData: {fileID: 0}
+  progressBarPrefab: {fileID: 0}
   currentState: 0
   warningStatePersist: 5
   outOfTerritoryChaseTime: 3

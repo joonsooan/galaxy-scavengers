@@ -231,21 +231,20 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
             _particleStartCoroutine = StartCoroutine(StartParticlesDelayed());
         }
         
+        if (!loadingEnterSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(loadingEnterSound);
+        }
+        if (BgmManager.Instance != null)
+        {
+            BgmManager.Instance.PlayLoadingBgm(loadingBgmFadeInTime);
+        }
+        
         if (imageRect != null)
         {
             _imageEntryTween = imageRect.DOAnchorPos(Vector2.zero, imageEntryDuration)
                 .SetEase(Ease.OutQuad)
                 .SetUpdate(true)
-                .OnStart(() => {
-                    if (!loadingEnterSound.IsNull)
-                    {
-                        RuntimeManager.PlayOneShot(loadingEnterSound);
-                    }
-                    if (BgmManager.Instance != null)
-                    {
-                        BgmManager.Instance.PlayLoadingBgm(loadingBgmFadeInTime);
-                    }
-                })
                 .OnComplete(() => {
                     _isEntryAnimationComplete = true;
                 });
@@ -255,16 +254,6 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
             _imageEntryTween = loadingImage.transform.DOLocalMove(_centerImagePosition, imageEntryDuration)
                 .SetEase(Ease.OutQuad)
                 .SetUpdate(true)
-                .OnStart(() => {
-                    if (!loadingEnterSound.IsNull)
-                    {
-                        RuntimeManager.PlayOneShot(loadingEnterSound);
-                    }
-                    if (BgmManager.Instance != null)
-                    {
-                        BgmManager.Instance.PlayLoadingBgm(loadingBgmFadeInTime);
-                    }
-                })
                 .OnComplete(() => {
                     _isEntryAnimationComplete = true;
                 });
