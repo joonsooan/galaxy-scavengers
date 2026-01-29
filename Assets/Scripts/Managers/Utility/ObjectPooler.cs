@@ -18,34 +18,43 @@ public class ObjectPooler : MonoBehaviour
     [SerializeField] private int defaultPoolSize = 10;
     public List<Pool> pools;
     private Dictionary<string, Queue<GameObject>> _poolDictionary;
+    private bool _isInitialized;
 
     private void Awake()
     {
         Instance = this;
     }
 
-    private void Start()
+    public void InitializePools()
     {
-        _poolDictionary = new Dictionary<string, Queue<GameObject>>();
+        if (_isInitialized)
+        {
+            return;
+        }
+
+        if (_poolDictionary == null)
+        {
+            _poolDictionary = new Dictionary<string, Queue<GameObject>>();
+        }
 
         RegisterEnemyPoolsFromSpawners();
-        
+
         foreach (Pool pool in pools)
         {
             if (pool == null || pool.prefab == null || string.IsNullOrEmpty(pool.tag))
             {
                 continue;
             }
-            
+
             if (_poolDictionary.ContainsKey(pool.tag))
             {
                 continue;
             }
-            
+
             Queue<GameObject> objectPool = new Queue<GameObject>();
 
             Transform poolParent = pool.parent;
-            
+
             for (int i = 0; i < pool.size; i++)
             {
                 GameObject obj = Instantiate(pool.prefab, poolParent);
@@ -55,6 +64,8 @@ public class ObjectPooler : MonoBehaviour
 
             _poolDictionary.Add(pool.tag, objectPool);
         }
+
+        _isInitialized = true;
     }
 
     private void RegisterEnemyPoolsFromSpawners()

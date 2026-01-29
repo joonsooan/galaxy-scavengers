@@ -269,6 +269,11 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator InitializeGameSceneAsync(IInitializationProgress progress = null)
     {
+        if (ObjectPooler.Instance != null)
+        {
+            ObjectPooler.Instance.InitializePools();
+        }
+
         yield return null;
 
         // Step 1: Generate Map

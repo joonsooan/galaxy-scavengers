@@ -39,14 +39,20 @@ public class InventorySystem : MonoBehaviour
     private GridLayoutGroup _inventoryGrid;
     private RectTransform _resourcePanelContent;
     private bool _isTransferDisabled;
+    private bool _isInitialized;
 
     private void Awake()
     {
         InitializeMaxStackAmounts();
     }
 
-    private void Start()
+    public void InitializeSystem()
     {
+        if (_isInitialized)
+        {
+            return;
+        }
+
         InitializeInventory();
         InitializeResourcePanel();
         
@@ -65,7 +71,7 @@ public class InventorySystem : MonoBehaviour
             currentResourcePanel.SetActive(false);
         }
 
-        SubscribeToResourceEvents();
+        _isInitialized = true;
     }
 
     private void HideInventoryPanel()
@@ -80,6 +86,11 @@ public class InventorySystem : MonoBehaviour
 
     private void OnEnable()
     {
+        if (!_isInitialized)
+        {
+            InitializeSystem();
+        }
+
         SubscribeToResourceEvents();
         DroneHub.OnDroneHubClicked += HideInventoryPanel;
         Processor.OnProcessorClicked += HideInventoryPanel;

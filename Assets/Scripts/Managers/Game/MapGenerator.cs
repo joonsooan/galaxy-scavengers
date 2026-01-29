@@ -479,9 +479,43 @@ public class MapGenerator : MonoBehaviour
             yield return null;
         }
         
-        if (groundTilemap != null) groundTilemap.SetTilesBlock(mapBounds, groundTiles);
-        if (lowWallTilemap != null) lowWallTilemap.SetTilesBlock(mapBounds, lowWallTiles);
-        if (highWallTilemap != null) highWallTilemap.SetTilesBlock(mapBounds, highWallTiles);
+        const int rowsPerFrame = 10;
+        for (int startRow = 0; startRow < height; startRow += rowsPerFrame)
+        {
+            int endRow = Mathf.Min(startRow + rowsPerFrame, height);
+            int chunkHeight = endRow - startRow;
+            
+            BoundsInt chunkBounds = new BoundsInt(
+                new Vector3Int(mapOrigin.x, mapOrigin.y + startRow, 0),
+                new Vector3Int(width, chunkHeight, 1)
+            );
+            
+            TileBase[] groundChunk = new TileBase[width * chunkHeight];
+            TileBase[] lowWallChunk = new TileBase[width * chunkHeight];
+            TileBase[] highWallChunk = new TileBase[width * chunkHeight];
+            
+            for (int y = startRow; y < endRow; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    int arrayIndex = x + y * width;
+                    int chunkIndex = x + (y - startRow) * width;
+                    
+                    groundChunk[chunkIndex] = groundTiles[arrayIndex];
+                    lowWallChunk[chunkIndex] = lowWallTiles[arrayIndex];
+                    highWallChunk[chunkIndex] = highWallTiles[arrayIndex];
+                }
+            }
+            
+            if (groundTilemap != null) groundTilemap.SetTilesBlock(chunkBounds, groundChunk);
+            yield return null;
+            
+            if (lowWallTilemap != null) lowWallTilemap.SetTilesBlock(chunkBounds, lowWallChunk);
+            yield return null;
+            
+            if (highWallTilemap != null) highWallTilemap.SetTilesBlock(chunkBounds, highWallChunk);
+            yield return null;
+        }
         
         if (_nativeTileTypes.IsCreated)
         {
@@ -491,7 +525,7 @@ public class MapGenerator : MonoBehaviour
         
         yield return StartCoroutine(PolishMapAsync(progress));
         
-        CopyTilesToBuildingManagerGroundTilemap(mapBounds);
+        yield return StartCoroutine(CopyTilesToBuildingManagerGroundTilemapAsync(mapBounds));
         
         if (groundTilemap != null) groundTilemap.CompressBounds();
         if (lowWallTilemap != null) lowWallTilemap.CompressBounds();
@@ -906,7 +940,32 @@ public class MapGenerator : MonoBehaviour
             }
         }
 
-        decorationTilemap.SetTilesBlock(mapBounds, decorationTiles);
+        const int decorationRowsPerFrame = 20;
+        for (int startRow = 0; startRow < height; startRow += decorationRowsPerFrame)
+        {
+            int endRow = Mathf.Min(startRow + decorationRowsPerFrame, height);
+            int chunkHeight = endRow - startRow;
+            
+            BoundsInt chunkBounds = new BoundsInt(
+                new Vector3Int(mapOrigin.x, mapOrigin.y + startRow, 0),
+                new Vector3Int(width, chunkHeight, 1)
+            );
+            
+            TileBase[] decorationChunk = new TileBase[width * chunkHeight];
+            
+            for (int y = startRow; y < endRow; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    int arrayIndex = x + y * width;
+                    int chunkIndex = x + (y - startRow) * width;
+                    decorationChunk[chunkIndex] = decorationTiles[arrayIndex];
+                }
+            }
+            
+            decorationTilemap.SetTilesBlock(chunkBounds, decorationChunk);
+            yield return null;
+        }
     }
 
 #if UNITY_EDITOR
@@ -1759,6 +1818,37 @@ public class MapGenerator : MonoBehaviour
         }
         
         bmTilemap.SetTilesBlock(mapBounds, tiles);
+        bmTilemap.CompressBounds();
+    }
+    
+    private IEnumerator CopyTilesToBuildingManagerGroundTilemapAsync(BoundsInt mapBounds)
+    {
+        if (BuildingManager.Instance == null || BuildingManager.Instance.GroundTilemap == null || groundTilemap == null) yield break;
+        
+        Tilemap bmTilemap = BuildingManager.Instance.GroundTilemap;
+        const int copyRowsPerFrame = 15;
+        
+        for (int startRow = 0; startRow < height; startRow += copyRowsPerFrame)
+        {
+            int endRow = Mathf.Min(startRow + copyRowsPerFrame, height);
+            int chunkHeight = endRow - startRow;
+            
+            BoundsInt chunkBounds = new BoundsInt(
+                new Vector3Int(mapBounds.xMin, mapBounds.yMin + startRow, 0),
+                new Vector3Int(mapBounds.size.x, chunkHeight, 1)
+            );
+            
+            TileBase[] tiles = new TileBase[chunkBounds.size.x * chunkBounds.size.y];
+            int index = 0;
+            foreach (Vector3Int pos in chunkBounds.allPositionsWithin)
+            {
+                tiles[index++] = groundTilemap.GetTile(pos);
+            }
+            
+            bmTilemap.SetTilesBlock(chunkBounds, tiles);
+            yield return null;
+        }
+        
         bmTilemap.CompressBounds();
     }
     
