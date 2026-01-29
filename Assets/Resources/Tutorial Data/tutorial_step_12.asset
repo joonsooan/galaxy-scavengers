@@ -28,6 +28,7 @@ MonoBehaviour:
   unitType: 
   itemType: 
   showProgressBar: 0
+  enableUIPanels: 06000000
   spawnUnits:
   - {fileID: 11400000, guid: 543df46f7aaa53f46be1a1b5736522f1, type: 2}
   grantResources: []

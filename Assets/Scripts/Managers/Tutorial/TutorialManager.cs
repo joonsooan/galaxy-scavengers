@@ -29,6 +29,18 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private int firstQuestId = 1;
     [SerializeField] private GameObject tutorialUI;
     [SerializeField] private TutorialStepData[] tutorialStepDataList;
+
+    [Header("UI Panels")]
+    [SerializeField] private GameObject resourcePanel;
+    [SerializeField] private GameObject statsPanel;
+    [SerializeField] private GameObject debuffPanel;
+    [SerializeField] private GameObject timeSlider;
+    [SerializeField] private GameObject gameSpeed;
+    [SerializeField] private GameObject noisePanel;
+    [SerializeField] private GameObject unitPopulationPanel;
+    [SerializeField] private GameObject alertPanel;
+    [SerializeField] private GameObject mainControlPanel;
+    [SerializeField] private GameObject launchButton;
     private int _buildingCompletedCount;
     private int _buildingPlacedCount;
     private int _bulletFireCount;
@@ -53,6 +65,7 @@ public class TutorialManager : MonoBehaviour
 
     private float _wasdInputTime;
     private bool _lastPausedState;
+    private Dictionary<TutorialUIPanel, GameObject> _uiPanels = new Dictionary<TutorialUIPanel, GameObject>();
     public static TutorialManager Instance { get; private set; }
 
     private void Awake()
@@ -151,6 +164,8 @@ public class TutorialManager : MonoBehaviour
         }
         
         DisableAllEnemyUnits();
+        BuildUIPanelDictionary();
+        HideAllUIPanels();
         
         NextStep();
     }
@@ -170,6 +185,7 @@ public class TutorialManager : MonoBehaviour
         }
 
         ProcessStepStartActions(currentStep);
+        EnableUIPanelsForStep(currentStep);
 
         _isWaitingForCondition = true;
         StartCoroutine(CheckStepCondition(currentStep));
@@ -552,6 +568,7 @@ public class TutorialManager : MonoBehaviour
         }
         
         EnableAllEnemyUnits();
+        ShowAllUIPanels();
 
         if (_tutorialUI != null) {
             _tutorialUI.HideTutorial();
@@ -570,6 +587,7 @@ public class TutorialManager : MonoBehaviour
         }
         
         EnableAllEnemyUnits();
+        ShowAllUIPanels();
         
         if (_tutorialUI != null) {
             _tutorialUI.HideTutorial();
@@ -614,6 +632,60 @@ public class TutorialManager : MonoBehaviour
             if (enemyUnit != null && enemyUnit.gameObject != null)
             {
                 enemyUnit.gameObject.SetActive(true);
+            }
+        }
+    }
+
+    private void BuildUIPanelDictionary()
+    {
+        _uiPanels.Clear();
+
+        _uiPanels[TutorialUIPanel.ResourcePanel] = resourcePanel;
+        _uiPanels[TutorialUIPanel.StatsPanel] = statsPanel;
+        _uiPanels[TutorialUIPanel.DebuffPanel] = debuffPanel;
+        _uiPanels[TutorialUIPanel.TimeSlider] = timeSlider;
+        _uiPanels[TutorialUIPanel.GameSpeed] = gameSpeed;
+        _uiPanels[TutorialUIPanel.NoisePanel] = noisePanel;
+        _uiPanels[TutorialUIPanel.UnitPopulationPanel] = unitPopulationPanel;
+        _uiPanels[TutorialUIPanel.AlertPanel] = alertPanel;
+        _uiPanels[TutorialUIPanel.MainControlPanel] = mainControlPanel;
+        _uiPanels[TutorialUIPanel.LaunchButton] = launchButton;
+    }
+
+    private void HideAllUIPanels()
+    {
+        foreach (var panel in _uiPanels.Values)
+        {
+            if (panel != null)
+            {
+                panel.SetActive(false);
+            }
+        }
+    }
+
+    private void ShowAllUIPanels()
+    {
+        foreach (var panel in _uiPanels.Values)
+        {
+            if (panel != null)
+            {
+                panel.SetActive(true);
+            }
+        }
+    }
+
+    private void EnableUIPanelsForStep(TutorialStepData step)
+    {
+        if (step == null || step.enableUIPanels == null)
+        {
+            return;
+        }
+
+        foreach (TutorialUIPanel panelType in step.enableUIPanels)
+        {
+            if (_uiPanels.TryGetValue(panelType, out GameObject panel) && panel != null)
+            {
+                panel.SetActive(true);
             }
         }
     }

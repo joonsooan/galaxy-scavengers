@@ -1,4 +1,19 @@
+using System.Collections.Generic;
 using UnityEngine;
+
+public enum TutorialUIPanel
+{
+    ResourcePanel,
+    StatsPanel,
+    DebuffPanel,
+    TimeSlider,
+    GameSpeed,
+    NoisePanel,
+    UnitPopulationPanel,
+    AlertPanel,
+    MainControlPanel,
+    LaunchButton
+}
 
 [CreateAssetMenu(fileName = "New Tutorial Step", menuName = "Tutorial/Tutorial Step Data")]
 public class TutorialStepData : ScriptableObject
@@ -28,6 +43,7 @@ public class TutorialStepData : ScriptableObject
 
     [Header("UI Settings")]
     public bool showProgressBar;
+    public List<TutorialUIPanel> enableUIPanels = new List<TutorialUIPanel>();
 
     [Header("Step Start Actions")]
     public UnitData[] spawnUnits;

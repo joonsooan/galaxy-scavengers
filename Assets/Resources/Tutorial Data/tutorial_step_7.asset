@@ -18,11 +18,12 @@ MonoBehaviour:
     \uACC4\uC18D \uCC44\uAD74\uD574\uBD05\uC2DC\uB2E4!"
   stepType: 6
   duration: 0
-  count: 90
+  count: 80
   resourceType: 0
   buildingType: 
   unitType: 
   itemType: 
   showProgressBar: 1
+  enableUIPanels: 
   spawnUnits: []
   grantResources: []

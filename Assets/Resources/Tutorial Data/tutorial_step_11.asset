@@ -28,5 +28,6 @@ MonoBehaviour:
   unitType: 
   itemType: 
   showProgressBar: 0
+  enableUIPanels: 08000000
   spawnUnits: []
   grantResources: []
