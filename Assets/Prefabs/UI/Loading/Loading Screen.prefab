@@ -5249,7 +5249,7 @@ MonoBehaviour:
   imageExitDuration: 0.75
   contentFadeOutDuration: 0.5
   imageExitDelay: 1
-  fadeOutDuration: 2
+  fadeOutDuration: 1
   resumeDelay: 0
   imageShakeStrength: 3
   imageShakeDuration: 0.25

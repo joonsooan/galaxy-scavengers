@@ -38261,7 +38261,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 0}
   m_FillRect: {fileID: 68991524}
   m_HandleRect: {fileID: 0}
@@ -53924,16 +53924,16 @@ MonoBehaviour:
   - {fileID: -5146700307962209370, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
   resourceStatsList:
   - resourceType: 0
-    amountToMine: 50
+    amountToMine: 200
     timeToMinePerUnit: 0.1
   - resourceType: 1
-    amountToMine: 30
+    amountToMine: 100
     timeToMinePerUnit: 0.2
   - resourceType: 2
-    amountToMine: 20
+    amountToMine: 100
     timeToMinePerUnit: 0.3
   - resourceType: 3
-    amountToMine: 10
+    amountToMine: 50
     timeToMinePerUnit: 0.5
 --- !u!4 &1995619767
 Transform:

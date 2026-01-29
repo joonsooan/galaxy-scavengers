@@ -17,11 +17,12 @@ MonoBehaviour:
     \uD655\uB300/\uCD95\uC18C\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
   stepType: 3
   duration: 0
-  count: 5
+  count: 15
   resourceType: 0
   buildingType: 
   unitType: 
   itemType: 
   showProgressBar: 1
+  enableUIPanels: 
   spawnUnits: []
   grantResources: []

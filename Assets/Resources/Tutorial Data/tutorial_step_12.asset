@@ -20,11 +20,11 @@ MonoBehaviour:
     \uC791\uC5C5\uD558\uB294 \uBAA8\uC2B5\uC744 \uC9C0\uCF1C\uBD05\uC2DC\uB2E4.\n\uC6B0\uD074\uB9AD\uD558\uBA74
     \uD604\uC7AC \uC120\uD0DD\uD55C \uAC74\uBB3C\uC774\uB098 UI\uB97C \uBE44\uD65C\uC131\uD654\uD560
     \uC218 \uC788\uC2B5\uB2C8\uB2E4."
-  stepType: 10
+  stepType: 1
   duration: 0
-  count: 0
+  count: 1
   resourceType: 0
-  buildingType: Storage
+  buildingType: 
   unitType: 
   itemType: 
   showProgressBar: 0
