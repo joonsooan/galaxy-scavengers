@@ -25,7 +25,7 @@ MonoBehaviour:
       amount: 20
     - resourceType: 3
       amount: 2
-    processingTime: 10
+    processingTime: 5
     produceAmount: 1
     priority: 0
   - resourceType: 9
@@ -35,7 +35,7 @@ MonoBehaviour:
       amount: 10
     - resourceType: 2
       amount: 3
-    processingTime: 10
+    processingTime: 5
     produceAmount: 1
     priority: 0
   - resourceType: 10
@@ -45,7 +45,7 @@ MonoBehaviour:
       amount: 10
     - resourceType: 3
       amount: 2
-    processingTime: 10
+    processingTime: 5
     produceAmount: 1
     priority: 0
   - resourceType: 11
@@ -57,7 +57,7 @@ MonoBehaviour:
       amount: 3
     - resourceType: 3
       amount: 2
-    processingTime: 10
+    processingTime: 5
     produceAmount: 1
     priority: 0
   - resourceType: 12
@@ -69,6 +69,6 @@ MonoBehaviour:
       amount: 10
     - resourceType: 3
       amount: 2
-    processingTime: 10
+    processingTime: 5
     produceAmount: 1
     priority: 0

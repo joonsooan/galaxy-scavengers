@@ -25,4 +25,8 @@ MonoBehaviour:
   itemType: 
   showProgressBar: 0
   spawnUnits: []
-  grantResources: []
+  grantResources:
+  - resourceType: 0
+    amount: 100
+  - resourceType: 1
+    amount: 100

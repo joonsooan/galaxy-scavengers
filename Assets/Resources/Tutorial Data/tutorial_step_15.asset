@@ -29,6 +29,6 @@ MonoBehaviour:
   spawnUnits: []
   grantResources:
   - resourceType: 0
-    amount: 200
+    amount: 400
   - resourceType: 1
-    amount: 200
+    amount: 400

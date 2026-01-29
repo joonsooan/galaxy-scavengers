@@ -293,9 +293,9 @@ MonoBehaviour:
   unitData: {fileID: 0}
   progressBarPrefab: {fileID: 5648413654597824292, guid: 0e7c462c413987749bca6d734a5a807f, type: 3}
   currentState: 0
-  carryCapacity: 10000
-  loadingTime: 2
-  unloadingTime: 2
+  carryCapacity: 1000
+  loadingTime: 1
+  unloadingTime: 1
   movement: {fileID: 4483249089817793867}
   constructingParticleSystem: {fileID: 2654175848666590096}
   particleOffsetDistance: 0.75

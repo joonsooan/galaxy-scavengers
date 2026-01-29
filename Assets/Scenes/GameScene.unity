@@ -53915,16 +53915,16 @@ MonoBehaviour:
   resourceStatsList:
   - resourceType: 0
     amountToMine: 50
-    timeToMinePerUnit: 0.2
+    timeToMinePerUnit: 0.1
   - resourceType: 1
     amountToMine: 30
-    timeToMinePerUnit: 0.4
+    timeToMinePerUnit: 0.2
   - resourceType: 2
-    amountToMine: 15
-    timeToMinePerUnit: 0.75
+    amountToMine: 20
+    timeToMinePerUnit: 0.3
   - resourceType: 3
     amountToMine: 10
-    timeToMinePerUnit: 1
+    timeToMinePerUnit: 0.5
 --- !u!4 &1995619767
 Transform:
   m_ObjectHideFlags: 0
