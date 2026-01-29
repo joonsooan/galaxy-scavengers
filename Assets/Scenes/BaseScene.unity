@@ -7126,7 +7126,7 @@ MonoBehaviour:
       Data4: 932237408
     Path: event:/SFX_LaunchCore
   fadeCanvasGroup: {fileID: 840868840}
-  fadeDuration: 0.75
+  fadeDuration: 0.4
 --- !u!1 &1106158777
 GameObject:
   m_ObjectHideFlags: 0

@@ -51,7 +51,7 @@ public class BtnManager_Base : MonoBehaviour
         }
 
         if (BgmManager.Instance != null) {
-            BgmManager.Instance.StopBgm(false);
+            BgmManager.Instance.StopBgm(fadeDuration);
         }
 
         StartCoroutine(CoreLaunchSequence());

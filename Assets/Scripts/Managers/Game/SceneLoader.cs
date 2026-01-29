@@ -152,6 +152,11 @@ public class SceneLoader : MonoBehaviour
         
         yield return new WaitForSecondsRealtime(gameScenePostFadeDelay);
         
+        if (BgmManager.Instance != null)
+        {
+            BgmManager.Instance.PlayGameBgm();
+        }
+        
         if (GameManager.Instance != null)
         {
             GameManager.Instance.SpawnUnitsAfterLoading();

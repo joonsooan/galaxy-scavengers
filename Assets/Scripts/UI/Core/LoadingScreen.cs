@@ -11,7 +11,8 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
     [Header("UI Elements")]
     [SerializeField] private Image backgroundImage;
     [SerializeField] private TextMeshProUGUI loadingText;
-    [SerializeField] private Image loadingImage;
+    [SerializeField] private RectTransform loadingImage;
+    [SerializeField] private Transform visualChild;
     [SerializeField] private ParticleSystem loadingParticles;
 
     [Header("Progress UI Elements")]
@@ -45,6 +46,8 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
     [Header("Audio")]
     [SerializeField] private EventReference loadingEnterSound;
     [SerializeField] private EventReference loadingHideSound;
+    [SerializeField] private float loadingBgmFadeInTime = 1.0f;
+    [SerializeField] private float loadingBgmFadeOutTime = 1.0f;
     
     private Tween _shakePositionTween;
     private Tween _shakeRotationTween;
@@ -100,7 +103,6 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
         if (loadingText != null) loadingText.text = loadingTextString;
         if (loadingImage != null) 
         {
-            loadingImage.color = Color.white;
             _centerImagePosition = loadingImage.transform.localPosition;
             RectTransform rectTransform = loadingImage.GetComponent<RectTransform>();
             if (rectTransform != null)
@@ -239,6 +241,10 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
                     {
                         RuntimeManager.PlayOneShot(loadingEnterSound);
                     }
+                    if (BgmManager.Instance != null)
+                    {
+                        BgmManager.Instance.PlayLoadingBgm(loadingBgmFadeInTime);
+                    }
                 })
                 .OnComplete(() => {
                     _isEntryAnimationComplete = true;
@@ -253,6 +259,10 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
                     if (!loadingEnterSound.IsNull)
                     {
                         RuntimeManager.PlayOneShot(loadingEnterSound);
+                    }
+                    if (BgmManager.Instance != null)
+                    {
+                        BgmManager.Instance.PlayLoadingBgm(loadingBgmFadeInTime);
                     }
                 })
                 .OnComplete(() => {
@@ -304,7 +314,6 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
             loadingParticles.Stop();
         }
     
-        // Don't reset position - let it stay where it is (at exit position)
         if (loadingImage != null)
         {
             loadingImage.transform.localRotation = Quaternion.identity;
@@ -320,24 +329,14 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
 
         DoContinuousShake(imageShakeStrength);
     }
-    
-    private void StartImageShakeWithStrength(float strength)
-    {
-        if (loadingImage == null) return;
-
-        _shakePositionTween?.Kill();
-        _shakeRotationTween?.Kill();
-
-        DoContinuousShake(strength);
-    }
 
     private void DoContinuousShake(float strength)
     {
-        if (loadingImage == null || loadingImage.gameObject == null) return;
+        if (visualChild == null) return;
         
         _currentShakeStrength = strength;
 
-        _shakePositionTween = loadingImage.transform.DOShakePosition(
+        _shakePositionTween = visualChild.DOShakePosition(
                 imageShakeDuration, 
                 new Vector3(strength, strength, 0), 
                 shakeVibrato, 
@@ -345,7 +344,7 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
                 false, 
                 false 
             )
-            .SetLink(loadingImage.gameObject)
+            .SetLink(visualChild.gameObject)
             .SetUpdate(true)
             .OnComplete(() => DoContinuousShake(_currentShakeStrength));
     }
@@ -368,6 +367,10 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
         if (!loadingHideSound.IsNull)
         {
             RuntimeManager.PlayOneShot(loadingHideSound);
+        }
+        if (BgmManager.Instance != null)
+        {
+            BgmManager.Instance.StopLoadingBgm(loadingBgmFadeOutTime);
         }
 
         if (progressText != null)

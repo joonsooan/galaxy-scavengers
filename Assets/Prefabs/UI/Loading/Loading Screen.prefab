@@ -1,5 +1,80 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4644891620267213588
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2274156340482688565}
+  - component: {fileID: 988493760162352303}
+  - component: {fileID: 8304850593117026139}
+  m_Layer: 5
+  m_Name: Core Image
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &2274156340482688565
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4644891620267213588}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1625195849438324668}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &988493760162352303
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4644891620267213588}
+  m_CullTransparentMesh: 1
+--- !u!114 &8304850593117026139
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4644891620267213588}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: -6098905946742477648, guid: 5b762cb9f106625499fce9deefe59bd0, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &4974028157126606496
 GameObject:
   m_ObjectHideFlags: 0
@@ -4893,9 +4968,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1625195849438324668}
   - component: {fileID: 2100136165204732834}
-  - component: {fileID: 7122229769533406684}
   m_Layer: 5
-  m_Name: Seed Core Image
+  m_Name: Seed Core Obj
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4913,6 +4987,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 2274156340482688565}
   - {fileID: 1868025417700379549}
   m_Father: {fileID: 6940393628182051328}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -4929,36 +5004,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6732347559138764527}
   m_CullTransparentMesh: 1
---- !u!114 &7122229769533406684
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6732347559138764527}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: -6098905946742477648, guid: 5b762cb9f106625499fce9deefe59bd0, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &8445103420683631775
 GameObject:
   m_ObjectHideFlags: 0
@@ -5189,14 +5234,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   backgroundImage: {fileID: 6119645445911168379}
   loadingText: {fileID: 8676754554312722543}
-  loadingImage: {fileID: 7122229769533406684}
+  loadingImage: {fileID: 1625195849438324668}
+  visualChild: {fileID: 2274156340482688565}
   loadingParticles: {fileID: 2518815341981756597}
   progressText: {fileID: 0}
   progressBarFill: {fileID: 0}
   progressBarContainer: {fileID: 0}
   loadingTextString: "\uADA4\uB3C4 \uAC15\uD558 \uC911..."
   backgroundColor: {r: 0, g: 0, b: 0, a: 1}
-  imageEntryDelay: 1
+  imageEntryDelay: 2
   imageEntryDuration: 1
   particleStartDelay: 0
   postInitWaitDuration: 1
@@ -5204,7 +5250,7 @@ MonoBehaviour:
   contentFadeOutDuration: 0.5
   imageExitDelay: 1
   fadeOutDuration: 1
-  resumeDelay: 0.5
+  resumeDelay: 5
   imageShakeStrength: 3
   imageShakeDuration: 0.25
   shakeVibrato: 20
@@ -5223,6 +5269,8 @@ MonoBehaviour:
       Data3: -817715557
       Data4: -466499267
     Path: event:/SFX_LoadingEnter
+  loadingBgmFadeInTime: 1.5
+  loadingBgmFadeOutTime: 1.5
 --- !u!114 &4486388738195986149
 MonoBehaviour:
   m_ObjectHideFlags: 0

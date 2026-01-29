@@ -60,9 +60,17 @@ MonoBehaviour:
     Path: event:/BGM_Title
   gameBgm:
     Guid:
-      Data1: -1052388172
-      Data2: 1103131406
-      Data3: 251409027
-      Data4: 1233819289
-    Path: event:/BGM_Title
+      Data1: 1637068943
+      Data2: 1322800087
+      Data3: -1524912504
+      Data4: 2102977565
+    Path: event:/BGM_Game_Playlist
+  loadingBgm:
+    Guid:
+      Data1: -1111977378
+      Data2: 1164406713
+      Data3: 228087483
+      Data4: 511340017
+    Path: event:/BGM_Loading
   defaultFadeOutTime: 0.5
+  defaultFadeInTime: 1
