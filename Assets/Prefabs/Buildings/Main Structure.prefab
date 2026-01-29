@@ -83,7 +83,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1027114353
-  m_SortingLayer: 2
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_Sprite: {fileID: 978782236917189718, guid: 2a2de143701d1d04fa5f04febe72e086, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -149,9 +149,9 @@ MonoBehaviour:
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.2
   currentHealth: 0
-  maxStorageAmount: 1000
+  maxStorageAmount: 2000
   producibleUnits: []
-  baseAetherCapacity: 500
+  baseAetherCapacity: 1000
 --- !u!114 &1036474081810028208
 MonoBehaviour:
   m_ObjectHideFlags: 0
