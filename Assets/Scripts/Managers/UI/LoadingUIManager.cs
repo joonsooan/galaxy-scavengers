@@ -85,28 +85,12 @@ public class LoadingUIManager : MonoBehaviour
         }
     }
 
-    public void HideLoadingScreen()
+    private void HideLoadingScreen()
     {
         if (_currentLoadingScreen != null)
         {
             Destroy(_currentLoadingScreen);
             _currentLoadingScreen = null;
-        }
-    }
-
-    public void HideLoadingScreenWithFade()
-    {
-        if (_currentLoadingScreen != null)
-        {
-            LoadingScreen loadingScreen = _currentLoadingScreen.GetComponent<LoadingScreen>();
-            if (loadingScreen != null)
-            {
-                StartCoroutine(HideLoadingScreenWithFadeCoroutine(loadingScreen));
-            }
-            else
-            {
-                HideLoadingScreen();
-            }
         }
     }
     

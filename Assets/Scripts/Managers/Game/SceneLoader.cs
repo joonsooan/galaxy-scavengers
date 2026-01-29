@@ -74,7 +74,37 @@ public class SceneLoader : MonoBehaviour
             LoadingUIManager.Instance.ShowLoadingScreen();
         }
 
+        if (LoadingUIManager.Instance != null)
+        {
+            LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
+            while (loadingScreen == null || !loadingScreen.IsEntryAnimationComplete)
+            {
+                yield return null;
+                if (LoadingUIManager.Instance != null)
+                {
+                    loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
         yield return null;
+
+        if (LoadingUIManager.Instance != null)
+        {
+            LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
+            while (loadingScreen == null || !loadingScreen.IsEntryAnimationComplete)
+            {
+                yield return null;
+                if (LoadingUIManager.Instance != null)
+                {
+                    loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
+                }
+            }
+        }
 
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(gameSceneName);
         asyncLoad.allowSceneActivation = false;
@@ -84,7 +114,7 @@ public class SceneLoader : MonoBehaviour
             yield return null;
         }
 
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSecondsRealtime(0.1f);
 
         asyncLoad.allowSceneActivation = true;
 
@@ -94,11 +124,9 @@ public class SceneLoader : MonoBehaviour
         }
 
         yield return StartCoroutine(WaitForGameSceneInitialization());
-        
-        // Freeze gameplay while loading screen is fading out and for an additional delay
+
         Time.timeScale = 0f;
 
-        // Wait for fade to complete and then wait additional delay
         if (LoadingUIManager.Instance != null)
         {
             yield return StartCoroutine(WaitForFadeCompleteAndDelay());
@@ -119,13 +147,11 @@ public class SceneLoader : MonoBehaviour
     {
         if (LoadingUIManager.Instance != null)
         {
-            // Wait for fade sequence to complete
             yield return LoadingUIManager.Instance.HideLoadingScreenWithFadeAsync();
         }
         
         yield return new WaitForSecondsRealtime(gameScenePostFadeDelay);
         
-        // Spawn units after loading screen is complete
         if (GameManager.Instance != null)
         {
             GameManager.Instance.SpawnUnitsAfterLoading();
@@ -140,7 +166,6 @@ public class SceneLoader : MonoBehaviour
             }
         }
         
-        // Resume gameplay after loading screen has disappeared and delay has passed
         Time.timeScale = 1f;
     }
     

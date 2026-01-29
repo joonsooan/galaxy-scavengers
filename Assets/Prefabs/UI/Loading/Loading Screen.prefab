@@ -5196,18 +5196,18 @@ MonoBehaviour:
   progressBarContainer: {fileID: 0}
   loadingTextString: "\uADA4\uB3C4 \uAC15\uD558 \uC911..."
   backgroundColor: {r: 0, g: 0, b: 0, a: 1}
+  imageEntryDelay: 1
+  imageEntryDuration: 1
   particleStartDelay: 0
+  postInitWaitDuration: 1
+  imageExitDuration: 0.75
+  contentFadeOutDuration: 0.5
+  imageExitDelay: 1
+  fadeOutDuration: 1
+  resumeDelay: 0.5
   imageShakeStrength: 3
   imageShakeDuration: 0.25
   shakeVibrato: 20
-  fadeOutDuration: 1
-  contentFadeOutDuration: 0.5
-  resumeDelay: 0
-  imageEntryDelay: 1
-  imageEntryDuration: 1
-  imageExitDuration: 1
-  postInitWaitDuration: 2
-  imageExitDelay: 1
   maxShakeStrengthMultiplier: 20
   loadingEnterSound:
     Guid:

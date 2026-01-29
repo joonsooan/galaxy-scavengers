@@ -13,33 +13,33 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
     [SerializeField] private TextMeshProUGUI loadingText;
     [SerializeField] private Image loadingImage;
     [SerializeField] private ParticleSystem loadingParticles;
-    
+
     [Header("Progress UI Elements")]
     [SerializeField] private TextMeshProUGUI progressText;
     [SerializeField] private Image progressBarFill;
     [SerializeField] private GameObject progressBarContainer;
 
-    [Header("Settings")]
+    [Header("Visual Settings")]
     [SerializeField] private string loadingTextString = "로딩 중...";
     [SerializeField] private Color backgroundColor = new (0f, 0f, 0f, 0.9f);
+
+    [Header("Timing - Entry & Particles")]
+    [SerializeField] private float imageEntryDelay;
+    [SerializeField] private float imageEntryDuration = 0.8f;
     [SerializeField] private float particleStartDelay = 1f;
-    
+
+    [Header("Timing - Fade Sequence")]
+    [SerializeField] private float postInitWaitDuration = 1.0f;
+    [SerializeField] private float imageExitDuration = 1.0f;
+    [SerializeField] private float contentFadeOutDuration = 0.5f;
+    [SerializeField] private float imageExitDelay = 2.0f;
+    [SerializeField] private float fadeOutDuration = 1f;
+    [SerializeField] private float resumeDelay = 0.5f;
+
     [Header("Shake Settings")]
     [SerializeField] private float imageShakeStrength = 15f;
     [SerializeField] private float imageShakeDuration = 0.1f;
     [SerializeField] private int shakeVibrato = 30;
-    
-    [Header("Fade Settings")]
-    [SerializeField] private float fadeOutDuration = 1f;
-    [SerializeField] private float contentFadeOutDuration = 0.5f;
-    [SerializeField] private float resumeDelay = 0.5f;
-    
-    [Header("Animation Settings")]
-    [SerializeField] private float imageEntryDelay;
-    [SerializeField] private float imageEntryDuration = 0.8f;
-    [SerializeField] private float imageExitDuration = 1.0f;
-    [SerializeField] private float postInitWaitDuration = 1.0f;
-    [SerializeField] private float imageExitDelay = 2.0f;
     [SerializeField] private float maxShakeStrengthMultiplier = 3.0f;
 
     [Header("Audio")]
@@ -204,7 +204,9 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
     private void StartEntryAnimationInternal()
     {
         if (loadingImage == null) return;
-        
+
+        Time.timeScale = 0f;
+
         _isEntryAnimationComplete = false;
         
         RectTransform imageRect = loadingImage.GetComponent<RectTransform>();
@@ -350,7 +352,7 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
 
     private IEnumerator StartParticlesDelayed()
     {
-        yield return new WaitForSeconds(particleStartDelay);
+        yield return new WaitForSecondsRealtime(particleStartDelay);
         if (loadingParticles != null) loadingParticles.Play();
     }
 
@@ -367,6 +369,17 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
         {
             RuntimeManager.PlayOneShot(loadingHideSound);
         }
+
+        if (progressText != null)
+        {
+            progressText.DOFade(0f, contentFadeOutDuration).SetUpdate(true);
+        }
+        if (loadingText != null)
+        {
+            loadingText.DOFade(0f, contentFadeOutDuration).SetUpdate(true);
+        }
+
+        yield return new WaitForSecondsRealtime(contentFadeOutDuration);
 
         if (loadingImage != null)
         {
@@ -413,17 +426,6 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
                 .SetEase(Ease.InQuad)
                 .SetUpdate(true);
         }
-
-        if (progressText != null)
-        {
-            progressText.DOFade(0f, contentFadeOutDuration).SetUpdate(true);
-        }
-        if (loadingText != null)
-        {
-            loadingText.DOFade(0f, contentFadeOutDuration).SetUpdate(true);
-        }
-
-        yield return new WaitForSecondsRealtime(contentFadeOutDuration);
 
         if (_imageExitTween != null && _imageExitTween.IsActive())
         {
