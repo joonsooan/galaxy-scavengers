@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using FMODUnity;
 using UnityEngine;
 
 public enum TutorialUIPanel
@@ -48,4 +49,11 @@ public class TutorialStepData : ScriptableObject
     [Header("Step Start Actions")]
     public UnitData[] spawnUnits;
     public ResourceCost[] grantResources;
+
+    [Header("Step Completion")]
+    public EventReference completionSound;
+
+    [Header("Material Highlight Settings")]
+    public bool enableMaterialHighlight;
+    public List<string> highlightTargetIDs = new List<string>();
 }

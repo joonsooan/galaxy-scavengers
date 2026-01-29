@@ -31,3 +31,14 @@ MonoBehaviour:
   enableUIPanels: 08000000
   spawnUnits: []
   grantResources: []
+  completionSound:
+    Guid:
+      Data1: -345895807
+      Data2: 1210214295
+      Data3: -73339495
+      Data4: 1624008095
+    Path: event:/SFX_UIClick
+  enableMaterialHighlight: 1
+  highlightTargetIDs:
+  - mainControl_baseBuilding
+  - baseBuilding_storage

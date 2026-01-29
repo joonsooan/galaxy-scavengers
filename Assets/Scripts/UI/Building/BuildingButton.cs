@@ -151,6 +151,11 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         GameManager.Instance.StartDrag(buildingData);
         BuildingInfoPanel.Instance.SelectBuilding(buildingData);
 
+        if (TutorialManager.Instance != null)
+        {
+            TutorialManager.Instance.DisableHighlightForTarget(gameObject);
+        }
+
         if (closePanelOnClick) {
             ClosePanel();
         }

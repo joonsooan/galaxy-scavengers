@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using FMODUnity;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -22,6 +24,14 @@ public enum TutorialStepType
     MineableTypesChanged
 }
 
+[Serializable]
+public struct HighlightableUI
+{
+    public string id;
+    public GameObject uiObject;
+    public Material highlightMaterial;
+}
+
 
 public class TutorialManager : MonoBehaviour
 {
@@ -41,6 +51,16 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private GameObject alertPanel;
     [SerializeField] private GameObject mainControlPanel;
     [SerializeField] private GameObject launchButton;
+
+    [Header("Highlight Settings")]
+    [SerializeField] private List<HighlightableUI> highlightableList = new List<HighlightableUI>();
+    private readonly List<GameObject> _activeHighlights = new List<GameObject>();
+    private readonly List<GameObject> _currentHighlightTargets = new List<GameObject>();
+    private readonly Dictionary<string, HighlightableUI> _highlightLookup = new Dictionary<string, HighlightableUI>();
+    private readonly Dictionary<GameObject, Material> _highlightMaterials = new Dictionary<GameObject, Material>();
+    private readonly Dictionary<GameObject, Material> _originalMaterials = new Dictionary<GameObject, Material>();
+    private readonly List<UnitBase> _spawnedEnemyUnits = new List<UnitBase>();
+    private readonly Dictionary<TutorialUIPanel, GameObject> _uiPanels = new Dictionary<TutorialUIPanel, GameObject>();
     private int _buildingCompletedCount;
     private int _buildingPlacedCount;
     private int _bulletFireCount;
@@ -49,23 +69,21 @@ public class TutorialManager : MonoBehaviour
     private bool _isWaitingForCondition;
     private int _itemProducedCount;
     private float _lastMouseWheelValue;
+    private bool _lastPausedState;
+    private int _mineableTypesChangedCount;
     private int _mouseWheelScrollCount;
 
     private int _numberKeyPressCount;
     private RectTransform _rect;
     private int _resourceBlockRevealCount;
-    private int _mineableTypesChangedCount;
     private int _resourceMinedAmount;
     private int _spacebarPressCount;
 
     private List<TutorialStepData> _tutorialSteps = new List<TutorialStepData>();
     private TutorialUI _tutorialUI;
     private int _unitProducedCount;
-    private readonly List<UnitBase> _spawnedEnemyUnits = new List<UnitBase>();
 
     private float _wasdInputTime;
-    private bool _lastPausedState;
-    private Dictionary<TutorialUIPanel, GameObject> _uiPanels = new Dictionary<TutorialUIPanel, GameObject>();
     public static TutorialManager Instance { get; private set; }
 
     private void Awake()
@@ -75,6 +93,11 @@ public class TutorialManager : MonoBehaviour
             return;
         }
         Instance = this;
+
+        foreach (HighlightableUI item in highlightableList) {
+            if (!string.IsNullOrEmpty(item.id))
+                _highlightLookup[item.id] = item;
+        }
 
         _rect = tutorialUI.GetComponent<RectTransform>();
         _tutorialUI = tutorialUI.GetComponent<TutorialUI>();
@@ -157,16 +180,15 @@ public class TutorialManager : MonoBehaviour
     {
         _isTutorialActive = true;
         _currentStepIndex = 0;
-        
-        if (DayNightCycleManager.Instance != null)
-        {
+
+        if (DayNightCycleManager.Instance != null) {
             DayNightCycleManager.Instance.SetAutoAdvanceTime(false);
         }
-        
+
         DisableAllEnemyUnits();
         BuildUIPanelDictionary();
         HideAllUIPanels();
-        
+
         NextStep();
     }
 
@@ -186,6 +208,7 @@ public class TutorialManager : MonoBehaviour
 
         ProcessStepStartActions(currentStep);
         EnableUIPanelsForStep(currentStep);
+        EnableMaterialHighlights(currentStep);
 
         _isWaitingForCondition = true;
         StartCoroutine(CheckStepCondition(currentStep));
@@ -281,8 +304,7 @@ public class TutorialManager : MonoBehaviour
         _resourceBlockRevealCount = 0;
         _mineableTypesChangedCount = 0;
         _lastMouseWheelValue = Input.mouseScrollDelta.y;
-        if (GameManager.Instance != null)
-        {
+        if (GameManager.Instance != null) {
             _lastPausedState = GameManager.Instance.IsPaused;
         }
     }
@@ -334,17 +356,15 @@ public class TutorialManager : MonoBehaviour
             case TutorialStepType.SpacebarPress:
                 bool spacebarPressed = Input.GetKeyDown(KeyCode.Space);
                 bool pauseButtonClicked = false;
-                
-                if (GameManager.Instance != null)
-                {
+
+                if (GameManager.Instance != null) {
                     bool currentPausedState = GameManager.Instance.IsPaused;
-                    if (currentPausedState != _lastPausedState)
-                    {
+                    if (currentPausedState != _lastPausedState) {
                         pauseButtonClicked = true;
                         _lastPausedState = currentPausedState;
                     }
                 }
-                
+
                 if (spacebarPressed || pauseButtonClicked) {
                     _spacebarPressCount++;
                     if (_tutorialUI != null && step.showProgressBar) {
@@ -440,6 +460,8 @@ public class TutorialManager : MonoBehaviour
 
             if (conditionMet) {
                 _isWaitingForCondition = false;
+                PlayCompletionSound(step);
+                DisableCurrentHighlights();
                 _currentStepIndex++;
                 NextStep();
                 yield break;
@@ -562,11 +584,10 @@ public class TutorialManager : MonoBehaviour
         _isTutorialActive = false;
         _isWaitingForCondition = false;
 
-        if (DayNightCycleManager.Instance != null)
-        {
+        if (DayNightCycleManager.Instance != null) {
             DayNightCycleManager.Instance.SetAutoAdvanceTime(true);
         }
-        
+
         EnableAllEnemyUnits();
         ShowAllUIPanels();
 
@@ -574,63 +595,55 @@ public class TutorialManager : MonoBehaviour
             _tutorialUI.HideTutorial();
         }
     }
-    
+
     public void SkipAllTutorials()
     {
         _isTutorialActive = false;
         _isWaitingForCondition = false;
         StopAllCoroutines();
-        
-        if (DayNightCycleManager.Instance != null)
-        {
+
+        if (DayNightCycleManager.Instance != null) {
             DayNightCycleManager.Instance.SetAutoAdvanceTime(true);
         }
-        
+
         EnableAllEnemyUnits();
         ShowAllUIPanels();
-        
+
         if (_tutorialUI != null) {
             _tutorialUI.HideTutorial();
         }
-        
-        if (QuestManager.Instance != null)
-        {
+
+        if (QuestManager.Instance != null) {
             QuestManager.Instance.CompleteQuest(firstQuestId);
         }
     }
-    
+
     public void RegisterSpawnedEnemy(EnemyUnitBase enemyUnit)
     {
         if (enemyUnit == null) return;
-        
-        if (!_spawnedEnemyUnits.Contains(enemyUnit))
-        {
+
+        if (!_spawnedEnemyUnits.Contains(enemyUnit)) {
             _spawnedEnemyUnits.Add(enemyUnit);
         }
-        
-        if (_isTutorialActive)
-        {
+
+        if (_isTutorialActive) {
             enemyUnit.gameObject.SetActive(false);
         }
     }
-    
+
     private void DisableAllEnemyUnits()
     {
-        foreach (UnitBase enemyUnit in _spawnedEnemyUnits)
-        {
-            if (enemyUnit != null && enemyUnit.gameObject != null)
-            {
+        foreach (UnitBase enemyUnit in _spawnedEnemyUnits) {
+            if (enemyUnit != null && enemyUnit.gameObject != null) {
                 enemyUnit.gameObject.SetActive(false);
             }
         }
     }
-    
+
     private void EnableAllEnemyUnits()
     {
-        foreach (UnitBase enemyUnit in _spawnedEnemyUnits)
-        {
-            if (enemyUnit != null && enemyUnit.gameObject != null)
-            {
+        foreach (UnitBase enemyUnit in _spawnedEnemyUnits) {
+            if (enemyUnit != null && enemyUnit.gameObject != null) {
                 enemyUnit.gameObject.SetActive(true);
             }
         }
@@ -654,10 +667,8 @@ public class TutorialManager : MonoBehaviour
 
     private void HideAllUIPanels()
     {
-        foreach (var panel in _uiPanels.Values)
-        {
-            if (panel != null)
-            {
+        foreach (GameObject panel in _uiPanels.Values) {
+            if (panel != null) {
                 panel.SetActive(false);
             }
         }
@@ -665,10 +676,8 @@ public class TutorialManager : MonoBehaviour
 
     private void ShowAllUIPanels()
     {
-        foreach (var panel in _uiPanels.Values)
-        {
-            if (panel != null)
-            {
+        foreach (GameObject panel in _uiPanels.Values) {
+            if (panel != null) {
                 panel.SetActive(true);
             }
         }
@@ -676,17 +685,85 @@ public class TutorialManager : MonoBehaviour
 
     private void EnableUIPanelsForStep(TutorialStepData step)
     {
-        if (step == null || step.enableUIPanels == null)
-        {
+        if (step == null || step.enableUIPanels == null) {
             return;
         }
 
-        foreach (TutorialUIPanel panelType in step.enableUIPanels)
-        {
-            if (_uiPanels.TryGetValue(panelType, out GameObject panel) && panel != null)
-            {
+        foreach (TutorialUIPanel panelType in step.enableUIPanels) {
+            if (_uiPanels.TryGetValue(panelType, out GameObject panel) && panel != null) {
                 panel.SetActive(true);
             }
+        }
+    }
+
+    private void PlayCompletionSound(TutorialStepData step)
+    {
+        if (step == null || step.completionSound.IsNull) {
+            return;
+        }
+
+        RuntimeManager.PlayOneShot(step.completionSound);
+    }
+
+    public void RegisterRuntimeUI(string id, GameObject uiObject, Material highlightMaterial)
+    {
+        HighlightableUI newEntry = new HighlightableUI {
+            id = id,
+            uiObject = uiObject,
+            highlightMaterial = highlightMaterial
+        };
+
+        _highlightLookup[id] = newEntry;
+    }
+
+    private void EnableMaterialHighlights(TutorialStepData step)
+    {
+        if (step == null || !step.enableMaterialHighlight || step.highlightTargetIDs == null) return;
+
+        DisableCurrentHighlights();
+
+        foreach (string id in step.highlightTargetIDs) {
+            if (_highlightLookup.TryGetValue(id, out HighlightableUI entry)) {
+                if (entry.uiObject == null || entry.highlightMaterial == null) continue;
+
+                Image image = entry.uiObject.GetComponent<Image>();
+                if (image != null) {
+                    if (!_originalMaterials.ContainsKey(entry.uiObject)) {
+                        _originalMaterials[entry.uiObject] = image.material;
+                    }
+
+                    image.material = entry.highlightMaterial;
+                    _activeHighlights.Add(entry.uiObject);
+                }
+            }
+        }
+    }
+
+    private void DisableCurrentHighlights()
+    {
+        foreach (GameObject target in _activeHighlights) {
+            if (target == null) continue;
+
+            Image image = target.GetComponent<Image>();
+            if (image != null && _originalMaterials.TryGetValue(target, out Material original)) {
+                image.material = original;
+            }
+        }
+
+        _activeHighlights.Clear();
+    }
+
+    public void DisableHighlightForTarget(GameObject target)
+    {
+        if (target == null) return;
+
+        Image image = target.GetComponent<Image>();
+        if (image != null) {
+            image.material = null;
+        }
+
+        if (_currentHighlightTargets.Contains(target)) {
+            _currentHighlightTargets.Remove(target);
         }
     }
 }

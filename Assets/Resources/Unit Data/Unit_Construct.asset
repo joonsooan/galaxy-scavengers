@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Unit_Construct
   m_EditorClassIdentifier: 
   unitName: "\uAC74\uC124 \uC720\uB2DB"
+  tutorialKey: unit_construct
   unitIcon: {fileID: -4285660500280345620, guid: 30f01861364baa14a97fcbce326e83db, type: 3}
   unitPrefab: {fileID: 6649466925040614564, guid: 20209a0e29d055c4b8ec63641b9ca28e, type: 3}
   productionTime: 3
