@@ -30,6 +30,7 @@ public class CameraTargetController : MonoBehaviour
     private bool _isManualMode;
     private Camera _mainCamera;
     private Bounds _mapBounds;
+    private Grid _grid;
 
     private PixelPerfectCamera _pixelPerfCam;
     private bool[] _zoomLevelInitialized;
@@ -97,6 +98,10 @@ public class CameraTargetController : MonoBehaviour
             Tilemap groundTilemap = mapGenerator.GroundTilemap;
             groundTilemap.CompressBounds();
             BoundsInt cellBounds = groundTilemap.cellBounds;
+            
+            if (_grid == null && groundTilemap.layoutGrid != null) {
+                _grid = groundTilemap.layoutGrid;
+            }
 
             if (cellBounds.size.x == 0 || cellBounds.size.y == 0) {
                 _hasBounds = false;
@@ -273,7 +278,19 @@ public class CameraTargetController : MonoBehaviour
         }
 
         if (!_isManualMode && followTarget != null) {
-            Vector3 targetPosition = new Vector3(followTarget.position.x, followTarget.position.y, transform.position.z);
+            Vector3 targetPosition = followTarget.position;
+            
+            if (_grid != null) {
+                Vector3 cellSize = _grid.cellSize;
+                targetPosition.x -= cellSize.x * 0.5f;
+                targetPosition.y -= cellSize.y * 0.5f;
+            }
+            else {
+                targetPosition.x -= 0.5f;
+                targetPosition.y -= 0.5f;
+            }
+            
+            targetPosition.z = transform.position.z;
             Vector3 newPos;
             
             if (smoothTime <= 0.01f) {

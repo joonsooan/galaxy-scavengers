@@ -561,6 +561,7 @@ public class MapGenerator : MonoBehaviour
             yield return StartCoroutine(FillDisconnectedAreasAsync());
         }
         yield return StartCoroutine(ConnectWallsToBordersAsync());
+        yield return StartCoroutine(RemoveIsolatedLowWallsAsync());
         yield return StartCoroutine(GenerateNaturalDecorationsAsync(progress));
     }
 
@@ -673,6 +674,7 @@ public class MapGenerator : MonoBehaviour
         if (enableEnemySpawnHoles) PunchEnemySpawnHoles();
         if (fillDisconnectedAreas) FillDisconnectedAreas();
         ConnectWallsToBorders();
+        RemoveIsolatedLowWalls();
         GenerateNaturalDecorations();
     }
 
@@ -1548,6 +1550,133 @@ public class MapGenerator : MonoBehaviour
                 yield return null;
             }
         }
+    }
+
+    private IEnumerator RemoveIsolatedLowWallsAsync()
+    {
+        if (lowWallTilemap == null) yield break;
+
+        HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
+        List<Vector2Int> tilesToRemove = new List<Vector2Int>();
+        int processed = 0;
+
+        for (int x = 1; x < width - 1; x++)
+        {
+            for (int y = 1; y < height - 1; y++)
+            {
+                Vector2Int pos = new Vector2Int(x, y);
+                if (visited.Contains(pos)) continue;
+
+                Vector3Int cellPos = new Vector3Int(x - _mapCenterXOffset, y - _mapCenterYOffset, 0);
+                if (lowWallTilemap == null || !lowWallTilemap.HasTile(cellPos)) continue;
+
+                List<Vector2Int> connectedGroup = FindConnectedLowWallGroup(x, y, visited);
+                
+                if (connectedGroup.Count >= 1 && connectedGroup.Count <= 4)
+                {
+                    tilesToRemove.AddRange(connectedGroup);
+                }
+
+                processed++;
+                if (processed >= polishOperationsPerFrame)
+                {
+                    processed = 0;
+                    yield return null;
+                }
+            }
+        }
+
+        processed = 0;
+        foreach (Vector2Int pos in tilesToRemove)
+        {
+            Vector3Int cellPos = new Vector3Int(pos.x - _mapCenterXOffset, pos.y - _mapCenterYOffset, 0);
+            SetWallTile(cellPos, null);
+
+            processed++;
+            if (processed >= polishOperationsPerFrame)
+            {
+                processed = 0;
+                yield return null;
+            }
+        }
+    }
+
+    private void RemoveIsolatedLowWalls()
+    {
+        if (lowWallTilemap == null) return;
+
+        HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
+        List<Vector2Int> tilesToRemove = new List<Vector2Int>();
+
+        for (int x = 1; x < width - 1; x++)
+        {
+            for (int y = 1; y < height - 1; y++)
+            {
+                Vector2Int pos = new Vector2Int(x, y);
+                if (visited.Contains(pos)) continue;
+
+                Vector3Int cellPos = new Vector3Int(x - _mapCenterXOffset, y - _mapCenterYOffset, 0);
+                if (lowWallTilemap == null || !lowWallTilemap.HasTile(cellPos)) continue;
+
+                List<Vector2Int> connectedGroup = FindConnectedLowWallGroup(x, y, visited);
+                
+                if (connectedGroup.Count >= 1 && connectedGroup.Count <= 4)
+                {
+                    tilesToRemove.AddRange(connectedGroup);
+                }
+            }
+        }
+
+        foreach (Vector2Int pos in tilesToRemove)
+        {
+            Vector3Int cellPos = new Vector3Int(pos.x - _mapCenterXOffset, pos.y - _mapCenterYOffset, 0);
+            SetWallTile(cellPos, null);
+        }
+    }
+
+    private List<Vector2Int> FindConnectedLowWallGroup(int startX, int startY, HashSet<Vector2Int> visited)
+    {
+        List<Vector2Int> group = new List<Vector2Int>();
+        Queue<Vector2Int> queue = new Queue<Vector2Int>();
+        HashSet<Vector2Int> groupVisited = new HashSet<Vector2Int>();
+
+        Vector2Int startPos = new Vector2Int(startX, startY);
+        queue.Enqueue(startPos);
+        groupVisited.Add(startPos);
+
+        Vector2Int[] neighbors = {
+            new Vector2Int(1, 0),
+            new Vector2Int(-1, 0),
+            new Vector2Int(0, 1),
+            new Vector2Int(0, -1)
+        };
+
+        while (queue.Count > 0)
+        {
+            Vector2Int current = queue.Dequeue();
+            group.Add(current);
+            visited.Add(current);
+
+            foreach (Vector2Int offset in neighbors)
+            {
+                Vector2Int neighbor = new Vector2Int(current.x + offset.x, current.y + offset.y);
+
+                if (neighbor.x < 1 || neighbor.x >= width - 1 || neighbor.y < 1 || neighbor.y >= height - 1)
+                    continue;
+
+                if (groupVisited.Contains(neighbor))
+                    continue;
+
+                Vector3Int neighborCellPos = new Vector3Int(neighbor.x - _mapCenterXOffset, neighbor.y - _mapCenterYOffset, 0);
+                if (lowWallTilemap != null && lowWallTilemap.HasTile(neighborCellPos))
+                {
+                    queue.Enqueue(neighbor);
+                    groupVisited.Add(neighbor);
+                }
+            }
+        }
+
+        return group;
     }
 
     private void PunchHoleWithThreshold(int centerX, int centerY, float radius)
