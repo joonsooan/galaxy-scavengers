@@ -27,8 +27,16 @@ public abstract class UnitBase : Damageable
     [SerializeField] private GameObject progressBarPrefab;
 
     public UnitState currentState;
-    protected UnitProgressBar progressBar;
     private bool _isRegisteredToNoiseManager;
+    protected UnitProgressBar progressBar;
+
+    private void Update()
+    {
+        if (unitType == UnitType.Ally && !_isRegisteredToNoiseManager && unitData != null && NoiseManager.Instance != null) {
+            NoiseManager.Instance.RegisterUnit(this);
+            _isRegisteredToNoiseManager = true;
+        }
+    }
 
     protected override void OnEnable()
     {
@@ -38,8 +46,7 @@ public abstract class UnitBase : Damageable
             UnitManager.Instance.AddUnit(this);
         }
 
-        if (unitType == UnitType.Ally && NoiseManager.Instance != null)
-        {
+        if (unitType == UnitType.Ally && NoiseManager.Instance != null) {
             NoiseManager.Instance.RegisterUnit(this);
             _isRegisteredToNoiseManager = true;
         }
@@ -50,23 +57,13 @@ public abstract class UnitBase : Damageable
         }
     }
 
-    private void Update()
-    {
-        if (unitType == UnitType.Ally && !_isRegisteredToNoiseManager && unitData != null && NoiseManager.Instance != null)
-        {
-            NoiseManager.Instance.RegisterUnit(this);
-            _isRegisteredToNoiseManager = true;
-        }
-    }
-
     protected override void OnDisable()
     {
         if (UnitManager.Instance != null) {
             UnitManager.Instance.RemoveUnit(this);
         }
 
-        if (unitType == UnitType.Ally && NoiseManager.Instance != null)
-        {
+        if (unitType == UnitType.Ally && NoiseManager.Instance != null) {
             NoiseManager.Instance.UnregisterUnit(this);
         }
 
@@ -75,7 +72,7 @@ public abstract class UnitBase : Damageable
         base.OnDisable();
     }
 
-    protected virtual void OnDestroy()
+    protected override void OnDestroy()
     {
         HideProgressBar();
     }

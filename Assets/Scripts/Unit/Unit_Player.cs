@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 public class Unit_Player : UnitBase
 {
@@ -22,20 +21,20 @@ public class Unit_Player : UnitBase
     [SerializeField] private Material laserMaterial;
     [SerializeField] private float laserWidth = 0.1f;
     [SerializeField] private ParticleSystem miningParticleSystem;
-    [SerializeField] private float particleOffsetDistance = 0.5f;
     [SerializeField] private float yOffset;
+    private float _attackStateEndTime;
     private Grid _grid;
+    private bool _isAttacking;
+    private bool _isBulletFiringEnabled;
+    private bool _isLookingAtFireDirection;
     private LineRenderer _laserRenderer;
+    private Vector2 _lastFireDirection;
     private float _lastFireTime;
+    private float _lookAtFireDirectionEndTime;
     private Camera _mainCamera;
     private Coroutine _mineCoroutine;
     private WaitForSeconds _miningDelay;
     private UnitSpriteController _spriteController;
-    private bool _isAttacking;
-    private float _attackStateEndTime;
-    private Vector2 _lastFireDirection;
-    private float _lookAtFireDirectionEndTime;
-    private bool _isLookingAtFireDirection;
 
     private ResourceNode _targetResourceNode;
 
@@ -65,6 +64,18 @@ public class Unit_Player : UnitBase
 
     private void Update()
     {
+        if (!_isBulletFiringEnabled) {
+            if (TutorialManager.Instance == null || !TutorialManager.Instance.IsTutorialActive()) {
+                _isBulletFiringEnabled = true;
+            }
+            else {
+                TutorialStepData currentStep = TutorialManager.Instance.GetCurrentTutorialStep();
+                if (currentStep != null && currentStep.stepType == TutorialStepType.BulletFired) {
+                    _isBulletFiringEnabled = true;
+                }
+            }
+        }
+
         HandleInput();
         CheckMiningRange();
         UpdateUnitState();
@@ -74,7 +85,7 @@ public class Unit_Player : UnitBase
         UpdateParticlePosition();
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         StopMiningParticles();
 
@@ -122,7 +133,7 @@ public class Unit_Player : UnitBase
 
         _spriteController.UpdateAnimationState(
             currentState,
-            isMining: isMining,
+            isMining,
             isAttacking: isAttacking
         );
     }
@@ -165,8 +176,7 @@ public class Unit_Player : UnitBase
 
     private void HandleInput()
     {
-        if (GameManager.Instance != null && GameManager.Instance.IsDragging())
-        {
+        if (GameManager.Instance != null && GameManager.Instance.IsDragging()) {
             return;
         }
 
@@ -472,6 +482,21 @@ public class Unit_Player : UnitBase
 
         if (bulletPrefab == null)
             return;
+
+        if (!_isBulletFiringEnabled) {
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive()) {
+                TutorialStepData currentStep = TutorialManager.Instance.GetCurrentTutorialStep();
+                if (currentStep != null && currentStep.stepType == TutorialStepType.BulletFired) {
+                    _isBulletFiringEnabled = true;
+                }
+                else {
+                    return;
+                }
+            }
+            else {
+                _isBulletFiringEnabled = true;
+            }
+        }
 
         Vector2 fireDirection = (targetPosition - transform.position).normalized;
         Vector3 spawnPosition = transform.position + (Vector3)fireDirection * 0.5f;

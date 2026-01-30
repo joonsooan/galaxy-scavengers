@@ -4,27 +4,23 @@ using UnityEngine.SceneManagement;
 
 public class SceneLoader : MonoBehaviour
 {
-    public static SceneLoader Instance { get; private set; }
-
     [SerializeField] private string titleSceneName = "TitleScene";
     [SerializeField] private string baseSceneName = "BaseScene";
     [SerializeField] private string gameSceneName = "GameScene";
-    
+
     [Header("Game Scene Loading Settings")]
-    [SerializeField] private float gameScenePostInitDelay = 1f;
     [SerializeField] private float gameScenePostFadeDelay = 1f;
-    
-    private bool _isLoading = false;
-    
+
+    private bool _isLoading;
+    public static SceneLoader Instance { get; private set; }
+
     private void Awake()
     {
-        if (Instance == null)
-        {
+        if (Instance == null) {
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
-        else
-        {
+        else {
             Destroy(gameObject);
         }
     }
@@ -38,23 +34,19 @@ public class SceneLoader : MonoBehaviour
     public void LoadBaseScene()
     {
         if (_isLoading) return;
-        
+
         string currentScene = SceneManager.GetActiveScene().name;
-        
-        if (currentScene == gameSceneName)
-        {
-            if (UnitManager.Instance != null)
-            {
+
+        if (currentScene == gameSceneName) {
+            if (UnitManager.Instance != null) {
                 UnitManager.Instance.RemoveAllUnits();
             }
         }
-        
-        if (currentScene == titleSceneName)
-        {
+
+        if (currentScene == titleSceneName) {
             SceneManager.LoadScene(baseSceneName);
         }
-        else
-        {
+        else {
             StartCoroutine(LoadSceneAsync(baseSceneName));
         }
     }
@@ -64,28 +56,23 @@ public class SceneLoader : MonoBehaviour
         if (_isLoading) return;
         StartCoroutine(LoadGameSceneAsync());
     }
-    
+
     private IEnumerator LoadGameSceneAsync()
     {
         _isLoading = true;
 
-        if (LoadingUIManager.Instance != null)
-        {
+        if (LoadingUIManager.Instance != null) {
             LoadingUIManager.Instance.ShowLoadingScreen();
         }
 
-        if (LoadingUIManager.Instance != null)
-        {
+        if (LoadingUIManager.Instance != null) {
             LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
-            while (loadingScreen == null || !loadingScreen.IsEntryAnimationComplete)
-            {
+            while (loadingScreen == null || !loadingScreen.IsEntryAnimationComplete) {
                 yield return null;
-                if (LoadingUIManager.Instance != null)
-                {
+                if (LoadingUIManager.Instance != null) {
                     loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
                 }
-                else
-                {
+                else {
                     break;
                 }
             }
@@ -93,14 +80,11 @@ public class SceneLoader : MonoBehaviour
 
         yield return null;
 
-        if (LoadingUIManager.Instance != null)
-        {
+        if (LoadingUIManager.Instance != null) {
             LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
-            while (loadingScreen == null || !loadingScreen.IsEntryAnimationComplete)
-            {
+            while (loadingScreen == null || !loadingScreen.IsEntryAnimationComplete) {
                 yield return null;
-                if (LoadingUIManager.Instance != null)
-                {
+                if (LoadingUIManager.Instance != null) {
                     loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
                 }
             }
@@ -109,8 +93,7 @@ public class SceneLoader : MonoBehaviour
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(gameSceneName);
         asyncLoad.allowSceneActivation = false;
 
-        while (asyncLoad.progress < 0.9f)
-        {
+        while (asyncLoad.progress < 0.9f) {
             yield return null;
         }
 
@@ -118,8 +101,7 @@ public class SceneLoader : MonoBehaviour
 
         asyncLoad.allowSceneActivation = true;
 
-        while (!asyncLoad.isDone)
-        {
+        while (!asyncLoad.isDone) {
             yield return null;
         }
 
@@ -127,53 +109,46 @@ public class SceneLoader : MonoBehaviour
 
         Time.timeScale = 0f;
 
-        if (LoadingUIManager.Instance != null)
-        {
+        if (LoadingUIManager.Instance != null) {
             yield return StartCoroutine(WaitForFadeCompleteAndDelay());
         }
 
         _isLoading = false;
     }
-    
+
     private IEnumerator WaitForGameSceneInitialization()
     {
-        while (GameManager.Instance == null || !GameManager.Instance.IsGameSceneInitialized)
-        {
+        while (GameManager.Instance == null || !GameManager.Instance.IsGameSceneInitialized) {
             yield return null;
         }
     }
-    
+
     private IEnumerator WaitForFadeCompleteAndDelay()
     {
-        if (LoadingUIManager.Instance != null)
-        {
+        if (LoadingUIManager.Instance != null) {
             yield return LoadingUIManager.Instance.HideLoadingScreenWithFadeAsync();
         }
-        
+
         yield return new WaitForSecondsRealtime(gameScenePostFadeDelay);
-        
-        if (BgmManager.Instance != null)
-        {
+
+        if (BgmManager.Instance != null) {
             BgmManager.Instance.PlayGameBgm();
         }
-        
-        if (GameManager.Instance != null)
-        {
+
+        if (GameManager.Instance != null) {
             GameManager.Instance.SpawnUnitsAfterLoading();
         }
-        
-        if (GameManager.Instance != null)
-        {
+
+        if (GameManager.Instance != null) {
             GameManager.IsGameplayReady = true;
-            foreach (Unit_Miner unit in FindObjectsByType<Unit_Miner>(FindObjectsSortMode.None))
-            {
+            foreach (Unit_Miner unit in FindObjectsByType<Unit_Miner>(FindObjectsSortMode.None)) {
                 unit.TryStartActions();
             }
         }
-        
+
         Time.timeScale = 1f;
     }
-    
+
     private IEnumerator LoadSceneAsync(string sceneName)
     {
         _isLoading = true;
@@ -183,8 +158,7 @@ public class SceneLoader : MonoBehaviour
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
         asyncLoad.allowSceneActivation = false;
 
-        while (asyncLoad.progress < 0.9f)
-        {
+        while (asyncLoad.progress < 0.9f) {
             yield return null;
         }
 
@@ -192,8 +166,7 @@ public class SceneLoader : MonoBehaviour
 
         asyncLoad.allowSceneActivation = true;
 
-        while (!asyncLoad.isDone)
-        {
+        while (!asyncLoad.isDone) {
             yield return null;
         }
 
@@ -201,7 +174,7 @@ public class SceneLoader : MonoBehaviour
 
         _isLoading = false;
     }
-    
+
     public void QuitGame()
     {
         Application.Quit();

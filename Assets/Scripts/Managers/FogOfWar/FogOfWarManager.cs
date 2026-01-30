@@ -3,8 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using Systems.Jobs;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 using UnityEngine.SceneManagement;
+using UnityEngine.Tilemaps;
 
 public enum FogOfWarState
 {
@@ -41,7 +41,7 @@ public class FogOfWarManager : MonoBehaviour
 
     private bool _isInitializing;
     private bool _isVisibilityUpdateRunning;
-    private Dictionary<IVisionProvider, HashSet<Vector3Int>> _providerAffectedTiles = new Dictionary<IVisionProvider, HashSet<Vector3Int>>();
+    private readonly Dictionary<IVisionProvider, HashSet<Vector3Int>> _providerAffectedTiles = new Dictionary<IVisionProvider, HashSet<Vector3Int>>();
     private bool _respectFog = true;
     private FogOfWarVisualUpdater _visualUpdater;
     public static FogOfWarManager Instance { get; private set; }
@@ -84,10 +84,9 @@ public class FogOfWarManager : MonoBehaviour
 
         _initializer?.SetReferences(fogTilemap, groundTilemap, _cachedMapGenerator);
         _visualUpdater = new FogOfWarVisualUpdater(fogTilemap, fogTile, fullyVisibleColor, partlyVisibleColor, invisibleColor, groundTilemap, _cachedMapGenerator);
-        
+
         string currentSceneName = SceneManager.GetActiveScene().name;
-        if (currentSceneName != "GameScene")
-        {
+        if (currentSceneName != "GameScene") {
             StartCoroutine(DelayedFogInitialization());
         }
 
@@ -350,8 +349,7 @@ public class FogOfWarManager : MonoBehaviour
 
         // Debug.Log("[FogOfWar] UpdateVisibilityCoroutine started");
 
-        if (_isVisibilityUpdateRunning)
-        {
+        if (_isVisibilityUpdateRunning) {
             // Debug.Log("[FogOfWar] UpdateVisibilityCoroutine request ignored; already running");
             yield break;
         }
@@ -577,7 +575,7 @@ public class FogOfWarManager : MonoBehaviour
                 try {
                     controller.OnVisibilityChangedDirect(cell, state);
                 }
-                catch (Exception e) {
+                catch (Exception) {
                     // Debug.LogWarning($"[FogOfWarManager] Error notifying VisibilityController: {e.Message}");
                     controllers.RemoveAt(i);
                 }

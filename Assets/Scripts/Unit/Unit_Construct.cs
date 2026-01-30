@@ -40,14 +40,14 @@ public class Unit_Construct : UnitBase
     private float _nextTaskRequestTime;
 
     private Rigidbody2D _rb;
+    private int _remainingRequestAmount;
     private UnitSpriteController _spriteController;
     private Transform _spriteTransform;
+    private List<IStorage> _storageRoute;
+    private int _storageRouteIndex;
 
     private IStorage _targetStorage;
     private Coroutine _unloadingCoroutine;
-    private List<IStorage> _storageRoute;
-    private int _storageRouteIndex;
-    private int _remainingRequestAmount;
 
     protected override void Awake()
     {
@@ -99,7 +99,7 @@ public class Unit_Construct : UnitBase
         ReleaseFromConstruction();
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         StopConstructionParticles();
         StopHover();
@@ -414,7 +414,7 @@ public class Unit_Construct : UnitBase
 
         float constructionSpeedMultiplier = GetConstructionSpeedMultiplier();
         float adjustedUnloadingTime = unloadingTime / constructionSpeedMultiplier;
-        
+
         while (elapsedTime < adjustedUnloadingTime) {
             elapsedTime += Time.deltaTime;
             float progress = elapsedTime / adjustedUnloadingTime;
@@ -545,8 +545,7 @@ public class Unit_Construct : UnitBase
                 }
 
                 if (candidates.Count > 0 && totalAvailable >= request.amount) {
-                    candidates.Sort((a, b) =>
-                    {
+                    candidates.Sort((a, b) => {
                         float distA = Vector3.Distance(site.GetPosition(), a.GetPosition());
                         float distB = Vector3.Distance(site.GetPosition(), b.GetPosition());
                         return distA.CompareTo(distB);
@@ -600,11 +599,9 @@ public class Unit_Construct : UnitBase
 
     private float GetConstructionSpeedMultiplier()
     {
-        if (CoreRepairManager.Instance != null && !CoreRepairManager.Instance.IsPartRepaired(CorePart.Repeater))
-        {
+        if (CoreRepairManager.Instance != null && !CoreRepairManager.Instance.IsPartRepaired(CorePart.Repeater)) {
             CorePartData repeaterData = CoreRepairManager.Instance.GetPartData(CorePart.Repeater);
-            if (repeaterData != null)
-            {
+            if (repeaterData != null) {
                 return 1f - repeaterData.debuffValue;
             }
         }

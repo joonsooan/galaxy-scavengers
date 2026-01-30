@@ -92,22 +92,16 @@ public class UnitSpriteController : MonoBehaviour
         float absY = Mathf.Abs(y);
 
         if (absX > 0.3f && absY > 0.3f) {
-            if (absX > absY) {
-                y = 0f;
-                x = x > 0 ? 1f : -1f;
-            }
-            else {
-                x = 0f;
-                y = y > 0 ? 1f : -1f;
-            }
-        }
-        else if (absY > absX) {
-            x = 0f;
-            y = y > 0 ? 1f : -1f;
-        }
-        else {
             y = 0f;
             x = x > 0 ? 1f : -1f;
+        }
+        else if (absX > absY) {
+            y = 0f;
+            x = x > 0 ? 1f : -1f;
+        }
+        else {
+            x = 0f;
+            y = y > 0 ? 1f : -1f;
         }
 
         _animator.SetFloat(InputXHash, x);

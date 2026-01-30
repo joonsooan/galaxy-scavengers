@@ -33,7 +33,7 @@ public class Unit_Miner : UnitBase
     [SerializeField] private float vibrationRadius = 0.1f;
     [SerializeField] private float vibrationSpeed = 2f;
 
-    private readonly Dictionary<ResourceType, int> _currentCarryAmounts = new ();
+    private readonly Dictionary<ResourceType, int> _currentCarryAmounts = new Dictionary<ResourceType, int>();
 
     private Canvas _canvas;
     private Vector3 _currentMiningDirection;
@@ -42,9 +42,9 @@ public class Unit_Miner : UnitBase
     private Coroutine _mineCoroutine;
     private WaitForSeconds _miningDelay;
     private Tween _miningVibrationTween;
+    private bool _noResourceAlertActive;
     private WaitForSeconds _searchWait;
     private Vector3 _spriteBaseLocalPosition;
-    private bool _noResourceAlertActive;
     private UnitSpriteController _spriteController;
     private Vector3Int _targetMiningCell;
     private ResourceNode _targetResourceNode;
@@ -88,17 +88,15 @@ public class Unit_Miner : UnitBase
     {
         base.OnDisable();
         UnsubscribeEvents();
-        if (_noResourceAlertActive)
-        {
+        if (_noResourceAlertActive) {
             GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.MinerNoResource);
             _noResourceAlertActive = false;
         }
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
-        if (_noResourceAlertActive)
-        {
+        if (_noResourceAlertActive) {
             GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.MinerNoResource);
             _noResourceAlertActive = false;
         }
@@ -246,19 +244,18 @@ public class Unit_Miner : UnitBase
     private IEnumerator UnloadResourceCoroutine()
     {
         unitMovement.StopMovement();
-        
+
         // Show progress bar during unloading
         ShowProgressBar();
         float elapsedTime = 0f;
-        
-        while (elapsedTime < unloadingTime)
-        {
+
+        while (elapsedTime < unloadingTime) {
             elapsedTime += Time.deltaTime;
             float progress = elapsedTime / unloadingTime;
             UpdateProgressBar(progress);
             yield return null;
         }
-        
+
         HideProgressBar();
 
         if (_targetStorage != null) {
@@ -286,8 +283,7 @@ public class Unit_Miner : UnitBase
             }
 
             List<ResourceType> resourceTypesToShow = resourcesToUnload.Keys.ToList();
-            if (_targetStorage != null)
-            {
+            if (_targetStorage != null) {
                 Vector3 storagePosition = ((Component)_targetStorage).transform.position;
                 StartCoroutine(ShowResourceImages(resourceTypesToShow, storagePosition));
             }
@@ -336,8 +332,7 @@ public class Unit_Miner : UnitBase
     private void FindAndSetTarget()
     {
         if (_currentCarryAmounts.Values.Sum() > 0) {
-            if (_noResourceAlertActive)
-            {
+            if (_noResourceAlertActive) {
                 GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.MinerNoResource);
                 _noResourceAlertActive = false;
             }
@@ -358,8 +353,7 @@ public class Unit_Miner : UnitBase
             if (_targetResourceNode.Reserve(this)) {
                 if (unitMovement.SetNewTarget(BuildingManager.Instance.grid.GetCellCenterWorld(_targetMiningCell))) {
                     currentState = UnitState.Moving;
-                    if (_noResourceAlertActive)
-                    {
+                    if (_noResourceAlertActive) {
                         GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.MinerNoResource);
                         _noResourceAlertActive = false;
                     }
@@ -379,8 +373,7 @@ public class Unit_Miner : UnitBase
             _targetResourceNode?.Unreserve();
             _targetResourceNode = null;
             currentState = UnitState.Idle;
-            if (!_noResourceAlertActive)
-            {
+            if (!_noResourceAlertActive) {
                 GameAlertUIManager.Instance?.RegisterAlert(GameAlertType.MinerNoResource);
                 _noResourceAlertActive = true;
             }
@@ -660,7 +653,7 @@ public class Unit_Miner : UnitBase
                 HandleTargetLoss();
             }
         }
-        
+
         if (currentState == UnitState.Idle) {
             if (_findResourceCoroutine == null) {
                 TryStartActions();
@@ -686,9 +679,8 @@ public class Unit_Miner : UnitBase
     {
         if (_canvas == null || resourceTypes == null || resourceTypes.Count == 0) yield break;
         Vector3 offset = new Vector3(0f, 0.5f, 0f);
-        
-        foreach (ResourceType resourceType in resourceTypes)
-        {
+
+        foreach (ResourceType resourceType in resourceTypes) {
             GameObject imageObj = ObjectPooler.Instance.SpawnFromPool(
                 "ResourceImage", spawnPosition + offset, Quaternion.identity);
 
