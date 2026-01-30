@@ -14,9 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stepIndex: 15
   text: "\uB2E4\uC74C\uC73C\uB85C \uC720\uB2DB\uC744 \uC0DD\uC0B0\uD574\uBCF4\uACA0\uC2B5\uB2C8\uB2E4!\n\uC720\uB2DB\uC740
-    \uB4DC\uB860 \uD5C8\uBE0C\uC5D0\uC11C \uC0DD\uC0B0\uD560 \uC218 \uC788\uC73C\uBA70,
-    \uD55C \uBC88\uC5D0 \uD55C \uAC1C\uB9CC \uAC74\uC124\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.\n\uB4DC\uB860
-    \uD5C8\uBE0C\uB294 \uAE30\uCD08 \uAC74\uBB3C \uD0ED\uC5D0 \uC788\uC2B5\uB2C8\uB2E4.\n\uC5EC\uBD84\uC758
+    <color=#FFC107>\uB4DC\uB860 \uD5C8\uBE0C</color>\uC5D0\uC11C \uC0DD\uC0B0\uD560
+    \uC218 \uC788\uC73C\uBA70, \uD55C \uBC88\uC5D0 \uD55C \uAC1C\uB9CC \uAC74\uC124\uD560
+    \uC218 \uC788\uC2B5\uB2C8\uB2E4.\n<color=#FFC107>\uB4DC\uB860 \uD5C8\uBE0C</color>\uB294
+    \uAE30\uCD08 \uAC74\uBB3C \uD0ED\uC5D0 \uC788\uC2B5\uB2C8\uB2E4.\n\uC5EC\uBD84\uC758
     \uC790\uC6D0\uC744 \uC900\uBE44\uD574\uB480\uC73C\uB2C8 \uBC14\uB85C \uC124\uCE58\uD574\uBCF4\uC8E0!"
   stepType: 10
   duration: 0
@@ -44,3 +45,7 @@ MonoBehaviour:
   highlightTargetIDs:
   - mainControl_baseBuilding
   - baseBuilding_droneHub
+  showArrowUI: 0
+  arrowUIPrefab: {fileID: 0}
+  arrowPosition: {x: 0, y: 0, z: 0}
+  arrowRotation: {x: 0, y: 0, z: 0}

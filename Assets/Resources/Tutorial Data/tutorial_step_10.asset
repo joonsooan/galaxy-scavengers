@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stepIndex: 10
   text: "\uBA54\uC778 \uC720\uB2DB\uC740 \uC790\uC6D0 \uCC44\uAD74\uACFC \uD568\uAED8
-    \uACF5\uACA9 \uAE30\uB2A5\uB3C4 \uB0B4\uC7A5\uB418\uC5B4 \uC788\uC2B5\uB2C8\uB2E4.\n\uD654\uBA74\uC744
-    \uD074\uB9AD\uD574 \uC5D0\uB108\uC9C0 \uD0C4\uC744 \uBC1C\uC0AC\uD574\uBD05\uC2DC\uB2E4!\n\uAFB9
+    \uACF5\uACA9 \uAE30\uB2A5\uB3C4 \uB0B4\uC7A5\uB418\uC5B4 \uC788\uC2B5\uB2C8\uB2E4.\n<color=#FFC107>\uD654\uBA74\uC744
+    \uD074\uB9AD</color>\uD574 \uC5D0\uB108\uC9C0 \uD0C4\uC744 \uBC1C\uC0AC\uD574\uBD05\uC2DC\uB2E4!\n\uAFB9
     \uB204\uB974\uBA74 \uC5F0\uC18D\uC73C\uB85C \uC5D0\uB108\uC9C0 \uD0C4\uC744 \uBC1C\uC0AC\uD569\uB2C8\uB2E4."
   stepType: 8
   duration: 0
@@ -36,4 +36,8 @@ MonoBehaviour:
       Data4: 1624008095
     Path: event:/SFX_UIClick
   enableMaterialHighlight: 0
-  highlightTargets: []
+  highlightTargetIDs: []
+  showArrowUI: 0
+  arrowUIPrefab: {fileID: 0}
+  arrowPosition: {x: 0, y: 0, z: 0}
+  arrowRotation: {x: 0, y: 0, z: 0}

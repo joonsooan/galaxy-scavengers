@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stepIndex: 2
   text: "\uAE30\uBCF8\uC801\uC778 \uC870\uC791\uBC95\uBD80\uD130 \uC54C\uC544\uBCF4\uC8E0!\n\uBA3C\uC800
-    WASD \uD0A4\uB97C \uC0AC\uC6A9\uD574 \uBA54\uC778 \uC720\uB2DB\uC744 \uC6C0\uC9C1\uC5EC\uBD05\uC2DC\uB2E4."
+    <color=#FFC107>WASD \uD0A4</color>\uB97C \uC0AC\uC6A9\uD574 \uBA54\uC778 \uC720\uB2DB\uC744
+    \uC6C0\uC9C1\uC5EC\uBD05\uC2DC\uB2E4."
   stepType: 2
   duration: 2
   count: 0
@@ -34,4 +35,8 @@ MonoBehaviour:
       Data4: 1624008095
     Path: event:/SFX_UIClick
   enableMaterialHighlight: 0
-  highlightTargets: []
+  highlightTargetIDs: []
+  showArrowUI: 0
+  arrowUIPrefab: {fileID: 0}
+  arrowPosition: {x: 0, y: 0, z: 0}
+  arrowRotation: {x: 0, y: 0, z: 0}

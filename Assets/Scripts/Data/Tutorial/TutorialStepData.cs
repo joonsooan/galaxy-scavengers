@@ -56,4 +56,8 @@ public class TutorialStepData : ScriptableObject
     [Header("Material Highlight Settings")]
     public bool enableMaterialHighlight;
     public List<string> highlightTargetIDs = new List<string>();
+
+    [Header("Arrow UI Settings")]
+    public bool showArrowUI;
+    public string arrowID;
 }

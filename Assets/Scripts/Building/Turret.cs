@@ -175,8 +175,19 @@ public class Turret : Damageable, IAetherConsumer
     {
         if (_target == null)
         {
-            Debug.Log("Target is null");
             return;
+        }
+
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive())
+        {
+            TutorialStepData currentStep = TutorialManager.Instance.GetCurrentTutorialStep();
+            if (currentStep != null && currentStep.stepType == TutorialStepType.BulletFired)
+            {
+            }
+            else
+            {
+                return;
+            }
         }
         
         GameObject bulletObj = ObjectPooler.Instance.SpawnFromPool("TurretBullet", _bulletSpawnPosition, Quaternion.identity);

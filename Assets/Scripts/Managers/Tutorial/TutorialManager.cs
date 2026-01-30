@@ -54,9 +54,12 @@ public class TutorialManager : MonoBehaviour
 
     [Header("Highlight Settings")]
     [SerializeField] private List<HighlightableUI> highlightableList = new List<HighlightableUI>();
+    [Header("Arrow UI Settings")]
+    [SerializeField] private List<GameObject> arrowUIObjects = new List<GameObject>();
     private readonly List<GameObject> _activeHighlights = new List<GameObject>();
     private readonly List<GameObject> _currentHighlightTargets = new List<GameObject>();
     private readonly Dictionary<string, HighlightableUI> _highlightLookup = new Dictionary<string, HighlightableUI>();
+    private readonly Dictionary<string, GameObject> _arrowUILookup = new Dictionary<string, GameObject>();
     private readonly Dictionary<GameObject, Material> _highlightMaterials = new Dictionary<GameObject, Material>();
     private readonly Dictionary<GameObject, Material> _originalMaterials = new Dictionary<GameObject, Material>();
     private readonly List<UnitBase> _spawnedEnemyUnits = new List<UnitBase>();
@@ -82,6 +85,7 @@ public class TutorialManager : MonoBehaviour
     private List<TutorialStepData> _tutorialSteps = new List<TutorialStepData>();
     private TutorialUI _tutorialUI;
     private int _unitProducedCount;
+    private GameObject _currentArrowUI;
 
     private float _wasdInputTime;
     public static TutorialManager Instance { get; private set; }
@@ -97,6 +101,16 @@ public class TutorialManager : MonoBehaviour
         foreach (HighlightableUI item in highlightableList) {
             if (!string.IsNullOrEmpty(item.id))
                 _highlightLookup[item.id] = item;
+        }
+
+        foreach (GameObject arrowUI in arrowUIObjects) {
+            if (arrowUI != null) {
+                TutorialArrowUI arrowComponent = arrowUI.GetComponent<TutorialArrowUI>();
+                if (arrowComponent != null && !string.IsNullOrEmpty(arrowComponent.ArrowID)) {
+                    _arrowUILookup[arrowComponent.ArrowID] = arrowUI;
+                    arrowUI.SetActive(false);
+                }
+            }
         }
 
         _rect = tutorialUI.GetComponent<RectTransform>();
@@ -209,6 +223,7 @@ public class TutorialManager : MonoBehaviour
         ProcessStepStartActions(currentStep);
         EnableUIPanelsForStep(currentStep);
         EnableMaterialHighlights(currentStep);
+        ShowArrowUI(currentStep);
 
         _isWaitingForCondition = true;
         StartCoroutine(CheckStepCondition(currentStep));
@@ -462,6 +477,7 @@ public class TutorialManager : MonoBehaviour
                 _isWaitingForCondition = false;
                 PlayCompletionSound(step);
                 DisableCurrentHighlights();
+                HideArrowUI();
                 _currentStepIndex++;
                 NextStep();
                 yield break;
@@ -538,6 +554,15 @@ public class TutorialManager : MonoBehaviour
         return _isTutorialActive;
     }
 
+    public TutorialStepData GetCurrentTutorialStep()
+    {
+        if (_isTutorialActive && _currentStepIndex >= 0 && _currentStepIndex < _tutorialSteps.Count)
+        {
+            return _tutorialSteps[_currentStepIndex];
+        }
+        return null;
+    }
+
     public void OnBuildingPlaced(string buildingType)
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
@@ -590,6 +615,7 @@ public class TutorialManager : MonoBehaviour
 
         EnableAllEnemyUnits();
         ShowAllUIPanels();
+        HideArrowUI();
 
         if (_tutorialUI != null) {
             _tutorialUI.HideTutorial();
@@ -608,6 +634,7 @@ public class TutorialManager : MonoBehaviour
 
         EnableAllEnemyUnits();
         ShowAllUIPanels();
+        HideArrowUI();
 
         if (_tutorialUI != null) {
             _tutorialUI.HideTutorial();
@@ -707,6 +734,11 @@ public class TutorialManager : MonoBehaviour
 
     public void RegisterRuntimeUI(string id, GameObject uiObject, Material highlightMaterial)
     {
+        if (string.IsNullOrEmpty(id) || uiObject == null)
+        {
+            return;
+        }
+
         HighlightableUI newEntry = new HighlightableUI {
             id = id,
             uiObject = uiObject,
@@ -714,26 +746,88 @@ public class TutorialManager : MonoBehaviour
         };
 
         _highlightLookup[id] = newEntry;
+
+        if (_isTutorialActive && _isWaitingForCondition && _currentStepIndex >= 0 && _currentStepIndex < _tutorialSteps.Count)
+        {
+            TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
+            if (currentStep != null && currentStep.enableMaterialHighlight && currentStep.highlightTargetIDs != null)
+            {
+                if (currentStep.highlightTargetIDs.Contains(id))
+                {
+                    ApplyHighlightToUI(uiObject, highlightMaterial);
+                }
+            }
+        }
+    }
+
+    private void ApplyHighlightToUI(GameObject uiObject, Material highlightMaterial)
+    {
+        if (uiObject == null || highlightMaterial == null) return;
+
+        Image targetImage = FindButtonImage(uiObject);
+        if (targetImage != null)
+        {
+            GameObject buttonObject = targetImage.gameObject;
+            if (!_originalMaterials.ContainsKey(buttonObject))
+            {
+                _originalMaterials[buttonObject] = targetImage.material;
+            }
+
+            targetImage.material = highlightMaterial;
+            
+            if (!_activeHighlights.Contains(buttonObject))
+            {
+                _activeHighlights.Add(buttonObject);
+            }
+        }
+    }
+
+    private Image FindButtonImage(GameObject parentObject)
+    {
+        Button[] buttons = parentObject.GetComponentsInChildren<Button>(true);
+        if (buttons != null && buttons.Length > 0)
+        {
+            Image image = buttons[0].GetComponent<Image>();
+            if (image != null)
+            {
+                return image;
+            }
+        }
+        return null;
     }
 
     private void EnableMaterialHighlights(TutorialStepData step)
     {
-        if (step == null || !step.enableMaterialHighlight || step.highlightTargetIDs == null) return;
+        if (step == null || !step.enableMaterialHighlight || step.highlightTargetIDs == null)
+        {
+            return;
+        }
 
         DisableCurrentHighlights();
 
-        foreach (string id in step.highlightTargetIDs) {
-            if (_highlightLookup.TryGetValue(id, out HighlightableUI entry)) {
-                if (entry.uiObject == null || entry.highlightMaterial == null) continue;
+        foreach (string id in step.highlightTargetIDs)
+        {
+            if (_highlightLookup.TryGetValue(id, out HighlightableUI entry))
+            {
+                if (entry.uiObject == null || entry.highlightMaterial == null)
+                {
+                    continue;
+                }
 
-                Image image = entry.uiObject.GetComponent<Image>();
-                if (image != null) {
-                    if (!_originalMaterials.ContainsKey(entry.uiObject)) {
-                        _originalMaterials[entry.uiObject] = image.material;
+                Image targetImage = FindButtonImage(entry.uiObject);
+                if (targetImage != null)
+                {
+                    GameObject buttonObject = targetImage.gameObject;
+                    if (!_originalMaterials.ContainsKey(buttonObject))
+                    {
+                        _originalMaterials[buttonObject] = targetImage.material;
                     }
 
-                    image.material = entry.highlightMaterial;
-                    _activeHighlights.Add(entry.uiObject);
+                    targetImage.material = entry.highlightMaterial;
+                    if (!_activeHighlights.Contains(buttonObject))
+                    {
+                        _activeHighlights.Add(buttonObject);
+                    }
                 }
             }
         }
@@ -764,6 +858,34 @@ public class TutorialManager : MonoBehaviour
 
         if (_currentHighlightTargets.Contains(target)) {
             _currentHighlightTargets.Remove(target);
+        }
+    }
+
+    private void ShowArrowUI(TutorialStepData step)
+    {
+        HideArrowUI();
+
+        if (step == null || !step.showArrowUI || string.IsNullOrEmpty(step.arrowID))
+        {
+            return;
+        }
+
+        if (_arrowUILookup.TryGetValue(step.arrowID, out GameObject arrowUI))
+        {
+            _currentArrowUI = arrowUI;
+            if (_currentArrowUI != null)
+            {
+                _currentArrowUI.SetActive(true);
+            }
+        }
+    }
+
+    private void HideArrowUI()
+    {
+        if (_currentArrowUI != null)
+        {
+            _currentArrowUI.SetActive(false);
+            _currentArrowUI = null;
         }
     }
 }

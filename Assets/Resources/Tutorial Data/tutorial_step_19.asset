@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stepIndex: 19
   text: "\uC774\uC81C \uC548\uC815\uC801\uC778 \uC790\uC6D0 \uC218\uAE09\uC774 \uAC00\uB2A5\uD574\uC84C\uAD70\uC694.\n\uB2E4\uC74C\uC73C\uB85C
-    \uCC44\uAD74\uD55C \uC790\uC6D0\uC744 \uC0C1\uC704 \uC790\uC6D0\uC73C\uB85C \uAC00\uACF5\uD574\uBD05\uC2DC\uB2E4!\n\uC0DD\uC0B0
-    \uAC74\uBB3C \uBC84\uD2BC\uC744 \uD074\uB9AD\uD55C \uB2E4\uC74C, \uC81C\uB828\uC18C
-    \uAC74\uBB3C\uC744 \uC120\uD0DD\uD574 \uC124\uCE58\uD574\uBCF4\uC138\uC694."
+    \uCC44\uAD74\uD55C \uC790\uC6D0\uC744 \uC0C1\uC704 \uC790\uC6D0\uC73C\uB85C \uAC00\uACF5\uD574\uBD05\uC2DC\uB2E4!\n<color=#FFC107>\uC0DD\uC0B0
+    \uAC74\uBB3C \uBC84\uD2BC</color>\uC744 \uD074\uB9AD\uD55C \uB2E4\uC74C, <color=#FFC107>\uC81C\uB828\uC18C</color>\uB97C
+    \uC120\uD0DD\uD574 \uC124\uCE58\uD574\uBCF4\uC138\uC694."
   stepType: 10
   duration: 0
   count: 1
@@ -41,3 +41,7 @@ MonoBehaviour:
   highlightTargetIDs:
   - mainControl_processor
   - processor_smelter
+  showArrowUI: 0
+  arrowUIPrefab: {fileID: 0}
+  arrowPosition: {x: 0, y: 0, z: 0}
+  arrowRotation: {x: 0, y: 0, z: 0}

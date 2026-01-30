@@ -16,8 +16,8 @@ MonoBehaviour:
   text: "\uC800\uC7A5\uACE0\uB294 \uCD5C\uB300 \uC800\uC7A5 \uC6A9\uB7C9\uC744 \uB298\uB824\uC8FC\uBA70,
     \uBAA8\uB4E0 \uC800\uC7A5\uACE0\uC5D0 \uC790\uC6D0\uC774 \uAC00\uB4DD\uCC28\uAC8C
     \uB418\uBA74 \uD68D\uB4DD\uD55C \uC790\uC6D0\uC744 \uC800\uC7A5\uD558\uC9C0 \uBABB\uD558\uAC8C
-    \uB418\uAC70\uB098 \uCD94\uAC00\uB85C \uD68D\uB4DD\uD55C \uC790\uC6D0\uC774 \uC18C\uBA78\uB429\uB2C8\uB2E4.\n(\uD654\uBA74\uC744
-    \uD074\uB9AD\uD574\uC11C \uB2E4\uC74C)"
+    \uB418\uAC70\uB098 \uCD94\uAC00\uB85C \uD68D\uB4DD\uD55C \uC790\uC6D0\uC774 \uC18C\uBA78\uB429\uB2C8\uB2E4.\n<color=#DBD1C7>(\uD654\uBA74\uC744
+    \uD074\uB9AD\uD574\uC11C \uB2E4\uC74C)</color>"
   stepType: 0
   duration: 0
   count: 1
@@ -37,4 +37,6 @@ MonoBehaviour:
       Data4: 1624008095
     Path: event:/SFX_UIClick
   enableMaterialHighlight: 0
-  highlightTargets: []
+  highlightTargetIDs: []
+  showArrowUI: 1
+  arrowID: storage_stats

@@ -292,7 +292,12 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
             float productionSpeedMultiplier = GetProductionSpeedMultiplier();
             _currentProductionTime = unitToProduce.productionTime / productionSpeedMultiplier;
 
-            yield return new WaitForSeconds(_currentProductionTime);
+            float elapsedTime = 0f;
+            while (elapsedTime < _currentProductionTime)
+            {
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
 
             _currentProducingUnit = null;
 
