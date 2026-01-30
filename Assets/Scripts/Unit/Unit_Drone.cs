@@ -20,6 +20,7 @@ public class Unit_Drone : UnitBase
     [SerializeField] private float hoverDuration = 1.5f;
     private Coroutine _assignmentCoroutine;
     private Vector3 _baseHoverLocalPosition;
+    private WaitForSeconds _assignmentWait;
 
     private int _carriedAmount;
 
@@ -63,6 +64,7 @@ public class Unit_Drone : UnitBase
             _spriteTransform = _spriteController.transform;
             _baseHoverLocalPosition = _spriteTransform.localPosition;
         }
+        _assignmentWait = CoroutineCache.GetWaitForSeconds(assignmentTime);
     }
 
     private void Update()
@@ -555,7 +557,7 @@ public class Unit_Drone : UnitBase
             _spriteController.UpdateSpriteDirection(moveDir);
         }
 
-        yield return new WaitForSeconds(assignmentTime);
+        yield return _assignmentWait;
 
         HasCheckedIn = true;
 

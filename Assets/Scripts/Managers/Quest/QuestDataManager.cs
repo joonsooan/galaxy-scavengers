@@ -121,10 +121,12 @@ public class QuestDataManager : MonoBehaviour
         }
     }
 
+    private static readonly WaitForSeconds _checkInventoryWait = CoroutineCache.GetWaitForSeconds(0.5f);
+
     private IEnumerator PeriodicallyCheckInventoryResources()
     {
         while (_inventorySystem != null && SceneManager.GetActiveScene().name == "GameScene") {
-            yield return new WaitForSeconds(0.5f);
+            yield return _checkInventoryWait;
             CheckAllActiveQuests();
         }
     }

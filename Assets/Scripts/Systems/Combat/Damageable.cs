@@ -30,6 +30,8 @@ public abstract class Damageable : MonoBehaviour, ICombo
             _sr = GetComponent<SpriteRenderer>();
         }
         _originalColor = _sr.color;
+        _attackAlertWait = CoroutineCache.GetWaitForSeconds(0.5f);
+        _flashWait = CoroutineCache.GetWaitForSeconds(flashDuration);
     }
 
     protected virtual void OnEnable()
@@ -85,6 +87,8 @@ public abstract class Damageable : MonoBehaviour, ICombo
     private float _lastDamageTime;
     private Coroutine _attackAlertTimerCoroutine;
     private const float AttackAlertTimeout = 5f;
+    private WaitForSeconds _attackAlertWait;
+    private WaitForSeconds _flashWait;
     
     private void RegisterAttackAlert()
     {
@@ -117,7 +121,7 @@ public abstract class Damageable : MonoBehaviour, ICombo
     {
         while (_isAttackAlertRegistered)
         {
-            yield return new WaitForSeconds(0.5f);
+            yield return _attackAlertWait;
             
             if (Time.time - _lastDamageTime >= AttackAlertTimeout)
             {
@@ -184,7 +188,7 @@ public abstract class Damageable : MonoBehaviour, ICombo
 
         _sr.color = flashColor;
 
-        yield return new WaitForSeconds(flashDuration);
+        yield return _flashWait;
 
         _sr.color = _originalColor;
     }

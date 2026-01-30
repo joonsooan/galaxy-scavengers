@@ -54,6 +54,12 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
     private Coroutine _particleStartCoroutine;
     private Tween _imageEntryTween;
     private Tween _imageExitTween;
+    private WaitForSeconds _imageEntryDelayWait;
+    private WaitForSecondsRealtime _particleStartDelayWait;
+    private WaitForSecondsRealtime _postInitWaitWait;
+    private WaitForSecondsRealtime _contentFadeOutWait;
+    private WaitForSecondsRealtime _imageExitDelayWait;
+    private WaitForSecondsRealtime _resumeDelayWait;
     
     private float _currentProgress;
     private string _currentStage = "";
@@ -71,6 +77,12 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
     {
         InitializeUI();
         _hasStartedEntryAnimation = false;
+        _imageEntryDelayWait = CoroutineCache.GetWaitForSeconds(imageEntryDelay);
+        _particleStartDelayWait = CoroutineCache.GetWaitForSecondsRealtime(particleStartDelay);
+        _postInitWaitWait = CoroutineCache.GetWaitForSecondsRealtime(postInitWaitDuration);
+        _contentFadeOutWait = CoroutineCache.GetWaitForSecondsRealtime(contentFadeOutDuration);
+        _imageExitDelayWait = CoroutineCache.GetWaitForSecondsRealtime(imageExitDelay);
+        _resumeDelayWait = CoroutineCache.GetWaitForSecondsRealtime(resumeDelay);
     }
 
     private void OnEnable()
@@ -199,7 +211,7 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
     
     private IEnumerator StartEntryAnimationDelayed()
     {
-        yield return new WaitForSeconds(imageEntryDelay);
+        yield return _imageEntryDelayWait;
         StartEntryAnimationInternal();
     }
     
@@ -340,7 +352,7 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
 
     private IEnumerator StartParticlesDelayed()
     {
-        yield return new WaitForSecondsRealtime(particleStartDelay);
+        yield return _particleStartDelayWait;
         if (loadingParticles != null) loadingParticles.Play();
     }
 
@@ -351,7 +363,7 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
             yield return null;
         }
 
-        yield return new WaitForSecondsRealtime(postInitWaitDuration);
+        yield return _postInitWaitWait;
 
         if (!loadingHideSound.IsNull)
         {
@@ -371,7 +383,7 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
             loadingText.DOFade(0f, contentFadeOutDuration).SetUpdate(true);
         }
 
-        yield return new WaitForSecondsRealtime(contentFadeOutDuration);
+        yield return _contentFadeOutWait;
 
         if (loadingImage != null)
         {
@@ -429,14 +441,14 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
         }
         _shakeStrengthTween = null;
 
-        yield return new WaitForSecondsRealtime(imageExitDelay);
+        yield return _imageExitDelayWait;
 
         if (backgroundImage != null)
         {
             yield return backgroundImage.DOFade(0f, fadeOutDuration).SetUpdate(true).WaitForCompletion();
         }
 
-        yield return new WaitForSecondsRealtime(resumeDelay);
+        yield return _resumeDelayWait;
         
         gameObject.SetActive(false); 
     }

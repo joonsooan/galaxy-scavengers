@@ -417,9 +417,11 @@ public class QuestUIHandler : MonoBehaviour
         }
     }
     
+    private static readonly WaitForSeconds _wait01 = CoroutineCache.GetWaitForSeconds(0.1f);
+
     private IEnumerator UpdateIndicatorAfterInit()
     {
-        yield return new WaitForSeconds(0.1f);
+        yield return _wait01;
         RequestIndicatorUpdate();
     }
     

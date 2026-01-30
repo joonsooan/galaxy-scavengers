@@ -28,6 +28,7 @@ public class BgmManager : MonoBehaviour
     private Coroutine _gameBgmCooldownCoroutine;
     private Coroutine _playGameBgmCoroutine;
     private bool _isGameBgmCooldownActive;
+    private WaitForSecondsRealtime _gameBgmCooldownWait;
     public static BgmManager Instance { get; private set; }
 
     private void Awake()
@@ -39,6 +40,11 @@ public class BgmManager : MonoBehaviour
         else {
             Destroy(gameObject);
         }
+    }
+
+    private void Start()
+    {
+        _gameBgmCooldownWait = CoroutineCache.GetWaitForSecondsRealtime(gameBgmCooldownTime);
     }
 
     private void OnDestroy()
@@ -161,7 +167,7 @@ public class BgmManager : MonoBehaviour
             yield return StartCoroutine(FadeOutBgm(gameBgmFadeOutTime));
         }
 
-        yield return new WaitForSecondsRealtime(gameBgmCooldownTime);
+        yield return _gameBgmCooldownWait;
 
         _isGameBgmCooldownActive = false;
 

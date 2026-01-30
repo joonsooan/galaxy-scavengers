@@ -11,6 +11,11 @@ public class SceneLoader : MonoBehaviour
     [Header("Game Scene Loading Settings")]
     [SerializeField] private float gameScenePostFadeDelay = 1f;
 
+    private static readonly WaitForSecondsRealtime _wait01Realtime = CoroutineCache.GetWaitForSecondsRealtime(0.1f);
+    private static readonly WaitForSeconds _wait01 = CoroutineCache.GetWaitForSeconds(0.1f);
+    private WaitForSecondsRealtime _postFadeDelayWait;
+    private float _cachedPostFadeDelay;
+
     private bool _isLoading;
     public static SceneLoader Instance { get; private set; }
 
@@ -23,6 +28,16 @@ public class SceneLoader : MonoBehaviour
         else {
             Destroy(gameObject);
         }
+    }
+
+    private WaitForSecondsRealtime GetPostFadeDelayWait()
+    {
+        if (_postFadeDelayWait == null || Mathf.Abs(_cachedPostFadeDelay - gameScenePostFadeDelay) > 0.001f)
+        {
+            _cachedPostFadeDelay = gameScenePostFadeDelay;
+            _postFadeDelayWait = CoroutineCache.GetWaitForSecondsRealtime(gameScenePostFadeDelay);
+        }
+        return _postFadeDelayWait;
     }
 
     public void LoadTitleScene()
@@ -97,7 +112,7 @@ public class SceneLoader : MonoBehaviour
             yield return null;
         }
 
-        yield return new WaitForSecondsRealtime(0.1f);
+        yield return _wait01Realtime;
 
         asyncLoad.allowSceneActivation = true;
 
@@ -129,7 +144,7 @@ public class SceneLoader : MonoBehaviour
             yield return LoadingUIManager.Instance.HideLoadingScreenWithFadeAsync();
         }
 
-        yield return new WaitForSecondsRealtime(gameScenePostFadeDelay);
+        yield return GetPostFadeDelayWait();
 
         if (BgmManager.Instance != null) {
             BgmManager.Instance.PlayGameBgm();
@@ -162,7 +177,7 @@ public class SceneLoader : MonoBehaviour
             yield return null;
         }
 
-        yield return new WaitForSeconds(0.1f);
+        yield return _wait01;
 
         asyncLoad.allowSceneActivation = true;
 
@@ -170,7 +185,7 @@ public class SceneLoader : MonoBehaviour
             yield return null;
         }
 
-        yield return new WaitForSeconds(0.1f);
+        yield return _wait01;
 
         _isLoading = false;
     }

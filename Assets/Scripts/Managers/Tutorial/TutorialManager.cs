@@ -161,7 +161,7 @@ public class TutorialManager : MonoBehaviour
             }
         }
 
-        yield return new WaitForSeconds(0.5f);
+        yield return CoroutineCache.GetWaitForSeconds(0.5f);
 
         StartTutorial();
     }
@@ -627,6 +627,14 @@ public class TutorialManager : MonoBehaviour
 
         if (_tutorialUI != null) {
             _tutorialUI.HideTutorial();
+        }
+
+        if (QuestManager.Instance != null) {
+            QuestManager.Instance.CompleteQuest(firstQuestId);
+        }
+
+        if (CoreRepairManager.Instance != null) {
+            CoreRepairManager.Instance.InitializeLanding();
         }
     }
 

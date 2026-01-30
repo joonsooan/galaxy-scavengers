@@ -44,6 +44,7 @@ public class Unit_Miner : UnitBase
     private Tween _miningVibrationTween;
     private bool _noResourceAlertActive;
     private WaitForSeconds _searchWait;
+    private WaitForSeconds _resourceImageSpawnWait;
     private Vector3 _spriteBaseLocalPosition;
     private UnitSpriteController _spriteController;
     private Vector3Int _targetMiningCell;
@@ -56,7 +57,8 @@ public class Unit_Miner : UnitBase
     {
         base.Awake();
         _canvas = GameObject.Find(canvasName)?.GetComponent<Canvas>();
-        _searchWait = new WaitForSeconds(resourceSearchInterval);
+        _searchWait = CoroutineCache.GetWaitForSeconds(resourceSearchInterval);
+        _resourceImageSpawnWait = CoroutineCache.GetWaitForSeconds(resourceImageSpawnInterval);
         InitializeCarryAmounts();
     }
 
@@ -691,7 +693,7 @@ public class Unit_Miner : UnitBase
                 }
             }
 
-            yield return new WaitForSeconds(resourceImageSpawnInterval);
+            yield return _resourceImageSpawnWait;
         }
     }
 
@@ -875,7 +877,7 @@ public class Unit_Miner : UnitBase
     {
         _targetResourceNode = target;
 
-        _miningDelay = new WaitForSeconds(target.timeToMinePerUnit);
+        _miningDelay = CoroutineCache.GetWaitForSeconds(target.timeToMinePerUnit);
 
         if (_mineCoroutine == null) {
             _mineCoroutine = StartCoroutine(MineResourceCoroutine());

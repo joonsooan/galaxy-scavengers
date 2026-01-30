@@ -250,7 +250,7 @@ public class EnemySpawner : MonoBehaviour
         int totalHoles = holes.Count;
 
         progress.UpdateProgress(0.0f, "적대적 생명체 탐색 중...");
-        yield return new WaitForSeconds(0.5f);
+        yield return CoroutineCache.GetWaitForSeconds(0.5f);
 
         for (int i = 0; i < totalHoles; i++) {
             Vector2Int holePos = holes[i];

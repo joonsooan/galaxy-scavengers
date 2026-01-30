@@ -336,7 +336,7 @@ public class Unit_Player : UnitBase
         }
 
         if (_mineCoroutine == null) {
-            _miningDelay = new WaitForSeconds(_targetResourceNode.timeToMinePerUnit);
+            _miningDelay = CoroutineCache.GetWaitForSeconds(_targetResourceNode.timeToMinePerUnit);
             _mineCoroutine = StartCoroutine(MineResourceCoroutine());
             currentState = UnitState.Mining;
         }

@@ -17,6 +17,8 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
     private readonly Dictionary<int, int> _targetUnitCounts = new Dictionary<int, int>();
     private AetherConsumptionManager _aetherConsumptionManager;
     private UnitData _currentProducingUnit;
+    private WaitForSeconds _productionWaitWait;
+    private Coroutine _productionCoroutine;
     private float _currentProductionTime;
     private bool _isManualQueueProcessing;
     private bool _isProducing;
@@ -39,6 +41,7 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
                 _progressSlider.gameObject.SetActive(false);
             }
         }
+        _productionWaitWait = CoroutineCache.GetWaitForSeconds(1f);
     }
 
     protected override void OnEnable()
@@ -108,12 +111,12 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
             IsOperational = true;
             if (!_isProducing) {
                 if (_productionQueue.Count > 0) {
-                    StartCoroutine(ProcessProductionQueue());
+                    _productionCoroutine = StartCoroutine(ProcessProductionQueue());
                 }
                 else if (HasPendingTargets()) {
                     UpdateQueueFromTargets();
                     if (_productionQueue.Count > 0) {
-                        StartCoroutine(ProcessProductionQueue());
+                        _productionCoroutine = StartCoroutine(ProcessProductionQueue());
                     }
                 }
             }
@@ -131,8 +134,9 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
 
     private void StopProduction()
     {
-        if (_isProducing) {
-            StopCoroutine(ProcessProductionQueue());
+        if (_isProducing && _productionCoroutine != null) {
+            StopCoroutine(_productionCoroutine);
+            _productionCoroutine = null;
             _isProducing = false;
         }
     }
@@ -144,7 +148,7 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
         if (!_isProducing && HasPendingTargets() && IsOperational) {
             UpdateQueueFromTargets();
             if (_productionQueue.Count > 0) {
-                StartCoroutine(ProcessProductionQueue());
+                _productionCoroutine = StartCoroutine(ProcessProductionQueue());
             }
         }
     }
@@ -198,7 +202,7 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
         OnUnitTargetChanged?.Invoke(unitIndex, currentProduced, targetCount);
 
         if (!_isProducing && _productionQueue.Count > 0 && IsOperational) {
-            StartCoroutine(ProcessProductionQueue());
+            _productionCoroutine = StartCoroutine(ProcessProductionQueue());
         }
     }
 
@@ -281,7 +285,7 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
                     yield break;
                 }
 
-                yield return new WaitForSeconds(1f);
+                yield return _productionWaitWait;
                 continue;
             }
 
@@ -356,6 +360,7 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
         }
 
         _isProducing = false;
+        _productionCoroutine = null;
     }
 
     private bool HasPendingTargets()
