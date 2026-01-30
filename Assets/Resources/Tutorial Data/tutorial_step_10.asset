@@ -19,7 +19,7 @@ MonoBehaviour:
     \uB204\uB974\uBA74 \uC5F0\uC18D\uC73C\uB85C \uC5D0\uB108\uC9C0 \uD0C4\uC744 \uBC1C\uC0AC\uD569\uB2C8\uB2E4."
   stepType: 8
   duration: 0
-  count: 6
+  count: 5
   resourceType: 0
   buildingType: 
   unitType: 
@@ -38,6 +38,4 @@ MonoBehaviour:
   enableMaterialHighlight: 0
   highlightTargetIDs: []
   showArrowUI: 0
-  arrowUIPrefab: {fileID: 0}
-  arrowPosition: {x: 0, y: 0, z: 0}
-  arrowRotation: {x: 0, y: 0, z: 0}
+  arrowID: 

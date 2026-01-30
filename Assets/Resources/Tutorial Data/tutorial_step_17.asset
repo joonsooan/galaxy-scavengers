@@ -36,9 +36,8 @@ MonoBehaviour:
       Data3: -73339495
       Data4: 1624008095
     Path: event:/SFX_UIClick
-  enableMaterialHighlight: 0
-  highlightTargetIDs: []
+  enableMaterialHighlight: 1
+  highlightTargetIDs:
+  - unit_miner
   showArrowUI: 0
-  arrowUIPrefab: {fileID: 0}
-  arrowPosition: {x: 0, y: 0, z: 0}
-  arrowRotation: {x: 0, y: 0, z: 0}
+  arrowID: 
