@@ -149,9 +149,9 @@ MonoBehaviour:
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.2
   currentHealth: 0
-  maxStorageAmount: 2000
+  maxStorageAmount: 5000
   producibleUnits: []
-  baseAetherCapacity: 1000
+  baseAetherCapacity: 2000
 --- !u!114 &1036474081810028208
 MonoBehaviour:
   m_ObjectHideFlags: 0

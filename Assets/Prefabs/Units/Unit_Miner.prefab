@@ -212,9 +212,9 @@ MonoBehaviour:
   unitMovement: {fileID: 4483249089817793867}
   unloadingTime: 1
   mineAmountPerAction: 1
-  maxCarryAmount: 50
+  maxCarryAmount: 25
   resourceSearchInterval: 1
-  maxSearchRadius: 50
+  maxSearchRadius: 100
   mineableResourceTypes: 
   canvasName: ObjectUI Canvas
   resourceImageSpawnInterval: 0.5
