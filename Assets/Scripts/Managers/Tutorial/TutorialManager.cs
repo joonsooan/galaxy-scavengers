@@ -80,6 +80,7 @@ public class TutorialManager : MonoBehaviour
     private RectTransform _rect;
     private int _resourceBlockRevealCount;
     private int _resourceMinedAmount;
+    private int _rightClickCount;
     private int _spacebarPressCount;
 
     private List<TutorialStepData> _tutorialSteps = new List<TutorialStepData>();
@@ -318,6 +319,7 @@ public class TutorialManager : MonoBehaviour
         _itemProducedCount = 0;
         _resourceBlockRevealCount = 0;
         _mineableTypesChangedCount = 0;
+        _rightClickCount = 0;
         _lastMouseWheelValue = Input.mouseScrollDelta.y;
         if (GameManager.Instance != null) {
             _lastPausedState = GameManager.Instance.IsPaused;
@@ -338,7 +340,13 @@ public class TutorialManager : MonoBehaviour
 
             case TutorialStepType.RightClick:
                 if (Input.GetMouseButtonUp(1) && IsClickingGameWorld()) {
-                    conditionMet = true;
+                    _rightClickCount++;
+                    if (_tutorialUI != null && step.showProgressBar) {
+                        _tutorialUI.UpdateProgress((float)_rightClickCount / step.count);
+                    }
+                    if (_rightClickCount >= step.count) {
+                        conditionMet = true;
+                    }
                 }
                 break;
 
@@ -888,4 +896,5 @@ public class TutorialManager : MonoBehaviour
             _currentArrowUI = null;
         }
     }
+
 }

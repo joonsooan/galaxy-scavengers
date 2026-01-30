@@ -33,6 +33,9 @@ public class Unit_Player : UnitBase
     private UnitSpriteController _spriteController;
     private bool _isAttacking;
     private float _attackStateEndTime;
+    private Vector2 _lastFireDirection;
+    private float _lookAtFireDirectionEndTime;
+    private bool _isLookingAtFireDirection;
 
     private ResourceNode _targetResourceNode;
 
@@ -136,7 +139,13 @@ public class Unit_Player : UnitBase
                 }
             }
         }
+        else if (_isLookingAtFireDirection && Time.time < _lookAtFireDirectionEndTime) {
+            if (_spriteController != null && _lastFireDirection.sqrMagnitude > 0.01f) {
+                _spriteController.UpdateSpriteDirection(_lastFireDirection);
+            }
+        }
         else if (_spriteController != null && playerMovement != null) {
+            _isLookingAtFireDirection = false;
             Vector2 moveDir = playerMovement.GetMoveDirection();
             if (moveDir.sqrMagnitude > 0.01f) {
                 _spriteController.ClearTarget();
@@ -467,7 +476,13 @@ public class Unit_Player : UnitBase
         Vector2 fireDirection = (targetPosition - transform.position).normalized;
         Vector3 spawnPosition = transform.position + (Vector3)fireDirection * 0.5f;
 
-        GameObject bulletObj = ObjectPooler.Instance.SpawnFromPool("PlayerBullet", spawnPosition, Quaternion.identity);
+        Quaternion bulletRotation = Quaternion.identity;
+        if (fireDirection.sqrMagnitude > 0.01f) {
+            float angle = Mathf.Atan2(fireDirection.y, fireDirection.x) * Mathf.Rad2Deg;
+            bulletRotation = Quaternion.AngleAxis(angle, Vector3.forward);
+        }
+
+        GameObject bulletObj = ObjectPooler.Instance.SpawnFromPool("PlayerBullet", spawnPosition, bulletRotation);
 
         if (bulletObj != null) {
             Player_Bullet bulletScript = bulletObj.GetComponent<Player_Bullet>();
@@ -484,6 +499,14 @@ public class Unit_Player : UnitBase
         _isAttacking = true;
         _attackStateEndTime = Time.time + fireInterval * 0.5f;
         currentState = UnitState.Attacking;
+
+        _lastFireDirection = fireDirection;
+        _isLookingAtFireDirection = true;
+        _lookAtFireDirectionEndTime = Time.time + 0.1f;
+
+        if (_spriteController != null) {
+            _spriteController.UpdateSpriteDirection(fireDirection);
+        }
 
         if (TutorialManager.Instance != null) {
             TutorialManager.Instance.OnBulletFired();

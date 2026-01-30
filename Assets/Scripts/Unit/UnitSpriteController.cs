@@ -88,10 +88,20 @@ public class UnitSpriteController : MonoBehaviour
         float x = _lastDirection.x;
         float y = _lastDirection.y;
 
-        if (Mathf.Abs(x) > 0.3f && Mathf.Abs(y) > 0.3f) {
-            y = 0f;
+        float absX = Mathf.Abs(x);
+        float absY = Mathf.Abs(y);
+
+        if (absX > 0.3f && absY > 0.3f) {
+            if (absX > absY) {
+                y = 0f;
+                x = x > 0 ? 1f : -1f;
+            }
+            else {
+                x = 0f;
+                y = y > 0 ? 1f : -1f;
+            }
         }
-        else if (Mathf.Abs(y) > Mathf.Abs(x)) {
+        else if (absY > absX) {
             x = 0f;
             y = y > 0 ? 1f : -1f;
         }

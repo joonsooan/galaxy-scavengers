@@ -267,8 +267,8 @@ TextureImporter:
         y: 0
         width: 25
         height: 16
-      alignment: 9
-      pivot: {x: 0.5, y: 0.0625}
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -289,8 +289,8 @@ TextureImporter:
         y: 0
         width: 25
         height: 16
-      alignment: 9
-      pivot: {x: 0.5, y: 0.0625}
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -299,6 +299,138 @@ TextureImporter:
       bones: []
       spriteID: 45dd23bb8803adf4999073ffaac30610
       internalID: -1309992471037224804
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-idle-left_2
+      rect:
+        serializedVersion: 2
+        x: 52
+        y: 0
+        width: 25
+        height: 16
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 490209f1eea33c440978d8fc5458ce72
+      internalID: 293143055
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-idle-left_3
+      rect:
+        serializedVersion: 2
+        x: 78
+        y: 0
+        width: 25
+        height: 16
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8575fd23f6b1bcc409c2b60407dc5a02
+      internalID: -1789215985
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-idle-left_4
+      rect:
+        serializedVersion: 2
+        x: 104
+        y: 0
+        width: 25
+        height: 16
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 13b2ca84420eadc4a91f3a9dd6b5bee3
+      internalID: -1196573570
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-idle-left_5
+      rect:
+        serializedVersion: 2
+        x: 130
+        y: 0
+        width: 25
+        height: 16
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 05c46c703a5277846bfdf97fc0fb6461
+      internalID: 802983713
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-idle-left_6
+      rect:
+        serializedVersion: 2
+        x: 156
+        y: 0
+        width: 25
+        height: 16
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e6ab11480c531d848a0f363acf85d784
+      internalID: -1471084670
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-idle-left_7
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 0
+        width: 25
+        height: 16
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f9eca48aaaaf2b6409d7b538f2105f27
+      internalID: -1091236898
       vertices: []
       indices: 
       edges: []
@@ -319,6 +451,12 @@ TextureImporter:
     nameFileIdTable:
       enemy-scuttler-idle-left_0: -9002351139726985340
       enemy-scuttler-idle-left_1: -1309992471037224804
+      enemy-scuttler-idle-left_2: 293143055
+      enemy-scuttler-idle-left_3: -1789215985
+      enemy-scuttler-idle-left_4: -1196573570
+      enemy-scuttler-idle-left_5: 802983713
+      enemy-scuttler-idle-left_6: -1471084670
+      enemy-scuttler-idle-left_7: -1091236898
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -28,6 +28,12 @@ public class Player_Bullet : MonoBehaviour
         _damage = damage;
         _direction = direction.normalized;
         
+        if (_direction.sqrMagnitude > 0.01f)
+        {
+            float angle = Mathf.Atan2(_direction.y, _direction.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+        }
+        
         if (_rb != null)
         {
             _rb.linearVelocity = _direction * speed;

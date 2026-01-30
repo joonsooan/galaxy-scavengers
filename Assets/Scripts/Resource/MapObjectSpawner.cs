@@ -40,6 +40,8 @@ public class MapObjectSpawner : MonoBehaviour
     [SerializeField] private Transform parentTransform;
     [SerializeField] private MapGenerator mapGenerator;
     [SerializeField] private Tilemap resourceTilemap;
+
+    public Transform ParentTransform => parentTransform;
     
     private void Awake()
     {
@@ -56,7 +58,7 @@ public class MapObjectSpawner : MonoBehaviour
     public static MapObjectSpawner Instance => _instance;
     
     [Header("Resource Settings")]
-    [SerializeField] private List<ResourceSpawnSettings> resourceSettings = new ();
+    [SerializeField] public List<ResourceSpawnSettings> resourceSettings = new ();
     
     [Header("Concentric Circle Division")]
     [Range(0, 20)]
@@ -181,6 +183,15 @@ public class MapObjectSpawner : MonoBehaviour
             
             resourceCircles.AddRange(startingAreaCircles);
             
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive())
+            {
+                ResourceCircle tutorialFerriteCircle = GenerateTutorialFerriteCircle();
+                if (tutorialFerriteCircle.center != Vector2Int.zero)
+                {
+                    resourceCircles.Add(tutorialFerriteCircle);
+                }
+            }
+            
             _cachedResourceCircles = new List<ResourceCircle>(resourceCircles);
             
             yield return StartCoroutine(SpawnResourcesInCirclesAsync(resourceCircles, progress));
@@ -291,10 +302,15 @@ public class MapObjectSpawner : MonoBehaviour
         }
     }
     
-    private void SpawnResourcesInCircles(List<ResourceCircle> resourceCircles)
+    public void SpawnResourcesInCircles(List<ResourceCircle> resourceCircles)
     {
-        List<float> divisionRadii = _circleGenerator.GetDivisionRadii();
-        List<float> sectorPowerValues = _circleGenerator.GetSectorPowerValues();
+        if (_tileManager == null)
+        {
+            _tileManager = new ResourceTileManager(resourceTilemap, _resourceTilePositions, resourceSettings);
+        }
+        
+        List<float> divisionRadii = _circleGenerator != null ? _circleGenerator.GetDivisionRadii() : new List<float>();
+        List<float> sectorPowerValues = _circleGenerator != null ? _circleGenerator.GetSectorPowerValues() : new List<float>();
         Vector2Int mapCenter = Vector2Int.zero;
         
         foreach (var circle in resourceCircles)
@@ -313,8 +329,12 @@ public class MapObjectSpawner : MonoBehaviour
                 }
             }
             
-            if (sectorIndex >= sectorPowerValues.Count) sectorIndex = sectorPowerValues.Count - 1;
-            float powerValue = sectorPowerValues[sectorIndex];
+            float powerValue = 1f;
+            if (sectorPowerValues.Count > 0)
+            {
+                if (sectorIndex >= sectorPowerValues.Count) sectorIndex = sectorPowerValues.Count - 1;
+                powerValue = sectorPowerValues[sectorIndex];
+            }
             
             int richness = Mathf.RoundToInt(settings.baseRichness * powerValue);
             
@@ -351,6 +371,12 @@ public class MapObjectSpawner : MonoBehaviour
             {
                 SpawnResourceAtPosition(cellPos, settings, richness);
             }
+        }
+        
+        RegisterBufferedResources();
+        if (_tileManager != null)
+        {
+            _tileManager.InitializeRuleTiles();
         }
     }
     
@@ -498,5 +524,30 @@ public class MapObjectSpawner : MonoBehaviour
     public void UpdateNearbyRuleTiles(Vector3Int minedPosition)
     {
         _tileManager?.UpdateNearbyRuleTiles(minedPosition);
+    }
+    
+    private ResourceCircle GenerateTutorialFerriteCircle()
+    {
+        if (BuildingManager.Instance == null || grid == null)
+        {
+            return new ResourceCircle { center = Vector2Int.zero, radius = 0f, resourceType = ResourceType.Ferrite };
+        }
+        
+        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
+        if (mainStructure == null)
+        {
+            return new ResourceCircle { center = Vector2Int.zero, radius = 0f, resourceType = ResourceType.Ferrite };
+        }
+        
+        Vector3Int mainStructureCell = grid.WorldToCell(mainStructure.transform.position);
+        Vector2Int center = new Vector2Int(mainStructureCell.x + 3, mainStructureCell.y + 3);
+        float radius = 3f;
+        
+        return new ResourceCircle
+        {
+            center = center,
+            radius = radius,
+            resourceType = ResourceType.Ferrite
+        };
     }
 }
