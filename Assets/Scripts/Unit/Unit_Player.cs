@@ -31,6 +31,8 @@ public class Unit_Player : UnitBase
     private Coroutine _mineCoroutine;
     private WaitForSeconds _miningDelay;
     private UnitSpriteController _spriteController;
+    private bool _isAttacking;
+    private float _attackStateEndTime;
 
     private ResourceNode _targetResourceNode;
 
@@ -62,6 +64,8 @@ public class Unit_Player : UnitBase
     {
         HandleInput();
         CheckMiningRange();
+        UpdateUnitState();
+        UpdateAnimationState();
         UpdateSpriteDirection();
         UpdateLaser();
         UpdateParticlePosition();
@@ -82,6 +86,44 @@ public class Unit_Player : UnitBase
         Gizmos.DrawWireSphere(transform.position, interactionRange);
     }
 
+    private void UpdateUnitState()
+    {
+        if (currentState == UnitState.Mining) {
+            return;
+        }
+
+        if (_isAttacking && Time.time >= _attackStateEndTime) {
+            _isAttacking = false;
+        }
+
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
+        bool isMoving = rb != null && rb.linearVelocity.sqrMagnitude > 0.01f;
+
+        if (isMoving && currentState != UnitState.Mining && !_isAttacking) {
+            currentState = UnitState.Moving;
+        }
+        else if (!isMoving && currentState != UnitState.Mining && !_isAttacking) {
+            currentState = UnitState.Idle;
+        }
+    }
+
+    private void UpdateAnimationState()
+    {
+        if (_spriteController == null) {
+            return;
+        }
+
+        bool isMining = currentState == UnitState.Mining;
+        bool isMoving = currentState == UnitState.Moving;
+        bool isAttacking = _isAttacking;
+
+        _spriteController.UpdateAnimationState(
+            currentState,
+            isMining: isMining,
+            isAttacking: isAttacking
+        );
+    }
+
     private void UpdateSpriteDirection()
     {
         if (currentState == UnitState.Mining && _targetResourceNode != null) {
@@ -99,6 +141,15 @@ public class Unit_Player : UnitBase
             if (moveDir.sqrMagnitude > 0.01f) {
                 _spriteController.ClearTarget();
                 _spriteController.UpdateSpriteDirection(moveDir);
+            }
+        }
+        else if (_isAttacking && _spriteController != null) {
+            Vector3 mouseWorldPos = GetMouseWorldPosition();
+            if (mouseWorldPos != Vector3.zero) {
+                Vector2 direction = (mouseWorldPos - transform.position).normalized;
+                if (direction.sqrMagnitude > 0.01f) {
+                    _spriteController.UpdateSpriteDirection(direction);
+                }
             }
         }
     }
@@ -430,6 +481,9 @@ public class Unit_Player : UnitBase
         }
 
         _lastFireTime = Time.time;
+        _isAttacking = true;
+        _attackStateEndTime = Time.time + fireInterval * 0.5f;
+        currentState = UnitState.Attacking;
 
         if (TutorialManager.Instance != null) {
             TutorialManager.Instance.OnBulletFired();

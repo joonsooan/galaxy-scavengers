@@ -13,6 +13,7 @@ public class UnitSpriteController : MonoBehaviour
     private static readonly int IsConstructingHash = Animator.StringToHash("IsConstructing");
     private static readonly int IsProcessingHash = Animator.StringToHash("IsProcessing");
     private static readonly int IsPatrollingHash = Animator.StringToHash("IsPatrolling");
+    private static readonly int IsAttackingHash = Animator.StringToHash("IsAttacking");
     private static readonly int CargoFillHash = Animator.StringToHash("CargoFill");
 
     private Animator _animator;
@@ -109,7 +110,8 @@ public class UnitSpriteController : MonoBehaviour
         bool? isMining = null,
         bool? isConstructing = null,
         bool? isProcessing = null,
-        bool? isPatrolling = null
+        bool? isPatrolling = null,
+        bool? isAttacking = null
     )
     {
         bool isMoving = currentState == UnitBase.UnitState.Moving || currentState == UnitBase.UnitState.ReturningToStorage;
@@ -134,6 +136,10 @@ public class UnitSpriteController : MonoBehaviour
 
         if (isPatrolling.HasValue) {
             _animator.SetBool(IsPatrollingHash, isPatrolling.Value);
+        }
+
+        if (isAttacking.HasValue) {
+            _animator.SetBool(IsAttackingHash, isAttacking.Value);
         }
     }
 

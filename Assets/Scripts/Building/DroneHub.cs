@@ -315,15 +315,6 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
                 yield break;
             }
 
-            int unitIndex = FindUnitIndex(unitToProduce);
-            if (unitIndex >= 0) {
-                _producedUnitCounts.TryGetValue(unitIndex, out int currentCount);
-                _producedUnitCounts[unitIndex] = currentCount + 1;
-
-                int targetCount = GetTargetUnitCount(unitIndex);
-                OnUnitTargetChanged?.Invoke(unitIndex, currentCount + 1, targetCount);
-            }
-
             if (UnitManager.Instance != null && !UnitManager.Instance.CanSpawnUnit())
             {
                 _productionQueue.Enqueue(unitToProduce);
@@ -340,6 +331,15 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
                 {
                     NoiseManager.Instance.RegisterUnit(unitBase);
                 }
+            }
+
+            int unitIndex = FindUnitIndex(unitToProduce);
+            if (unitIndex >= 0) {
+                _producedUnitCounts.TryGetValue(unitIndex, out int currentCount);
+                _producedUnitCounts[unitIndex] = currentCount + 1;
+
+                int targetCount = GetTargetUnitCount(unitIndex);
+                OnUnitTargetChanged?.Invoke(unitIndex, currentCount + 1, targetCount);
             }
 
             OnUnitProduced?.Invoke(unitToProduce);
