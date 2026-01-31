@@ -5306,7 +5306,6 @@ MonoBehaviour:
   autoRegenerateDecorationsInPlayMode: 0
   useMapNoiseForDecorations: 1
   densityScale: 10
-  typeScale: 20
   densityOffset: {x: 0, y: 0}
   typeOffset: {x: 0, y: 0}
   densityThreshold: 0.5
@@ -21423,7 +21422,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 662.501
+  orthographic size: 11.25
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -49401,7 +49400,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a53fc9225eeea914da95e9559e53c88a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  firstQuestId: 1
+  firstQuestId: 0
   tutorialUI: {fileID: 293458368}
   tutorialStepDataList:
   - {fileID: 11400000, guid: 41b7abbe9b9322141a3b61981fb2b909, type: 2}
