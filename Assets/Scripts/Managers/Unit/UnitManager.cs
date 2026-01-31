@@ -140,4 +140,22 @@ public class UnitManager : MonoBehaviour
         _allyUnits.Clear();
         _enemyUnits.Clear();
     }
+
+    public List<UnitBase> GetAllyUnitsInArea(Vector3 center, float radius)
+    {
+        List<UnitBase> results = new List<UnitBase>();
+        float radiusSquared = radius * radius;
+
+        foreach (UnitBase unit in _allyUnits)
+        {
+            if (unit == null) continue;
+            float distSquared = (center - unit.transform.position).sqrMagnitude;
+            if (distSquared <= radiusSquared)
+            {
+                results.Add(unit);
+            }
+        }
+
+        return results;
+    }
 }

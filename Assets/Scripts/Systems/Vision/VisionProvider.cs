@@ -21,6 +21,10 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
     private CircleCollider2D _visionCollider;
     private float _updateInterval = 0.1f;
     private float _lastUpdateTime;
+    private float _staticUpdateInterval = 0.5f;
+    private float _dynamicUpdateInterval = 0.1f;
+    private float _movementThreshold = 0.01f;
+    private Vector3 _previousFramePosition;
 
     private void Awake()
     {
@@ -56,6 +60,10 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
         if (_grid == null || FogOfWarManager.Instance == null) return;
 
         float currentTime = Time.time;
+        bool isMoving = Vector3.SqrMagnitude(transform.position - _previousFramePosition) > _movementThreshold * _movementThreshold;
+        _updateInterval = isMoving ? _dynamicUpdateInterval : _staticUpdateInterval;
+        _previousFramePosition = transform.position;
+
         if (currentTime - _lastUpdateTime < _updateInterval) return;
 
         bool positionChanged = Vector3.SqrMagnitude(transform.position - _lastPosition) > 0.1f;
@@ -80,6 +88,7 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
         UpdateColliderRadius();
         _lastPosition = transform.position;
         _lastVisionRange = visionRange;
+        _previousFramePosition = transform.position;
     }
 
     private void OnDisable()
@@ -127,6 +136,8 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
         GetTilesInCollider(_tempNewTiles);
         
         _tempEnteredTiles.Clear();
+        _tempExitedTiles.Clear();
+
         foreach (Vector3Int tile in _tempNewTiles)
         {
             if (!_currentAffectedTiles.Contains(tile))
@@ -135,7 +146,6 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
             }
         }
 
-        _tempExitedTiles.Clear();
         foreach (Vector3Int tile in _currentAffectedTiles)
         {
             if (!_tempNewTiles.Contains(tile))
@@ -149,10 +159,7 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
         }
 
         _currentAffectedTiles.Clear();
-        foreach (Vector3Int tile in _tempNewTiles)
-        {
-            _currentAffectedTiles.Add(tile);
-        }
+        _currentAffectedTiles.UnionWith(_tempNewTiles);
     }
 
     private void GetTilesInCollider(HashSet<Vector3Int> outputTiles)
@@ -170,7 +177,13 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
         Vector3Int centerCell = _grid.WorldToCell(center);
 
         for (int x = -rangeInCells; x <= rangeInCells; x++) {
+            int xSquared = x * x;
             for (int y = -rangeInCells; y <= rangeInCells; y++) {
+                int ySquared = y * y;
+                if (xSquared + ySquared > rangeInCells * rangeInCells + rangeInCells) {
+                    continue;
+                }
+
                 Vector3Int cell = centerCell + new Vector3Int(x, y, 0);
                 Vector3 cellWorldPos = _grid.GetCellCenterWorld(cell);
                 float distanceSquared = (center - cellWorldPos).sqrMagnitude;
@@ -185,9 +198,6 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
                         outputTiles.Add(cell);
                     }
                     else {
-                        if (!HasLineOfSight(centerCell, cell)) {
-                            continue;
-                        }
                         outputTiles.Add(cell);
                     }
                 }
@@ -198,45 +208,6 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
         }
     }
 
-    private bool HasLineOfSight(Vector3Int origin, Vector3Int target)
-    {
-        if (_mapGenerator == null) {
-            return true;
-        }
-
-        int x0 = origin.x;
-        int y0 = origin.y;
-        int x1 = target.x;
-        int y1 = target.y;
-
-        int dx = Mathf.Abs(x1 - x0);
-        int dy = Mathf.Abs(y1 - y0);
-
-        int sx = x0 < x1 ? 1 : -1;
-        int sy = y0 < y1 ? 1 : -1;
-
-        int err = dx - dy;
-
-        Vector3Int current = origin;
-
-        while (true) {
-            if (current.x == x1 && current.y == y1) {
-                break;
-            }
-
-            int e2 = 2 * err;
-            if (e2 > -dy) {
-                err -= dy;
-                current.x += sx;
-            }
-            if (e2 < dx) {
-                err += dx;
-                current.y += sy;
-            }
-        }
-
-        return true;
-    }
 
     private void RegisterWithFogOfWar()
     {
