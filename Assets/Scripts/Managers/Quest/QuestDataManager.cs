@@ -16,6 +16,7 @@ public enum QuestState
 
 public class QuestDataManager : MonoBehaviour
 {
+    private static readonly WaitForSeconds _checkInventoryWait = CoroutineCache.GetWaitForSeconds(0.5f);
     [Header("Quest List")]
     [SerializeField] private List<QuestData> allQuests = new List<QuestData>();
     private readonly HashSet<int> _activeQuestIds = new HashSet<int>();
@@ -121,8 +122,6 @@ public class QuestDataManager : MonoBehaviour
         }
     }
 
-    private static readonly WaitForSeconds _checkInventoryWait = CoroutineCache.GetWaitForSeconds(0.5f);
-
     private IEnumerator PeriodicallyCheckInventoryResources()
     {
         while (_inventorySystem != null && SceneManager.GetActiveScene().name == "GameScene") {
@@ -193,13 +192,11 @@ public class QuestDataManager : MonoBehaviour
     {
         if (questData == null) return;
 
-        if (!allQuests.Contains(questData))
-        {
+        if (!allQuests.Contains(questData)) {
             allQuests.Add(questData);
         }
 
-        if (!_questDataDict.ContainsKey(questData.questId))
-        {
+        if (!_questDataDict.ContainsKey(questData.questId)) {
             _questDataDict[questData.questId] = questData;
             _questStates[questData.questId] = QuestState.Available;
         }
@@ -446,10 +443,8 @@ public class QuestDataManager : MonoBehaviour
         _completedQuestIds.Clear();
         _activeQuestIds.Clear();
 
-        // Clear saved progress from PlayerPrefs
         ClearSavedQuestProgress();
 
-        // Reset quest check data progress
         foreach (QuestData quest in _questDataDict.Values) {
             if (quest == null) continue;
 
@@ -465,20 +460,17 @@ public class QuestDataManager : MonoBehaviour
             questTracker.ResetAllQuestProgress();
         }
 
-        // Clear quest progress from all QuestUIHandler instances (there may be multiple - one for each UI provider)
         QuestUIHandler[] questUIHandlers = FindObjectsByType<QuestUIHandler>(FindObjectsSortMode.None);
         foreach (QuestUIHandler questUIHandler in questUIHandlers) {
             if (questUIHandler != null) {
                 questUIHandler.ClearQuestProgress();
+                questUIHandler.RefreshQuestUI();
             }
         }
 
-        // Re-initialize all quests to their default states
         foreach (QuestData quest in _questDataDict.Values) {
             if (quest == null) continue;
 
-            // Check if quest has prerequisites
-            // -1 means no prerequisites (first quest, always available)
             bool hasPrerequisites = HasRealPrerequisites(quest.previousQuestIds);
 
             if (!hasPrerequisites) {
@@ -489,9 +481,15 @@ public class QuestDataManager : MonoBehaviour
             }
         }
 
-        // Notify all quests that their state changed
         foreach (int questId in _questStates.Keys) {
             OnQuestStateChanged?.Invoke(questId);
+        }
+
+        SaveQuestProgress();
+
+        TutorialManager tutorialManager = FindFirstObjectByType<TutorialManager>();
+        if (tutorialManager != null) {
+            tutorialManager.OnQuestProgressReset();
         }
     }
 
@@ -595,6 +593,14 @@ public class QuestDataManager : MonoBehaviour
 
         if (PlayerPrefs.HasKey("QuestCompletedIds")) {
             PlayerPrefs.DeleteKey("QuestCompletedIds");
+        }
+
+        if (PlayerPrefs.HasKey("QuestViewedIds")) {
+            PlayerPrefs.DeleteKey("QuestViewedIds");
+        }
+
+        if (PlayerPrefs.HasKey("QuestFinishedIds")) {
+            PlayerPrefs.DeleteKey("QuestFinishedIds");
         }
 
         PlayerPrefs.Save();

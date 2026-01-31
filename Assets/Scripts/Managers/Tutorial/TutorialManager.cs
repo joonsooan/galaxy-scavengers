@@ -661,6 +661,32 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    public void OnQuestProgressReset()
+    {
+        if (_isTutorialActive) {
+            _isTutorialActive = false;
+            _isWaitingForCondition = false;
+            StopAllCoroutines();
+
+            if (DayNightCycleManager.Instance != null) {
+                DayNightCycleManager.Instance.SetAutoAdvanceTime(true);
+            }
+
+            EnableAllEnemyUnits();
+            ShowAllUIPanels();
+            HideArrowUI();
+
+            if (_tutorialUI != null) {
+                _tutorialUI.HideTutorial();
+            }
+        }
+
+        if (ShouldStartTutorial()) {
+            InitializeTutorialSteps();
+            StartCoroutine(WaitForGameInitialization());
+        }
+    }
+
     public void RegisterSpawnedEnemy(EnemyUnitBase enemyUnit)
     {
         if (enemyUnit == null) return;

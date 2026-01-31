@@ -308,7 +308,6 @@ public class QuestUIHandler : MonoBehaviour
         
         List<QuestData> currentQuests = QuestDataManager.Instance.GetCurrentQuestsByProvider(questProvider);
         
-        // Filter out finished quests - this must happen before checking if list is empty
         if (currentQuests != null)
         {
             currentQuests = currentQuests.Where(quest => !_finishedQuestIds.Contains(quest.questId)).ToList();
@@ -321,7 +320,6 @@ public class QuestUIHandler : MonoBehaviour
         
         foreach (QuestData quest in currentQuests)
         {
-            // Double-check: never create cells for finished quests
             if (_finishedQuestIds.Contains(quest.questId))
             {
                 continue;
@@ -487,5 +485,20 @@ public class QuestUIHandler : MonoBehaviour
         }
         
         PlayerPrefs.Save();
+        
+        if (_isQuestMode)
+        {
+            LoadQuestCells();
+        }
+    }
+    
+    public void RefreshQuestUI()
+    {
+        if (_isQuestMode)
+        {
+            LoadQuestCells();
+        }
+        
+        RequestIndicatorUpdate();
     }
 }
