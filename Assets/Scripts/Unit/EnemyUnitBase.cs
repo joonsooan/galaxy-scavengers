@@ -10,6 +10,8 @@ public abstract class EnemyUnitBase : UnitBase
     private const float TerritoryCheckIntervalIdle = 1.0f;
     private const float TerritoryCheckIntervalWarning = 0.3f;
     private const float PathRecomputeDistance = 2.0f;
+    private const float PathUpdateInterval = 0.25f;
+    private const float MinTargetMoveThreshold = 0.5f;
 
     [Header("Zones")]
     [SerializeField] protected float warningStatePersist = 5f;
@@ -27,21 +29,24 @@ public abstract class EnemyUnitBase : UnitBase
 
     [Header("References")]
     [SerializeField] protected UnitMovement unitMovement;
-    private Coroutine _attackCoroutine;
     private Coroutine _aiUpdateCoroutine;
+    private WaitForSeconds _aiUpdateWait;
+    private Coroutine _attackCoroutine;
     private CircleCollider2D _attackRangeCollider;
     private float _currentRoamInterval;
     private float _homeRadius;
     private bool _isInInfiniteAttackState;
-    private WaitForSeconds _aiUpdateWait;
 
     private bool _lastActionWasMove;
     private float _lastInfiniteAttackTargetUpdateTime;
+    private Vector3 _lastKnownTargetPos;
     private float _lastMoveToTargetTime;
     private Vector3 _lastPathfindingTargetPos;
     private Vector3 _lastTargetPos;
     private float _lastTerritoryCheckTime;
     private float _outOfTerritoryTimer;
+
+    private float _pathUpdateTimer;
     private float _roamTimer;
     private Vector3 _spawnPosition;
     private UnitSpriteController _spriteController;
@@ -62,20 +67,37 @@ public abstract class EnemyUnitBase : UnitBase
         _spawnPosition = Vector3.zero;
         aiState = AIState.Idle;
         _isInInfiniteAttackState = false;
+        _aiUpdateWait = CoroutineCache.GetWaitForSeconds(0.1f);
     }
 
     protected void Start()
     {
         SetNewRoamInterval();
         _spriteController = GetComponentInChildren<UnitSpriteController>();
-        _aiUpdateWait = CoroutineCache.GetWaitForSeconds(0.1f);
-
-        _aiUpdateCoroutine = StartCoroutine(AIUpdateRoutine());
     }
 
     private void LateUpdate()
     {
         UpdateAnimationState();
+    }
+
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+
+        if (_aiUpdateWait != null) {
+            _aiUpdateCoroutine = StartCoroutine(AIUpdateRoutine());
+        }
+    }
+
+    protected override void OnDisable()
+    {
+        if (_aiUpdateCoroutine != null) {
+            StopCoroutine(_aiUpdateCoroutine);
+            _aiUpdateCoroutine = null;
+        }
+
+        base.OnDisable();
     }
 
     protected virtual void OnDrawGizmosSelected()
@@ -610,6 +632,16 @@ public abstract class EnemyUnitBase : UnitBase
         else {
             return;
         }
+
+        if (Time.time < _pathUpdateTimer) return;
+
+        float distSq = (targetPos - _lastKnownTargetPos).sqrMagnitude;
+        if (distSq < MinTargetMoveThreshold * MinTargetMoveThreshold && unitMovement.IsMoving) {
+            return;
+        }
+
+        _pathUpdateTimer = Time.time + PathUpdateInterval;
+        _lastKnownTargetPos = targetPos;
 
         float pathRecomputeDistanceSquared = PathRecomputeDistance * PathRecomputeDistance;
         float distanceFromLastPathfindingSquared = (targetPos - _lastPathfindingTargetPos).sqrMagnitude;
