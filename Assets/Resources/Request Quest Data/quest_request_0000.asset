@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 898dc1efeda45414a8149ac16673e46f, type: 3}
+  m_Name: quest_request_0000
+  m_EditorClassIdentifier: 
+  questId: 1000
+  questType: 1
+  questProvider: 0
+  previousQuestIds: 
+  questName: Reqeust Quest 1
+  questInfo: "\uD14C\uC2A4\uD2B8\uC6A9 \uC815\uBCF4"
+  requiredResources:
+  - resourceType: 0
+    amount: 20
+  - resourceType: 1
+    amount: 20
+  questCheckRequirements: []
+  questFinishReward:
+    resourceRewards: []
+    moduleRewards: []
+    creditReward: 50
+    unlockedBuildings: []
+    newUnits: []

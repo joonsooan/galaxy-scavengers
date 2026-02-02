@@ -91,6 +91,8 @@ public class TutorialManager : MonoBehaviour
 
     private float _wasdInputTime;
     public static TutorialManager Instance { get; private set; }
+    
+    public static event Action OnTutorialEnded;
 
     private void Awake()
     {
@@ -637,6 +639,8 @@ public class TutorialManager : MonoBehaviour
         if (CoreRepairManager.Instance != null) {
             CoreRepairManager.Instance.InitializeLanding();
         }
+        
+        OnTutorialEnded?.Invoke();
     }
 
     public void SkipAllTutorials()
@@ -660,6 +664,12 @@ public class TutorialManager : MonoBehaviour
         if (QuestManager.Instance != null) {
             QuestManager.Instance.CompleteQuest(firstQuestId);
         }
+        
+        if (CoreRepairManager.Instance != null) {
+            CoreRepairManager.Instance.InitializeLanding();
+        }
+        
+        OnTutorialEnded?.Invoke();
     }
 
     public void OnQuestProgressReset()

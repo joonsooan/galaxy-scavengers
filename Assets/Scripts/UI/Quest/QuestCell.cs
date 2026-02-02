@@ -9,10 +9,12 @@ public class QuestCell : MonoBehaviour
     [SerializeField] private TMP_Text questIdText;
     [SerializeField] private Button cellButton;
     [SerializeField] private GameObject configureIcon;
+    [SerializeField] private GameObject notifierIcon;
 
     private QuestData _questData;
     private QuestDetailPanel _questDetailPanel;
     private QuestUIHandler _questUIHandler;
+    private GameSceneQuestUIManager _gameSceneQuestUIManager;
     private bool _isNew;
 
     private void Awake()
@@ -72,11 +74,12 @@ public class QuestCell : MonoBehaviour
         UpdateConfigureIcon(_isNew, _questData);
     }
 
-    public void Initialize(QuestData questData, QuestDetailPanel questDetailPanel, bool isNew, QuestUIHandler questUIHandler = null)
+    public void Initialize(QuestData questData, QuestDetailPanel questDetailPanel, bool isNew, QuestUIHandler questUIHandler = null, GameSceneQuestUIManager gameSceneQuestUIManager = null)
     {
         _questData = questData;
         _questDetailPanel = questDetailPanel;
         _questUIHandler = questUIHandler;
+        _gameSceneQuestUIManager = gameSceneQuestUIManager;
         _isNew = isNew;
 
         if (questNameText != null && questData != null)
@@ -117,6 +120,36 @@ public class QuestCell : MonoBehaviour
         }
         
         configureIcon.SetActive(shouldShow);
+        
+        if (notifierIcon != null)
+        {
+            bool shouldShowNotifier = false;
+            if (questData.questType == QuestType.CoreRepairQuest)
+            {
+                shouldShowNotifier = isNew;
+            }
+            else if (questData.questType == QuestType.RequestQuest)
+            {
+                if (_gameSceneQuestUIManager != null)
+                {
+                    bool isAccepted = _gameSceneQuestUIManager.IsRequestQuestAccepted(questData.questId);
+                    if (isAccepted)
+                    {
+                        QuestState state = QuestDataManager.Instance.GetQuestState(questData.questId);
+                        shouldShowNotifier = state == QuestState.Completable;
+                    }
+                    else
+                    {
+                        shouldShowNotifier = isNew;
+                    }
+                }
+                else
+                {
+                    shouldShowNotifier = isNew;
+                }
+            }
+            notifierIcon.SetActive(shouldShowNotifier);
+        }
     }
 
     private void MarkAsViewed()
@@ -130,11 +163,43 @@ public class QuestCell : MonoBehaviour
 
     private void OnCellClicked()
     {
-        if (_questData != null && _questDetailPanel != null)
+        if (_questData == null) return;
+        
+        if (_questData.questType == QuestType.RequestQuest)
+        {
+            if (_gameSceneQuestUIManager == null)
+            {
+                _gameSceneQuestUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
+            }
+            
+            if (_gameSceneQuestUIManager != null && QuestDataManager.Instance != null)
+            {
+                QuestState state = QuestDataManager.Instance.GetQuestState(_questData.questId);
+                bool isAccepted = _gameSceneQuestUIManager.IsRequestQuestAccepted(_questData.questId);
+                
+                if (state == QuestState.Available && !isAccepted)
+                {
+                    _gameSceneQuestUIManager.ShowRequestQuestAcceptPanel(_questData);
+                    return;
+                }
+            }
+        }
+        
+        if (_questDetailPanel != null)
         {
             _questDetailPanel.DisplayQuestInfo(_questData, _questData.questId);
             
             MarkAsViewed();
+            
+            if (_gameSceneQuestUIManager == null)
+            {
+                _gameSceneQuestUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
+            }
+            
+            if (_gameSceneQuestUIManager != null)
+            {
+                _gameSceneQuestUIManager.MarkQuestAsViewed(_questData.questId);
+            }
             
             if (_questUIHandler != null)
             {

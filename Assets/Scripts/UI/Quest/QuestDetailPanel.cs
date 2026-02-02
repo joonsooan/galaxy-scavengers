@@ -20,6 +20,8 @@ public class QuestDetailPanel : MonoBehaviour
     [SerializeField] private GameObject requirementTextPrefab;
     [SerializeField] private Button questActionButton;
     [SerializeField] private TMP_Text questActionButtonText;
+    [SerializeField] private Button acceptButton;
+    [SerializeField] private Button rejectButton;
     [SerializeField] private QuestUIHandler questUIHandler;
 
     private int _currentQuestId = -1;
@@ -52,6 +54,18 @@ public class QuestDetailPanel : MonoBehaviour
         {
             questActionButton.onClick.RemoveAllListeners();
             questActionButton.onClick.AddListener(OnQuestActionButtonClicked);
+        }
+        
+        if (acceptButton != null)
+        {
+            acceptButton.onClick.RemoveAllListeners();
+            acceptButton.onClick.AddListener(OnAcceptButtonClicked);
+        }
+        
+        if (rejectButton != null)
+        {
+            rejectButton.onClick.RemoveAllListeners();
+            rejectButton.onClick.AddListener(OnRejectButtonClicked);
         }
     }
 
@@ -129,11 +143,6 @@ public class QuestDetailPanel : MonoBehaviour
     public void DisplayQuestInfo(QuestData questData, int questId)
     {
         if (questData == null) return;
-
-        if (_currentQuestId == questId)
-        {
-            return;
-        }
 
         _currentQuestId = questId;
         
@@ -530,16 +539,34 @@ public class QuestDetailPanel : MonoBehaviour
         if (_currentQuestId == -1 || questActionButton == null)
         {
             if (questActionButton != null) questActionButton.gameObject.SetActive(false);
+            if (acceptButton != null) acceptButton.gameObject.SetActive(false);
+            if (rejectButton != null) rejectButton.gameObject.SetActive(false);
             return;
         }
 
         if (QuestDataManager.Instance == null)
         {
             if (questActionButton != null) questActionButton.gameObject.SetActive(false);
+            if (acceptButton != null) acceptButton.gameObject.SetActive(false);
+            if (rejectButton != null) rejectButton.gameObject.SetActive(false);
             return;
         }
 
+        QuestData questData = QuestDataManager.Instance.GetQuestData(_currentQuestId);
         QuestState questState = QuestDataManager.Instance.GetQuestState(_currentQuestId);
+        
+        bool isRequestQuest = questData != null && questData.questType == QuestType.RequestQuest;
+        
+        if (isRequestQuest && questState == QuestState.Available)
+        {
+            if (questActionButton != null) questActionButton.gameObject.SetActive(false);
+            if (acceptButton != null) acceptButton.gameObject.SetActive(true);
+            if (rejectButton != null) rejectButton.gameObject.SetActive(true);
+            return;
+        }
+        
+        if (acceptButton != null) acceptButton.gameObject.SetActive(false);
+        if (rejectButton != null) rejectButton.gameObject.SetActive(false);
         
         FMODUIButton fmodButton = questActionButton.GetComponent<FMODUIButton>();
         if (fmodButton != null)
@@ -584,7 +611,6 @@ public class QuestDetailPanel : MonoBehaviour
         }
         else if (questState == QuestState.Completable)
         {
-            // Completable quests are ready to complete
             questActionButton.gameObject.SetActive(true);
             if (questActionButtonText != null)
             {
@@ -639,7 +665,56 @@ public class QuestDetailPanel : MonoBehaviour
         }
         else if (questState == QuestState.Completable)
         {
-            // Completable quests are ready to complete
+            QuestData questData = QuestDataManager.Instance.GetQuestData(_currentQuestId);
+            
+            if (questData != null && questData.questType == QuestType.CoreRepairQuest)
+            {
+                if (CoreRepairManager.Instance != null && ResourceDataManager.Instance != null)
+                {
+                    CorePart partToRepair = CoreRepairManager.Instance.GetCorePartFromQuestId(_currentQuestId);
+                    
+                    if (questData.requiredResources != null && questData.requiredResources.Length > 0)
+                    {
+                        bool hasEnoughResources = true;
+                        foreach (ResourceCost cost in questData.requiredResources)
+                        {
+                            if (ResourceDataManager.Instance.GetResourceAmount(cost.resourceType) < cost.amount)
+                            {
+                                hasEnoughResources = false;
+                                break;
+                            }
+                        }
+                        
+                        if (hasEnoughResources)
+                        {
+                            foreach (ResourceCost cost in questData.requiredResources)
+                            {
+                                ResourceDataManager.Instance.RemoveResource(cost.resourceType, cost.amount);
+                            }
+                            
+                            if (CoreRepairManager.Instance.TryRepairPart(partToRepair, false))
+                            {
+                                if (QuestManager.Instance != null)
+                                {
+                                    QuestManager.Instance.CompleteQuest(_currentQuestId);
+                                    QuestManager.Instance.FinishQuest(_currentQuestId);
+                                }
+                                
+                                ClearQuestInfo();
+                                
+                                GameSceneQuestUIManager questUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
+                                if (questUIManager != null)
+                                {
+                                    questUIManager.LoadActiveQuests();
+                                }
+                                
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+            
             if (QuestManager.Instance != null)
             {
                 bool completed = QuestManager.Instance.CompleteQuest(_currentQuestId);
@@ -655,6 +730,40 @@ public class QuestDetailPanel : MonoBehaviour
         }
     }
     
+    private void OnAcceptButtonClicked()
+    {
+        if (_currentQuestId == -1 || QuestDataManager.Instance == null) return;
+        
+        QuestData questData = QuestDataManager.Instance.GetQuestData(_currentQuestId);
+        if (questData == null || questData.questType != QuestType.RequestQuest) return;
+        
+        QuestState questState = QuestDataManager.Instance.GetQuestState(_currentQuestId);
+        if (questState != QuestState.Available) return;
+        
+        GameSceneQuestUIManager questUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
+        if (questUIManager != null)
+        {
+            questUIManager.OnRequestQuestAccepted(_currentQuestId);
+        }
+    }
+    
+    private void OnRejectButtonClicked()
+    {
+        if (_currentQuestId == -1 || QuestDataManager.Instance == null) return;
+        
+        QuestData questData = QuestDataManager.Instance.GetQuestData(_currentQuestId);
+        if (questData == null || questData.questType != QuestType.RequestQuest) return;
+        
+        QuestState questState = QuestDataManager.Instance.GetQuestState(_currentQuestId);
+        if (questState != QuestState.Available) return;
+        
+        GameSceneQuestUIManager questUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
+        if (questUIManager != null)
+        {
+            questUIManager.OnRequestQuestRejected(_currentQuestId);
+        }
+    }
+    
     private void FinishQuestAndGiveRewards(int questId)
     {
         if (questUIHandler != null)
@@ -666,30 +775,64 @@ public class QuestDetailPanel : MonoBehaviour
         if (quest == null) return;
         
         BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
-        if (inventoryManager == null) return;
         
-        if (quest.requiredResources != null && quest.requiredResources.Length > 0)
+        if (quest.questType == QuestType.RequestQuest)
         {
-            foreach (ResourceCost cost in quest.requiredResources)
+            if (ResourceDataManager.Instance != null && quest.requiredResources != null && quest.requiredResources.Length > 0)
             {
-                if (!inventoryManager.RemoveResource(cost.resourceType, cost.amount))
+                foreach (ResourceCost cost in quest.requiredResources)
                 {
-                    Debug.LogWarning($"QuestDetailPanel: Failed to remove {cost.amount} {cost.resourceType} from base inventory when finishing quest {questId}");
+                    if (!ResourceDataManager.Instance.RemoveResource(cost.resourceType, cost.amount))
+                    {
+                        Debug.LogWarning($"QuestDetailPanel: Failed to remove {cost.amount} {cost.resourceType} from ResourceDataManager when finishing quest {questId}");
+                    }
+                }
+            }
+            
+            if (quest.questFinishReward != null)
+            {
+                if (quest.questFinishReward.resourceRewards != null && quest.questFinishReward.resourceRewards.Length > 0)
+                {
+                    foreach (ResourceCost reward in quest.questFinishReward.resourceRewards)
+                    {
+                        if (ResourceDataManager.Instance != null)
+                        {
+                            ResourceDataManager.Instance.AddResource(reward.resourceType, reward.amount);
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (inventoryManager == null) return;
+            
+            if (quest.requiredResources != null && quest.requiredResources.Length > 0)
+            {
+                foreach (ResourceCost cost in quest.requiredResources)
+                {
+                    if (!inventoryManager.RemoveResource(cost.resourceType, cost.amount))
+                    {
+                        Debug.LogWarning($"QuestDetailPanel: Failed to remove {cost.amount} {cost.resourceType} from base inventory when finishing quest {questId}");
+                    }
+                }
+            }
+            
+            if (quest.questFinishReward != null)
+            {
+                if (quest.questFinishReward.resourceRewards != null && quest.questFinishReward.resourceRewards.Length > 0)
+                {
+                    foreach (ResourceCost reward in quest.questFinishReward.resourceRewards)
+                    {
+                        inventoryManager.AddResource(reward.resourceType, reward.amount);
+                    }
                 }
             }
         }
         
         if (quest.questFinishReward != null)
         {
-            if (quest.questFinishReward.resourceRewards != null && quest.questFinishReward.resourceRewards.Length > 0)
-            {
-                foreach (ResourceCost reward in quest.questFinishReward.resourceRewards)
-                {
-                    inventoryManager.AddResource(reward.resourceType, reward.amount);
-                }
-            }
-
-            if (quest.questFinishReward.moduleRewards != null && quest.questFinishReward.moduleRewards.Length > 0)
+            if (quest.questFinishReward.moduleRewards != null && quest.questFinishReward.moduleRewards.Length > 0 && inventoryManager != null)
             {
                 foreach (ModuleRecipe moduleRecipe in quest.questFinishReward.moduleRewards)
                 {
@@ -710,7 +853,6 @@ public class QuestDetailPanel : MonoBehaviour
                 }
             }
             
-            // Unlock buildings
             if (quest.questFinishReward.unlockedBuildings != null && quest.questFinishReward.unlockedBuildings.Length > 0)
             {
                 if (BuildingUnlockManager.Instance == null)
@@ -725,11 +867,20 @@ public class QuestDetailPanel : MonoBehaviour
                 }
             }
             
-            BaseInventorySystem inventorySystem = FindFirstObjectByType<BaseInventorySystem>();
-            inventorySystem.ForceRefreshInventory();
-            
-            CoreCustomUIManager coreCustomUIManager = FindFirstObjectByType<CoreCustomUIManager>();
-            coreCustomUIManager.RefreshModuleSelectionGrid();
+            if (inventoryManager != null)
+            {
+                BaseInventorySystem inventorySystem = FindFirstObjectByType<BaseInventorySystem>();
+                if (inventorySystem != null)
+                {
+                    inventorySystem.ForceRefreshInventory();
+                }
+                
+                CoreCustomUIManager coreCustomUIManager = FindFirstObjectByType<CoreCustomUIManager>();
+                if (coreCustomUIManager != null)
+                {
+                    coreCustomUIManager.RefreshModuleSelectionGrid();
+                }
+            }
         }
         
         if (QuestManager.Instance != null)

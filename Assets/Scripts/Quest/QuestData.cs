@@ -8,6 +8,13 @@ public enum QuestProvider
     NPC_4
 }
 
+public enum QuestType
+{
+    BaseQuest,
+    RequestQuest,
+    CoreRepairQuest
+}
+
 [System.Serializable]
 public class QuestReward
 {
@@ -34,6 +41,9 @@ public class QuestData : ScriptableObject
 {
     [Header("Quest Identification")]
     public int questId;
+    
+    [Header("Quest Type")]
+    public QuestType questType = QuestType.BaseQuest;
     
     [Header("Quest Provider")]
     public QuestProvider questProvider = QuestProvider.NPC_1;

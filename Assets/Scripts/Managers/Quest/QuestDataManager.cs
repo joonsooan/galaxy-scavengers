@@ -112,6 +112,11 @@ public class QuestDataManager : MonoBehaviour
                 yield return null;
             }
             StartCoroutine(PeriodicallyCheckInventoryResources());
+            
+            while (ResourceDataManager.Instance == null) {
+                yield return null;
+            }
+            ResourceDataManager.OnResourceAmountChanged += OnResourceDataManagerResourceChanged;
         }
     }
 
@@ -119,6 +124,52 @@ public class QuestDataManager : MonoBehaviour
     {
         if (_baseInventoryManager != null) {
             _baseInventoryManager.OnResourceChanged -= OnInventoryResourceChanged;
+        }
+        
+        ResourceDataManager.OnResourceAmountChanged -= OnResourceDataManagerResourceChanged;
+    }
+    
+    private void OnResourceDataManagerResourceChanged(ResourceType resourceType, int amount)
+    {
+        foreach (QuestData quest in _questDataDict.Values) {
+            QuestState currentState = _questStates[quest.questId];
+
+            if (currentState != QuestState.Active && currentState != QuestState.Completable) {
+                continue;
+            }
+
+            if (quest.questType != QuestType.RequestQuest && quest.questType != QuestType.CoreRepairQuest) {
+                continue;
+            }
+
+            bool requiresThisResource = false;
+            if (quest.requiredResources != null) {
+                foreach (ResourceCost cost in quest.requiredResources) {
+                    if (cost.resourceType == resourceType) {
+                        requiresThisResource = true;
+                        break;
+                    }
+                }
+            }
+
+            bool hasQuestCheckRequirements = quest.questCheckRequirements != null && quest.questCheckRequirements.Length > 0;
+
+            if (!requiresThisResource && !hasQuestCheckRequirements) {
+                continue;
+            }
+
+            bool requirementsMet = AreAllQuestRequirementsMet(quest);
+
+            if (currentState == QuestState.Active && requirementsMet) {
+                _questStates[quest.questId] = QuestState.Completable;
+                OnQuestStateChanged?.Invoke(quest.questId);
+                SaveQuestProgress();
+            }
+            else if (currentState == QuestState.Completable && !requirementsMet) {
+                _questStates[quest.questId] = QuestState.Active;
+                OnQuestStateChanged?.Invoke(quest.questId);
+                SaveQuestProgress();
+            }
         }
     }
 
@@ -196,9 +247,12 @@ public class QuestDataManager : MonoBehaviour
             allQuests.Add(questData);
         }
 
-        if (!_questDataDict.ContainsKey(questData.questId)) {
+        bool isNewQuest = !_questDataDict.ContainsKey(questData.questId);
+        if (isNewQuest) {
             _questDataDict[questData.questId] = questData;
             _questStates[questData.questId] = QuestState.Available;
+            OnQuestStateChanged?.Invoke(questData.questId);
+            SaveQuestProgress();
         }
     }
 
@@ -334,37 +388,69 @@ public class QuestDataManager : MonoBehaviour
         string sceneName = SceneManager.GetActiveScene().name;
         Dictionary<ResourceType, int> inventoryResources = null;
 
-        if (sceneName == "BaseScene") {
-            if (_baseInventoryManager == null) {
-                _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
-            }
+        if (quest.questType == QuestType.BaseQuest) {
+            if (sceneName == "BaseScene") {
+                if (_baseInventoryManager == null) {
+                    _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+                }
 
-            if (_baseInventoryManager == null) {
+                if (_baseInventoryManager == null) {
+                    return false;
+                }
+
+                inventoryResources = _baseInventoryManager.GetAllResources();
+            }
+            else {
                 return false;
             }
-
-            inventoryResources = _baseInventoryManager.GetAllResources();
         }
-        else if (sceneName == "GameScene") {
-            if (_inventorySystem == null) {
-                _inventorySystem = FindFirstObjectByType<InventorySystem>();
-            }
+        else if (quest.questType == QuestType.RequestQuest || quest.questType == QuestType.CoreRepairQuest) {
+            if (sceneName == "GameScene") {
+                if (ResourceDataManager.Instance == null) {
+                    return false;
+                }
 
-            if (_inventorySystem == null) {
+                inventoryResources = new Dictionary<ResourceType, int>();
+                foreach (ResourceType type in System.Enum.GetValues(typeof(ResourceType))) {
+                    inventoryResources[type] = ResourceDataManager.Instance.GetResourceAmount(type);
+                }
+            }
+            else {
                 return false;
             }
-
-            inventoryResources = _inventorySystem.GetAllResourcesFromInventory();
         }
         else {
-            return false;
+            if (sceneName == "BaseScene") {
+                if (_baseInventoryManager == null) {
+                    _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+                }
+
+                if (_baseInventoryManager == null) {
+                    return false;
+                }
+
+                inventoryResources = _baseInventoryManager.GetAllResources();
+            }
+            else if (sceneName == "GameScene") {
+                if (_inventorySystem == null) {
+                    _inventorySystem = FindFirstObjectByType<InventorySystem>();
+                }
+
+                if (_inventorySystem == null) {
+                    return false;
+                }
+
+                inventoryResources = _inventorySystem.GetAllResourcesFromInventory();
+            }
+            else {
+                return false;
+            }
         }
 
         if (inventoryResources == null) {
             return false;
         }
 
-        // Check resource requirements
         if (quest.requiredResources != null && quest.requiredResources.Length > 0) {
             foreach (ResourceCost cost in quest.requiredResources) {
                 inventoryResources.TryGetValue(cost.resourceType, out int currentAmount);
@@ -374,7 +460,6 @@ public class QuestDataManager : MonoBehaviour
             }
         }
 
-        // Check quest tracking requirements
         if (quest.questCheckRequirements != null && quest.questCheckRequirements.Length > 0) {
             foreach (QuestCheckData checkData in quest.questCheckRequirements) {
                 if (!checkData.IsRequirementMet()) {
