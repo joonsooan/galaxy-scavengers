@@ -165,6 +165,11 @@ public class RequestQuestManager : MonoBehaviour
         if (questData != null && _spawnedRequestQuests.Contains(questData))
         {
             _spawnedRequestQuests.Remove(questData);
+            
+            if (QuestDataManager.Instance != null)
+            {
+                QuestDataManager.Instance.UnregisterRuntimeQuest(questData.questId);
+            }
         }
     }
 }

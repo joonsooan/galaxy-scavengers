@@ -20,8 +20,6 @@ public class QuestDetailPanel : MonoBehaviour
     [SerializeField] private GameObject requirementTextPrefab;
     [SerializeField] private Button questActionButton;
     [SerializeField] private TMP_Text questActionButtonText;
-    [SerializeField] private Button acceptButton;
-    [SerializeField] private Button rejectButton;
     [SerializeField] private QuestUIHandler questUIHandler;
 
     private int _currentQuestId = -1;
@@ -54,18 +52,6 @@ public class QuestDetailPanel : MonoBehaviour
         {
             questActionButton.onClick.RemoveAllListeners();
             questActionButton.onClick.AddListener(OnQuestActionButtonClicked);
-        }
-        
-        if (acceptButton != null)
-        {
-            acceptButton.onClick.RemoveAllListeners();
-            acceptButton.onClick.AddListener(OnAcceptButtonClicked);
-        }
-        
-        if (rejectButton != null)
-        {
-            rejectButton.onClick.RemoveAllListeners();
-            rejectButton.onClick.AddListener(OnRejectButtonClicked);
         }
     }
 
@@ -142,7 +128,10 @@ public class QuestDetailPanel : MonoBehaviour
 
     public void DisplayQuestInfo(QuestData questData, int questId)
     {
-        if (questData == null) return;
+        if (questData == null)
+        {
+            return;
+        }
 
         _currentQuestId = questId;
         
@@ -411,12 +400,10 @@ public class QuestDetailPanel : MonoBehaviour
                     }
                     else
                     {
-                        Debug.LogWarning($"QuestDetailPanel: CreditRewardCell component not found on prefab {creditRewardCellPrefab.name}");
                     }
                 }
                 else
                 {
-                    Debug.LogWarning("QuestDetailPanel: creditRewardCellPrefab is not assigned, using fallback");
                     GameObject cellObj = Instantiate(baseInventoryCellPrefab, rewardGridContainer.transform);
                     BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
                     if (cell != null)
@@ -536,19 +523,15 @@ public class QuestDetailPanel : MonoBehaviour
 
     private void UpdateButtonVisibility()
     {
-        if (_currentQuestId == -1 || questActionButton == null)
+        if (_currentQuestId == -1)
         {
             if (questActionButton != null) questActionButton.gameObject.SetActive(false);
-            if (acceptButton != null) acceptButton.gameObject.SetActive(false);
-            if (rejectButton != null) rejectButton.gameObject.SetActive(false);
             return;
         }
 
         if (QuestDataManager.Instance == null)
         {
             if (questActionButton != null) questActionButton.gameObject.SetActive(false);
-            if (acceptButton != null) acceptButton.gameObject.SetActive(false);
-            if (rejectButton != null) rejectButton.gameObject.SetActive(false);
             return;
         }
 
@@ -560,13 +543,13 @@ public class QuestDetailPanel : MonoBehaviour
         if (isRequestQuest && questState == QuestState.Available)
         {
             if (questActionButton != null) questActionButton.gameObject.SetActive(false);
-            if (acceptButton != null) acceptButton.gameObject.SetActive(true);
-            if (rejectButton != null) rejectButton.gameObject.SetActive(true);
             return;
         }
         
-        if (acceptButton != null) acceptButton.gameObject.SetActive(false);
-        if (rejectButton != null) rejectButton.gameObject.SetActive(false);
+        if (questActionButton == null)
+        {
+            return;
+        }
         
         FMODUIButton fmodButton = questActionButton.GetComponent<FMODUIButton>();
         if (fmodButton != null)
@@ -730,39 +713,6 @@ public class QuestDetailPanel : MonoBehaviour
         }
     }
     
-    private void OnAcceptButtonClicked()
-    {
-        if (_currentQuestId == -1 || QuestDataManager.Instance == null) return;
-        
-        QuestData questData = QuestDataManager.Instance.GetQuestData(_currentQuestId);
-        if (questData == null || questData.questType != QuestType.RequestQuest) return;
-        
-        QuestState questState = QuestDataManager.Instance.GetQuestState(_currentQuestId);
-        if (questState != QuestState.Available) return;
-        
-        GameSceneQuestUIManager questUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
-        if (questUIManager != null)
-        {
-            questUIManager.OnRequestQuestAccepted(_currentQuestId);
-        }
-    }
-    
-    private void OnRejectButtonClicked()
-    {
-        if (_currentQuestId == -1 || QuestDataManager.Instance == null) return;
-        
-        QuestData questData = QuestDataManager.Instance.GetQuestData(_currentQuestId);
-        if (questData == null || questData.questType != QuestType.RequestQuest) return;
-        
-        QuestState questState = QuestDataManager.Instance.GetQuestState(_currentQuestId);
-        if (questState != QuestState.Available) return;
-        
-        GameSceneQuestUIManager questUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
-        if (questUIManager != null)
-        {
-            questUIManager.OnRequestQuestRejected(_currentQuestId);
-        }
-    }
     
     private void FinishQuestAndGiveRewards(int questId)
     {
@@ -782,10 +732,7 @@ public class QuestDetailPanel : MonoBehaviour
             {
                 foreach (ResourceCost cost in quest.requiredResources)
                 {
-                    if (!ResourceDataManager.Instance.RemoveResource(cost.resourceType, cost.amount))
-                    {
-                        Debug.LogWarning($"QuestDetailPanel: Failed to remove {cost.amount} {cost.resourceType} from ResourceDataManager when finishing quest {questId}");
-                    }
+                    ResourceDataManager.Instance.RemoveResource(cost.resourceType, cost.amount);
                 }
             }
             
@@ -811,10 +758,7 @@ public class QuestDetailPanel : MonoBehaviour
             {
                 foreach (ResourceCost cost in quest.requiredResources)
                 {
-                    if (!inventoryManager.RemoveResource(cost.resourceType, cost.amount))
-                    {
-                        Debug.LogWarning($"QuestDetailPanel: Failed to remove {cost.amount} {cost.resourceType} from base inventory when finishing quest {questId}");
-                    }
+                    inventoryManager.RemoveResource(cost.resourceType, cost.amount);
                 }
             }
             
@@ -849,7 +793,6 @@ public class QuestDetailPanel : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning($"QuestDetailPanel: CreditManager.Instance is null. Cannot award {quest.questFinishReward.creditReward} credits for quest {questId}");
                 }
             }
             

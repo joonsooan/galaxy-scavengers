@@ -256,6 +256,35 @@ public class QuestDataManager : MonoBehaviour
         }
     }
 
+    public void UnregisterRuntimeQuest(int questId)
+    {
+        if (!_questDataDict.ContainsKey(questId)) {
+            return;
+        }
+
+        QuestData quest = _questDataDict[questId];
+
+        _questDataDict.Remove(questId);
+        _questStates.Remove(questId);
+        _activeQuestIds.Remove(questId);
+        _completedQuestIds.Remove(questId);
+
+        if (quest != null && allQuests.Contains(quest)) {
+            allQuests.Remove(quest);
+        }
+        else {
+            allQuests.RemoveAll(q => q != null && q.questId == questId);
+        }
+
+        string stateKey = $"QuestState_{questId}";
+        if (PlayerPrefs.HasKey(stateKey)) {
+            PlayerPrefs.DeleteKey(stateKey);
+        }
+
+        SaveQuestProgress();
+        OnQuestStateChanged?.Invoke(questId);
+    }
+
     private void InitializeQuests()
     {
         _questDataDict.Clear();

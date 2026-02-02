@@ -163,7 +163,10 @@ public class QuestCell : MonoBehaviour
 
     private void OnCellClicked()
     {
-        if (_questData == null) return;
+        if (_questData == null)
+        {
+            return;
+        }
         
         if (_questData.questType == QuestType.RequestQuest)
         {
@@ -172,29 +175,34 @@ public class QuestCell : MonoBehaviour
                 _gameSceneQuestUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
             }
             
-            if (_gameSceneQuestUIManager != null && QuestDataManager.Instance != null)
+            if (QuestDataManager.Instance != null)
             {
                 QuestState state = QuestDataManager.Instance.GetQuestState(_questData.questId);
-                bool isAccepted = _gameSceneQuestUIManager.IsRequestQuestAccepted(_questData.questId);
+                bool isAccepted = _gameSceneQuestUIManager != null && _gameSceneQuestUIManager.IsRequestQuestAccepted(_questData.questId);
                 
-                if (state == QuestState.Available && !isAccepted)
+                if (_gameSceneQuestUIManager != null && state == QuestState.Available && !isAccepted)
                 {
                     _gameSceneQuestUIManager.ShowRequestQuestAcceptPanel(_questData);
                     return;
                 }
             }
         }
-        
+
         if (_questDetailPanel != null)
         {
-            _questDetailPanel.DisplayQuestInfo(_questData, _questData.questId);
-            
-            MarkAsViewed();
-            
             if (_gameSceneQuestUIManager == null)
             {
                 _gameSceneQuestUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
             }
+            
+            if (_gameSceneQuestUIManager != null)
+            {
+                _gameSceneQuestUIManager.ShowQuestDetailPanel();
+            }
+            
+            _questDetailPanel.DisplayQuestInfo(_questData, _questData.questId);
+            
+            MarkAsViewed();
             
             if (_gameSceneQuestUIManager != null)
             {

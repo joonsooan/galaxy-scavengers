@@ -11,8 +11,8 @@ public class GameSceneQuestUIManager : MonoBehaviour
     [SerializeField] private GameObject questPanel;
     [SerializeField] private GameObject questCellPrefab;
     [SerializeField] private Transform questCellGridParent;
-    [SerializeField] private QuestDetailPanel questDetailPanel;
-    [SerializeField] private QuestDetailPanel requestQuestAcceptPanel;
+    [SerializeField] private GameObject questDetailPanelObject;
+    [SerializeField] private GameObject requestQuestAcceptPanelObject;
     [SerializeField] private Button toggleQuestPanelButton;
     
     [Header("Notification Settings")]
@@ -24,12 +24,24 @@ public class GameSceneQuestUIManager : MonoBehaviour
     private readonly HashSet<int> _acceptedRequestQuests = new HashSet<int>();
     private bool _isPanelOpen = false;
     private float _savedTimeScale = 1f;
+
+    private QuestDetailPanel _questDetailPanel;
+    private RequestQuestAcceptPanel _requestQuestAcceptPanel;
     
     private void Awake()
     {
-        if (questDetailPanel != null)
+        if (questDetailPanelObject != null)
         {
-            questDetailPanel.SetGameSceneMode(true);
+            _questDetailPanel = questDetailPanelObject.GetComponent<QuestDetailPanel>();
+            if (_questDetailPanel != null)
+            {
+                _questDetailPanel.SetGameSceneMode(true);
+            }
+        }
+
+        if (requestQuestAcceptPanelObject != null)
+        {
+            _requestQuestAcceptPanel = requestQuestAcceptPanelObject.GetComponent<RequestQuestAcceptPanel>();
         }
     }
     
@@ -51,9 +63,9 @@ public class GameSceneQuestUIManager : MonoBehaviour
             toggleQuestPanelButton.onClick.AddListener(ToggleQuestPanel);
         }
         
-        if (questDetailPanel != null)
+        if (_questDetailPanel != null)
         {
-            questDetailPanel.SetGameSceneMode(true);
+            _questDetailPanel.SetGameSceneMode(true);
         }
         
         if (questCellGridParent != null)
@@ -61,9 +73,9 @@ public class GameSceneQuestUIManager : MonoBehaviour
             questCellGridParent.gameObject.SetActive(false);
         }
         
-        if (questDetailPanel != null)
+        if (questDetailPanelObject != null)
         {
-            questDetailPanel.gameObject.SetActive(false);
+            questDetailPanelObject.SetActive(false);
         }
         
         if (notifierIcon != null)
@@ -129,9 +141,9 @@ public class GameSceneQuestUIManager : MonoBehaviour
         
         LoadActiveQuests();
         
-        if (questDetailPanel != null)
+        if (_questDetailPanel != null)
         {
-            questDetailPanel.RefreshQuestState(questId);
+            _questDetailPanel.RefreshQuestState(questId);
         }
         
         UpdateNotifierIcons();
@@ -155,7 +167,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
     
     public void LoadActiveQuests()
     {
-        if (questCellPrefab == null || questCellGridParent == null || questDetailPanel == null)
+        if (questCellPrefab == null || questCellGridParent == null || _questDetailPanel == null)
         {
             return;
         }
@@ -190,7 +202,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
             if (questCell != null)
             {
                 bool isNew = !_viewedQuestIds.Contains(quest.questId) && quest.questType == QuestType.RequestQuest && !_acceptedRequestQuests.Contains(quest.questId);
-                questCell.Initialize(quest, questDetailPanel, isNew, null, this);
+                questCell.Initialize(quest, _questDetailPanel, isNew, null, this);
                 _questCells.Add(questCell);
             }
             else
@@ -243,9 +255,9 @@ public class GameSceneQuestUIManager : MonoBehaviour
             questCellGridParent.gameObject.SetActive(true);
         }
         
-        if (questDetailPanel != null)
+        if (questDetailPanelObject != null)
         {
-            questDetailPanel.gameObject.SetActive(true);
+            questDetailPanelObject.SetActive(true);
         }
         
         if (shaderMaterial != null)
@@ -265,10 +277,10 @@ public class GameSceneQuestUIManager : MonoBehaviour
     {
         _isPanelOpen = false;
         
-        if (questDetailPanel != null)
+        if (_questDetailPanel != null && questDetailPanelObject != null)
         {
-            questDetailPanel.ClearQuestInfo();
-            questDetailPanel.gameObject.SetActive(false);
+            _questDetailPanel.ClearQuestInfo();
+            questDetailPanelObject.SetActive(false);
         }
         
         if (questCellGridParent != null)
@@ -366,7 +378,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
             return;
         }
         
-        if (requestQuestAcceptPanel == null)
+        if (_requestQuestAcceptPanel == null || requestQuestAcceptPanelObject == null)
         {
             return;
         }
@@ -377,16 +389,28 @@ public class GameSceneQuestUIManager : MonoBehaviour
         }
         
         QuestState state = QuestDataManager.Instance.GetQuestState(questData.questId);
-        if (state != QuestState.Available || _acceptedRequestQuests.Contains(questData.questId))
+        bool isAccepted = _acceptedRequestQuests.Contains(questData.questId);
+        
+        if (state != QuestState.Available || isAccepted)
         {
             return;
         }
         
-        _savedTimeScale = Time.timeScale;
-        Time.timeScale = 0f;
+        if (questDetailPanelObject != null && questDetailPanelObject.activeSelf && _questDetailPanel != null)
+        {
+            _questDetailPanel.ClearQuestInfo();
+            questDetailPanelObject.SetActive(false);
+        }
         
-        requestQuestAcceptPanel.DisplayQuestInfo(questData, questData.questId);
-        requestQuestAcceptPanel.gameObject.SetActive(true);
+        // Pause the game through GameManager so that pause UI (space key icon) stays in sync
+        GameManager gameManager = GameManager.Instance;
+        if (gameManager != null && !gameManager.IsPaused)
+        {
+            gameManager.TogglePause();
+        }
+        
+        _requestQuestAcceptPanel.DisplayQuestInfo(questData);
+        requestQuestAcceptPanelObject.SetActive(true);
     }
     
     public void OnRequestQuestAccepted(int questId)
@@ -422,17 +446,34 @@ public class GameSceneQuestUIManager : MonoBehaviour
     
     private void CloseRequestQuestAcceptPanel()
     {
-        Time.timeScale = _savedTimeScale;
-        
-        if (requestQuestAcceptPanel != null)
+        GameManager gameManager = GameManager.Instance;
+        if (gameManager != null && gameManager.IsPaused)
         {
-            requestQuestAcceptPanel.ClearQuestInfo();
-            requestQuestAcceptPanel.gameObject.SetActive(false);
+            gameManager.TogglePause();
+        }
+        
+        if (_requestQuestAcceptPanel != null && requestQuestAcceptPanelObject != null)
+        {
+            _requestQuestAcceptPanel.ClearQuestInfo();
+            requestQuestAcceptPanelObject.SetActive(false);
         }
     }
     
     public bool IsRequestQuestAccepted(int questId)
     {
         return _acceptedRequestQuests.Contains(questId);
+    }
+    
+    public void ShowQuestDetailPanel()
+    {
+        if (questDetailPanelObject != null)
+        {
+            questDetailPanelObject.SetActive(true);
+        }
+        
+        if (questCellGridParent != null && !questCellGridParent.gameObject.activeSelf)
+        {
+            questCellGridParent.gameObject.SetActive(true);
+        }
     }
 }
