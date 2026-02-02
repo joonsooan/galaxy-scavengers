@@ -10,6 +10,8 @@ public class LoadingUIManager : MonoBehaviour
 
     [Header("Loading UI References")]
     [SerializeField] private GameObject loadingScreenPrefab;
+    [SerializeField] private GameObject successLoadingScreenPrefab;
+    [SerializeField] private GameObject gameOverLoadingScreenPrefab;
     
     private GameObject _currentLoadingScreen;
     private Canvas _loadingCanvas;
@@ -85,7 +87,7 @@ public class LoadingUIManager : MonoBehaviour
         }
     }
 
-    private void HideLoadingScreen()
+    public void HideLoadingScreen()
     {
         if (_currentLoadingScreen != null)
         {
@@ -119,5 +121,61 @@ public class LoadingUIManager : MonoBehaviour
             Destroy(_currentLoadingScreen);
             _currentLoadingScreen = null;
         }
+    }
+
+    public void ShowSuccessLoadingScreen()
+    {
+        if (_currentLoadingScreen != null)
+        {
+            return;
+        }
+
+        if (_loadingCanvas == null)
+        {
+            InitializeCanvas();
+        }
+
+        if (successLoadingScreenPrefab != null)
+        {
+            _currentLoadingScreen = Instantiate(successLoadingScreenPrefab, _loadingCanvas.transform);
+            _currentLoadingScreen.SetActive(true);
+        }
+    }
+
+    public void ShowGameOverLoadingScreen()
+    {
+        if (_currentLoadingScreen != null)
+        {
+            return;
+        }
+
+        if (_loadingCanvas == null)
+        {
+            InitializeCanvas();
+        }
+
+        if (gameOverLoadingScreenPrefab != null)
+        {
+            _currentLoadingScreen = Instantiate(gameOverLoadingScreenPrefab, _loadingCanvas.transform);
+            _currentLoadingScreen.SetActive(true);
+        }
+    }
+
+    public SuccessLoadingScreen GetSuccessLoadingScreenComponent()
+    {
+        if (_currentLoadingScreen != null)
+        {
+            return _currentLoadingScreen.GetComponent<SuccessLoadingScreen>();
+        }
+        return null;
+    }
+
+    public GameOverLoadingScreen GetGameOverLoadingScreenComponent()
+    {
+        if (_currentLoadingScreen != null)
+        {
+            return _currentLoadingScreen.GetComponent<GameOverLoadingScreen>();
+        }
+        return null;
     }
 }

@@ -25,6 +25,8 @@ public class QuestDataManager : MonoBehaviour
     private readonly Dictionary<int, QuestData> _questDataDict = new Dictionary<int, QuestData>();
     private readonly Dictionary<int, QuestState> _questStates = new Dictionary<int, QuestState>();
     private readonly HashSet<int> _questsVisitedGameScene = new HashSet<int>();
+    private readonly HashSet<int> _questsReturnedSuccessfully = new HashSet<int>();
+    private readonly HashSet<int> _questsReturnedWithFailure = new HashSet<int>();
 
     private BaseInventoryManager _baseInventoryManager;
     private InventorySystem _inventorySystem;
@@ -134,21 +136,45 @@ public class QuestDataManager : MonoBehaviour
             
             if (quest.questCheckRequirements != null && quest.questCheckRequirements.Length > 0)
             {
-                bool hasDefaultCheck = false;
+                bool hasSuccessCheck = false;
+                bool hasFailureCheck = false;
                 foreach (QuestCheckData checkData in quest.questCheckRequirements)
                 {
-                    if (checkData.checkType == QuestCheckType.Default)
+                    if (checkData.checkType == QuestCheckType.ReturnFromGameSceneSuccess)
                     {
-                        hasDefaultCheck = true;
-                        break;
+                        hasSuccessCheck = true;
+                    }
+                    else if (checkData.checkType == QuestCheckType.ReturnFromGameSceneFailure)
+                    {
+                        hasFailureCheck = true;
                     }
                 }
                 
-                if (hasDefaultCheck)
+                if (hasSuccessCheck && _questsReturnedSuccessfully.Contains(quest.questId))
+                {
+                    CheckSingleQuestCompletion(quest.questId);
+                }
+                else if (hasFailureCheck && _questsReturnedWithFailure.Contains(quest.questId))
                 {
                     CheckSingleQuestCompletion(quest.questId);
                 }
             }
+        }
+    }
+
+    public void MarkQuestReturnedSuccessfully(int questId)
+    {
+        if (_questsVisitedGameScene.Contains(questId))
+        {
+            _questsReturnedSuccessfully.Add(questId);
+        }
+    }
+
+    public void MarkQuestReturnedWithFailure(int questId)
+    {
+        if (_questsVisitedGameScene.Contains(questId))
+        {
+            _questsReturnedWithFailure.Add(questId);
         }
     }
 
@@ -325,6 +351,9 @@ public class QuestDataManager : MonoBehaviour
         _questStates.Remove(questId);
         _activeQuestIds.Remove(questId);
         _completedQuestIds.Remove(questId);
+        _questsVisitedGameScene.Remove(questId);
+        _questsReturnedSuccessfully.Remove(questId);
+        _questsReturnedWithFailure.Remove(questId);
 
         if (quest != null && allQuests.Contains(quest)) {
             allQuests.Remove(quest);
@@ -557,12 +586,17 @@ public class QuestDataManager : MonoBehaviour
 
         if (quest.questCheckRequirements != null && quest.questCheckRequirements.Length > 0) {
             foreach (QuestCheckData checkData in quest.questCheckRequirements) {
-                if (checkData.checkType == QuestCheckType.Default)
+                if (checkData.checkType == QuestCheckType.ReturnFromGameSceneSuccess)
                 {
-                    bool visitedGameScene = _questsVisitedGameScene.Contains(quest.questId);
-                    string currentScene = SceneManager.GetActiveScene().name;
-                    bool isMet = visitedGameScene && currentScene == "BaseScene";
-                    
+                    bool isMet = _questsReturnedSuccessfully.Contains(quest.questId);
+                    if (!isMet)
+                    {
+                        return false;
+                    }
+                }
+                else if (checkData.checkType == QuestCheckType.ReturnFromGameSceneFailure)
+                {
+                    bool isMet = _questsReturnedWithFailure.Contains(quest.questId);
                     if (!isMet)
                     {
                         return false;
@@ -828,6 +862,8 @@ public class QuestDataManager : MonoBehaviour
         _completedQuestIds.Add(questId);
         _activeQuestIds.Remove(questId);
         _questsVisitedGameScene.Remove(questId);
+        _questsReturnedSuccessfully.Remove(questId);
+        _questsReturnedWithFailure.Remove(questId);
         OnQuestStateChanged?.Invoke(questId);
         SaveQuestProgress();
 

@@ -42,7 +42,8 @@ public class QuestCheckData
             case QuestCheckType.ResourceRequirement:
                 return true;
                 
-            case QuestCheckType.Default:
+            case QuestCheckType.ReturnFromGameSceneSuccess:
+            case QuestCheckType.ReturnFromGameSceneFailure:
                 return false;
                 
             case QuestCheckType.BuildingConstructed:

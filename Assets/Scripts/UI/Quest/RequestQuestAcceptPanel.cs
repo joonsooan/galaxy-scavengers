@@ -114,7 +114,8 @@ public class RequestQuestAcceptPanel : MonoBehaviour
                     {
                         primaryCheckType = checkData.checkType;
                     }
-                    if (checkData.checkType != QuestCheckType.Default)
+                    if (checkData.checkType != QuestCheckType.ReturnFromGameSceneSuccess &&
+                        checkData.checkType != QuestCheckType.ReturnFromGameSceneFailure)
                     {
                         break;
                     }
@@ -146,7 +147,8 @@ public class RequestQuestAcceptPanel : MonoBehaviour
             QuestCheckType.BeaconPlacedForScout => "탐사 요구사항",
             QuestCheckType.ScoutEnteredLocation => "탐사 요구사항",
             QuestCheckType.ModulePlacedOnCore => "모듈 요구사항",
-            QuestCheckType.Default => "요구사항",
+            QuestCheckType.ReturnFromGameSceneSuccess => "요구사항",
+            QuestCheckType.ReturnFromGameSceneFailure => "요구사항",
             _ => "요구사항"
         };
     }
@@ -172,7 +174,8 @@ public class RequestQuestAcceptPanel : MonoBehaviour
                     checkData.checkType == QuestCheckType.BeaconPlacedForScout ||
                     checkData.checkType == QuestCheckType.ScoutEnteredLocation ||
                     checkData.checkType == QuestCheckType.ModulePlacedOnCore ||
-                    checkData.checkType == QuestCheckType.Default)
+                    checkData.checkType == QuestCheckType.ReturnFromGameSceneSuccess ||
+                    checkData.checkType == QuestCheckType.ReturnFromGameSceneFailure)
                 {
                     if (!string.IsNullOrEmpty(checkData.displayText))
                     {

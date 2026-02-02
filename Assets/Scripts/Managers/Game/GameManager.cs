@@ -167,7 +167,7 @@ public class GameManager : MonoBehaviour
     {
         Time.timeScale = 1;
         if (SceneLoader.Instance != null) {
-            SceneLoader.Instance.LoadBaseScene();
+            SceneLoader.Instance.LoadBaseScene(SceneLoader.ReturnFromGameState.Failure);
         }
     }
 

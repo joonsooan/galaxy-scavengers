@@ -743,7 +743,7 @@ public class TutorialManager : MonoBehaviour
         _uiPanels[TutorialUIPanel.QuestPanel] = questPanel;
     }
 
-    private void HideAllUIPanels()
+    public void HideAllUIPanels()
     {
         foreach (GameObject panel in _uiPanels.Values) {
             if (panel != null) {

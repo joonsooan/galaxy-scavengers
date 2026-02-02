@@ -1,9 +1,18 @@
 using System.Collections;
+using DG.Tweening;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class SceneLoader : MonoBehaviour
 {
+    public enum ReturnFromGameState
+    {
+        None,
+        Success,
+        Failure
+    }
+
     [SerializeField] private string titleSceneName = "TitleScene";
     [SerializeField] private string baseSceneName = "BaseScene";
     [SerializeField] private string gameSceneName = "GameScene";
@@ -17,6 +26,9 @@ public class SceneLoader : MonoBehaviour
     private float _cachedPostFadeDelay;
 
     private bool _isLoading;
+    private ReturnFromGameState _returnState = ReturnFromGameState.None;
+    private AsyncOperation _baseSceneLoadOperation;
+    private bool _waitingForContinue;
     public static SceneLoader Instance { get; private set; }
 
     private void Awake()
@@ -46,24 +58,186 @@ public class SceneLoader : MonoBehaviour
         StartCoroutine(LoadSceneAsync(titleSceneName));
     }
 
-    public void LoadBaseScene()
+    public void LoadBaseScene(ReturnFromGameState returnState = ReturnFromGameState.None)
     {
         if (_isLoading) return;
 
         string currentScene = SceneManager.GetActiveScene().name;
 
         if (currentScene == gameSceneName) {
+            _returnState = returnState;
             if (UnitManager.Instance != null) {
                 UnitManager.Instance.RemoveAllUnits();
             }
+            StartCoroutine(LoadBaseSceneFromGameAsync());
         }
-
-        if (currentScene == titleSceneName) {
+        else if (currentScene == titleSceneName) {
             SceneManager.LoadScene(baseSceneName);
         }
         else {
             StartCoroutine(LoadSceneAsync(baseSceneName));
         }
+    }
+
+    private IEnumerator LoadBaseSceneFromGameAsync()
+    {
+        _isLoading = true;
+        _waitingForContinue = true;
+
+        if (_returnState == ReturnFromGameState.Success)
+        {
+            if (QuestDataManager.Instance != null)
+            {
+                foreach (int questId in QuestDataManager.Instance.GetActiveQuestIds())
+                {
+                    QuestDataManager.Instance.MarkQuestReturnedSuccessfully(questId);
+                }
+            }
+
+            if (LoadingUIManager.Instance != null)
+            {
+                LoadingUIManager.Instance.ShowSuccessLoadingScreen();
+            }
+
+            if (LoadingUIManager.Instance != null)
+            {
+                SuccessLoadingScreen successScreen = LoadingUIManager.Instance.GetSuccessLoadingScreenComponent();
+                while (successScreen == null || !successScreen.IsEntryAnimationComplete)
+                {
+                    yield return null;
+                    if (LoadingUIManager.Instance != null)
+                    {
+                        successScreen = LoadingUIManager.Instance.GetSuccessLoadingScreenComponent();
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+        else if (_returnState == ReturnFromGameState.Failure)
+        {
+            if (QuestDataManager.Instance != null)
+            {
+                foreach (int questId in QuestDataManager.Instance.GetActiveQuestIds())
+                {
+                    QuestDataManager.Instance.MarkQuestReturnedWithFailure(questId);
+                }
+            }
+
+            if (LoadingUIManager.Instance != null)
+            {
+                LoadingUIManager.Instance.ShowGameOverLoadingScreen();
+            }
+
+            yield return new WaitForSecondsRealtime(0.5f);
+        }
+
+        yield return null;
+
+        _baseSceneLoadOperation = SceneManager.LoadSceneAsync(baseSceneName);
+        _baseSceneLoadOperation.allowSceneActivation = false;
+
+        while (_baseSceneLoadOperation.progress < 0.9f)
+        {
+            yield return null;
+        }
+
+        while (_waitingForContinue)
+        {
+            yield return null;
+        }
+
+        yield return _wait01Realtime;
+
+        _baseSceneLoadOperation.allowSceneActivation = true;
+
+        while (!_baseSceneLoadOperation.isDone)
+        {
+            yield return null;
+        }
+
+        yield return StartCoroutine(WaitForBaseSceneInitialization());
+
+        if (BgmManager.Instance != null)
+        {
+            if (_returnState == ReturnFromGameState.Success)
+            {
+                BgmManager.Instance.StopSuccessLoadingBgm(1.0f);
+            }
+            else if (_returnState == ReturnFromGameState.Failure)
+            {
+                BgmManager.Instance.StopFailureLoadingBgm(1.0f);
+            }
+        }
+
+        yield return new WaitForSecondsRealtime(0.5f);
+
+        if (BgmManager.Instance != null)
+        {
+            BgmManager.Instance.PlayBaseBgm();
+        }
+
+        if (_returnState == ReturnFromGameState.Success)
+        {
+            SuccessLoadingScreen successScreen = null;
+            if (LoadingUIManager.Instance != null)
+            {
+                successScreen = LoadingUIManager.Instance.GetSuccessLoadingScreenComponent();
+            }
+
+            if (successScreen != null)
+            {
+                yield return StartCoroutine(FadeOutSuccessLoadingBackground(successScreen));
+            }
+        }
+
+        if (LoadingUIManager.Instance != null)
+        {
+            LoadingUIManager.Instance.HideLoadingScreen();
+        }
+
+        GameObject fadeOverlay = GameObject.Find("FadeOverlay");
+        if (fadeOverlay != null)
+        {
+            Image fadeImage = fadeOverlay.GetComponent<Image>();
+            if (fadeImage != null)
+            {
+                fadeImage.DOFade(0f, 0.5f).SetUpdate(true).OnComplete(() => {
+                    fadeOverlay.SetActive(false);
+                });
+            }
+            else
+            {
+                fadeOverlay.SetActive(false);
+            }
+        }
+
+        _returnState = ReturnFromGameState.None;
+        _isLoading = false;
+    }
+
+    private IEnumerator FadeOutSuccessLoadingBackground(SuccessLoadingScreen successScreen)
+    {
+        Image backgroundImage = successScreen.GetBackgroundImage();
+        float fadeOutDuration = successScreen.GetFadeOutDuration();
+
+        if (backgroundImage != null && fadeOutDuration > 0f)
+        {
+            yield return backgroundImage.DOFade(0f, fadeOutDuration).SetUpdate(true).WaitForCompletion();
+        }
+    }
+
+    public void CompleteBaseSceneLoad()
+    {
+        _waitingForContinue = false;
+    }
+
+    private IEnumerator WaitForBaseSceneInitialization()
+    {
+        yield return null;
+        yield return null;
     }
 
     public void LoadGameScene()
@@ -75,6 +249,22 @@ public class SceneLoader : MonoBehaviour
     private IEnumerator LoadGameSceneAsync()
     {
         _isLoading = true;
+
+        GameObject fadePanel = FindFadePanel();
+        if (fadePanel != null)
+        {
+            fadePanel.SetActive(true);
+            Image fadeImage = fadePanel.GetComponent<Image>();
+            if (fadeImage != null)
+            {
+                Color currentColor = fadeImage.color;
+                if (currentColor.a < 1f)
+                {
+                    fadeImage.DOFade(1f, 0.5f).SetUpdate(true);
+                    yield return new WaitForSecondsRealtime(0.5f);
+                }
+            }
+        }
 
         if (LoadingUIManager.Instance != null) {
             LoadingUIManager.Instance.ShowLoadingScreen();
@@ -188,6 +378,19 @@ public class SceneLoader : MonoBehaviour
         yield return _wait01;
 
         _isLoading = false;
+    }
+
+    private GameObject FindFadePanel()
+    {
+        Transform[] allTransforms = FindObjectsOfType<Transform>(true);
+        foreach (Transform t in allTransforms)
+        {
+            if (t.name == "Fade Panel")
+            {
+                return t.gameObject;
+            }
+        }
+        return null;
     }
 
     public void QuitGame()

@@ -6,5 +6,6 @@ public enum QuestCheckType
     BeaconPlacedForScout,     // Check if beacon is placed to send unit_scout
     ScoutEnteredLocation,     // Check if unit_scout enters specific map location
     ModulePlacedOnCore,       // Check if module is placed on core during resource transfer
-    Default                   // Auto-completable when returning to BaseScene after accepting quest
+    ReturnFromGameSceneSuccess,  // Auto-completable when successfully returning to BaseScene from GameScene
+    ReturnFromGameSceneFailure   // Auto-completable when failing and returning to BaseScene from GameScene
 }

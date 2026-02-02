@@ -1,27 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="2e9922bb-ccc6-4c6e-93bd-15fa8a8d7f34" name="변경" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.galaxy-scavengers/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.galaxy-scavengers/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Buildings/2_Drone Hub.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Buildings/2_Drone Hub.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Core Part Data/CorePart_Barrier.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Core Part Data/CorePart_Barrier.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Core Part Data/CorePart_Controller.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Core Part Data/CorePart_Controller.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Core Part Data/CorePart_Engine.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Core Part Data/CorePart_Engine.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Core Part Data/CorePart_Repeater.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Core Part Data/CorePart_Repeater.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Core Part Data/CorePart_Storage.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Core Part Data/CorePart_Storage.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0000.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0000.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/BaseScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/BaseScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/buildrecords/Desktop/Master.br" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/buildrecords/Desktop/Master.br" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{09c5c2a7-33dc-4800-87f0-a823fed212a1}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{09c5c2a7-33dc-4800-87f0-a823fed212a1}.pdc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{48e1c5b5-c83f-4a4e-8e43-b2c4368fe3b0}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{48e1c5b5-c83f-4a4e-8e43-b2c4368fe3b0}.pdc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{5ee6a6ac-3aba-4daf-a356-aa0cac916500}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{5ee6a6ac-3aba-4daf-a356-aa0cac916500}.pdc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{68b9a556-bba2-45ea-9da7-427092ae8859}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{68b9a556-bba2-45ea-9da7-427092ae8859}.pdc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{8c4ffb0a-7dc9-4972-8412-9a83420c91a7}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{8c4ffb0a-7dc9-4972-8412-9a83420c91a7}.pdc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{8ced1dfd-c3ad-4be8-865c-9f937eab9d89}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{8ced1dfd-c3ad-4be8-865c-9f937eab9d89}.pdc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{8e195066-019f-4ed5-b73e-d5ae92192e25}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{8e195066-019f-4ed5-b73e-d5ae92192e25}.pdc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{a4670585-25c1-44e7-8f65-39c2f162485e}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{a4670585-25c1-44e7-8f65-39c2f162485e}.pdc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{be8f3e2f-446c-4223-8053-f7ca2a5c0e83}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{be8f3e2f-446c-4223-8053-f7ca2a5c0e83}.pdc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Build/Desktop/Master.bank" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Build/Desktop/Master.bank" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Build/Desktop/Master.strings.bank" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Build/Desktop/Master.strings.bank" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Managers/_BgmManager.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Managers/_BgmManager.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Managers/_SceneLoader.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Managers/_SceneLoader.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/UI/Loading/Loading Screen.prefab" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/UI/Loading/Loading Screen.prefab.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/TitleScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/TitleScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Audio/BgmManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Audio/BgmManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Game/GameManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Game/GameManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Game/SceneLoader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Game/SceneLoader.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Quest/QuestDataManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Quest/QuestDataManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Quest/QuestUIManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Quest/QuestUIManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Scene/BaseSceneManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Scene/BaseSceneManager.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Tutorial/TutorialManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Tutorial/TutorialManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/UI/BtnManager_Base.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/UI/BtnManager_Base.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/UI/LoadingUIManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/UI/LoadingUIManager.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Quest/QuestCheckData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Quest/QuestCheckData.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Quest/QuestCheckType.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Quest/QuestCheckType.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Quest/QuestTracker.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Quest/QuestTracker.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestCell.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestCell.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Core/LaunchUIController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Core/LaunchUIController.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestDetailPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestDetailPanel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestTester.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestTester.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestUIHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestUIHandler.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/RequestQuestAcceptPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/RequestQuestAcceptPanel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Unit/Unit_Player.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Unit/Unit_Player.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/ShaderGraphSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ShaderGraphSettings.asset" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,12 +53,12 @@
     &quot;assignee&quot;: &quot;joonsooan&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/joonsooan/galaxy-scavengers.git&quot;,
-    &quot;accountId&quot;: &quot;fd279124-bb1b-4475-ba86-b2eaadce6455&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/joonsooan/galaxy-scavengers.git",
+    "accountId": "d66faa6f-4685-4909-b65b-7bb60794448e"
   }
-}</component>
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
 }</component>
@@ -56,12 +72,52 @@
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
     "git-widget-placeholder": "feature-new-ingame-systems",
-    "ignore.virus.scanning.warn.message": "true"
+    "ignore.virus.scanning.warn.message": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager" selected="Unity 에디터에 연결.Unity 에디터에 연결">
+  <component name="RunManager" selected="Attach to Unity Editor.Attach to Unity Editor">
     <configuration name="유닛 테스트(배치 모드)" type="RunUnityExe" factoryName="Unity Executable">
+      <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.0.59f2\Editor\Unity.exe" />
+      <option name="PROGRAM_PARAMETERS" value="-runTests -batchmode -projectPath &quot;C:\Unity Projects\galaxy-scavengers&quot; -testResults Logs/results.xml -logFile Logs/Editor.log -testPlatform EditMode -debugCodeOptimization" />
+      <option name="WORKING_DIRECTORY" value="C:\Unity Projects\galaxy-scavengers" />
+      <option name="PASS_PARENT_ENVS" value="1" />
+      <option name="ENV_FILE_PATHS" value="" />
+      <option name="REDIRECT_INPUT_PATH" value="" />
+      <option name="MIXED_MODE_DEBUG" value="0" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Standalone Player" type="RunUnityExe" factoryName="Unity Executable">
+      <option name="EXE_PATH" value="$PROJECT_DIR$/../Builds/galaxy-scavengers/galaxy-scavengers_26.02.01\Galaxy Scavengers.exe" />
+      <option name="PROGRAM_PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="C:\Unity Projects\Builds\galaxy-scavengers\galaxy-scavengers_26.02.01" />
+      <option name="PASS_PARENT_ENVS" value="1" />
+      <option name="ENV_FILE_PATHS" value="" />
+      <option name="REDIRECT_INPUT_PATH" value="" />
+      <option name="MIXED_MODE_DEBUG" value="0" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Start Unity" type="RunUnityExe" factoryName="Unity Executable">
+      <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.0.59f2\Editor\Unity.exe" />
+      <option name="PROGRAM_PARAMETERS" value="-projectPath &quot;C:\Unity Projects\galaxy-scavengers&quot; -debugCodeOptimization" />
+      <option name="WORKING_DIRECTORY" value="C:\Unity Projects\galaxy-scavengers" />
+      <option name="PASS_PARENT_ENVS" value="1" />
+      <option name="ENV_FILE_PATHS" value="" />
+      <option name="REDIRECT_INPUT_PATH" value="" />
+      <option name="MIXED_MODE_DEBUG" value="0" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Unit Tests (batch mode)" type="RunUnityExe" factoryName="Unity Executable">
       <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.0.59f2\Editor\Unity.exe" />
       <option name="PROGRAM_PARAMETERS" value="-runTests -batchmode -projectPath &quot;C:\Unity Projects\galaxy-scavengers&quot; -testResults Logs/results.xml -logFile Logs/Editor.log -testPlatform EditMode -debugCodeOptimization" />
       <option name="WORKING_DIRECTORY" value="C:\Unity Projects\galaxy-scavengers" />
@@ -79,6 +135,19 @@
       <option name="ENV_FILE_PATHS" value="" />
       <option name="REDIRECT_INPUT_PATH" value="" />
       <option name="MIXED_MODE_DEBUG" value="0" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost" useMixedMode="false">
+      <option name="allowRunningInParallel" value="false" />
+      <option name="listenPortForConnections" value="false" />
+      <option name="pid" />
+      <option name="projectPathOnTarget" />
+      <option name="runtimes">
+        <list />
+      </option>
+      <option name="selectedOptions">
+        <list />
+      </option>
       <method v="2" />
     </configuration>
     <configuration name="Unity 에디터에 연결" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost" useMixedMode="false">
@@ -109,8 +178,12 @@
       <workItem from="1769998948939" duration="1552000" />
       <workItem from="1770008927183" duration="27000" />
       <workItem from="1770012132409" duration="3757000" />
+      <workItem from="1770040615209" duration="1260000" />
     </task>
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
   <component name="UnityProjectConfiguration" hasMinimizedUI="true" />
   <component name="UnityProjectDiscoverer">
