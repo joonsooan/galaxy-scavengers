@@ -10134,6 +10134,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Produce Button
       objectReference: {fileID: 0}
+    - target: {fileID: 8185951838047228272, guid: 2174fafcdb5da504bb2dcf537c0b99b5, type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 2100000, guid: 6ea0045cefbea8645a63e514e349fefc, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

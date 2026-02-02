@@ -9,21 +9,23 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
     [Header("Aether Consumption")]
     [SerializeField] private int aetherConsumptionPerSecond = 1;
     [Header("Production Progress UI")]
-    [SerializeField] private GameObject progressSliderPrefab;
-    [SerializeField] private Vector3 progressSliderOffset = new Vector3(0f, 1f, 0f);
-    private readonly Dictionary<int, int> _producedUnitCounts = new Dictionary<int, int>();
+    [SerializeField] private ProductionProgressSlider productionSlider;
 
-    private readonly Queue<UnitData> _productionQueue = new Queue<UnitData>();
-    private readonly Dictionary<int, int> _targetUnitCounts = new Dictionary<int, int>();
+    private readonly Dictionary<int, int> _producedUnitCounts = new ();
+    private readonly Queue<UnitData> _productionQueue = new ();
+    private readonly Dictionary<int, int> _targetUnitCounts = new ();
+    
     private AetherConsumptionManager _aetherConsumptionManager;
     private UnitData _currentProducingUnit;
+    
     private float _currentProductionTime;
+    private float _productionStartTime;
     private bool _isManualQueueProcessing;
     private bool _isProducing;
+    
     private Coroutine _productionCoroutine;
-    private float _productionStartTime;
     private WaitForSeconds _productionWaitWait;
-    private ProductionProgressSlider _progressSlider;
+    private ProductionProgressSlider _sliderInstance;
 
     public DroneHubData DroneHubData {
         get {
@@ -33,15 +35,11 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
 
     private void Start()
     {
-        if (IsProperlyPlacedBuilding() && progressSliderPrefab != null) {
-            GameObject sliderObj = Instantiate(progressSliderPrefab);
-            _progressSlider = sliderObj.GetComponent<ProductionProgressSlider>();
-            if (_progressSlider != null) {
-                _progressSlider.Initialize(this, progressSliderOffset);
-                _progressSlider.gameObject.SetActive(false);
-            }
-        }
         _productionWaitWait = CoroutineCache.GetWaitForSeconds(1f);
+        
+        if (productionSlider != null) {
+            productionSlider.Initialize(transform);
+        }
     }
 
     protected override void OnEnable()
@@ -65,14 +63,11 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
         if (_aetherConsumptionManager != null) {
             _aetherConsumptionManager.UnregisterConsumer(this);
         }
-
         ResourceManager.OnResourceAmountChanged -= OnResourceAmountChanged;
 
-        if (_progressSlider != null) {
-            Destroy(_progressSlider.gameObject);
-            _progressSlider = null;
+        if (productionSlider != null) {
+            productionSlider.gameObject.SetActive(false);
         }
-
         base.OnDisable();
     }
 
@@ -283,6 +278,7 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
         while (_productionQueue.Count > 0 || HasPendingTargets()) {
             if (!IsOperational) {
                 _isProducing = false;
+                if (productionSlider != null) productionSlider.gameObject.SetActive(false);
                 yield break;
             }
 
@@ -291,6 +287,7 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
             }
 
             if (_productionQueue.Count == 0) {
+                _sliderInstance?.gameObject.SetActive(false);
                 if (!HasPendingTargets()) {
                     _isProducing = false;
                     yield break;
@@ -306,14 +303,27 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
 
             float productionSpeedMultiplier = GetProductionSpeedMultiplier();
             _currentProductionTime = unitToProduce.productionTime / productionSpeedMultiplier;
+            
+            if (productionSlider != null) {
+                productionSlider.gameObject.SetActive(true);
+                productionSlider.SetProgress(0f);
+            }
 
             float elapsedTime = 0f;
             while (elapsedTime < _currentProductionTime) {
                 elapsedTime += Time.deltaTime;
+                if (productionSlider != null) {
+                    float progress = elapsedTime / _currentProductionTime;
+                    productionSlider.SetProgress(progress);
+                }
                 yield return null;
             }
 
             _currentProducingUnit = null;
+            
+            if (productionSlider != null) {
+                productionSlider.gameObject.SetActive(false);
+            }
 
             if (!IsOperational) {
                 Queue<UnitData> tempQueue = new Queue<UnitData>();
