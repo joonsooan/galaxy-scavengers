@@ -40,8 +40,10 @@ public class QuestCheckData
         switch (checkType)
         {
             case QuestCheckType.ResourceRequirement:
-                // Resource requirements are checked separately in QuestDataManager
                 return true;
+                
+            case QuestCheckType.Default:
+                return false;
                 
             case QuestCheckType.BuildingConstructed:
             case QuestCheckType.UnitProduced:

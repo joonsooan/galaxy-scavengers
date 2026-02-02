@@ -24,6 +24,7 @@ public class QuestDataManager : MonoBehaviour
 
     private readonly Dictionary<int, QuestData> _questDataDict = new Dictionary<int, QuestData>();
     private readonly Dictionary<int, QuestState> _questStates = new Dictionary<int, QuestState>();
+    private readonly HashSet<int> _questsVisitedGameScene = new HashSet<int>();
 
     private BaseInventoryManager _baseInventoryManager;
     private InventorySystem _inventorySystem;
@@ -93,6 +94,62 @@ public class QuestDataManager : MonoBehaviour
         _inventorySystem = null;
         UnsubscribeFromInventoryEvents();
         StartCoroutine(SubscribeToInventoryEvents());
+        
+        if (scene.name == "GameScene")
+        {
+            foreach (int questId in _activeQuestIds)
+            {
+                if (_questStates.ContainsKey(questId) && _questStates[questId] == QuestState.Active)
+                {
+                    _questsVisitedGameScene.Add(questId);
+                }
+            }
+        }
+        else if (scene.name == "BaseScene")
+        {
+            StartCoroutine(CheckDefaultQuestsAfterSceneLoad());
+        }
+    }
+    
+    private IEnumerator CheckDefaultQuestsAfterSceneLoad()
+    {
+        yield return null;
+        yield return null;
+        
+        foreach (QuestData quest in _questDataDict.Values)
+        {
+            QuestState currentState = _questStates[quest.questId];
+            
+            if (currentState != QuestState.Active)
+            {
+                continue;
+            }
+            
+            bool visitedGameScene = _questsVisitedGameScene.Contains(quest.questId);
+            
+            if (!visitedGameScene)
+            {
+                continue;
+            }
+            
+            if (quest.questCheckRequirements != null && quest.questCheckRequirements.Length > 0)
+            {
+                bool hasDefaultCheck = false;
+                foreach (QuestCheckData checkData in quest.questCheckRequirements)
+                {
+                    if (checkData.checkType == QuestCheckType.Default)
+                    {
+                        hasDefaultCheck = true;
+                        break;
+                    }
+                }
+                
+                if (hasDefaultCheck)
+                {
+                    CheckSingleQuestCompletion(quest.questId);
+                }
+            }
+        }
     }
 
     private IEnumerator SubscribeToInventoryEvents()
@@ -291,6 +348,7 @@ public class QuestDataManager : MonoBehaviour
         _questStates.Clear();
         _completedQuestIds.Clear();
         _activeQuestIds.Clear();
+        _questsVisitedGameScene.Clear();
 
         foreach (QuestData quest in allQuests) {
             if (quest == null) continue;
@@ -372,14 +430,24 @@ public class QuestDataManager : MonoBehaviour
             return false;
         }
 
+        string currentScene = SceneManager.GetActiveScene().name;
         _activeQuestIds.Add(questId);
         _questStates[questId] = QuestState.Active;
+
+        if (_questDataDict.ContainsKey(questId))
+        {
+            QuestData quest = _questDataDict[questId];
+        }
 
         OnQuestStateChanged?.Invoke(questId);
         SaveQuestProgress();
 
         if (_questDataDict.ContainsKey(questId)) {
-            CheckSingleQuestCompletion(questId);
+            QuestData quest = _questDataDict[questId];
+            if (quest.questType != QuestType.BaseQuest)
+            {
+                CheckSingleQuestCompletion(questId);
+            }
         }
 
         return true;
@@ -395,8 +463,6 @@ public class QuestDataManager : MonoBehaviour
         QuestState currentState = _questStates[questId];
 
         if (currentState == QuestState.Completable) {
-            // Completable quests already have all requirements met, but don't auto-complete
-            // They wait for user to click the complete button
             return;
         }
 
@@ -405,7 +471,6 @@ public class QuestDataManager : MonoBehaviour
         }
 
         if (AreAllQuestRequirementsMet(quest)) {
-            // Transition to Completable state instead of completing directly
             _questStates[questId] = QuestState.Completable;
             OnQuestStateChanged?.Invoke(questId);
             SaveQuestProgress();
@@ -416,6 +481,7 @@ public class QuestDataManager : MonoBehaviour
     {
         string sceneName = SceneManager.GetActiveScene().name;
         Dictionary<ResourceType, int> inventoryResources = null;
+        
 
         if (quest.questType == QuestType.BaseQuest) {
             if (sceneName == "BaseScene") {
@@ -491,8 +557,23 @@ public class QuestDataManager : MonoBehaviour
 
         if (quest.questCheckRequirements != null && quest.questCheckRequirements.Length > 0) {
             foreach (QuestCheckData checkData in quest.questCheckRequirements) {
-                if (!checkData.IsRequirementMet()) {
-                    return false;
+                if (checkData.checkType == QuestCheckType.Default)
+                {
+                    bool visitedGameScene = _questsVisitedGameScene.Contains(quest.questId);
+                    string currentScene = SceneManager.GetActiveScene().name;
+                    bool isMet = visitedGameScene && currentScene == "BaseScene";
+                    
+                    if (!isMet)
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    bool isMet = checkData.IsRequirementMet();
+                    if (!isMet) {
+                        return false;
+                    }
                 }
             }
         }
@@ -727,6 +808,15 @@ public class QuestDataManager : MonoBehaviour
             return false;
         }
 
+        if (questId == 0)
+        {
+            string sceneName = SceneManager.GetActiveScene().name;
+            if (sceneName != "BaseScene")
+            {
+                return false;
+            }
+        }
+
         QuestState currentState = _questStates[questId];
 
         if (currentState != QuestState.Active && currentState != QuestState.Completable) {
@@ -737,6 +827,7 @@ public class QuestDataManager : MonoBehaviour
         _questStates[questId] = QuestState.Completed;
         _completedQuestIds.Add(questId);
         _activeQuestIds.Remove(questId);
+        _questsVisitedGameScene.Remove(questId);
         OnQuestStateChanged?.Invoke(questId);
         SaveQuestProgress();
 

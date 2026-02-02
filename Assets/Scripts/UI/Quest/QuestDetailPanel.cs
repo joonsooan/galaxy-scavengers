@@ -223,7 +223,10 @@ public class QuestDetailPanel : MonoBehaviour
                     {
                         primaryCheckType = checkData.checkType;
                     }
-                    break;
+                    if (checkData.checkType != QuestCheckType.Default)
+                    {
+                        break;
+                    }
                 }
             }
         }
@@ -252,6 +255,7 @@ public class QuestDetailPanel : MonoBehaviour
             QuestCheckType.BeaconPlacedForScout => "탐사 요구사항",
             QuestCheckType.ScoutEnteredLocation => "탐사 요구사항",
             QuestCheckType.ModulePlacedOnCore => "모듈 요구사항",
+            QuestCheckType.Default => "요구사항",
             _ => "요구사항"
         };
     }
@@ -273,7 +277,8 @@ public class QuestDetailPanel : MonoBehaviour
                     checkData.checkType == QuestCheckType.UnitProduced ||
                     checkData.checkType == QuestCheckType.BeaconPlacedForScout ||
                     checkData.checkType == QuestCheckType.ScoutEnteredLocation ||
-                    checkData.checkType == QuestCheckType.ModulePlacedOnCore)
+                    checkData.checkType == QuestCheckType.ModulePlacedOnCore ||
+                    checkData.checkType == QuestCheckType.Default)
                 {
                     if (!string.IsNullOrEmpty(checkData.displayText))
                     {
@@ -716,13 +721,21 @@ public class QuestDetailPanel : MonoBehaviour
     
     private void FinishQuestAndGiveRewards(int questId)
     {
+        if (QuestManager.Instance != null)
+        {
+            QuestManager.Instance.FinishQuest(questId);
+        }
+        
         if (questUIHandler != null)
         {
             questUIHandler.OnQuestFinished(questId);
         }
         
         QuestData quest = QuestDataManager.Instance.GetQuestData(questId);
-        if (quest == null) return;
+        if (quest == null)
+        {
+            return;
+        }
         
         BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
         

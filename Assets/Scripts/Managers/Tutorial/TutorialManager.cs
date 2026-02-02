@@ -36,7 +36,7 @@ public struct HighlightableUI
 public class TutorialManager : MonoBehaviour
 {
     [Header("Tutorial Settings")]
-    [SerializeField] private int firstQuestId = 1;
+    [SerializeField] private int firstQuestId = 0;
     [SerializeField] private GameObject tutorialUI;
     [SerializeField] private TutorialStepData[] tutorialStepDataList;
 
@@ -126,6 +126,11 @@ public class TutorialManager : MonoBehaviour
         if (ShouldStartTutorial()) {
             InitializeTutorialSteps();
             StartCoroutine(WaitForGameInitialization());
+        }
+        else
+        {
+            BuildUIPanelDictionary();
+            ShowAllUIPanels();
         }
     }
 
@@ -632,10 +637,6 @@ public class TutorialManager : MonoBehaviour
             _tutorialUI.HideTutorial();
         }
 
-        if (QuestManager.Instance != null) {
-            QuestManager.Instance.CompleteQuest(firstQuestId);
-        }
-
         if (CoreRepairManager.Instance != null) {
             CoreRepairManager.Instance.InitializeLanding();
         }
@@ -659,10 +660,6 @@ public class TutorialManager : MonoBehaviour
 
         if (_tutorialUI != null) {
             _tutorialUI.HideTutorial();
-        }
-
-        if (QuestManager.Instance != null) {
-            QuestManager.Instance.CompleteQuest(firstQuestId);
         }
         
         if (CoreRepairManager.Instance != null) {

@@ -114,7 +114,10 @@ public class RequestQuestAcceptPanel : MonoBehaviour
                     {
                         primaryCheckType = checkData.checkType;
                     }
-                    break;
+                    if (checkData.checkType != QuestCheckType.Default)
+                    {
+                        break;
+                    }
                 }
             }
         }
@@ -143,6 +146,7 @@ public class RequestQuestAcceptPanel : MonoBehaviour
             QuestCheckType.BeaconPlacedForScout => "탐사 요구사항",
             QuestCheckType.ScoutEnteredLocation => "탐사 요구사항",
             QuestCheckType.ModulePlacedOnCore => "모듈 요구사항",
+            QuestCheckType.Default => "요구사항",
             _ => "요구사항"
         };
     }
@@ -167,7 +171,8 @@ public class RequestQuestAcceptPanel : MonoBehaviour
                     checkData.checkType == QuestCheckType.UnitProduced ||
                     checkData.checkType == QuestCheckType.BeaconPlacedForScout ||
                     checkData.checkType == QuestCheckType.ScoutEnteredLocation ||
-                    checkData.checkType == QuestCheckType.ModulePlacedOnCore)
+                    checkData.checkType == QuestCheckType.ModulePlacedOnCore ||
+                    checkData.checkType == QuestCheckType.Default)
                 {
                     if (!string.IsNullOrEmpty(checkData.displayText))
                     {

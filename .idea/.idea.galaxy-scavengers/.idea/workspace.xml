@@ -3,14 +3,25 @@
   <component name="ChangeListManager">
     <list default="true" id="2e9922bb-ccc6-4c6e-93bd-15fa8a8d7f34" name="변경" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.galaxy-scavengers/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.galaxy-scavengers/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Managers/_QuestManager.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Managers/_QuestManager.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Buildings/2_Drone Hub.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Buildings/2_Drone Hub.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Core Part Data/CorePart_Barrier.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Core Part Data/CorePart_Barrier.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Core Part Data/CorePart_Controller.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Core Part Data/CorePart_Controller.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Core Part Data/CorePart_Engine.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Core Part Data/CorePart_Engine.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Core Part Data/CorePart_Repeater.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Core Part Data/CorePart_Repeater.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Core Part Data/CorePart_Storage.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Core Part Data/CorePart_Storage.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0000.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0000.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/BaseScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/BaseScene.unity" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Quest/QuestDataManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Quest/QuestDataManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Quest/RequestQuestManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Quest/RequestQuestManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/GameSceneQuestUIManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/GameSceneQuestUIManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Quest/QuestUIManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Quest/QuestUIManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Tutorial/TutorialManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Tutorial/TutorialManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Quest/QuestCheckData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Quest/QuestCheckData.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Quest/QuestCheckType.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Quest/QuestCheckType.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Quest/QuestTracker.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Quest/QuestTracker.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestCell.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestCell.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestDetailPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestDetailPanel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Status/GameSpeedUI.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Status/GameSpeedUI.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestTester.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestTester.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestUIHandler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestUIHandler.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/RequestQuestAcceptPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/RequestQuestAcceptPanel.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -97,7 +108,7 @@
       <workItem from="1769997740488" duration="3000" />
       <workItem from="1769998948939" duration="1552000" />
       <workItem from="1770008927183" duration="27000" />
-      <workItem from="1770012132409" duration="2454000" />
+      <workItem from="1770012132409" duration="3757000" />
     </task>
     <servers />
   </component>

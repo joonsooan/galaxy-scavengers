@@ -124,7 +124,12 @@ public class QuestCell : MonoBehaviour
         if (notifierIcon != null)
         {
             bool shouldShowNotifier = false;
-            if (questData.questType == QuestType.CoreRepairQuest)
+            if (questData.questType == QuestType.BaseQuest)
+            {
+                QuestState state = QuestDataManager.Instance.GetQuestState(questData.questId);
+                shouldShowNotifier = state == QuestState.Completable;
+            }
+            else if (questData.questType == QuestType.CoreRepairQuest)
             {
                 shouldShowNotifier = isNew;
             }
