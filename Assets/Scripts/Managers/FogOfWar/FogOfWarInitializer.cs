@@ -15,6 +15,7 @@ public class FogOfWarInitializer
     private Tilemap _cachedGroundTilemap;
     private Tilemap _cachedWallTilemap;
     private Color _invisibleColor;
+    private static readonly WaitForSeconds _wait05 = CoroutineCache.GetWaitForSeconds(0.5f);
     
     public FogOfWarInitializer(FogOfWarManager manager, Grid grid, Tilemap fogTilemap, TileBase fogTile, 
         Tilemap groundTilemap, MapGenerator mapGenerator, Color invisibleColor)
@@ -40,7 +41,7 @@ public class FogOfWarInitializer
         if (progress != null)
         {
             progress.UpdateProgress(0.0f, "대기 농도 및 가시거리 분석 중...");
-            yield return new WaitForSeconds(0.5f);
+            yield return _wait05;
         }
         
         List<Tilemap> terrainTilemaps = CollectTerrainTilemaps();
@@ -311,11 +312,13 @@ public class FogOfWarInitializer
             BoundsInt bounds = terrainTilemap.cellBounds;
             foreach (Vector3Int pos in bounds.allPositionsWithin)
             {
-                if (terrainTilemap.HasTile(pos))
+                if (!terrainTilemap.HasTile(pos))
                 {
-                    allTilePositions.Add(pos);
-                    tileVisibility[pos] = FogOfWarState.Invisible;
+                    continue;
                 }
+
+                allTilePositions.Add(pos);
+                tileVisibility[pos] = FogOfWarState.Invisible;
             }
         }
         

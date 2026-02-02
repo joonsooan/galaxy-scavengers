@@ -16,10 +16,34 @@ public class UnitManager : MonoBehaviour
     public IReadOnlyList<UnitBase> EnemyUnits => _enemyUnits;
     public IReadOnlyList<UnitBase> AllyUnits => _allyUnits;
 
+    [Header("Population Settings")]
+    [SerializeField] private int baseMaxPopulation = 50;
+
     private readonly List<UnitBase> _enemyUnits = new();
     private readonly List<UnitBase> _allyUnits = new();
     
     public static event Action<UnitBase> OnUnitCountChanged;
+
+    public int GetMaxPopulation()
+    {
+        int maxPop = baseMaxPopulation;
+        
+        if (CoreRepairManager.Instance != null && !CoreRepairManager.Instance.IsPartRepaired(CorePart.Controller))
+        {
+            CorePartData controllerData = CoreRepairManager.Instance.GetPartData(CorePart.Controller);
+            if (controllerData != null)
+            {
+                maxPop = Mathf.Max(1, Mathf.RoundToInt(baseMaxPopulation * (1f - controllerData.debuffValue)));
+            }
+        }
+        
+        return maxPop;
+    }
+
+    public bool CanSpawnUnit()
+    {
+        return _allyUnits.Count < GetMaxPopulation();
+    }
     
     private void Awake()
     {
@@ -73,6 +97,14 @@ public class UnitManager : MonoBehaviour
         }
         else if (unit.unitType == UnitBase.UnitType.Ally && !_allyUnits.Contains(unit))
         {
+            if (!CanSpawnUnit())
+            {
+                if (unit.gameObject != null)
+                {
+                    Destroy(unit.gameObject);
+                }
+                return;
+            }
             _allyUnits.Add(unit);
         }
         OnUnitCountChanged?.Invoke(unit);
@@ -107,5 +139,23 @@ public class UnitManager : MonoBehaviour
 
         _allyUnits.Clear();
         _enemyUnits.Clear();
+    }
+
+    public List<UnitBase> GetAllyUnitsInArea(Vector3 center, float radius)
+    {
+        List<UnitBase> results = new List<UnitBase>();
+        float radiusSquared = radius * radius;
+
+        foreach (UnitBase unit in _allyUnits)
+        {
+            if (unit == null) continue;
+            float distSquared = (center - unit.transform.position).sqrMagnitude;
+            if (distSquared <= radiusSquared)
+            {
+                results.Add(unit);
+            }
+        }
+
+        return results;
     }
 }

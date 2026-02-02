@@ -213,6 +213,7 @@ MonoBehaviour:
   droneIcon: {fileID: 2149455835236925970}
   emptySlotIcon: {fileID: 3270293437597525463}
   cellButton: {fileID: 4113288312921380297}
+  glowMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
 --- !u!1 &7893659078431901417
 GameObject:
   m_ObjectHideFlags: 0

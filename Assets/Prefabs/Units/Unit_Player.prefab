@@ -76,10 +76,10 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -374210987
-  m_SortingLayer: 3
+  m_SortingLayer: 4
   m_SortingOrder: 0
-  m_Sprite: {fileID: -5932265281250941504, guid: b2344e19305fc3140bc7ee8cae2166c3, type: 3}
-  m_Color: {r: 1, g: 0.96290576, b: 0.19607842, a: 1}
+  m_Sprite: {fileID: -285713518536452679, guid: b6aa50edba1d7734cb70f4ca31236512, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -99,7 +99,7 @@ Animator:
   m_GameObject: {fileID: 2144778890209210267}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: fc23de8949a786847aafdab0beb73634, type: 2}
+  m_Controller: {fileID: 9100000, guid: b96e92b4409479f46a078bcebfa1291d, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -290,6 +290,7 @@ MonoBehaviour:
   flashDuration: 0.3
   currentHealth: 0
   unitType: 0
+  unitData: {fileID: 0}
   progressBarPrefab: {fileID: 0}
   currentState: 0
   interactionRange: 6
@@ -316,7 +317,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d034f5ba11219d742984a949de4abd7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 6
+  moveSpeed: 7.5
 --- !u!114 &6911189482688880012
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -329,7 +330,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4df76de1adfb064e95b506d49b881b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  visionRange: 7.5
+  visionRange: 8.5
   isActive: 1
   hasOffest: 0
   offest: {x: 0.5, y: 0.5, z: 0}

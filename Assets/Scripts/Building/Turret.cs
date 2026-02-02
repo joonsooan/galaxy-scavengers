@@ -13,7 +13,9 @@ public class Turret : Damageable, IAetherConsumer
 
     private Transform _target;
     private Coroutine _attackCoroutine;
+    private Coroutine _updateTargetCoroutine;
     private WaitForSeconds _findTargetWait;
+    private WaitForSeconds _fireIntervalWait;
     private Vector3 _bulletSpawnPosition;
     private bool _isOperational = true;
     private AetherConsumptionManager _aetherConsumptionManager;
@@ -43,8 +45,9 @@ public class Turret : Damageable, IAetherConsumer
         }
         
         _bulletSpawnPosition = transform.position + new Vector3(0.5f, 0.5f, 0f);
-        _findTargetWait = new WaitForSeconds(0.2f);
-        StartCoroutine(UpdateTargetCoroutine());
+        _findTargetWait = CoroutineCache.GetWaitForSeconds(0.2f);
+        _fireIntervalWait = CoroutineCache.GetWaitForSeconds(fireInterval);
+        _updateTargetCoroutine = StartCoroutine(UpdateTargetCoroutine());
     }
 
     protected override void OnDisable()
@@ -58,6 +61,7 @@ public class Turret : Damageable, IAetherConsumer
         
         StopAllCoroutines();
         _attackCoroutine = null;
+        _updateTargetCoroutine = null;
     }
     
     private void FindAndCacheAetherManager()
@@ -167,7 +171,7 @@ public class Turret : Damageable, IAetherConsumer
         while (true)
         {
             Shoot();
-            yield return new WaitForSeconds(fireInterval);
+            yield return _fireIntervalWait;
         }
     }
 
@@ -175,7 +179,6 @@ public class Turret : Damageable, IAetherConsumer
     {
         if (_target == null)
         {
-            Debug.Log("Target is null");
             return;
         }
         

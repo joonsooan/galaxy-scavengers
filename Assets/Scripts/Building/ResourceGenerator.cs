@@ -15,11 +15,18 @@ public class ResourceGenerator : Damageable
     private bool _isConstructed;
     private AetherConsumptionManager _aetherConsumptionManager;
     private bool _wasAetherStorageFull;
+    private WaitForSeconds _generationIntervalWait;
     
     public float GenerationInterval => generationInterval;
     public int ResourceAmount => resourceAmount;
     public ResourceType ResourceType => resourceType;
     public bool IsConstructed => _isConstructed;
+
+    protected override void Awake()
+    {
+        base.Awake();
+        _generationIntervalWait = CoroutineCache.GetWaitForSeconds(generationInterval);
+    }
 
     protected override void OnEnable()
     {
@@ -98,7 +105,7 @@ public class ResourceGenerator : Damageable
     {
         while (true)
         {
-            yield return new WaitForSeconds(generationInterval);
+            yield return _generationIntervalWait;
             
             GenerateResource();
         }
@@ -108,6 +115,8 @@ public class ResourceGenerator : Damageable
     {
         if (resourceType == ResourceType.Aether)
         {
+            FindAndCacheAetherManager();
+            
             if (_aetherConsumptionManager != null && _aetherConsumptionManager.IsAetherCapacityFull)
             {
                 if (!_wasAetherStorageFull && GameAlertUIManager.Instance != null)

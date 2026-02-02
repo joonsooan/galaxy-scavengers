@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 public class Unit_Player : UnitBase
 {
@@ -22,11 +21,16 @@ public class Unit_Player : UnitBase
     [SerializeField] private Material laserMaterial;
     [SerializeField] private float laserWidth = 0.1f;
     [SerializeField] private ParticleSystem miningParticleSystem;
-    [SerializeField] private float particleOffsetDistance = 0.5f;
     [SerializeField] private float yOffset;
+    private float _attackStateEndTime;
     private Grid _grid;
+    private bool _isAttacking;
+    private bool _isBulletFiringEnabled;
+    private bool _isLookingAtFireDirection;
     private LineRenderer _laserRenderer;
+    private Vector2 _lastFireDirection;
     private float _lastFireTime;
+    private float _lookAtFireDirectionEndTime;
     private Camera _mainCamera;
     private Coroutine _mineCoroutine;
     private WaitForSeconds _miningDelay;
@@ -60,14 +64,28 @@ public class Unit_Player : UnitBase
 
     private void Update()
     {
+        if (!_isBulletFiringEnabled) {
+            if (TutorialManager.Instance == null || !TutorialManager.Instance.IsTutorialActive()) {
+                _isBulletFiringEnabled = true;
+            }
+            else {
+                TutorialStepData currentStep = TutorialManager.Instance.GetCurrentTutorialStep();
+                if (currentStep != null && currentStep.stepType == TutorialStepType.BulletFired) {
+                    _isBulletFiringEnabled = true;
+                }
+            }
+        }
+
         HandleInput();
         CheckMiningRange();
+        UpdateUnitState();
+        UpdateAnimationState();
         UpdateSpriteDirection();
         UpdateLaser();
         UpdateParticlePosition();
     }
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         StopMiningParticles();
 
@@ -82,6 +100,44 @@ public class Unit_Player : UnitBase
         Gizmos.DrawWireSphere(transform.position, interactionRange);
     }
 
+    private void UpdateUnitState()
+    {
+        if (currentState == UnitState.Mining) {
+            return;
+        }
+
+        if (_isAttacking && Time.time >= _attackStateEndTime) {
+            _isAttacking = false;
+        }
+
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
+        bool isMoving = rb != null && rb.linearVelocity.sqrMagnitude > 0.01f;
+
+        if (isMoving && currentState != UnitState.Mining && !_isAttacking) {
+            currentState = UnitState.Moving;
+        }
+        else if (!isMoving && currentState != UnitState.Mining && !_isAttacking) {
+            currentState = UnitState.Idle;
+        }
+    }
+
+    private void UpdateAnimationState()
+    {
+        if (_spriteController == null) {
+            return;
+        }
+
+        bool isMining = currentState == UnitState.Mining;
+        bool isMoving = currentState == UnitState.Moving;
+        bool isAttacking = _isAttacking;
+
+        _spriteController.UpdateAnimationState(
+            currentState,
+            isMining,
+            isAttacking: isAttacking
+        );
+    }
+
     private void UpdateSpriteDirection()
     {
         if (currentState == UnitState.Mining && _targetResourceNode != null) {
@@ -94,17 +150,36 @@ public class Unit_Player : UnitBase
                 }
             }
         }
+        else if (_isLookingAtFireDirection && Time.time < _lookAtFireDirectionEndTime) {
+            if (_spriteController != null && _lastFireDirection.sqrMagnitude > 0.01f) {
+                _spriteController.UpdateSpriteDirection(_lastFireDirection);
+            }
+        }
         else if (_spriteController != null && playerMovement != null) {
+            _isLookingAtFireDirection = false;
             Vector2 moveDir = playerMovement.GetMoveDirection();
             if (moveDir.sqrMagnitude > 0.01f) {
                 _spriteController.ClearTarget();
                 _spriteController.UpdateSpriteDirection(moveDir);
             }
         }
+        else if (_isAttacking && _spriteController != null) {
+            Vector3 mouseWorldPos = GetMouseWorldPosition();
+            if (mouseWorldPos != Vector3.zero) {
+                Vector2 direction = (mouseWorldPos - transform.position).normalized;
+                if (direction.sqrMagnitude > 0.01f) {
+                    _spriteController.UpdateSpriteDirection(direction);
+                }
+            }
+        }
     }
 
     private void HandleInput()
     {
+        if (GameManager.Instance != null && GameManager.Instance.IsDragging()) {
+            return;
+        }
+
         if (Input.GetMouseButtonDown(0)) {
             if (IsPointerOverUI()) {
                 return;
@@ -261,7 +336,7 @@ public class Unit_Player : UnitBase
         }
 
         if (_mineCoroutine == null) {
-            _miningDelay = new WaitForSeconds(_targetResourceNode.timeToMinePerUnit);
+            _miningDelay = CoroutineCache.GetWaitForSeconds(_targetResourceNode.timeToMinePerUnit);
             _mineCoroutine = StartCoroutine(MineResourceCoroutine());
             currentState = UnitState.Mining;
         }
@@ -408,10 +483,31 @@ public class Unit_Player : UnitBase
         if (bulletPrefab == null)
             return;
 
+        if (!_isBulletFiringEnabled) {
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive()) {
+                TutorialStepData currentStep = TutorialManager.Instance.GetCurrentTutorialStep();
+                if (currentStep != null && currentStep.stepType == TutorialStepType.BulletFired) {
+                    _isBulletFiringEnabled = true;
+                }
+                else {
+                    return;
+                }
+            }
+            else {
+                _isBulletFiringEnabled = true;
+            }
+        }
+
         Vector2 fireDirection = (targetPosition - transform.position).normalized;
         Vector3 spawnPosition = transform.position + (Vector3)fireDirection * 0.5f;
 
-        GameObject bulletObj = ObjectPooler.Instance.SpawnFromPool("PlayerBullet", spawnPosition, Quaternion.identity);
+        Quaternion bulletRotation = Quaternion.identity;
+        if (fireDirection.sqrMagnitude > 0.01f) {
+            float angle = Mathf.Atan2(fireDirection.y, fireDirection.x) * Mathf.Rad2Deg;
+            bulletRotation = Quaternion.AngleAxis(angle, Vector3.forward);
+        }
+
+        GameObject bulletObj = ObjectPooler.Instance.SpawnFromPool("PlayerBullet", spawnPosition, bulletRotation);
 
         if (bulletObj != null) {
             Player_Bullet bulletScript = bulletObj.GetComponent<Player_Bullet>();
@@ -425,6 +521,17 @@ public class Unit_Player : UnitBase
         }
 
         _lastFireTime = Time.time;
+        _isAttacking = true;
+        _attackStateEndTime = Time.time + fireInterval * 0.5f;
+        currentState = UnitState.Attacking;
+
+        _lastFireDirection = fireDirection;
+        _isLookingAtFireDirection = true;
+        _lookAtFireDirectionEndTime = Time.time + 0.1f;
+
+        if (_spriteController != null) {
+            _spriteController.UpdateSpriteDirection(fireDirection);
+        }
 
         if (TutorialManager.Instance != null) {
             TutorialManager.Instance.OnBulletFired();

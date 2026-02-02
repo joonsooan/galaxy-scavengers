@@ -20,6 +20,7 @@ public class Unit_Drone : UnitBase
     [SerializeField] private float hoverDuration = 1.5f;
     private Coroutine _assignmentCoroutine;
     private Vector3 _baseHoverLocalPosition;
+    private WaitForSeconds _assignmentWait;
 
     private int _carriedAmount;
 
@@ -36,6 +37,9 @@ public class Unit_Drone : UnitBase
     private Transform _spriteTransform;
     private IStorage _targetStorage;
     private Coroutine _unloadingCoroutine;
+    private List<IStorage> _storageRoute;
+    private int _storageRouteIndex;
+    private int _remainingRequestAmount;
 
     public bool HasCheckedIn { get; private set; }
 
@@ -60,6 +64,7 @@ public class Unit_Drone : UnitBase
             _spriteTransform = _spriteController.transform;
             _baseHoverLocalPosition = _spriteTransform.localPosition;
         }
+        _assignmentWait = CoroutineCache.GetWaitForSeconds(assignmentTime);
     }
 
     private void Update()
@@ -371,16 +376,6 @@ public class Unit_Drone : UnitBase
         }
 
         if (!movement.IsMoving) {
-            // Validate that the storage still has the required resources before loading
-            if (_targetStorage != null && _currentRequest != null) {
-                int availableAmount = _targetStorage.GetCurrentResourceAmount(_currentRequest.type);
-                if (availableAmount < _currentRequest.amount) {
-                    // Storage no longer has enough resources, cancel task
-                    SetTask_ReturnHome();
-                    return;
-                }
-            }
-
             if (_loadingCoroutine == null) {
                 _loadingCoroutine = StartCoroutine(LoadingResourceCoroutine());
             }
@@ -410,35 +405,70 @@ public class Unit_Drone : UnitBase
 
         HideProgressBar();
 
-        if (_targetStorage != null && _currentRequest != null) {
+        if (_targetStorage != null && _currentRequest != null && _remainingRequestAmount > 0) {
             int availableAmount = _targetStorage.GetCurrentResourceAmount(_currentRequest.type);
-            if (availableAmount < _currentRequest.amount) {
-                SetTask_ReturnHome();
-                _loadingCoroutine = null;
-                yield break;
+            if (availableAmount > 0) {
+                int amountToWithdraw = Mathf.Min(_remainingRequestAmount, availableAmount);
+                if (_targetStorage.TryWithdrawResource(_currentRequest.type, amountToWithdraw, out int withdrawnAmount) && withdrawnAmount > 0) {
+                    _carriedResourceType = _currentRequest.type;
+                    _carriedAmount += withdrawnAmount;
+                    _remainingRequestAmount -= withdrawnAmount;
+                }
             }
 
-            if (_targetStorage.TryWithdrawResource(_currentRequest.type, _currentRequest.amount, out int withdrawnAmount)) {
-                if (withdrawnAmount > 0) {
-                    _carriedResourceType = _currentRequest.type;
-                    _carriedAmount = withdrawnAmount;
+            if (_remainingRequestAmount > 0) {
+                bool movedToNext = false;
+                if (_storageRoute != null && _storageRoute.Count > 0) {
+                    for (int i = _storageRouteIndex + 1; i < _storageRoute.Count; i++) {
+                        IStorage nextStorage = _storageRoute[i];
+                        if (nextStorage == null) continue;
+                        int nextAvailable = nextStorage.GetCurrentResourceAmount(_currentRequest.type);
+                        if (nextAvailable <= 0) continue;
+                        bool hasPath = movement.SetNewTarget(nextStorage.GetPosition());
+                        if (!hasPath) continue;
+                        _storageRouteIndex = i;
+                        _targetStorage = nextStorage;
+                        _currentState = DroneState.FetchingResource;
+                        movement.ResumeMovement();
+                        movedToNext = true;
+                        break;
+                    }
+                }
 
+                if (!movedToNext) {
+                    if (_carriedAmount > 0 && _currentProcessor != null) {
+                        Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
+                        movement.ResumeMovement();
+                        movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
+                        _currentState = DroneState.DeliveringResource;
+                    }
+                    else {
+                        SetTask_ReturnHome();
+                    }
+                }
+            }
+            else {
+                if (_carriedAmount > 0 && _currentProcessor != null) {
                     Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
                     movement.ResumeMovement();
                     movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
-
                     _currentState = DroneState.DeliveringResource;
                 }
                 else {
                     SetTask_ReturnHome();
                 }
             }
+        }
+        else {
+            if (_carriedAmount > 0 && _currentProcessor != null) {
+                Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
+                movement.ResumeMovement();
+                movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
+                _currentState = DroneState.DeliveringResource;
+            }
             else {
                 SetTask_ReturnHome();
             }
-        }
-        else {
-            SetTask_ReturnHome();
         }
 
         _loadingCoroutine = null;
@@ -477,7 +507,17 @@ public class Unit_Drone : UnitBase
             _spriteController.SetTargetTransform(_currentProcessor.transform);
         }
 
-        yield return new WaitForSeconds(unloadingTime);
+        ShowProgressBar();
+        float elapsedTime = 0f;
+
+        while (elapsedTime < unloadingTime) {
+            elapsedTime += Time.deltaTime;
+            float progress = unloadingTime > 0f ? elapsedTime / unloadingTime : 1f;
+            UpdateProgressBar(progress);
+            yield return null;
+        }
+
+        HideProgressBar();
         bool taskAssigned = false;
 
         if (_currentProcessor != null) {
@@ -517,7 +557,7 @@ public class Unit_Drone : UnitBase
             _spriteController.UpdateSpriteDirection(moveDir);
         }
 
-        yield return new WaitForSeconds(assignmentTime);
+        yield return _assignmentWait;
 
         HasCheckedIn = true;
 
@@ -535,7 +575,6 @@ public class Unit_Drone : UnitBase
             return;
         }
 
-        // Check if processor is operational (has aether)
         if (_currentProcessor != null && _currentProcessor is IAetherConsumer consumer && !consumer.IsOperational) {
             SetTask_Idle();
             return;
@@ -556,13 +595,14 @@ public class Unit_Drone : UnitBase
                 }
             }
 
-            // Show progress bar during processing
             if (CurrentRecipeTask != null && CurrentRecipeTask.isProcessing) {
                 ShowProgressBar();
-                float progress = CurrentRecipeTask.processingProgress;
-                UpdateProgressBar(progress);
-            }
-            else {
+                float normalizedProgress = 0f;
+                if (CurrentRecipeTask.recipeData != null && CurrentRecipeTask.recipeData.processingTime > 0f) {
+                    normalizedProgress = CurrentRecipeTask.processingProgress / CurrentRecipeTask.recipeData.processingTime;
+                }
+                UpdateProgressBar(normalizedProgress);
+            } else {
                 HideProgressBar();
             }
 
@@ -616,37 +656,53 @@ public class Unit_Drone : UnitBase
     {
         _currentRequest = request;
         _targetStorage = null;
+        _storageRoute = null;
+        _storageRouteIndex = 0;
+        _remainingRequestAmount = request != null ? request.amount : 0;
 
-        if (ResourceManager.Instance != null) {
+        if (ResourceManager.Instance != null && request != null && processor != null && _remainingRequestAmount > 0) {
             List<IStorage> storages = ResourceManager.Instance.GetAllStorages();
             if (storages != null && storages.Count > 0) {
                 List<IStorage> candidates = new List<IStorage>();
+                int totalAvailable = 0;
                 foreach (IStorage storage in storages) {
                     if (storage == null) continue;
                     int availableAmount = storage.GetCurrentResourceAmount(request.type);
                     if (availableAmount <= 0) continue;
+                    totalAvailable += availableAmount;
                     candidates.Add(storage);
                 }
 
-                if (candidates.Count > 0) {
+                if (candidates.Count > 0 && totalAvailable >= request.amount) {
                     candidates.Sort((a, b) => {
                         float distA = Vector3.Distance(processor.GetPosition(), a.GetPosition());
                         float distB = Vector3.Distance(processor.GetPosition(), b.GetPosition());
-                        int amountA = a.GetCurrentResourceAmount(request.type);
-                        int amountB = b.GetCurrentResourceAmount(request.type);
-
-                        if (amountA >= request.amount && amountB < request.amount) return -1;
-                        if (amountA < request.amount && amountB >= request.amount) return 1;
-
                         return distA.CompareTo(distB);
                     });
 
+                    List<IStorage> route = new List<IStorage>();
+                    int remaining = request.amount;
                     foreach (IStorage storage in candidates) {
-                        bool hasPath = movement.SetNewTarget(storage.GetPosition());
-                        if (hasPath) {
-                            _targetStorage = storage;
-                            _currentState = DroneState.FetchingResource;
-                            return;
+                        int availableAmount = storage.GetCurrentResourceAmount(request.type);
+                        if (availableAmount <= 0) continue;
+                        route.Add(storage);
+                        remaining -= availableAmount;
+                        if (remaining <= 0) {
+                            break;
+                        }
+                    }
+
+                    if (route.Count > 0) {
+                        for (int i = 0; i < route.Count; i++) {
+                            IStorage storage = route[i];
+                            bool hasPath = movement.SetNewTarget(storage.GetPosition());
+                            if (hasPath) {
+                                _storageRoute = route;
+                                _storageRouteIndex = i;
+                                _targetStorage = storage;
+                                _currentState = DroneState.FetchingResource;
+                                return;
+                            }
                         }
                     }
                 }
@@ -681,6 +737,7 @@ public class Unit_Drone : UnitBase
     public void SetTask_Idle()
     {
         ReleaseFromRecipeTask();
+        HideProgressBar();
         _currentState = DroneState.Idle;
     }
 

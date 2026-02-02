@@ -29,6 +29,7 @@ public class GameManager : MonoBehaviour
     private bool _isCombatSpeedLockActive;
 
     private float _savedTimeScale = 1f;
+    private static readonly WaitForSeconds _wait05 = CoroutineCache.GetWaitForSeconds(0.5f);
     public static GameManager Instance { get; private set; }
     public bool IsPaused { get; private set; }
 
@@ -129,6 +130,11 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F)) {
             if (FogOfWarManager.Instance != null) {
                 FogOfWarManager.Instance.ToggleFogVisibility();
+            }
+        }
+        if (Input.GetKeyDown(KeyCode.T)) {
+            if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive()) {
+                TutorialManager.Instance.SkipAllTutorials();
             }
         }
 #endif
@@ -245,7 +251,7 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        yield return new WaitForSeconds(0.5f);
+        yield return _wait05;
 
         IInitializationProgress progress = GetInitializationProgress();
         yield return StartCoroutine(InitializeGameSceneAsync(progress));
@@ -261,6 +267,11 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator InitializeGameSceneAsync(IInitializationProgress progress = null)
     {
+        if (ObjectPooler.Instance != null)
+        {
+            ObjectPooler.Instance.InitializePools();
+        }
+
         yield return null;
 
         // Step 1: Generate Map
@@ -280,7 +291,11 @@ public class GameManager : MonoBehaviour
 
         if (progress != null) {
             progress.UpdateProgress(0.0f, "착륙 좌표 고정 중...");
-            yield return new WaitForSeconds(0.5f);
+            yield return _wait05;
+        }
+
+        if (CoreRepairManager.Instance != null) {
+            CoreRepairManager.Instance.InitializeLanding();
         }
 
         IsGameSceneInitialized = true;

@@ -13,6 +13,7 @@ public class UnitSpriteController : MonoBehaviour
     private static readonly int IsConstructingHash = Animator.StringToHash("IsConstructing");
     private static readonly int IsProcessingHash = Animator.StringToHash("IsProcessing");
     private static readonly int IsPatrollingHash = Animator.StringToHash("IsPatrolling");
+    private static readonly int IsAttackingHash = Animator.StringToHash("IsAttacking");
     private static readonly int CargoFillHash = Animator.StringToHash("CargoFill");
 
     private Animator _animator;
@@ -87,16 +88,20 @@ public class UnitSpriteController : MonoBehaviour
         float x = _lastDirection.x;
         float y = _lastDirection.y;
 
-        if (Mathf.Abs(x) > 0.3f && Mathf.Abs(y) > 0.3f) {
-            y = 0f;
-        }
-        else if (Mathf.Abs(y) > Mathf.Abs(x)) {
-            x = 0f;
-            y = y > 0 ? 1f : -1f;
-        }
-        else {
+        float absX = Mathf.Abs(x);
+        float absY = Mathf.Abs(y);
+
+        if (absX > 0.3f && absY > 0.3f) {
             y = 0f;
             x = x > 0 ? 1f : -1f;
+        }
+        else if (absX > absY) {
+            y = 0f;
+            x = x > 0 ? 1f : -1f;
+        }
+        else {
+            x = 0f;
+            y = y > 0 ? 1f : -1f;
         }
 
         _animator.SetFloat(InputXHash, x);
@@ -109,7 +114,8 @@ public class UnitSpriteController : MonoBehaviour
         bool? isMining = null,
         bool? isConstructing = null,
         bool? isProcessing = null,
-        bool? isPatrolling = null
+        bool? isPatrolling = null,
+        bool? isAttacking = null
     )
     {
         bool isMoving = currentState == UnitBase.UnitState.Moving || currentState == UnitBase.UnitState.ReturningToStorage;
@@ -134,6 +140,10 @@ public class UnitSpriteController : MonoBehaviour
 
         if (isPatrolling.HasValue) {
             _animator.SetBool(IsPatrollingHash, isPatrolling.Value);
+        }
+
+        if (isAttacking.HasValue) {
+            _animator.SetBool(IsAttackingHash, isAttacking.Value);
         }
     }
 

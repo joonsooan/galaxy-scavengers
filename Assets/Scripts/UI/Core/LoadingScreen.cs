@@ -1,51 +1,65 @@
 using System.Collections;
-using UnityEngine;
-using UnityEngine.UI;
 using DG.Tweening;
+using FMODUnity;
 using Systems.Jobs;
 using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class LoadingScreen : MonoBehaviour, IInitializationProgress
 {
     [Header("UI Elements")]
     [SerializeField] private Image backgroundImage;
     [SerializeField] private TextMeshProUGUI loadingText;
-    [SerializeField] private Image loadingImage;
+    [SerializeField] private RectTransform loadingImage;
+    [SerializeField] private Transform visualChild;
     [SerializeField] private ParticleSystem loadingParticles;
-    
+
     [Header("Progress UI Elements")]
     [SerializeField] private TextMeshProUGUI progressText;
     [SerializeField] private Image progressBarFill;
     [SerializeField] private GameObject progressBarContainer;
 
-    [Header("Settings")]
+    [Header("Visual Settings")]
     [SerializeField] private string loadingTextString = "로딩 중...";
     [SerializeField] private Color backgroundColor = new (0f, 0f, 0f, 0.9f);
+
+    [Header("Timing - Entry & Particles")]
+    [SerializeField] private float imageEntryDelay;
+    [SerializeField] private float imageEntryDuration = 0.8f;
     [SerializeField] private float particleStartDelay = 1f;
-    
+
+    [Header("Timing - Fade Sequence")]
+    [SerializeField] private float postInitWaitDuration = 1.0f;
+    [SerializeField] private float imageExitDuration = 1.0f;
+    [SerializeField] private float contentFadeOutDuration = 0.5f;
+    [SerializeField] private float imageExitDelay = 2.0f;
+    [SerializeField] private float fadeOutDuration = 1f;
+    [SerializeField] private float resumeDelay = 0.5f;
+
     [Header("Shake Settings")]
     [SerializeField] private float imageShakeStrength = 15f;
     [SerializeField] private float imageShakeDuration = 0.1f;
     [SerializeField] private int shakeVibrato = 30;
-    
-    [Header("Fade Settings")]
-    [SerializeField] private float fadeOutDuration = 1f;
-    [SerializeField] private float contentFadeOutDuration = 0.5f;
-    [SerializeField] private float resumeDelay = 0.5f;
-    
-    [Header("Animation Settings")]
-    [SerializeField] private float imageEntryDelay;
-    [SerializeField] private float imageEntryDuration = 0.8f;
-    [SerializeField] private float imageExitDuration = 1.0f;
-    [SerializeField] private float postInitWaitDuration = 1.0f;
-    [SerializeField] private float imageExitDelay = 2.0f;
     [SerializeField] private float maxShakeStrengthMultiplier = 3.0f;
+
+    [Header("Audio")]
+    [SerializeField] private EventReference loadingEnterSound;
+    [SerializeField] private EventReference loadingHideSound;
+    [SerializeField] private float loadingBgmFadeInTime = 1.0f;
+    [SerializeField] private float loadingBgmFadeOutTime = 1.0f;
     
     private Tween _shakePositionTween;
     private Tween _shakeRotationTween;
     private Coroutine _particleStartCoroutine;
     private Tween _imageEntryTween;
     private Tween _imageExitTween;
+    private WaitForSeconds _imageEntryDelayWait;
+    private WaitForSecondsRealtime _particleStartDelayWait;
+    private WaitForSecondsRealtime _postInitWaitWait;
+    private WaitForSecondsRealtime _contentFadeOutWait;
+    private WaitForSecondsRealtime _imageExitDelayWait;
+    private WaitForSecondsRealtime _resumeDelayWait;
     
     private float _currentProgress;
     private string _currentStage = "";
@@ -63,6 +77,12 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
     {
         InitializeUI();
         _hasStartedEntryAnimation = false;
+        _imageEntryDelayWait = CoroutineCache.GetWaitForSeconds(imageEntryDelay);
+        _particleStartDelayWait = CoroutineCache.GetWaitForSecondsRealtime(particleStartDelay);
+        _postInitWaitWait = CoroutineCache.GetWaitForSecondsRealtime(postInitWaitDuration);
+        _contentFadeOutWait = CoroutineCache.GetWaitForSecondsRealtime(contentFadeOutDuration);
+        _imageExitDelayWait = CoroutineCache.GetWaitForSecondsRealtime(imageExitDelay);
+        _resumeDelayWait = CoroutineCache.GetWaitForSecondsRealtime(resumeDelay);
     }
 
     private void OnEnable()
@@ -95,7 +115,6 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
         if (loadingText != null) loadingText.text = loadingTextString;
         if (loadingImage != null) 
         {
-            loadingImage.color = Color.white;
             _centerImagePosition = loadingImage.transform.localPosition;
             RectTransform rectTransform = loadingImage.GetComponent<RectTransform>();
             if (rectTransform != null)
@@ -192,14 +211,16 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
     
     private IEnumerator StartEntryAnimationDelayed()
     {
-        yield return new WaitForSeconds(imageEntryDelay);
+        yield return _imageEntryDelayWait;
         StartEntryAnimationInternal();
     }
     
     private void StartEntryAnimationInternal()
     {
         if (loadingImage == null) return;
-        
+
+        Time.timeScale = 0f;
+
         _isEntryAnimationComplete = false;
         
         RectTransform imageRect = loadingImage.GetComponent<RectTransform>();
@@ -220,6 +241,15 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
         {
             if (_particleStartCoroutine != null) StopCoroutine(_particleStartCoroutine);
             _particleStartCoroutine = StartCoroutine(StartParticlesDelayed());
+        }
+        
+        if (!loadingEnterSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(loadingEnterSound);
+        }
+        if (BgmManager.Instance != null)
+        {
+            BgmManager.Instance.PlayLoadingBgm(loadingBgmFadeInTime);
         }
         
         if (imageRect != null)
@@ -285,7 +315,6 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
             loadingParticles.Stop();
         }
     
-        // Don't reset position - let it stay where it is (at exit position)
         if (loadingImage != null)
         {
             loadingImage.transform.localRotation = Quaternion.identity;
@@ -301,24 +330,14 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
 
         DoContinuousShake(imageShakeStrength);
     }
-    
-    private void StartImageShakeWithStrength(float strength)
-    {
-        if (loadingImage == null) return;
-
-        _shakePositionTween?.Kill();
-        _shakeRotationTween?.Kill();
-
-        DoContinuousShake(strength);
-    }
 
     private void DoContinuousShake(float strength)
     {
-        if (loadingImage == null || loadingImage.gameObject == null) return;
+        if (visualChild == null) return;
         
         _currentShakeStrength = strength;
 
-        _shakePositionTween = loadingImage.transform.DOShakePosition(
+        _shakePositionTween = visualChild.DOShakePosition(
                 imageShakeDuration, 
                 new Vector3(strength, strength, 0), 
                 shakeVibrato, 
@@ -326,14 +345,14 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
                 false, 
                 false 
             )
-            .SetLink(loadingImage.gameObject)
+            .SetLink(visualChild.gameObject)
             .SetUpdate(true)
             .OnComplete(() => DoContinuousShake(_currentShakeStrength));
     }
 
     private IEnumerator StartParticlesDelayed()
     {
-        yield return new WaitForSeconds(particleStartDelay);
+        yield return _particleStartDelayWait;
         if (loadingParticles != null) loadingParticles.Play();
     }
 
@@ -344,7 +363,27 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
             yield return null;
         }
 
-        yield return new WaitForSecondsRealtime(postInitWaitDuration);
+        yield return _postInitWaitWait;
+
+        if (!loadingHideSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(loadingHideSound);
+        }
+        if (BgmManager.Instance != null)
+        {
+            BgmManager.Instance.StopLoadingBgm(loadingBgmFadeOutTime);
+        }
+
+        if (progressText != null)
+        {
+            progressText.DOFade(0f, contentFadeOutDuration).SetUpdate(true);
+        }
+        if (loadingText != null)
+        {
+            loadingText.DOFade(0f, contentFadeOutDuration).SetUpdate(true);
+        }
+
+        yield return _contentFadeOutWait;
 
         if (loadingImage != null)
         {
@@ -392,17 +431,6 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
                 .SetUpdate(true);
         }
 
-        if (progressText != null)
-        {
-            progressText.DOFade(0f, contentFadeOutDuration).SetUpdate(true);
-        }
-        if (loadingText != null)
-        {
-            loadingText.DOFade(0f, contentFadeOutDuration).SetUpdate(true);
-        }
-
-        yield return new WaitForSecondsRealtime(contentFadeOutDuration);
-
         if (_imageExitTween != null && _imageExitTween.IsActive())
         {
             yield return _imageExitTween.WaitForCompletion();
@@ -413,14 +441,14 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
         }
         _shakeStrengthTween = null;
 
-        yield return new WaitForSecondsRealtime(imageExitDelay);
+        yield return _imageExitDelayWait;
 
         if (backgroundImage != null)
         {
             yield return backgroundImage.DOFade(0f, fadeOutDuration).SetUpdate(true).WaitForCompletion();
         }
 
-        yield return new WaitForSecondsRealtime(resumeDelay);
+        yield return _resumeDelayWait;
         
         gameObject.SetActive(false); 
     }

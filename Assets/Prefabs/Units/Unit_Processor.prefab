@@ -76,7 +76,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1027114353
-  m_SortingLayer: 2
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_Sprite: {fileID: 7260633080061073943, guid: ce2426aeab4bce14c87c148ad9dafe5b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -290,12 +290,13 @@ MonoBehaviour:
   flashDuration: 0.3
   currentHealth: 0
   unitType: 0
+  unitData: {fileID: 0}
   progressBarPrefab: {fileID: 5648413654597824292, guid: 0e7c462c413987749bca6d734a5a807f, type: 3}
   currentState: 0
-  carryCapacity: 10
-  processingSpeed: 0.5
-  loadingTime: 3
-  unloadingTime: 3
+  carryCapacity: 1000
+  processingSpeed: 2
+  loadingTime: 1
+  unloadingTime: 1
   assignmentTime: 1
   movement: {fileID: 4483249089817793867}
   hoverHeight: 0.1
@@ -312,7 +313,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 330c45daea6434b46bc02141d339b613, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 2
+  moveSpeed: 5
   waypointTolerance: 0.1
 --- !u!114 &2105189539104061689
 MonoBehaviour:
@@ -326,7 +327,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4df76de1adfb064e95b506d49b881b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  visionRange: 7.5
+  visionRange: 8.5
   isActive: 1
   hasOffest: 0
   offest: {x: 0.5, y: 0.5, z: 0}

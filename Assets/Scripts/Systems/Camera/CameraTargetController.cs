@@ -12,7 +12,7 @@ public class CameraTargetController : MonoBehaviour
     public float panSpeed = 10f;
     public float edgePanSpeed = 20f;
     public float panBorderThickness = 10f;
-    public float smoothing = 5f;
+    public float smoothTime = 0.1f;
 
     public Transform followTarget;
     public MapGenerator mapGenerator;
@@ -30,10 +30,12 @@ public class CameraTargetController : MonoBehaviour
     private bool _isManualMode;
     private Camera _mainCamera;
     private Bounds _mapBounds;
+    private Grid _grid;
 
     private PixelPerfectCamera _pixelPerfCam;
     private bool[] _zoomLevelInitialized;
     private Vector3[] _zoomLevelPositions;
+    private Vector3 _currentVelocity;
 
     private void Awake()
     {
@@ -63,6 +65,7 @@ public class CameraTargetController : MonoBehaviour
 
         _zoomLevelPositions = new Vector3[zoomCameras.Length];
         _zoomLevelInitialized = new bool[zoomCameras.Length];
+        
         for (int i = 0; i < _zoomLevelPositions.Length; i++) {
             _zoomLevelPositions[i] = transform.position;
             _zoomLevelInitialized[i] = false;
@@ -95,6 +98,10 @@ public class CameraTargetController : MonoBehaviour
             Tilemap groundTilemap = mapGenerator.GroundTilemap;
             groundTilemap.CompressBounds();
             BoundsInt cellBounds = groundTilemap.cellBounds;
+            
+            if (_grid == null && groundTilemap.layoutGrid != null) {
+                _grid = groundTilemap.layoutGrid;
+            }
 
             if (cellBounds.size.x == 0 || cellBounds.size.y == 0) {
                 _hasBounds = false;
@@ -271,8 +278,27 @@ public class CameraTargetController : MonoBehaviour
         }
 
         if (!_isManualMode && followTarget != null) {
-            Vector3 targetPosition = new Vector3(followTarget.position.x, followTarget.position.y, transform.position.z);
-            Vector3 newPos = Vector3.Lerp(_zoomLevelPositions[_currentZoomIndex], targetPosition, smoothing * Time.unscaledDeltaTime);
+            Vector3 targetPosition = followTarget.position;
+            
+            if (_grid != null) {
+                Vector3 cellSize = _grid.cellSize;
+                targetPosition.x -= cellSize.x * 0.5f;
+                targetPosition.y -= cellSize.y * 0.5f;
+            }
+            else {
+                targetPosition.x -= 0.5f;
+                targetPosition.y -= 0.5f;
+            }
+            
+            targetPosition.z = transform.position.z;
+            Vector3 newPos;
+            
+            if (smoothTime <= 0.01f) {
+                newPos = targetPosition;
+            } else {
+                newPos = Vector3.SmoothDamp(transform.position, targetPosition, ref _currentVelocity, smoothTime);
+            }
+
             _zoomLevelPositions[_currentZoomIndex] = newPos;
             transform.position = newPos;
         }

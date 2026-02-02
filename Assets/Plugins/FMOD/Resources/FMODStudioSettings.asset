@@ -380,8 +380,8 @@ MonoBehaviour:
   switchSettingsMigration: 1
   HasSourceProject: 1
   HasPlatforms: 1
-  sourceProjectPath: Assets/FMOD/asterisk-fmod/asterisk-fmod.fspro
-  sourceBankPath: Assets/FMOD/asterisk-fmod/Build
+  sourceProjectPath: Assets/FMOD/galaxy-scavengers-fmod/galaxy-scavengers-fmod.fspro
+  sourceBankPath: Assets/FMOD/galaxy-scavengers-fmod/Build
   sourceBankPathUnformatted: 
   BankRefreshCooldown: 5
   ShowBankRefreshWindow: 0

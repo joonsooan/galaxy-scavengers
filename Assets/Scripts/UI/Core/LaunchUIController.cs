@@ -25,6 +25,7 @@ public class LaunchUIController : MonoBehaviour
 
     private bool _isCountingDown;
     private Coroutine _countdownCoroutine;
+    private WaitForSeconds _launchCompleteDisplayWait;
 
     private void Awake()
     {
@@ -39,6 +40,7 @@ public class LaunchUIController : MonoBehaviour
         }
 
         UpdateNeededAetherText();
+        _launchCompleteDisplayWait = CoroutineCache.GetWaitForSeconds(launchCompleteDisplayDuration);
     }
 
     public void ShowLaunchPanel()
@@ -95,6 +97,12 @@ public class LaunchUIController : MonoBehaviour
         if (!buttonClickSound.IsNull)
         {
             RuntimeManager.PlayOneShot(buttonClickSound);
+        }
+
+        if (CoreRepairManager.Instance != null && !CoreRepairManager.Instance.IsPartRepaired(CorePart.Engine))
+        {
+            Debug.LogWarning("LaunchUIController: Engine is not repaired! Cannot launch.");
+            return;
         }
 
         MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
@@ -171,7 +179,7 @@ public class LaunchUIController : MonoBehaviour
         if (launchCompleteUI != null)
         {
             launchCompleteUI.Show();
-            yield return new WaitForSeconds(launchCompleteDisplayDuration);
+            yield return _launchCompleteDisplayWait;
         }
 
         _isCountingDown = false;

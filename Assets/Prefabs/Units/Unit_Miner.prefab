@@ -76,7 +76,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1027114353
-  m_SortingLayer: 2
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_Sprite: {fileID: -5932265281250941504, guid: b2344e19305fc3140bc7ee8cae2166c3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -206,14 +206,15 @@ MonoBehaviour:
   flashDuration: 0.3
   currentHealth: 0
   unitType: 0
+  unitData: {fileID: 0}
   progressBarPrefab: {fileID: 5648413654597824292, guid: 0e7c462c413987749bca6d734a5a807f, type: 3}
   currentState: 0
   unitMovement: {fileID: 4483249089817793867}
-  unloadingTime: 3
+  unloadingTime: 1
   mineAmountPerAction: 1
-  maxCarryAmount: 10
+  maxCarryAmount: 25
   resourceSearchInterval: 1
-  maxSearchRadius: 50
+  maxSearchRadius: 100
   mineableResourceTypes: 
   canvasName: ObjectUI Canvas
   resourceImageSpawnInterval: 0.5
@@ -234,7 +235,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 330c45daea6434b46bc02141d339b613, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 3
+  moveSpeed: 5
   waypointTolerance: 0.2
 --- !u!114 &1616897775811544138
 MonoBehaviour:
@@ -248,7 +249,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4df76de1adfb064e95b506d49b881b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  visionRange: 7.5
+  visionRange: 8.5
   isActive: 1
   hasOffest: 0
   offest: {x: 0.5, y: 0.5, z: 0}

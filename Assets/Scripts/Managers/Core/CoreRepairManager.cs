@@ -1,0 +1,281 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+public class CoreRepairManager : MonoBehaviour
+{
+    public static CoreRepairManager Instance { get; private set; }
+
+    [Header("Core Part Data")]
+    [SerializeField] private List<CorePartData> corePartDataList = new List<CorePartData>();
+
+    [Header("Landing Settings")]
+    [SerializeField] private bool alwaysDamageEngine = true;
+    [SerializeField] private int randomDamagedPartsCount = 2;
+
+    private readonly Dictionary<CorePart, bool> _partRepairStatus = new Dictionary<CorePart, bool>();
+    private readonly Dictionary<CorePart, CorePartData> _partDataDict = new Dictionary<CorePart, CorePartData>();
+    private readonly Dictionary<CorePart, int> _partQuestIds = new Dictionary<CorePart, int>();
+    private bool _isInitialized = false;
+    private int _nextQuestId = 10000;
+
+    public event Action<CorePart> OnPartRepaired;
+    public event Action OnRepairStatusChanged;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
+
+    private void Start()
+    {
+        InitializePartData();
+    }
+
+    private void InitializePartData()
+    {
+        foreach (CorePart part in Enum.GetValues(typeof(CorePart)))
+        {
+            _partRepairStatus[part] = true;
+        }
+
+        foreach (CorePartData data in corePartDataList)
+        {
+            if (data != null)
+            {
+                _partDataDict[data.partType] = data;
+            }
+        }
+    }
+
+    public void InitializeLanding()
+    {
+        if (_isInitialized) return;
+
+        foreach (CorePart part in Enum.GetValues(typeof(CorePart)))
+        {
+            _partRepairStatus[part] = true;
+        }
+
+        List<CorePart> partsToDamage = new List<CorePart>();
+
+        if (alwaysDamageEngine)
+        {
+            partsToDamage.Add(CorePart.Engine);
+        }
+
+        List<CorePart> otherParts = Enum.GetValues(typeof(CorePart))
+            .Cast<CorePart>()
+            .Where(p => p != CorePart.Engine)
+            .ToList();
+
+        for (int i = 0; i < randomDamagedPartsCount && otherParts.Count > 0; i++)
+        {
+            int randomIndex = UnityEngine.Random.Range(0, otherParts.Count);
+            partsToDamage.Add(otherParts[randomIndex]);
+            otherParts.RemoveAt(randomIndex);
+        }
+
+        foreach (CorePart part in partsToDamage)
+        {
+            _partRepairStatus[part] = false;
+            CreateRepairQuest(part);
+        }
+
+        _isInitialized = true;
+        ApplyDebuffs();
+        OnRepairStatusChanged?.Invoke();
+    }
+
+    private void CreateRepairQuest(CorePart part)
+    {
+        CorePartData partData = GetPartData(part);
+        if (partData == null) return;
+
+        QuestData questData = ScriptableObject.CreateInstance<QuestData>();
+        questData.questId = _nextQuestId++;
+        questData.questName = partData.partName + " 수리";
+        questData.questInfo = partData.partDescription;
+        questData.requiredResources = partData.requiredResources != null ? 
+            (ResourceCost[])partData.requiredResources.Clone() : new ResourceCost[0];
+        questData.questFinishReward = partData.repairReward;
+        questData.previousQuestIds = new int[0];
+
+        _partQuestIds[part] = questData.questId;
+
+        if (QuestDataManager.Instance != null)
+        {
+            QuestDataManager.Instance.RegisterRuntimeQuest(questData);
+            QuestDataManager.Instance.StartQuest(questData.questId);
+        }
+    }
+
+    public bool IsPartRepaired(CorePart part)
+    {
+        return _partRepairStatus.ContainsKey(part) && _partRepairStatus[part];
+    }
+
+    public CorePartData GetPartData(CorePart part)
+    {
+        return _partDataDict.ContainsKey(part) ? _partDataDict[part] : null;
+    }
+
+    public List<CorePart> GetDamagedParts()
+    {
+        return _partRepairStatus
+            .Where(kvp => !kvp.Value)
+            .Select(kvp => kvp.Key)
+            .ToList();
+    }
+
+    public bool TryRepairPart(CorePart part)
+    {
+        if (IsPartRepaired(part)) return false;
+
+        CorePartData partData = GetPartData(part);
+        if (partData == null) return false;
+
+        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (inventoryManager == null) return false;
+
+        if (partData.requiredResources != null && partData.requiredResources.Length > 0)
+        {
+            foreach (ResourceCost cost in partData.requiredResources)
+            {
+                int availableAmount = inventoryManager.GetResourceAmount(cost.resourceType);
+                if (availableAmount < cost.amount)
+                {
+                    return false;
+                }
+            }
+
+            foreach (ResourceCost cost in partData.requiredResources)
+            {
+                inventoryManager.RemoveResource(cost.resourceType, cost.amount);
+            }
+        }
+
+        _partRepairStatus[part] = true;
+        
+        if (_partQuestIds.ContainsKey(part) && QuestManager.Instance != null)
+        {
+            int questId = _partQuestIds[part];
+            QuestManager.Instance.CompleteQuest(questId);
+            QuestManager.Instance.FinishQuest(questId);
+        }
+
+        ApplyDebuffs();
+        OnPartRepaired?.Invoke(part);
+        OnRepairStatusChanged?.Invoke();
+        return true;
+    }
+
+    private void ApplyDebuffs()
+    {
+        ApplyStorageDebuff();
+        ApplyPopulationDebuff();
+        ApplyProductionDebuff();
+        ApplyBarrierNoise();
+    }
+
+    private void ApplyStorageDebuff()
+    {
+        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
+        if (mainStructure == null) return;
+
+        InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
+        if (inventorySystem == null) return;
+
+        bool isStorageDamaged = !IsPartRepaired(CorePart.Storage);
+        CorePartData storageData = GetPartData(CorePart.Storage);
+
+        if (isStorageDamaged && storageData != null)
+        {
+            float reductionFactor = 1f - storageData.debuffValue;
+            int totalCells = inventorySystem.GetTotalCellCount();
+            int maxUsableCells = Mathf.Max(1, Mathf.RoundToInt(totalCells * reductionFactor));
+            inventorySystem.SetMaxUsableCells(maxUsableCells);
+        }
+        else
+        {
+            int totalCells = inventorySystem.GetTotalCellCount();
+            inventorySystem.SetMaxUsableCells(totalCells);
+        }
+    }
+
+    private void ApplyPopulationDebuff()
+    {
+        if (!IsPartRepaired(CorePart.Controller))
+        {
+            CorePartData controllerData = GetPartData(CorePart.Controller);
+            if (controllerData != null && UnitManager.Instance != null)
+            {
+            }
+        }
+    }
+
+    private void ApplyProductionDebuff()
+    {
+        if (!IsPartRepaired(CorePart.Repeater))
+        {
+            CorePartData repeaterData = GetPartData(CorePart.Repeater);
+            if (repeaterData != null)
+            {
+            }
+        }
+    }
+
+    private void ApplyBarrierNoise()
+    {
+        if (NoiseManager.Instance == null) return;
+
+        if (!IsPartRepaired(CorePart.Barrier))
+        {
+            CorePartData barrierData = GetPartData(CorePart.Barrier);
+            if (barrierData != null)
+            {
+                NoiseManager.Instance.SetBarrierNoiseCoefficient(barrierData.debuffValue * 100f);
+            }
+        }
+        else
+        {
+            NoiseManager.Instance.SetBarrierNoiseCoefficient(0f);
+        }
+    }
+
+    public string GetDebuffDescription(CorePart part)
+    {
+        if (IsPartRepaired(part)) return string.Empty;
+
+        CorePartData partData = GetPartData(part);
+        string partLabel = partData != null && !string.IsNullOrEmpty(partData.partName) ? partData.partName : part.ToString();
+
+        if (part == CorePart.Engine)
+        {
+            return $"{partLabel} 파손 : 시드 코어 발사를 위해 수리 필수";
+        }
+
+        float debuffPercent = partData != null ? Mathf.RoundToInt(partData.debuffValue * 100f) : 0f;
+
+        switch (part)
+        {
+            case CorePart.Barrier:
+                return $"{partLabel} 파손 : 소음계수 {debuffPercent}% 증가";
+            case CorePart.Controller:
+                return $"{partLabel} 파손 : 최대 유닛 제한 {debuffPercent}% 감소";
+            case CorePart.Repeater:
+                return $"{partLabel} 파손 : 건물 생산 속도, 유닛 작업 속도 {debuffPercent}% 감소";
+            case CorePart.Storage:
+                return $"{partLabel} 파손 : 시드 코어 저장 공간 {debuffPercent}% 감소";
+            default:
+                return string.Empty;
+        }
+    }
+}

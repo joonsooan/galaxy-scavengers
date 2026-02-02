@@ -13,15 +13,29 @@ MonoBehaviour:
   m_Name: tutorial_step_3
   m_EditorClassIdentifier: 
   stepIndex: 3
-  text: "\uC88B\uC2B5\uB2C8\uB2E4!\n\uB9C8\uC6B0\uC2A4 \uD720\uC744 \uC0AC\uC6A9\uD558\uC5EC
-    \uD655\uB300/\uCD95\uC18C\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+  text: "\uC88B\uC2B5\uB2C8\uB2E4!\n<color=#FFC107>\uB9C8\uC6B0\uC2A4 \uD720</color>\uC744
+    \uC0AC\uC6A9\uD558\uC5EC \uD655\uB300/\uCD95\uC18C\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
   stepType: 3
   duration: 0
-  count: 10
+  count: 15
   resourceType: 0
   buildingType: 
   unitType: 
   itemType: 
   showProgressBar: 1
+  enableUIPanels: 
   spawnUnits: []
   grantResources: []
+  completionSound:
+    Guid:
+      Data1: -345895807
+      Data2: 1210214295
+      Data3: -73339495
+      Data4: 1624008095
+    Path: event:/SFX_UIClick
+  enableMaterialHighlight: 0
+  highlightTargetIDs: []
+  showArrowUI: 0
+  arrowUIPrefab: {fileID: 0}
+  arrowPosition: {x: 0, y: 0, z: 0}
+  arrowRotation: {x: 0, y: 0, z: 0}

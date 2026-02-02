@@ -13,15 +13,28 @@ MonoBehaviour:
   m_Name: tutorial_step_5
   m_EditorClassIdentifier: 
   stepIndex: 5
-  text: "1, 2, 3 \uD0A4\uB97C \uB20C\uB7EC \uAC8C\uC784 \uC18D\uB3C4\uB97C \uBCC0\uACBD\uD560
-    \uC218 \uC788\uC2B5\uB2C8\uB2E4.\n\uC9C0\uAE08 \uBC14\uB85C \uD574\uBCF4\uC2DC\uC8E0!"
+  text: "<color=#FFC107>1, 2, 3 \uD0A4</color>\uB97C \uB20C\uB7EC \uAC8C\uC784 \uC18D\uB3C4\uB97C
+    \uBCC0\uACBD\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.\n\uC9C0\uAE08 \uBC14\uB85C
+    \uD574\uBCF4\uC2DC\uC8E0!"
   stepType: 5
   duration: 0
-  count: 5
+  count: 3
   resourceType: 0
   buildingType: 
   unitType: 
   itemType: 
   showProgressBar: 1
+  enableUIPanels: 
   spawnUnits: []
   grantResources: []
+  completionSound:
+    Guid:
+      Data1: -345895807
+      Data2: 1210214295
+      Data3: -73339495
+      Data4: 1624008095
+    Path: event:/SFX_UIClick
+  enableMaterialHighlight: 0
+  highlightTargetIDs: []
+  showArrowUI: 1
+  arrowID: speed_btn

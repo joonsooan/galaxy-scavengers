@@ -21,12 +21,22 @@ public abstract class UnitBase : Damageable
 
     [Header("Unit Settings")]
     public UnitType unitType;
+    public UnitData unitData;
 
     [Header("Progress Bar")]
     [SerializeField] private GameObject progressBarPrefab;
 
     public UnitState currentState;
+    private bool _isRegisteredToNoiseManager;
     protected UnitProgressBar progressBar;
+
+    private void Update()
+    {
+        if (unitType == UnitType.Ally && !_isRegisteredToNoiseManager && unitData != null && NoiseManager.Instance != null) {
+            NoiseManager.Instance.RegisterUnit(this);
+            _isRegisteredToNoiseManager = true;
+        }
+    }
 
     protected override void OnEnable()
     {
@@ -34,6 +44,11 @@ public abstract class UnitBase : Damageable
 
         if (UnitManager.Instance != null) {
             UnitManager.Instance.AddUnit(this);
+        }
+
+        if (unitType == UnitType.Ally && NoiseManager.Instance != null) {
+            NoiseManager.Instance.RegisterUnit(this);
+            _isRegisteredToNoiseManager = true;
         }
 
         VisionProvider visionProvider = GetComponent<VisionProvider>();
@@ -48,12 +63,16 @@ public abstract class UnitBase : Damageable
             UnitManager.Instance.RemoveUnit(this);
         }
 
+        if (unitType == UnitType.Ally && NoiseManager.Instance != null) {
+            NoiseManager.Instance.UnregisterUnit(this);
+        }
+
         HideProgressBar();
 
         base.OnDisable();
     }
 
-    protected virtual void OnDestroy()
+    protected override void OnDestroy()
     {
         HideProgressBar();
     }

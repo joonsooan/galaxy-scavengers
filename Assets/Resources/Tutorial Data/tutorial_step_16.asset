@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: tutorial_step_16
   m_EditorClassIdentifier: 
   stepIndex: 16
-  text: "\uC774\uC81C \uC0DD\uC0B0\uD560 \uC720\uB2DB\uC744 \uACE8\uB77C\uBD05\uC2DC\uB2E4.\n\uB4DC\uB860
-    \uD5C8\uBE0C\uB97C \uD074\uB9AD\uD55C \uB2E4\uC74C \uCC44\uAD74 \uC720\uB2DB\uC744
-    \uD558\uB098 \uC0DD\uC0B0\uD574\uBCF4\uC138\uC694!"
+  text: "\uC774\uC81C \uC0DD\uC0B0\uD560 \uC720\uB2DB\uC744 \uACE8\uB77C\uBD05\uC2DC\uB2E4.\n<color=#FFC107>\uB4DC\uB860
+    \uD5C8\uBE0C</color>\uB97C \uD074\uB9AD\uD55C \uB2E4\uC74C <color=#FFC107>\uCC44\uAD74
+    \uC720\uB2DB</color>\uC744 \uD558\uB098 \uC0DD\uC0B0\uD574\uBCF4\uC138\uC694!"
   stepType: 11
   duration: 0
   count: 1
@@ -24,5 +24,20 @@ MonoBehaviour:
   unitType: Miner
   itemType: 
   showProgressBar: 0
+  enableUIPanels: 
   spawnUnits: []
   grantResources: []
+  completionSound:
+    Guid:
+      Data1: -345895807
+      Data2: 1210214295
+      Data3: -73339495
+      Data4: 1624008095
+    Path: event:/SFX_UIClick
+  enableMaterialHighlight: 1
+  highlightTargetIDs:
+  - unit_miner
+  showArrowUI: 0
+  arrowUIPrefab: {fileID: 0}
+  arrowPosition: {x: 0, y: 0, z: 0}
+  arrowRotation: {x: 0, y: 0, z: 0}

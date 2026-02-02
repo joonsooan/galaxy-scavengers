@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stepIndex: 4
   text: "\uB54C\uB85C\uB294 \uC7A0\uC2DC \uC0DD\uAC01\uC744 \uC815\uB9AC\uD560 \uD544\uC694\uB3C4
-    \uC788\uB294 \uBC95\uC774\uC8E0.\nSpace \uD0A4\uB97C \uB204\uB974\uAC70\uB098
-    \uC544\uC774\uCF58\uC744 \uD074\uB9AD\uD574 \uC2DC\uAC04\uC744 \uC77C\uC2DC\uC815\uC9C0\uB97C
-    \uD574\uBD05\uC2DC\uB2E4."
+    \uC788\uB294 \uBC95\uC774\uC8E0.\n<color=#FFC107>Space \uD0A4</color>\uB97C \uB204\uB974\uAC70\uB098
+    <color=#FFC107>\uC544\uC774\uCF58\uC744 \uD074\uB9AD</color>\uD574 \uC2DC\uAC04\uC744
+    \uC77C\uC2DC\uC815\uC9C0\uB97C \uD574\uBD05\uC2DC\uB2E4."
   stepType: 4
   duration: 0
   count: 4
@@ -25,5 +25,17 @@ MonoBehaviour:
   unitType: 
   itemType: 
   showProgressBar: 1
+  enableUIPanels: 04000000
   spawnUnits: []
   grantResources: []
+  completionSound:
+    Guid:
+      Data1: -345895807
+      Data2: 1210214295
+      Data3: -73339495
+      Data4: 1624008095
+    Path: event:/SFX_UIClick
+  enableMaterialHighlight: 0
+  highlightTargetIDs: []
+  showArrowUI: 1
+  arrowID: resume_btn

@@ -972,6 +972,7 @@ MonoBehaviour:
       Data3: 1616156851
       Data4: 765321994
     Path: event:/SFX_GamePause
+  glowMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
 --- !u!1 &6141588514809969945
 GameObject:
   m_ObjectHideFlags: 0

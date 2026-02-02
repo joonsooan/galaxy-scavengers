@@ -484,6 +484,15 @@ public class BuildingManager : MonoBehaviour
 
         HandleBuildingLogic(newPieceObject, data);
 
+        if (NoiseManager.Instance != null)
+        {
+            Damageable damageable = newPieceObject.GetComponent<Damageable>();
+            if (damageable != null)
+            {
+                NoiseManager.Instance.RegisterBuilding(damageable);
+            }
+        }
+
         OnBuildingConstructed?.Invoke(data);
     }
 
@@ -575,6 +584,15 @@ public class BuildingManager : MonoBehaviour
         }
 
         HandleBuildingLogic(pieceObject, data);
+
+        if (NoiseManager.Instance != null)
+        {
+            Damageable damageable = pieceObject.GetComponent<Damageable>();
+            if (damageable != null)
+            {
+                NoiseManager.Instance.RegisterBuilding(damageable);
+            }
+        }
 
         foreach (Vector3Int targetPos in recipePositions) {
             OnTilemapChanged?.Invoke(targetPos);

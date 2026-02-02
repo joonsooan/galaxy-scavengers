@@ -17,41 +17,36 @@ public class SpriteProcessor : AssetPostprocessor
     {
     }
 
+    [Obsolete("Obsolete")]
     public void OnPostprocessTexture(Texture2D texture)
     {
         // Only process files that contain "itspkr" in their path
-        if (!assetPath.Contains("itspkr"))
-        {
+        if (!assetPath.Contains("itspkr")) {
             return;
         }
 
         TextureImporter textureImporter = (TextureImporter)assetImporter;
-        
+
         // Check if sprite sheet is already configured
         // If it has sprites and they match our expected count (64 sprites), skip reimport
-        if (textureImporter.spritesheet != null && textureImporter.spritesheet.Length == 64)
-        {
+        if (textureImporter.spritesheet != null && textureImporter.spritesheet.Length == 64) {
             // Verify the sprite sheet structure matches what we expect
             bool isValid = true;
-            for (int j = 0; j < textureImporter.spritesheet.Length; j++)
-            {
-                if (string.IsNullOrEmpty(textureImporter.spritesheet[j].name))
-                {
+            for (int j = 0; j < textureImporter.spritesheet.Length; j++) {
+                if (string.IsNullOrEmpty(textureImporter.spritesheet[j].name)) {
                     isValid = false;
                     break;
                 }
             }
-            
-            if (isValid)
-            {
+
+            if (isValid) {
                 // Sprite sheet is already configured correctly, don't reimport
                 return;
             }
         }
 
         // Only proceed if tileSize is valid
-        if (TileGen.tileSize <= 0)
-        {
+        if (TileGen.tileSize <= 0) {
             Debug.LogWarning($"TileGen: tileSize is {TileGen.tileSize}, cannot process texture. Skipping sprite sheet generation.");
             return;
         }
@@ -94,22 +89,19 @@ public class SpriteProcessor : AssetPostprocessor
 
         // Only set spritesheet if it's different from current
         bool needsUpdate = textureImporter.spritesheet == null || textureImporter.spritesheet.Length != finalMetas.Count;
-        if (!needsUpdate)
-        {
+        if (!needsUpdate) {
             // Check if names match
-            for (int idx = 0; idx < finalMetas.Count; idx++)
-            {
-                if (textureImporter.spritesheet[idx].name != finalMetas[idx].name)
-                {
+            for (int idx = 0; idx < finalMetas.Count; idx++) {
+                if (textureImporter.spritesheet[idx].name != finalMetas[idx].name) {
                     needsUpdate = true;
                     break;
                 }
             }
         }
 
-        if (needsUpdate)
-        {
+        if (needsUpdate) {
             textureImporter.spritesheet = finalMetas.ToArray();
+
             // Don't call Refresh() here as it causes infinite reimport loop
             // AssetDatabase.Refresh() will be called by Unity automatically after this method
         }
@@ -118,48 +110,39 @@ public class SpriteProcessor : AssetPostprocessor
     private void OnPreprocessTexture()
     {
         // Only process files that contain "itspkr" in their path
-        if (!assetPath.Contains("itspkr"))
-        {
+        if (!assetPath.Contains("itspkr")) {
             return;
         }
 
         TextureImporter textureImporter = (TextureImporter)assetImporter;
-        
+
         // Only set spritePixelsPerUnit if tileSize is valid
-        if (TileGen.tileSize > 0)
-        {
+        if (TileGen.tileSize > 0) {
             // Only update if it's different to avoid unnecessary reimports
-            if (textureImporter.spritePixelsPerUnit != TileGen.tileSize)
-            {
+            if (textureImporter.spritePixelsPerUnit != TileGen.tileSize) {
                 textureImporter.textureType = TextureImporterType.Sprite;
                 textureImporter.spriteImportMode = SpriteImportMode.Multiple;
                 textureImporter.mipmapEnabled = false;
                 textureImporter.filterMode = FilterMode.Point;
                 textureImporter.spritePixelsPerUnit = TileGen.tileSize;
             }
-            else
-            {
+            else {
                 // Ensure other settings are correct even if pixelsPerUnit is already set
-                if (textureImporter.textureType != TextureImporterType.Sprite)
-                {
+                if (textureImporter.textureType != TextureImporterType.Sprite) {
                     textureImporter.textureType = TextureImporterType.Sprite;
                 }
-                if (textureImporter.spriteImportMode != SpriteImportMode.Multiple)
-                {
+                if (textureImporter.spriteImportMode != SpriteImportMode.Multiple) {
                     textureImporter.spriteImportMode = SpriteImportMode.Multiple;
                 }
-                if (textureImporter.mipmapEnabled)
-                {
+                if (textureImporter.mipmapEnabled) {
                     textureImporter.mipmapEnabled = false;
                 }
-                if (textureImporter.filterMode != FilterMode.Point)
-                {
+                if (textureImporter.filterMode != FilterMode.Point) {
                     textureImporter.filterMode = FilterMode.Point;
                 }
             }
         }
-        else
-        {
+        else {
             Debug.LogWarning($"TileGen: tileSize is {TileGen.tileSize}, cannot set spritePixelsPerUnit for {assetPath}. Make sure TileGen.tileSize is initialized before importing.");
         }
     }
@@ -179,6 +162,7 @@ public class TileGen : MonoBehaviour
     public TileGenGuide tileGuide;
 
     public Texture2D finalTexture;
+    private readonly SpriteProcessor sProcessor = new SpriteProcessor();
     private string fileName;
     private int halfTile;
     private Texture2D inputTexFixed;
@@ -217,7 +201,6 @@ public class TileGen : MonoBehaviour
     private Texture2D refWEBridge;
     private Texture2D refWShore;
     private string ruleTilePath;
-    private readonly SpriteProcessor sProcessor = new SpriteProcessor();
     private int stage;
 
     private string txtrPath;

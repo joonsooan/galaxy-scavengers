@@ -9,8 +9,12 @@ public class UnitAssignCell : MonoBehaviour
     [SerializeField] private Image emptySlotIcon;
     [SerializeField] private Button cellButton;
 
+    [Header("Tutorial Settings")]
+    [SerializeField] private Material glowMaterial;
+
     private Unit_Drone _assignedDrone;
     private Processor _processor;
+    private string _tutorialID;
 
     private void Awake()
     {
@@ -21,6 +25,12 @@ public class UnitAssignCell : MonoBehaviour
     {
         _processor = processor;
         _assignedDrone = drone;
+        
+        _tutorialID = "unit_assign_cell";
+        if (TutorialManager.Instance != null) {
+            TutorialManager.Instance.RegisterRuntimeUI(_tutorialID, gameObject, glowMaterial);
+        }
+        
         UpdateUI();
     }
 

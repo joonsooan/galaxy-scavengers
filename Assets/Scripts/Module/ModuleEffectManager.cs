@@ -5,10 +5,14 @@ using UnityEngine.SceneManagement;
 
 public class ModuleEffectManager : MonoBehaviour
 {
-    private readonly Dictionary<ModuleStatType, float> _activeStatModifiers = new ();
+    private readonly Dictionary<ModuleStatType, float> _activeStatModifiers = new Dictionary<ModuleStatType, float>();
     public static ModuleEffectManager Instance { get; private set; }
 
-    public IReadOnlyDictionary<ModuleStatType, float> ActiveStatModifiers => _activeStatModifiers;
+    public IReadOnlyDictionary<ModuleStatType, float> ActiveStatModifiers {
+        get {
+            return _activeStatModifiers;
+        }
+    }
 
     private void Awake()
     {
@@ -83,8 +87,8 @@ public class ModuleEffectManager : MonoBehaviour
 
         _activeStatModifiers.Clear();
 
-        Debug.Log($"ModuleEffectManager: 활성화된 모듈 {modules.Count} 개 발견");
-        
+        // Debug.Log($"ModuleEffectManager: 활성화된 모듈 {modules.Count} 개 발견");
+
         foreach (Module module in modules) {
             if (module == null) {
                 Debug.LogWarning("ModuleEffectManager: null 모듈이 발견되었습니다.");
@@ -93,7 +97,8 @@ public class ModuleEffectManager : MonoBehaviour
 
             if (module.effectData != null) {
                 ApplyModuleEffect(module);
-            } else {
+            }
+            else {
                 Debug.LogWarning($"ModuleEffectManager: 모듈 '{module.moduleName}'에 effectData가 없습니다.");
             }
         }
@@ -102,10 +107,10 @@ public class ModuleEffectManager : MonoBehaviour
         UpdateActiveStatsDisplay();
 
         Debug.Log($"ModuleEffectManager: 모듈 {modules.Count} 개 적용 완료");
-        
+
         if (_activeStatModifiers.Count > 0) {
             Debug.Log("ModuleEffectManager: 활성화된 스탯 수정자:");
-            foreach (var kvp in _activeStatModifiers) {
+            foreach (KeyValuePair<ModuleStatType, float> kvp in _activeStatModifiers) {
                 Debug.Log($"  - {kvp.Key}: +{kvp.Value * 100f:F0}%");
             }
         }
@@ -114,13 +119,13 @@ public class ModuleEffectManager : MonoBehaviour
     private void ApplyModuleEffect(Module module)
     {
         if (module.effectData == null) return;
-        
+
         module.effectData.ApplyModifiers();
 
         Debug.Log($"ModuleEffectManager: 모듈 '{module.moduleName}' 적용");
-        
+
         if (module.effectData.StatModifiers != null && module.effectData.StatModifiers.Count > 0) {
-            foreach (var modifier in module.effectData.StatModifiers) {
+            foreach (ModuleStatModifier modifier in module.effectData.StatModifiers) {
                 if (modifier.modifierValue > 0f) {
                     Debug.Log($"  - {modifier.statType}: +{modifier.modifierValue * 100f:F0}%");
                 }

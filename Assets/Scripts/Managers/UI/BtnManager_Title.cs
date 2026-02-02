@@ -19,6 +19,14 @@ public class BtnManager_Title : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        if (BgmManager.Instance != null)
+        {
+            BgmManager.Instance.PlayTitleBgm();
+        }
+    }
+
     private void OnDestroy()
     {
         if (startButton != null)

@@ -13,6 +13,7 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
     private HashSet<Vector3Int> _tempEnteredTiles = new HashSet<Vector3Int>();
     private HashSet<Vector3Int> _tempExitedTiles = new HashSet<Vector3Int>();
     private Grid _grid;
+    private MapGenerator _mapGenerator;
 
     private bool _isRegistered;
     private Vector3 _lastPosition;
@@ -20,6 +21,10 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
     private CircleCollider2D _visionCollider;
     private float _updateInterval = 0.1f;
     private float _lastUpdateTime;
+    private float _staticUpdateInterval = 0.5f;
+    private float _dynamicUpdateInterval = 0.1f;
+    private float _movementThreshold = 0.01f;
+    private Vector3 _previousFramePosition;
 
     private void Awake()
     {
@@ -37,6 +42,8 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
         if (_grid == null) {
             _grid = FindFirstObjectByType<Grid>();
         }
+
+        _mapGenerator = FindFirstObjectByType<MapGenerator>();
     }
 
     private void Start()
@@ -53,6 +60,10 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
         if (_grid == null || FogOfWarManager.Instance == null) return;
 
         float currentTime = Time.time;
+        bool isMoving = Vector3.SqrMagnitude(transform.position - _previousFramePosition) > _movementThreshold * _movementThreshold;
+        _updateInterval = isMoving ? _dynamicUpdateInterval : _staticUpdateInterval;
+        _previousFramePosition = transform.position;
+
         if (currentTime - _lastUpdateTime < _updateInterval) return;
 
         bool positionChanged = Vector3.SqrMagnitude(transform.position - _lastPosition) > 0.1f;
@@ -77,6 +88,7 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
         UpdateColliderRadius();
         _lastPosition = transform.position;
         _lastVisionRange = visionRange;
+        _previousFramePosition = transform.position;
     }
 
     private void OnDisable()
@@ -124,6 +136,8 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
         GetTilesInCollider(_tempNewTiles);
         
         _tempEnteredTiles.Clear();
+        _tempExitedTiles.Clear();
+
         foreach (Vector3Int tile in _tempNewTiles)
         {
             if (!_currentAffectedTiles.Contains(tile))
@@ -132,7 +146,6 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
             }
         }
 
-        _tempExitedTiles.Clear();
         foreach (Vector3Int tile in _currentAffectedTiles)
         {
             if (!_tempNewTiles.Contains(tile))
@@ -146,10 +159,7 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
         }
 
         _currentAffectedTiles.Clear();
-        foreach (Vector3Int tile in _tempNewTiles)
-        {
-            _currentAffectedTiles.Add(tile);
-        }
+        _currentAffectedTiles.UnionWith(_tempNewTiles);
     }
 
     private void GetTilesInCollider(HashSet<Vector3Int> outputTiles)
@@ -167,17 +177,37 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
         Vector3Int centerCell = _grid.WorldToCell(center);
 
         for (int x = -rangeInCells; x <= rangeInCells; x++) {
+            int xSquared = x * x;
             for (int y = -rangeInCells; y <= rangeInCells; y++) {
+                int ySquared = y * y;
+                if (xSquared + ySquared > rangeInCells * rangeInCells + rangeInCells) {
+                    continue;
+                }
+
                 Vector3Int cell = centerCell + new Vector3Int(x, y, 0);
                 Vector3 cellWorldPos = _grid.GetCellCenterWorld(cell);
                 float distanceSquared = (center - cellWorldPos).sqrMagnitude;
 
-                if (distanceSquared <= radiusSquared) {
+                if (distanceSquared > radiusSquared) {
+                    continue;
+                }
+
+                if (_mapGenerator != null) {
+                    bool isTerrainCell = _mapGenerator.IsTerrainCell(cell);
+                    if (isTerrainCell) {
+                        outputTiles.Add(cell);
+                    }
+                    else {
+                        outputTiles.Add(cell);
+                    }
+                }
+                else {
                     outputTiles.Add(cell);
                 }
             }
         }
     }
+
 
     private void RegisterWithFogOfWar()
     {

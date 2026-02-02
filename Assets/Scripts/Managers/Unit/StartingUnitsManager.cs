@@ -153,7 +153,7 @@ public class StartingUnitsManager : MonoBehaviour
         Vector3 centerPosition = mainStructure.transform.position;
 
         if (_allStartingUnits == null || _allStartingUnits.Count == 0) {
-            Debug.Log("StartingUnitsManager: No starting units configured.");
+            // Debug.Log("StartingUnitsManager: No starting units configured.");
             return;
         }
 

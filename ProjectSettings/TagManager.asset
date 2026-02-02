@@ -46,6 +46,9 @@ TagManager:
   - name: Ground
     uniqueID: 4030836561
     locked: 0
+  - name: Deco Props
+    uniqueID: 292294805
+    locked: 0
   - name: Objects
     uniqueID: 3267852943
     locked: 0

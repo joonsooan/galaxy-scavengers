@@ -1,6 +1,6 @@
+using FMODUnity;
 using UnityEngine;
 using UnityEngine.UI;
-using FMODUnity;
 
 public class BaseSceneManager : MonoBehaviour
 {
@@ -31,18 +31,29 @@ public class BaseSceneManager : MonoBehaviour
     {
         titleButton.onClick.AddListener(LoadTitle);
         inventoryButton.onClick.AddListener(ToggleInventoryPanel);
-        moduleButton.onClick.AddListener(() => { PlayButtonSound(); OpenUIPanel(1); });
-        laboratoryButton.onClick.AddListener(() => { PlayButtonSound(); OpenUIPanel(2); });
-        farmButton.onClick.AddListener(() => { PlayButtonSound(); OpenUIPanel(3); });
-        mapButton.onClick.AddListener(() => { PlayButtonSound(); OpenUIPanel(4); });
-        coreLaunchButton.onClick.AddListener(() => { PlayButtonSound(); OpenUIPanel(5); });
-    }
+        moduleButton.onClick.AddListener(() => {
+            PlayButtonSound();
+            OpenUIPanel(1);
+        });
+        laboratoryButton.onClick.AddListener(() => {
+            PlayButtonSound();
+            OpenUIPanel(2);
+        });
+        farmButton.onClick.AddListener(() => {
+            PlayButtonSound();
+            OpenUIPanel(3);
+        });
+        mapButton.onClick.AddListener(() => {
+            PlayButtonSound();
+            OpenUIPanel(4);
+        });
+        coreLaunchButton.onClick.AddListener(() => {
+            PlayButtonSound();
+            OpenUIPanel(5);
+        });
 
-    private void PlayButtonSound()
-    {
-        if (!buttonClickSound.IsNull)
-        {
-            RuntimeManager.PlayOneShot(buttonClickSound);
+        if (BgmManager.Instance != null) {
+            // BgmManager.Instance.PlayBaseBgm();
         }
     }
 
@@ -71,6 +82,13 @@ public class BaseSceneManager : MonoBehaviour
         farmButton.onClick.RemoveAllListeners();
         mapButton.onClick.RemoveAllListeners();
         coreLaunchButton.onClick.RemoveAllListeners();
+    }
+
+    private void PlayButtonSound()
+    {
+        if (!buttonClickSound.IsNull) {
+            RuntimeManager.PlayOneShot(buttonClickSound);
+        }
     }
 
     private void LoadTitle()

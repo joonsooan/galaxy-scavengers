@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stepIndex: 20
   text: "\uB2E4\uC74C\uC73C\uB85C \uC790\uC6D0 \uAC00\uACF5\uC744 \uB2F4\uB2F9\uD560
-    \uAC00\uACF5 \uC720\uB2DB\uC744 \uB4DC\uB860 \uD5C8\uBE0C\uC5D0\uC11C \uD558\uB098
-    \uC0DD\uC0B0\uD574\uBCF4\uC138\uC694!"
+    <color=#FFC107>\uAC00\uACF5 \uC720\uB2DB</color>\uC744 <color=#FFC107>\uB4DC\uB860
+    \uD5C8\uBE0C</color>\uC5D0\uC11C \uD558\uB098 \uC0DD\uC0B0\uD574\uBCF4\uC138\uC694!"
   stepType: 11
   duration: 0
   count: 1
@@ -24,5 +24,24 @@ MonoBehaviour:
   unitType: Processor
   itemType: 
   showProgressBar: 0
+  enableUIPanels: 
   spawnUnits: []
-  grantResources: []
+  grantResources:
+  - resourceType: 0
+    amount: 100
+  - resourceType: 1
+    amount: 100
+  completionSound:
+    Guid:
+      Data1: -345895807
+      Data2: 1210214295
+      Data3: -73339495
+      Data4: 1624008095
+    Path: event:/SFX_UIClick
+  enableMaterialHighlight: 1
+  highlightTargetIDs:
+  - unit_processor
+  showArrowUI: 0
+  arrowUIPrefab: {fileID: 0}
+  arrowPosition: {x: 0, y: 0, z: 0}
+  arrowRotation: {x: 0, y: 0, z: 0}

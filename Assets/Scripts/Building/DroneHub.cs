@@ -20,7 +20,9 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
     private float _currentProductionTime;
     private bool _isManualQueueProcessing;
     private bool _isProducing;
+    private Coroutine _productionCoroutine;
     private float _productionStartTime;
+    private WaitForSeconds _productionWaitWait;
     private ProductionProgressSlider _progressSlider;
 
     public DroneHubData DroneHubData {
@@ -39,6 +41,7 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
                 _progressSlider.gameObject.SetActive(false);
             }
         }
+        _productionWaitWait = CoroutineCache.GetWaitForSeconds(1f);
     }
 
     protected override void OnEnable()
@@ -95,12 +98,12 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
             IsOperational = true;
             if (!_isProducing) {
                 if (_productionQueue.Count > 0) {
-                    StartCoroutine(ProcessProductionQueue());
+                    _productionCoroutine = StartCoroutine(ProcessProductionQueue());
                 }
                 else if (HasPendingTargets()) {
                     UpdateQueueFromTargets();
                     if (_productionQueue.Count > 0) {
-                        StartCoroutine(ProcessProductionQueue());
+                        _productionCoroutine = StartCoroutine(ProcessProductionQueue());
                     }
                 }
             }
@@ -112,14 +115,26 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
         OnDroneHubClicked?.Invoke(this);
     }
 
+    private float GetProductionSpeedMultiplier()
+    {
+        if (CoreRepairManager.Instance != null && !CoreRepairManager.Instance.IsPartRepaired(CorePart.Repeater)) {
+            CorePartData repeaterData = CoreRepairManager.Instance.GetPartData(CorePart.Repeater);
+            if (repeaterData != null) {
+                return 1f - repeaterData.debuffValue;
+            }
+        }
+        return 1f;
+    }
+
     public static event Action<DroneHub> OnDroneHubClicked;
     public static event Action<int, int, int> OnUnitTargetChanged;
     public static event Action<UnitData> OnUnitProduced;
 
     private void StopProduction()
     {
-        if (_isProducing) {
-            StopCoroutine(ProcessProductionQueue());
+        if (_isProducing && _productionCoroutine != null) {
+            StopCoroutine(_productionCoroutine);
+            _productionCoroutine = null;
             _isProducing = false;
         }
     }
@@ -131,7 +146,7 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
         if (!_isProducing && HasPendingTargets() && IsOperational) {
             UpdateQueueFromTargets();
             if (_productionQueue.Count > 0) {
-                StartCoroutine(ProcessProductionQueue());
+                _productionCoroutine = StartCoroutine(ProcessProductionQueue());
             }
         }
     }
@@ -160,6 +175,19 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
         return count;
     }
 
+    private int GetTotalActiveCount(int unitIndex)
+    {
+        if (droneHubData == null || droneHubData.ProducibleUnits == null) return 0;
+
+        int count = CountUnitsInQueue(unitIndex);
+
+        if (_currentProducingUnit != null && _currentProducingUnit == droneHubData.ProducibleUnits[unitIndex]) {
+            count++;
+        }
+
+        return count;
+    }
+
     public void SetTargetUnitCount(int unitIndex, int targetCount)
     {
         if (droneHubData == null || droneHubData.ProducibleUnits == null ||
@@ -171,21 +199,21 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
         _targetUnitCounts[unitIndex] = Mathf.Max(0, targetCount);
 
         int neededInTotal = targetCount - currentProduced;
-        int currentlyQueued = CountUnitsInQueue(unitIndex);
+        int currentlyActive = GetTotalActiveCount(unitIndex);
 
-        if (neededInTotal > currentlyQueued) {
-            int unitsToAdd = neededInTotal - currentlyQueued;
+        if (neededInTotal > currentlyActive) {
+            int unitsToAdd = neededInTotal - currentlyActive;
             AddUnitsToQueue(unitIndex, unitsToAdd);
         }
-        else if (neededInTotal < currentlyQueued) {
-            int unitsToRemove = currentlyQueued - neededInTotal;
+        else if (neededInTotal < currentlyActive) {
+            int unitsToRemove = currentlyActive - neededInTotal;
             RemoveUnitsFromQueue(unitIndex, unitsToRemove);
         }
 
         OnUnitTargetChanged?.Invoke(unitIndex, currentProduced, targetCount);
 
         if (!_isProducing && _productionQueue.Count > 0 && IsOperational) {
-            StartCoroutine(ProcessProductionQueue());
+            _productionCoroutine = StartCoroutine(ProcessProductionQueue());
         }
     }
 
@@ -268,16 +296,22 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
                     yield break;
                 }
 
-                yield return new WaitForSeconds(1f);
+                yield return _productionWaitWait;
                 continue;
             }
 
             UnitData unitToProduce = _productionQueue.Dequeue();
             _currentProducingUnit = unitToProduce;
             _productionStartTime = Time.time;
-            _currentProductionTime = unitToProduce.productionTime;
 
-            yield return new WaitForSeconds(unitToProduce.productionTime);
+            float productionSpeedMultiplier = GetProductionSpeedMultiplier();
+            _currentProductionTime = unitToProduce.productionTime / productionSpeedMultiplier;
+
+            float elapsedTime = 0f;
+            while (elapsedTime < _currentProductionTime) {
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
 
             _currentProducingUnit = null;
 
@@ -295,6 +329,21 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
                 yield break;
             }
 
+            if (UnitManager.Instance != null && !UnitManager.Instance.CanSpawnUnit()) {
+                _productionQueue.Enqueue(unitToProduce);
+                continue;
+            }
+
+            GameObject unitObj = Instantiate(unitToProduce.unitPrefab, transform.position, Quaternion.identity, UnitManager.Instance.unitParent);
+            UnitBase unitBase = unitObj.GetComponent<UnitBase>();
+            if (unitBase != null) {
+                unitBase.unitData = unitToProduce;
+
+                if (NoiseManager.Instance != null && unitBase.unitType == UnitBase.UnitType.Ally) {
+                    NoiseManager.Instance.RegisterUnit(unitBase);
+                }
+            }
+
             int unitIndex = FindUnitIndex(unitToProduce);
             if (unitIndex >= 0) {
                 _producedUnitCounts.TryGetValue(unitIndex, out int currentCount);
@@ -303,8 +352,6 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
                 int targetCount = GetTargetUnitCount(unitIndex);
                 OnUnitTargetChanged?.Invoke(unitIndex, currentCount + 1, targetCount);
             }
-
-            Instantiate(unitToProduce.unitPrefab, transform.position, Quaternion.identity, UnitManager.Instance.unitParent);
 
             OnUnitProduced?.Invoke(unitToProduce);
 
@@ -320,6 +367,7 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
         }
 
         _isProducing = false;
+        _productionCoroutine = null;
     }
 
     private bool HasPendingTargets()
@@ -350,8 +398,8 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
 
             if (currentCount < targetCount) {
                 int needed = targetCount - currentCount;
-                int queued = CountUnitsInQueue(i);
-                int toAdd = needed - queued;
+                int currentlyActive = GetTotalActiveCount(i);
+                int toAdd = needed - currentlyActive;
 
                 if (toAdd > 0) {
                     AddUnitsToQueue(i, toAdd);

@@ -101,20 +101,22 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
         }
     }
 
+    private static readonly WaitForSeconds _wait01 = CoroutineCache.GetWaitForSeconds(0.1f);
+
     private IEnumerator WaitForModulesAndRefreshSlots()
     {
         if (_customizationManager == null) {
             yield break;
         }
 
-        yield return new WaitForSeconds(0.1f);
+        yield return _wait01;
 
         yield return new WaitUntil(() => {
             BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
             return inventoryManager != null;
         });
 
-        yield return new WaitForSeconds(0.1f);
+        yield return _wait01;
 
         RefreshSlots();
         RefreshModuleSelectionGrid();

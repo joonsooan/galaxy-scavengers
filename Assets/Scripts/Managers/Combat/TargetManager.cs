@@ -36,4 +36,23 @@ public class TargetManager : MonoBehaviour
             _allTargets.Remove(target);
         }
     }
+
+    public List<Damageable> GetTargetsInArea(Vector3 center, float radius)
+    {
+        List<Damageable> results = new List<Damageable>();
+        float radiusSquared = radius * radius;
+
+        foreach (Damageable target in _allTargets)
+        {
+            if (target == null) continue;
+            if (target.GetComponent<UnitBase>() != null) continue;
+            float distSquared = (center - target.transform.position).sqrMagnitude;
+            if (distSquared <= radiusSquared)
+            {
+                results.Add(target);
+            }
+        }
+
+        return results;
+    }
 }

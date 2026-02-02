@@ -39,14 +39,20 @@ public class InventorySystem : MonoBehaviour
     private GridLayoutGroup _inventoryGrid;
     private RectTransform _resourcePanelContent;
     private bool _isTransferDisabled;
+    private bool _isInitialized;
 
     private void Awake()
     {
         InitializeMaxStackAmounts();
     }
 
-    private void Start()
+    public void InitializeSystem()
     {
+        if (_isInitialized)
+        {
+            return;
+        }
+
         InitializeInventory();
         InitializeResourcePanel();
         
@@ -65,7 +71,7 @@ public class InventorySystem : MonoBehaviour
             currentResourcePanel.SetActive(false);
         }
 
-        SubscribeToResourceEvents();
+        _isInitialized = true;
     }
 
     private void HideInventoryPanel()
@@ -80,6 +86,11 @@ public class InventorySystem : MonoBehaviour
 
     private void OnEnable()
     {
+        if (!_isInitialized)
+        {
+            InitializeSystem();
+        }
+
         SubscribeToResourceEvents();
         DroneHub.OnDroneHubClicked += HideInventoryPanel;
         Processor.OnProcessorClicked += HideInventoryPanel;
@@ -435,6 +446,31 @@ public class InventorySystem : MonoBehaviour
     public void SetTransferEnabled(bool isEnabled)
     {
         _isTransferDisabled = !isEnabled;
+    }
+
+    public int GetTotalCellCount()
+    {
+        return _inventoryCells.Count;
+    }
+
+    public void SetMaxUsableCells(int maxCells)
+    {
+        int currentTotal = _inventoryCells.Count;
+        maxCells = Mathf.Clamp(maxCells, 1, currentTotal);
+
+        for (int i = 0; i < _inventoryCells.Count; i++)
+        {
+            bool shouldBeActive = i < maxCells;
+            if (_inventoryCells[i] != null && _inventoryCells[i].gameObject != null)
+            {
+                _inventoryCells[i].gameObject.SetActive(shouldBeActive);
+            }
+        }
+    }
+
+    public int GetMaxUsableCells()
+    {
+        return _inventoryCells.Count(cell => cell != null && cell.gameObject != null && cell.gameObject.activeSelf);
     }
 }
 
