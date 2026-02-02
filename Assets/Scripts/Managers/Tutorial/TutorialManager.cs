@@ -50,6 +50,7 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private GameObject unitPopulationPanel;
     [SerializeField] private GameObject alertPanel;
     [SerializeField] private GameObject mainControlPanel;
+    [SerializeField] private GameObject questPanel;
     [SerializeField] private GameObject launchButton;
 
     [Header("Highlight Settings")]
@@ -732,6 +733,7 @@ public class TutorialManager : MonoBehaviour
         _uiPanels[TutorialUIPanel.AlertPanel] = alertPanel;
         _uiPanels[TutorialUIPanel.MainControlPanel] = mainControlPanel;
         _uiPanels[TutorialUIPanel.LaunchButton] = launchButton;
+        _uiPanels[TutorialUIPanel.QuestPanel] = questPanel;
     }
 
     private void HideAllUIPanels()

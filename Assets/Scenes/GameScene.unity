@@ -21422,7 +21422,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 11.25
+  orthographic size: 662.501
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -21447,7 +21447,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0.5, z: -40}
+  m_LocalPosition: {x: 0.5, y: 0.5, z: -20}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -37347,6 +37347,118 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 770598625}
   m_CullTransparentMesh: 1
+--- !u!1 &771103534
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 771103536}
+  - component: {fileID: 771103535}
+  m_Layer: 0
+  m_Name: _TutorialManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &771103535
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 771103534}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a53fc9225eeea914da95e9559e53c88a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  firstQuestId: 0
+  tutorialUI: {fileID: 293458368}
+  tutorialStepDataList:
+  - {fileID: 11400000, guid: 41b7abbe9b9322141a3b61981fb2b909, type: 2}
+  - {fileID: 11400000, guid: 339a08f0b1d65514d9c9ba77dfd1cab6, type: 2}
+  - {fileID: 11400000, guid: 8c4515d2b865f1b40afb7b07adbd0d7c, type: 2}
+  - {fileID: 11400000, guid: 4019e054f36abd742a15dc516f38a50b, type: 2}
+  - {fileID: 11400000, guid: bb60669d84ed43c40bef7703d37ebfa4, type: 2}
+  - {fileID: 11400000, guid: 61d3fb1921531544ab8803ce6f59e44d, type: 2}
+  - {fileID: 11400000, guid: 4be62746899fc0c4b8cb99fd554a5bcb, type: 2}
+  - {fileID: 11400000, guid: ad2ba75bc2a09fc49b94f5007208c359, type: 2}
+  - {fileID: 11400000, guid: 829966317fc1c2241a6da0b0c445ae8f, type: 2}
+  - {fileID: 11400000, guid: 1c2e0916c0c00aa48b8d000fb2896d77, type: 2}
+  - {fileID: 11400000, guid: c3a282dab0cc9de4e96d12de6b91b0c5, type: 2}
+  - {fileID: 11400000, guid: 9811aba7cc1a52d4780b678ccde44be3, type: 2}
+  - {fileID: 11400000, guid: a3e194e131105704699b903e622b66c0, type: 2}
+  - {fileID: 11400000, guid: 58258b9f4afbd4e41a0f3ca13f0b73e6, type: 2}
+  - {fileID: 11400000, guid: 482d25f2254f45148a654110ca2bdcc2, type: 2}
+  - {fileID: 11400000, guid: 2f4d1a2fcdceaef40ac2ab213405be66, type: 2}
+  - {fileID: 11400000, guid: e4ae52ed79a21f64c87db0e0c284aae6, type: 2}
+  - {fileID: 11400000, guid: 5b80fd8997f9803419cabc412b7dec07, type: 2}
+  - {fileID: 11400000, guid: fc787208e2d466e4ca8ad74dfa9c4da7, type: 2}
+  - {fileID: 11400000, guid: 481b95b9f4893534c9d7fc9f97f1e79e, type: 2}
+  - {fileID: 11400000, guid: 2394150a712e7044b842872191a2305d, type: 2}
+  resourcePanel: {fileID: 1089803132}
+  statsPanel: {fileID: 197872736}
+  debuffPanel: {fileID: 2111770750}
+  timeSlider: {fileID: 432427245}
+  gameSpeed: {fileID: 1029636134}
+  noisePanel: {fileID: 850145275}
+  unitPopulationPanel: {fileID: 393683347}
+  alertPanel: {fileID: 1078723809}
+  mainControlPanel: {fileID: 152035975}
+  questPanel: {fileID: 53596316}
+  launchButton: {fileID: 1085667705}
+  highlightableList:
+  - id: mainControl_baseBuilding
+    uiObject: {fileID: 664278389}
+    highlightMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
+  - id: mainControl_processor
+    uiObject: {fileID: 1581555304}
+    highlightMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
+  - id: mainControl_mineType
+    uiObject: {fileID: 1720721910}
+    highlightMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
+  - id: baseBuilding_storage
+    uiObject: {fileID: 4282902000147823475}
+    highlightMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
+  - id: baseBuilding_droneHub
+    uiObject: {fileID: 1051671680}
+    highlightMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
+  - id: processor_smelter
+    uiObject: {fileID: 482066712}
+    highlightMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
+  - id: unit_miner
+    uiObject: {fileID: 0}
+    highlightMaterial: {fileID: 0}
+  - id: unit_processor
+    uiObject: {fileID: 0}
+    highlightMaterial: {fileID: 0}
+  - id: processor_AlloyPlate
+    uiObject: {fileID: 0}
+    highlightMaterial: {fileID: 0}
+  arrowUIObjects:
+  - {fileID: 518974348}
+  - {fileID: 1075880215}
+  - {fileID: 1145865374}
+  - {fileID: 1595281993}
+--- !u!4 &771103536
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 771103534}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &773020341
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -49199,7 +49311,6 @@ GameObject:
   - component: {fileID: 1538527381}
   - component: {fileID: 1538527382}
   - component: {fileID: 1538527383}
-  - component: {fileID: 1538527384}
   m_Layer: 0
   m_Name: _UIManager
   m_TagString: Untagged
@@ -49388,85 +49499,6 @@ MonoBehaviour:
   seekerMissilePanel: {fileID: 0}
   nexusDataPanel: {fileID: 0}
   neuralMatrixPanel: {fileID: 0}
---- !u!114 &1538527384
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1538527375}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a53fc9225eeea914da95e9559e53c88a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  firstQuestId: 0
-  tutorialUI: {fileID: 293458368}
-  tutorialStepDataList:
-  - {fileID: 11400000, guid: 41b7abbe9b9322141a3b61981fb2b909, type: 2}
-  - {fileID: 11400000, guid: 339a08f0b1d65514d9c9ba77dfd1cab6, type: 2}
-  - {fileID: 11400000, guid: 8c4515d2b865f1b40afb7b07adbd0d7c, type: 2}
-  - {fileID: 11400000, guid: 4019e054f36abd742a15dc516f38a50b, type: 2}
-  - {fileID: 11400000, guid: bb60669d84ed43c40bef7703d37ebfa4, type: 2}
-  - {fileID: 11400000, guid: 61d3fb1921531544ab8803ce6f59e44d, type: 2}
-  - {fileID: 11400000, guid: 4be62746899fc0c4b8cb99fd554a5bcb, type: 2}
-  - {fileID: 11400000, guid: ad2ba75bc2a09fc49b94f5007208c359, type: 2}
-  - {fileID: 11400000, guid: 829966317fc1c2241a6da0b0c445ae8f, type: 2}
-  - {fileID: 11400000, guid: 1c2e0916c0c00aa48b8d000fb2896d77, type: 2}
-  - {fileID: 11400000, guid: c3a282dab0cc9de4e96d12de6b91b0c5, type: 2}
-  - {fileID: 11400000, guid: 9811aba7cc1a52d4780b678ccde44be3, type: 2}
-  - {fileID: 11400000, guid: a3e194e131105704699b903e622b66c0, type: 2}
-  - {fileID: 11400000, guid: 58258b9f4afbd4e41a0f3ca13f0b73e6, type: 2}
-  - {fileID: 11400000, guid: 482d25f2254f45148a654110ca2bdcc2, type: 2}
-  - {fileID: 11400000, guid: 2f4d1a2fcdceaef40ac2ab213405be66, type: 2}
-  - {fileID: 11400000, guid: e4ae52ed79a21f64c87db0e0c284aae6, type: 2}
-  - {fileID: 11400000, guid: 5b80fd8997f9803419cabc412b7dec07, type: 2}
-  - {fileID: 11400000, guid: fc787208e2d466e4ca8ad74dfa9c4da7, type: 2}
-  - {fileID: 11400000, guid: 481b95b9f4893534c9d7fc9f97f1e79e, type: 2}
-  - {fileID: 11400000, guid: 2394150a712e7044b842872191a2305d, type: 2}
-  resourcePanel: {fileID: 1089803132}
-  statsPanel: {fileID: 197872736}
-  debuffPanel: {fileID: 2111770750}
-  timeSlider: {fileID: 432427245}
-  gameSpeed: {fileID: 1029636134}
-  noisePanel: {fileID: 850145275}
-  unitPopulationPanel: {fileID: 393683347}
-  alertPanel: {fileID: 1078723809}
-  mainControlPanel: {fileID: 152035975}
-  launchButton: {fileID: 1085667705}
-  highlightableList:
-  - id: mainControl_baseBuilding
-    uiObject: {fileID: 664278389}
-    highlightMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
-  - id: mainControl_processor
-    uiObject: {fileID: 1581555304}
-    highlightMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
-  - id: mainControl_mineType
-    uiObject: {fileID: 1720721910}
-    highlightMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
-  - id: baseBuilding_storage
-    uiObject: {fileID: 4282902000147823475}
-    highlightMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
-  - id: baseBuilding_droneHub
-    uiObject: {fileID: 1051671680}
-    highlightMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
-  - id: processor_smelter
-    uiObject: {fileID: 482066712}
-    highlightMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
-  - id: unit_miner
-    uiObject: {fileID: 0}
-    highlightMaterial: {fileID: 0}
-  - id: unit_processor
-    uiObject: {fileID: 0}
-    highlightMaterial: {fileID: 0}
-  - id: processor_AlloyPlate
-    uiObject: {fileID: 0}
-    highlightMaterial: {fileID: 0}
-  arrowUIObjects:
-  - {fileID: 518974348}
-  - {fileID: 1075880215}
-  - {fileID: 1145865374}
-  - {fileID: 1595281993}
 --- !u!1 &1539729019
 GameObject:
   m_ObjectHideFlags: 0
@@ -68540,6 +68572,7 @@ SceneRoots:
   - {fileID: 1995619767}
   - {fileID: 1451674085}
   - {fileID: 1355668859}
+  - {fileID: 771103536}
   - {fileID: 1538527376}
   - {fileID: 313771326}
   - {fileID: 956259329}
