@@ -67,11 +67,6 @@ public class QuestDetailPanel : MonoBehaviour
         {
             inventoryManager.OnResourceChanged += OnInventoryResourceChanged;
         }
-        
-        if (_isGameSceneMode)
-        {
-            ClearQuestInfo();
-        }
     }
 
     private void OnDisable()
@@ -85,11 +80,6 @@ public class QuestDetailPanel : MonoBehaviour
         if (inventoryManager != null)
         {
             inventoryManager.OnResourceChanged -= OnInventoryResourceChanged;
-        }
-        
-        if (_isGameSceneMode)
-        {
-            ClearQuestInfo();
         }
     }
     
@@ -131,6 +121,11 @@ public class QuestDetailPanel : MonoBehaviour
         if (questData == null)
         {
             return;
+        }
+
+        if (!gameObject.activeSelf)
+        {
+            gameObject.SetActive(true);
         }
 
         _currentQuestId = questId;

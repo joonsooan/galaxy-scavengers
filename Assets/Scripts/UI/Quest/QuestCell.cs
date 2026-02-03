@@ -205,6 +205,11 @@ public class QuestCell : MonoBehaviour
                 _gameSceneQuestUIManager.ShowQuestDetailPanel();
             }
             
+            if (_questDetailPanel.gameObject != null)
+            {
+                _questDetailPanel.gameObject.SetActive(true);
+            }
+            
             _questDetailPanel.DisplayQuestInfo(_questData, _questData.questId);
             
             MarkAsViewed();
@@ -222,7 +227,14 @@ public class QuestCell : MonoBehaviour
         
         if (cellButton != null && UnityEngine.EventSystems.EventSystem.current != null)
         {
-            StartCoroutine(SelectButtonAfterFrame());
+            if (gameObject.activeInHierarchy)
+            {
+                StartCoroutine(SelectButtonAfterFrame());
+            }
+            else if (_gameSceneQuestUIManager != null)
+            {
+                _gameSceneQuestUIManager.SelectButtonAfterFrame(cellButton.gameObject);
+            }
         }
     }
     

@@ -19,11 +19,10 @@ public class GameSceneQuestUIManager : MonoBehaviour
     [SerializeField] private GameObject notifierIcon;
     [SerializeField] private Material shaderMaterial;
     
-    private readonly List<QuestCell> _questCells = new List<QuestCell>();
-    private readonly HashSet<int> _viewedQuestIds = new HashSet<int>();
-    private readonly HashSet<int> _acceptedRequestQuests = new HashSet<int>();
-    private bool _isPanelOpen = false;
-    private float _savedTimeScale = 1f;
+    private readonly List<QuestCell> _questCells = new ();
+    private readonly HashSet<int> _viewedQuestIds = new ();
+    private readonly HashSet<int> _acceptedRequestQuests = new ();
+    private bool _isPanelOpen;
 
     private QuestDetailPanel _questDetailPanel;
     private RequestQuestAcceptPanel _requestQuestAcceptPanel;
@@ -43,6 +42,20 @@ public class GameSceneQuestUIManager : MonoBehaviour
         {
             _requestQuestAcceptPanel = requestQuestAcceptPanelObject.GetComponent<RequestQuestAcceptPanel>();
         }
+        
+        if (questPanel != null)
+        {
+            Button panelButton = questPanel.GetComponent<Button>();
+            if (panelButton == null)
+            {
+                panelButton = questPanel.GetComponentInChildren<Button>();
+            }
+            if (panelButton != null)
+            {
+                panelButton.onClick.RemoveAllListeners();
+                panelButton.onClick.AddListener(ToggleQuestPanel);
+            }
+        }
     }
     
     private void OnEnable()
@@ -61,6 +74,20 @@ public class GameSceneQuestUIManager : MonoBehaviour
         {
             toggleQuestPanelButton.onClick.RemoveAllListeners();
             toggleQuestPanelButton.onClick.AddListener(ToggleQuestPanel);
+        }
+        
+        if (questPanel != null)
+        {
+            Button panelButton = questPanel.GetComponent<Button>();
+            if (panelButton == null)
+            {
+                panelButton = questPanel.GetComponentInChildren<Button>();
+            }
+            if (panelButton != null)
+            {
+                panelButton.onClick.RemoveAllListeners();
+                panelButton.onClick.AddListener(ToggleQuestPanel);
+            }
         }
         
         if (_questDetailPanel != null)
@@ -270,14 +297,15 @@ public class GameSceneQuestUIManager : MonoBehaviour
     {
         _isPanelOpen = true;
         
+        if (_questDetailPanel != null && questDetailPanelObject != null && questDetailPanelObject.activeSelf)
+        {
+            _questDetailPanel.ClearQuestInfo();
+            questDetailPanelObject.SetActive(false);
+        }
+        
         if (questCellGridParent != null)
         {
             questCellGridParent.gameObject.SetActive(true);
-        }
-        
-        if (questDetailPanelObject != null)
-        {
-            questDetailPanelObject.SetActive(true);
         }
         
         if (shaderMaterial != null)
@@ -297,15 +325,18 @@ public class GameSceneQuestUIManager : MonoBehaviour
     {
         _isPanelOpen = false;
         
-        if (_questDetailPanel != null && questDetailPanelObject != null)
-        {
-            _questDetailPanel.ClearQuestInfo();
-            questDetailPanelObject.SetActive(false);
-        }
-        
         if (questCellGridParent != null)
         {
             questCellGridParent.gameObject.SetActive(false);
+        }
+        
+        if (questDetailPanelObject != null)
+        {
+            if (_questDetailPanel != null)
+            {
+                _questDetailPanel.ClearQuestInfo();
+            }
+            questDetailPanelObject.SetActive(false);
         }
     }
     
@@ -515,10 +546,22 @@ public class GameSceneQuestUIManager : MonoBehaviour
         {
             questDetailPanelObject.SetActive(true);
         }
-        
-        if (questCellGridParent != null && !questCellGridParent.gameObject.activeSelf)
+    }
+    
+    public void SelectButtonAfterFrame(GameObject buttonObject)
+    {
+        if (buttonObject != null && gameObject.activeInHierarchy)
         {
-            questCellGridParent.gameObject.SetActive(true);
+            StartCoroutine(SelectButtonAfterFrameCoroutine(buttonObject));
+        }
+    }
+    
+    private IEnumerator SelectButtonAfterFrameCoroutine(GameObject buttonObject)
+    {
+        yield return null;
+        if (buttonObject != null && UnityEngine.EventSystems.EventSystem.current != null)
+        {
+            UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(buttonObject);
         }
     }
 }

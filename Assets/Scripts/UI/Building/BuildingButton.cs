@@ -30,7 +30,6 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
     private void Start()
     {
-        // Wait for BuildingUnlockManager to initialize
         if (BuildingUnlockManager.Instance == null) {
             GameObject unlockManagerObj = new GameObject("BuildingUnlockManager");
             unlockManagerObj.AddComponent<BuildingUnlockManager>();
@@ -38,7 +37,6 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
         UpdateUnlockStatus();
 
-        // Subscribe to unlock events
         if (BuildingUnlockManager.Instance != null) {
             BuildingUnlockManager.Instance.OnBuildingUnlocked += OnBuildingUnlocked;
         }
@@ -72,6 +70,15 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
     public void OnPointerEnter(PointerEventData eventData)
     {
+        if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
+        {
+            UIManager uiManager = GameManager.Instance.uiManager;
+            if (uiManager.IsProcessorPanelActive() || uiManager.IsDroneHubPanelActive())
+            {
+                return;
+            }
+        }
+        
         if (buildingData != null && BuildingInfoPanel.Instance != null) {
             BuildingInfoPanel.Instance.PreviewInfo(buildingData);
         }
@@ -140,7 +147,6 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
     private void OnBuildingUnlocked(BuildingData unlockedBuilding)
     {
-        // If this button's building was unlocked, show it
         if (unlockedBuilding == buildingData) {
             UpdateUnlockStatus();
         }
@@ -148,6 +154,19 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
     private void OnButtonClicked()
     {
+        if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
+        {
+            UIManager uiManager = GameManager.Instance.uiManager;
+            if (uiManager.IsProcessorPanelActive())
+            {
+                uiManager.HideProcessorInfo();
+            }
+            if (uiManager.IsDroneHubPanelActive())
+            {
+                uiManager.HideDroneHubInfo();
+            }
+        }
+        
         GameManager.Instance.StartDrag(buildingData);
         BuildingInfoPanel.Instance.SelectBuilding(buildingData);
 
