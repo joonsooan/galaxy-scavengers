@@ -59,15 +59,13 @@ public class CoreRepairManager : MonoBehaviour
     {
         if (QuestDataManager.Instance != null)
         {
-            foreach (var kvp in _partQuestIds.ToList())
+            List<QuestData> allCoreRepairQuests = QuestDataManager.Instance.GetAllQuests()
+                .Where(q => q != null && q.questType == QuestType.CoreRepairQuest)
+                .ToList();
+            
+            foreach (QuestData quest in allCoreRepairQuests)
             {
-                int questId = kvp.Value;
-                QuestData existingQuest = QuestDataManager.Instance.GetQuestData(questId);
-                if (existingQuest != null && existingQuest.questType == QuestType.CoreRepairQuest)
-                {
-                    QuestDataManager.Instance.ResetCoreRepairQuestState(questId);
-                }
-                QuestDataManager.Instance.UnregisterRuntimeQuest(questId);
+                QuestDataManager.Instance.UnregisterRuntimeQuest(quest.questId);
             }
         }
         _partQuestIds.Clear();
@@ -76,6 +74,7 @@ public class CoreRepairManager : MonoBehaviour
     public void InitializeLanding()
     {
         ResetCoreRepairQuests();
+        _nextQuestId = 10000;
         _isInitialized = false;
 
         foreach (CorePart part in Enum.GetValues(typeof(CorePart)))

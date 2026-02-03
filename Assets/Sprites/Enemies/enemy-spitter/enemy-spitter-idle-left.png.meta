@@ -285,7 +285,7 @@ TextureImporter:
       name: enemy-spitter-idle-left_1
       rect:
         serializedVersion: 2
-        x: 25
+        x: 24
         y: 0
         width: 24
         height: 24
@@ -307,7 +307,7 @@ TextureImporter:
       name: enemy-spitter-idle-left_2
       rect:
         serializedVersion: 2
-        x: 50
+        x: 48
         y: 0
         width: 24
         height: 24
@@ -329,7 +329,7 @@ TextureImporter:
       name: enemy-spitter-idle-left_3
       rect:
         serializedVersion: 2
-        x: 75
+        x: 72
         y: 0
         width: 24
         height: 24
@@ -351,7 +351,7 @@ TextureImporter:
       name: enemy-spitter-idle-left_4
       rect:
         serializedVersion: 2
-        x: 100
+        x: 96
         y: 0
         width: 24
         height: 24
@@ -373,7 +373,7 @@ TextureImporter:
       name: enemy-spitter-idle-left_5
       rect:
         serializedVersion: 2
-        x: 125
+        x: 120
         y: 0
         width: 24
         height: 24
@@ -395,7 +395,7 @@ TextureImporter:
       name: enemy-spitter-idle-left_6
       rect:
         serializedVersion: 2
-        x: 150
+        x: 144
         y: 0
         width: 24
         height: 24
@@ -417,7 +417,7 @@ TextureImporter:
       name: enemy-spitter-idle-left_7
       rect:
         serializedVersion: 2
-        x: 175
+        x: 168
         y: 0
         width: 24
         height: 24

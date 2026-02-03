@@ -170,7 +170,7 @@ TextureImporter:
       name: enemy-spitter-attack-left_1
       rect:
         serializedVersion: 2
-        x: 25
+        x: 24
         y: 0
         width: 24
         height: 24
@@ -192,7 +192,7 @@ TextureImporter:
       name: enemy-spitter-attack-left_2
       rect:
         serializedVersion: 2
-        x: 50
+        x: 48
         y: 0
         width: 24
         height: 24
@@ -214,7 +214,7 @@ TextureImporter:
       name: enemy-spitter-attack-left_3
       rect:
         serializedVersion: 2
-        x: 75
+        x: 72
         y: 0
         width: 24
         height: 24
@@ -236,7 +236,7 @@ TextureImporter:
       name: enemy-spitter-attack-left_4
       rect:
         serializedVersion: 2
-        x: 100
+        x: 96
         y: 0
         width: 24
         height: 24
@@ -258,7 +258,7 @@ TextureImporter:
       name: enemy-spitter-attack-left_5
       rect:
         serializedVersion: 2
-        x: 125
+        x: 120
         y: 0
         width: 24
         height: 24
@@ -280,7 +280,7 @@ TextureImporter:
       name: enemy-spitter-attack-left_6
       rect:
         serializedVersion: 2
-        x: 150
+        x: 144
         y: 0
         width: 24
         height: 24
@@ -302,7 +302,7 @@ TextureImporter:
       name: enemy-spitter-attack-left_7
       rect:
         serializedVersion: 2
-        x: 175
+        x: 168
         y: 0
         width: 24
         height: 24
@@ -324,7 +324,7 @@ TextureImporter:
       name: enemy-spitter-attack-left_8
       rect:
         serializedVersion: 2
-        x: 200
+        x: 192
         y: 0
         width: 24
         height: 24
@@ -346,7 +346,7 @@ TextureImporter:
       name: enemy-spitter-attack-left_9
       rect:
         serializedVersion: 2
-        x: 225
+        x: 216
         y: 0
         width: 24
         height: 24
@@ -368,7 +368,7 @@ TextureImporter:
       name: enemy-spitter-attack-left_10
       rect:
         serializedVersion: 2
-        x: 250
+        x: 240
         y: 0
         width: 24
         height: 24
@@ -390,7 +390,7 @@ TextureImporter:
       name: enemy-spitter-attack-left_11
       rect:
         serializedVersion: 2
-        x: 275
+        x: 264
         y: 0
         width: 24
         height: 24
@@ -412,7 +412,7 @@ TextureImporter:
       name: enemy-spitter-attack-left_12
       rect:
         serializedVersion: 2
-        x: 300
+        x: 288
         y: 0
         width: 24
         height: 24
@@ -434,7 +434,7 @@ TextureImporter:
       name: enemy-spitter-attack-left_13
       rect:
         serializedVersion: 2
-        x: 325
+        x: 312
         y: 0
         width: 24
         height: 24
@@ -456,7 +456,7 @@ TextureImporter:
       name: enemy-spitter-attack-left_14
       rect:
         serializedVersion: 2
-        x: 350
+        x: 336
         y: 0
         width: 24
         height: 24
@@ -478,7 +478,7 @@ TextureImporter:
       name: enemy-spitter-attack-left_15
       rect:
         serializedVersion: 2
-        x: 375
+        x: 360
         y: 0
         width: 24
         height: 24

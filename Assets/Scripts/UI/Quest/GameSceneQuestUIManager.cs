@@ -152,6 +152,15 @@ public class GameSceneQuestUIManager : MonoBehaviour
             yield return null;
         }
         
+        List<QuestData> coreRepairQuests = QuestDataManager.Instance.GetAllQuests()
+            .Where(q => q != null && q.questType == QuestType.CoreRepairQuest)
+            .ToList();
+        
+        foreach (QuestData quest in coreRepairQuests)
+        {
+            _viewedQuestIds.Remove(quest.questId);
+        }
+        
         yield return null;
         
         LoadActiveQuests();

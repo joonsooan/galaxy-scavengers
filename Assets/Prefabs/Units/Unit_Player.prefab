@@ -171,7 +171,7 @@ MonoBehaviour:
   m_LightType: 3
   m_BlendStyleIndex: 0
   m_FalloffIntensity: 0.5
-  m_Color: {r: 1, g: 1, b: 1, a: 0.47058824}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 0.5
   m_LightVolumeIntensity: 1
   m_LightVolumeEnabled: 0
@@ -303,7 +303,6 @@ MonoBehaviour:
   laserMaterial: {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
   laserWidth: 0.2
   miningParticleSystem: {fileID: 1571686775330981254}
-  particleOffsetDistance: 0
   yOffset: 0
 --- !u!114 &-7343223670657477598
 MonoBehaviour:
