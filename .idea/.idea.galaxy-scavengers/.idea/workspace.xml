@@ -6,21 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="2e9922bb-ccc6-4c6e-93bd-15fa8a8d7f34" name="변경" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.galaxy-scavengers/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.galaxy-scavengers/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{3d1bb574-bf49-477c-ac4e-0e12cd43a3c1}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{3d1bb574-bf49-477c-ac4e-0e12cd43a3c1}.pdc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{5cad282f-b557-41a2-8399-1a4a3025ae06}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{5cad282f-b557-41a2-8399-1a4a3025ae06}.pdc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{8c4ffb0a-7dc9-4972-8412-9a83420c91a7}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{8c4ffb0a-7dc9-4972-8412-9a83420c91a7}.pdc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{8ced1dfd-c3ad-4be8-865c-9f937eab9d89}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{8ced1dfd-c3ad-4be8-865c-9f937eab9d89}.pdc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{8e195066-019f-4ed5-b73e-d5ae92192e25}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{8e195066-019f-4ed5-b73e-d5ae92192e25}.pdc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{a4670585-25c1-44e7-8f65-39c2f162485e}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{a4670585-25c1-44e7-8f65-39c2f162485e}.pdc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{e8e5093a-636a-4b05-873f-267e48ca36a0}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{e8e5093a-636a-4b05-873f-267e48ca36a0}.pdc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Normal Maps/Buildings/seed_core.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Normal Maps/Buildings/seed_core.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Normal Maps/Buildings/seed_core.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Normal Maps/Buildings/seed_core.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Core Part Data/CorePart_Controller.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Core Part Data/CorePart_Controller.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Building/BuildingButton.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Building/BuildingButton.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Core/CoreRepairManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Core/CoreRepairManager.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/GameSceneQuestUIManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/GameSceneQuestUIManager.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestCell.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestCell.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestDetailPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestDetailPanel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Sprites/Buildings/seed_core.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Sprites/Buildings/seed_core.png.meta" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

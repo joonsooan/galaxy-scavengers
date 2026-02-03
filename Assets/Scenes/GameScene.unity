@@ -1515,7 +1515,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &53596317
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1556,8 +1556,9 @@ MonoBehaviour:
   questDetailPanelObject: {fileID: 733751478}
   requestQuestAcceptPanelObject: {fileID: 6394633008225565772}
   toggleQuestPanelButton: {fileID: 53596321}
-  notifierIcon: {fileID: 7575517312150288073, guid: c80e3ff170a14984db2f4152c8b43fae, type: 3}
+  notifierIcon: {fileID: 990474923}
   shaderMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
+  shaderMaterialResourcePath: 
 --- !u!114 &53596319
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4642,6 +4643,7 @@ MonoBehaviour:
   toggleQuestPanelButton: {fileID: 53596321}
   notifierIcon: {fileID: 990474923}
   shaderMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
+  shaderMaterialResourcePath: 
 --- !u!1001 &298228684
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -21494,7 +21496,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0.5, z: -10}
+  m_LocalPosition: {x: 0.5, y: 0.5, z: -40}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

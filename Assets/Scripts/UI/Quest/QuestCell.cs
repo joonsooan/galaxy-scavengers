@@ -71,7 +71,13 @@ public class QuestCell : MonoBehaviour
     {
         if (_questData == null || QuestDataManager.Instance == null) return;
         
-        UpdateConfigureIcon(_isNew, _questData);
+        bool isNew = _isNew;
+        if (_gameSceneQuestUIManager != null && _questData.questType == QuestType.CoreRepairQuest)
+        {
+            isNew = !_gameSceneQuestUIManager.IsQuestViewed(_questData.questId);
+        }
+        
+        UpdateConfigureIcon(isNew, _questData);
     }
 
     public void Initialize(QuestData questData, QuestDetailPanel questDetailPanel, bool isNew, QuestUIHandler questUIHandler = null, GameSceneQuestUIManager gameSceneQuestUIManager = null)
@@ -81,6 +87,13 @@ public class QuestCell : MonoBehaviour
         _questUIHandler = questUIHandler;
         _gameSceneQuestUIManager = gameSceneQuestUIManager;
         _isNew = isNew;
+
+        if (questData != null && questData.questType == QuestType.CoreRepairQuest)
+        {
+            bool isViewedFromManager = _gameSceneQuestUIManager != null && _gameSceneQuestUIManager.IsQuestViewed(questData.questId);
+            QuestState questState = QuestDataManager.Instance != null ? QuestDataManager.Instance.GetQuestState(questData.questId) : QuestState.Locked;
+            Debug.Log($"[QuestCell] Initialize CoreRepairQuest: QuestID={questData.questId}, QuestName={questData.questName}, IsNew={isNew}, IsViewedFromManager={isViewedFromManager}, QuestState={questState}");
+        }
 
         if (questNameText != null && questData != null)
         {
@@ -131,7 +144,17 @@ public class QuestCell : MonoBehaviour
             }
             else if (questData.questType == QuestType.CoreRepairQuest)
             {
-                shouldShowNotifier = isNew;
+                if (_gameSceneQuestUIManager != null)
+                {
+                    bool isViewed = _gameSceneQuestUIManager.IsQuestViewed(questData.questId);
+                    shouldShowNotifier = !isViewed;
+                    Debug.Log($"[QuestCell] UpdateConfigureIcon CoreRepairQuest: QuestID={questData.questId}, IsNew={isNew}, IsViewed={isViewed}, ShouldShowNotifier={shouldShowNotifier}");
+                }
+                else
+                {
+                    shouldShowNotifier = isNew;
+                    Debug.Log($"[QuestCell] UpdateConfigureIcon CoreRepairQuest (no manager): QuestID={questData.questId}, IsNew={isNew}, ShouldShowNotifier={shouldShowNotifier}");
+                }
             }
             else if (questData.questType == QuestType.RequestQuest)
             {
@@ -145,7 +168,7 @@ public class QuestCell : MonoBehaviour
                     }
                     else
                     {
-                        shouldShowNotifier = isNew;
+                        shouldShowNotifier = !_gameSceneQuestUIManager.IsQuestViewed(questData.questId);
                     }
                 }
                 else

@@ -62,6 +62,11 @@ public class CoreRepairManager : MonoBehaviour
             foreach (var kvp in _partQuestIds.ToList())
             {
                 int questId = kvp.Value;
+                QuestData existingQuest = QuestDataManager.Instance.GetQuestData(questId);
+                if (existingQuest != null && existingQuest.questType == QuestType.CoreRepairQuest)
+                {
+                    QuestDataManager.Instance.ResetCoreRepairQuestState(questId);
+                }
                 QuestDataManager.Instance.UnregisterRuntimeQuest(questId);
             }
         }
@@ -127,8 +132,29 @@ public class CoreRepairManager : MonoBehaviour
 
         if (QuestDataManager.Instance != null)
         {
+            QuestData existingQuest = QuestDataManager.Instance.GetQuestData(questData.questId);
+            bool questExists = existingQuest != null;
+            
+            Debug.Log($"[CoreRepairQuest] Creating quest for {part}: QuestID={questData.questId}, QuestExists={questExists}, ExistingQuestType={existingQuest?.questType}");
+            
             QuestDataManager.Instance.RegisterRuntimeQuest(questData);
-            QuestDataManager.Instance.StartQuest(questData.questId);
+            
+            if (questExists && existingQuest.questType == QuestType.CoreRepairQuest)
+            {
+                QuestState stateBefore = QuestDataManager.Instance.GetQuestState(questData.questId);
+                Debug.Log($"[CoreRepairQuest] Resetting quest state: QuestID={questData.questId}, StateBefore={stateBefore}");
+                QuestDataManager.Instance.ResetCoreRepairQuestState(questData.questId);
+                QuestState stateAfter = QuestDataManager.Instance.GetQuestState(questData.questId);
+                Debug.Log($"[CoreRepairQuest] Quest state after reset: QuestID={questData.questId}, StateAfter={stateAfter}");
+            }
+            else
+            {
+                QuestState stateBefore = QuestDataManager.Instance.GetQuestState(questData.questId);
+                Debug.Log($"[CoreRepairQuest] Starting new quest: QuestID={questData.questId}, StateBefore={stateBefore}");
+                QuestDataManager.Instance.StartQuest(questData.questId);
+                QuestState stateAfter = QuestDataManager.Instance.GetQuestState(questData.questId);
+                Debug.Log($"[CoreRepairQuest] Quest state after start: QuestID={questData.questId}, StateAfter={stateAfter}");
+            }
         }
     }
 

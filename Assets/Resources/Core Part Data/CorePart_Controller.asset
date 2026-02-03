@@ -22,7 +22,7 @@ MonoBehaviour:
   - resourceType: 9
     amount: 10
   - resourceType: 12
-    amount: 0
+    amount: 10
   repairReward:
     resourceRewards: []
     moduleRewards: []

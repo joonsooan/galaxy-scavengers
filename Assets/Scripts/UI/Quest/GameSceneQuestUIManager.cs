@@ -18,6 +18,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
     [Header("Notification Settings")]
     [SerializeField] private GameObject notifierIcon;
     [SerializeField] private Material shaderMaterial;
+    [SerializeField] private string shaderMaterialResourcePath;
     
     private readonly List<QuestCell> _questCells = new ();
     private readonly HashSet<int> _viewedQuestIds = new ();
@@ -55,6 +56,11 @@ public class GameSceneQuestUIManager : MonoBehaviour
                 panelButton.onClick.RemoveAllListeners();
                 panelButton.onClick.AddListener(ToggleQuestPanel);
             }
+        }
+        
+        if (shaderMaterial == null && !string.IsNullOrEmpty(shaderMaterialResourcePath))
+        {
+            shaderMaterial = Resources.Load<Material>(shaderMaterialResourcePath);
         }
     }
     
@@ -176,6 +182,15 @@ public class GameSceneQuestUIManager : MonoBehaviour
                     ShowNotifierForNewQuest(questId);
                 }
             }
+            
+            if (questData.questType == QuestType.RequestQuest)
+            {
+                QuestState state = QuestDataManager.Instance.GetQuestState(questId);
+                if (state == QuestState.Available && !_viewedQuestIds.Contains(questId) && !_acceptedRequestQuests.Contains(questId))
+                {
+                    ShowNotifierForNewQuest(questId);
+                }
+            }
         }
         
         LoadActiveQuests();
@@ -194,6 +209,21 @@ public class GameSceneQuestUIManager : MonoBehaviour
         {
             ShowNotifierForNewQuest(questData.questId);
             StartCoroutine(RefreshQuestListAfterSpawn());
+        }
+    }
+    
+    private void DisableShaderMaterial()
+    {
+        if (shaderMaterial != null)
+        {
+            if (shaderMaterial.HasProperty("_Enabled"))
+            {
+                shaderMaterial.SetFloat("_Enabled", 0f);
+            }
+            else if (shaderMaterial.HasProperty("_Intensity"))
+            {
+                shaderMaterial.SetFloat("_Intensity", 0f);
+            }
         }
     }
     
@@ -248,6 +278,13 @@ public class GameSceneQuestUIManager : MonoBehaviour
                 else if (quest.questType == QuestType.CoreRepairQuest)
                 {
                     isNew = !_viewedQuestIds.Contains(quest.questId);
+                    bool isViewed = _viewedQuestIds.Contains(quest.questId);
+                    QuestState questState = QuestDataManager.Instance.GetQuestState(quest.questId);
+                    Debug.Log($"[GameSceneQuestUIManager] Creating CoreRepairQuest cell: QuestID={quest.questId}, QuestName={quest.questName}, IsNew={isNew}, IsViewed={isViewed}, QuestState={questState}, ViewedQuestIdsCount={_viewedQuestIds.Count}");
+                    if (isNew)
+                    {
+                        ShowNotifierForNewQuest(quest.questId);
+                    }
                 }
                 questCell.Initialize(quest, _questDetailPanel, isNew, null, this);
                 _questCells.Add(questCell);
@@ -499,6 +536,8 @@ public class GameSceneQuestUIManager : MonoBehaviour
         _acceptedRequestQuests.Add(questId);
         _viewedQuestIds.Add(questId);
         
+        DisableShaderMaterial();
+        
         CloseRequestQuestAcceptPanel();
         LoadActiveQuests();
         UpdateNotifierIcons();
@@ -514,6 +553,10 @@ public class GameSceneQuestUIManager : MonoBehaviour
                 RequestQuestManager.Instance.RemoveRequestQuest(questData);
             }
         }
+        
+        _viewedQuestIds.Add(questId);
+        
+        DisableShaderMaterial();
         
         CloseRequestQuestAcceptPanel();
         LoadActiveQuests();
@@ -538,6 +581,11 @@ public class GameSceneQuestUIManager : MonoBehaviour
     public bool IsRequestQuestAccepted(int questId)
     {
         return _acceptedRequestQuests.Contains(questId);
+    }
+    
+    public bool IsQuestViewed(int questId)
+    {
+        return _viewedQuestIds.Contains(questId);
     }
     
     public void ShowQuestDetailPanel()
