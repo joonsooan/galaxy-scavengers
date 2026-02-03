@@ -7,11 +7,12 @@ using UnityEngine.SceneManagement;
 
 public enum QuestState
 {
-    Locked, // Quest is locked (prerequisite not met)
-    Available, // Quest is available to be picked up
-    Active, // Quest is currently active
-    Completable, // Quest is active and all requirements are met
-    Completed // Quest has been completed
+    Locked,
+    Available,
+    Active,
+    Completable,
+    Completed,
+    Finished
 }
 
 public class QuestDataManager : MonoBehaviour
@@ -895,6 +896,10 @@ public class QuestDataManager : MonoBehaviour
             Debug.LogWarning($"Quest {questId} is {currentState} and cannot be finished. Quest must be Completed.");
             return false;
         }
+
+        _questStates[questId] = QuestState.Finished;
+        OnQuestStateChanged?.Invoke(questId);
+        SaveQuestProgress();
 
         UnlockDependentQuests(questId);
 

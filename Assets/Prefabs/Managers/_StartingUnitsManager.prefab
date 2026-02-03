@@ -45,5 +45,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startingUnits: []
-  questUnitMappings: []
+  questUnitMappings:
+  - questId: 0
+    unitData: {fileID: 11400000, guid: 543df46f7aaa53f46be1a1b5736522f1, type: 2}
+    count: 1
+    spawnRadius: 3
+    spawnInterval: 0
   maxSpawnAttempts: 10

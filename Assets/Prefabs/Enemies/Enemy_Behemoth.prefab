@@ -77,7 +77,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1027114353
-  m_SortingLayer: 2
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_Sprite: {fileID: 6150808516666299658, guid: 32571226b7a3f4b4eb477c649ff5ffe0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -133,7 +133,7 @@ SortingGroup:
   m_GameObject: {fileID: 4630979056125191867}
   m_Enabled: 1
   m_SortingLayerID: -1027114353
-  m_SortingLayer: 2
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_SortAtRoot: 0
 --- !u!1 &7944764008120523387
@@ -248,7 +248,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 330c45daea6434b46bc02141d339b613, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 1.5
+  moveSpeed: 5
   waypointTolerance: 0.1
 --- !u!114 &-5060092193258834609
 MonoBehaviour:
@@ -276,16 +276,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 200
-  currentHealth: 0
-  unitType: 1
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
+  currentHealth: 0
+  unitType: 1
+  unitData: {fileID: 0}
+  progressBarPrefab: {fileID: 0}
   currentState: 0
   warningStatePersist: 5
   outOfTerritoryChaseTime: 3
   attackDamage: 15
   attackRange: 1.5
   attackSpeed: 3
+  maxUnitChaseDistance: 10
+  attackDamageTiming: 0.4
   minTargetMoveDistance: 0.5
   minRoamInterval: 5
   maxRoamInterval: 7

@@ -719,6 +719,9 @@ public class QuestDetailPanel : MonoBehaviour
     
     private void FinishQuestAndGiveRewards(int questId)
     {
+        QuestData quest = QuestDataManager.Instance.GetQuestData(questId);
+        bool isRequestQuest = quest != null && quest.questType == QuestType.RequestQuest;
+        
         if (QuestManager.Instance != null)
         {
             QuestManager.Instance.FinishQuest(questId);
@@ -729,7 +732,6 @@ public class QuestDetailPanel : MonoBehaviour
             questUIHandler.OnQuestFinished(questId);
         }
         
-        QuestData quest = QuestDataManager.Instance.GetQuestData(questId);
         if (quest == null)
         {
             return;
@@ -737,7 +739,7 @@ public class QuestDetailPanel : MonoBehaviour
         
         BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
         
-        if (quest.questType == QuestType.RequestQuest)
+        if (isRequestQuest)
         {
             if (ResourceDataManager.Instance != null && quest.requiredResources != null && quest.requiredResources.Length > 0)
             {
@@ -840,6 +842,15 @@ public class QuestDetailPanel : MonoBehaviour
         if (QuestManager.Instance != null)
         {
             QuestManager.Instance.FinishQuest(questId);
+        }
+        
+        if (isRequestQuest)
+        {
+            GameSceneQuestUIManager questUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
+            if (questUIManager != null)
+            {
+                questUIManager.LoadActiveQuests();
+            }
         }
         
         ClearQuestInfo();

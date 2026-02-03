@@ -186,7 +186,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
             if (questData.questType == QuestType.CoreRepairQuest)
             {
                 QuestState state = QuestDataManager.Instance.GetQuestState(questId);
-                if (state == QuestState.Active && !_viewedQuestIds.Contains(questId))
+                if ((state == QuestState.Active || state == QuestState.Completable) && !_viewedQuestIds.Contains(questId))
                 {
                     ShowNotifierForNewQuest(questId);
                 }
@@ -195,6 +195,11 @@ public class GameSceneQuestUIManager : MonoBehaviour
             if (questData.questType == QuestType.RequestQuest)
             {
                 QuestState state = QuestDataManager.Instance.GetQuestState(questId);
+                if (state == QuestState.Completed || state == QuestState.Finished)
+                {
+                    LoadActiveQuests();
+                    return;
+                }
                 if (state == QuestState.Available && !_viewedQuestIds.Contains(questId) && !_acceptedRequestQuests.Contains(questId))
                 {
                     ShowNotifierForNewQuest(questId);
@@ -267,7 +272,8 @@ public class GameSceneQuestUIManager : MonoBehaviour
             bool isActive = state == QuestState.Active || state == QuestState.Completable;
             bool isRequestQuestAvailable = quest.questType == QuestType.RequestQuest && state == QuestState.Available;
             bool isRequestQuestAccepted = quest.questType == QuestType.RequestQuest && _acceptedRequestQuests.Contains(quest.questId);
-            bool shouldInclude = isActive || isRequestQuestAvailable || isRequestQuestAccepted;
+            bool isRequestQuestFinished = quest.questType == QuestType.RequestQuest && (state == QuestState.Completed || state == QuestState.Finished);
+            bool shouldInclude = (isActive || isRequestQuestAvailable || isRequestQuestAccepted) && !isRequestQuestFinished;
             
             return shouldInclude;
         }).ToList();
@@ -287,9 +293,6 @@ public class GameSceneQuestUIManager : MonoBehaviour
                 else if (quest.questType == QuestType.CoreRepairQuest)
                 {
                     isNew = !_viewedQuestIds.Contains(quest.questId);
-                    bool isViewed = _viewedQuestIds.Contains(quest.questId);
-                    QuestState questState = QuestDataManager.Instance.GetQuestState(quest.questId);
-                    Debug.Log($"[GameSceneQuestUIManager] Creating CoreRepairQuest cell: QuestID={quest.questId}, QuestName={quest.questName}, IsNew={isNew}, IsViewed={isViewed}, QuestState={questState}, ViewedQuestIdsCount={_viewedQuestIds.Count}");
                     if (isNew)
                     {
                         ShowNotifierForNewQuest(quest.questId);

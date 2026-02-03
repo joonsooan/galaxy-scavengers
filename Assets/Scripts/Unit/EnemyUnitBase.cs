@@ -12,6 +12,7 @@ public abstract class EnemyUnitBase : UnitBase
     private const float PathRecomputeDistance = 2.0f;
     private const float PathUpdateInterval = 0.25f;
     private const float MinTargetMoveThreshold = 0.5f;
+    private const float AttackHysteresisBuffer = 0.5f;
 
     [Header("Zones")]
     [SerializeField] protected float warningStatePersist = 5f;
@@ -21,6 +22,8 @@ public abstract class EnemyUnitBase : UnitBase
     [SerializeField] protected int attackDamage = 10;
     [SerializeField] protected float attackRange = 1.5f;
     [SerializeField] protected float attackSpeed = 1f;
+    [SerializeField] protected float maxUnitChaseDistance = 5.0f;
+    [SerializeField] protected float attackDamageTiming = 0.4f;
     [SerializeField] private float minTargetMoveDistance = 0.5f;
 
     [Header("Roaming")]
@@ -187,51 +190,35 @@ public abstract class EnemyUnitBase : UnitBase
         if (_spriteController == null) {
             return;
         }
-
-        bool isAttacking = aiState == AIState.Attack;
         
-        if (isAttacking) {
-            currentState = UnitState.Attacking;
-        }
-        else if (aiState == AIState.Warning || unitMovement != null && unitMovement.IsMoving) {
+        bool isMoving = unitMovement != null && unitMovement.IsMoving;
+        
+        if (isMoving) {
             currentState = UnitState.Moving;
+        }
+        else if (aiState == AIState.Attack) {
+            currentState = UnitState.Attacking;
         }
         else {
             currentState = UnitState.Idle;
         }
 
-        _spriteController.UpdateAnimationState(currentState, isAttacking: isAttacking);
+        _spriteController.UpdateAnimationState(currentState);
 
         if (currentState == UnitState.Moving && unitMovement != null) {
             Vector3 moveDir = unitMovement.GetMoveDirection();
             _spriteController.UpdateSpriteDirection(moveDir);
             _spriteController.ClearTarget();
         }
-        else if (currentState == UnitState.Attacking) {
-            Vector3 targetPos = Vector3.zero;
-            bool hasTarget = false;
-
-            if (_targetDamageable != null) {
-                targetPos = _targetDamageable.transform.position;
-                hasTarget = true;
-            }
-            else if (_targetUnit != null) {
-                targetPos = _targetUnit.transform.position;
-                hasTarget = true;
-            }
-
-            if (hasTarget) {
-                Vector2 direction = (targetPos - transform.position).normalized;
+        else if (currentState == UnitState.Attacking || aiState == AIState.Warning) {
+            Transform targetT = _targetDamageable != null ? _targetDamageable.transform : (_targetUnit != null ? _targetUnit.transform : null);
+            if (targetT != null) {
+                Vector2 direction = (targetT.position - transform.position).normalized;
                 _spriteController.UpdateSpriteDirection(direction);
-                if (_targetDamageable != null) {
-                    _spriteController.SetTargetTransform(_targetDamageable.transform);
-                }
-                else if (_targetUnit != null) {
-                    _spriteController.SetTargetTransform(_targetUnit.transform);
-                }
+                _spriteController.SetTargetTransform(targetT);
             }
         }
-        else if (currentState == UnitState.Idle) {
+        else {
             _spriteController.ClearTarget();
         }
     }
@@ -316,26 +303,14 @@ public abstract class EnemyUnitBase : UnitBase
         }
     }
 
-    protected void EnterWarningState()
+    private void EnterWarningState()
     {
-        if (aiState == AIState.Attack) {
-            if (_attackCoroutine != null) {
-                StopCoroutine(_attackCoroutine);
-                _attackCoroutine = null;
-            }
-        }
-
+        if (aiState == AIState.Warning) return;
+        
         aiState = AIState.Warning;
         _warningTimer = 0f;
         _outOfTerritoryTimer = 0f;
-
         _lastMoveToTargetTime = -MinMoveUpdateInterval;
-        _lastTargetPos = Vector3.positiveInfinity;
-        _lastPathfindingTargetPos = Vector3.positiveInfinity;
-
-        if (unitMovement != null) {
-            unitMovement.StopMovement();
-        }
     }
 
     private void HandleWarning()
@@ -351,21 +326,16 @@ public abstract class EnemyUnitBase : UnitBase
         }
 
         Vector3 targetPos = currentBuilding != null ? currentBuilding.transform.position : currentUnit.transform.position;
-        float distanceFromSpawnSquared = (_spawnPosition - targetPos).sqrMagnitude;
-        float territoryRadiusSquared = _territoryRadius * _territoryRadius;
-
-        if (distanceFromSpawnSquared > territoryRadiusSquared) {
-            _outOfTerritoryTimer += Time.deltaTime;
-
-            if (_outOfTerritoryTimer > outOfTerritoryChaseTime) {
-                ReturnToIdle();
+        
+        if (currentUnit != null) {
+            float distanceToUnit = (transform.position - targetPos).magnitude;
+            if (distanceToUnit > maxUnitChaseDistance) {
+                if (!_isInInfiniteAttackState) { ReturnToIdle(); }
+                else { _targetUnit = null; FindClosestTargetForInfiniteAttack(); }
                 return;
             }
         }
-        else {
-            _outOfTerritoryTimer = 0f;
-        }
-
+        
         float distanceToTargetSquared = (transform.position - targetPos).sqrMagnitude;
         float attackRangeSquared = attackRange * attackRange;
 
@@ -374,37 +344,16 @@ public abstract class EnemyUnitBase : UnitBase
             return;
         }
 
-        if (_warningTimer >= warningStatePersist) {
-            ReturnToIdle();
-            return;
-        }
+        float distanceFromSpawnSquared = (_spawnPosition - targetPos).sqrMagnitude;
+        float territoryRadiusSquared = _territoryRadius * _territoryRadius;
+        if (distanceFromSpawnSquared > territoryRadiusSquared) {
+            _outOfTerritoryTimer += Time.deltaTime;
+            if (_outOfTerritoryTimer > outOfTerritoryChaseTime) { ReturnToIdle(); return; }
+        } else { _outOfTerritoryTimer = 0f; }
 
-        bool isTimeForUpdate = Time.time - _lastMoveToTargetTime >= MinMoveUpdateInterval;
-        float minTargetMoveDistanceSquared = minTargetMoveDistance * minTargetMoveDistance;
-        bool hasTargetMovedEnough = (targetPos - _lastTargetPos).sqrMagnitude > minTargetMoveDistanceSquared;
-        bool needsPathfinding = false;
+        if (_warningTimer >= warningStatePersist) { ReturnToIdle(); return; }
 
-        if (unitMovement != null) {
-            bool hasValidPath = unitMovement.IsMoving && unitMovement.FinalTargetPosition != default;
-            if (!hasValidPath) {
-                needsPathfinding = true;
-            }
-            else {
-                float pathTargetDistanceSquared = (targetPos - unitMovement.FinalTargetPosition).sqrMagnitude;
-                float pathRecomputeDistanceSquared = PathRecomputeDistance * PathRecomputeDistance;
-                if (pathTargetDistanceSquared > pathRecomputeDistanceSquared) {
-                    needsPathfinding = true;
-                }
-            }
-        }
-
-        if (isTimeForUpdate && needsPathfinding) {
-            if (hasTargetMovedEnough || unitMovement == null || !unitMovement.IsMoving) {
-                _lastMoveToTargetTime = Time.time;
-                _lastTargetPos = targetPos;
-                MoveToCurrentTarget();
-            }
-        }
+        MoveToCurrentTarget();
     }
 
     private void HandleAttack()
@@ -427,81 +376,23 @@ public abstract class EnemyUnitBase : UnitBase
 
         Vector3 targetPos = currentBuilding != null ? currentBuilding.transform.position : currentUnit.transform.position;
         float distanceToTargetSquared = (transform.position - targetPos).sqrMagnitude;
-        float attackRangeSquared = attackRange * attackRange;
-
-        bool isMovingTarget = currentUnit != null;
+        
+        float currentAttackRange = (_attackCoroutine != null) ? (attackRange + AttackHysteresisBuffer) : attackRange;
+        float attackRangeSquared = currentAttackRange * currentAttackRange;
 
         if (distanceToTargetSquared > attackRangeSquared) {
-            if (!_isInInfiniteAttackState) {
-                EnterWarningState();
-                return;
+            if (_attackCoroutine != null) {
+                StopCoroutine(_attackCoroutine);
+                _attackCoroutine = null;
+                if (_spriteController != null) _spriteController.UpdateAnimationState(currentState, isAttacking: false);
             }
-
-            if (isMovingTarget) {
-                bool isTimeForUpdate = Time.time - _lastMoveToTargetTime >= MinMoveUpdateInterval;
-                float minTargetMoveDistanceSquared = minTargetMoveDistance * minTargetMoveDistance;
-                bool hasTargetMovedEnough = (targetPos - _lastTargetPos).sqrMagnitude > minTargetMoveDistanceSquared;
-                bool needsPathfinding = false;
-
-                if (unitMovement != null) {
-                    bool hasValidPath = unitMovement.IsMoving && unitMovement.FinalTargetPosition != default;
-                    if (!hasValidPath) {
-                        needsPathfinding = true;
-                    }
-                    else {
-                        float pathTargetDistanceSquared = (targetPos - unitMovement.FinalTargetPosition).sqrMagnitude;
-                        float pathRecomputeDistanceSquared = PathRecomputeDistance * PathRecomputeDistance;
-                        if (pathTargetDistanceSquared > pathRecomputeDistanceSquared) {
-                            needsPathfinding = true;
-                        }
-                    }
-                }
-
-                if (isTimeForUpdate && needsPathfinding) {
-                    if (hasTargetMovedEnough || unitMovement == null || !unitMovement.IsMoving) {
-                        _lastMoveToTargetTime = Time.time;
-                        _lastTargetPos = targetPos;
-                        MoveToCurrentTarget();
-                    }
-                }
-            }
-            else if (!_isInInfiniteAttackState) {
-                EnterWarningState();
-            }
+            
+            MoveToCurrentTarget();
             return;
         }
 
-        if (unitMovement != null) {
+        if (unitMovement != null && unitMovement.IsMoving) {
             unitMovement.StopMovement();
-        }
-
-        if (currentBuilding != null) {
-            if (currentBuilding.CurrentHealth <= 0) {
-                _targetDamageable = null;
-                if (!_isInInfiniteAttackState) {
-                    EnterWarningState();
-                }
-                return;
-            }
-        }
-        else if (currentUnit != null) {
-            Damageable unitDamageable = currentUnit.GetComponent<Damageable>();
-            if (unitDamageable != null) {
-                if (unitDamageable.CurrentHealth <= 0) {
-                    _targetUnit = null;
-                    if (!_isInInfiniteAttackState) {
-                        EnterWarningState();
-                    }
-                    return;
-                }
-            }
-            else if (currentUnit.CurrentHealth <= 0) {
-                _targetUnit = null;
-                if (!_isInInfiniteAttackState) {
-                    EnterWarningState();
-                }
-                return;
-            }
         }
 
         if (_attackCoroutine == null) {
@@ -509,46 +400,21 @@ public abstract class EnemyUnitBase : UnitBase
         }
     }
 
-    protected void EnterAttackState()
+    private void EnterAttackState()
     {
-        if (aiState == AIState.Attack) {
-            return;
-        }
-
+        if (aiState == AIState.Attack) return;
         aiState = AIState.Attack;
         _warningTimer = 0f;
-        _lastMoveToTargetTime = -MinMoveUpdateInterval;
-        _lastTargetPos = Vector3.positiveInfinity;
-        _lastPathfindingTargetPos = Vector3.positiveInfinity;
-
-        if (unitMovement != null) {
-            unitMovement.StopMovement();
-        }
-
-        if (_attackCoroutine == null) {
-            _attackCoroutine = StartCoroutine(AttackCoroutine());
-        }
     }
 
-    protected void ReturnToIdle()
+    private void ReturnToIdle()
     {
-        if (_isInInfiniteAttackState) {
-            return;
-        }
-
+        if (_isInInfiniteAttackState) return;
         aiState = AIState.Idle;
-        _warningTimer = 0f;
         _targetDamageable = null;
         _targetUnit = null;
-
-        if (_attackCoroutine != null) {
-            StopCoroutine(_attackCoroutine);
-            _attackCoroutine = null;
-        }
-
-        if (unitMovement != null) {
-            unitMovement.StopMovement();
-        }
+        if (_attackCoroutine != null) { StopCoroutine(_attackCoroutine); _attackCoroutine = null; }
+        if (unitMovement != null) unitMovement.StopMovement();
     }
 
     private void ChooseRoamDestination()
@@ -619,83 +485,20 @@ public abstract class EnemyUnitBase : UnitBase
         return true;
     }
 
-    protected void MoveToCurrentTarget()
+    private void MoveToCurrentTarget()
     {
         if (unitMovement == null) return;
-
-        Vector3 targetPos;
-
-        if (_targetDamageable != null) {
-            targetPos = _targetDamageable.transform.position;
-        }
-        else if (_targetUnit != null) {
-            targetPos = _targetUnit.transform.position;
-        }
-        else {
-            return;
-        }
+        Vector3 targetPos = _targetDamageable != null ? _targetDamageable.transform.position : (_targetUnit != null ? _targetUnit.transform.position : Vector3.zero);
+        if (targetPos == Vector3.zero) return;
 
         if (Time.time < _pathUpdateTimer) return;
-
-        float distSq = (targetPos - _lastKnownTargetPos).sqrMagnitude;
-        if (distSq < MinTargetMoveThreshold * MinTargetMoveThreshold && unitMovement.IsMoving) {
-            return;
-        }
-
-        _pathUpdateTimer = Time.time + PathUpdateInterval;
-        _lastKnownTargetPos = targetPos;
-
-        float pathRecomputeDistanceSquared = PathRecomputeDistance * PathRecomputeDistance;
-        float distanceFromLastPathfindingSquared = (targetPos - _lastPathfindingTargetPos).sqrMagnitude;
-
-        if (distanceFromLastPathfindingSquared > pathRecomputeDistanceSquared || _lastPathfindingTargetPos == Vector3.positiveInfinity) {
-            _lastPathfindingTargetPos = targetPos;
+        
+        float minTargetMoveDistanceSquared = minTargetMoveDistance * minTargetMoveDistance;
+        if ((targetPos - _lastTargetPos).sqrMagnitude > minTargetMoveDistanceSquared || !unitMovement.IsMoving) {
+            _pathUpdateTimer = Time.time + PathUpdateInterval;
+            _lastTargetPos = targetPos;
             unitMovement.SetNewTarget(targetPos, unitMovement.waypointTolerance);
         }
-    }
-
-    private Damageable FindClosestDamageableInTerritory()
-    {
-        if (TargetManager.Instance == null || TargetManager.Instance.AllTargets.Count == 0) {
-            return null;
-        }
-
-        float bestDistanceSquared = float.MaxValue;
-        Damageable bestTarget = null;
-        float territoryRadiusSquared = _territoryRadius * _territoryRadius;
-
-        foreach (Damageable target in TargetManager.Instance.AllTargets) {
-            if (target == null) continue;
-            if (target.GetComponent<UnitBase>() != null) continue;
-
-            float distFromSpawnSquared = (_spawnPosition - target.transform.position).sqrMagnitude;
-            if (distFromSpawnSquared <= territoryRadiusSquared && distFromSpawnSquared < bestDistanceSquared) {
-                bestDistanceSquared = distFromSpawnSquared;
-                bestTarget = target;
-            }
-        }
-        return bestTarget;
-    }
-
-    private UnitBase FindClosestAllyInTerritory()
-    {
-        if (UnitManager.Instance == null || UnitManager.Instance.AllyUnits == null || UnitManager.Instance.AllyUnits.Count == 0) {
-            return null;
-        }
-
-        float bestDistanceSquared = float.MaxValue;
-        UnitBase bestUnit = null;
-        float territoryRadiusSquared = _territoryRadius * _territoryRadius;
-
-        foreach (UnitBase unit in UnitManager.Instance.AllyUnits) {
-            if (unit == null) continue;
-            float distFromSpawnSquared = (_spawnPosition - unit.transform.position).sqrMagnitude;
-            if (distFromSpawnSquared <= territoryRadiusSquared && distFromSpawnSquared < bestDistanceSquared) {
-                bestDistanceSquared = distFromSpawnSquared;
-                bestUnit = unit;
-            }
-        }
-        return bestUnit;
     }
 
     private void FindClosestTargetForInfiniteAttack()
@@ -718,7 +521,6 @@ public abstract class EnemyUnitBase : UnitBase
                 if (distSquared < bestDistanceSquared) {
                     bestDistanceSquared = distSquared;
                     bestDamageable = target;
-                    bestUnit = null;
                 }
             }
         }
@@ -744,81 +546,46 @@ public abstract class EnemyUnitBase : UnitBase
 
     private IEnumerator AttackCoroutine()
     {
-        WaitForSeconds wait = new WaitForSeconds(1f / attackSpeed);
+        float baseCooldown = 1f / attackSpeed;
+        
         while (aiState == AIState.Attack) {
-            Damageable currentBuilding = _targetDamageable;
-            UnitBase currentUnit = _targetUnit;
+            Damageable currentTarget = _targetDamageable;
+            UnitBase currentUnitTarget = _targetUnit;
+            
+            if (currentTarget == null && currentUnitTarget == null) yield break;
 
-            if (_isInInfiniteAttackState && currentBuilding == null && currentUnit == null) {
-                FindClosestTargetForInfiniteAttack();
-                currentBuilding = _targetDamageable;
-                currentUnit = _targetUnit;
-
-                if (currentBuilding == null && currentUnit == null) {
-                    yield return wait;
-                    continue;
-                }
-            }
-
-            if (currentBuilding == null && currentUnit == null) {
-                if (!_isInInfiniteAttackState) {
-                    EnterWarningState();
-                }
+            Vector3 targetPos = currentTarget != null ? currentTarget.transform.position : currentUnitTarget.transform.position;
+            if ((transform.position - targetPos).sqrMagnitude > (attackRange * attackRange)) {
+                _attackCoroutine = null;
                 yield break;
             }
 
-            Vector3 targetPos = currentBuilding != null ? currentBuilding.transform.position : currentUnit.transform.position;
-            float distanceToTargetSquared = (transform.position - targetPos).sqrMagnitude;
-            float attackRangeSquared = attackRange * attackRange;
+            if (_spriteController != null) {
+                _spriteController.UpdateAnimationState(currentState, isAttacking: true);
+                
+                float animationLength = _spriteController.GetCurrentAnimationLength();
+                if (animationLength <= 0) animationLength = 0.5f; // 예외 처리
 
-            if (distanceToTargetSquared > attackRangeSquared) {
-                yield return wait;
-                continue;
+                float damageDelay = animationLength * Mathf.Clamp01(attackDamageTiming);
+                
+                yield return CoroutineCache.GetWaitForSeconds(damageDelay);
+
+                float checkRangeSq = (attackRange + AttackHysteresisBuffer) * (attackRange + AttackHysteresisBuffer);
+                if ((transform.position - targetPos).sqrMagnitude <= checkRangeSq) {
+                    if (currentTarget != null) currentTarget.TakeDamage(attackDamage);
+                    else if (currentUnitTarget != null) currentUnitTarget.TakeDamage(attackDamage);
+                }
+
+                yield return CoroutineCache.GetWaitForSeconds(animationLength - damageDelay);
+                _spriteController.UpdateAnimationState(currentState, isAttacking: false);
+
+                float remainingCooldown = Mathf.Max(0, baseCooldown - animationLength);
+                if (remainingCooldown > 0) yield return CoroutineCache.GetWaitForSeconds(remainingCooldown);
             }
-
-            if (currentBuilding != null) {
-                if (currentBuilding.CurrentHealth > 0) {
-                    currentBuilding.TakeDamage(attackDamage);
-                }
-                else {
-                    _targetDamageable = null;
-                    if (!_isInInfiniteAttackState) {
-                        EnterWarningState();
-                    }
-                    yield break;
-                }
+            else {
+                if (currentTarget != null) currentTarget.TakeDamage(attackDamage);
+                yield return CoroutineCache.GetWaitForSeconds(baseCooldown);
             }
-            else if (currentUnit != null) {
-                Damageable unitDamageable = currentUnit.GetComponent<Damageable>();
-                if (unitDamageable != null) {
-                    if (unitDamageable.CurrentHealth > 0) {
-                        unitDamageable.TakeDamage(attackDamage);
-                    }
-
-                    if (unitDamageable.CurrentHealth <= 0) {
-                        _targetUnit = null;
-                        if (!_isInInfiniteAttackState) {
-                            EnterWarningState();
-                        }
-                        yield break;
-                    }
-                }
-                else {
-                    if (currentUnit.currentHealth > 0) {
-                        currentUnit.TakeDamage(attackDamage);
-                    }
-
-                    if (currentUnit.currentHealth <= 0f) {
-                        _targetUnit = null;
-                        if (!_isInInfiniteAttackState) {
-                            EnterWarningState();
-                        }
-                        yield break;
-                    }
-                }
-            }
-
-            yield return wait;
         }
         _attackCoroutine = null;
     }
