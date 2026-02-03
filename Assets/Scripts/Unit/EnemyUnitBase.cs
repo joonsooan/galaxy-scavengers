@@ -188,7 +188,9 @@ public abstract class EnemyUnitBase : UnitBase
             return;
         }
 
-        if (aiState == AIState.Attack) {
+        bool isAttacking = aiState == AIState.Attack;
+        
+        if (isAttacking) {
             currentState = UnitState.Attacking;
         }
         else if (aiState == AIState.Warning || unitMovement != null && unitMovement.IsMoving) {
@@ -198,7 +200,7 @@ public abstract class EnemyUnitBase : UnitBase
             currentState = UnitState.Idle;
         }
 
-        _spriteController.UpdateAnimationState(currentState);
+        _spriteController.UpdateAnimationState(currentState, isAttacking: isAttacking);
 
         if (currentState == UnitState.Moving && unitMovement != null) {
             Vector3 moveDir = unitMovement.GetMoveDirection();
