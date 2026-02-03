@@ -28,6 +28,17 @@ public class BtnManager_Base : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        if (fadeCanvasGroup != null) {
+            if (fadeCanvasGroup.gameObject != null) {
+                fadeCanvasGroup.gameObject.SetActive(true);
+            }
+            fadeCanvasGroup.alpha = 0f;
+        }
+        _isLaunching = false;
+    }
+
     private void OnDestroy()
     {
         if (coreLaunchButton != null) {
@@ -36,6 +47,17 @@ public class BtnManager_Base : MonoBehaviour
         if (titleButton != null) {
             titleButton.onClick.RemoveListener(BackToTitle);
         }
+    }
+
+    public void ResetFadeCanvasGroup()
+    {
+        if (fadeCanvasGroup != null) {
+            if (fadeCanvasGroup.gameObject != null) {
+                fadeCanvasGroup.gameObject.SetActive(true);
+            }
+            fadeCanvasGroup.alpha = 0f;
+        }
+        _isLaunching = false;
     }
 
     private void OnCoreLaunchClicked()
@@ -59,18 +81,24 @@ public class BtnManager_Base : MonoBehaviour
 
     private IEnumerator CoreLaunchSequence()
     {
-        if (fadeCanvasGroup != null && fadeDuration > 0f) {
-            float elapsed = 0f;
-            while (elapsed < fadeDuration) {
-                elapsed += Time.deltaTime;
-                float t = Mathf.Clamp01(elapsed / fadeDuration);
-                fadeCanvasGroup.alpha = t;
-                yield return null;
+        if (fadeCanvasGroup != null) {
+            if (fadeCanvasGroup.gameObject != null) {
+                fadeCanvasGroup.gameObject.SetActive(true);
             }
-            fadeCanvasGroup.alpha = 1f;
-        }
-        else if (fadeCanvasGroup != null) {
-            fadeCanvasGroup.alpha = 1f;
+            
+            if (fadeDuration > 0f) {
+                float elapsed = 0f;
+                while (elapsed < fadeDuration) {
+                    elapsed += Time.deltaTime;
+                    float t = Mathf.Clamp01(elapsed / fadeDuration);
+                    fadeCanvasGroup.alpha = t;
+                    yield return null;
+                }
+                fadeCanvasGroup.alpha = 1f;
+            }
+            else {
+                fadeCanvasGroup.alpha = 1f;
+            }
         }
 
         SceneLoader.Instance.LoadGameScene();

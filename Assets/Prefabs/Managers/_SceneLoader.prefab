@@ -48,7 +48,11 @@ MonoBehaviour:
   titleSceneName: TitleScene
   baseSceneName: BaseScene
   gameSceneName: GameScene
+  fadeDuration: 0.5
   gameScenePostFadeDelay: 1
+  baseSceneBgmStopDelay: 0
+  baseSceneBgmFadeOutTime: 1
+  gameOverLoadingScreenDelay: 0.5
 --- !u!114 &5978680509315379117
 MonoBehaviour:
   m_ObjectHideFlags: 0

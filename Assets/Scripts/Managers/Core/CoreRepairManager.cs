@@ -55,9 +55,23 @@ public class CoreRepairManager : MonoBehaviour
         }
     }
 
+    public void ResetCoreRepairQuests()
+    {
+        if (QuestDataManager.Instance != null)
+        {
+            foreach (var kvp in _partQuestIds.ToList())
+            {
+                int questId = kvp.Value;
+                QuestDataManager.Instance.UnregisterRuntimeQuest(questId);
+            }
+        }
+        _partQuestIds.Clear();
+    }
+
     public void InitializeLanding()
     {
-        if (_isInitialized) return;
+        ResetCoreRepairQuests();
+        _isInitialized = false;
 
         foreach (CorePart part in Enum.GetValues(typeof(CorePart)))
         {

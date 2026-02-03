@@ -128,7 +128,7 @@ public class SuccessLoadingScreen : MonoBehaviour
         {
             loadingText.text = loadingTextString;
             Color textColor = loadingText.color;
-            textColor.a = 1f;
+            textColor.a = 0f;
             loadingText.color = textColor;
         }
         if (loadingImage != null) 
@@ -262,6 +262,14 @@ public class SuccessLoadingScreen : MonoBehaviour
             BgmManager.Instance.PlaySuccessLoadingBgm(loadingBgmFadeInTime);
         }
         
+        if (loadingText != null)
+        {
+            Color textColor = loadingText.color;
+            textColor.a = 0f;
+            loadingText.color = textColor;
+            loadingText.DOFade(1f, imageEntryDuration).SetUpdate(true);
+        }
+
         if (imageRect != null)
         {
             _imageEntryTween = imageRect.DOAnchorPos(Vector2.zero, imageEntryDuration)

@@ -86,6 +86,12 @@ public class BaseSceneManager : MonoBehaviour
                 }
             }
         }
+
+        BtnManager_Base btnManager = FindFirstObjectByType<BtnManager_Base>();
+        if (btnManager != null)
+        {
+            btnManager.ResetFadeCanvasGroup();
+        }
     }
 
     private GameObject FindFadePanel()

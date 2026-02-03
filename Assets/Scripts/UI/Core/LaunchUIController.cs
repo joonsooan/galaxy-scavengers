@@ -22,14 +22,20 @@ public class LaunchUIController : MonoBehaviour
     [SerializeField] private float launchCompleteDisplayDuration = 2f;
     [SerializeField] private float fadeToBlackDuration = 1f;
     [SerializeField] private float blackScreenWaitDuration = 1f;
+    [SerializeField] private float tutorialPanelHideDelay = 0.5f;
 
     [Header("Audio")]
     [SerializeField] private EventReference buttonClickSound;
+    [SerializeField] private float bgmFadeOutTime = 0.5f;
 
     private bool _isCountingDown;
     private Coroutine _countdownCoroutine;
     private WaitForSeconds _launchCompleteDisplayWait;
     private WaitForSecondsRealtime _blackScreenWaitWait;
+    private WaitForSecondsRealtime _tutorialPanelHideDelayWait;
+    private WaitForSecondsRealtime _fadeToBlackDurationWait;
+    private float _cachedTutorialPanelHideDelay;
+    private float _cachedFadeToBlackDuration;
     private GameObject _fadeOverlay;
 
     private void Awake()
@@ -45,8 +51,25 @@ public class LaunchUIController : MonoBehaviour
         }
 
         UpdateNeededAetherText();
+        UpdateCachedWaits();
+    }
+
+    private void UpdateCachedWaits()
+    {
         _launchCompleteDisplayWait = CoroutineCache.GetWaitForSeconds(launchCompleteDisplayDuration);
         _blackScreenWaitWait = CoroutineCache.GetWaitForSecondsRealtime(blackScreenWaitDuration);
+
+        if (_tutorialPanelHideDelayWait == null || Mathf.Abs(_cachedTutorialPanelHideDelay - tutorialPanelHideDelay) > 0.001f)
+        {
+            _cachedTutorialPanelHideDelay = tutorialPanelHideDelay;
+            _tutorialPanelHideDelayWait = CoroutineCache.GetWaitForSecondsRealtime(tutorialPanelHideDelay);
+        }
+
+        if (_fadeToBlackDurationWait == null || Mathf.Abs(_cachedFadeToBlackDuration - fadeToBlackDuration) > 0.001f)
+        {
+            _cachedFadeToBlackDuration = fadeToBlackDuration;
+            _fadeToBlackDurationWait = CoroutineCache.GetWaitForSecondsRealtime(fadeToBlackDuration);
+        }
     }
 
     private void CreateFadeOverlay()
@@ -199,7 +222,10 @@ public class LaunchUIController : MonoBehaviour
             remaining -= Time.deltaTime;
         }
 
+        remaining = 0f;
         UpdateCountdownText(0f);
+
+        yield return null;
 
         if (countdownPanel != null)
         {
@@ -227,9 +253,12 @@ public class LaunchUIController : MonoBehaviour
             TutorialManager.Instance.HideAllUIPanels();
         }
 
+        UpdateCachedWaits();
+        yield return _tutorialPanelHideDelayWait;
+
         if (BgmManager.Instance != null)
         {
-            BgmManager.Instance.StopBgm(0.5f);
+            BgmManager.Instance.StopBgm(bgmFadeOutTime);
         }
 
         yield return StartCoroutine(FadeToBlack());
@@ -261,8 +290,9 @@ public class LaunchUIController : MonoBehaviour
             yield break;
         }
 
+        UpdateCachedWaits();
         fadeImage.DOFade(1f, fadeToBlackDuration).SetUpdate(true);
-        yield return new WaitForSecondsRealtime(fadeToBlackDuration);
+        yield return _fadeToBlackDurationWait;
     }
 
     private void UpdateNeededAetherText()

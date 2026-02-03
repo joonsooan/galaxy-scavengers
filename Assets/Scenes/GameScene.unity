@@ -49697,7 +49697,10 @@ MonoBehaviour:
   countdownDurationSeconds: 10
   neededAetherPerCell: 100
   freeLaunchCells: 2
-  launchCompleteDisplayDuration: 2
+  launchCompleteDisplayDuration: 0
+  fadeToBlackDuration: 1
+  blackScreenWaitDuration: 1
+  tutorialPanelHideDelay: 1
   buttonClickSound:
     Guid:
       Data1: -345895807
@@ -49705,6 +49708,7 @@ MonoBehaviour:
       Data3: -73339495
       Data4: 1624008095
     Path: event:/SFX_UIClick
+  bgmFadeOutTime: 1
 --- !u!114 &1538527380
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -901,6 +901,26 @@ public class QuestDataManager : MonoBehaviour
         return true;
     }
 
+    public void ResetCoreRepairQuestState(int questId)
+    {
+        if (!_questDataDict.ContainsKey(questId)) {
+            return;
+        }
+
+        QuestData quest = _questDataDict[questId];
+        if (quest == null || quest.questType != QuestType.CoreRepairQuest) {
+            return;
+        }
+
+        _completedQuestIds.Remove(questId);
+        _questsReturnedSuccessfully.Remove(questId);
+        _questsReturnedWithFailure.Remove(questId);
+        _questStates[questId] = QuestState.Active;
+        _activeQuestIds.Add(questId);
+        OnQuestStateChanged?.Invoke(questId);
+        SaveQuestProgress();
+    }
+
     private void UnlockDependentQuests(int completedQuestId)
     {
         foreach (QuestData quest in _questDataDict.Values) {

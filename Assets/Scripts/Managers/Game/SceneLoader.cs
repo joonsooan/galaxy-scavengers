@@ -9,12 +9,30 @@ public class SceneLoader : MonoBehaviour
 {
     public enum ReturnFromGameState { None, Success, Failure }
 
+    [Header("Scene Names")]
     [SerializeField] private string titleSceneName = "TitleScene";
     [SerializeField] private string baseSceneName = "BaseScene";
     [SerializeField] private string gameSceneName = "GameScene";
+
+    [Header("Fade Settings")]
+    [SerializeField] private float fadeDuration = 0.5f;
+
+    [Header("Game Scene Loading Settings")]
     [SerializeField] private float gameScenePostFadeDelay = 1f;
 
-    private static readonly WaitForSecondsRealtime _wait01Realtime = new WaitForSecondsRealtime(0.1f);
+    [Header("Base Scene Loading Settings")]
+    [SerializeField] private float baseSceneBgmStopDelay = 0.5f;
+    [SerializeField] private float baseSceneBgmFadeOutTime = 1.0f;
+    [SerializeField] private float gameOverLoadingScreenDelay = 0.5f;
+
+    private static readonly WaitForSecondsRealtime _wait01Realtime = CoroutineCache.GetWaitForSecondsRealtime(0.1f);
+    private WaitForSecondsRealtime _gameScenePostFadeDelayWait;
+    private WaitForSecondsRealtime _baseSceneBgmStopDelayWait;
+    private WaitForSecondsRealtime _gameOverLoadingScreenDelayWait;
+    private float _cachedGameScenePostFadeDelay;
+    private float _cachedBaseSceneBgmStopDelay;
+    private float _cachedGameOverLoadingScreenDelay;
+
     private bool _isLoading;
     private bool _waitingForContinue;
     private ReturnFromGameState _returnState = ReturnFromGameState.None;
@@ -26,6 +44,32 @@ public class SceneLoader : MonoBehaviour
     {
         if (Instance == null) { Instance = this; DontDestroyOnLoad(gameObject); }
         else { Destroy(gameObject); }
+    }
+
+    private void Start()
+    {
+        UpdateCachedWaits();
+    }
+
+    private void UpdateCachedWaits()
+    {
+        if (_gameScenePostFadeDelayWait == null || Mathf.Abs(_cachedGameScenePostFadeDelay - gameScenePostFadeDelay) > 0.001f)
+        {
+            _cachedGameScenePostFadeDelay = gameScenePostFadeDelay;
+            _gameScenePostFadeDelayWait = CoroutineCache.GetWaitForSecondsRealtime(gameScenePostFadeDelay);
+        }
+
+        if (_baseSceneBgmStopDelayWait == null || Mathf.Abs(_cachedBaseSceneBgmStopDelay - baseSceneBgmStopDelay) > 0.001f)
+        {
+            _cachedBaseSceneBgmStopDelay = baseSceneBgmStopDelay;
+            _baseSceneBgmStopDelayWait = CoroutineCache.GetWaitForSecondsRealtime(baseSceneBgmStopDelay);
+        }
+
+        if (_gameOverLoadingScreenDelayWait == null || Mathf.Abs(_cachedGameOverLoadingScreenDelay - gameOverLoadingScreenDelay) > 0.001f)
+        {
+            _cachedGameOverLoadingScreenDelay = gameOverLoadingScreenDelay;
+            _gameOverLoadingScreenDelayWait = CoroutineCache.GetWaitForSecondsRealtime(gameOverLoadingScreenDelay);
+        }
     }
 
     public void LoadTitleScene()
@@ -67,8 +111,9 @@ public class SceneLoader : MonoBehaviour
     private IEnumerator LoadGameSceneAsync()
     {
         _isLoading = true;
+        UpdateCachedWaits();
         
-        yield return StartCoroutine(FadeRoutine(1f, 0.5f));
+        yield return StartCoroutine(FadeRoutine(1f, fadeDuration));
 
         if (LoadingUIManager.Instance != null) {
             LoadingUIManager.Instance.ShowLoadingScreen();
@@ -83,7 +128,7 @@ public class SceneLoader : MonoBehaviour
 
         if (LoadingUIManager.Instance != null) yield return LoadingUIManager.Instance.HideLoadingScreenWithFadeAsync();
         
-        yield return new WaitForSecondsRealtime(gameScenePostFadeDelay);
+        yield return _gameScenePostFadeDelayWait;
         
         BgmManager.Instance?.PlayGameBgm();
         GameManager.Instance?.SpawnUnitsAfterLoading();
@@ -97,6 +142,7 @@ public class SceneLoader : MonoBehaviour
     {
         _isLoading = true;
         _waitingForContinue = true;
+        UpdateCachedWaits();
 
         if (LoadingUIManager.Instance != null) {
             bool isSuccess = _returnState == ReturnFromGameState.Success;
@@ -114,7 +160,7 @@ public class SceneLoader : MonoBehaviour
                 yield return StartCoroutine(WaitForLoadingEntry(LoadingUIManager.Instance.GetSuccessLoadingScreenComponent()));
             } else {
                 LoadingUIManager.Instance.ShowGameOverLoadingScreen();
-                yield return new WaitForSecondsRealtime(0.5f);
+                yield return _gameOverLoadingScreenDelayWait;
             }
         }
 
@@ -127,12 +173,12 @@ public class SceneLoader : MonoBehaviour
         while (!_baseSceneLoadOperation.isDone) yield return null;
 
         if (BgmManager.Instance != null) {
-            if (_returnState == ReturnFromGameState.Success) BgmManager.Instance.StopSuccessLoadingBgm(1.0f);
-            else if (_returnState == ReturnFromGameState.Failure) BgmManager.Instance.StopFailureLoadingBgm(1.0f);
+            if (_returnState == ReturnFromGameState.Success) BgmManager.Instance.StopSuccessLoadingBgm(baseSceneBgmFadeOutTime);
+            else if (_returnState == ReturnFromGameState.Failure) BgmManager.Instance.StopFailureLoadingBgm(baseSceneBgmFadeOutTime);
             BgmManager.Instance.PlayBaseBgm();
         }
 
-        yield return new WaitForSecondsRealtime(0.5f);
+        yield return _baseSceneBgmStopDelayWait;
 
         if (_returnState == ReturnFromGameState.Success && LoadingUIManager.Instance != null) {
             var successScreen = LoadingUIManager.Instance.GetSuccessLoadingScreenComponent();
@@ -142,7 +188,7 @@ public class SceneLoader : MonoBehaviour
         }
 
         LoadingUIManager.Instance?.HideLoadingScreen();
-        yield return StartCoroutine(FadeRoutine(0f, 0.5f));
+        yield return StartCoroutine(FadeRoutine(0f, fadeDuration));
 
         _returnState = ReturnFromGameState.None;
         _isLoading = false;
