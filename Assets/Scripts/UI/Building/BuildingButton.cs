@@ -80,7 +80,12 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         }
         
         if (buildingData != null && BuildingInfoPanel.Instance != null) {
-            BuildingInfoPanel.Instance.PreviewInfo(buildingData);
+            Damageable damageable = null;
+            if (buildingData.buildingPrefab != null)
+            {
+                damageable = buildingData.buildingPrefab.GetComponent<Damageable>();
+            }
+            BuildingInfoPanel.Instance.PreviewInfo(buildingData, damageable);
         }
     }
 

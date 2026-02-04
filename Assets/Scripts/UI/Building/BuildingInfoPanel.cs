@@ -38,7 +38,7 @@ public class BuildingInfoPanel : MonoBehaviour
             Damageable damageable = data.buildingPrefab.GetComponent<Damageable>();
             if (damageable != null)
             {
-                UpdateHealthDisplay(damageable, true);
+                UpdateHealthDisplay(damageable, false);
             }
         }
     }
@@ -48,7 +48,7 @@ public class BuildingInfoPanel : MonoBehaviour
         UpdateUI(data);
         if (damageable != null)
         {
-            UpdateHealthDisplay(damageable, false);
+            UpdateHealthDisplay(damageable, true);
         }
     }
     
@@ -84,7 +84,7 @@ public class BuildingInfoPanel : MonoBehaviour
         }
     }
 
-    public void UpdateHealthDisplay(Damageable damageable, bool showMaxHealth = false)
+    private void UpdateHealthDisplay(Damageable damageable, bool showMaxHealth = false)
     {
         if (healthText == null) return;
         if (damageable == null)
@@ -95,11 +95,11 @@ public class BuildingInfoPanel : MonoBehaviour
 
         if (showMaxHealth)
         {
-            healthText.text = $"{damageable.MaxHealth}";
+            healthText.text = $"체력 : {damageable.MaxHealth}";
         }
         else
         {
-            healthText.text = $"{damageable.CurrentHealth}/{damageable.MaxHealth}";
+            healthText.text = $"현재 체력 : {damageable.CurrentHealth} / {damageable.MaxHealth}";
         }
     }
 

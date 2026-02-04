@@ -54,12 +54,31 @@ public class Enemy_Bullet : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.isTrigger) return;
+        if (other is not BoxCollider2D) return;
 
-        UnitBase unit = other.GetComponent<UnitBase>();
-        if (unit != null && unit.unitType == UnitBase.UnitType.Ally) {
-            unit.TakeDamage(_damage);
-            Deactivate();
+        Damageable damageable = other.GetComponent<Damageable>();
+        if (damageable != null)
+        {
+            bool shouldDamage = false;
+            
+            UnitBase unit = damageable as UnitBase;
+            if (unit != null)
+            {
+                if (unit.unitType == UnitBase.UnitType.Ally)
+                {
+                    shouldDamage = true;
+                }
+            }
+            else
+            {
+                shouldDamage = true;
+            }
+            
+            if (shouldDamage)
+            {
+                damageable.TakeDamage(_damage);
+                Deactivate();
+            }
         }
     }
 

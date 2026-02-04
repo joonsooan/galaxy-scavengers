@@ -417,7 +417,7 @@ public class UIManager : MonoBehaviour
         }
 
         if (storageAmountText != null) {
-            storageAmountText.text = $"{totalAmount.ToString()}/{maxCapacity.ToString()}";
+            storageAmountText.text = $"{totalAmount.ToString()} / {maxCapacity.ToString()}";
         }
     }
 
