@@ -147,7 +147,6 @@ GameObject:
   - component: {fileID: 407409324728012381}
   - component: {fileID: 952973934286858722}
   - component: {fileID: 4198946278330008068}
-  - component: {fileID: -2382125923714539233}
   - component: {fileID: 3132766170232860239}
   - component: {fileID: -5060092193258834609}
   - component: {fileID: -9190535632355532876}
@@ -237,42 +236,6 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.5
---- !u!58 &-2382125923714539233
-CircleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7944764008120523387}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_Radius: 2
 --- !u!114 &3132766170232860239
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -323,13 +286,14 @@ MonoBehaviour:
   warningStatePersist: 5
   outOfTerritoryChaseTime: 3
   attackDamage: 10
-  attackRange: 1.5
+  attackRange: 5
   attackSpeed: 1.5
   maxUnitChaseDistance: 10
   attackDamageTiming: 0.75
   minTargetMoveDistance: 0.5
   bodyCollider: {fileID: 4198946278330008068}
-  attackRangeCollider: {fileID: -2382125923714539233}
   minRoamInterval: 2
   maxRoamInterval: 3
   unitMovement: {fileID: 3132766170232860239}
+  bulletPoolTag: EnemyBullet
+  bulletSpeed: 8
