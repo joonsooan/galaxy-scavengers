@@ -18,7 +18,6 @@ public abstract class EnemyUnitBase : UnitBase
     [Header("Combat")]
     [SerializeField] protected int attackDamage = 10;
     [SerializeField] protected float attackRange = 1.5f;
-    [SerializeField] protected float attackSpeed = 1f;
     [SerializeField] protected float maxUnitChaseDistance = 5.0f;
     [SerializeField] protected float attackDamageTiming = 0.4f;
     [SerializeField] private float minTargetMoveDistance = 0.5f;
@@ -277,30 +276,36 @@ public abstract class EnemyUnitBase : UnitBase
 
     private void HandleAttack()
     {
+        if (_attackCoroutine != null) return;
+
         Damageable currentBuilding = _targetDamageable;
         UnitBase currentUnit = _targetUnit;
+
         if (_isInInfiniteAttackState && currentBuilding == null && currentUnit == null) {
             FindClosestTargetForInfiniteAttack();
             currentBuilding = _targetDamageable;
             currentUnit = _targetUnit;
         }
+
         if (currentBuilding == null && currentUnit == null) {
             if (!_isInInfiniteAttackState) EnterWarningState();
             return;
         }
+
         Vector3 targetPos = currentBuilding != null ? currentBuilding.transform.position : currentUnit.transform.position;
-        float currentAttackRange = (_attackCoroutine != null) ? (attackRange + AttackHysteresisBuffer) : attackRange;
-        if ((transform.position - targetPos).sqrMagnitude > currentAttackRange * currentAttackRange) {
-            if (_attackCoroutine != null) {
-                StopCoroutine(_attackCoroutine);
-                _attackCoroutine = null;
-                if (_spriteController != null) _spriteController.UpdateAnimationState(currentState, isAttacking: false);
-            }
+        float distanceToTargetSquared = (transform.position - targetPos).sqrMagnitude;
+        float attackRangeSquared = attackRange * attackRange;
+
+        if (distanceToTargetSquared > attackRangeSquared) {
             MoveToCurrentTarget();
             return;
         }
-        if (unitMovement != null && unitMovement.IsMoving) unitMovement.StopMovement();
-        if (_attackCoroutine == null) _attackCoroutine = StartCoroutine(AttackCoroutine());
+
+        if (unitMovement != null && unitMovement.IsMoving) {
+            unitMovement.StopMovement();
+        }
+
+        _attackCoroutine = StartCoroutine(AttackCoroutine());
     }
 
     private void EnterAttackState()
@@ -391,46 +396,43 @@ public abstract class EnemyUnitBase : UnitBase
 
     private IEnumerator AttackCoroutine()
     {
-        float baseCooldown = 1f / attackSpeed;
         while (aiState == AIState.Attack) {
             Damageable currentT = _targetDamageable;
             UnitBase currentU = _targetUnit;
-            if (currentT == null && currentU == null) yield break;
-            Vector3 tPos = currentT != null ? currentT.transform.position : currentU.transform.position;
-            if ((transform.position - tPos).sqrMagnitude > attackRange * attackRange) { _attackCoroutine = null; yield break; }
             
+            if (currentT == null && currentU == null) break;
+
+            Vector3 tPos = currentT != null ? currentT.transform.position : currentU.transform.position;
+            
+            if ((transform.position - tPos).sqrMagnitude > attackRange * attackRange) {
+                break; 
+            }
+
             if (_spriteController != null) {
                 _spriteController.UpdateAnimationState(currentState, isAttacking: true);
-            
+                
                 yield return null; 
 
                 float animLen = _spriteController.GetCurrentAnimationLength();
                 if (animLen <= 0) animLen = 0.5f;
 
                 float dDelay = animLen * Mathf.Clamp01(attackDamageTiming);
+                
                 yield return CoroutineCache.GetWaitForSeconds(dDelay);
 
-                currentT = _targetDamageable;
-                currentU = _targetUnit;
-                if (currentT != null || currentU != null) {
-                    Vector3 currentTPos = currentT != null ? currentT.transform.position : currentU.transform.position;
-                    float checkR = attackRange + AttackHysteresisBuffer;
-                    if ((transform.position - currentTPos).sqrMagnitude <= checkR * checkR) {
-                        PerformAttackLogic(currentT, currentU);
-                    }
+                if (_targetDamageable != null || _targetUnit != null) {
+                    PerformAttackLogic(_targetDamageable, _targetUnit);
                 }
 
                 yield return CoroutineCache.GetWaitForSeconds(Mathf.Max(0, animLen - dDelay));
                 _spriteController.UpdateAnimationState(currentState, isAttacking: false);
-
-                float remain = Mathf.Max(0, baseCooldown - animLen);
-                if (remain > 0) yield return CoroutineCache.GetWaitForSeconds(remain);
             }
             else {
                 PerformAttackLogic(currentT, currentU);
-                yield return CoroutineCache.GetWaitForSeconds(baseCooldown);
+                yield return CoroutineCache.GetWaitForSeconds(0.5f);
             }
         }
+        
         _attackCoroutine = null;
     }
 
