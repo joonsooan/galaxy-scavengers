@@ -286,10 +286,10 @@ MonoBehaviour:
   warningStatePersist: 5
   outOfTerritoryChaseTime: 3
   attackDamage: 10
-  attackRange: 5
+  attackRange: 7
   attackSpeed: 1.5
   maxUnitChaseDistance: 10
-  attackDamageTiming: 0.75
+  attackDamageTiming: 0.875
   minTargetMoveDistance: 0.5
   bodyCollider: {fileID: 4198946278330008068}
   minRoamInterval: 2
