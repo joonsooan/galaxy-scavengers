@@ -98,7 +98,7 @@ GameObject:
   - component: {fileID: 4483249089817793867}
   - component: {fileID: 1616897775811544138}
   - component: {fileID: -297290674602724703}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Unit_Scout
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -147,7 +147,7 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 1
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!114 &-1745388413814833203
 MonoBehaviour:

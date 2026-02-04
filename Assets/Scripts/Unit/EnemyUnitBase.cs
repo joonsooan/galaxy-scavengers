@@ -25,6 +25,10 @@ public abstract class EnemyUnitBase : UnitBase
     [SerializeField] protected float maxUnitChaseDistance = 5.0f;
     [SerializeField] protected float attackDamageTiming = 0.4f;
     [SerializeField] private float minTargetMoveDistance = 0.5f;
+    
+    [Header("Colliders")]
+    [SerializeField] private CircleCollider2D bodyCollider;
+    [SerializeField] private CircleCollider2D attackRangeCollider;
 
     [Header("Roaming")]
     public float minRoamInterval = 2.0f;
@@ -63,9 +67,14 @@ public abstract class EnemyUnitBase : UnitBase
     {
         base.Awake();
 
-        _attackRangeCollider = GetComponent<CircleCollider2D>();
-        _attackRangeCollider.radius = attackRange;
-        _attackRangeCollider.isTrigger = true;
+        if (attackRangeCollider != null) {
+            attackRangeCollider.radius = attackRange;
+            attackRangeCollider.isTrigger = true;
+        }
+
+        if (bodyCollider != null) {
+            bodyCollider.isTrigger = false;
+        }
 
         _spawnPosition = Vector3.zero;
         aiState = AIState.Idle;
@@ -87,6 +96,11 @@ public abstract class EnemyUnitBase : UnitBase
     protected override void OnEnable()
     {
         base.OnEnable();
+
+        if (_currentRoamInterval <= 0f) {
+            SetNewRoamInterval();
+        }
+        _roamTimer = _currentRoamInterval;
 
         if (_aiUpdateWait != null) {
             _aiUpdateCoroutine = StartCoroutine(AIUpdateRoutine());

@@ -147,10 +147,11 @@ GameObject:
   - component: {fileID: 407409324728012381}
   - component: {fileID: 952973934286858722}
   - component: {fileID: -7692210126921437933}
+  - component: {fileID: 3777656547336431290}
   - component: {fileID: 3132766170232860239}
   - component: {fileID: -5060092193258834609}
   - component: {fileID: -5414244451522802995}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Enemy_Behemoth
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -189,7 +190,7 @@ Rigidbody2D:
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_GravityScale: 0
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 727e4f6cc0cb2a94195e4ab4fd9c49f7, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -198,7 +199,7 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 1
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!58 &-7692210126921437933
 CircleCollider2D:
@@ -235,7 +236,43 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 1
+  m_Radius: 0.75
+--- !u!58 &3777656547336431290
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7944764008120523387}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_Radius: 1.5
 --- !u!114 &3132766170232860239
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -248,7 +285,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 330c45daea6434b46bc02141d339b613, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
+  moveSpeed: 4
   waypointTolerance: 0.1
 --- !u!114 &-5060092193258834609
 MonoBehaviour:
@@ -291,6 +328,8 @@ MonoBehaviour:
   maxUnitChaseDistance: 10
   attackDamageTiming: 0.4
   minTargetMoveDistance: 0.5
-  minRoamInterval: 5
-  maxRoamInterval: 7
+  bodyCollider: {fileID: -7692210126921437933}
+  attackRangeCollider: {fileID: 3777656547336431290}
+  minRoamInterval: 2
+  maxRoamInterval: 3
   unitMovement: {fileID: 3132766170232860239}

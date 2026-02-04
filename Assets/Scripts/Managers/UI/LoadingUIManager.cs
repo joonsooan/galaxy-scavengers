@@ -178,4 +178,19 @@ public class LoadingUIManager : MonoBehaviour
         }
         return null;
     }
+
+    private void OnDestroy()
+    {
+        if (_currentLoadingScreen != null)
+        {
+            Destroy(_currentLoadingScreen);
+            _currentLoadingScreen = null;
+        }
+
+        if (_loadingCanvas != null && _loadingCanvas.gameObject != null)
+        {
+            Destroy(_loadingCanvas.gameObject);
+            _loadingCanvas = null;
+        }
+    }
 }
