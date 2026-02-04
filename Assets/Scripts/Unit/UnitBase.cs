@@ -28,6 +28,7 @@ public abstract class UnitBase : Damageable
 
     [Header("Health Bar")]
     [SerializeField] private GameObject healthBarPrefab;
+    [SerializeField] private float healthBarYOffset = 1.5f;
 
     public UnitState currentState;
     private bool _isRegisteredToNoiseManager;
@@ -148,6 +149,7 @@ public abstract class UnitBase : Damageable
         if (healthBar != null)
         {
             healthBar.Initialize(transform);
+            healthBar.SetYOffset(healthBarYOffset);
             float healthRatio = (float)currentHealth / maxHealth;
             healthBar.SetHealth(healthRatio);
         }

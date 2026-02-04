@@ -94,7 +94,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 1, b: 0, a: 1}
+  m_Color: {r: 0.44275898, g: 1, b: 0.12893075, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -217,7 +217,7 @@ MonoBehaviour:
   healthSlider: {fileID: 719003724595468743}
   fillImage: {fileID: 1796603260182968027}
   yOffset: 1.5
-  fadeDelay: 5
+  fadeDelay: 10
   fadeDuration: 0.5
 --- !u!225 &5690449089677927926
 CanvasGroup:

@@ -86,6 +86,11 @@ public class UnitHealthBar : MonoBehaviour
         }
     }
 
+    public void SetYOffset(float offset)
+    {
+        yOffset = offset;
+    }
+
     private void LateUpdate()
     {
         if (_target == null)
