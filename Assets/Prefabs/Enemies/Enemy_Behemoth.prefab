@@ -282,6 +282,7 @@ MonoBehaviour:
   unitType: 1
   unitData: {fileID: 0}
   progressBarPrefab: {fileID: 0}
+  healthBarPrefab: {fileID: 5648413654597824292, guid: 5d743151f1ca85d45ab75ff0d9fd86fc, type: 3}
   currentState: 0
   warningStatePersist: 5
   outOfTerritoryChaseTime: 3

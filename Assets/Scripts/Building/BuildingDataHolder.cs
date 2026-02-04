@@ -9,5 +9,10 @@ public class BuildingDataHolder : MonoBehaviour
     {
         buildingData = data;
     }
+
+    public Damageable GetDamageable()
+    {
+        return GetComponent<Damageable>();
+    }
 }
 

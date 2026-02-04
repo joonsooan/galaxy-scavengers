@@ -161,7 +161,8 @@ public class BuildingHoverManager : MonoBehaviour
         }
 
         BuildingInfoPanel.Instance.gameObject.SetActive(true);
-        BuildingInfoPanel.Instance.PreviewInfo(buildingDataHolder.buildingData);
+        Damageable damageable = buildingDataHolder.GetDamageable();
+        BuildingInfoPanel.Instance.PreviewInfo(buildingDataHolder.buildingData, damageable);
     }
 
     private bool IsProcessorOrDroneHubPanelActive()

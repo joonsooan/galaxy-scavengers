@@ -66,6 +66,7 @@ public abstract class Damageable : MonoBehaviour, ICombo
         currentHealth -= damage;
         OnDamageTaken(damage);
         OnAnyDamageTaken?.Invoke(this);
+        OnHealthChanged();
 
         if (_flashCoroutine != null) {
             StopCoroutine(_flashCoroutine);
@@ -164,6 +165,10 @@ public abstract class Damageable : MonoBehaviour, ICombo
     {
     }
 
+    protected virtual void OnHealthChanged()
+    {
+    }
+
     public void SetMaxHealth(int newMaxHealth)
     {
         float healthRatio = maxHealth > 0 ? (float)currentHealth / maxHealth : 1f;
@@ -180,6 +185,7 @@ public abstract class Damageable : MonoBehaviour, ICombo
 
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
         Debug.Log($"{gameObject.name} Healed : {currentHealth}/{maxHealth}");
+        OnHealthChanged();
     }
 
     private IEnumerator FlashEffect()
