@@ -287,9 +287,8 @@ MonoBehaviour:
   outOfTerritoryChaseTime: 3
   attackDamage: 5
   attackRange: 1.5
-  attackSpeed: 2
   maxUnitChaseDistance: 10
-  attackDamageTiming: 0.75
+  attackDamageTiming: 0.73
   minTargetMoveDistance: 0.5
   bodyCollider: {fileID: 7137731683458437488}
   minRoamInterval: 2

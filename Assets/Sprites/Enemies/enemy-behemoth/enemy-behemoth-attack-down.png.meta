@@ -1,157 +1,52 @@
 fileFormatVersion: 2
-guid: b280b5652701ec4418b35b3e69e7cf06
+guid: 587de7f2580dff94d9fbcd68803acc32
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5171837291945445293
-    second: enemy-behemoth-idle-left_0
+      213: -1430492635832636395
+    second: enemy-behemoth-attack-down_0
   - first:
-      213: -392803967886185481
-    second: enemy-behemoth-idle-left_1
+      213: -756886023829155174
+    second: enemy-behemoth-attack-down_1
   - first:
-      213: -5027509340213622084
-    second: 0
+      213: -2256152148382882531
+    second: enemy-behemoth-attack-down_2
   - first:
-      213: -2374222918679686493
-    second: 1
+      213: 2782253608419456569
+    second: enemy-behemoth-attack-down_3
   - first:
-      213: -761933863725385812
-    second: 2
+      213: -8699503108584147675
+    second: enemy-behemoth-attack-down_4
   - first:
-      213: -5906598218874874896
-    second: 3
+      213: 7256409855850210445
+    second: enemy-behemoth-attack-down_5
   - first:
-      213: -1816755548282093316
-    second: 4
+      213: 2191441917738189340
+    second: enemy-behemoth-attack-down_6
   - first:
-      213: 2008176328888099268
-    second: 5
+      213: -1137465737318655390
+    second: enemy-behemoth-attack-down_7
   - first:
-      213: 6967745887157389618
-    second: 6
+      213: -6688812599897281179
+    second: enemy-behemoth-attack-down_8
   - first:
-      213: 6501298950303736333
-    second: 7
+      213: -6883705550032974637
+    second: enemy-behemoth-attack-down_9
   - first:
-      213: -3181606171480048652
-    second: 8
+      213: 5858296675099340953
+    second: enemy-behemoth-attack-down_10
   - first:
-      213: -7010260848350730462
-    second: 9
+      213: -1167973111457528405
+    second: enemy-behemoth-attack-down_11
   - first:
-      213: -8655818156195654838
-    second: 10
+      213: -8828343688855480573
+    second: enemy-behemoth-attack-down_12
   - first:
-      213: 6346318911325233748
-    second: 11
+      213: 1301711639965986275
+    second: enemy-behemoth-attack-down_13
   - first:
-      213: 1840059084634729652
-    second: 12
-  - first:
-      213: 1127223760459724062
-    second: 13
-  - first:
-      213: 2450565909728410856
-    second: 14
-  - first:
-      213: -3165705482850905674
-    second: 15
-  - first:
-      213: -5774996654182199871
-    second: 16
-  - first:
-      213: 4443897450750874535
-    second: 17
-  - first:
-      213: 5661049957185019681
-    second: 18
-  - first:
-      213: 8474981341611232960
-    second: 19
-  - first:
-      213: 6836142153017594085
-    second: 20
-  - first:
-      213: 2185498278340178504
-    second: 21
-  - first:
-      213: 430984766625829748
-    second: 22
-  - first:
-      213: -1317986280940093683
-    second: 23
-  - first:
-      213: -8326724806951850010
-    second: 24
-  - first:
-      213: 8914089594741642868
-    second: 25
-  - first:
-      213: 276181914589855336
-    second: 26
-  - first:
-      213: 588497054336764479
-    second: 27
-  - first:
-      213: -540048619370252142
-    second: 28
-  - first:
-      213: -3511060238418154924
-    second: 29
-  - first:
-      213: -6691012767228139306
-    second: 30
-  - first:
-      213: 8251907811329543855
-    second: 31
-  - first:
-      213: -8946788012438720712
-    second: 32
-  - first:
-      213: -3538851436377425636
-    second: 33
-  - first:
-      213: 5837620518785745679
-    second: 34
-  - first:
-      213: 735763825654373507
-    second: 35
-  - first:
-      213: -6766607325196344940
-    second: 36
-  - first:
-      213: 7123294266852565953
-    second: 37
-  - first:
-      213: 1812952166184403864
-    second: 38
-  - first:
-      213: 765628930423093814
-    second: 39
-  - first:
-      213: 3140112598110723769
-    second: 40
-  - first:
-      213: -1761356356439173420
-    second: 41
-  - first:
-      213: -4344009131248462207
-    second: 42
-  - first:
-      213: 9089047170882561291
-    second: 43
-  - first:
-      213: -8699157891823377207
-    second: 44
-  - first:
-      213: 1744244361374601134
-    second: 45
-  - first:
-      213: 2612548079664777360
-    second: 46
-  - first:
-      213: 3221110418805894947
-    second: other
+      213: 1249084581614476302
+    second: enemy-behemoth-attack-down_14
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -248,7 +143,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -260,7 +155,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: enemy-behemoth-idle-left_0
+      name: enemy-behemoth-attack-down_0
       rect:
         serializedVersion: 2
         x: 0
@@ -273,16 +168,16 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: d347c8443dad45746866e06c570dc2a2
-      internalID: -5171837291945445293
+      spriteID: 51c226bd68ed52ce0800000000000000
+      internalID: -1430492635832636395
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-behemoth-idle-left_1
+      name: enemy-behemoth-attack-down_1
       rect:
         serializedVersion: 2
         x: 33
@@ -295,16 +190,16 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: c9f67f2a374d4f44d83f67d02f71e715
-      internalID: -392803967886185481
+      spriteID: a929436eb200f75f0800000000000000
+      internalID: -756886023829155174
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-behemoth-idle-left_2
+      name: enemy-behemoth-attack-down_2
       rect:
         serializedVersion: 2
         x: 66
@@ -317,16 +212,16 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: d0e0e49d59964cb49b144bafd3370500
-      internalID: 226357772
+      spriteID: d15676c139980b0e0800000000000000
+      internalID: -2256152148382882531
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-behemoth-idle-left_3
+      name: enemy-behemoth-attack-down_3
       rect:
         serializedVersion: 2
         x: 99
@@ -339,16 +234,16 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 4d77b61fb7f39c64db53216e5778d342
-      internalID: -508772797
+      spriteID: 936f3e47aec8c9620800000000000000
+      internalID: 2782253608419456569
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-behemoth-idle-left_4
+      name: enemy-behemoth-attack-down_4
       rect:
         serializedVersion: 2
         x: 132
@@ -361,16 +256,16 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 71e4e10e43aa6ff419569476d4081f0a
-      internalID: 1177570135
+      spriteID: 5257f62c308254780800000000000000
+      internalID: -8699503108584147675
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-behemoth-idle-left_5
+      name: enemy-behemoth-attack-down_5
       rect:
         serializedVersion: 2
         x: 165
@@ -383,16 +278,16 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: b44107f9c685c6540b2ee9db959f8182
-      internalID: -1231496622
+      spriteID: d84689a5152f3b460800000000000000
+      internalID: 7256409855850210445
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-behemoth-idle-left_6
+      name: enemy-behemoth-attack-down_6
       rect:
         serializedVersion: 2
         x: 198
@@ -405,16 +300,16 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: e175ac9698352f74d95458e7ea71ae6f
-      internalID: 1010652136
+      spriteID: c128fac30d0996e10800000000000000
+      internalID: 2191441917738189340
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-behemoth-idle-left_7
+      name: enemy-behemoth-attack-down_7
       rect:
         serializedVersion: 2
         x: 231
@@ -427,16 +322,16 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: dcb76d3f817499f45b58d579400e951f
-      internalID: -441570964
+      spriteID: 26a91fe30f8e630f0800000000000000
+      internalID: -1137465737318655390
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-behemoth-idle-left_8
+      name: enemy-behemoth-attack-down_8
       rect:
         serializedVersion: 2
         x: 264
@@ -449,16 +344,16 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 6c142ea578e027c4b8de88295e7dabf9
-      internalID: 1186173699
+      spriteID: 56d27f511609c23a0800000000000000
+      internalID: -6688812599897281179
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-behemoth-idle-left_9
+      name: enemy-behemoth-attack-down_9
       rect:
         serializedVersion: 2
         x: 297
@@ -471,16 +366,16 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 37fbd76e0c3bdb74aab9e43134cc4374
-      internalID: 197604174
+      spriteID: 3dc46ef064a2870a0800000000000000
+      internalID: -6883705550032974637
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-behemoth-idle-left_10
+      name: enemy-behemoth-attack-down_10
       rect:
         serializedVersion: 2
         x: 330
@@ -493,16 +388,16 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 18e5f879a5bd4cd42bb42b1d95cf584b
-      internalID: 1340541532
+      spriteID: 990f52499c9dc4150800000000000000
+      internalID: 5858296675099340953
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-behemoth-idle-left_11
+      name: enemy-behemoth-attack-down_11
       rect:
         serializedVersion: 2
         x: 363
@@ -515,16 +410,16 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 3b8005ae4e658474e84483417601a074
-      internalID: 981246434
+      spriteID: ba5cd50b4a68acfe0800000000000000
+      internalID: -1167973111457528405
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-behemoth-idle-left_12
+      name: enemy-behemoth-attack-down_12
       rect:
         serializedVersion: 2
         x: 396
@@ -537,16 +432,16 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 10f887ae847ae884988ccaa34f9a2182
-      internalID: 1233917340
+      spriteID: 30715b6803c6b7580800000000000000
+      internalID: -8828343688855480573
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-behemoth-idle-left_13
+      name: enemy-behemoth-attack-down_13
       rect:
         serializedVersion: 2
         x: 429
@@ -559,16 +454,16 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 3b80068b51343d84a8727e8a948a7e55
-      internalID: 1447356569
+      spriteID: 3ede92cf6db901210800000000000000
+      internalID: 1301711639965986275
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-behemoth-idle-left_14
+      name: enemy-behemoth-attack-down_14
       rect:
         serializedVersion: 2
         x: 462
@@ -581,32 +476,10 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: 0a5cb84003c33034782764df3a081f5f
-      internalID: -1682115256
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: enemy-behemoth-idle-left_15
-      rect:
-        serializedVersion: 2
-        x: 495
-        y: 0
-        width: 32
-        height: 32
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 1dd08cb2c31b5604bacf427815c10e33
-      internalID: -1062040929
+      spriteID: e0c5c8d1fc3a55110800000000000000
+      internalID: 1249084581614476302
       vertices: []
       indices: 
       edges: []
@@ -615,7 +488,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: deb1ef2ef769fa24695b0ae91bb8140a
+    spriteID: ae6c5838f506e324fa006dc222b580b3
     internalID: 0
     vertices: []
     indices: 
@@ -625,22 +498,21 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      enemy-behemoth-idle-left_0: -5171837291945445293
-      enemy-behemoth-idle-left_1: -392803967886185481
-      enemy-behemoth-idle-left_10: 1340541532
-      enemy-behemoth-idle-left_11: 981246434
-      enemy-behemoth-idle-left_12: 1233917340
-      enemy-behemoth-idle-left_13: 1447356569
-      enemy-behemoth-idle-left_14: -1682115256
-      enemy-behemoth-idle-left_15: -1062040929
-      enemy-behemoth-idle-left_2: 226357772
-      enemy-behemoth-idle-left_3: -508772797
-      enemy-behemoth-idle-left_4: 1177570135
-      enemy-behemoth-idle-left_5: -1231496622
-      enemy-behemoth-idle-left_6: 1010652136
-      enemy-behemoth-idle-left_7: -441570964
-      enemy-behemoth-idle-left_8: 1186173699
-      enemy-behemoth-idle-left_9: 197604174
+      enemy-behemoth-attack-down_0: -1430492635832636395
+      enemy-behemoth-attack-down_1: -756886023829155174
+      enemy-behemoth-attack-down_10: 5858296675099340953
+      enemy-behemoth-attack-down_11: -1167973111457528405
+      enemy-behemoth-attack-down_12: -8828343688855480573
+      enemy-behemoth-attack-down_13: 1301711639965986275
+      enemy-behemoth-attack-down_14: 1249084581614476302
+      enemy-behemoth-attack-down_2: -2256152148382882531
+      enemy-behemoth-attack-down_3: 2782253608419456569
+      enemy-behemoth-attack-down_4: -8699503108584147675
+      enemy-behemoth-attack-down_5: 7256409855850210445
+      enemy-behemoth-attack-down_6: 2191441917738189340
+      enemy-behemoth-attack-down_7: -1137465737318655390
+      enemy-behemoth-attack-down_8: -6688812599897281179
+      enemy-behemoth-attack-down_9: -6883705550032974637
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
