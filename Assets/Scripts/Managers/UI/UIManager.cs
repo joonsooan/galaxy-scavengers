@@ -29,17 +29,6 @@ public class UIManager : MonoBehaviour
     [Header("Audio")]
     [SerializeField] private EventReference buildingUIClickSound;
 
-    [Header("Tips Reference")]
-    [SerializeField] private GameObject tipPanel;
-    [SerializeField] private GameObject tipResourcePanel1;
-    [SerializeField] private GameObject tipResourcePanel2;
-    [SerializeField] private GameObject tipRecipeBtn;
-    [SerializeField] private GameObject tipCardBtn;
-    [SerializeField] private GameObject tipSolanaRequiredPanel;
-    [SerializeField] private GameObject tipRemainTimePanel;
-    [SerializeField] private GameObject tipMineTypePanel;
-    [SerializeField] private GameObject tipUnitMakeBtn;
-
     private ActiveUIPanel _activeUIPanel = ActiveUIPanel.None;
     private AreaBuildingDestroyer _areaBuildingDestroyer;
 
@@ -452,86 +441,6 @@ public class UIManager : MonoBehaviour
         screenPos.y += storageUIPanelOffset.y;
 
         storageInfoPanel.transform.position = screenPos;
-    }
-
-    public void ToggleTipPanel()
-    {
-        if (tipPanel == null) return;
-        bool isActive = !tipPanel.activeSelf;
-        tipPanel.SetActive(isActive);
-    }
-
-    public void DisplayResourcePanel()
-    {
-        tipResourcePanel1.SetActive(true);
-        tipResourcePanel2.SetActive(true);
-    }
-
-    public void DisplayRecipeBtn()
-    {
-        tipRecipeBtn.SetActive(true);
-    }
-
-    public void DisplayCardBtn()
-    {
-        tipCardBtn.SetActive(true);
-    }
-
-    public void DisplaySolanaRequiredPanel()
-    {
-        tipSolanaRequiredPanel.SetActive(true);
-    }
-
-    public void DisplayRemainTimePanel()
-    {
-        tipRemainTimePanel.SetActive(true);
-    }
-
-    public void DisplayMineTypePanel()
-    {
-        tipMineTypePanel.SetActive(true);
-    }
-
-    public void DisplayUnitMakeBtn()
-    {
-        tipUnitMakeBtn.SetActive(true);
-    }
-
-
-    public void HideResourcePanel()
-    {
-        tipResourcePanel1.SetActive(false);
-        tipResourcePanel2.SetActive(false);
-    }
-
-    public void HideRecipeBtn()
-    {
-        tipRecipeBtn.SetActive(false);
-    }
-
-    public void HideCardBtn()
-    {
-        tipCardBtn.SetActive(false);
-    }
-
-    public void HideSolanaRequiredPanel()
-    {
-        tipSolanaRequiredPanel.SetActive(false);
-    }
-
-    public void HideRemainTimePanel()
-    {
-        tipRemainTimePanel.SetActive(false);
-    }
-
-    public void HideMineTypePanel()
-    {
-        tipMineTypePanel.SetActive(false);
-    }
-
-    public void HideUnitMakeBtn()
-    {
-        tipUnitMakeBtn.SetActive(false);
     }
 
     private enum ActiveUIPanel

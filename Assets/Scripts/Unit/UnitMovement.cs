@@ -19,6 +19,7 @@ public class UnitMovement : MonoBehaviour
     private static readonly Dictionary<Vector3Int, Node> AllNodes = new Dictionary<Vector3Int, Node>(1000);
     private static readonly HashSet<Vector3Int> ClosedSet = new HashSet<Vector3Int>();
     private static readonly MinHeap OpenSet = new MinHeap(1000);
+    private static readonly Dictionary<Vector3Int, HashSet<UnitMovement>> _cellAssignments = new Dictionary<Vector3Int, HashSet<UnitMovement>>();
 
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
@@ -33,6 +34,7 @@ public class UnitMovement : MonoBehaviour
     private bool _isForceStopped;
 
     private Vector3Int _lastExploredCell = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
+    private Vector3Int _assignedInteractionCell = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
 
     private Queue<Vector3> _path = new Queue<Vector3>();
 
@@ -47,6 +49,11 @@ public class UnitMovement : MonoBehaviour
     }
 
     public Vector3 FinalTargetPosition { get; private set; }
+
+    public static bool IsCellAssigned(Vector3Int cell)
+    {
+        return _cellAssignments.TryGetValue(cell, out var units) && units != null && units.Count > 0;
+    }
 
     private void Awake()
     {
@@ -76,8 +83,6 @@ public class UnitMovement : MonoBehaviour
             }
         }
 
-        // Update sprite direction based on velocity, but only if velocity is significant
-        // This prevents rapid updates that could cause animation speed issues
         if (_rb.linearVelocity.sqrMagnitude > 0.01f) {
             Vector2 normalizedVelocity = _rb.linearVelocity.normalized;
             _spriteController?.UpdateSpriteDirection(normalizedVelocity);
@@ -131,6 +136,7 @@ public class UnitMovement : MonoBehaviour
     private void OnDisable()
     {
         BuildingManager.OnTilemapChanged -= HandleTilemapChange;
+        UnregisterInteractionCell();
     }
 
     private void OnDrawGizmosSelected()
@@ -175,11 +181,16 @@ public class UnitMovement : MonoBehaviour
             return false;
         }
 
+        UnregisterInteractionCell();
+
         _rb.linearVelocity = Vector2.zero;
         _isForceStopped = false;
         FinalTargetPosition = targetPosition;
         _finalStoppingDistance = stoppingDistance;
         _isAtFinalTarget = false;
+
+        Vector3Int targetCell = _grid.WorldToCell(targetPosition);
+        RegisterInteractionCell(targetCell);
 
         _path = FindPath(transform.position, FinalTargetPosition);
 
@@ -229,9 +240,13 @@ public class UnitMovement : MonoBehaviour
             }
         }
 
+        UnregisterInteractionCell();
+
         FinalTargetPosition = _grid.GetCellCenterWorld(targetCellForPathfinding);
         _finalStoppingDistance = stoppingDistance;
         _isAtFinalTarget = false;
+
+        RegisterInteractionCell(targetCellForPathfinding);
 
         _path = FindPath(transform.position, FinalTargetPosition);
 
@@ -257,6 +272,7 @@ public class UnitMovement : MonoBehaviour
         _rb.linearVelocity = Vector2.zero;
         _path.Clear();
         _currentWaypoint = default;
+        UnregisterInteractionCell();
     }
 
     public void ForceStopAllMovement()
@@ -267,6 +283,7 @@ public class UnitMovement : MonoBehaviour
         _currentWaypoint = default;
         _isAtFinalTarget = false;
         FinalTargetPosition = default;
+        UnregisterInteractionCell();
     }
 
     public void ResumeMovement()
@@ -385,15 +402,66 @@ public class UnitMovement : MonoBehaviour
         float minDistance = float.MaxValue;
 
         foreach (Vector3Int cell in potentialCells) {
-            if (IsCellWalkable(cell)) {
-                float distance = GetDistance(startCell, cell);
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    bestCell = cell;
+            if (!IsCellWalkable(cell)) continue;
+
+            bool isAssigned = _cellAssignments.TryGetValue(cell, out var assignedUnits) && 
+                             assignedUnits != null && assignedUnits.Count > 0 &&
+                             !assignedUnits.Contains(this);
+
+            if (isAssigned) continue;
+
+            float distance = GetDistance(startCell, cell);
+            if (distance < minDistance) {
+                minDistance = distance;
+                bestCell = cell;
+            }
+        }
+
+        if (bestCell == new Vector3Int(int.MinValue, int.MinValue, int.MinValue)) {
+            foreach (Vector3Int cell in potentialCells) {
+                if (IsCellWalkable(cell)) {
+                    float distance = GetDistance(startCell, cell);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        bestCell = cell;
+                    }
                 }
             }
         }
+
         return bestCell;
+    }
+
+    private void RegisterInteractionCell(Vector3Int cell)
+    {
+        if (cell == new Vector3Int(int.MinValue, int.MinValue, int.MinValue)) {
+            return;
+        }
+
+        _assignedInteractionCell = cell;
+
+        if (!_cellAssignments.TryGetValue(cell, out var units)) {
+            units = new HashSet<UnitMovement>();
+            _cellAssignments[cell] = units;
+        }
+
+        units.Add(this);
+    }
+
+    private void UnregisterInteractionCell()
+    {
+        if (_assignedInteractionCell == new Vector3Int(int.MinValue, int.MinValue, int.MinValue)) {
+            return;
+        }
+
+        if (_cellAssignments.TryGetValue(_assignedInteractionCell, out var units)) {
+            units.Remove(this);
+            if (units.Count == 0) {
+                _cellAssignments.Remove(_assignedInteractionCell);
+            }
+        }
+
+        _assignedInteractionCell = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
     }
 
     private Queue<Vector3> ReconstructPath(Node endNode)

@@ -95,6 +95,14 @@ public abstract class Damageable : MonoBehaviour, ICombo
     {
         if (GameAlertUIManager.Instance == null) return;
         
+        if (this is UnitBase unitBase)
+        {
+            if (unitBase.unitType != UnitBase.UnitType.Ally)
+            {
+                return;
+            }
+        }
+        
         _lastDamageTime = Time.time;
         
         if (!_isAttackAlertRegistered)

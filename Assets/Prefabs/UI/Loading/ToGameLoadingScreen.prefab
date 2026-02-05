@@ -5284,7 +5284,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   panelPrefab: {fileID: 1149639257978639157, guid: 7bd6dd4a615de854e86bf535f3dfbde2, type: 3}
-  entryDuration: 0.5
+  entryDuration: 1
   startYOffset: -1080
   entryEase: 18
 --- !u!1 &8947874853078222736

@@ -48,7 +48,7 @@ public class BuildingInfoPanel : MonoBehaviour
         UpdateUI(data);
         if (damageable != null)
         {
-            UpdateHealthDisplay(damageable, true);
+            UpdateHealthDisplay(damageable, false);
         }
     }
     
