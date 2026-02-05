@@ -28,6 +28,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _SampleTexture2D_7d3955bee2b24bf594ca2f95bd45ce1c_Texture_1_Texture2D:
+        m_Texture: {fileID: 2800000, guid: 6cc59da776cc3d04eb94dcf48ea521a6, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _SampleTexture2D_8cbcbdfa50c04428a1e737acc880ea5e_Texture_1_Texture2D:
         m_Texture: {fileID: 2800000, guid: 1285b167027787243bd226c9c21a18ff, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -47,6 +51,8 @@ Material:
     m_Ints: []
     m_Floats:
     - _Border_Strength: 10
+    - _Cloud_Intensity: 0.3
+    - _Cloud_Speed: 0.03
     - _ColorMask: 15
     - _Glow_Intensity: 0.6
     - _QueueControl: 0
@@ -60,5 +66,6 @@ Material:
     - _UIMaskSoftnessY: 1
     m_Colors:
     - _ClipRect: {r: 0, g: 0, b: 0, a: 0}
+    - _Cloud_Color: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
