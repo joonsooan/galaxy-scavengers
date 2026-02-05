@@ -349,6 +349,9 @@ MonoBehaviour:
   constructingParticleSystem: {fileID: 2654175848666590096}
   particleOffsetDistance: 0.75
   yOffset: 0.2
+  constructionSiteAnimationPrefab: {fileID: 7018299364416689850, guid: 578204989ba5cfc4a9c1e5f0f2484a7d, type: 3}
+  siteAnimationSortingOrder: 10
+  constructionAnimationStateName: constructing
   hoverHeight: 0.1
   hoverDuration: 1.5
 --- !u!114 &4483249089817793867

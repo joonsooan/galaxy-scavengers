@@ -19,6 +19,8 @@ public class Unit_Construct : UnitBase
     [SerializeField] private float particleOffsetDistance = 0.5f;
     [SerializeField] private float yOffset;
     [SerializeField] private GameObject constructionSiteAnimationPrefab;
+    [SerializeField] private int siteAnimationSortingOrder = 10;
+    [SerializeField] private string constructionAnimationStateName = "constructing";
 
     [Header("Hover Animation")]
     [SerializeField] private float hoverHeight = 0.2f;
@@ -27,13 +29,13 @@ public class Unit_Construct : UnitBase
 
     private int _carriedAmount;
     private ResourceType _carriedResourceType;
-
     private Vector3 _currentConstructionDirection;
 
     private ConstructionSite _currentConstructionSite;
     private ConstructionSite.ConstructionRequest _currentRequest;
     private ConstructState _currentState = ConstructState.Idle;
     private Tween _hoverTween;
+    private int _constructionStateHash;
 
     private Coroutine _loadingCoroutine;
 
@@ -50,6 +52,7 @@ public class Unit_Construct : UnitBase
     private IStorage _targetStorage;
     private Coroutine _unloadingCoroutine;
     private GameObject _currentSiteAnimation;
+    private Animator _currentSiteAnimator;
 
     protected override void Awake()
     {
@@ -68,6 +71,7 @@ public class Unit_Construct : UnitBase
             _spriteTransform = _spriteController.transform;
             _baseHoverLocalPosition = _spriteTransform.localPosition;
         }
+        _constructionStateHash = Animator.StringToHash(constructionAnimationStateName);
     }
 
     private void Update()
@@ -420,6 +424,7 @@ public class Unit_Construct : UnitBase
             elapsedTime += Time.deltaTime;
             float progress = elapsedTime / adjustedUnloadingTime;
             UpdateProgressBar(progress);
+            UpdateSiteAnimationProgress(progress);
             yield return null;
         }
 
@@ -737,6 +742,29 @@ public class Unit_Construct : UnitBase
 
         Vector3 pieceWorldPos = BuildingManager.Instance.grid.GetCellCenterWorld(pieceCell);
         _currentSiteAnimation = Instantiate(constructionSiteAnimationPrefab, pieceWorldPos, Quaternion.identity);
+        
+        if (_currentSiteAnimation != null) {
+            foreach (SpriteRenderer sr in _currentSiteAnimation.GetComponentsInChildren<SpriteRenderer>(true)) {
+                sr.sortingOrder = siteAnimationSortingOrder;
+            }
+        }
+        _currentSiteAnimator = _currentSiteAnimation != null ? _currentSiteAnimation.GetComponent<Animator>() : null;
+        
+        if (_currentSiteAnimator != null) {
+            _currentSiteAnimator.Play(Animator.StringToHash(constructionAnimationStateName), 0, 0f);
+        }
+
+        if (_currentSiteAnimator != null) {
+            int hash = Animator.StringToHash(constructionAnimationStateName);
+            _currentSiteAnimator.Play(hash, 0, 0f);
+        }
+    }
+
+    private void UpdateSiteAnimationProgress(float progress)
+    {
+        if (_currentSiteAnimator == null) return;
+        
+        _currentSiteAnimator.Play(_constructionStateHash, 0, Mathf.Clamp01(progress));
     }
 
     private void StopSiteAnimation()
@@ -745,6 +773,7 @@ public class Unit_Construct : UnitBase
             Destroy(_currentSiteAnimation);
             _currentSiteAnimation = null;
         }
+        _currentSiteAnimator = null;
     }
 
     private enum ConstructState
