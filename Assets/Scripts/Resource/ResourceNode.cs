@@ -10,10 +10,16 @@ public class ResourceNode : MonoBehaviour
 
     [HideInInspector] public Vector3Int cellPosition;
     
+    [Header("UI")]
+    [SerializeField] private ProductionProgressSlider progressSliderPrefab;
+
     private Unit_Miner _reservedUnit;
+    private int _initialAmountToMine;
+    private ProductionProgressSlider _progressSliderInstance;
 
     public bool IsReserved { get; private set; }
     public bool IsDepleted => amountToMine <= 0;
+    public int InitialAmountToMine => _initialAmountToMine;
 
     private VisibilityController _visibilityController;
     
@@ -79,12 +85,14 @@ public class ResourceNode : MonoBehaviour
             {
                 amountToMine = stats.amountToMine;
                 timeToMinePerUnit = stats.timeToMinePerUnit;
+                _initialAmountToMine = stats.amountToMine;
             }
         }
     }
 
     private void OnDestroy()
     {
+        HideProgressSlider();
         if (ResourceManager.Instance != null) {
             ResourceManager.Instance.RemoveResourceNode(this);
         }
@@ -120,8 +128,10 @@ public class ResourceNode : MonoBehaviour
     {
         int amountMined = Mathf.Min(amountToMine, workAmount);
         amountToMine -= amountMined;
+        UpdateProgressSlider();
 
         if (IsDepleted) {
+            HideProgressSlider();
             Destroy(gameObject);
         }
 
@@ -137,6 +147,44 @@ public class ResourceNode : MonoBehaviour
             {
                 sr.enabled = false;
             }
+        }
+    }
+
+    private void UpdateProgressSlider()
+    {
+        if (_initialAmountToMine <= 0)
+        {
+            HideProgressSlider();
+            return;
+        }
+
+        if (amountToMine > 0 && amountToMine < _initialAmountToMine)
+        {
+            if (_progressSliderInstance == null && progressSliderPrefab != null)
+            {
+                _progressSliderInstance = Instantiate(progressSliderPrefab);
+                _progressSliderInstance.Initialize(transform);
+                _progressSliderInstance.gameObject.SetActive(true);
+            }
+
+            if (_progressSliderInstance != null)
+            {
+                float progress = Mathf.Clamp01((float)amountToMine / _initialAmountToMine);
+                _progressSliderInstance.SetProgress(progress);
+            }
+        }
+        else
+        {
+            HideProgressSlider();
+        }
+    }
+
+    private void HideProgressSlider()
+    {
+        if (_progressSliderInstance != null)
+        {
+            Destroy(_progressSliderInstance.gameObject);
+            _progressSliderInstance = null;
         }
     }
 }

@@ -79,6 +79,10 @@ public class ResourceManager : MonoBehaviour
     [Header("Resource Stats")]
     [SerializeField] private List<ResourceStats> resourceStatsList;
 
+    [Header("Resource Metadata")]
+    [SerializeField] private List<string> resourceDisplayNames;
+    [SerializeField] private List<string> resourceDescriptions;
+
     public static ResourceManager Instance { get; private set; }
 
     private void Awake()
@@ -284,6 +288,26 @@ public class ResourceManager : MonoBehaviour
     {
         int index = (int)type;
         return index >= 0 && index < resourceIcons.Count ? resourceIcons[index] : null;
+    }
+
+    public string GetResourceDisplayName(ResourceType type)
+    {
+        int index = (int)type;
+        if (resourceDisplayNames != null && index >= 0 && index < resourceDisplayNames.Count && !string.IsNullOrEmpty(resourceDisplayNames[index]))
+        {
+            return resourceDisplayNames[index];
+        }
+        return type.ToString();
+    }
+
+    public string GetResourceDescription(ResourceType type)
+    {
+        int index = (int)type;
+        if (resourceDescriptions != null && index >= 0 && index < resourceDescriptions.Count)
+        {
+            return resourceDescriptions[index] ?? string.Empty;
+        }
+        return string.Empty;
     }
 
     private void AddCheatResources()
