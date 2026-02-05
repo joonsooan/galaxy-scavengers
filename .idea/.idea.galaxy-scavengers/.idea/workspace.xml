@@ -4,56 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2e9922bb-ccc6-4c6e-93bd-15fa8a8d7f34" name="변경" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.galaxy-scavengers/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.galaxy-scavengers/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/buildrecords/Desktop/Master.br" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/buildrecords/Desktop/Master.br" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/05418933.fobj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/05418933.fobj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/090324BA.fobj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/090324BA.fobj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/13CF6A06.fobj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/13CF6A06.fobj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/1A9E2EDE.fobj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/1A9E2EDE.fobj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/41CE0C22.fobj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/41CE0C22.fobj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/45ECE2FF.fobj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/45ECE2FF.fobj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/47DCA497.fobj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/47DCA497.fobj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/57522EB0.fobj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/57522EB0.fobj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/645581BB.fobj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/645581BB.fobj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/710ECE18.fobj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/710ECE18.fobj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/D108BCD5.fobj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/D108BCD5.fobj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/D637DB14.fobj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/D637DB14.fobj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/E5D57CBE.fobj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/E5D57CBE.fobj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/E99D4567.fobj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/E99D4567.fobj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/EDCCBFBE.fobj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/EDCCBFBE.fobj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/F70B3DCA.fobj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/F70B3DCA.fobj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/FCE0CD52.fobj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/FCE0CD52.fobj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/FEAC2A48.fobj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/fsbcache/Desktop/FEAC2A48.fobj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{09c5c2a7-33dc-4800-87f0-a823fed212a1}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{09c5c2a7-33dc-4800-87f0-a823fed212a1}.pdc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{48e1c5b5-c83f-4a4e-8e43-b2c4368fe3b0}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{48e1c5b5-c83f-4a4e-8e43-b2c4368fe3b0}.pdc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{5ee6a6ac-3aba-4daf-a356-aa0cac916500}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{5ee6a6ac-3aba-4daf-a356-aa0cac916500}.pdc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{68b9a556-bba2-45ea-9da7-427092ae8859}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{68b9a556-bba2-45ea-9da7-427092ae8859}.pdc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Build/Desktop/Master.bank" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Build/Desktop/Master.bank" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Build/Desktop/Master.strings.bank" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Build/Desktop/Master.strings.bank" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{0bea6f20-0d14-47aa-8eb7-fddfede26b64}.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{0bea6f20-0d14-47aa-8eb7-fddfede26b64}.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{0c64ec07-1525-4628-82ba-69d2486e72ed}.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{0c64ec07-1525-4628-82ba-69d2486e72ed}.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{14eeedc4-853e-4b9f-88ea-deca8c463dcf}.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{14eeedc4-853e-4b9f-88ea-deca8c463dcf}.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{679151b5-7c9f-43c4-ae23-d9fe60d09037}.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{679151b5-7c9f-43c4-ae23-d9fe60d09037}.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{6f7e1606-7458-4c5b-9ba6-42cf3dc931e4}.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{6f7e1606-7458-4c5b-9ba6-42cf3dc931e4}.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{7f453dc1-9ec6-403e-a4fd-05da7d60d2bf}.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{7f453dc1-9ec6-403e-a4fd-05da7d60d2bf}.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{820b44e9-6439-42b5-9709-9bc9f58247d6}.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{820b44e9-6439-42b5-9709-9bc9f58247d6}.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{8c925687-b4ec-4cb7-b398-54600ae39d2d}.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{8c925687-b4ec-4cb7-b398-54600ae39d2d}.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{bdb8925e-6fb9-4567-bb56-980df16d7a1e}.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{bdb8925e-6fb9-4567-bb56-980df16d7a1e}.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{c145d4b4-730e-41c0-8332-fc0e99968a49}.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{c145d4b4-730e-41c0-8332-fc0e99968a49}.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{d25ce4ff-18ee-4d9d-9a64-513b0d35e1fa}.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{d25ce4ff-18ee-4d9d-9a64-513b0d35e1fa}.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{d9faef6e-3444-4f76-a832-db3109cab167}.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{d9faef6e-3444-4f76-a832-db3109cab167}.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{eb620c81-6797-4822-99ed-a0fb9f65cc60}.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{eb620c81-6797-4822-99ed-a0fb9f65cc60}.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{ef0b7d44-e4a4-401a-b579-b35d8f40de9c}.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/Metadata/Event/{ef0b7d44-e4a4-401a-b579-b35d8f40de9c}.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Resources/Resource 0.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Resources/Resource 0.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Resources/Resource 1.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Resources/Resource 1.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Resources/Resource 2.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Resources/Resource 2.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Resources/Resource 3.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Resources/Resource 3.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Building/BuildingHoverManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Building/BuildingHoverManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Resource/ResourceManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Resource/ResourceManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Resource/ResourceNode.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Resource/ResourceNode.cs" afterDir="false" />
-    </list>
+    <list default="true" id="2e9922bb-ccc6-4c6e-93bd-15fa8a8d7f34" name="변경" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -88,27 +39,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "Unity 에디터에 연결.Attach to Unity Editor.executor": "Debug",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "feature-new-ingame-systems",
-    "ignore.virus.scanning.warn.message": "true",
-    "junie.onboarding.icon.badge.shown": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;Unity 에디터에 연결.Attach to Unity Editor.executor&quot;: &quot;Debug&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature-new-ingame-systems&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
-  <component name="RunManager" selected="Unity 에디터에 연결.Attach to Unity Editor">
+}</component>
+  <component name="RunManager" selected="Attach to Unity Editor.Attach to Unity Editor">
     <configuration name="유닛 테스트(배치 모드)" type="RunUnityExe" factoryName="Unity Executable">
       <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.0.59f2\Editor\Unity.exe" />
       <option name="PROGRAM_PARAMETERS" value="-runTests -batchmode -projectPath &quot;C:\Unity Projects\galaxy-scavengers&quot; -testResults Logs/results.xml -logFile Logs/Editor.log -testPlatform EditMode -debugCodeOptimization" />
@@ -169,15 +120,13 @@
       <option name="MIXED_MODE_DEBUG" value="0" />
       <method v="2" />
     </configuration>
-    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost" useMixedMode="false" ignored-value-for-modified-check="24864">
+    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost" useMixedMode="false">
       <option name="allowRunningInParallel" value="false" />
       <option name="listenPortForConnections" value="false" />
-      <option name="pid" value="24864" />
+      <option name="pid" />
       <option name="projectPathOnTarget" />
       <option name="runtimes">
-        <list>
-          <MonoRuntime />
-        </list>
+        <list />
       </option>
       <option name="selectedOptions">
         <list />
@@ -216,6 +165,7 @@
       <workItem from="1770258802365" duration="763000" />
       <workItem from="1770259932292" duration="460000" />
       <workItem from="1770260444736" duration="9830000" />
+      <workItem from="1770294550682" duration="5000" />
     </task>
     <servers />
   </component>
