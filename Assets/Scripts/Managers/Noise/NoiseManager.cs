@@ -10,26 +10,35 @@ public class NoiseManager : MonoBehaviour
     [Header("Noise Settings")]
     [SerializeField] private float maxNoiseValue = 100f;
 
-    private readonly HashSet<Damageable> _registeredBuildings = new HashSet<Damageable>();
-    private readonly HashSet<UnitBase> _registeredUnits = new HashSet<UnitBase>();
-    private float _barrierNoiseCoefficient = 0f;
-    private float _totalNoise = 0f;
-
 #if UNITY_EDITOR
-    private bool _cheatNoise100Active = false;
-    public bool IsCheatNoise100Active => _cheatNoise100Active;
-#else
-    public bool IsCheatNoise100Active => false;
+    [Header("Test (Editor Only)")]
+    [SerializeField] private bool useTestNoiseValue;
+    [SerializeField] [Range(0f, 100f)] private float testNoisePercentage;
+    private float _lastTestNoisePercentage = -1f;
 #endif
 
+    private readonly HashSet<Damageable> _registeredBuildings = new HashSet<Damageable>();
+    private readonly HashSet<UnitBase> _registeredUnits = new HashSet<UnitBase>();
+    private float _barrierNoiseCoefficient;
+    private float _totalNoise;
+
+    public bool IsCheatNoise100Active
+    {
+        get
+        {
+#if UNITY_EDITOR
+            return useTestNoiseValue && testNoisePercentage >= 100f;
+#endif
+        }
+    }
+
     public event Action<float> OnNoiseChanged;
-    public float TotalNoise => _totalNoise;
     public float NoisePercentage
     {
         get
         {
 #if UNITY_EDITOR
-            if (_cheatNoise100Active) return 100f;
+            if (useTestNoiseValue) return testNoisePercentage;
 #endif
             return Mathf.Clamp01(_totalNoise / maxNoiseValue) * 100f;
         }
@@ -38,10 +47,21 @@ public class NoiseManager : MonoBehaviour
 #if UNITY_EDITOR
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.N))
+        if (useTestNoiseValue)
         {
-            _cheatNoise100Active = !_cheatNoise100Active;
-            OnNoiseChanged?.Invoke(NoisePercentage);
+            if (Mathf.Abs(_lastTestNoisePercentage - testNoisePercentage) > 0.001f)
+            {
+                _lastTestNoisePercentage = testNoisePercentage;
+                OnNoiseChanged?.Invoke(testNoisePercentage);
+                CheckAndLogZoneChange();
+            }
+        }
+        else if (_lastTestNoisePercentage >= 0f)
+        {
+            _lastTestNoisePercentage = -1f;
+            float real = Mathf.Clamp01(_totalNoise / maxNoiseValue) * 100f;
+            OnNoiseChanged?.Invoke(real);
+            CheckAndLogZoneChange();
         }
     }
 #endif
@@ -120,7 +140,14 @@ public class NoiseManager : MonoBehaviour
         _totalNoise = buildingNoise + unitNoise + _barrierNoiseCoefficient;
         _totalNoise = Mathf.Clamp(_totalNoise, 0f, maxNoiseValue);
 
-        OnNoiseChanged?.Invoke(NoisePercentage);
+        float pct = NoisePercentage;
+        OnNoiseChanged?.Invoke(pct);
+        CheckAndLogZoneChange();
+    }
+
+    private void CheckAndLogZoneChange()
+    {
+        NoiseZone current = GetCurrentNoiseZone();
     }
 
     private UnitData GetUnitData(UnitBase unit)
@@ -140,15 +167,14 @@ public class NoiseManager : MonoBehaviour
         {
             return NoiseZone.Danger;
         }
-        else if (percentage >= 70f)
+        if (percentage >= 70f)
         {
             return NoiseZone.Warning;
         }
-        else if (percentage >= 30f)
+        if (percentage >= 50f)
         {
             return NoiseZone.Caution;
         }
-        else
         {
             return NoiseZone.Safe;
         }

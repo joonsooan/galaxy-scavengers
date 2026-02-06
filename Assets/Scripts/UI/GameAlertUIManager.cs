@@ -20,6 +20,9 @@ public class GameAlertUIManager : MonoBehaviour
     [SerializeField] private GameObject droneNoResourceCell;
     [SerializeField] private GameObject storageFullCell;
     [SerializeField] private GameObject aetherStorageFullCell;
+    [SerializeField] private GameObject noiseCautionCell;
+    [SerializeField] private GameObject noiseWarningCell;
+    [SerializeField] private GameObject noiseDangerCell;
 
     private int _minerNoResourceCount;
     private int _unitUnderAttackCount;
@@ -39,6 +42,33 @@ public class GameAlertUIManager : MonoBehaviour
         Instance = this;
 
         SetAllInactive();
+    }
+
+    private void OnEnable()
+    {
+        if (NoiseManager.Instance != null)
+        {
+            NoiseManager.Instance.OnNoiseChanged += OnNoiseChanged;
+            OnNoiseChanged(NoiseManager.Instance.NoisePercentage);
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (NoiseManager.Instance != null)
+        {
+            NoiseManager.Instance.OnNoiseChanged -= OnNoiseChanged;
+        }
+    }
+
+    private void OnNoiseChanged(float noisePercentage)
+    {
+        if (NoiseManager.Instance == null) return;
+
+        NoiseManager.NoiseZone zone = NoiseManager.Instance.GetCurrentNoiseZone();
+        if (noiseCautionCell != null) noiseCautionCell.SetActive(zone == NoiseManager.NoiseZone.Caution);
+        if (noiseWarningCell != null) noiseWarningCell.SetActive(zone == NoiseManager.NoiseZone.Warning);
+        if (noiseDangerCell != null) noiseDangerCell.SetActive(zone == NoiseManager.NoiseZone.Danger);
     }
 
     public void RegisterAlert(GameAlertType type)
@@ -155,6 +185,9 @@ public class GameAlertUIManager : MonoBehaviour
         if (droneNoResourceCell != null) droneNoResourceCell.SetActive(false);
         if (storageFullCell != null) storageFullCell.SetActive(false);
         if (aetherStorageFullCell != null) aetherStorageFullCell.SetActive(false);
+        if (noiseCautionCell != null) noiseCautionCell.SetActive(false);
+        if (noiseWarningCell != null) noiseWarningCell.SetActive(false);
+        if (noiseDangerCell != null) noiseDangerCell.SetActive(false);
     }
 }
 

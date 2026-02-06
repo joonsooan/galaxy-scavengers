@@ -20,13 +20,15 @@ public class EnemySpawner : MonoBehaviour
 
     [Header("Budget Formula (basePoints + noise*noiseAlpha) * (1 + time*timeBeta)")]
     [SerializeField] [Range(0f, 500f)] private float basePoints = 50f;
-    [SerializeField] [Range(0f, 10f)] private float noiseAlpha = 1f;
+    [SerializeField] [Range(0f, 1f)] private float noiseAlpha = 1f;
     [SerializeField] [Range(0f, 1f)] private float timeBeta = 0.1f;
 
     [Header("Wave Budget Settings")]
     [SerializeField] private float noise100WaveCooldown = 30f;
     [SerializeField] private int noise100AreaCount = 3;
-    [SerializeField] [Range(0f, 2f)] private float noise100BudgetMultiplier = 1.5f;
+    [SerializeField] [Range(0f, 1f)] private float noise100BudgetMultiplier = 1.5f;
+    [SerializeField] [Range(0f, 1f)] private float noiseCautionBudgetMultiplier = 0.5f;
+    [SerializeField] [Range(0f, 1f)] private float noiseWarningBudgetMultiplier = 1f;
 
     private float _lastNoise100WaveTime = -1f;
     private bool _isWaveFromNoise100 = false;
@@ -69,6 +71,16 @@ public class EnemySpawner : MonoBehaviour
         {
             SpawnWaveFromBudget();
         }
+
+        NoiseManager.NoiseZone zone = NoiseManager.Instance.GetCurrentNoiseZone();
+        if (zone == NoiseManager.NoiseZone.Caution)
+        {
+            ActivateExistingEnemiesFromBudget(noiseCautionBudgetMultiplier);
+        }
+        else if (zone == NoiseManager.NoiseZone.Warning)
+        {
+            ActivateExistingEnemiesFromBudget(noiseWarningBudgetMultiplier);
+        }
     }
 
     private void OnNoiseChanged(float noisePercentage)
@@ -105,9 +117,11 @@ public class EnemySpawner : MonoBehaviour
         }
     }
 
-    private void ActivateExistingEnemiesFromBudget()
+    private void ActivateExistingEnemiesFromBudget(float multiplier)
     {
-        float totalBudget = CalculateWaveBudget(noise100BudgetMultiplier);
+        if (UnitManager.Instance == null) return;
+
+        float totalBudget = CalculateWaveBudget(multiplier);
         List<EnemySpawnData> validEnemies = enemyPrefabs
             .Where(e => e != null && e.enemyPrefab != null && e.cost > 0)
             .ToList();
@@ -130,7 +144,12 @@ public class EnemySpawner : MonoBehaviour
             candidates.RemoveAt(idx);
             selected.ActivateInfiniteAttackState();
         }
-        Debug.Log($"[EnemySpawner] Noise100 at night: activated {toActivate} existing enemies (budget={totalBudget}, maxCount={maxCount})");
+        Debug.Log($"[EnemySpawner] Zone rush: activated {toActivate} existing enemies (budget={totalBudget}, multiplier={multiplier})");
+    }
+
+    private void ActivateExistingEnemiesFromBudget()
+    {
+        ActivateExistingEnemiesFromBudget(noise100BudgetMultiplier);
     }
 
     private void OnDayStarted()
@@ -199,7 +218,6 @@ public class EnemySpawner : MonoBehaviour
         }
 
         float budgetPerHole = selectedHoles.Count > 0 ? totalBudget / selectedHoles.Count : 0f;
-        Debug.Log($"[EnemySpawner] Spawn wave: isNoise100={_isWaveFromNoise100}, totalBudget={totalBudget}, holes={selectedHoles.Count}, budgetPerHole={budgetPerHole}");
 
         if (BuildingManager.Instance == null) return;
         Grid grid = BuildingManager.Instance.grid;
@@ -259,12 +277,6 @@ public class EnemySpawner : MonoBehaviour
                     }
                 }
             }
-        }
-
-        foreach (var kvp in holeSpawnCounts)
-        {
-            string counts = string.Join(", ", kvp.Value.Select(x => $"{x.Key} x{x.Value}"));
-            Debug.Log($"[EnemySpawner] Hole {kvp.Key}: {counts}");
         }
 
         _isWaveFromNoise100 = false;
