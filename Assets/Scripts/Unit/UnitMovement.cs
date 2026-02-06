@@ -21,6 +21,9 @@ public class UnitMovement : MonoBehaviour
     private static readonly MinHeap OpenSet = new MinHeap(1000);
     private static readonly Dictionary<Vector3Int, HashSet<UnitMovement>> _cellAssignments = new Dictionary<Vector3Int, HashSet<UnitMovement>>();
 
+    private static readonly float D = 1f;
+    private static readonly float D2 = 1.41421356f;
+
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
 
@@ -192,6 +195,12 @@ public class UnitMovement : MonoBehaviour
         Vector3Int targetCell = _grid.WorldToCell(targetPosition);
         RegisterInteractionCell(targetCell);
 
+        if (HasClearLineOfSight(transform.position, FinalTargetPosition)) {
+            _path.Clear();
+            _currentWaypoint = FinalTargetPosition;
+            return true;
+        }
+
         _path = FindPath(transform.position, FinalTargetPosition);
 
         if (_path.Count > 1) {
@@ -247,6 +256,12 @@ public class UnitMovement : MonoBehaviour
         _isAtFinalTarget = false;
 
         RegisterInteractionCell(targetCellForPathfinding);
+
+        if (HasClearLineOfSight(transform.position, FinalTargetPosition)) {
+            _path.Clear();
+            _currentWaypoint = FinalTargetPosition;
+            return true;
+        }
 
         _path = FindPath(transform.position, FinalTargetPosition);
 
@@ -327,6 +342,7 @@ public class UnitMovement : MonoBehaviour
         while (OpenSet.Count > 0 && iterations < maxIterations) {
             iterations++;
             Node currentNode = OpenSet.Pop();
+            if (ClosedSet.Contains(currentNode.position)) continue;
             ClosedSet.Add(currentNode.position);
 
             if (currentNode.position == endCell) {
@@ -351,6 +367,7 @@ public class UnitMovement : MonoBehaviour
                 else if (newGCost < neighborNode.gCost) {
                     neighborNode.parent = currentNode;
                     neighborNode.gCost = newGCost;
+                    OpenSet.Push(neighborNode);
                 }
             }
         }
@@ -360,6 +377,24 @@ public class UnitMovement : MonoBehaviour
 
         Debug.LogWarning("Path not found");
         return new Queue<Vector3>();
+    }
+
+    private bool HasClearLineOfSight(Vector3 from, Vector3 to)
+    {
+        Vector3Int startCell = _grid.WorldToCell(from);
+        Vector3Int endCell = _grid.WorldToCell(to);
+
+        int dx = Mathf.Abs(endCell.x - startCell.x);
+        int dy = Mathf.Abs(endCell.y - startCell.y);
+        int steps = Mathf.Max(dx, dy, 1);
+
+        for (int i = 0; i <= steps; i++) {
+            float t = (float)i / steps;
+            Vector3 point = Vector3.Lerp(from, to, t);
+            Vector3Int cell = _grid.WorldToCell(point);
+            if (!IsCellWalkable(cell)) return false;
+        }
+        return true;
     }
 
     private bool IsCellWalkable(Vector3Int cell)
@@ -480,7 +515,7 @@ public class UnitMovement : MonoBehaviour
     {
         int dx = Mathf.Abs(a.x - b.x);
         int dy = Mathf.Abs(a.y - b.y);
-        return dx + dy;
+        return D * (dx + dy) + (D2 - 2f * D) * Mathf.Min(dx, dy);
     }
 
     private Node GetNodeFromPool(Vector3Int position, Node parent, float gCost, float hCost)

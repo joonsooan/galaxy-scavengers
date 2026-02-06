@@ -13,8 +13,6 @@ public class GameManager : MonoBehaviour
     public UIManager uiManager;
     public CardDragger cardDragger;
 
-    [Header("UI Elements")]
-    [SerializeField] private GameObject pausePanel;
 
     [Header("Audio")]
     [SerializeField] private EventReference pauseSound;
@@ -158,8 +156,8 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        if (pausePanel != null) {
-            pausePanel.SetActive(IsPaused);
+        if (uiManager != null) {
+            uiManager.SetPausePanelActive(IsPaused);
         }
     }
 
@@ -227,12 +225,6 @@ public class GameManager : MonoBehaviour
         mapGenerator = FindFirstObjectByType<MapGenerator>();
         uiManager = FindFirstObjectByType<UIManager>();
         cardDragger = FindFirstObjectByType<CardDragger>();
-
-        GameObject pausePanelObject = GameObject.Find("PausePanel");
-        if (pausePanelObject != null) {
-            pausePanel = pausePanelObject;
-            pausePanel.SetActive(false);
-        }
 
         StartCoroutine(WaitForEntryAnimationAndInitialize());
     }

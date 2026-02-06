@@ -83,6 +83,7 @@ public abstract class EnemyUnitBase : UnitBase
         base.OnEnable();
         if (_currentRoamInterval <= 0f) SetNewRoamInterval();
         _roamTimer = _currentRoamInterval;
+        _pathUpdateTimer = Time.time + Random.Range(0f, PathUpdateInterval);
         if (_aiUpdateWait != null) {
             _aiUpdateCoroutine = StartCoroutine(AIUpdateRoutine());
         }
@@ -358,7 +359,9 @@ public abstract class EnemyUnitBase : UnitBase
         if (targetPos == Vector3.zero) return;
         if (Time.time < _pathUpdateTimer) return;
         if ((targetPos - _lastTargetPos).sqrMagnitude > minTargetMoveDistance * minTargetMoveDistance || !unitMovement.IsMoving) {
-            _pathUpdateTimer = Time.time + PathUpdateInterval;
+            float dist = Vector3.Distance(transform.position, targetPos);
+            float interval = dist < 5f ? 0.2f : dist < 15f ? 0.35f : 0.5f;
+            _pathUpdateTimer = Time.time + interval;
             _lastTargetPos = targetPos;
             unitMovement.SetNewTarget(targetPos, unitMovement.waypointTolerance);
         }

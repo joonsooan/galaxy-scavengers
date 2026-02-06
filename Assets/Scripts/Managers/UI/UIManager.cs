@@ -20,6 +20,9 @@ public class UIManager : MonoBehaviour
     [Header("Drone Hub Info Panel")]
     [SerializeField] private GameObject droneHubInfoPanel;
 
+    [Header("Pause Panel")]
+    [SerializeField] private GameObject pausePanel;
+
     [Header("Storage Info Panel")]
     [SerializeField] private GameObject storageInfoPanel;
     [SerializeField] private GameObject storageResourceListParent;
@@ -40,6 +43,7 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
+        if (pausePanel != null) pausePanel.SetActive(false);
         if (buildingInfoPanel != null) buildingInfoPanel.SetActive(false);
         if (processorInfoPanel != null) processorInfoPanel.SetActive(false);
         if (droneHubInfoPanel != null) droneHubInfoPanel.SetActive(false);
@@ -352,6 +356,13 @@ public class UIManager : MonoBehaviour
     public bool IsDroneHubPanelActive()
     {
         return droneHubInfoPanel != null && droneHubInfoPanel.activeSelf;
+    }
+
+    public void SetPausePanelActive(bool active)
+    {
+        if (pausePanel != null) {
+            pausePanel.SetActive(active);
+        }
     }
 
     public void DisplayStorageInfo(IStorage storage)
