@@ -5,6 +5,7 @@ using UnityEngine;
 public enum TutorialUIPanel
 {
     ResourcePanel,
+    ResourceInfoPanel,
     StatsPanel,
     DebuffPanel,
     TimeSlider,

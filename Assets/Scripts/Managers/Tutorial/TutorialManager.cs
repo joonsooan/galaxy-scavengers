@@ -42,6 +42,7 @@ public class TutorialManager : MonoBehaviour
 
     [Header("UI Panels")]
     [SerializeField] private GameObject resourcePanel;
+    [SerializeField] private GameObject resourceInfoPanel;
     [SerializeField] private GameObject statsPanel;
     [SerializeField] private GameObject debuffPanel;
     [SerializeField] private GameObject timeSlider;
@@ -731,6 +732,7 @@ public class TutorialManager : MonoBehaviour
         _uiPanels.Clear();
 
         _uiPanels[TutorialUIPanel.ResourcePanel] = resourcePanel;
+        _uiPanels[TutorialUIPanel.ResourceInfoPanel] = resourceInfoPanel;
         _uiPanels[TutorialUIPanel.StatsPanel] = statsPanel;
         _uiPanels[TutorialUIPanel.DebuffPanel] = debuffPanel;
         _uiPanels[TutorialUIPanel.TimeSlider] = timeSlider;

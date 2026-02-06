@@ -215,7 +215,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   progressSlider: {fileID: 719003724595468743}
   fillImage: {fileID: 1796603260182968027}
-  yOffset: 0
+  yOffset: 0.5
 --- !u!1 &8346600003447637991
 GameObject:
   m_ObjectHideFlags: 0
