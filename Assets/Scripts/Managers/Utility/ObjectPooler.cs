@@ -217,9 +217,15 @@ public class ObjectPooler : MonoBehaviour
             objectToSpawn.transform.parent.gameObject.SetActive(true);
         }
 
-        objectToSpawn.SetActive(true);
         objectToSpawn.transform.position = position;
         objectToSpawn.transform.rotation = rotation;
+        Rigidbody2D rb = objectToSpawn.GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.position = position;
+            rb.linearVelocity = Vector2.zero;
+        }
+        objectToSpawn.SetActive(true);
 
         if (ModuleEffectManager.Instance != null)
         {

@@ -484,6 +484,28 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: enemy-behemoth-attack-right_15
+      rect:
+        serializedVersion: 2
+        x: 495
+        y: 0
+        width: 32
+        height: 32
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f94ff8131416c1b47b8529c221e907d3
+      internalID: -1797880085
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -505,6 +527,7 @@ TextureImporter:
       enemy-behemoth-attack-right_12: -1206051374151710925
       enemy-behemoth-attack-right_13: -1630601869367037955
       enemy-behemoth-attack-right_14: 4231906115087870568
+      enemy-behemoth-attack-right_15: -1797880085
       enemy-behemoth-attack-right_2: -6517160597806864383
       enemy-behemoth-attack-right_3: -8762876268629792599
       enemy-behemoth-attack-right_4: -54033816953866630

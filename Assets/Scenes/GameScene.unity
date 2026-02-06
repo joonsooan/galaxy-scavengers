@@ -2474,7 +2474,6 @@ GameObject:
   m_Component:
   - component: {fileID: 100804181}
   - component: {fileID: 100804180}
-  - component: {fileID: 100804182}
   m_Layer: 0
   m_Name: _DayNightCycleManager
   m_TagString: Untagged
@@ -2554,19 +2553,6 @@ Transform:
   - {fileID: 784291428}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &100804182
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 100804179}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 77daf26563badcc45ae6c51587df8386, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  numberOfEnemiesToActivate: 3
 --- !u!1 &106817880
 GameObject:
   m_ObjectHideFlags: 0
@@ -5358,9 +5344,9 @@ MonoBehaviour:
   basePoints: 40
   noiseAlpha: 1
   timeBeta: 0.3
-  noise100WaveCooldown: 60
-  noise100AreaCount: 3
-  noise100BudgetMultiplier: 1.5
+  noise100WaveCooldown: 30
+  noise100AreaCount: 10
+  noise100BudgetMultiplier: 0.5
 --- !u!114 &313771330
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21557,7 +21543,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 662.501
+  orthographic size: 11.25
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -21582,7 +21568,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0.5, z: -40}
+  m_LocalPosition: {x: 0.5, y: 0.5, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

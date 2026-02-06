@@ -15,9 +15,36 @@ public class NoiseManager : MonoBehaviour
     private float _barrierNoiseCoefficient = 0f;
     private float _totalNoise = 0f;
 
+#if UNITY_EDITOR
+    private bool _cheatNoise100Active = false;
+    public bool IsCheatNoise100Active => _cheatNoise100Active;
+#else
+    public bool IsCheatNoise100Active => false;
+#endif
+
     public event Action<float> OnNoiseChanged;
     public float TotalNoise => _totalNoise;
-    public float NoisePercentage => Mathf.Clamp01(_totalNoise / maxNoiseValue) * 100f;
+    public float NoisePercentage
+    {
+        get
+        {
+#if UNITY_EDITOR
+            if (_cheatNoise100Active) return 100f;
+#endif
+            return Mathf.Clamp01(_totalNoise / maxNoiseValue) * 100f;
+        }
+    }
+
+#if UNITY_EDITOR
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.N))
+        {
+            _cheatNoise100Active = !_cheatNoise100Active;
+            OnNoiseChanged?.Invoke(NoisePercentage);
+        }
+    }
+#endif
 
     private void Awake()
     {

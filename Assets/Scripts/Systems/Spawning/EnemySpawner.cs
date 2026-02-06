@@ -26,7 +26,7 @@ public class EnemySpawner : MonoBehaviour
     [Header("Wave Budget Settings")]
     [SerializeField] private float noise100WaveCooldown = 30f;
     [SerializeField] private int noise100AreaCount = 3;
-    [SerializeField] [Range(1f, 3f)] private float noise100BudgetMultiplier = 1.5f;
+    [SerializeField] [Range(0f, 2f)] private float noise100BudgetMultiplier = 1.5f;
 
     private float _lastNoise100WaveTime = -1f;
     private bool _isWaveFromNoise100 = false;
@@ -79,10 +79,22 @@ public class EnemySpawner : MonoBehaviour
             {
                 _wasNoise100 = true;
                 float timeSinceLastWave = _lastNoise100WaveTime < 0f ? float.MaxValue : Time.time - _lastNoise100WaveTime;
-                if (timeSinceLastWave >= noise100WaveCooldown)
+                bool bypassCooldown = false;
+#if UNITY_EDITOR
+                bypassCooldown = NoiseManager.Instance != null && NoiseManager.Instance.IsCheatNoise100Active;
+#endif
+                if (timeSinceLastWave >= noise100WaveCooldown || bypassCooldown)
                 {
-                    _isWaveFromNoise100 = true;
-                    SpawnWaveFromBudget();
+                    bool isNight = DayNightCycleManager.Instance != null && !DayNightCycleManager.Instance.IsDay();
+                    if (isNight && UnitManager.Instance != null && UnitManager.Instance.EnemyUnits.Count > 0)
+                    {
+                        ActivateExistingEnemiesFromBudget();
+                    }
+                    else
+                    {
+                        _isWaveFromNoise100 = true;
+                        SpawnWaveFromBudget();
+                    }
                     _lastNoise100WaveTime = Time.time;
                 }
             }
@@ -91,6 +103,34 @@ public class EnemySpawner : MonoBehaviour
         {
             _wasNoise100 = false;
         }
+    }
+
+    private void ActivateExistingEnemiesFromBudget()
+    {
+        float totalBudget = CalculateWaveBudget(noise100BudgetMultiplier);
+        List<EnemySpawnData> validEnemies = enemyPrefabs
+            .Where(e => e != null && e.enemyPrefab != null && e.cost > 0)
+            .ToList();
+        if (validEnemies.Count == 0) return;
+
+        int minCost = validEnemies.Min(e => e.cost);
+        int maxCount = Mathf.FloorToInt(totalBudget / minCost);
+        List<EnemyUnitBase> candidates = UnitManager.Instance.EnemyUnits
+            .Where(u => u != null && u is EnemyUnitBase)
+            .Cast<EnemyUnitBase>()
+            .Where(e => !e.IsInInfiniteAttackState())
+            .ToList();
+        if (candidates.Count == 0) return;
+
+        int toActivate = Mathf.Min(maxCount, candidates.Count);
+        for (int i = 0; i < toActivate; i++)
+        {
+            int idx = Random.Range(0, candidates.Count);
+            EnemyUnitBase selected = candidates[idx];
+            candidates.RemoveAt(idx);
+            selected.ActivateInfiniteAttackState();
+        }
+        Debug.Log($"[EnemySpawner] Noise100 at night: activated {toActivate} existing enemies (budget={totalBudget}, maxCount={maxCount})");
     }
 
     private void OnDayStarted()
@@ -200,6 +240,8 @@ public class EnemySpawner : MonoBehaviour
                         EnemyUnitBase enemyScript = enemy.GetComponent<EnemyUnitBase>();
                         if (enemyScript != null)
                         {
+                            UnitMovement movement = enemy.GetComponent<UnitMovement>();
+                            if (movement != null) movement.StopMovement();
                             enemyScript.SetTerritoryCenter(center, homeRadius, territoryRadius);
                             if (_isWaveFromNoise100)
                             {
