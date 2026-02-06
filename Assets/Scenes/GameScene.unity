@@ -5464,20 +5464,36 @@ MonoBehaviour:
   enemyPrefabs:
   - enemyPrefab: {fileID: 7944764008120523387, guid: 6ef6e727776f20b46a722ca01f6b9153, type: 3}
     cost: 5
+    enhancementCost: 5
+    moveSpeedBonusPercent: 20
+    attackBonusPercent: 20
+    healthBonusPercent: 20
+    enhancedSpriteColor: {r: 1, g: 0.8, b: 0.4, a: 1}
   - enemyPrefab: {fileID: 7944764008120523387, guid: 81c943f3f9505ab4d8562d2c693ac7d5, type: 3}
     cost: 10
+    enhancementCost: 10
+    moveSpeedBonusPercent: 20
+    attackBonusPercent: 20
+    healthBonusPercent: 20
+    enhancedSpriteColor: {r: 1, g: 0.8, b: 0.4, a: 1}
   - enemyPrefab: {fileID: 7944764008120523387, guid: 0aeed2fd5f8651c47b1db59e47ae792c, type: 3}
     cost: 15
+    enhancementCost: 15
+    moveSpeedBonusPercent: 20
+    attackBonusPercent: 20
+    healthBonusPercent: 20
+    enhancedSpriteColor: {r: 1, g: 0.8, b: 0.4, a: 1}
   maxEnemiesPerHole: 10
+  maxSpawnCountPerWave: 200
   spawnRadiusOffset: 5
   basePoints: 30
   noiseAlpha: 0.25
   timeBeta: 0.4
   noise100WaveCooldown: 30
   noise100AreaCount: 10
-  noise100BudgetMultiplier: 0.5
-  noiseCautionBudgetMultiplier: 0.2
-  noiseWarningBudgetMultiplier: 0.1
+  noise100BudgetMultiplier: 0.15
+  noiseCautionBudgetMultiplier: 0.1
+  noiseWarningBudgetMultiplier: 0.05
 --- !u!114 &313771330
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -21543,7 +21559,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 11.25
+  orthographic size: 662.501
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2

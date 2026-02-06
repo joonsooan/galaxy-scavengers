@@ -10,6 +10,11 @@ public class NoiseManager : MonoBehaviour
     [Header("Noise Settings")]
     [SerializeField] private float maxNoiseValue = 100f;
 
+    [Header("Zone Thresholds (Percentage)")]
+    [SerializeField] private float dangerThreshold = 100f;
+    [SerializeField] private float warningThreshold = 70f;
+    [SerializeField] private float cautionThreshold = 50f;
+
 #if UNITY_EDITOR
     [Header("Test (Editor Only)")]
     [SerializeField] private bool useTestNoiseValue;
@@ -162,22 +167,20 @@ public class NoiseManager : MonoBehaviour
     public NoiseZone GetCurrentNoiseZone()
     {
         float percentage = NoisePercentage;
-        
-        if (percentage >= 100f)
+
+        if (percentage >= dangerThreshold)
         {
             return NoiseZone.Danger;
         }
-        if (percentage >= 70f)
+        if (percentage >= warningThreshold)
         {
             return NoiseZone.Warning;
         }
-        if (percentage >= 50f)
+        if (percentage >= cautionThreshold)
         {
             return NoiseZone.Caution;
         }
-        {
-            return NoiseZone.Safe;
-        }
+        return NoiseZone.Safe;
     }
 
     public enum NoiseZone

@@ -202,6 +202,18 @@ public abstract class Damageable : MonoBehaviour, ICombo
         OnHealthChanged();
     }
 
+    public void SetPersistentTint(Color color)
+    {
+        if (_sr == null) {
+            _sr = GetComponentInChildren<SpriteRenderer>();
+            if (_sr == null) _sr = GetComponent<SpriteRenderer>();
+        }
+        if (_sr != null) {
+            _originalColor = color;
+            _sr.color = color;
+        }
+    }
+
     private IEnumerator FlashEffect()
     {
         if (_sr == null) yield break;

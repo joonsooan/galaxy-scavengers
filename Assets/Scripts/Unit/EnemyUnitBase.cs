@@ -50,7 +50,13 @@ public abstract class EnemyUnitBase : UnitBase
     private UnitBase _targetUnit;
     private float _territoryRadius;
     private float _warningTimer;
+    private bool _isEnhanced;
+    private float _enhancementMoveSpeedMult = 1f;
+    private float _enhancementAttackMult = 1f;
+    private float _enhancementHealthMult = 1f;
     protected AIState aiState;
+
+    public bool IsEnhanced => _isEnhanced;
 
     protected override void Awake()
     {
@@ -95,6 +101,7 @@ public abstract class EnemyUnitBase : UnitBase
             StopCoroutine(_aiUpdateCoroutine);
             _aiUpdateCoroutine = null;
         }
+        ResetEnhancement();
         base.OnDisable();
     }
 
@@ -146,6 +153,44 @@ public abstract class EnemyUnitBase : UnitBase
         _spawnPosition = territoryCenter;
         _homeRadius = hRadius;
         _territoryRadius = tRadius;
+    }
+
+    public void ApplyEnhancement(Color spriteColor, float moveSpeedMult, float attackMult, float healthMult)
+    {
+        _isEnhanced = true;
+        _enhancementMoveSpeedMult = moveSpeedMult;
+        _enhancementAttackMult = attackMult;
+        _enhancementHealthMult = healthMult;
+        SetPersistentTint(spriteColor);
+        if (unitMovement != null) {
+            unitMovement.moveSpeed *= moveSpeedMult;
+        }
+        attackDamage = Mathf.RoundToInt(attackDamage * attackMult);
+        int newMaxHealth = Mathf.RoundToInt(MaxHealth * healthMult);
+        SetMaxHealth(newMaxHealth);
+        RestoreToFullHealth();
+    }
+
+    private void ResetEnhancement()
+    {
+        if (!_isEnhanced) return;
+
+        _isEnhanced = false;
+        SetPersistentTint(Color.white);
+        if (unitMovement != null && _enhancementMoveSpeedMult > 0f) {
+            unitMovement.moveSpeed /= _enhancementMoveSpeedMult;
+        }
+        if (_enhancementAttackMult > 0f) {
+            attackDamage = Mathf.RoundToInt(attackDamage / _enhancementAttackMult);
+        }
+        if (_enhancementHealthMult > 0f) {
+            int baseMaxHealth = Mathf.RoundToInt(MaxHealth / _enhancementHealthMult);
+            SetMaxHealth(baseMaxHealth);
+            RestoreToFullHealth();
+        }
+        _enhancementMoveSpeedMult = 1f;
+        _enhancementAttackMult = 1f;
+        _enhancementHealthMult = 1f;
     }
 
     private void UpdateStateLogic()
@@ -371,24 +416,39 @@ public abstract class EnemyUnitBase : UnitBase
     {
         if (Time.time - _lastInfiniteAttackTargetUpdateTime < InfiniteAttackTargetUpdateInterval) return;
         _lastInfiniteAttackTargetUpdateTime = Time.time;
-        float bestDistSq = float.MaxValue;
-        Damageable bestD = null;
-        UnitBase bestU = null;
+
+        float bestBuildingDistSq = float.MaxValue;
+        Damageable bestBuilding = null;
         if (TargetManager.Instance != null) {
             foreach (Damageable t in TargetManager.Instance.AllTargets) {
                 if (t == null || t.GetComponent<UnitBase>() != null) continue;
                 float dSq = (transform.position - t.transform.position).sqrMagnitude;
-                if (dSq < bestDistSq) { bestDistSq = dSq; bestD = t; }
+                if (dSq < bestBuildingDistSq) { bestBuildingDistSq = dSq; bestBuilding = t; }
             }
         }
+
+        float bestUnitDistSq = float.MaxValue;
+        UnitBase bestUnit = null;
         if (UnitManager.Instance != null && UnitManager.Instance.AllyUnits != null) {
             foreach (UnitBase u in UnitManager.Instance.AllyUnits) {
                 if (u == null || u.CurrentHealth <= 0) continue;
                 float dSq = (transform.position - u.transform.position).sqrMagnitude;
-                if (dSq < bestDistSq) { bestDistSq = dSq; bestD = null; bestU = u; }
+                if (dSq < bestUnitDistSq) { bestUnitDistSq = dSq; bestUnit = u; }
             }
         }
-        _targetDamageable = bestD; _targetUnit = bestU;
+
+        if (bestBuilding != null) {
+            _targetDamageable = bestBuilding;
+            _targetUnit = null;
+        }
+        else if (bestUnit != null) {
+            _targetDamageable = null;
+            _targetUnit = bestUnit;
+        }
+        else {
+            _targetDamageable = null;
+            _targetUnit = null;
+        }
     }
     
     protected virtual void PerformAttackLogic(Damageable building, UnitBase unit)

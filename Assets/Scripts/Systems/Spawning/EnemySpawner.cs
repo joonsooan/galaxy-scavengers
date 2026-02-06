@@ -10,12 +10,20 @@ public class EnemySpawnData
     public GameObject enemyPrefab;
     [Header("Wave Budget")]
     public int cost = 10;
+
+    [Header("Enhancement")]
+    public int enhancementCost = 15;
+    [Range(0f, 100f)] public float moveSpeedBonusPercent = 20f;
+    [Range(0f, 100f)] public float attackBonusPercent = 20f;
+    [Range(0f, 100f)] public float healthBonusPercent = 20f;
+    public Color enhancedSpriteColor = new Color(1f, 0.8f, 0.4f);
 }
 
 public class EnemySpawner : MonoBehaviour
 {
     [SerializeField] private List<EnemySpawnData> enemyPrefabs = new List<EnemySpawnData>();
     [SerializeField] private int maxEnemiesPerHole = 7;
+    [SerializeField] private int maxSpawnCountPerWave = 50;
     [SerializeField] private float spawnRadiusOffset = 1f;
 
     [Header("Budget Formula (basePoints + noise*noiseAlpha) * (1 + time*timeBeta)")]
@@ -121,22 +129,23 @@ public class EnemySpawner : MonoBehaviour
     {
         if (UnitManager.Instance == null) return;
 
-        float totalBudget = CalculateWaveBudget(multiplier);
-        List<EnemySpawnData> validEnemies = enemyPrefabs
-            .Where(e => e != null && e.enemyPrefab != null && e.cost > 0)
-            .ToList();
-        if (validEnemies.Count == 0) return;
-
-        int minCost = validEnemies.Min(e => e.cost);
-        int maxCount = Mathf.FloorToInt(totalBudget / minCost);
-        List<EnemyUnitBase> candidates = UnitManager.Instance.EnemyUnits
+        List<EnemyUnitBase> allEnemies = UnitManager.Instance.EnemyUnits
             .Where(u => u != null && u is EnemyUnitBase)
             .Cast<EnemyUnitBase>()
+            .ToList();
+        int totalSpawned = allEnemies.Count;
+        if (totalSpawned == 0) return;
+
+        int targetAttackCount = Mathf.FloorToInt(totalSpawned * multiplier);
+        int alreadyInAttack = allEnemies.Count(e => e.IsInInfiniteAttackState());
+        int slotsRemaining = Mathf.Max(0, targetAttackCount - alreadyInAttack);
+
+        List<EnemyUnitBase> candidates = allEnemies
             .Where(e => !e.IsInInfiniteAttackState())
             .ToList();
-        if (candidates.Count == 0) return;
+        if (candidates.Count == 0 || slotsRemaining <= 0) return;
 
-        int toActivate = Mathf.Min(maxCount, candidates.Count);
+        int toActivate = Mathf.Min(slotsRemaining, candidates.Count);
         for (int i = 0; i < toActivate; i++)
         {
             int idx = Random.Range(0, candidates.Count);
@@ -144,7 +153,8 @@ public class EnemySpawner : MonoBehaviour
             candidates.RemoveAt(idx);
             selected.ActivateInfiniteAttackState();
         }
-        Debug.Log($"[EnemySpawner] Zone rush: activated {toActivate} existing enemies (budget={totalBudget}, multiplier={multiplier})");
+        Debug.Log($"[EnemySpawner] Zone rush: activated {toActivate} existing enemies (total={totalSpawned}, targetAttack={targetAttackCount}, multiplier={multiplier})");
+        LogEnemyStats();
     }
 
     private void ActivateExistingEnemiesFromBudget()
@@ -222,12 +232,12 @@ public class EnemySpawner : MonoBehaviour
         if (BuildingManager.Instance == null) return;
         Grid grid = BuildingManager.Instance.grid;
         if (grid == null) return;
-        Dictionary<int, Dictionary<string, int>> holeSpawnCounts = new Dictionary<int, Dictionary<string, int>>();
+
+        List<(EnemySpawnData data, Vector2Int pos)> allSpawnsUncapped = new List<(EnemySpawnData, Vector2Int)>();
 
         for (int holeIdx = 0; holeIdx < selectedHoles.Count; holeIdx++)
         {
             Vector2Int holePos = selectedHoles[holeIdx];
-            List<(EnemySpawnData data, Vector2Int pos)> holeSpawnList = new List<(EnemySpawnData, Vector2Int)>();
             float remainingBudget = budgetPerHole;
 
             while (remainingBudget > 0f)
@@ -236,41 +246,107 @@ public class EnemySpawner : MonoBehaviour
                 if (affordable.Count == 0) break;
 
                 EnemySpawnData selectedEnemy = affordable[Random.Range(0, affordable.Count)];
-                holeSpawnList.Add((selectedEnemy, holePos));
+                allSpawnsUncapped.Add((selectedEnemy, holePos));
                 remainingBudget -= selectedEnemy.cost;
             }
+        }
 
-            holeSpawnCounts[holeIdx] = new Dictionary<string, int>();
-            foreach (var spawn in holeSpawnList)
+        float enhancementBudget = 0f;
+        List<(EnemySpawnData data, Vector2Int pos)> finalSpawns;
+
+        if (allSpawnsUncapped.Count > maxSpawnCountPerWave)
+        {
+            for (int i = allSpawnsUncapped.Count - 1; i > 0; i--)
             {
-                Vector3 center = mapGenerator.GetEnemySpawnHoleWorldPosition(spawn.pos);
-                (float homeRadius, float territoryRadius) = mapGenerator.GetHoleRadiusValues(spawn.pos);
+                int j = Random.Range(0, i + 1);
+                var temp = allSpawnsUncapped[i];
+                allSpawnsUncapped[i] = allSpawnsUncapped[j];
+                allSpawnsUncapped[j] = temp;
+            }
 
-                if (homeRadius <= 0f || territoryRadius <= 0f) continue;
+            for (int i = maxSpawnCountPerWave; i < allSpawnsUncapped.Count; i++)
+            {
+                enhancementBudget += allSpawnsUncapped[i].data.cost;
+            }
 
-                Vector3 spawnPos = FindValidSpawnPosition(center, spawnRadiusOffset, grid);
-                if (spawnPos != Vector3.zero && center != Vector3.zero)
+            finalSpawns = new List<(EnemySpawnData, Vector2Int)>();
+            for (int i = 0; i < maxSpawnCountPerWave; i++)
+            {
+                finalSpawns.Add(allSpawnsUncapped[i]);
+            }
+        }
+        else
+        {
+            finalSpawns = new List<(EnemySpawnData, Vector2Int)>(allSpawnsUncapped);
+        }
+
+        for (int i = finalSpawns.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            var temp = finalSpawns[i];
+            finalSpawns[i] = finalSpawns[j];
+            finalSpawns[j] = temp;
+        }
+
+        List<(EnemySpawnData data, Vector2Int pos, bool isEnhanced)> enhancedSpawns = new List<(EnemySpawnData, Vector2Int, bool)>();
+        float remainingEnhancementBudget = enhancementBudget;
+        foreach (var spawn in finalSpawns)
+        {
+            bool isEnhanced = false;
+            if (remainingEnhancementBudget >= spawn.data.enhancementCost && spawn.data.enhancementCost > 0)
+            {
+                remainingEnhancementBudget -= spawn.data.enhancementCost;
+                isEnhanced = true;
+            }
+            enhancedSpawns.Add((spawn.data, spawn.pos, isEnhanced));
+        }
+
+        Dictionary<int, Dictionary<string, int>> holeSpawnCounts = new Dictionary<int, Dictionary<string, int>>();
+        for (int holeIdx = 0; holeIdx < selectedHoles.Count; holeIdx++)
+        {
+            holeSpawnCounts[holeIdx] = new Dictionary<string, int>();
+        }
+
+        foreach (var spawn in enhancedSpawns)
+        {
+            Vector3 center = mapGenerator.GetEnemySpawnHoleWorldPosition(spawn.pos);
+            (float homeRadius, float territoryRadius) = mapGenerator.GetHoleRadiusValues(spawn.pos);
+
+            if (homeRadius <= 0f || territoryRadius <= 0f) continue;
+
+            Vector3 spawnPos = FindValidSpawnPosition(center, spawnRadiusOffset, grid);
+            if (spawnPos != Vector3.zero && center != Vector3.zero)
+            {
+                string poolTag = GetPoolTagFromPrefab(spawn.data.enemyPrefab);
+                GameObject enemy = ObjectPooler.Instance.SpawnFromPool(poolTag, spawnPos, Quaternion.identity);
+                if (enemy != null)
                 {
-                    string poolTag = GetPoolTagFromPrefab(spawn.data.enemyPrefab);
-                    GameObject enemy = ObjectPooler.Instance.SpawnFromPool(poolTag, spawnPos, Quaternion.identity);
-                    if (enemy != null)
+                    EnemyUnitBase enemyScript = enemy.GetComponent<EnemyUnitBase>();
+                    if (enemyScript != null)
                     {
-                        EnemyUnitBase enemyScript = enemy.GetComponent<EnemyUnitBase>();
-                        if (enemyScript != null)
+                        UnitMovement movement = enemy.GetComponent<UnitMovement>();
+                        if (movement != null) movement.StopMovement();
+                        enemyScript.SetTerritoryCenter(center, homeRadius, territoryRadius);
+                        if (spawn.isEnhanced)
                         {
-                            UnitMovement movement = enemy.GetComponent<UnitMovement>();
-                            if (movement != null) movement.StopMovement();
-                            enemyScript.SetTerritoryCenter(center, homeRadius, territoryRadius);
-                            if (_isWaveFromNoise100)
-                            {
-                                enemyScript.ActivateInfiniteAttackState();
-                            }
-                            if (TutorialManager.Instance != null)
-                            {
-                                TutorialManager.Instance.RegisterSpawnedEnemy(enemyScript);
-                            }
+                            float moveMult = 1f + spawn.data.moveSpeedBonusPercent / 100f;
+                            float attackMult = 1f + spawn.data.attackBonusPercent / 100f;
+                            float healthMult = 1f + spawn.data.healthBonusPercent / 100f;
+                            enemyScript.ApplyEnhancement(spawn.data.enhancedSpriteColor, moveMult, attackMult, healthMult);
                         }
+                        if (_isWaveFromNoise100)
+                        {
+                            enemyScript.ActivateInfiniteAttackState();
+                        }
+                        if (TutorialManager.Instance != null)
+                        {
+                            TutorialManager.Instance.RegisterSpawnedEnemy(enemyScript);
+                        }
+                    }
 
+                    int holeIdx = selectedHoles.IndexOf(spawn.pos);
+                    if (holeIdx >= 0 && holeIdx < holeSpawnCounts.Count)
+                    {
                         if (!holeSpawnCounts[holeIdx].ContainsKey(poolTag))
                             holeSpawnCounts[holeIdx][poolTag] = 0;
                         holeSpawnCounts[holeIdx][poolTag]++;
@@ -280,6 +356,53 @@ public class EnemySpawner : MonoBehaviour
         }
 
         _isWaveFromNoise100 = false;
+        LogEnemyStats();
+    }
+
+    private static void LogEnemyStats()
+    {
+        if (UnitManager.Instance == null) return;
+
+        var enemies = UnitManager.Instance.EnemyUnits;
+        int total = 0;
+        int attackStateCount = 0;
+        Dictionary<string, int> totalByType = new Dictionary<string, int>();
+        Dictionary<string, int> attackByType = new Dictionary<string, int>();
+        Dictionary<string, int> enhancedByType = new Dictionary<string, int>();
+
+        foreach (UnitBase unit in enemies)
+        {
+            if (unit == null) continue;
+            if (!(unit is EnemyUnitBase enemy)) continue;
+
+            total++;
+            string typeName = enemy.GetType().Name;
+            if (!totalByType.ContainsKey(typeName)) totalByType[typeName] = 0;
+            totalByType[typeName]++;
+
+            if (enemy.IsInInfiniteAttackState())
+            {
+                attackStateCount++;
+                if (!attackByType.ContainsKey(typeName)) attackByType[typeName] = 0;
+                attackByType[typeName]++;
+            }
+
+            if (enemy.IsEnhanced)
+            {
+                if (!enhancedByType.ContainsKey(typeName)) enhancedByType[typeName] = 0;
+                enhancedByType[typeName]++;
+            }
+        }
+
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        sb.AppendLine($"[EnemySpawner] Enemy Stats | Total: {total}, AttackState: {attackStateCount}");
+        sb.Append("  By Type - Total: ");
+        foreach (var kvp in totalByType) sb.Append($"{kvp.Key}={kvp.Value} ");
+        sb.Append("\n  By Type - Attack: ");
+        foreach (var kvp in attackByType) sb.Append($"{kvp.Key}={kvp.Value} ");
+        sb.Append("\n  By Type - Enhanced: ");
+        foreach (var kvp in enhancedByType) sb.Append($"{kvp.Key}={kvp.Value} ");
+        Debug.Log(sb.ToString());
     }
 
     public static string GetPoolTagFromPrefab(GameObject prefab)
