@@ -146,11 +146,11 @@ GameObject:
   m_Component:
   - component: {fileID: 407409324728012381}
   - component: {fileID: 952973934286858722}
-  - component: {fileID: -2382125923714539233}
+  - component: {fileID: 4198946278330008068}
   - component: {fileID: 3132766170232860239}
   - component: {fileID: -5060092193258834609}
   - component: {fileID: -9190535632355532876}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Enemy_Spitter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -189,7 +189,7 @@ Rigidbody2D:
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_GravityScale: 0
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 727e4f6cc0cb2a94195e4ab4fd9c49f7, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -198,9 +198,9 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 1
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
---- !u!58 &-2382125923714539233
+--- !u!58 &4198946278330008068
 CircleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -235,7 +235,7 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 0.75
+  m_Radius: 0.5
 --- !u!114 &3132766170232860239
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -248,7 +248,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 330c45daea6434b46bc02141d339b613, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 2
+  moveSpeed: 4
   waypointTolerance: 0.1
 --- !u!114 &-5060092193258834609
 MonoBehaviour:
@@ -275,20 +275,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bcc6acac2691c8743aba9a6aeaa12b2c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 75
+  maxHealth: 150
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
   currentHealth: 0
   unitType: 1
   unitData: {fileID: 0}
   progressBarPrefab: {fileID: 0}
+  healthBarPrefab: {fileID: 5648413654597824292, guid: 5d743151f1ca85d45ab75ff0d9fd86fc, type: 3}
+  healthBarYOffset: 1
   currentState: 0
   warningStatePersist: 5
   outOfTerritoryChaseTime: 3
   attackDamage: 10
-  attackRange: 1.5
-  attackSpeed: 1.5
+  attackRange: 7
+  maxUnitChaseDistance: 10
+  attackDamageTiming: 0.875
   minTargetMoveDistance: 0.5
-  minRoamInterval: 4
-  maxRoamInterval: 6
+  bodyCollider: {fileID: 4198946278330008068}
+  minRoamInterval: 2
+  maxRoamInterval: 3
   unitMovement: {fileID: 3132766170232860239}
+  bulletPoolTag: EnemyBullet
+  bulletSpeed: 8

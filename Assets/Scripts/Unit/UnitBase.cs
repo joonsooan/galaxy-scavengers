@@ -26,9 +26,15 @@ public abstract class UnitBase : Damageable
     [Header("Progress Bar")]
     [SerializeField] private GameObject progressBarPrefab;
 
+    [Header("Health Bar")]
+    [SerializeField] private GameObject healthBarPrefab;
+    [SerializeField] private float healthBarYOffset = 1.5f;
+
     public UnitState currentState;
     private bool _isRegisteredToNoiseManager;
     protected UnitProgressBar progressBar;
+    protected UnitHealthBar healthBar;
+    private int _previousHealth;
 
     private void Update()
     {
@@ -55,6 +61,8 @@ public abstract class UnitBase : Damageable
         if (visionProvider != null && FogOfWarManager.Instance != null && FogOfWarManager.Instance.IsInitialized) {
             visionProvider.ForceUpdateAffectedTiles();
         }
+
+        _previousHealth = currentHealth;
     }
 
     protected override void OnDisable()
@@ -68,6 +76,7 @@ public abstract class UnitBase : Damageable
         }
 
         HideProgressBar();
+        HideHealthBar();
 
         base.OnDisable();
     }
@@ -75,6 +84,7 @@ public abstract class UnitBase : Damageable
     protected override void OnDestroy()
     {
         HideProgressBar();
+        HideHealthBar();
     }
 
     protected void ShowProgressBar()
@@ -102,6 +112,54 @@ public abstract class UnitBase : Damageable
 
         if (progressBar != null) {
             progressBar.SetProgress(progress);
+        }
+    }
+
+    protected override void OnHealthChanged()
+    {
+        base.OnHealthChanged();
+        
+        if (_previousHealth != currentHealth)
+        {
+            if (currentHealth < maxHealth)
+            {
+                ShowHealthBar();
+                if (healthBar != null)
+                {
+                    float healthRatio = (float)currentHealth / maxHealth;
+                    healthBar.SetHealth(healthRatio);
+                }
+            }
+            else if (currentHealth >= maxHealth)
+            {
+                HideHealthBar();
+            }
+            
+            _previousHealth = currentHealth;
+        }
+    }
+
+    protected void ShowHealthBar()
+    {
+        if (healthBar != null) return;
+        if (healthBarPrefab == null) return;
+
+        GameObject barObj = Instantiate(healthBarPrefab);
+        healthBar = barObj.GetComponent<UnitHealthBar>();
+        if (healthBar != null)
+        {
+            healthBar.Initialize(transform);
+            healthBar.SetYOffset(healthBarYOffset);
+            float healthRatio = (float)currentHealth / maxHealth;
+            healthBar.SetHealth(healthRatio);
+        }
+    }
+
+    protected void HideHealthBar()
+    {
+        if (healthBar != null) {
+            healthBar.Destroy();
+            healthBar = null;
         }
     }
 }

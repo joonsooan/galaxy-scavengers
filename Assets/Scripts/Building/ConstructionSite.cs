@@ -160,6 +160,10 @@ public class ConstructionSite : MonoBehaviour
     
     private Vector3Int FindBestInteractionCell(Unit_Construct drone, List<Vector3Int> availableCells)
     {
+        if (availableCells.Count == 0) {
+            return new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
+        }
+
         Vector3Int bestCell = availableCells[0];
         float minDistance = float.MaxValue;
         Vector3 dronePos = drone.transform.position;
@@ -169,6 +173,10 @@ public class ConstructionSite : MonoBehaviour
         {
             bool isUnassigned = !assignedCells.Contains(cell);
             bool bestIsAssigned = assignedCells.Contains(bestCell);
+            
+            bool isGloballyAssigned = UnitMovement.IsCellAssigned(cell);
+            if (isGloballyAssigned && isUnassigned) continue;
+
             float distance = Vector3.Distance(dronePos, BuildingManager.Instance.grid.GetCellCenterWorld(cell));
             
             if (isUnassigned && bestIsAssigned)

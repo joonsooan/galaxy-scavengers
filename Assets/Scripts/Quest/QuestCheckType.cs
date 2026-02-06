@@ -5,5 +5,7 @@ public enum QuestCheckType
     UnitProduced,             // Check if specific unit(s) are produced
     BeaconPlacedForScout,     // Check if beacon is placed to send unit_scout
     ScoutEnteredLocation,     // Check if unit_scout enters specific map location
-    ModulePlacedOnCore        // Check if module is placed on core during resource transfer
+    ModulePlacedOnCore,       // Check if module is placed on core during resource transfer
+    ReturnFromGameSceneSuccess,  // Auto-completable when successfully returning to BaseScene from GameScene
+    ReturnFromGameSceneFailure   // Auto-completable when failing and returning to BaseScene from GameScene
 }

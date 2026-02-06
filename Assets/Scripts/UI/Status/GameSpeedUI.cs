@@ -68,7 +68,7 @@ public class GameSpeedUI : MonoBehaviour
         }
     }
 
-    private void UpdateDisplay()
+    public void UpdateDisplay()
     {
         if (_gameManager == null) return;
 

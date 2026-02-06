@@ -71,6 +71,12 @@ MonoBehaviour:
       Data3: -764822910
       Data4: -311267768
     Path: event:/BGM_InGame/BGM_InGame_2
+  - Guid:
+      Data1: 2135244225
+      Data2: 1077845702
+      Data3: -637141596
+      Data4: -1076731779
+    Path: event:/BGM_InGame/BGM_InGame_3
   loadingBgm:
     Guid:
       Data1: -1111977378
@@ -78,6 +84,20 @@ MonoBehaviour:
       Data3: 228087483
       Data4: 511340017
     Path: event:/BGM_Loading
+  successLoadingBgm:
+    Guid:
+      Data1: -637866130
+      Data2: 1333146692
+      Data3: 836448936
+      Data4: 1739704841
+    Path: event:/BGM_EscapeSuccess
+  failureLoadingBgm:
+    Guid:
+      Data1: -2113190679
+      Data2: 1119183929
+      Data3: -912586345
+      Data4: -699956491
+    Path: event:/BGM_EscapeFail
   defaultFadeOutTime: 0.5
   defaultFadeInTime: 1
   gameBgmFadeInTime: 3

@@ -67,11 +67,6 @@ public class QuestDetailPanel : MonoBehaviour
         {
             inventoryManager.OnResourceChanged += OnInventoryResourceChanged;
         }
-        
-        if (_isGameSceneMode)
-        {
-            ClearQuestInfo();
-        }
     }
 
     private void OnDisable()
@@ -85,11 +80,6 @@ public class QuestDetailPanel : MonoBehaviour
         if (inventoryManager != null)
         {
             inventoryManager.OnResourceChanged -= OnInventoryResourceChanged;
-        }
-        
-        if (_isGameSceneMode)
-        {
-            ClearQuestInfo();
         }
     }
     
@@ -128,11 +118,14 @@ public class QuestDetailPanel : MonoBehaviour
 
     public void DisplayQuestInfo(QuestData questData, int questId)
     {
-        if (questData == null) return;
-
-        if (_currentQuestId == questId)
+        if (questData == null)
         {
             return;
+        }
+
+        if (!gameObject.activeSelf)
+        {
+            gameObject.SetActive(true);
         }
 
         _currentQuestId = questId;
@@ -225,7 +218,11 @@ public class QuestDetailPanel : MonoBehaviour
                     {
                         primaryCheckType = checkData.checkType;
                     }
-                    break;
+                    if (checkData.checkType != QuestCheckType.ReturnFromGameSceneSuccess &&
+                        checkData.checkType != QuestCheckType.ReturnFromGameSceneFailure)
+                    {
+                        break;
+                    }
                 }
             }
         }
@@ -254,6 +251,8 @@ public class QuestDetailPanel : MonoBehaviour
             QuestCheckType.BeaconPlacedForScout => "탐사 요구사항",
             QuestCheckType.ScoutEnteredLocation => "탐사 요구사항",
             QuestCheckType.ModulePlacedOnCore => "모듈 요구사항",
+            QuestCheckType.ReturnFromGameSceneSuccess => "요구사항",
+            QuestCheckType.ReturnFromGameSceneFailure => "요구사항",
             _ => "요구사항"
         };
     }
@@ -275,7 +274,9 @@ public class QuestDetailPanel : MonoBehaviour
                     checkData.checkType == QuestCheckType.UnitProduced ||
                     checkData.checkType == QuestCheckType.BeaconPlacedForScout ||
                     checkData.checkType == QuestCheckType.ScoutEnteredLocation ||
-                    checkData.checkType == QuestCheckType.ModulePlacedOnCore)
+                    checkData.checkType == QuestCheckType.ModulePlacedOnCore ||
+                    checkData.checkType == QuestCheckType.ReturnFromGameSceneSuccess ||
+                    checkData.checkType == QuestCheckType.ReturnFromGameSceneFailure)
                 {
                     if (!string.IsNullOrEmpty(checkData.displayText))
                     {
@@ -402,12 +403,10 @@ public class QuestDetailPanel : MonoBehaviour
                     }
                     else
                     {
-                        Debug.LogWarning($"QuestDetailPanel: CreditRewardCell component not found on prefab {creditRewardCellPrefab.name}");
                     }
                 }
                 else
                 {
-                    Debug.LogWarning("QuestDetailPanel: creditRewardCellPrefab is not assigned, using fallback");
                     GameObject cellObj = Instantiate(baseInventoryCellPrefab, rewardGridContainer.transform);
                     BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
                     if (cell != null)
@@ -527,7 +526,7 @@ public class QuestDetailPanel : MonoBehaviour
 
     private void UpdateButtonVisibility()
     {
-        if (_currentQuestId == -1 || questActionButton == null)
+        if (_currentQuestId == -1)
         {
             if (questActionButton != null) questActionButton.gameObject.SetActive(false);
             return;
@@ -539,7 +538,21 @@ public class QuestDetailPanel : MonoBehaviour
             return;
         }
 
+        QuestData questData = QuestDataManager.Instance.GetQuestData(_currentQuestId);
         QuestState questState = QuestDataManager.Instance.GetQuestState(_currentQuestId);
+        
+        bool isRequestQuest = questData != null && questData.questType == QuestType.RequestQuest;
+        
+        if (isRequestQuest && questState == QuestState.Available)
+        {
+            if (questActionButton != null) questActionButton.gameObject.SetActive(false);
+            return;
+        }
+        
+        if (questActionButton == null)
+        {
+            return;
+        }
         
         FMODUIButton fmodButton = questActionButton.GetComponent<FMODUIButton>();
         if (fmodButton != null)
@@ -584,7 +597,6 @@ public class QuestDetailPanel : MonoBehaviour
         }
         else if (questState == QuestState.Completable)
         {
-            // Completable quests are ready to complete
             questActionButton.gameObject.SetActive(true);
             if (questActionButtonText != null)
             {
@@ -639,7 +651,56 @@ public class QuestDetailPanel : MonoBehaviour
         }
         else if (questState == QuestState.Completable)
         {
-            // Completable quests are ready to complete
+            QuestData questData = QuestDataManager.Instance.GetQuestData(_currentQuestId);
+            
+            if (questData != null && questData.questType == QuestType.CoreRepairQuest)
+            {
+                if (CoreRepairManager.Instance != null && ResourceDataManager.Instance != null)
+                {
+                    CorePart partToRepair = CoreRepairManager.Instance.GetCorePartFromQuestId(_currentQuestId);
+                    
+                    if (questData.requiredResources != null && questData.requiredResources.Length > 0)
+                    {
+                        bool hasEnoughResources = true;
+                        foreach (ResourceCost cost in questData.requiredResources)
+                        {
+                            if (ResourceDataManager.Instance.GetResourceAmount(cost.resourceType) < cost.amount)
+                            {
+                                hasEnoughResources = false;
+                                break;
+                            }
+                        }
+                        
+                        if (hasEnoughResources)
+                        {
+                            foreach (ResourceCost cost in questData.requiredResources)
+                            {
+                                ResourceDataManager.Instance.RemoveResource(cost.resourceType, cost.amount);
+                            }
+                            
+                            if (CoreRepairManager.Instance.TryRepairPart(partToRepair, false))
+                            {
+                                if (QuestManager.Instance != null)
+                                {
+                                    QuestManager.Instance.CompleteQuest(_currentQuestId);
+                                    QuestManager.Instance.FinishQuest(_currentQuestId);
+                                }
+                                
+                                ClearQuestInfo();
+                                
+                                GameSceneQuestUIManager questUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
+                                if (questUIManager != null)
+                                {
+                                    questUIManager.LoadActiveQuests();
+                                }
+                                
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+            
             if (QuestManager.Instance != null)
             {
                 bool completed = QuestManager.Instance.CompleteQuest(_currentQuestId);
@@ -655,41 +716,80 @@ public class QuestDetailPanel : MonoBehaviour
         }
     }
     
+    
     private void FinishQuestAndGiveRewards(int questId)
     {
+        QuestData quest = QuestDataManager.Instance.GetQuestData(questId);
+        bool isRequestQuest = quest != null && quest.questType == QuestType.RequestQuest;
+        
+        if (QuestManager.Instance != null)
+        {
+            QuestManager.Instance.FinishQuest(questId);
+        }
+        
         if (questUIHandler != null)
         {
             questUIHandler.OnQuestFinished(questId);
         }
         
-        QuestData quest = QuestDataManager.Instance.GetQuestData(questId);
-        if (quest == null) return;
+        if (quest == null)
+        {
+            return;
+        }
         
         BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
-        if (inventoryManager == null) return;
         
-        if (quest.requiredResources != null && quest.requiredResources.Length > 0)
+        if (isRequestQuest)
         {
-            foreach (ResourceCost cost in quest.requiredResources)
+            if (ResourceDataManager.Instance != null && quest.requiredResources != null && quest.requiredResources.Length > 0)
             {
-                if (!inventoryManager.RemoveResource(cost.resourceType, cost.amount))
+                foreach (ResourceCost cost in quest.requiredResources)
                 {
-                    Debug.LogWarning($"QuestDetailPanel: Failed to remove {cost.amount} {cost.resourceType} from base inventory when finishing quest {questId}");
+                    ResourceDataManager.Instance.RemoveResource(cost.resourceType, cost.amount);
+                }
+            }
+            
+            if (quest.questFinishReward != null)
+            {
+                if (quest.questFinishReward.resourceRewards != null && quest.questFinishReward.resourceRewards.Length > 0)
+                {
+                    foreach (ResourceCost reward in quest.questFinishReward.resourceRewards)
+                    {
+                        if (ResourceDataManager.Instance != null)
+                        {
+                            ResourceDataManager.Instance.AddResource(reward.resourceType, reward.amount);
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (inventoryManager == null) return;
+            
+            if (quest.requiredResources != null && quest.requiredResources.Length > 0)
+            {
+                foreach (ResourceCost cost in quest.requiredResources)
+                {
+                    inventoryManager.RemoveResource(cost.resourceType, cost.amount);
+                }
+            }
+            
+            if (quest.questFinishReward != null)
+            {
+                if (quest.questFinishReward.resourceRewards != null && quest.questFinishReward.resourceRewards.Length > 0)
+                {
+                    foreach (ResourceCost reward in quest.questFinishReward.resourceRewards)
+                    {
+                        inventoryManager.AddResource(reward.resourceType, reward.amount);
+                    }
                 }
             }
         }
         
         if (quest.questFinishReward != null)
         {
-            if (quest.questFinishReward.resourceRewards != null && quest.questFinishReward.resourceRewards.Length > 0)
-            {
-                foreach (ResourceCost reward in quest.questFinishReward.resourceRewards)
-                {
-                    inventoryManager.AddResource(reward.resourceType, reward.amount);
-                }
-            }
-
-            if (quest.questFinishReward.moduleRewards != null && quest.questFinishReward.moduleRewards.Length > 0)
+            if (quest.questFinishReward.moduleRewards != null && quest.questFinishReward.moduleRewards.Length > 0 && inventoryManager != null)
             {
                 foreach (ModuleRecipe moduleRecipe in quest.questFinishReward.moduleRewards)
                 {
@@ -706,11 +806,9 @@ public class QuestDetailPanel : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning($"QuestDetailPanel: CreditManager.Instance is null. Cannot award {quest.questFinishReward.creditReward} credits for quest {questId}");
                 }
             }
             
-            // Unlock buildings
             if (quest.questFinishReward.unlockedBuildings != null && quest.questFinishReward.unlockedBuildings.Length > 0)
             {
                 if (BuildingUnlockManager.Instance == null)
@@ -725,16 +823,34 @@ public class QuestDetailPanel : MonoBehaviour
                 }
             }
             
-            BaseInventorySystem inventorySystem = FindFirstObjectByType<BaseInventorySystem>();
-            inventorySystem.ForceRefreshInventory();
-            
-            CoreCustomUIManager coreCustomUIManager = FindFirstObjectByType<CoreCustomUIManager>();
-            coreCustomUIManager.RefreshModuleSelectionGrid();
+            if (inventoryManager != null)
+            {
+                BaseInventorySystem inventorySystem = FindFirstObjectByType<BaseInventorySystem>();
+                if (inventorySystem != null)
+                {
+                    inventorySystem.ForceRefreshInventory();
+                }
+                
+                CoreCustomUIManager coreCustomUIManager = FindFirstObjectByType<CoreCustomUIManager>();
+                if (coreCustomUIManager != null)
+                {
+                    coreCustomUIManager.RefreshModuleSelectionGrid();
+                }
+            }
         }
         
         if (QuestManager.Instance != null)
         {
             QuestManager.Instance.FinishQuest(questId);
+        }
+        
+        if (isRequestQuest)
+        {
+            GameSceneQuestUIManager questUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
+            if (questUIManager != null)
+            {
+                questUIManager.LoadActiveQuests();
+            }
         }
         
         ClearQuestInfo();

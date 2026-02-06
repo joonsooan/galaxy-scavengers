@@ -23,7 +23,7 @@ MonoBehaviour:
   unitType: 
   itemType: 
   showProgressBar: 0
-  enableUIPanels: 000000000300000007000000
+  enableUIPanels: 000000000400000008000000
   spawnUnits: []
   grantResources: []
   completionSound:
@@ -34,4 +34,6 @@ MonoBehaviour:
       Data4: 1624008095
     Path: event:/SFX_UIClick
   enableMaterialHighlight: 0
-  highlightTargets: []
+  highlightTargetIDs: []
+  showArrowUI: 0
+  arrowID: 

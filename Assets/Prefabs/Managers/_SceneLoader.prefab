@@ -48,8 +48,11 @@ MonoBehaviour:
   titleSceneName: TitleScene
   baseSceneName: BaseScene
   gameSceneName: GameScene
-  gameScenePostInitDelay: 1
+  fadeDuration: 0.5
   gameScenePostFadeDelay: 1
+  baseSceneBgmStopDelay: 0
+  baseSceneBgmFadeOutTime: 1
+  gameOverLoadingScreenDelay: 0.5
 --- !u!114 &5978680509315379117
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -63,10 +66,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   loadingScreenPrefab: {fileID: 8740857451738434286, guid: e53eb0d33bb4c4347b0d9b79c73e76c4, type: 3}
-  loadingStartSound:
-    Guid:
-      Data1: 1870534150
-      Data2: 1281061976
-      Data3: -817715557
-      Data4: -466499267
-    Path: event:/SFX_LoadingEnter
+  successLoadingScreenPrefab: {fileID: 8740857451738434286, guid: c227092bdba655440bd0207ac5a6830f, type: 3}
+  gameOverLoadingScreenPrefab: {fileID: 8740857451738434286, guid: 1c2313cef16f62e4a971214dd8c7a3f7, type: 3}

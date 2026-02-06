@@ -18,6 +18,9 @@ public class Unit_Construct : UnitBase
     [SerializeField] private ParticleSystem constructingParticleSystem;
     [SerializeField] private float particleOffsetDistance = 0.5f;
     [SerializeField] private float yOffset;
+    [SerializeField] private GameObject constructionSiteAnimationPrefab;
+    [SerializeField] private int siteAnimationSortingOrder = 10;
+    [SerializeField] private string constructionAnimationStateName = "constructing";
 
     [Header("Hover Animation")]
     [SerializeField] private float hoverHeight = 0.2f;
@@ -26,13 +29,13 @@ public class Unit_Construct : UnitBase
 
     private int _carriedAmount;
     private ResourceType _carriedResourceType;
-
     private Vector3 _currentConstructionDirection;
 
     private ConstructionSite _currentConstructionSite;
     private ConstructionSite.ConstructionRequest _currentRequest;
     private ConstructState _currentState = ConstructState.Idle;
     private Tween _hoverTween;
+    private int _constructionStateHash;
 
     private Coroutine _loadingCoroutine;
 
@@ -48,6 +51,8 @@ public class Unit_Construct : UnitBase
 
     private IStorage _targetStorage;
     private Coroutine _unloadingCoroutine;
+    private GameObject _currentSiteAnimation;
+    private Animator _currentSiteAnimator;
 
     protected override void Awake()
     {
@@ -66,6 +71,7 @@ public class Unit_Construct : UnitBase
             _spriteTransform = _spriteController.transform;
             _baseHoverLocalPosition = _spriteTransform.localPosition;
         }
+        _constructionStateHash = Animator.StringToHash(constructionAnimationStateName);
     }
 
     private void Update()
@@ -112,12 +118,10 @@ public class Unit_Construct : UnitBase
             currentState = UnitState.Idle;
             break;
         case ConstructState.FetchingResource:
-            // When loading, use Idle state (not Unloading) to prevent animation speed issues
             if (movement != null && movement.IsMoving) {
                 currentState = UnitState.Moving;
             }
             else if (_loadingCoroutine != null) {
-                // Loading from storage - use Idle state
                 currentState = UnitState.Idle;
             }
             else {
@@ -132,7 +136,6 @@ public class Unit_Construct : UnitBase
                 currentState = UnitState.Constructing;
             }
             else {
-                // Waiting at delivery location - use Idle state
                 currentState = UnitState.Idle;
             }
             break;
@@ -172,7 +175,7 @@ public class Unit_Construct : UnitBase
         if (currentState == UnitState.Moving || currentState == UnitState.ReturningToStorage) {
             Vector3 moveDir = movement.GetMoveDirection();
             _spriteController?.UpdateSpriteDirection(moveDir);
-            _spriteController?.ClearTarget(); // Clear target when moving
+            _spriteController?.ClearTarget();
         }
         else if (currentState == UnitState.Constructing && _currentRequest != null && _currentRequest.site != null) {
             if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null) {
@@ -240,7 +243,6 @@ public class Unit_Construct : UnitBase
 
         movement.ForceStopAllMovement();
 
-        // Show progress bar during loading
         ShowProgressBar();
         float elapsedTime = 0f;
 
@@ -390,8 +392,9 @@ public class Unit_Construct : UnitBase
             yield break;
         }
 
+        Vector3Int targetPieceCell = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
         if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null) {
-            Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
+            targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
             Vector3 piecePos = BuildingManager.Instance.grid.GetCellCenterWorld(targetPieceCell);
             if (TryGetComponent(out UnitSpriteController spriteController)) {
                 Vector2 direction = (piecePos - transform.position).normalized;
@@ -407,8 +410,10 @@ public class Unit_Construct : UnitBase
         movement.ForceStopAllMovement();
 
         StartConstructionParticles();
+        if (targetPieceCell != new Vector3Int(int.MinValue, int.MinValue, int.MinValue)) {
+            StartSiteAnimation(targetPieceCell);
+        }
 
-        // Show progress bar during constructing (unloading)
         ShowProgressBar();
         float elapsedTime = 0f;
 
@@ -419,6 +424,7 @@ public class Unit_Construct : UnitBase
             elapsedTime += Time.deltaTime;
             float progress = elapsedTime / adjustedUnloadingTime;
             UpdateProgressBar(progress);
+            UpdateSiteAnimationProgress(progress);
             yield return null;
         }
 
@@ -426,12 +432,14 @@ public class Unit_Construct : UnitBase
 
         if (!CanDepositResource()) {
             StopConstructionParticles();
+            StopSiteAnimation();
             _unloadingCoroutine = null;
             SetTask_Idle();
             yield break;
         }
 
         StopConstructionParticles();
+        StopSiteAnimation();
         _unloadingCoroutine = null;
 
         if (_currentRequest != null && _currentRequest.site != null) {
@@ -611,6 +619,7 @@ public class Unit_Construct : UnitBase
     private void ReleaseFromConstruction()
     {
         StopConstructionParticles();
+        StopSiteAnimation();
 
         if (_currentRequest != null) {
             _currentRequest.site?.CancelRequest(_currentRequest);
@@ -721,6 +730,50 @@ public class Unit_Construct : UnitBase
                 _spriteTransform.DOLocalMoveY(baseY, 0.2f).SetEase(Ease.OutQuad);
             }
         }
+    }
+
+    private void StartSiteAnimation(Vector3Int pieceCell)
+    {
+        if (constructionSiteAnimationPrefab == null || BuildingManager.Instance == null || BuildingManager.Instance.grid == null) {
+            return;
+        }
+
+        StopSiteAnimation();
+
+        Vector3 pieceWorldPos = BuildingManager.Instance.grid.GetCellCenterWorld(pieceCell);
+        _currentSiteAnimation = Instantiate(constructionSiteAnimationPrefab, pieceWorldPos, Quaternion.identity);
+        
+        if (_currentSiteAnimation != null) {
+            foreach (SpriteRenderer sr in _currentSiteAnimation.GetComponentsInChildren<SpriteRenderer>(true)) {
+                sr.sortingOrder = siteAnimationSortingOrder;
+            }
+        }
+        _currentSiteAnimator = _currentSiteAnimation != null ? _currentSiteAnimation.GetComponent<Animator>() : null;
+        
+        if (_currentSiteAnimator != null) {
+            _currentSiteAnimator.Play(Animator.StringToHash(constructionAnimationStateName), 0, 0f);
+        }
+
+        if (_currentSiteAnimator != null) {
+            int hash = Animator.StringToHash(constructionAnimationStateName);
+            _currentSiteAnimator.Play(hash, 0, 0f);
+        }
+    }
+
+    private void UpdateSiteAnimationProgress(float progress)
+    {
+        if (_currentSiteAnimator == null) return;
+        
+        _currentSiteAnimator.Play(_constructionStateHash, 0, Mathf.Clamp01(progress));
+    }
+
+    private void StopSiteAnimation()
+    {
+        if (_currentSiteAnimation != null) {
+            Destroy(_currentSiteAnimation);
+            _currentSiteAnimation = null;
+        }
+        _currentSiteAnimator = null;
     }
 
     private enum ConstructState

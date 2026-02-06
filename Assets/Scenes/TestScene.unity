@@ -7810,7 +7810,6 @@ MonoBehaviour:
   autoRegenerateDecorationsInPlayMode: 1
   useMapNoiseForDecorations: 1
   densityScale: 10
-  typeScale: 20
   densityOffset: {x: 0, y: 0}
   typeOffset: {x: 0, y: 0}
   densityThreshold: 0.5

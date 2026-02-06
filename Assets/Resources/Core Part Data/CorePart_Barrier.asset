@@ -20,9 +20,9 @@ MonoBehaviour:
     \uACC4\uC218\uAC00 \uC99D\uAC00\uD569\uB2C8\uB2E4."
   requiredResources:
   - resourceType: 6
-    amount: 50
+    amount: 10
   - resourceType: 10
-    amount: 50
+    amount: 10
   repairReward:
     resourceRewards: []
     moduleRewards: []

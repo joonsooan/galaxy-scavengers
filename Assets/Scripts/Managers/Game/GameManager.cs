@@ -13,8 +13,6 @@ public class GameManager : MonoBehaviour
     public UIManager uiManager;
     public CardDragger cardDragger;
 
-    [Header("UI Elements")]
-    [SerializeField] private GameObject pausePanel;
 
     [Header("Audio")]
     [SerializeField] private EventReference pauseSound;
@@ -158,8 +156,8 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        if (pausePanel != null) {
-            pausePanel.SetActive(IsPaused);
+        if (uiManager != null) {
+            uiManager.SetPausePanelActive(IsPaused);
         }
     }
 
@@ -167,7 +165,7 @@ public class GameManager : MonoBehaviour
     {
         Time.timeScale = 1;
         if (SceneLoader.Instance != null) {
-            SceneLoader.Instance.LoadBaseScene();
+            SceneLoader.Instance.LoadBaseScene(SceneLoader.ReturnFromGameState.Failure);
         }
     }
 
@@ -227,12 +225,6 @@ public class GameManager : MonoBehaviour
         mapGenerator = FindFirstObjectByType<MapGenerator>();
         uiManager = FindFirstObjectByType<UIManager>();
         cardDragger = FindFirstObjectByType<CardDragger>();
-
-        GameObject pausePanelObject = GameObject.Find("PausePanel");
-        if (pausePanelObject != null) {
-            pausePanel = pausePanelObject;
-            pausePanel.SetActive(false);
-        }
 
         StartCoroutine(WaitForEntryAnimationAndInitialize());
     }
@@ -372,21 +364,6 @@ public class GameManager : MonoBehaviour
             mapGenerator.GenerateEnemyTerritoryRadiusValues();
         }
 
-        // Spawn enemy units during loading (keep existing behavior)
-        EnemySpawner[] enemySpawners = FindObjectsByType<EnemySpawner>(FindObjectsSortMode.None);
-        if (progress != null) {
-            foreach (EnemySpawner enemySpawner in enemySpawners) {
-                if (enemySpawner == null) continue;
-                yield return StartCoroutine(enemySpawner.SpawnEnemiesAsync(progress));
-            }
-        }
-        else {
-            foreach (EnemySpawner enemySpawner in enemySpawners) {
-                if (enemySpawner == null) continue;
-                enemySpawner.SpawnEnemies();
-            }
-        }
-
         if (mapGenerator != null) {
             mapGenerator.DrawEnemyTerritoryTiles();
         }
@@ -412,12 +389,6 @@ public class GameManager : MonoBehaviour
 
         if (mapGenerator != null) {
             mapGenerator.GenerateEnemyTerritoryRadiusValues();
-        }
-
-        // Spawn enemy units during loading (keep existing behavior)
-        foreach (EnemySpawner enemySpawner in FindObjectsByType<EnemySpawner>(FindObjectsSortMode.None)) {
-            if (enemySpawner == null) continue;
-            enemySpawner.SpawnEnemies();
         }
 
         if (mapGenerator != null) {

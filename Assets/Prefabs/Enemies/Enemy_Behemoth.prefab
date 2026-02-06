@@ -77,7 +77,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1027114353
-  m_SortingLayer: 2
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_Sprite: {fileID: 6150808516666299658, guid: 32571226b7a3f4b4eb477c649ff5ffe0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -133,7 +133,7 @@ SortingGroup:
   m_GameObject: {fileID: 4630979056125191867}
   m_Enabled: 1
   m_SortingLayerID: -1027114353
-  m_SortingLayer: 2
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_SortAtRoot: 0
 --- !u!1 &7944764008120523387
@@ -150,7 +150,7 @@ GameObject:
   - component: {fileID: 3132766170232860239}
   - component: {fileID: -5060092193258834609}
   - component: {fileID: -5414244451522802995}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Enemy_Behemoth
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -185,11 +185,11 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
+  m_Mass: 1.5
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_GravityScale: 0
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 727e4f6cc0cb2a94195e4ab4fd9c49f7, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -198,7 +198,7 @@ Rigidbody2D:
     m_Bits: 0
   m_Interpolate: 1
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!58 &-7692210126921437933
 CircleCollider2D:
@@ -235,7 +235,7 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 1
+  m_Radius: 0.5
 --- !u!114 &3132766170232860239
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -248,7 +248,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 330c45daea6434b46bc02141d339b613, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 1.5
+  moveSpeed: 4
   waypointTolerance: 0.1
 --- !u!114 &-5060092193258834609
 MonoBehaviour:
@@ -275,18 +275,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 351b09cb654fd844dafd3b21e8ddb6d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 200
-  currentHealth: 0
-  unitType: 1
+  maxHealth: 300
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
+  currentHealth: 0
+  unitType: 1
+  unitData: {fileID: 0}
+  progressBarPrefab: {fileID: 0}
+  healthBarPrefab: {fileID: 5648413654597824292, guid: 5d743151f1ca85d45ab75ff0d9fd86fc, type: 3}
+  healthBarYOffset: 1.25
   currentState: 0
   warningStatePersist: 5
   outOfTerritoryChaseTime: 3
   attackDamage: 15
   attackRange: 1.5
-  attackSpeed: 3
+  maxUnitChaseDistance: 10
+  attackDamageTiming: 0.73
   minTargetMoveDistance: 0.5
-  minRoamInterval: 5
-  maxRoamInterval: 7
+  bodyCollider: {fileID: -7692210126921437933}
+  minRoamInterval: 2
+  maxRoamInterval: 3
   unitMovement: {fileID: 3132766170232860239}

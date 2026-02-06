@@ -285,7 +285,7 @@ TextureImporter:
       name: enemy-spitter-idle-right_1
       rect:
         serializedVersion: 2
-        x: 25
+        x: 24
         y: 0
         width: 24
         height: 24
@@ -299,6 +299,138 @@ TextureImporter:
       bones: []
       spriteID: 545a025bbd134434daade63eb8e52df3
       internalID: -4876432651690767736
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-spitter-idle-right_2
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 0
+        width: 24
+        height: 24
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0006895e56b92a14cb1089b8a920fc6c
+      internalID: 1127988323
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-spitter-idle-right_3
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 0
+        width: 24
+        height: 24
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9a003b056719e9a4b9ae7d00885d57ef
+      internalID: -979413788
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-spitter-idle-right_4
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 0
+        width: 24
+        height: 24
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ac00e64f73740444a813594c11df8149
+      internalID: 1890343470
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-spitter-idle-right_5
+      rect:
+        serializedVersion: 2
+        x: 120
+        y: 0
+        width: 24
+        height: 24
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f9f8f5a164fe6264c80afaf6f0d15726
+      internalID: -966351946
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-spitter-idle-right_6
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 0
+        width: 24
+        height: 24
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3dc09a7a9c51a57438143539ee2cdaf1
+      internalID: 1074980943
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-spitter-idle-right_7
+      rect:
+        serializedVersion: 2
+        x: 168
+        y: 0
+        width: 24
+        height: 24
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8db07c8ac2e9eb7489eee4acb144918f
+      internalID: 1798578103
       vertices: []
       indices: 
       edges: []
@@ -319,6 +451,12 @@ TextureImporter:
     nameFileIdTable:
       enemy-spitter-idle-right_0: 9050383259948104239
       enemy-spitter-idle-right_1: -4876432651690767736
+      enemy-spitter-idle-right_2: 1127988323
+      enemy-spitter-idle-right_3: -979413788
+      enemy-spitter-idle-right_4: 1890343470
+      enemy-spitter-idle-right_5: -966351946
+      enemy-spitter-idle-right_6: 1074980943
+      enemy-spitter-idle-right_7: 1798578103
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

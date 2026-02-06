@@ -66,6 +66,7 @@ public abstract class Damageable : MonoBehaviour, ICombo
         currentHealth -= damage;
         OnDamageTaken(damage);
         OnAnyDamageTaken?.Invoke(this);
+        OnHealthChanged();
 
         if (_flashCoroutine != null) {
             StopCoroutine(_flashCoroutine);
@@ -93,6 +94,14 @@ public abstract class Damageable : MonoBehaviour, ICombo
     private void RegisterAttackAlert()
     {
         if (GameAlertUIManager.Instance == null) return;
+        
+        if (this is UnitBase unitBase)
+        {
+            if (unitBase.unitType != UnitBase.UnitType.Ally)
+            {
+                return;
+            }
+        }
         
         _lastDamageTime = Time.time;
         
@@ -164,6 +173,10 @@ public abstract class Damageable : MonoBehaviour, ICombo
     {
     }
 
+    protected virtual void OnHealthChanged()
+    {
+    }
+
     public void SetMaxHealth(int newMaxHealth)
     {
         float healthRatio = maxHealth > 0 ? (float)currentHealth / maxHealth : 1f;
@@ -180,6 +193,25 @@ public abstract class Damageable : MonoBehaviour, ICombo
 
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
         Debug.Log($"{gameObject.name} Healed : {currentHealth}/{maxHealth}");
+        OnHealthChanged();
+    }
+
+    public void RestoreToFullHealth()
+    {
+        currentHealth = maxHealth;
+        OnHealthChanged();
+    }
+
+    public void SetPersistentTint(Color color)
+    {
+        if (_sr == null) {
+            _sr = GetComponentInChildren<SpriteRenderer>();
+            if (_sr == null) _sr = GetComponent<SpriteRenderer>();
+        }
+        if (_sr != null) {
+            _originalColor = color;
+            _sr.color = color;
+        }
     }
 
     private IEnumerator FlashEffect()

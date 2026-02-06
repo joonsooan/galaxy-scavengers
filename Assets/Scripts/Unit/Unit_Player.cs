@@ -92,6 +92,11 @@ public class Unit_Player : UnitBase
         if (_laserRenderer != null) {
             Destroy(_laserRenderer.gameObject);
         }
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.GameOver();
+        }
     }
 
     private void OnDrawGizmosSelected()

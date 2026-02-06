@@ -1,3 +1,5 @@
+using System.Collections;
+using DG.Tweening;
 using FMODUnity;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,8 +25,9 @@ public class BaseSceneManager : MonoBehaviour
     [SerializeField] private GameObject farmUIPanel;
     [SerializeField] private GameObject mapUIPanel;
     [SerializeField] private GameObject coreLaunchUIPanel;
+    [SerializeField] private float fadeInDuration = 1f;
     private BaseInventorySystem _baseInventorySystem;
-
+    private GameObject _fadePanel;
     private int _currentPanelIndex = -1;
 
     private void Awake()
@@ -60,6 +63,48 @@ public class BaseSceneManager : MonoBehaviour
     private void Start()
     {
         _baseInventorySystem = FindFirstObjectByType<BaseInventorySystem>();
+        StartCoroutine(HandleSceneEntryFade());
+    }
+
+    private IEnumerator HandleSceneEntryFade()
+    {
+        yield return null;
+        yield return null;
+
+        GameObject fadePanelObj = FindFadePanel();
+        if (fadePanelObj != null)
+        {
+            Image fadeImage = fadePanelObj.GetComponent<Image>();
+            if (fadeImage != null)
+            {
+                Color currentColor = fadeImage.color;
+                if (currentColor.a > 0f)
+                {
+                    fadePanelObj.SetActive(true);
+                    fadeImage.DOFade(0f, fadeInDuration).SetUpdate(true);
+                    yield return new WaitForSecondsRealtime(fadeInDuration);
+                }
+            }
+        }
+
+        BtnManager_Base btnManager = FindFirstObjectByType<BtnManager_Base>();
+        if (btnManager != null)
+        {
+            btnManager.ResetFadeCanvasGroup();
+        }
+    }
+
+    private GameObject FindFadePanel()
+    {
+        Transform[] allTransforms = FindObjectsOfType<Transform>(true);
+        foreach (Transform t in allTransforms)
+        {
+            if (t.name == "Fade Panel")
+            {
+                return t.gameObject;
+            }
+        }
+        return null;
     }
 
     private void Update()

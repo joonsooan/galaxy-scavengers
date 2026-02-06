@@ -28,7 +28,7 @@ MonoBehaviour:
   unitType: 
   itemType: 
   showProgressBar: 0
-  enableUIPanels: 08000000
+  enableUIPanels: 09000000
   spawnUnits: []
   grantResources: []
   completionSound:
@@ -43,6 +43,4 @@ MonoBehaviour:
   - mainControl_baseBuilding
   - baseBuilding_storage
   showArrowUI: 0
-  arrowUIPrefab: {fileID: 0}
-  arrowPosition: {x: 0, y: 0, z: 0}
-  arrowRotation: {x: 0, y: 0, z: 0}
+  arrowID: 

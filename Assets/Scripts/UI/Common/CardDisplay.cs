@@ -28,13 +28,11 @@ public class CardDisplay : InfoDisplayTrigger, IPointerClickHandler, IPointerExi
     protected override void ShowInfo()
     {
         GameManager.Instance?.uiManager.DisplayCardInfo(buildingPieceData);
-        GameManager.Instance?.uiManager.DisplayCardBtn();
     }
 
     protected override void HideInfo()
     {
         GameManager.Instance?.uiManager.HideCardInfo();
-        GameManager.Instance?.uiManager.HideCardBtn();
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -45,7 +43,6 @@ public class CardDisplay : InfoDisplayTrigger, IPointerClickHandler, IPointerExi
     public new void OnPointerExit(PointerEventData eventData)
     {
         GameManager.Instance?.uiManager.HideCardInfo();
-        GameManager.Instance?.uiManager.HideCardBtn();
     }
     
     public void OnClick()

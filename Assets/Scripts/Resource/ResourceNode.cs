@@ -5,15 +5,23 @@ public class ResourceNode : MonoBehaviour
 {
     [Header("Resource Stats")]
     public ResourceType resourceType;
-    [HideInInspector] public int amountToMine; // 채굴해 얻을 수 있는 자원의 총량
-    [HideInInspector] public float timeToMinePerUnit; // 한 번 채굴을 완료하는 데 걸리는 시간
+    [HideInInspector] public int amountToMine;
+    [HideInInspector] public float timeToMinePerUnit;
 
     [HideInInspector] public Vector3Int cellPosition;
     
+    [Header("UI")]
+    [SerializeField] private ProductionProgressSlider progressSliderPrefab;
+
     private Unit_Miner _reservedUnit;
+    private int _initialAmountToMine;
+    private ProductionProgressSlider _progressSliderInstance;
+    private float _lastMinedTime = -999f;
+    private const float SliderHideDelay = 1f;
 
     public bool IsReserved { get; private set; }
     public bool IsDepleted => amountToMine <= 0;
+    public int InitialAmountToMine => _initialAmountToMine;
 
     private VisibilityController _visibilityController;
     
@@ -79,12 +87,14 @@ public class ResourceNode : MonoBehaviour
             {
                 amountToMine = stats.amountToMine;
                 timeToMinePerUnit = stats.timeToMinePerUnit;
+                _initialAmountToMine = stats.amountToMine;
             }
         }
     }
 
     private void OnDestroy()
     {
+        HideProgressSlider();
         if (ResourceManager.Instance != null) {
             ResourceManager.Instance.RemoveResourceNode(this);
         }
@@ -118,14 +128,25 @@ public class ResourceNode : MonoBehaviour
 
     public int Mine(int workAmount)
     {
+        _lastMinedTime = Time.time;
         int amountMined = Mathf.Min(amountToMine, workAmount);
         amountToMine -= amountMined;
+        UpdateProgressSlider();
 
         if (IsDepleted) {
+            HideProgressSlider();
             Destroy(gameObject);
         }
 
         return amountMined;
+    }
+
+    private void Update()
+    {
+        if (_progressSliderInstance != null && (Time.time - _lastMinedTime) >= SliderHideDelay)
+        {
+            HideProgressSlider();
+        }
     }
     
     private void DisableAllSpriteRenderers()
@@ -137,6 +158,44 @@ public class ResourceNode : MonoBehaviour
             {
                 sr.enabled = false;
             }
+        }
+    }
+
+    private void UpdateProgressSlider()
+    {
+        if (_initialAmountToMine <= 0 || amountToMine <= 0)
+        {
+            HideProgressSlider();
+            return;
+        }
+
+        if ((Time.time - _lastMinedTime) < SliderHideDelay)
+        {
+            if (_progressSliderInstance == null && progressSliderPrefab != null)
+            {
+                _progressSliderInstance = Instantiate(progressSliderPrefab);
+                _progressSliderInstance.Initialize(transform);
+                _progressSliderInstance.gameObject.SetActive(true);
+            }
+
+            if (_progressSliderInstance != null)
+            {
+                float progress = Mathf.Clamp01((float)amountToMine / _initialAmountToMine);
+                _progressSliderInstance.SetProgress(progress);
+            }
+        }
+        else
+        {
+            HideProgressSlider();
+        }
+    }
+
+    private void HideProgressSlider()
+    {
+        if (_progressSliderInstance != null)
+        {
+            Destroy(_progressSliderInstance.gameObject);
+            _progressSliderInstance = null;
         }
     }
 }

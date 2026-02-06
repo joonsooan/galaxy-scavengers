@@ -8,6 +8,7 @@ public class BuildingInfoPanel : MonoBehaviour
     [SerializeField] private TMP_Text buildingName;
     [SerializeField] private GameObject resourcePanel;
     [SerializeField] private TMP_Text buildingDesc;
+    [SerializeField] private TMP_Text healthText;
     [SerializeField] private GameObject resourceInfoCellPrefab;
     
     [SerializeField] private List<BuildingPieceData> allPieceDatabase;
@@ -32,11 +33,23 @@ public class BuildingInfoPanel : MonoBehaviour
     {
         _selectedData = data;
         UpdateUI(data);
+        if (data != null && data.buildingPrefab != null)
+        {
+            Damageable damageable = data.buildingPrefab.GetComponent<Damageable>();
+            if (damageable != null)
+            {
+                UpdateHealthDisplay(damageable, false);
+            }
+        }
     }
     
-    public void PreviewInfo(BuildingData data)
+    public void PreviewInfo(BuildingData data, Damageable damageable = null)
     {
         UpdateUI(data);
+        if (damageable != null)
+        {
+            UpdateHealthDisplay(damageable, false);
+        }
     }
     
     public void CancelPreview()
@@ -71,10 +84,30 @@ public class BuildingInfoPanel : MonoBehaviour
         }
     }
 
+    private void UpdateHealthDisplay(Damageable damageable, bool showMaxHealth = false)
+    {
+        if (healthText == null) return;
+        if (damageable == null)
+        {
+            healthText.text = string.Empty;
+            return;
+        }
+
+        if (showMaxHealth)
+        {
+            healthText.text = $"체력 : {damageable.MaxHealth}";
+        }
+        else
+        {
+            healthText.text = $"현재 체력 : {damageable.CurrentHealth} / {damageable.MaxHealth}";
+        }
+    }
+
     private void ClearUI()
     {
         if (buildingName != null) buildingName.text = string.Empty;
         if (buildingDesc != null) buildingDesc.text = string.Empty;
+        if (healthText != null) healthText.text = string.Empty;
         if (resourcePanel != null)
         {
             foreach (Transform child in resourcePanel.transform)
@@ -161,6 +194,11 @@ public class BuildingInfoPanel : MonoBehaviour
         if (buildingDesc != null)
         {
             buildingDesc.text = string.Empty;
+        }
+
+        if (healthText != null)
+        {
+            healthText.text = string.Empty;
         }
 
         if (resourcePanel != null)

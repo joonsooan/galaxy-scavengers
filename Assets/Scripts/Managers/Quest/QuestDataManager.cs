@@ -7,11 +7,12 @@ using UnityEngine.SceneManagement;
 
 public enum QuestState
 {
-    Locked, // Quest is locked (prerequisite not met)
-    Available, // Quest is available to be picked up
-    Active, // Quest is currently active
-    Completable, // Quest is active and all requirements are met
-    Completed // Quest has been completed
+    Locked,
+    Available,
+    Active,
+    Completable,
+    Completed,
+    Finished
 }
 
 public class QuestDataManager : MonoBehaviour
@@ -24,6 +25,9 @@ public class QuestDataManager : MonoBehaviour
 
     private readonly Dictionary<int, QuestData> _questDataDict = new Dictionary<int, QuestData>();
     private readonly Dictionary<int, QuestState> _questStates = new Dictionary<int, QuestState>();
+    private readonly HashSet<int> _questsVisitedGameScene = new HashSet<int>();
+    private readonly HashSet<int> _questsReturnedSuccessfully = new HashSet<int>();
+    private readonly HashSet<int> _questsReturnedWithFailure = new HashSet<int>();
 
     private BaseInventoryManager _baseInventoryManager;
     private InventorySystem _inventorySystem;
@@ -93,6 +97,86 @@ public class QuestDataManager : MonoBehaviour
         _inventorySystem = null;
         UnsubscribeFromInventoryEvents();
         StartCoroutine(SubscribeToInventoryEvents());
+        
+        if (scene.name == "GameScene")
+        {
+            foreach (int questId in _activeQuestIds)
+            {
+                if (_questStates.ContainsKey(questId) && _questStates[questId] == QuestState.Active)
+                {
+                    _questsVisitedGameScene.Add(questId);
+                }
+            }
+        }
+        else if (scene.name == "BaseScene")
+        {
+            StartCoroutine(CheckDefaultQuestsAfterSceneLoad());
+        }
+    }
+    
+    private IEnumerator CheckDefaultQuestsAfterSceneLoad()
+    {
+        yield return null;
+        yield return null;
+        
+        foreach (QuestData quest in _questDataDict.Values)
+        {
+            QuestState currentState = _questStates[quest.questId];
+            
+            if (currentState != QuestState.Active)
+            {
+                continue;
+            }
+            
+            bool visitedGameScene = _questsVisitedGameScene.Contains(quest.questId);
+            
+            if (!visitedGameScene)
+            {
+                continue;
+            }
+            
+            if (quest.questCheckRequirements != null && quest.questCheckRequirements.Length > 0)
+            {
+                bool hasSuccessCheck = false;
+                bool hasFailureCheck = false;
+                foreach (QuestCheckData checkData in quest.questCheckRequirements)
+                {
+                    if (checkData.checkType == QuestCheckType.ReturnFromGameSceneSuccess)
+                    {
+                        hasSuccessCheck = true;
+                    }
+                    else if (checkData.checkType == QuestCheckType.ReturnFromGameSceneFailure)
+                    {
+                        hasFailureCheck = true;
+                    }
+                }
+                
+                if (hasSuccessCheck && _questsReturnedSuccessfully.Contains(quest.questId))
+                {
+                    CheckSingleQuestCompletion(quest.questId);
+                }
+                else if (hasFailureCheck && _questsReturnedWithFailure.Contains(quest.questId))
+                {
+                    CheckSingleQuestCompletion(quest.questId);
+                }
+            }
+        }
+    }
+
+    public void MarkQuestReturnedSuccessfully(int questId)
+    {
+        if (_questsVisitedGameScene.Contains(questId))
+        {
+            _questsReturnedSuccessfully.Add(questId);
+        }
+    }
+
+    public void MarkQuestReturnedWithFailure(int questId)
+    {
+        if (_questsVisitedGameScene.Contains(questId))
+        {
+            _questsReturnedWithFailure.Add(questId);
+        }
     }
 
     private IEnumerator SubscribeToInventoryEvents()
@@ -112,6 +196,11 @@ public class QuestDataManager : MonoBehaviour
                 yield return null;
             }
             StartCoroutine(PeriodicallyCheckInventoryResources());
+            
+            while (ResourceDataManager.Instance == null) {
+                yield return null;
+            }
+            ResourceDataManager.OnResourceAmountChanged += OnResourceDataManagerResourceChanged;
         }
     }
 
@@ -119,6 +208,52 @@ public class QuestDataManager : MonoBehaviour
     {
         if (_baseInventoryManager != null) {
             _baseInventoryManager.OnResourceChanged -= OnInventoryResourceChanged;
+        }
+        
+        ResourceDataManager.OnResourceAmountChanged -= OnResourceDataManagerResourceChanged;
+    }
+    
+    private void OnResourceDataManagerResourceChanged(ResourceType resourceType, int amount)
+    {
+        foreach (QuestData quest in _questDataDict.Values) {
+            QuestState currentState = _questStates[quest.questId];
+
+            if (currentState != QuestState.Active && currentState != QuestState.Completable) {
+                continue;
+            }
+
+            if (quest.questType != QuestType.RequestQuest && quest.questType != QuestType.CoreRepairQuest) {
+                continue;
+            }
+
+            bool requiresThisResource = false;
+            if (quest.requiredResources != null) {
+                foreach (ResourceCost cost in quest.requiredResources) {
+                    if (cost.resourceType == resourceType) {
+                        requiresThisResource = true;
+                        break;
+                    }
+                }
+            }
+
+            bool hasQuestCheckRequirements = quest.questCheckRequirements != null && quest.questCheckRequirements.Length > 0;
+
+            if (!requiresThisResource && !hasQuestCheckRequirements) {
+                continue;
+            }
+
+            bool requirementsMet = AreAllQuestRequirementsMet(quest);
+
+            if (currentState == QuestState.Active && requirementsMet) {
+                _questStates[quest.questId] = QuestState.Completable;
+                OnQuestStateChanged?.Invoke(quest.questId);
+                SaveQuestProgress();
+            }
+            else if (currentState == QuestState.Completable && !requirementsMet) {
+                _questStates[quest.questId] = QuestState.Active;
+                OnQuestStateChanged?.Invoke(quest.questId);
+                SaveQuestProgress();
+            }
         }
     }
 
@@ -196,10 +331,45 @@ public class QuestDataManager : MonoBehaviour
             allQuests.Add(questData);
         }
 
-        if (!_questDataDict.ContainsKey(questData.questId)) {
+        bool isNewQuest = !_questDataDict.ContainsKey(questData.questId);
+        if (isNewQuest) {
             _questDataDict[questData.questId] = questData;
             _questStates[questData.questId] = QuestState.Available;
+            OnQuestStateChanged?.Invoke(questData.questId);
+            SaveQuestProgress();
         }
+    }
+
+    public void UnregisterRuntimeQuest(int questId)
+    {
+        if (!_questDataDict.ContainsKey(questId)) {
+            return;
+        }
+
+        QuestData quest = _questDataDict[questId];
+
+        _questDataDict.Remove(questId);
+        _questStates.Remove(questId);
+        _activeQuestIds.Remove(questId);
+        _completedQuestIds.Remove(questId);
+        _questsVisitedGameScene.Remove(questId);
+        _questsReturnedSuccessfully.Remove(questId);
+        _questsReturnedWithFailure.Remove(questId);
+
+        if (quest != null && allQuests.Contains(quest)) {
+            allQuests.Remove(quest);
+        }
+        else {
+            allQuests.RemoveAll(q => q != null && q.questId == questId);
+        }
+
+        string stateKey = $"QuestState_{questId}";
+        if (PlayerPrefs.HasKey(stateKey)) {
+            PlayerPrefs.DeleteKey(stateKey);
+        }
+
+        SaveQuestProgress();
+        OnQuestStateChanged?.Invoke(questId);
     }
 
     private void InitializeQuests()
@@ -208,6 +378,7 @@ public class QuestDataManager : MonoBehaviour
         _questStates.Clear();
         _completedQuestIds.Clear();
         _activeQuestIds.Clear();
+        _questsVisitedGameScene.Clear();
 
         foreach (QuestData quest in allQuests) {
             if (quest == null) continue;
@@ -289,14 +460,24 @@ public class QuestDataManager : MonoBehaviour
             return false;
         }
 
+        string currentScene = SceneManager.GetActiveScene().name;
         _activeQuestIds.Add(questId);
         _questStates[questId] = QuestState.Active;
+
+        if (_questDataDict.ContainsKey(questId))
+        {
+            QuestData quest = _questDataDict[questId];
+        }
 
         OnQuestStateChanged?.Invoke(questId);
         SaveQuestProgress();
 
         if (_questDataDict.ContainsKey(questId)) {
-            CheckSingleQuestCompletion(questId);
+            QuestData quest = _questDataDict[questId];
+            if (quest.questType != QuestType.BaseQuest)
+            {
+                CheckSingleQuestCompletion(questId);
+            }
         }
 
         return true;
@@ -312,8 +493,6 @@ public class QuestDataManager : MonoBehaviour
         QuestState currentState = _questStates[questId];
 
         if (currentState == QuestState.Completable) {
-            // Completable quests already have all requirements met, but don't auto-complete
-            // They wait for user to click the complete button
             return;
         }
 
@@ -322,7 +501,6 @@ public class QuestDataManager : MonoBehaviour
         }
 
         if (AreAllQuestRequirementsMet(quest)) {
-            // Transition to Completable state instead of completing directly
             _questStates[questId] = QuestState.Completable;
             OnQuestStateChanged?.Invoke(questId);
             SaveQuestProgress();
@@ -333,38 +511,71 @@ public class QuestDataManager : MonoBehaviour
     {
         string sceneName = SceneManager.GetActiveScene().name;
         Dictionary<ResourceType, int> inventoryResources = null;
+        
 
-        if (sceneName == "BaseScene") {
-            if (_baseInventoryManager == null) {
-                _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+        if (quest.questType == QuestType.BaseQuest) {
+            if (sceneName == "BaseScene") {
+                if (_baseInventoryManager == null) {
+                    _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+                }
+
+                if (_baseInventoryManager == null) {
+                    return false;
+                }
+
+                inventoryResources = _baseInventoryManager.GetAllResources();
             }
-
-            if (_baseInventoryManager == null) {
+            else {
                 return false;
             }
-
-            inventoryResources = _baseInventoryManager.GetAllResources();
         }
-        else if (sceneName == "GameScene") {
-            if (_inventorySystem == null) {
-                _inventorySystem = FindFirstObjectByType<InventorySystem>();
-            }
+        else if (quest.questType == QuestType.RequestQuest || quest.questType == QuestType.CoreRepairQuest) {
+            if (sceneName == "GameScene") {
+                if (ResourceDataManager.Instance == null) {
+                    return false;
+                }
 
-            if (_inventorySystem == null) {
+                inventoryResources = new Dictionary<ResourceType, int>();
+                foreach (ResourceType type in System.Enum.GetValues(typeof(ResourceType))) {
+                    inventoryResources[type] = ResourceDataManager.Instance.GetResourceAmount(type);
+                }
+            }
+            else {
                 return false;
             }
-
-            inventoryResources = _inventorySystem.GetAllResourcesFromInventory();
         }
         else {
-            return false;
+            if (sceneName == "BaseScene") {
+                if (_baseInventoryManager == null) {
+                    _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+                }
+
+                if (_baseInventoryManager == null) {
+                    return false;
+                }
+
+                inventoryResources = _baseInventoryManager.GetAllResources();
+            }
+            else if (sceneName == "GameScene") {
+                if (_inventorySystem == null) {
+                    _inventorySystem = FindFirstObjectByType<InventorySystem>();
+                }
+
+                if (_inventorySystem == null) {
+                    return false;
+                }
+
+                inventoryResources = _inventorySystem.GetAllResourcesFromInventory();
+            }
+            else {
+                return false;
+            }
         }
 
         if (inventoryResources == null) {
             return false;
         }
 
-        // Check resource requirements
         if (quest.requiredResources != null && quest.requiredResources.Length > 0) {
             foreach (ResourceCost cost in quest.requiredResources) {
                 inventoryResources.TryGetValue(cost.resourceType, out int currentAmount);
@@ -374,11 +585,30 @@ public class QuestDataManager : MonoBehaviour
             }
         }
 
-        // Check quest tracking requirements
         if (quest.questCheckRequirements != null && quest.questCheckRequirements.Length > 0) {
             foreach (QuestCheckData checkData in quest.questCheckRequirements) {
-                if (!checkData.IsRequirementMet()) {
-                    return false;
+                if (checkData.checkType == QuestCheckType.ReturnFromGameSceneSuccess)
+                {
+                    bool isMet = _questsReturnedSuccessfully.Contains(quest.questId);
+                    if (!isMet)
+                    {
+                        return false;
+                    }
+                }
+                else if (checkData.checkType == QuestCheckType.ReturnFromGameSceneFailure)
+                {
+                    bool isMet = _questsReturnedWithFailure.Contains(quest.questId);
+                    if (!isMet)
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    bool isMet = checkData.IsRequirementMet();
+                    if (!isMet) {
+                        return false;
+                    }
                 }
             }
         }
@@ -613,6 +843,15 @@ public class QuestDataManager : MonoBehaviour
             return false;
         }
 
+        if (questId == 0)
+        {
+            string sceneName = SceneManager.GetActiveScene().name;
+            if (sceneName != "BaseScene")
+            {
+                return false;
+            }
+        }
+
         QuestState currentState = _questStates[questId];
 
         if (currentState != QuestState.Active && currentState != QuestState.Completable) {
@@ -623,6 +862,9 @@ public class QuestDataManager : MonoBehaviour
         _questStates[questId] = QuestState.Completed;
         _completedQuestIds.Add(questId);
         _activeQuestIds.Remove(questId);
+        _questsVisitedGameScene.Remove(questId);
+        _questsReturnedSuccessfully.Remove(questId);
+        _questsReturnedWithFailure.Remove(questId);
         OnQuestStateChanged?.Invoke(questId);
         SaveQuestProgress();
 
@@ -655,9 +897,33 @@ public class QuestDataManager : MonoBehaviour
             return false;
         }
 
+        _questStates[questId] = QuestState.Finished;
+        OnQuestStateChanged?.Invoke(questId);
+        SaveQuestProgress();
+
         UnlockDependentQuests(questId);
 
         return true;
+    }
+
+    public void ResetCoreRepairQuestState(int questId)
+    {
+        if (!_questDataDict.ContainsKey(questId)) {
+            return;
+        }
+
+        QuestData quest = _questDataDict[questId];
+        if (quest == null || quest.questType != QuestType.CoreRepairQuest) {
+            return;
+        }
+
+        _completedQuestIds.Remove(questId);
+        _questsReturnedSuccessfully.Remove(questId);
+        _questsReturnedWithFailure.Remove(questId);
+        _questStates[questId] = QuestState.Active;
+        _activeQuestIds.Add(questId);
+        OnQuestStateChanged?.Invoke(questId);
+        SaveQuestProgress();
     }
 
     private void UnlockDependentQuests(int completedQuestId)

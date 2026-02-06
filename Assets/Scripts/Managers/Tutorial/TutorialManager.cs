@@ -36,12 +36,13 @@ public struct HighlightableUI
 public class TutorialManager : MonoBehaviour
 {
     [Header("Tutorial Settings")]
-    [SerializeField] private int firstQuestId = 1;
+    [SerializeField] private int firstQuestId = 0;
     [SerializeField] private GameObject tutorialUI;
     [SerializeField] private TutorialStepData[] tutorialStepDataList;
 
     [Header("UI Panels")]
     [SerializeField] private GameObject resourcePanel;
+    [SerializeField] private GameObject resourceInfoPanel;
     [SerializeField] private GameObject statsPanel;
     [SerializeField] private GameObject debuffPanel;
     [SerializeField] private GameObject timeSlider;
@@ -50,6 +51,7 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private GameObject unitPopulationPanel;
     [SerializeField] private GameObject alertPanel;
     [SerializeField] private GameObject mainControlPanel;
+    [SerializeField] private GameObject questPanel;
     [SerializeField] private GameObject launchButton;
 
     [Header("Highlight Settings")]
@@ -90,6 +92,8 @@ public class TutorialManager : MonoBehaviour
 
     private float _wasdInputTime;
     public static TutorialManager Instance { get; private set; }
+    
+    public static event Action OnTutorialEnded;
 
     private void Awake()
     {
@@ -123,6 +127,11 @@ public class TutorialManager : MonoBehaviour
         if (ShouldStartTutorial()) {
             InitializeTutorialSteps();
             StartCoroutine(WaitForGameInitialization());
+        }
+        else
+        {
+            BuildUIPanelDictionary();
+            ShowAllUIPanels();
         }
     }
 
@@ -629,13 +638,11 @@ public class TutorialManager : MonoBehaviour
             _tutorialUI.HideTutorial();
         }
 
-        if (QuestManager.Instance != null) {
-            QuestManager.Instance.CompleteQuest(firstQuestId);
-        }
-
         if (CoreRepairManager.Instance != null) {
             CoreRepairManager.Instance.InitializeLanding();
         }
+        
+        OnTutorialEnded?.Invoke();
     }
 
     public void SkipAllTutorials()
@@ -655,10 +662,12 @@ public class TutorialManager : MonoBehaviour
         if (_tutorialUI != null) {
             _tutorialUI.HideTutorial();
         }
-
-        if (QuestManager.Instance != null) {
-            QuestManager.Instance.CompleteQuest(firstQuestId);
+        
+        if (CoreRepairManager.Instance != null) {
+            CoreRepairManager.Instance.InitializeLanding();
         }
+        
+        OnTutorialEnded?.Invoke();
     }
 
     public void OnQuestProgressReset()
@@ -723,6 +732,7 @@ public class TutorialManager : MonoBehaviour
         _uiPanels.Clear();
 
         _uiPanels[TutorialUIPanel.ResourcePanel] = resourcePanel;
+        _uiPanels[TutorialUIPanel.ResourceInfoPanel] = resourceInfoPanel;
         _uiPanels[TutorialUIPanel.StatsPanel] = statsPanel;
         _uiPanels[TutorialUIPanel.DebuffPanel] = debuffPanel;
         _uiPanels[TutorialUIPanel.TimeSlider] = timeSlider;
@@ -732,9 +742,10 @@ public class TutorialManager : MonoBehaviour
         _uiPanels[TutorialUIPanel.AlertPanel] = alertPanel;
         _uiPanels[TutorialUIPanel.MainControlPanel] = mainControlPanel;
         _uiPanels[TutorialUIPanel.LaunchButton] = launchButton;
+        _uiPanels[TutorialUIPanel.QuestPanel] = questPanel;
     }
 
-    private void HideAllUIPanels()
+    public void HideAllUIPanels()
     {
         foreach (GameObject panel in _uiPanels.Values) {
             if (panel != null) {

@@ -9,6 +9,7 @@ public class BuildingHoverManager : MonoBehaviour
     private Camera _mainCamera;
     private BuildingDataHolder _currentHoveredBuilding;
     private IStorage _currentHoveredStorage;
+    private ResourceNode _currentHoveredResource;
     private bool _keepPanelVisible = false;
     private bool _panelsJustClosed = false;
     private float _panelsClosedTime = 0f;
@@ -144,10 +145,37 @@ public class BuildingHoverManager : MonoBehaviour
         }
     }
 
+    public void OnResourceEnter(ResourceNode node)
+    {
+        if (node == null)
+        {
+            return;
+        }
+        if (node == _currentHoveredResource)
+        {
+            return;
+        }
+        if (_currentHoveredResource != null && _currentHoveredResource != node)
+        {
+            ClearResourceHover();
+        }
+        _currentHoveredResource = node;
+        ShowResourceInfo(node);
+    }
+
+    public void OnResourceExit(ResourceNode node)
+    {
+        if (node == _currentHoveredResource)
+        {
+            ClearResourceHover();
+        }
+    }
+
     private void ClearAllHovers()
     {
         ClearHover();
         ClearStorageHover();
+        ClearResourceHover();
     }
 
     private void ShowBuildingInfo(BuildingDataHolder buildingDataHolder)
@@ -161,7 +189,8 @@ public class BuildingHoverManager : MonoBehaviour
         }
 
         BuildingInfoPanel.Instance.gameObject.SetActive(true);
-        BuildingInfoPanel.Instance.PreviewInfo(buildingDataHolder.buildingData);
+        Damageable damageable = buildingDataHolder.GetDamageable();
+        BuildingInfoPanel.Instance.PreviewInfo(buildingDataHolder.buildingData, damageable);
     }
 
     private bool IsProcessorOrDroneHubPanelActive()
@@ -249,6 +278,37 @@ public class BuildingHoverManager : MonoBehaviour
                 GameManager.Instance.uiManager.HideStorageInfo();
             }
             _currentHoveredStorage = null;
+        }
+    }
+
+    private void ShowResourceInfo(ResourceNode node)
+    {
+        if (ResourceInfoPanel.Instance == null)
+        {
+            return;
+        }
+        if (node == null || node.IsDepleted)
+        {
+            return;
+        }
+        if (IsProcessorOrDroneHubPanelActive() || _panelsJustClosed)
+        {
+            return;
+        }
+        ResourceInfoPanel.Instance.gameObject.SetActive(true);
+        ResourceInfoPanel.Instance.PreviewInfo(node);
+    }
+
+    private void ClearResourceHover()
+    {
+        if (_currentHoveredResource != null)
+        {
+            if (ResourceInfoPanel.Instance != null)
+            {
+                ResourceInfoPanel.Instance.CancelPreview();
+                ResourceInfoPanel.Instance.gameObject.SetActive(false);
+            }
+            _currentHoveredResource = null;
         }
     }
 

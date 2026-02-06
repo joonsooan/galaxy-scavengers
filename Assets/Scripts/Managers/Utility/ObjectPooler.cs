@@ -18,6 +18,7 @@ public class ObjectPooler : MonoBehaviour
     [SerializeField] private int defaultPoolSize = 10;
     public List<Pool> pools;
     private Dictionary<string, Queue<GameObject>> _poolDictionary;
+    private Dictionary<string, GameObject> _prefabMap;
     private bool _isInitialized;
 
     private void Awake()
@@ -35,6 +36,10 @@ public class ObjectPooler : MonoBehaviour
         if (_poolDictionary == null)
         {
             _poolDictionary = new Dictionary<string, Queue<GameObject>>();
+        }
+        if (_prefabMap == null)
+        {
+            _prefabMap = new Dictionary<string, GameObject>();
         }
 
         RegisterEnemyPoolsFromSpawners();
@@ -129,6 +134,7 @@ public class ObjectPooler : MonoBehaviour
         {
             string poolTag = kvp.Key;
             GameObject prefab = kvp.Value;
+            _prefabMap[poolTag] = prefab;
             int poolSize = Mathf.Max(defaultPoolSize, spawnCounts.GetValueOrDefault(poolTag, defaultPoolSize));
             
             Transform poolParent = GetOrCreatePoolParent(poolTag);
@@ -166,20 +172,61 @@ public class ObjectPooler : MonoBehaviour
             return null;
         }
 
-        GameObject objectToSpawn = _poolDictionary[objTag].Dequeue();
+        Queue<GameObject> pool = _poolDictionary[objTag];
+        GameObject objectToSpawn = null;
+        int count = pool.Count;
+        for (int i = 0; i < count; i++)
+        {
+            GameObject candidate = pool.Dequeue();
+            pool.Enqueue(candidate);
+            if (!candidate.activeSelf)
+            {
+                objectToSpawn = candidate;
+                break;
+            }
+        }
 
-        // Ensure parent is active so spawned objects are visible
+        if (objectToSpawn == null)
+        {
+            GameObject prefab = null;
+            if (_prefabMap != null && _prefabMap.TryGetValue(objTag, out prefab) && prefab != null)
+            {
+                Transform poolParent = GetOrCreatePoolParent(objTag);
+                objectToSpawn = Instantiate(prefab, poolParent);
+                pool.Enqueue(objectToSpawn);
+            }
+            else
+            {
+                Pool poolConfig = pools?.Find(p => p != null && p.tag == objTag);
+                if (poolConfig != null && poolConfig.prefab != null)
+                {
+                    Transform poolParent = GetOrCreatePoolParent(objTag);
+                    objectToSpawn = Instantiate(poolConfig.prefab, poolParent);
+                    pool.Enqueue(objectToSpawn);
+                }
+                else
+                {
+                    objectToSpawn = pool.Dequeue();
+                    pool.Enqueue(objectToSpawn);
+                }
+            }
+        }
+
         if (objectToSpawn.transform.parent != null && !objectToSpawn.transform.parent.gameObject.activeSelf)
         {
             objectToSpawn.transform.parent.gameObject.SetActive(true);
         }
 
-        objectToSpawn.SetActive(true);
         objectToSpawn.transform.position = position;
         objectToSpawn.transform.rotation = rotation;
+        Rigidbody2D rb = objectToSpawn.GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.position = position;
+            rb.linearVelocity = Vector2.zero;
+        }
+        objectToSpawn.SetActive(true);
 
-        _poolDictionary[objTag].Enqueue(objectToSpawn);
-        
         if (ModuleEffectManager.Instance != null)
         {
             ModuleEffectManager.Instance.OnObjectCreated(objectToSpawn);

@@ -35,6 +35,7 @@ public class DayNightCycleManager : MonoBehaviour
     [SerializeField] private List<TimeProfile> timeProfiles = new List<TimeProfile>();
 
     private bool _wasDay = true;
+    private float _totalElapsedInGameHours;
 
     public static DayNightCycleManager Instance { get; private set; }
 
@@ -60,7 +61,9 @@ public class DayNightCycleManager : MonoBehaviour
     {
         if (autoAdvanceTime && Application.isPlaying) {
             float hoursPerSecond = 1f / RealSecondsPerInGameHour;
-            currentTime += hoursPerSecond * Time.deltaTime;
+            float delta = hoursPerSecond * Time.deltaTime;
+            currentTime += delta;
+            _totalElapsedInGameHours += delta;
             if (currentTime >= 24f) currentTime -= 24f;
         }
         else {
@@ -213,6 +216,11 @@ public class DayNightCycleManager : MonoBehaviour
     public float GetTime()
     {
         return currentTime;
+    }
+
+    public float GetTotalElapsedInGameHours()
+    {
+        return _totalElapsedInGameHours;
     }
 
     public bool IsDay()

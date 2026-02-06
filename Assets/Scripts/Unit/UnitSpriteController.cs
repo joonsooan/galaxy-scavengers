@@ -173,4 +173,13 @@ public class UnitSpriteController : MonoBehaviour
         _targetTransform = null;
         _targetPosition = null;
     }
+
+    public float GetCurrentAnimationLength()
+    {
+        if (_animator != null && _animator.isInitialized) {
+            AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
+            return stateInfo.length;
+        }
+        return 0f;
+    }
 }

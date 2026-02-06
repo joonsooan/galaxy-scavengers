@@ -9,10 +9,12 @@ public class QuestCell : MonoBehaviour
     [SerializeField] private TMP_Text questIdText;
     [SerializeField] private Button cellButton;
     [SerializeField] private GameObject configureIcon;
+    [SerializeField] private GameObject notifierIcon;
 
     private QuestData _questData;
     private QuestDetailPanel _questDetailPanel;
     private QuestUIHandler _questUIHandler;
+    private GameSceneQuestUIManager _gameSceneQuestUIManager;
     private bool _isNew;
 
     private void Awake()
@@ -69,15 +71,23 @@ public class QuestCell : MonoBehaviour
     {
         if (_questData == null || QuestDataManager.Instance == null) return;
         
-        UpdateConfigureIcon(_isNew, _questData);
+        bool isNew = _isNew;
+        if (_gameSceneQuestUIManager != null && _questData.questType == QuestType.CoreRepairQuest)
+        {
+            isNew = !_gameSceneQuestUIManager.IsQuestViewed(_questData.questId);
+        }
+        
+        UpdateConfigureIcon(isNew, _questData);
     }
 
-    public void Initialize(QuestData questData, QuestDetailPanel questDetailPanel, bool isNew, QuestUIHandler questUIHandler = null)
+    public void Initialize(QuestData questData, QuestDetailPanel questDetailPanel, bool isNew, QuestUIHandler questUIHandler = null, GameSceneQuestUIManager gameSceneQuestUIManager = null)
     {
         _questData = questData;
         _questDetailPanel = questDetailPanel;
         _questUIHandler = questUIHandler;
+        _gameSceneQuestUIManager = gameSceneQuestUIManager;
         _isNew = isNew;
+
 
         if (questNameText != null && questData != null)
         {
@@ -117,6 +127,49 @@ public class QuestCell : MonoBehaviour
         }
         
         configureIcon.SetActive(shouldShow);
+        
+        if (notifierIcon != null)
+        {
+            bool shouldShowNotifier = false;
+            if (questData.questType == QuestType.BaseQuest)
+            {
+                QuestState state = QuestDataManager.Instance.GetQuestState(questData.questId);
+                shouldShowNotifier = state == QuestState.Completable;
+            }
+            else if (questData.questType == QuestType.CoreRepairQuest)
+            {
+                if (_gameSceneQuestUIManager != null)
+                {
+                    bool isViewed = _gameSceneQuestUIManager.IsQuestViewed(questData.questId);
+                    shouldShowNotifier = !isViewed;
+                }
+                else
+                {
+                    shouldShowNotifier = isNew;
+                }
+            }
+            else if (questData.questType == QuestType.RequestQuest)
+            {
+                if (_gameSceneQuestUIManager != null)
+                {
+                    bool isAccepted = _gameSceneQuestUIManager.IsRequestQuestAccepted(questData.questId);
+                    if (isAccepted)
+                    {
+                        QuestState state = QuestDataManager.Instance.GetQuestState(questData.questId);
+                        shouldShowNotifier = state == QuestState.Completable;
+                    }
+                    else
+                    {
+                        shouldShowNotifier = !_gameSceneQuestUIManager.IsQuestViewed(questData.questId);
+                    }
+                }
+                else
+                {
+                    shouldShowNotifier = isNew;
+                }
+            }
+            notifierIcon.SetActive(shouldShowNotifier);
+        }
     }
 
     private void MarkAsViewed()
@@ -130,11 +183,56 @@ public class QuestCell : MonoBehaviour
 
     private void OnCellClicked()
     {
-        if (_questData != null && _questDetailPanel != null)
+        if (_questData == null)
         {
+            return;
+        }
+        
+        if (_questData.questType == QuestType.RequestQuest)
+        {
+            if (_gameSceneQuestUIManager == null)
+            {
+                _gameSceneQuestUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
+            }
+            
+            if (QuestDataManager.Instance != null)
+            {
+                QuestState state = QuestDataManager.Instance.GetQuestState(_questData.questId);
+                bool isAccepted = _gameSceneQuestUIManager != null && _gameSceneQuestUIManager.IsRequestQuestAccepted(_questData.questId);
+                
+                if (_gameSceneQuestUIManager != null && state == QuestState.Available && !isAccepted)
+                {
+                    _gameSceneQuestUIManager.ShowRequestQuestAcceptPanel(_questData);
+                    return;
+                }
+            }
+        }
+
+        if (_questDetailPanel != null)
+        {
+            if (_gameSceneQuestUIManager == null)
+            {
+                _gameSceneQuestUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
+            }
+            
+            if (_gameSceneQuestUIManager != null)
+            {
+                _gameSceneQuestUIManager.ShowQuestDetailPanel();
+            }
+            
+            if (_questDetailPanel.gameObject != null)
+            {
+                _questDetailPanel.gameObject.SetActive(true);
+            }
+            
             _questDetailPanel.DisplayQuestInfo(_questData, _questData.questId);
             
             MarkAsViewed();
+            
+            if (_gameSceneQuestUIManager != null)
+            {
+                _gameSceneQuestUIManager.MarkQuestAsViewed(_questData.questId);
+            }
             
             if (_questUIHandler != null)
             {
@@ -144,7 +242,14 @@ public class QuestCell : MonoBehaviour
         
         if (cellButton != null && UnityEngine.EventSystems.EventSystem.current != null)
         {
-            StartCoroutine(SelectButtonAfterFrame());
+            if (gameObject.activeInHierarchy)
+            {
+                StartCoroutine(SelectButtonAfterFrame());
+            }
+            else if (_gameSceneQuestUIManager != null)
+            {
+                _gameSceneQuestUIManager.SelectButtonAfterFrame(cellButton.gameObject);
+            }
         }
     }
     

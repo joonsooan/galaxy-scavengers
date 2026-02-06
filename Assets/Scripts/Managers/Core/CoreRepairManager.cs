@@ -17,7 +17,6 @@ public class CoreRepairManager : MonoBehaviour
     private readonly Dictionary<CorePart, bool> _partRepairStatus = new Dictionary<CorePart, bool>();
     private readonly Dictionary<CorePart, CorePartData> _partDataDict = new Dictionary<CorePart, CorePartData>();
     private readonly Dictionary<CorePart, int> _partQuestIds = new Dictionary<CorePart, int>();
-    private bool _isInitialized = false;
     private int _nextQuestId = 10000;
 
     public event Action<CorePart> OnPartRepaired;
@@ -55,9 +54,26 @@ public class CoreRepairManager : MonoBehaviour
         }
     }
 
+    public void ResetCoreRepairQuests()
+    {
+        if (QuestDataManager.Instance != null)
+        {
+            List<QuestData> allCoreRepairQuests = QuestDataManager.Instance.GetAllQuests()
+                .Where(q => q != null && q.questType == QuestType.CoreRepairQuest)
+                .ToList();
+            
+            foreach (QuestData quest in allCoreRepairQuests)
+            {
+                QuestDataManager.Instance.UnregisterRuntimeQuest(quest.questId);
+            }
+        }
+        _partQuestIds.Clear();
+    }
+
     public void InitializeLanding()
     {
-        if (_isInitialized) return;
+        ResetCoreRepairQuests();
+        _nextQuestId = 10000;
 
         foreach (CorePart part in Enum.GetValues(typeof(CorePart)))
         {
@@ -89,7 +105,6 @@ public class CoreRepairManager : MonoBehaviour
             CreateRepairQuest(part);
         }
 
-        _isInitialized = true;
         ApplyDebuffs();
         OnRepairStatusChanged?.Invoke();
     }
@@ -101,6 +116,7 @@ public class CoreRepairManager : MonoBehaviour
 
         QuestData questData = ScriptableObject.CreateInstance<QuestData>();
         questData.questId = _nextQuestId++;
+        questData.questType = QuestType.CoreRepairQuest;
         questData.questName = partData.partName + " 수리";
         questData.questInfo = partData.partDescription;
         questData.requiredResources = partData.requiredResources != null ? 
@@ -112,8 +128,19 @@ public class CoreRepairManager : MonoBehaviour
 
         if (QuestDataManager.Instance != null)
         {
+            QuestData existingQuest = QuestDataManager.Instance.GetQuestData(questData.questId);
+            bool questExists = existingQuest != null;
+            
             QuestDataManager.Instance.RegisterRuntimeQuest(questData);
-            QuestDataManager.Instance.StartQuest(questData.questId);
+            
+            if (questExists && existingQuest.questType == QuestType.CoreRepairQuest)
+            {
+                QuestDataManager.Instance.ResetCoreRepairQuestState(questData.questId);
+            }
+            else
+            {
+                QuestDataManager.Instance.StartQuest(questData.questId);
+            }
         }
     }
 
@@ -134,41 +161,61 @@ public class CoreRepairManager : MonoBehaviour
             .Select(kvp => kvp.Key)
             .ToList();
     }
+    
+    public CorePart GetCorePartFromQuestId(int questId)
+    {
+        foreach (KeyValuePair<CorePart, int> kvp in _partQuestIds)
+        {
+            if (kvp.Value == questId)
+            {
+                return kvp.Key;
+            }
+        }
+        return CorePart.Engine;
+    }
 
     public bool TryRepairPart(CorePart part)
+    {
+        return TryRepairPart(part, true);
+    }
+    
+    public bool TryRepairPart(CorePart part, bool checkResources)
     {
         if (IsPartRepaired(part)) return false;
 
         CorePartData partData = GetPartData(part);
         if (partData == null) return false;
 
-        BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
-        if (inventoryManager == null) return false;
-
-        if (partData.requiredResources != null && partData.requiredResources.Length > 0)
+        if (checkResources)
         {
-            foreach (ResourceCost cost in partData.requiredResources)
-            {
-                int availableAmount = inventoryManager.GetResourceAmount(cost.resourceType);
-                if (availableAmount < cost.amount)
-                {
-                    return false;
-                }
-            }
+            BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
+            if (inventoryManager == null) return false;
 
-            foreach (ResourceCost cost in partData.requiredResources)
+            if (partData.requiredResources != null && partData.requiredResources.Length > 0)
             {
-                inventoryManager.RemoveResource(cost.resourceType, cost.amount);
+                foreach (ResourceCost cost in partData.requiredResources)
+                {
+                    int availableAmount = inventoryManager.GetResourceAmount(cost.resourceType);
+                    if (availableAmount < cost.amount)
+                    {
+                        return false;
+                    }
+                }
+
+                foreach (ResourceCost cost in partData.requiredResources)
+                {
+                    inventoryManager.RemoveResource(cost.resourceType, cost.amount);
+                }
             }
         }
 
         _partRepairStatus[part] = true;
         
-        if (_partQuestIds.ContainsKey(part) && QuestManager.Instance != null)
+        if (_partQuestIds.ContainsKey(part) && QuestDataManager.Instance != null)
         {
             int questId = _partQuestIds[part];
-            QuestManager.Instance.CompleteQuest(questId);
-            QuestManager.Instance.FinishQuest(questId);
+            QuestDataManager.Instance.CompleteQuest(questId);
+            QuestDataManager.Instance.FinishQuest(questId);
         }
 
         ApplyDebuffs();

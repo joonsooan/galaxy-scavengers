@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4183704755259827819}
   - component: {fileID: 6865986198788389803}
-  - component: {fileID: 8775157412599978825}
+  - component: {fileID: -8930661040791311178}
   - component: {fileID: 5177927966069864011}
   - component: {fileID: 2862589005175752118}
   - component: {fileID: -243382722571625938}
@@ -79,7 +79,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1027114353
-  m_SortingLayer: 2
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_Sprite: {fileID: 5303534084345622160, guid: f6c185f52157ec74e9e1d690c2fcbece, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -92,8 +92,8 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!58 &8775157412599978825
-CircleCollider2D:
+--- !u!70 &-8930661040791311178
+CapsuleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -127,7 +127,8 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0.5}
-  m_Radius: 1.5
+  m_Size: {x: 3, y: 2}
+  m_Direction: 0
 --- !u!61 &5177927966069864011
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -204,7 +205,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4df76de1adfb064e95b506d49b881b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  visionRange: 4.5
+  visionRange: 7.5
   isActive: 1
   hasOffest: 0
   offest: {x: 0.5, y: 0.5, z: 0}

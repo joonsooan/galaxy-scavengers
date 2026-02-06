@@ -57,7 +57,6 @@ public class Player_Bullet : MonoBehaviour
                     BuildingManager.Instance.IsResourceTile(currentCell))
                 {
                     Deactivate();
-                    return;
                 }
             }
         }

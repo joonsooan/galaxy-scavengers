@@ -1,4 +1,5 @@
 using System.Collections;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,13 +20,23 @@ public class LaunchUIController : MonoBehaviour
     [SerializeField] private int neededAetherPerCell = 10;
     [SerializeField] private int freeLaunchCells = 0;
     [SerializeField] private float launchCompleteDisplayDuration = 2f;
+    [SerializeField] private float fadeToBlackDuration = 1f;
+    [SerializeField] private float blackScreenWaitDuration = 1f;
+    [SerializeField] private float tutorialPanelHideDelay = 0.5f;
 
     [Header("Audio")]
     [SerializeField] private EventReference buttonClickSound;
+    [SerializeField] private float bgmFadeOutTime = 0.5f;
 
     private bool _isCountingDown;
     private Coroutine _countdownCoroutine;
     private WaitForSeconds _launchCompleteDisplayWait;
+    private WaitForSecondsRealtime _blackScreenWaitWait;
+    private WaitForSecondsRealtime _tutorialPanelHideDelayWait;
+    private WaitForSecondsRealtime _fadeToBlackDurationWait;
+    private float _cachedTutorialPanelHideDelay;
+    private float _cachedFadeToBlackDuration;
+    private GameObject _fadeOverlay;
 
     private void Awake()
     {
@@ -40,7 +51,59 @@ public class LaunchUIController : MonoBehaviour
         }
 
         UpdateNeededAetherText();
+        UpdateCachedWaits();
+    }
+
+    private void UpdateCachedWaits()
+    {
         _launchCompleteDisplayWait = CoroutineCache.GetWaitForSeconds(launchCompleteDisplayDuration);
+        _blackScreenWaitWait = CoroutineCache.GetWaitForSecondsRealtime(blackScreenWaitDuration);
+
+        if (_tutorialPanelHideDelayWait == null || Mathf.Abs(_cachedTutorialPanelHideDelay - tutorialPanelHideDelay) > 0.001f)
+        {
+            _cachedTutorialPanelHideDelay = tutorialPanelHideDelay;
+            _tutorialPanelHideDelayWait = CoroutineCache.GetWaitForSecondsRealtime(tutorialPanelHideDelay);
+        }
+
+        if (_fadeToBlackDurationWait == null || Mathf.Abs(_cachedFadeToBlackDuration - fadeToBlackDuration) > 0.001f)
+        {
+            _cachedFadeToBlackDuration = fadeToBlackDuration;
+            _fadeToBlackDurationWait = CoroutineCache.GetWaitForSecondsRealtime(fadeToBlackDuration);
+        }
+    }
+
+    private void CreateFadeOverlay()
+    {
+        if (_fadeOverlay != null)
+        {
+            return;
+        }
+
+        Canvas canvas = FindFirstObjectByType<Canvas>();
+        if (canvas == null)
+        {
+            GameObject canvasObj = new GameObject("FadeCanvas");
+            canvas = canvasObj.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 10000;
+            CanvasScaler scaler = canvasObj.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920, 1080);
+            canvasObj.AddComponent<GraphicRaycaster>();
+        }
+
+        _fadeOverlay = new GameObject("FadeOverlay");
+        _fadeOverlay.transform.SetParent(canvas.transform, false);
+        RectTransform rectTransform = _fadeOverlay.AddComponent<RectTransform>();
+        rectTransform.anchorMin = Vector2.zero;
+        rectTransform.anchorMax = Vector2.one;
+        rectTransform.sizeDelta = Vector2.zero;
+        rectTransform.anchoredPosition = Vector2.zero;
+
+        Image fadeImage = _fadeOverlay.AddComponent<Image>();
+        fadeImage.color = new Color(0f, 0f, 0f, 0f);
+
+        _fadeOverlay.SetActive(false);
     }
 
     public void ShowLaunchPanel()
@@ -159,7 +222,10 @@ public class LaunchUIController : MonoBehaviour
             remaining -= Time.deltaTime;
         }
 
+        remaining = 0f;
         UpdateCountdownText(0f);
+
+        yield return null;
 
         if (countdownPanel != null)
         {
@@ -182,10 +248,51 @@ public class LaunchUIController : MonoBehaviour
             yield return _launchCompleteDisplayWait;
         }
 
+        if (TutorialManager.Instance != null)
+        {
+            TutorialManager.Instance.HideAllUIPanels();
+        }
+
+        UpdateCachedWaits();
+        yield return _tutorialPanelHideDelayWait;
+
+        if (BgmManager.Instance != null)
+        {
+            BgmManager.Instance.StopBgm(bgmFadeOutTime);
+        }
+
+        yield return StartCoroutine(FadeToBlack());
+
+        yield return _blackScreenWaitWait;
+
         _isCountingDown = false;
         _countdownCoroutine = null;
 
-        SceneLoader.Instance.LoadBaseScene();
+        SceneLoader.Instance.LoadBaseScene(SceneLoader.ReturnFromGameState.Success);
+    }
+
+    private IEnumerator FadeToBlack()
+    {
+        if (_fadeOverlay == null)
+        {
+            CreateFadeOverlay();
+        }
+
+        if (_fadeOverlay == null)
+        {
+            yield break;
+        }
+
+        _fadeOverlay.SetActive(true);
+        Image fadeImage = _fadeOverlay.GetComponent<Image>();
+        if (fadeImage == null)
+        {
+            yield break;
+        }
+
+        UpdateCachedWaits();
+        fadeImage.DOFade(1f, fadeToBlackDuration).SetUpdate(true);
+        yield return _fadeToBlackDurationWait;
     }
 
     private void UpdateNeededAetherText()
@@ -231,5 +338,4 @@ public class LaunchUIController : MonoBehaviour
         countdownText.text = $"{minutes:00} : {seconds:00}";
     }
 }
-
 

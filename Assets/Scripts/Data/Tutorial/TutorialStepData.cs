@@ -5,6 +5,7 @@ using UnityEngine;
 public enum TutorialUIPanel
 {
     ResourcePanel,
+    ResourceInfoPanel,
     StatsPanel,
     DebuffPanel,
     TimeSlider,
@@ -13,7 +14,8 @@ public enum TutorialUIPanel
     UnitPopulationPanel,
     AlertPanel,
     MainControlPanel,
-    LaunchButton
+    LaunchButton,
+    QuestPanel
 }
 
 [CreateAssetMenu(fileName = "New Tutorial Step", menuName = "Tutorial/Tutorial Step Data")]

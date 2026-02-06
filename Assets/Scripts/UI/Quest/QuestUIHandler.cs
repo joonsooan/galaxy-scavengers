@@ -107,7 +107,28 @@ public class QuestUIHandler : MonoBehaviour
     {
         if (_isQuestMode)
         {
-            LoadQuestCells();
+            if (QuestDataManager.Instance != null)
+            {
+                QuestData questData = QuestDataManager.Instance.GetQuestData(questId);
+                if (questData != null && questData.questType == QuestType.BaseQuest)
+                {
+                    foreach (QuestCell cell in _questCells)
+                    {
+                        if (cell != null && cell.GetQuestData() != null && cell.GetQuestData().questId == questId)
+                        {
+                            cell.CheckAndUpdateCompletability();
+                        }
+                    }
+                }
+                else
+                {
+                    LoadQuestCells();
+                }
+            }
+            else
+            {
+                LoadQuestCells();
+            }
         }
         
         RequestIndicatorUpdate();
@@ -196,7 +217,6 @@ public class QuestUIHandler : MonoBehaviour
         
         _isQuestMode = true;
         
-        // Clear shop detail panel when switching to quest UI
         _uiProvider.ClearDetailPanel();
         
         GameObject shopContainer = _uiProvider.GetShopUIContainer();
@@ -245,7 +265,6 @@ public class QuestUIHandler : MonoBehaviour
         shopContainer.SetActive(true);
         _uiProvider.ShowShopUI();
         
-        // Clear detail panel when switching to shop UI
         _uiProvider.ClearDetailPanel();
         
         UpdateButtonStates(showQuest: false);
@@ -310,7 +329,7 @@ public class QuestUIHandler : MonoBehaviour
         
         if (currentQuests != null)
         {
-            currentQuests = currentQuests.Where(quest => !_finishedQuestIds.Contains(quest.questId)).ToList();
+            currentQuests = currentQuests.Where(quest => !_finishedQuestIds.Contains(quest.questId) && quest.questType == QuestType.BaseQuest).ToList();
         }
         
         if (currentQuests == null || currentQuests.Count == 0)
@@ -342,6 +361,7 @@ public class QuestUIHandler : MonoBehaviour
             }
         }
         
+        StartCoroutine(RefreshQuestCellsAfterFrame());
         RequestIndicatorUpdate();
     }
     
@@ -391,6 +411,7 @@ public class QuestUIHandler : MonoBehaviour
             currentQuests = currentQuests.Where(quest =>
             {
                 if (_finishedQuestIds.Contains(quest.questId)) return false;
+                if (quest.questType != QuestType.BaseQuest) return false;
                 
                 QuestState state = QuestDataManager.Instance.GetQuestState(quest.questId);
                 
@@ -421,6 +442,18 @@ public class QuestUIHandler : MonoBehaviour
     {
         yield return _wait01;
         RequestIndicatorUpdate();
+    }
+    
+    private IEnumerator RefreshQuestCellsAfterFrame()
+    {
+        yield return null;
+        foreach (QuestCell cell in _questCells)
+        {
+            if (cell != null && cell.GetQuestData() != null)
+            {
+                cell.CheckAndUpdateCompletability();
+            }
+        }
     }
     
     private void SaveQuestProgress()

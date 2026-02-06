@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: quest_0000
   m_EditorClassIdentifier: 
   questId: 0
+  questType: 0
   questProvider: 0
   previousQuestIds: ffffffff
   questName: "\uD29C\uD1A0\uB9AC\uC5BC"
@@ -21,14 +22,12 @@ MonoBehaviour:
     \uAD6C\uC870\uBB3C\uC5D0 \uC190\uC0C1\uC774 \uC0DD\uACA8 \uC5BC\uB9C8 \uBC84\uD2F0\uC9C0
     \uBABB\uD560 \uAC83 \uAC19\uC2B5\uB2C8\uB2E4.\n\uD558\uB2E8\uC758 \uCF54\uC5B4
     \uBC1C\uC0AC \uBC84\uD2BC\uC744 \uB20C\uB7EC \uCD9C\uBC1C\uD558\uC138\uC694."
-  requiredResources:
-  - resourceType: 0
-    amount: 50
+  requiredResources: []
   questCheckRequirements:
-  - checkType: 0
+  - checkType: 6
     targetId: 
     requiredCount: 0
-    displayText: 
+    displayText: "\uD589\uC131 \uCC29\uB959 \uD6C4 \uBB34\uC0AC\uD788 \uBCF5\uADC0"
     targetLocation: {x: 0, y: 0, z: 0}
     locationTolerance: 0
   questFinishReward:
