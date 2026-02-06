@@ -196,6 +196,12 @@ public abstract class Damageable : MonoBehaviour, ICombo
         OnHealthChanged();
     }
 
+    public void RestoreToFullHealth()
+    {
+        currentHealth = maxHealth;
+        OnHealthChanged();
+    }
+
     private IEnumerator FlashEffect()
     {
         if (_sr == null) yield break;

@@ -372,21 +372,6 @@ public class GameManager : MonoBehaviour
             mapGenerator.GenerateEnemyTerritoryRadiusValues();
         }
 
-        // Spawn enemy units during loading (keep existing behavior)
-        EnemySpawner[] enemySpawners = FindObjectsByType<EnemySpawner>(FindObjectsSortMode.None);
-        if (progress != null) {
-            foreach (EnemySpawner enemySpawner in enemySpawners) {
-                if (enemySpawner == null) continue;
-                yield return StartCoroutine(enemySpawner.SpawnEnemiesAsync(progress));
-            }
-        }
-        else {
-            foreach (EnemySpawner enemySpawner in enemySpawners) {
-                if (enemySpawner == null) continue;
-                enemySpawner.SpawnEnemies();
-            }
-        }
-
         if (mapGenerator != null) {
             mapGenerator.DrawEnemyTerritoryTiles();
         }
@@ -412,12 +397,6 @@ public class GameManager : MonoBehaviour
 
         if (mapGenerator != null) {
             mapGenerator.GenerateEnemyTerritoryRadiusValues();
-        }
-
-        // Spawn enemy units during loading (keep existing behavior)
-        foreach (EnemySpawner enemySpawner in FindObjectsByType<EnemySpawner>(FindObjectsSortMode.None)) {
-            if (enemySpawner == null) continue;
-            enemySpawner.SpawnEnemies();
         }
 
         if (mapGenerator != null) {

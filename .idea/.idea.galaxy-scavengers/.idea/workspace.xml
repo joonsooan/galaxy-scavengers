@@ -6,28 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="2e9922bb-ccc6-4c6e-93bd-15fa8a8d7f34" name="변경" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.galaxy-scavengers/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.galaxy-scavengers/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/Shaders/Star_0.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Shaders/Star_0.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/Shaders/Star_1.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Shaders/Star_1.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/Shaders/Star_2.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Shaders/Star_2.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/Shaders/Star_3.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Shaders/Star_3.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Buildings/1_Generator.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Buildings/1_Generator.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Buildings/2_Drone Hub.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Buildings/2_Drone Hub.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Buildings/3_Smelter.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Buildings/3_Smelter.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Buildings/4_Assembler.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Buildings/4_Assembler.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Buildings/5_Reactor.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Buildings/5_Reactor.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Buildings/7_Repair Station.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Buildings/7_Repair Station.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Buildings/8_AutoTurret.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Buildings/8_AutoTurret.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/UI/Star_3.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/UI/Star_3.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/BaseScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/BaseScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/TitleScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/TitleScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Building/BuildingHoverTrigger.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Building/BuildingHoverTrigger.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Resource/ResourceNode.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Resource/ResourceNode.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Sprites/Legacy/beacon.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Sprites/Legacy/beacon.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Sprites/Legacy/bullet_1.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Sprites/Legacy/bullet_1.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Sprites/Legacy/objects-sheet.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Sprites/Legacy/objects-sheet.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/Title Scene/title-new.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Sprites/UI/Title Scene/title-new.png.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/basescene-background.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Sprites/UI/basescene-background.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/star_1.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Sprites/UI/star_1.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,14 +24,17 @@
     &quot;assignee&quot;: &quot;joonsooan&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/joonsooan/galaxy-scavengers.git",
-    "accountId": "d66faa6f-4685-4909-b65b-7bb60794448e"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/joonsooan/galaxy-scavengers.git&quot;,
+    &quot;accountId&quot;: &quot;fd279124-bb1b-4475-ba86-b2eaadce6455&quot;
   }
-}]]></component>
+}</component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/Temp/GeneratedFromGraph-Atmosphere_3D.shader" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="PerforceDirect.Settings">
+    <option name="CHARSET" value="없음" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
@@ -105,7 +86,7 @@
       <method v="2" />
     </configuration>
     <configuration name="Standalone Player" type="RunUnityExe" factoryName="Unity Executable">
-      <option name="EXE_PATH" value="$PROJECT_DIR$/../Builds/galaxy-scavengers/galaxy-scavengers_26.02.01\Galaxy Scavengers.exe" />
+      <option name="EXE_PATH" value="$PROJECT_DIR$/../Builds/galaxy-scavengers/galaxy-scavengers_26.02.05\Galaxy Scavengers.exe" />
       <option name="PROGRAM_PARAMETERS" value="" />
       <option name="WORKING_DIRECTORY" value="C:\Unity Projects\Builds\galaxy-scavengers\galaxy-scavengers_26.02.01" />
       <option name="PASS_PARENT_ENVS" value="1" />
@@ -191,6 +172,8 @@
       <workItem from="1770260444736" duration="9830000" />
       <workItem from="1770294550682" duration="5000" />
       <workItem from="1770294572899" duration="1732000" />
+      <workItem from="1770341198740" duration="494000" />
+      <workItem from="1770341737816" duration="448000" />
     </task>
     <servers />
   </component>
