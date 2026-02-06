@@ -2494,7 +2494,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c90e03b4b8f687648b584f96455ef6ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RealSecondsPerInGameHour: 15
+  RealSecondsPerInGameHour: 1
   currentTime: 6
   gameStartTime: 6
   autoAdvanceTime: 1
@@ -5355,7 +5355,7 @@ MonoBehaviour:
     cost: 15
   maxEnemiesPerHole: 10
   spawnRadiusOffset: 5
-  basePoints: 50
+  basePoints: 40
   noiseAlpha: 1
   timeBeta: 0.3
   noise100WaveCooldown: 60
@@ -21557,7 +21557,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 11.25
+  orthographic size: 662.501
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2

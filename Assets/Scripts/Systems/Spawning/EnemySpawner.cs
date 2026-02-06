@@ -113,11 +113,11 @@ public class EnemySpawner : MonoBehaviour
     {
         float noise = NoiseManager.Instance != null ? NoiseManager.Instance.NoisePercentage : 0f;
         float totalElapsedHours = DayNightCycleManager.Instance != null ? DayNightCycleManager.Instance.GetTotalElapsedInGameHours() : 0f;
-        float time = totalElapsedHours / 60f;
-        float rawResult = (basePoints + (noise * noiseAlpha)) * (1f + (time * timeBeta));
+        float rawResult = (basePoints + (noise * noiseAlpha)) * (1f + (totalElapsedHours * timeBeta));
         float result = rawResult * multiplier;
 
-        Debug.Log($"[EnemySpawner] Budget calc: basePoints={basePoints}, noise={noise}, totalElapsedInGameHours={totalElapsedHours}, time={time}, noiseAlpha={noiseAlpha}, timeBeta={timeBeta}, rawResult={rawResult}, multiplier={multiplier}, finalBudget={result}");
+        Debug.Log($"[EnemySpawner] Budget calc: basePoints={basePoints}, noise={noise}, totalElapsedInGameHours={totalElapsedHours}, \n"
+            + $"noiseAlpha={noiseAlpha}, timeBeta={timeBeta}, rawResult={rawResult}, multiplier={multiplier}, finalBudget={result}");
 
         return result;
     }
@@ -129,7 +129,6 @@ public class EnemySpawner : MonoBehaviour
 
         List<EnemySpawnData> validEnemies = enemyPrefabs
             .Where(e => e != null && e.enemyPrefab != null && e.cost > 0)
-            .OrderBy(e => e.cost)
             .ToList();
 
         if (validEnemies.Count == 0) return;
@@ -140,10 +139,11 @@ public class EnemySpawner : MonoBehaviour
         IReadOnlyList<Vector2Int> holes = mapGenerator.EnemySpawnHolePositions;
         if (holes == null || holes.Count == 0) return;
 
+        List<Vector2Int> uniqueHoles = holes.Distinct().ToList();
         List<Vector2Int> selectedHoles;
         if (_isWaveFromNoise100)
         {
-            List<Vector2Int> availableHoles = new List<Vector2Int>(holes);
+            List<Vector2Int> availableHoles = new List<Vector2Int>(uniqueHoles);
             selectedHoles = new List<Vector2Int>();
             int count = Mathf.Min(noise100AreaCount, availableHoles.Count);
             for (int i = 0; i < count && availableHoles.Count > 0; i++)
@@ -155,7 +155,7 @@ public class EnemySpawner : MonoBehaviour
         }
         else
         {
-            selectedHoles = new List<Vector2Int>(holes);
+            selectedHoles = new List<Vector2Int>(uniqueHoles);
         }
 
         float budgetPerHole = selectedHoles.Count > 0 ? totalBudget / selectedHoles.Count : 0f;
@@ -174,18 +174,10 @@ public class EnemySpawner : MonoBehaviour
 
             while (remainingBudget > 0f)
             {
-                EnemySpawnData selectedEnemy = null;
-                foreach (EnemySpawnData enemy in validEnemies)
-                {
-                    if (enemy.cost <= remainingBudget)
-                    {
-                        selectedEnemy = enemy;
-                        break;
-                    }
-                }
+                List<EnemySpawnData> affordable = validEnemies.Where(e => e.cost <= remainingBudget).ToList();
+                if (affordable.Count == 0) break;
 
-                if (selectedEnemy == null) break;
-
+                EnemySpawnData selectedEnemy = affordable[Random.Range(0, affordable.Count)];
                 holeSpawnList.Add((selectedEnemy, holePos));
                 remainingBudget -= selectedEnemy.cost;
             }
