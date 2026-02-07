@@ -103,6 +103,11 @@ public class GameManager : MonoBehaviour
 
         if (IsLoadingScreenActive()) return;
 
+        GameMenuManager gameMenuManager = FindFirstObjectByType<GameMenuManager>();
+        if (gameMenuManager != null && gameMenuManager.IsMenuOpen()) {
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.Space)) {
             TogglePause();
         }

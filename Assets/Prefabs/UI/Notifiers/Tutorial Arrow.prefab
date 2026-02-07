@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 710380278184857879}
   - component: {fileID: 626625733541256491}
   - component: {fileID: -5915218168167444899}
+  - component: {fileID: -6674992460788162431}
   m_Layer: 5
   m_Name: Tutorial Arrow
   m_TagString: Untagged
@@ -36,7 +37,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: -60, y: -11}
-  m_SizeDelta: {x: 30, y: 6}
+  m_SizeDelta: {x: 100, y: 75}
   m_Pivot: {x: 1, y: 1}
 --- !u!222 &710380278184857879
 CanvasRenderer:
@@ -59,15 +60,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-  m_Type: 1
+  m_Sprite: {fileID: -765150924802650856, guid: a6f9f48000d3b19489646016818524a4, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -89,3 +90,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   arrowID: 
+--- !u!114 &-6674992460788162431
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1060488276189768622}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f074321f761e2549b722967a525d188, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  direction: 4
+  bounceDistance: 20
+  bounceDuration: 0.5
+  bounceEase: 6
