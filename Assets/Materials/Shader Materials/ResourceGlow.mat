@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Resource Nodes
-  m_Shader: {fileID: -6465566751694194690, guid: 6cc822c0a6d463e44bd6f6c0dde8c1d2, type: 3}
+  m_Name: ResourceGlow
+  m_Shader: {fileID: -6465566751694194690, guid: f372734e9d231224d8fd70f3eb5803ab, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -24,7 +24,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 2f045daff8f3d3845a408fd2791ebe17, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -41,13 +41,14 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _NightGlowIntensity: 1.5
-    - _Threshold: 0.9
+    - _EmissionIntensity: 1
+    - _NightDimmer: 0
+    - _PulseSpeed: 0.5
     m_Colors:
-    - _GlowColor: {r: 1, g: 1, b: 1, a: 0}
+    - _EdgeOffset: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
---- !u!114 &2746437357391471721
+--- !u!114 &6705354838417491844
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
