@@ -103,6 +103,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   direction: 4
-  bounceDistance: 20
+  bounceDistance: 5
   bounceDuration: 0.5
   bounceEase: 6

@@ -103,8 +103,7 @@ public class GameManager : MonoBehaviour
 
         if (IsLoadingScreenActive()) return;
 
-        GameMenuManager gameMenuManager = FindFirstObjectByType<GameMenuManager>();
-        if (gameMenuManager != null && gameMenuManager.IsMenuOpen()) {
+        if (GameMenuManager.Instance != null && GameMenuManager.Instance.IsMenuOpen()) {
             return;
         }
 

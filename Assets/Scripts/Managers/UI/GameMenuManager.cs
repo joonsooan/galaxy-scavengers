@@ -1,12 +1,14 @@
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using FMODUnity;
 
 public class GameMenuManager : MonoBehaviour
 {
     [Header("Menu UI References")]
-    [SerializeField] private Button menuOpenButton;
     [SerializeField] private GameObject mainPanel;
+    [SerializeField] private GameObject overlayPanel;
     [SerializeField] private Button continueButton;
     [SerializeField] private Button returnToTitleButton;
     [SerializeField] private Button quitGameButton;
@@ -16,51 +18,220 @@ public class GameMenuManager : MonoBehaviour
     [SerializeField] private Slider sfxVolumeSlider;
     [SerializeField] private Slider musicVolumeSlider;
 
+    [Header("Volume Text Displays")]
+    [SerializeField] private TMP_Text masterVolumeText;
+    [SerializeField] private TMP_Text sfxVolumeText;
+    [SerializeField] private TMP_Text musicVolumeText;
+
+    private GameObject _currentMainPanel;
+    private GameObject _currentOverlayPanel;
+    private Button _currentContinueButton;
+    private Button _currentReturnToTitleButton;
+    private Button _currentQuitGameButton;
+    private Slider _currentMasterVolumeSlider;
+    private Slider _currentSFXVolumeSlider;
+    private Slider _currentMusicVolumeSlider;
+    private TMP_Text _currentMasterVolumeText;
+    private TMP_Text _currentSFXVolumeText;
+    private TMP_Text _currentMusicVolumeText;
+
     [Header("Audio")]
     [SerializeField] private EventReference menuOpenSound;
     [SerializeField] private EventReference menuCloseSound;
     [SerializeField] private EventReference buttonClickSound;
 
     private FMODVolumeController _volumeController;
+    private Button _currentMenuOpenButton;
     private bool _isMenuOpen;
+
+    public static GameMenuManager Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
+    }
+
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
 
     private void Start()
     {
         _volumeController = FMODVolumeController.Instance;
+        InitializeUIReferences();
+        FindAndSetupMenuUI();
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        FindAndSetupMenuUI();
+    }
+
+    private void InitializeUIReferences()
+    {
+        _currentMainPanel = mainPanel;
+        _currentOverlayPanel = overlayPanel;
+        _currentContinueButton = continueButton;
+        _currentReturnToTitleButton = returnToTitleButton;
+        _currentQuitGameButton = quitGameButton;
+        _currentMasterVolumeSlider = masterVolumeSlider;
+        _currentSFXVolumeSlider = sfxVolumeSlider;
+        _currentMusicVolumeSlider = musicVolumeSlider;
+        _currentMasterVolumeText = masterVolumeText;
+        _currentSFXVolumeText = sfxVolumeText;
+        _currentMusicVolumeText = musicVolumeText;
+    }
+
+    private void FindAndSetupMenuUI()
+    {
+        FindAndSetupMenuOpenButton();
         
-        if (mainPanel != null)
+        MenuUIProvider provider = FindFirstObjectByType<MenuUIProvider>();
+        if (provider != null)
         {
-            mainPanel.SetActive(false);
+            SetMenuUI(provider);
+        }
+        else
+        {
+            InitializeUIReferences();
+        }
+
+        if (_currentMainPanel == null)
+        {
+            Debug.LogWarning("GameMenuManager: Main Panel이 설정되지 않았습니다. MenuUIProvider를 추가하거나 GameMenuManager의 기본 mainPanel을 설정하세요.");
+        }
+        else
+        {
+            _currentMainPanel.SetActive(false);
+        }
+
+        if (_currentOverlayPanel != null)
+        {
+            _currentOverlayPanel.SetActive(false);
         }
 
         SetupButtons();
         SetupSliders();
     }
 
+    public void SetMenuUI(MenuUIProvider provider)
+    {
+        if (provider == null) return;
+
+        if (provider.mainPanel != null)
+            _currentMainPanel = provider.mainPanel;
+        else
+            _currentMainPanel = mainPanel;
+
+        if (provider.overlayPanel != null)
+            _currentOverlayPanel = provider.overlayPanel;
+        else
+            _currentOverlayPanel = overlayPanel;
+
+        if (provider.continueButton != null)
+            _currentContinueButton = provider.continueButton;
+        else
+            _currentContinueButton = continueButton;
+
+        if (provider.returnToTitleButton != null)
+            _currentReturnToTitleButton = provider.returnToTitleButton;
+        else
+            _currentReturnToTitleButton = returnToTitleButton;
+
+        if (provider.quitGameButton != null)
+            _currentQuitGameButton = provider.quitGameButton;
+        else
+            _currentQuitGameButton = quitGameButton;
+
+        if (provider.masterVolumeSlider != null)
+            _currentMasterVolumeSlider = provider.masterVolumeSlider;
+        else
+            _currentMasterVolumeSlider = masterVolumeSlider;
+
+        if (provider.sfxVolumeSlider != null)
+            _currentSFXVolumeSlider = provider.sfxVolumeSlider;
+        else
+            _currentSFXVolumeSlider = sfxVolumeSlider;
+
+        if (provider.musicVolumeSlider != null)
+            _currentMusicVolumeSlider = provider.musicVolumeSlider;
+        else
+            _currentMusicVolumeSlider = musicVolumeSlider;
+
+        if (provider.masterVolumeText != null)
+            _currentMasterVolumeText = provider.masterVolumeText;
+        else
+            _currentMasterVolumeText = masterVolumeText;
+
+        if (provider.sfxVolumeText != null)
+            _currentSFXVolumeText = provider.sfxVolumeText;
+        else
+            _currentSFXVolumeText = sfxVolumeText;
+
+        if (provider.musicVolumeText != null)
+            _currentMusicVolumeText = provider.musicVolumeText;
+        else
+            _currentMusicVolumeText = musicVolumeText;
+    }
+
+    public void SetMenuOpenButton(Button button)
+    {
+        if (_currentMenuOpenButton != null)
+        {
+            _currentMenuOpenButton.onClick.RemoveListener(OpenMenu);
+        }
+
+        _currentMenuOpenButton = button;
+
+        if (_currentMenuOpenButton != null)
+        {
+            _currentMenuOpenButton.onClick.RemoveAllListeners();
+            _currentMenuOpenButton.onClick.AddListener(OpenMenu);
+        }
+    }
+
+    private void FindAndSetupMenuOpenButton()
+    {
+        MenuOpenButtonProvider provider = FindFirstObjectByType<MenuOpenButtonProvider>();
+        if (provider != null && provider.menuOpenButton != null)
+        {
+            SetMenuOpenButton(provider.menuOpenButton);
+        }
+    }
+
     private void SetupButtons()
     {
-        if (menuOpenButton != null)
+        if (_currentContinueButton != null)
         {
-            menuOpenButton.onClick.RemoveAllListeners();
-            menuOpenButton.onClick.AddListener(OpenMenu);
+            _currentContinueButton.onClick.RemoveAllListeners();
+            _currentContinueButton.onClick.AddListener(CloseMenu);
         }
 
-        if (continueButton != null)
+        if (_currentReturnToTitleButton != null)
         {
-            continueButton.onClick.RemoveAllListeners();
-            continueButton.onClick.AddListener(CloseMenu);
+            _currentReturnToTitleButton.onClick.RemoveAllListeners();
+            _currentReturnToTitleButton.onClick.AddListener(ReturnToTitle);
         }
 
-        if (returnToTitleButton != null)
+        if (_currentQuitGameButton != null)
         {
-            returnToTitleButton.onClick.RemoveAllListeners();
-            returnToTitleButton.onClick.AddListener(ReturnToTitle);
-        }
-
-        if (quitGameButton != null)
-        {
-            quitGameButton.onClick.RemoveAllListeners();
-            quitGameButton.onClick.AddListener(QuitGame);
+            _currentQuitGameButton.onClick.RemoveAllListeners();
+            _currentQuitGameButton.onClick.AddListener(QuitGame);
         }
     }
 
@@ -68,25 +239,31 @@ public class GameMenuManager : MonoBehaviour
     {
         if (_volumeController == null) return;
 
-        if (masterVolumeSlider != null)
+        if (_currentMasterVolumeSlider != null)
         {
-            masterVolumeSlider.value = _volumeController.GetMasterVolume();
-            masterVolumeSlider.onValueChanged.RemoveAllListeners();
-            masterVolumeSlider.onValueChanged.AddListener(OnMasterVolumeChanged);
+            float masterVolume = _volumeController.GetMasterVolume();
+            _currentMasterVolumeSlider.value = masterVolume;
+            _currentMasterVolumeSlider.onValueChanged.RemoveAllListeners();
+            _currentMasterVolumeSlider.onValueChanged.AddListener(OnMasterVolumeChanged);
+            UpdateMasterVolumeText(masterVolume);
         }
 
-        if (sfxVolumeSlider != null)
+        if (_currentSFXVolumeSlider != null)
         {
-            sfxVolumeSlider.value = _volumeController.GetSFXVolume();
-            sfxVolumeSlider.onValueChanged.RemoveAllListeners();
-            sfxVolumeSlider.onValueChanged.AddListener(OnSFXVolumeChanged);
+            float sfxVolume = _volumeController.GetSFXVolume();
+            _currentSFXVolumeSlider.value = sfxVolume;
+            _currentSFXVolumeSlider.onValueChanged.RemoveAllListeners();
+            _currentSFXVolumeSlider.onValueChanged.AddListener(OnSFXVolumeChanged);
+            UpdateSFXVolumeText(sfxVolume);
         }
 
-        if (musicVolumeSlider != null)
+        if (_currentMusicVolumeSlider != null)
         {
-            musicVolumeSlider.value = _volumeController.GetMusicVolume();
-            musicVolumeSlider.onValueChanged.RemoveAllListeners();
-            musicVolumeSlider.onValueChanged.AddListener(OnMusicVolumeChanged);
+            float musicVolume = _volumeController.GetMusicVolume();
+            _currentMusicVolumeSlider.value = musicVolume;
+            _currentMusicVolumeSlider.onValueChanged.RemoveAllListeners();
+            _currentMusicVolumeSlider.onValueChanged.AddListener(OnMusicVolumeChanged);
+            UpdateMusicVolumeText(musicVolume);
         }
     }
 
@@ -109,14 +286,22 @@ public class GameMenuManager : MonoBehaviour
     {
         if (_isMenuOpen) return;
 
-        _isMenuOpen = true;
-
-        if (mainPanel != null)
+        if (_currentMainPanel == null)
         {
-            mainPanel.SetActive(true);
+            Debug.LogWarning("GameMenuManager: Main Panel이 설정되지 않았습니다. MenuUIProvider를 확인하세요.");
+            return;
         }
 
-        if (GameManager.Instance != null && !GameManager.Instance.IsPaused)
+        _isMenuOpen = true;
+
+        _currentMainPanel.SetActive(true);
+
+        if (_currentOverlayPanel != null)
+        {
+            _currentOverlayPanel.SetActive(true);
+        }
+
+        if (IsGameScene() && GameManager.Instance != null && !GameManager.Instance.IsPaused)
         {
             GameManager.Instance.TogglePause();
         }
@@ -133,12 +318,17 @@ public class GameMenuManager : MonoBehaviour
 
         _isMenuOpen = false;
 
-        if (mainPanel != null)
+        if (_currentMainPanel != null)
         {
-            mainPanel.SetActive(false);
+            _currentMainPanel.SetActive(false);
         }
 
-        if (GameManager.Instance != null && GameManager.Instance.IsPaused)
+        if (_currentOverlayPanel != null)
+        {
+            _currentOverlayPanel.SetActive(false);
+        }
+
+        if (IsGameScene() && GameManager.Instance != null && GameManager.Instance.IsPaused)
         {
             GameManager.Instance.TogglePause();
         }
@@ -149,13 +339,18 @@ public class GameMenuManager : MonoBehaviour
         }
     }
 
+    private bool IsGameScene()
+    {
+        return SceneManager.GetActiveScene().name == "GameScene";
+    }
+
     private void OnMasterVolumeChanged(float value)
     {
         if (_volumeController != null)
         {
             _volumeController.SetMasterVolume(value);
         }
-        PlayButtonSound();
+        UpdateMasterVolumeText(value);
     }
 
     private void OnSFXVolumeChanged(float value)
@@ -164,7 +359,7 @@ public class GameMenuManager : MonoBehaviour
         {
             _volumeController.SetSFXVolume(value);
         }
-        PlayButtonSound();
+        UpdateSFXVolumeText(value);
     }
 
     private void OnMusicVolumeChanged(float value)
@@ -173,12 +368,44 @@ public class GameMenuManager : MonoBehaviour
         {
             _volumeController.SetMusicVolume(value);
         }
-        PlayButtonSound();
+        UpdateMusicVolumeText(value);
+    }
+
+    private void UpdateMasterVolumeText(float value)
+    {
+        if (_currentMasterVolumeText != null)
+        {
+            int percentage = Mathf.RoundToInt(value * 100f);
+            _currentMasterVolumeText.text = $"{percentage}";
+        }
+    }
+
+    private void UpdateSFXVolumeText(float value)
+    {
+        if (_currentSFXVolumeText != null)
+        {
+            int percentage = Mathf.RoundToInt(value * 100f);
+            _currentSFXVolumeText.text = $"{percentage}";
+        }
+    }
+
+    private void UpdateMusicVolumeText(float value)
+    {
+        if (_currentMusicVolumeText != null)
+        {
+            int percentage = Mathf.RoundToInt(value * 100f);
+            _currentMusicVolumeText.text = $"{percentage}";
+        }
     }
 
     private void ReturnToTitle()
     {
         PlayButtonSound();
+        
+        if (BgmManager.Instance != null)
+        {
+            BgmManager.Instance.StopBgm(0.5f);
+        }
         
         if (SceneLoader.Instance != null)
         {
@@ -216,39 +443,39 @@ public class GameMenuManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (menuOpenButton != null)
+        if (_currentMenuOpenButton != null)
         {
-            menuOpenButton.onClick.RemoveAllListeners();
+            _currentMenuOpenButton.onClick.RemoveAllListeners();
         }
 
-        if (continueButton != null)
+        if (_currentContinueButton != null)
         {
-            continueButton.onClick.RemoveAllListeners();
+            _currentContinueButton.onClick.RemoveAllListeners();
         }
 
-        if (returnToTitleButton != null)
+        if (_currentReturnToTitleButton != null)
         {
-            returnToTitleButton.onClick.RemoveAllListeners();
+            _currentReturnToTitleButton.onClick.RemoveAllListeners();
         }
 
-        if (quitGameButton != null)
+        if (_currentQuitGameButton != null)
         {
-            quitGameButton.onClick.RemoveAllListeners();
+            _currentQuitGameButton.onClick.RemoveAllListeners();
         }
 
-        if (masterVolumeSlider != null)
+        if (_currentMasterVolumeSlider != null)
         {
-            masterVolumeSlider.onValueChanged.RemoveAllListeners();
+            _currentMasterVolumeSlider.onValueChanged.RemoveAllListeners();
         }
 
-        if (sfxVolumeSlider != null)
+        if (_currentSFXVolumeSlider != null)
         {
-            sfxVolumeSlider.onValueChanged.RemoveAllListeners();
+            _currentSFXVolumeSlider.onValueChanged.RemoveAllListeners();
         }
 
-        if (musicVolumeSlider != null)
+        if (_currentMusicVolumeSlider != null)
         {
-            musicVolumeSlider.onValueChanged.RemoveAllListeners();
+            _currentMusicVolumeSlider.onValueChanged.RemoveAllListeners();
         }
     }
 }
