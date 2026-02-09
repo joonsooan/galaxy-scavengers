@@ -13,6 +13,8 @@ public class LaunchUIController : MonoBehaviour
     [SerializeField] private GameObject countdownPanel;
     [SerializeField] private TMP_Text countdownText;
     [SerializeField] private TMP_Text neededAetherText;
+    [SerializeField] private TMP_Text launchAvailableText;
+    [SerializeField] private Button launchButton;
     [SerializeField] private LaunchCompleteUI launchCompleteUI;
 
     [Header("Launch Settings")]
@@ -52,6 +54,23 @@ public class LaunchUIController : MonoBehaviour
 
         UpdateNeededAetherText();
         UpdateCachedWaits();
+        UpdateLaunchAvailability();
+    }
+
+    private void OnEnable()
+    {
+        if (CoreRepairManager.Instance != null)
+        {
+            CoreRepairManager.Instance.OnRepairStatusChanged += UpdateLaunchAvailability;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (CoreRepairManager.Instance != null)
+        {
+            CoreRepairManager.Instance.OnRepairStatusChanged -= UpdateLaunchAvailability;
+        }
     }
 
     private void UpdateCachedWaits()
@@ -135,6 +154,7 @@ public class LaunchUIController : MonoBehaviour
         }
 
         UpdateNeededAetherText();
+        UpdateLaunchAvailability();
     }
 
     public void OnCancelLaunch()
@@ -169,7 +189,43 @@ public class LaunchUIController : MonoBehaviour
         }
 
         MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
+        if (mainStructure == null)
+        {
+            return;
+        }
+
         InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
+        if (inventorySystem == null)
+        {
+            return;
+        }
+
+        if (launchPanel != null)
+        {
+            launchPanel.SetActive(false);
+        }
+
+        inventorySystem.ToggleInventory();
+    }
+
+    public void StartLaunchCountdown()
+    {
+        if (_isCountingDown)
+        {
+            return;
+        }
+
+        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
+        if (mainStructure == null)
+        {
+            return;
+        }
+
+        InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
+        if (inventorySystem == null)
+        {
+            return;
+        }
 
         int occupiedCells = inventorySystem.GetOccupiedCellCount();
         int cellsRequiringAether = Mathf.Max(0, occupiedCells - freeLaunchCells);
@@ -191,11 +247,6 @@ public class LaunchUIController : MonoBehaviour
         }
 
         inventorySystem.SetTransferEnabled(false);
-
-        if (launchPanel != null)
-        {
-            launchPanel.SetActive(false);
-        }
 
         if (countdownPanel != null)
         {
@@ -336,6 +387,43 @@ public class LaunchUIController : MonoBehaviour
         int seconds = totalSeconds % 60;
 
         countdownText.text = $"{minutes:00} : {seconds:00}";
+    }
+
+    private void UpdateLaunchAvailability()
+    {
+        bool isEngineRepaired = CoreRepairManager.Instance != null && CoreRepairManager.Instance.IsPartRepaired(CorePart.Engine);
+
+        if (launchAvailableText != null)
+        {
+            if (isEngineRepaired)
+            {
+                launchAvailableText.text = "발사 시퀀스 시동 가능";
+                launchAvailableText.color = new Color(0f, 1f, 0f, 1f);
+            }
+            else
+            {
+                launchAvailableText.text = "발사 시퀀스 시동 불가! 메인 엔진 수리 필요";
+                launchAvailableText.color = new Color(1f, 0f, 0f, 1f);
+            }
+        }
+
+        if (launchButton != null)
+        {
+            launchButton.interactable = isEngineRepaired;
+
+            TMP_Text buttonText = launchButton.GetComponentInChildren<TMP_Text>();
+            if (buttonText != null)
+            {
+                if (isEngineRepaired)
+                {
+                    buttonText.text = "발사";
+                }
+                else
+                {
+                    buttonText.text = "발사 불가";
+                }
+            }
+        }
     }
 }
 

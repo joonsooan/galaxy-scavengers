@@ -64,10 +64,6 @@ public class MainStructure : BaseStorage, IClickable
     
     public void OnClicked()
     {
-        if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
-        {
-            GameManager.Instance.uiManager.ShowMainStructureUI();
-        }
     }
     
     public void AddResourceToStorageOnly(ResourceType type, int amount)

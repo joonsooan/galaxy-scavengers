@@ -4,20 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2e9922bb-ccc6-4c6e-93bd-15fa8a8d7f34" name="변경" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.galaxy-scavengers/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.galaxy-scavengers/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{8ced1dfd-c3ad-4be8-865c-9f937eab9d89}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{8ced1dfd-c3ad-4be8-865c-9f937eab9d89}.pdc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{a4670585-25c1-44e7-8f65-39c2f162485e}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{a4670585-25c1-44e7-8f65-39c2f162485e}.pdc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{e8e5093a-636a-4b05-873f-267e48ca36a0}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{e8e5093a-636a-4b05-873f-267e48ca36a0}.pdc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Managers/_BgmManager.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Managers/_BgmManager.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/TitleScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/TitleScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Audio/BgmManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Audio/BgmManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Core/CoreRepairManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Core/CoreRepairManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Game/SceneLoader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Game/SceneLoader.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Quest/QuestDataManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Quest/QuestDataManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Tutorial/TutorialManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Tutorial/TutorialManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/MenuUIProvider.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/MenuUIProvider.cs" afterDir="false" />
-    </list>
+    <list default="true" id="2e9922bb-ccc6-4c6e-93bd-15fa8a8d7f34" name="변경" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -184,7 +171,7 @@
       <workItem from="1770341737816" duration="448000" />
       <workItem from="1770472359724" duration="606000" />
       <workItem from="1770562631487" duration="641000" />
-      <workItem from="1770597168734" duration="6103000" />
+      <workItem from="1770597168734" duration="6979000" />
     </task>
     <servers />
   </component>
