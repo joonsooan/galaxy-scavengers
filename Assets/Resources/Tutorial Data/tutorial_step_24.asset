@@ -10,14 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c74002d918083e14eb5bcbcc12257fde, type: 3}
-  m_Name: tutorial_step_22
+  m_Name: tutorial_step_24
   m_EditorClassIdentifier: 
-  stepIndex: 22
-  text: "\uC790\uC6D0 \uAC00\uACF5\uAE4C\uC9C0 \uBAA8\uB450 \uC775\uD788\uC168\uC2B5\uB2C8\uB2E4!
-    \uC774\uC81C \uAC70\uC758 \uB2E4 \uC654\uC2B5\uB2C8\uB2E4.\n\uAC00\uACF5\uD55C
-    \uC790\uC6D0\uC740 \uBB34\uC0AC\uD788 \uB4E4\uACE0 \uD0C8\uCD9C\uD574\uC57C\uC9C0
-    \uC4F8\uBAA8\uAC00 \uC788\uC5B4\uC9D1\uB2C8\uB2E4.\n\uD589\uC131\uC744 \uD0C8\uCD9C\uD558\uAE30
-    \uC704\uD574\uC11C \uCF54\uC5B4\uB97C \uC218\uB9AC\uD574\uC57C \uD569\uB2C8\uB2E4.\n<color=#DBD1C7>(\uD654\uBA74\uC744
+  stepIndex: 24
+  text: "\uCF54\uC5B4 \uC218\uB9AC\uC5D0 \uD544\uC694\uD55C \uC790\uC6D0\uC740 \uD018\uC2A4\uD2B8
+    \uCC3D\uC5D0\uC11C \uD655\uC778\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.\n\uD018\uC2A4\uD2B8
+    \uCC3D\uC5D0\uB294 \uD604\uC7AC \uC9C4\uD589 \uC911\uC778 \uD018\uC2A4\uD2B8\uB97C
+    \uD655\uC778\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.\n<color=#DBD1C7>(\uD654\uBA74\uC744
     \uD074\uB9AD\uD574\uC11C \uB2E4\uC74C)</color>"
   stepType: 0
   duration: 0
@@ -27,7 +26,7 @@ MonoBehaviour:
   unitType: 
   itemType: 
   showProgressBar: 0
-  enableUIPanels: 0a000000
+  enableUIPanels: 0b000000
   spawnUnits: []
   grantResources: []
   completionSound:
@@ -40,4 +39,4 @@ MonoBehaviour:
   enableMaterialHighlight: 0
   highlightTargetIDs: []
   showArrowUI: 1
-  arrowID: launch_btn
+  arrowID: quest_panel

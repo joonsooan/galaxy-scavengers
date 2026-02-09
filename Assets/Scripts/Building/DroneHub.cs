@@ -282,6 +282,14 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
                 yield break;
             }
 
+            if (UnitManager.Instance != null && !UnitManager.Instance.CanSpawnUnit()) {
+                if (productionSlider != null) {
+                    productionSlider.gameObject.SetActive(false);
+                }
+                _isProducing = false;
+                yield break;
+            }
+
             if (_productionQueue.Count == 0) {
                 UpdateQueueFromTargets();
             }
@@ -311,6 +319,16 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
 
             float elapsedTime = 0f;
             while (elapsedTime < _currentProductionTime) {
+                if (UnitManager.Instance != null && !UnitManager.Instance.CanSpawnUnit()) {
+                    _currentProducingUnit = null;
+                    if (productionSlider != null) {
+                        productionSlider.gameObject.SetActive(false);
+                    }
+                    _productionQueue.Enqueue(unitToProduce);
+                    _isProducing = false;
+                    yield break;
+                }
+
                 elapsedTime += Time.deltaTime;
                 if (productionSlider != null) {
                     float progress = elapsedTime / _currentProductionTime;

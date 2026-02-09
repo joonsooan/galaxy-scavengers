@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour
     [Header("Audio")]
     [SerializeField] private EventReference pauseSound;
     [SerializeField] private EventReference resumeSound;
+    [SerializeField] private EventReference speedChangeSound;
 
     [HideInInspector] public UnityEvent<DisplayableData> onStartDrag;
     [HideInInspector] public UnityEvent onEndDrag;
@@ -186,6 +187,11 @@ public class GameManager : MonoBehaviour
         if (canChangeActualTimeScale)
         {
             Time.timeScale = _savedTimeScale;
+        }
+
+        if (!speedChangeSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(speedChangeSound);
         }
     }
 

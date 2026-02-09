@@ -339,7 +339,24 @@ public class TutorialManager : MonoBehaviour
 
     private IEnumerator CheckStepCondition(TutorialStepData step)
     {
+        if (step == null)
+        {
+            yield break;
+        }
+
+        yield return null;
+
         while (_isWaitingForCondition) {
+            if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count)
+            {
+                yield break;
+            }
+
+            if (step != _tutorialSteps[_currentStepIndex])
+            {
+                yield break;
+            }
+
             bool conditionMet = false;
 
             switch (step.stepType) {
@@ -434,6 +451,9 @@ public class TutorialManager : MonoBehaviour
                 break;
 
             case TutorialStepType.ResourceMined:
+                if (step.count <= 0) {
+                    break;
+                }
                 if (_tutorialUI != null && step.showProgressBar) {
                     _tutorialUI.UpdateProgress((float)_resourceMinedAmount / step.count);
                 }
@@ -485,7 +505,10 @@ public class TutorialManager : MonoBehaviour
                 break;
 
             case TutorialStepType.UnitProduced:
-                if (_tutorialUI != null && step.showProgressBar && step.count > 0) {
+                if (step.count <= 0) {
+                    break;
+                }
+                if (_tutorialUI != null && step.showProgressBar) {
                     _tutorialUI.UpdateProgress((float)_unitProducedCount / step.count);
                 }
                 if (_unitProducedCount >= step.count) {
@@ -494,7 +517,10 @@ public class TutorialManager : MonoBehaviour
                 break;
 
             case TutorialStepType.ItemProduced:
-                if (_tutorialUI != null && step.showProgressBar && step.count > 0) {
+                if (step.count <= 0) {
+                    break;
+                }
+                if (_tutorialUI != null && step.showProgressBar) {
                     _tutorialUI.UpdateProgress((float)_itemProducedCount / step.count);
                 }
                 if (_itemProducedCount >= step.count) {
@@ -542,6 +568,7 @@ public class TutorialManager : MonoBehaviour
     public void OnResourceMined(ResourceType resourceType, int amount)
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
+        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
         if (currentStep.stepType == TutorialStepType.ResourceMined && currentStep.resourceType == resourceType) {
@@ -552,6 +579,7 @@ public class TutorialManager : MonoBehaviour
     public void OnBulletFired()
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
+        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
         if (currentStep.stepType == TutorialStepType.BulletFired) {
@@ -562,6 +590,7 @@ public class TutorialManager : MonoBehaviour
     public void OnResourceBlockRevealed()
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
+        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
         if (currentStep.stepType == TutorialStepType.ResourceBlockRevealed) {
@@ -572,6 +601,7 @@ public class TutorialManager : MonoBehaviour
     private void OnMineableTypesChanged(ResourceType[] newTypes)
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
+        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
         if (currentStep.stepType == TutorialStepType.MineableTypesChanged) {
@@ -596,6 +626,7 @@ public class TutorialManager : MonoBehaviour
     public void OnBuildingPlaced(string buildingType)
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
+        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
         if (currentStep.stepType == TutorialStepType.BuildingPlaced && currentStep.buildingType == buildingType) {
@@ -606,6 +637,7 @@ public class TutorialManager : MonoBehaviour
     public void OnBuildingCompleted(string buildingType)
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
+        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
         if (currentStep.stepType == TutorialStepType.BuildingCompleted &&
@@ -617,6 +649,7 @@ public class TutorialManager : MonoBehaviour
     public void OnUnitProduced(string unitType)
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
+        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
         if (currentStep.stepType == TutorialStepType.UnitProduced && currentStep.unitType == unitType) {
@@ -627,6 +660,7 @@ public class TutorialManager : MonoBehaviour
     public void OnItemProduced(string itemType)
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
+        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
         if (currentStep.stepType == TutorialStepType.ItemProduced && currentStep.itemType == itemType) {
@@ -942,6 +976,23 @@ public class TutorialManager : MonoBehaviour
             if (_currentArrowUI != null)
             {
                 _currentArrowUI.SetActive(true);
+            }
+        }
+        else
+        {
+            foreach (GameObject arrowObj in arrowUIObjects)
+            {
+                if (arrowObj != null)
+                {
+                    TutorialArrowUI arrowComponent = arrowObj.GetComponent<TutorialArrowUI>();
+                    if (arrowComponent != null && arrowComponent.ArrowID == step.arrowID)
+                    {
+                        _arrowUILookup[step.arrowID] = arrowObj;
+                        _currentArrowUI = arrowObj;
+                        _currentArrowUI.SetActive(true);
+                        break;
+                    }
+                }
             }
         }
     }
