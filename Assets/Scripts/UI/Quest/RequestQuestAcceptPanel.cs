@@ -73,7 +73,32 @@ public class RequestQuestAcceptPanel : MonoBehaviour
         DisplayRequiredResources(questData);
         DisplayQuestRewards(questData);
         
+        Canvas.ForceUpdateCanvases();
+        
         RectTransform panelRect = GetComponent<RectTransform>();
+        if (panelRect != null)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
+        }
+        
+        if (requiredResourcesGridContainer != null)
+        {
+            RectTransform requiredRect = requiredResourcesGridContainer.GetComponent<RectTransform>();
+            if (requiredRect != null)
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(requiredRect);
+            }
+        }
+        
+        if (rewardGridContainer != null)
+        {
+            RectTransform rewardRect = rewardGridContainer.GetComponent<RectTransform>();
+            if (rewardRect != null)
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(rewardRect);
+            }
+        }
+        
         if (panelRect != null)
         {
             LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
@@ -265,17 +290,6 @@ public class RequestQuestAcceptPanel : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
-
-        foreach (Transform child in requiredResourcesGridContainer.transform)
-        {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(child.GetComponent<RectTransform>());
-        }
-
-        RectTransform containerRect = requiredResourcesGridContainer.GetComponent<RectTransform>();
-        if (containerRect != null)
-        {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(containerRect);
-        }
     }
 
     private void DisplayQuestRewards(QuestData questData)
@@ -425,16 +439,6 @@ public class RequestQuestAcceptPanel : MonoBehaviour
                 }
             }
 
-            foreach (Transform child in rewardGridContainer.transform)
-            {
-                LayoutRebuilder.ForceRebuildLayoutImmediate(child.GetComponent<RectTransform>());
-            }
-
-            RectTransform containerRect = rewardGridContainer.GetComponent<RectTransform>();
-            if (containerRect != null)
-            {
-                LayoutRebuilder.ForceRebuildLayoutImmediate(containerRect);
-            }
         }
     }
 
@@ -448,17 +452,6 @@ public class RequestQuestAcceptPanel : MonoBehaviour
         foreach (Transform child in rewardGridContainer.transform)
         {
             Destroy(child.gameObject);
-        }
-
-        foreach (Transform child in rewardGridContainer.transform)
-        {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(child.GetComponent<RectTransform>());
-        }
-
-        RectTransform containerRect = rewardGridContainer.GetComponent<RectTransform>();
-        if (containerRect != null)
-        {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(containerRect);
         }
     }
 

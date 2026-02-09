@@ -81,6 +81,7 @@ public class ResourceManager : MonoBehaviour
 
     [Header("Resource Metadata")]
     [SerializeField] private List<string> resourceDisplayNames;
+    [TextArea(3, 10)]
     [SerializeField] private List<string> resourceDescriptions;
 
     public static ResourceManager Instance { get; private set; }

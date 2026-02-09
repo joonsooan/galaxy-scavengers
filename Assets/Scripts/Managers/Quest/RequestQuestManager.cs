@@ -10,7 +10,9 @@ public class RequestQuestManager : MonoBehaviour
     public static RequestQuestManager Instance { get; private set; }
     
     [Header("Request Quest Settings")]
+    [Tooltip("튜토리얼 종료 후 첫 퀘스트가 생성되기까지의 실제 시간(초)")]
     [SerializeField] private float initialQuestDelay = 10f;
+    [Tooltip("퀘스트 간 간격의 실제 시간(초)")]
     [SerializeField] private float timeBetweenQuests = 30f;
     
     private List<QuestData> _availableRequestQuests = new List<QuestData>();
@@ -75,14 +77,12 @@ public class RequestQuestManager : MonoBehaviour
         }
         
         bool isTutorialActive = TutorialManager.Instance.IsTutorialActive();
+        bool shouldStartTutorial = TutorialManager.Instance.ShouldStartTutorial();
         
-        if (!isTutorialActive)
+        if (!isTutorialActive && !shouldStartTutorial && !_isInitialized)
         {
-            if (!_isInitialized)
-            {
-                _isInitialized = true;
-                StartCoroutine(SpawnFirstRequestQuestWithDelay());
-            }
+            _isInitialized = true;
+            StartCoroutine(SpawnFirstRequestQuestWithDelay());
         }
     }
     
@@ -145,6 +145,13 @@ public class RequestQuestManager : MonoBehaviour
             
             if (SceneManager.GetActiveScene().name == "GameScene")
             {
+                bool isTutorialActive = TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive();
+                
+                if (isTutorialActive)
+                {
+                    continue;
+                }
+                
                 QuestData nextQuest = _availableRequestQuests[_currentQuestIndex];
                 SpawnRequestQuest(nextQuest);
                 _currentQuestIndex++;
@@ -155,6 +162,12 @@ public class RequestQuestManager : MonoBehaviour
     private void SpawnRequestQuest(QuestData questData)
     {
         if (questData == null || QuestDataManager.Instance == null)
+        {
+            return;
+        }
+        
+        bool isTutorialActive = TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive();
+        if (isTutorialActive)
         {
             return;
         }

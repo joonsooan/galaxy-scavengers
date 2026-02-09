@@ -319,7 +319,7 @@ public class CoreRepairManager : MonoBehaviour
         switch (part)
         {
             case CorePart.Barrier:
-                return $"{partLabel} 파손 : 소음계수 {debuffPercent}% 증가";
+                return $"{partLabel} 파손 : 소음 정도 {debuffPercent}% 증가";
             case CorePart.Controller:
                 return $"{partLabel} 파손 : 최대 유닛 제한 {debuffPercent}% 감소";
             case CorePart.Repeater:

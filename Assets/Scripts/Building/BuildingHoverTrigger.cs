@@ -31,7 +31,7 @@ public class BuildingHoverTrigger : MonoBehaviour
         if (other.CompareTag("MouseHoverDetector"))
         {
             Initialize();
-
+            
             bool isTouchingBuildingArea = IsTouchingAnyCollider(other);
             bool isTouchingStorageArea = _storage != null && IsTouchingCapsuleCollider(other);
 
@@ -39,7 +39,7 @@ public class BuildingHoverTrigger : MonoBehaviour
             {
                 return;
             }
-
+            
             if (BuildingHoverManager.Instance != null)
             {
                 if ((isTouchingBuildingArea || isTouchingStorageArea) && _buildingDataHolder != null && _buildingDataHolder.buildingData != null)
