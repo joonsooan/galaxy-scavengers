@@ -730,10 +730,6 @@ public class TutorialManager : MonoBehaviour
             _tutorialUI.HideTutorial();
         }
 
-        if (CoreRepairManager.Instance != null) {
-            CoreRepairManager.Instance.InitializeLanding();
-        }
-
         if (BgmManager.Instance != null) {
             BgmManager.Instance.PlayGameBgm();
         }
@@ -758,11 +754,7 @@ public class TutorialManager : MonoBehaviour
         if (_tutorialUI != null) {
             _tutorialUI.HideTutorial();
         }
-        
-        if (CoreRepairManager.Instance != null) {
-            CoreRepairManager.Instance.InitializeLanding();
-        }
-        
+
         OnTutorialEnded?.Invoke();
     }
 
@@ -852,7 +844,12 @@ public class TutorialManager : MonoBehaviour
 
     private void ShowAllUIPanels()
     {
-        foreach (GameObject panel in _uiPanels.Values) {
+        foreach (KeyValuePair<TutorialUIPanel, GameObject> entry in _uiPanels) {
+            if (entry.Key == TutorialUIPanel.ResourceInfoPanel) {
+                continue;
+            }
+
+            GameObject panel = entry.Value;
             if (panel != null) {
                 panel.SetActive(true);
             }

@@ -929,7 +929,7 @@ public class QuestDataManager : MonoBehaviour
         }
 
         _questStates[questId] = QuestState.Finished;
-        _completedQuestIds.Remove(questId);
+        _completedQuestIds.Add(questId);
         OnQuestStateChanged?.Invoke(questId);
         SaveQuestProgress();
 

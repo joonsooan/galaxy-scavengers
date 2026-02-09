@@ -33,6 +33,6 @@ MonoBehaviour:
   questFinishReward:
     resourceRewards: []
     moduleRewards: []
-    creditReward: 50
+    creditReward: 30
     unlockedBuildings: []
     newUnits: []

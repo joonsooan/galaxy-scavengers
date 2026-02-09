@@ -110,7 +110,7 @@ MonoBehaviour:
   defaultFadeInTime: 1
   gameBgmFadeInTime: 3
   gameBgmFadeOutTime: 3
-  gameBgmCooldownTime: 60
+  gameBgmCooldownTime: 30
 --- !u!114 &7245013787098741407
 MonoBehaviour:
   m_ObjectHideFlags: 0

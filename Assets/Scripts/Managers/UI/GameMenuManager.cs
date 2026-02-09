@@ -402,11 +402,6 @@ public class GameMenuManager : MonoBehaviour
     {
         PlayButtonSound();
         
-        if (BgmManager.Instance != null)
-        {
-            BgmManager.Instance.StopBgm(0.5f);
-        }
-        
         if (SceneLoader.Instance != null)
         {
             CloseMenu();

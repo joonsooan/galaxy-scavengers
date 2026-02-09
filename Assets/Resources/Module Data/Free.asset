@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36da8054e533da44f85efae509af8de5, type: 3}
   m_Name: Free
   m_EditorClassIdentifier: 
-  moduleName: "\uBB34\uB8CC \uBAA8\uB4C8"
+  moduleName: "\uAE30\uBCF8 \uBAA8\uB4C8"
   moduleDescription: "\uD2B9\uBCC4\uD55C \uAE30\uB2A5\uC740 \uC5C6\uB294 \uBAA8\uB4C8\uC785\uB2C8\uB2E4."
   moduleIcon: {fileID: 2658361925361728200, guid: fab7722ada301b640bf2fca2a51df314, type: 3}
   ingredients:

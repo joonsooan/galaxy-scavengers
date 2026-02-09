@@ -851,11 +851,6 @@ public class QuestDetailPanel : MonoBehaviour
             }
         }
         
-        if (QuestManager.Instance != null)
-        {
-            QuestManager.Instance.FinishQuest(questId);
-        }
-        
         if (isRequestQuest)
         {
             GameSceneQuestUIManager questUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();

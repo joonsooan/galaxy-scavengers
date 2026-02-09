@@ -33,6 +33,8 @@ public class NoiseManager : MonoBehaviour
         {
 #if UNITY_EDITOR
             return useTestNoiseValue && testNoisePercentage >= 100f;
+#else
+            return false;
 #endif
         }
     }

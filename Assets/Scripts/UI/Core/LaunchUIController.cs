@@ -13,7 +13,6 @@ public class LaunchUIController : MonoBehaviour
     [SerializeField] private GameObject countdownPanel;
     [SerializeField] private TMP_Text countdownText;
     [SerializeField] private TMP_Text neededAetherText;
-    [SerializeField] private TMP_Text launchAvailableText;
     [SerializeField] private Button launchButton;
     [SerializeField] private LaunchCompleteUI launchCompleteUI;
 
@@ -182,12 +181,6 @@ public class LaunchUIController : MonoBehaviour
             RuntimeManager.PlayOneShot(buttonClickSound);
         }
 
-        if (CoreRepairManager.Instance != null && !CoreRepairManager.Instance.IsPartRepaired(CorePart.Engine))
-        {
-            Debug.LogWarning("LaunchUIController: Engine is not repaired! Cannot launch.");
-            return;
-        }
-
         MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
         if (mainStructure == null)
         {
@@ -213,6 +206,12 @@ public class LaunchUIController : MonoBehaviour
         if (_isCountingDown)
         {
             return;
+        }
+
+        GameSceneQuestUIManager questUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
+        if (questUIManager != null)
+        {
+            questUIManager.HideQuestPanel();
         }
 
         MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
@@ -392,21 +391,7 @@ public class LaunchUIController : MonoBehaviour
     private void UpdateLaunchAvailability()
     {
         bool isEngineRepaired = CoreRepairManager.Instance != null && CoreRepairManager.Instance.IsPartRepaired(CorePart.Engine);
-
-        if (launchAvailableText != null)
-        {
-            if (isEngineRepaired)
-            {
-                launchAvailableText.text = "발사 시퀀스 시동 가능";
-                launchAvailableText.color = new Color(0f, 1f, 0f, 1f);
-            }
-            else
-            {
-                launchAvailableText.text = "발사 시퀀스 시동 불가! 메인 엔진 수리 필요";
-                launchAvailableText.color = new Color(1f, 0f, 0f, 1f);
-            }
-        }
-
+        
         if (launchButton != null)
         {
             launchButton.interactable = isEngineRepaired;
@@ -416,11 +401,11 @@ public class LaunchUIController : MonoBehaviour
             {
                 if (isEngineRepaired)
                 {
-                    buttonText.text = "발사";
+                    buttonText.text = "탈출";
                 }
                 else
                 {
-                    buttonText.text = "발사 불가";
+                    buttonText.text = "탈출\n불가";
                 }
             }
         }

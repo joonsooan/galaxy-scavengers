@@ -78,7 +78,6 @@ public class SceneLoader : MonoBehaviour
         
         if (BgmManager.Instance != null)
         {
-            BgmManager.Instance.StopBgm(false);
             BgmManager.Instance.PlayTitleBgm();
         }
         

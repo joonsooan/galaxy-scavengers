@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: quest_0002
   m_EditorClassIdentifier: 
   questId: 2
-  questType: 0
   questProvider: 0
   previousQuestIds: 00000000
   questName: "\uC548\uC815\uC801 \uC5D0\uB108\uC9C0\uC6D0 \uD655\uBCF4"
@@ -28,7 +27,7 @@ MonoBehaviour:
     \uC77C\uC5B4\uB0A0\uC9C0\uB3C4 \uBAA8\uB974\uACA0\uAD70\uC694."
   requiredResources:
   - resourceType: 1
-    amount: 500
+    amount: 40
   questCheckRequirements:
   - checkType: 0
     targetId: 
@@ -39,6 +38,6 @@ MonoBehaviour:
   questFinishReward:
     resourceRewards: []
     moduleRewards: []
-    creditReward: 100
+    creditReward: 20
     unlockedBuildings: []
     newUnits: []
