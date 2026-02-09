@@ -5,53 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2e9922bb-ccc6-4c6e-93bd-15fa8a8d7f34" name="변경" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.galaxy-scavengers/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.galaxy-scavengers/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Fonts/SCDream3 SDF.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Fonts/SCDream3 SDF.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Buildings/Main Structure.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Buildings/Main Structure.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Module Data/Free.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Module Data/Free.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0000.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0000.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0001.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0001.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0002.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0002.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0002.asset.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0002.asset.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0003.asset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0003.asset.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0004.asset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0004.asset.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0005.asset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0005.asset.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0006.asset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0006.asset.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0007.asset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0007.asset.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0008.asset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0008.asset.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0009.asset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0009.asset.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0010.asset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0010.asset.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0011.asset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0011.asset.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0012.asset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0012.asset.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0013.asset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0013.asset.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0014.asset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0014.asset.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0015.asset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data/quest_0015.asset.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/BaseScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/BaseScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Game/SceneLoader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Game/SceneLoader.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Quest/QuestDataManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Quest/QuestDataManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Tutorial/TutorialManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Tutorial/TutorialManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/UI/GameMenuManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/UI/GameMenuManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Unit/StartingUnitsManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Unit/StartingUnitsManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Core/LaunchUIController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Core/LaunchUIController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestDetailPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestDetailPanel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Settings/UniversalRP.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Settings/UniversalRP.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/TextMesh Pro/Resources/Fonts &amp; Materials/LiberationSans SDF - Fallback.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/TextMesh Pro/Resources/Fonts &amp; Materials/LiberationSans SDF - Fallback.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/UniversalRenderPipelineGlobalSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/UniversalRenderPipelineGlobalSettings.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/GraphicsSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/GraphicsSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Managers/_QuestManager.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Managers/_QuestManager.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/TitleScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/TitleScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Building/BuildingHoverTrigger.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Building/BuildingHoverTrigger.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Quest/RequestQuestManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Quest/RequestQuestManager.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -119,7 +76,7 @@
       <method v="2" />
     </configuration>
     <configuration name="독립실행형 플레이어" type="RunUnityExe" factoryName="Unity Executable">
-      <option name="EXE_PATH" value="$PROJECT_DIR$/../Builds/galaxy-scavengers/galaxy-scavengers_26.02.01\Galaxy Scavengers.exe" />
+      <option name="EXE_PATH" value="$PROJECT_DIR$/../Builds/galaxy-scavengers/galaxy-scavengers_26.02.09\Galaxy Scavengers.exe" />
       <option name="PROGRAM_PARAMETERS" value="" />
       <option name="WORKING_DIRECTORY" value="C:\Unity Projects\Builds\galaxy-scavengers\galaxy-scavengers_26.02.05" />
       <option name="PASS_PARENT_ENVS" value="1" />
@@ -219,7 +176,7 @@
       <workItem from="1770341737816" duration="448000" />
       <workItem from="1770472359724" duration="606000" />
       <workItem from="1770562631487" duration="641000" />
-      <workItem from="1770597168734" duration="10805000" />
+      <workItem from="1770597168734" duration="11443000" />
     </task>
     <servers />
   </component>

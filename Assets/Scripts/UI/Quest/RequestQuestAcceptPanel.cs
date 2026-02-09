@@ -5,6 +5,7 @@ using UnityEngine.UI;
 public class RequestQuestAcceptPanel : MonoBehaviour
 {
     [SerializeField] private TMP_Text questNameText;
+    [SerializeField] private TMP_Text questInfoText;
     [SerializeField] private TMP_Text requiredResourceText;
     [SerializeField] private TMP_Text rewardText;
     [SerializeField] private GameObject requiredResourcesGridContainer;
@@ -50,6 +51,12 @@ public class RequestQuestAcceptPanel : MonoBehaviour
             questNameText.gameObject.SetActive(true);
         }
 
+        if (questInfoText != null)
+        {
+            questInfoText.text = questData.questInfo;
+            questInfoText.gameObject.SetActive(true);
+        }
+
         UpdateRequiredResourceText(questData);
 
         if (requiredResourceText != null)
@@ -81,6 +88,12 @@ public class RequestQuestAcceptPanel : MonoBehaviour
         {
             questNameText.text = "";
             questNameText.gameObject.SetActive(false);
+        }
+
+        if (questInfoText != null)
+        {
+            questInfoText.text = "";
+            questInfoText.gameObject.SetActive(false);
         }
 
         if (requiredResourceText != null)

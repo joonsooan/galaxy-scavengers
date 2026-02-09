@@ -10,6 +10,7 @@ public class RequestQuestManager : MonoBehaviour
     public static RequestQuestManager Instance { get; private set; }
     
     [Header("Request Quest Settings")]
+    [SerializeField] private float initialQuestDelay = 10f;
     [SerializeField] private float timeBetweenQuests = 30f;
     
     private List<QuestData> _availableRequestQuests = new List<QuestData>();
@@ -80,7 +81,7 @@ public class RequestQuestManager : MonoBehaviour
             if (!_isInitialized)
             {
                 _isInitialized = true;
-                SpawnFirstRequestQuest();
+                StartCoroutine(SpawnFirstRequestQuestWithDelay());
             }
         }
     }
@@ -106,6 +107,16 @@ public class RequestQuestManager : MonoBehaviour
         }
         
         _isInitialized = true;
+        StartCoroutine(SpawnFirstRequestQuestWithDelay());
+    }
+
+    private IEnumerator SpawnFirstRequestQuestWithDelay()
+    {
+        if (initialQuestDelay > 0f)
+        {
+            yield return new WaitForSeconds(initialQuestDelay);
+        }
+
         SpawnFirstRequestQuest();
     }
     
