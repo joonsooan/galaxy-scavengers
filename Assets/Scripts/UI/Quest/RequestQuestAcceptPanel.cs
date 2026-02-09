@@ -65,6 +65,12 @@ public class RequestQuestAcceptPanel : MonoBehaviour
 
         DisplayRequiredResources(questData);
         DisplayQuestRewards(questData);
+        
+        RectTransform panelRect = GetComponent<RectTransform>();
+        if (panelRect != null)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
+        }
     }
 
     public void ClearQuestInfo()

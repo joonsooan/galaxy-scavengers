@@ -110,7 +110,19 @@ public class QuestDetailPanel : MonoBehaviour
                     return;
                 }
                 
-                ClearQuestInfo();
+                if (_isGameSceneMode)
+                {
+                    GameSceneQuestUIManager questUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
+                    if (questUIManager != null)
+                    {
+                        questUIManager.HideQuestPanel();
+                    }
+                }
+                else
+                {
+                    ClearQuestInfo();
+                }
+                
                 return;
             }
         }

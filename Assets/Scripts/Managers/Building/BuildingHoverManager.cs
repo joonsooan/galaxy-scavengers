@@ -75,7 +75,7 @@ public class BuildingHoverManager : MonoBehaviour
             return;
         }
 
-        if (UIUtils.IsPointerOverUI() && !IsPointerOverFloatingNumText())
+        if (UIUtils.IsPointerOverUI() && !IsPointerOverFloatingNumText() && !IsPointerOverProgressSlider())
         {
             ClearAllHovers();
             return;
@@ -230,6 +230,49 @@ public class BuildingHoverManager : MonoBehaviour
             if (result.gameObject != null && result.gameObject.GetComponent<FloatingNumText>() != null)
             {
                 return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool IsPointerOverProgressSlider()
+    {
+        if (EventSystem.current == null) return false;
+
+        PointerEventData pointerEventData = new PointerEventData(EventSystem.current);
+        pointerEventData.position = Input.mousePosition;
+
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerEventData, results);
+
+        foreach (RaycastResult result in results)
+        {
+            if (result.gameObject != null)
+            {
+                ProductionProgressSlider slider = result.gameObject.GetComponent<ProductionProgressSlider>();
+                if (slider == null)
+                {
+                    slider = result.gameObject.GetComponentInParent<ProductionProgressSlider>();
+                }
+                if (slider == null)
+                {
+                    slider = result.gameObject.GetComponentInChildren<ProductionProgressSlider>();
+                }
+                if (slider != null)
+                {
+                    return true;
+                }
+                
+                Transform current = result.gameObject.transform;
+                while (current != null)
+                {
+                    if (current.GetComponent<ProductionProgressSlider>() != null)
+                    {
+                        return true;
+                    }
+                    current = current.parent;
+                }
             }
         }
 

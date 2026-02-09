@@ -165,6 +165,30 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void CycleGameSpeed()
+    {
+        float currentSpeed = _savedTimeScale;
+        
+        if (currentSpeed <= 1f)
+        {
+            _savedTimeScale = 2f;
+        }
+        else if (currentSpeed <= 2f)
+        {
+            _savedTimeScale = 3f;
+        }
+        else
+        {
+            _savedTimeScale = 1f;
+        }
+
+        bool canChangeActualTimeScale = !_isCombatSpeedLockActive && !IsPaused;
+        if (canChangeActualTimeScale)
+        {
+            Time.timeScale = _savedTimeScale;
+        }
+    }
+
     public void GameOver()
     {
         Time.timeScale = 1;

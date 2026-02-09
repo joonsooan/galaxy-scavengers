@@ -370,7 +370,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
         }
     }
 
-    private void HideQuestPanel()
+    public void HideQuestPanel()
     {
         _isPanelOpen = false;
         

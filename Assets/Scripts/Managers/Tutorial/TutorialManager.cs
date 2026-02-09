@@ -79,6 +79,7 @@ public class TutorialManager : MonoBehaviour
     private int _mouseWheelScrollCount;
 
     private int _numberKeyPressCount;
+    private float _lastTimeScale;
     private RectTransform _rect;
     private int _resourceBlockRevealCount;
     private int _resourceMinedAmount;
@@ -332,6 +333,7 @@ public class TutorialManager : MonoBehaviour
         _lastMouseWheelValue = Input.mouseScrollDelta.y;
         if (GameManager.Instance != null) {
             _lastPausedState = GameManager.Instance.IsPaused;
+            _lastTimeScale = GameManager.Instance.GetTimeScale();
         }
     }
 
@@ -409,7 +411,18 @@ public class TutorialManager : MonoBehaviour
                 break;
 
             case TutorialStepType.NumberKeyPress:
-                if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Alpha3)) {
+                bool numberKeyPressed = Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Alpha3);
+                bool timeScaleChanged = false;
+
+                if (GameManager.Instance != null) {
+                    float currentTimeScale = GameManager.Instance.GetTimeScale();
+                    if (Mathf.Abs(currentTimeScale - _lastTimeScale) > 0.01f) {
+                        timeScaleChanged = true;
+                        _lastTimeScale = currentTimeScale;
+                    }
+                }
+
+                if (numberKeyPressed || timeScaleChanged) {
                     _numberKeyPressCount++;
                     if (_tutorialUI != null && step.showProgressBar) {
                         _tutorialUI.UpdateProgress((float)_numberKeyPressCount / step.count);
