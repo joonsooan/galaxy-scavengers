@@ -58,4 +58,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   initialQuestDelay: 30
-  timeBetweenQuests: 90
+  timeBetweenQuests: 150
