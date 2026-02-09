@@ -66,6 +66,7 @@ public class BaseSceneManager : MonoBehaviour
         StartCoroutine(HandleSceneEntryFade());
     }
 
+
     private IEnumerator HandleSceneEntryFade()
     {
         yield return null;

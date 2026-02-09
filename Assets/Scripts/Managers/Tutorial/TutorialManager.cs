@@ -659,6 +659,11 @@ public class TutorialManager : MonoBehaviour
         return _isTutorialActive;
     }
 
+    public int GetFirstQuestId()
+    {
+        return firstQuestId;
+    }
+
     public TutorialStepData GetCurrentTutorialStep()
     {
         if (_isTutorialActive && _currentStepIndex >= 0 && _currentStepIndex < _tutorialSteps.Count)
