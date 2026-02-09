@@ -125,7 +125,9 @@ public class TutorialManager : MonoBehaviour
 
     private void Start()
     {
-        if (ShouldStartTutorial()) {
+        bool shouldStart = ShouldStartTutorial();
+
+        if (shouldStart) {
             InitializeTutorialSteps();
             StartCoroutine(WaitForGameInitialization());
         }
@@ -136,23 +138,58 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    public void CheckAndStartTutorialIfNeeded()
+    {
+        if (!_isTutorialActive && ShouldStartTutorial())
+        {
+            InitializeTutorialSteps();
+            StartCoroutine(WaitForGameInitialization());
+        }
+    }
+
     private void OnEnable()
     {
         UnitManager.OnMineableTypesChanged += OnMineableTypesChanged;
+        GameManager.OnGameSceneInitialized += OnGameSceneInitialized;
     }
 
     private void OnDisable()
     {
         UnitManager.OnMineableTypesChanged -= OnMineableTypesChanged;
+        GameManager.OnGameSceneInitialized -= OnGameSceneInitialized;
     }
 
-    private bool ShouldStartTutorial()
+    private void OnGameSceneInitialized()
+    {
+        if (!_isTutorialActive && ShouldStartTutorial())
+        {
+            InitializeTutorialSteps();
+            StartCoroutine(WaitForGameInitialization());
+        }
+    }
+
+    public bool ShouldStartTutorial()
     {
         if (QuestManager.Instance == null) {
+            Debug.LogWarning("[TutorialManager] ShouldStartTutorial: QuestManager.Instance is null");
             return false;
         }
 
-        return !QuestManager.Instance.IsQuestCompleted(firstQuestId);
+        if (firstQuestId < 0) {
+            Debug.LogWarning($"[TutorialManager] ShouldStartTutorial: firstQuestId is invalid ({firstQuestId})");
+            return false;
+        }
+
+        QuestData questData = QuestManager.Instance.GetQuestData(firstQuestId);
+        if (questData == null) {
+            Debug.LogWarning($"[TutorialManager] ShouldStartTutorial: Quest with ID {firstQuestId} not found");
+            return false;
+        }
+
+        bool isCompleted = QuestManager.Instance.IsQuestCompleted(firstQuestId);
+        bool shouldStart = !isCompleted;
+        
+        return shouldStart;
     }
 
     private IEnumerator WaitForGameInitialization()
@@ -203,6 +240,14 @@ public class TutorialManager : MonoBehaviour
 
     private void StartTutorial()
     {
+        if (CoreRepairManager.Instance != null) {
+            CoreRepairManager.Instance.ApplyDebuffsImmediately();
+        }
+
+        if (BgmManager.Instance != null) {
+            BgmManager.Instance.PlayTutorialBgm();
+        }
+
         _isTutorialActive = true;
         _currentStepIndex = 0;
 
@@ -687,6 +732,10 @@ public class TutorialManager : MonoBehaviour
 
         if (CoreRepairManager.Instance != null) {
             CoreRepairManager.Instance.InitializeLanding();
+        }
+
+        if (BgmManager.Instance != null) {
+            BgmManager.Instance.PlayGameBgm();
         }
         
         OnTutorialEnded?.Invoke();

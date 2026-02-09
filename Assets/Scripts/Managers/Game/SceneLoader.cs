@@ -75,6 +75,13 @@ public class SceneLoader : MonoBehaviour
     public void LoadTitleScene()
     {
         if (_isLoading) return;
+        
+        if (BgmManager.Instance != null)
+        {
+            BgmManager.Instance.StopBgm(false);
+            BgmManager.Instance.PlayTitleBgm();
+        }
+        
         StartCoroutine(LoadSceneSimple(titleSceneName));
     }
 
@@ -130,7 +137,10 @@ public class SceneLoader : MonoBehaviour
         
         yield return _gameScenePostFadeDelayWait;
         
-        BgmManager.Instance?.PlayGameBgm();
+        if (TutorialManager.Instance == null || (!TutorialManager.Instance.IsTutorialActive() && !TutorialManager.Instance.ShouldStartTutorial()))
+        {
+            BgmManager.Instance?.PlayGameBgm();
+        }
         GameManager.Instance?.SpawnUnitsAfterLoading();
         if (GameManager.Instance != null) GameManager.IsGameplayReady = true;
 

@@ -11,6 +11,7 @@ public class BgmManager : MonoBehaviour
     [SerializeField] private EventReference titleBgm;
     [SerializeField] private EventReference baseBgm;
     [SerializeField] private EventReference[] gameBgms;
+    [SerializeField] private EventReference tutorialBgm;
     [SerializeField] private EventReference loadingBgm;
     [SerializeField] private EventReference successLoadingBgm;
     [SerializeField] private EventReference failureLoadingBgm;
@@ -63,12 +64,44 @@ public class BgmManager : MonoBehaviour
 
     public void PlayTitleBgm()
     {
-        PlayBgm(titleBgm, false);
+        StopGameBgmCooldown();
+        
+        if (_playGameBgmCoroutine != null)
+        {
+            StopCoroutine(_playGameBgmCoroutine);
+            _playGameBgmCoroutine = null;
+        }
+        
+        PlayBgm(titleBgm, true);
     }
 
     public void PlayBaseBgm()
     {
         PlayBgm(titleBgm, false);
+    }
+
+    public void PlayTutorialBgm()
+    {
+        if (tutorialBgm.IsNull)
+        {
+            PlayGameBgm();
+            return;
+        }
+
+        StopGameBgmCooldown();
+
+        if (_playGameBgmCoroutine != null)
+        {
+            StopCoroutine(_playGameBgmCoroutine);
+            _playGameBgmCoroutine = null;
+        }
+
+        if (_hasInstance)
+        {
+            StopCurrent(false);
+        }
+
+        _playGameBgmCoroutine = StartCoroutine(PlayGameBgmWithFade(tutorialBgm));
     }
 
     public void PlayGameBgm()
@@ -171,6 +204,10 @@ public class BgmManager : MonoBehaviour
         if (_hasInstance && gameBgmFadeOutTime > 0f)
         {
             yield return StartCoroutine(FadeOutBgm(gameBgmFadeOutTime));
+        }
+        else if (_hasInstance)
+        {
+            StopCurrent(true);
         }
 
         yield return _gameBgmCooldownWait;

@@ -232,6 +232,11 @@ public class CoreRepairManager : MonoBehaviour
         ApplyBarrierNoise();
     }
 
+    public void ApplyDebuffsImmediately()
+    {
+        ApplyDebuffs();
+    }
+
     private void ApplyStorageDebuff()
     {
         MainStructure mainStructure = FindFirstObjectByType<MainStructure>();

@@ -21,11 +21,20 @@ public class MenuUIProvider : MonoBehaviour
     [SerializeField] public TMP_Text sfxVolumeText;
     [SerializeField] public TMP_Text musicVolumeText;
 
+    [Header("Quest Reset")]
+    [SerializeField] private Button resetQuestButton;
+
     private void Awake()
     {
         if (GameMenuManager.Instance != null)
         {
             GameMenuManager.Instance.SetMenuUI(this);
+        }
+
+        if (resetQuestButton != null)
+        {
+            resetQuestButton.onClick.RemoveAllListeners();
+            resetQuestButton.onClick.AddListener(OnResetQuestButtonClicked);
         }
     }
 
@@ -35,5 +44,25 @@ public class MenuUIProvider : MonoBehaviour
         {
             GameMenuManager.Instance.SetMenuUI(this);
         }
+    }
+
+    private void OnDestroy()
+    {
+        if (resetQuestButton != null)
+        {
+            resetQuestButton.onClick.RemoveAllListeners();
+        }
+    }
+
+    private void OnResetQuestButtonClicked()
+    {
+        if (QuestDataManager.Instance == null)
+        {
+            Debug.LogWarning("MenuUIProvider: QuestDataManager.Instance is null. Cannot reset quest progress.");
+            return;
+        }
+
+        QuestDataManager.Instance.ResetAllQuestProgress();
+        Debug.Log("MenuUIProvider: Quest progress has been reset.");
     }
 }

@@ -121,7 +121,7 @@ public class QuestDataManager : MonoBehaviour
         
         foreach (QuestData quest in _questDataDict.Values)
         {
-            QuestState currentState = _questStates[quest.questId];
+            QuestState currentState = GetQuestState(quest.questId);
             
             if (currentState != QuestState.Active)
             {
@@ -672,6 +672,9 @@ public class QuestDataManager : MonoBehaviour
         _questStates.Clear();
         _completedQuestIds.Clear();
         _activeQuestIds.Clear();
+        _questsVisitedGameScene.Clear();
+        _questsReturnedSuccessfully.Clear();
+        _questsReturnedWithFailure.Clear();
 
         ClearSavedQuestProgress();
 
@@ -747,15 +750,30 @@ public class QuestDataManager : MonoBehaviour
             string stateKey = $"QuestState_{quest.questId}";
             if (PlayerPrefs.HasKey(stateKey)) {
                 int savedState = PlayerPrefs.GetInt(stateKey);
-                _questStates[quest.questId] = (QuestState)savedState;
+                QuestState loadedState = (QuestState)savedState;
 
-                if (_questStates[quest.questId] == QuestState.Active ||
-                    _questStates[quest.questId] == QuestState.Completable) {
-                    _activeQuestIds.Add(quest.questId);
+                if (loadedState == QuestState.Finished)
+                {
+                    bool hasPrerequisites = HasRealPrerequisites(quest.previousQuestIds);
+                    if (!hasPrerequisites) {
+                        _questStates[quest.questId] = QuestState.Available;
+                    }
+                    else {
+                        _questStates[quest.questId] = QuestState.Locked;
+                    }
                 }
+                else
+                {
+                    _questStates[quest.questId] = loadedState;
 
-                if (_questStates[quest.questId] == QuestState.Completed) {
-                    _completedQuestIds.Add(quest.questId);
+                    if (_questStates[quest.questId] == QuestState.Active ||
+                        _questStates[quest.questId] == QuestState.Completable) {
+                        _activeQuestIds.Add(quest.questId);
+                    }
+
+                    if (_questStates[quest.questId] == QuestState.Completed) {
+                        _completedQuestIds.Add(quest.questId);
+                    }
                 }
             }
         }
@@ -815,6 +833,19 @@ public class QuestDataManager : MonoBehaviour
             if (PlayerPrefs.HasKey(stateKey)) {
                 PlayerPrefs.DeleteKey(stateKey);
             }
+
+            if (quest.questCheckRequirements != null) {
+                for (int i = 0; i < quest.questCheckRequirements.Length; i++) {
+                    string progressKey = $"QuestCheckProgress_{quest.questId}_{i}";
+                    string completedKey = $"QuestCheckCompleted_{quest.questId}_{i}";
+                    if (PlayerPrefs.HasKey(progressKey)) {
+                        PlayerPrefs.DeleteKey(progressKey);
+                    }
+                    if (PlayerPrefs.HasKey(completedKey)) {
+                        PlayerPrefs.DeleteKey(completedKey);
+                    }
+                }
+            }
         }
 
         if (PlayerPrefs.HasKey("QuestActiveIds")) {
@@ -852,7 +883,7 @@ public class QuestDataManager : MonoBehaviour
             }
         }
 
-        QuestState currentState = _questStates[questId];
+        QuestState currentState = GetQuestState(questId);
 
         if (currentState != QuestState.Active && currentState != QuestState.Completable) {
             Debug.LogWarning($"Quest {questId} is {currentState} and cannot be completed. Quest must be Active or Completable.");
@@ -890,7 +921,7 @@ public class QuestDataManager : MonoBehaviour
             return false;
         }
 
-        QuestState currentState = _questStates[questId];
+        QuestState currentState = GetQuestState(questId);
 
         if (currentState != QuestState.Completed) {
             Debug.LogWarning($"Quest {questId} is {currentState} and cannot be finished. Quest must be Completed.");
@@ -898,6 +929,7 @@ public class QuestDataManager : MonoBehaviour
         }
 
         _questStates[questId] = QuestState.Finished;
+        _completedQuestIds.Remove(questId);
         OnQuestStateChanged?.Invoke(questId);
         SaveQuestProgress();
 
