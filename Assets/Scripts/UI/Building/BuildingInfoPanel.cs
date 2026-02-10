@@ -43,17 +43,17 @@ public class BuildingInfoPanel : MonoBehaviour
             Damageable damageable = data.buildingPrefab.GetComponent<Damageable>();
             if (damageable != null)
             {
-                UpdateHealthDisplay(damageable, false);
+                UpdateHealthDisplay(damageable, true);
             }
         }
     }
     
-    public void PreviewInfo(BuildingData data, Damageable damageable = null)
+    public void PreviewInfo(BuildingData data, Damageable damageable = null, bool showMaxHealthOnly = false)
     {
         UpdateUI(data);
         if (damageable != null)
         {
-            UpdateHealthDisplay(damageable, false);
+            UpdateHealthDisplay(damageable, showMaxHealthOnly);
         }
     }
     

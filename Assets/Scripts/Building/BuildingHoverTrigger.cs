@@ -6,7 +6,6 @@ public class BuildingHoverTrigger : MonoBehaviour
     private IStorage _storage;
     private bool _isInitialized;
 
-    private BoxCollider2D[] _boxColliders;
     private CapsuleCollider2D[] _capsuleColliders;
 
     private void Awake()
@@ -20,9 +19,8 @@ public class BuildingHoverTrigger : MonoBehaviour
 
         _buildingDataHolder = GetComponent<BuildingDataHolder>();
         _storage = GetComponent<IStorage>();
-        _boxColliders = GetComponentsInChildren<BoxCollider2D>();
         _capsuleColliders = GetComponentsInChildren<CapsuleCollider2D>();
-        
+
         _isInitialized = true;
     }
 
@@ -32,21 +30,20 @@ public class BuildingHoverTrigger : MonoBehaviour
         {
             Initialize();
             
-            bool isTouchingBuildingArea = IsTouchingAnyCollider(other);
-            bool isTouchingStorageArea = _storage != null && IsTouchingCapsuleCollider(other);
+            bool isTouchingBuildingArea = IsTouchingCapsuleCollider(other);
 
-            if (!isTouchingBuildingArea && !isTouchingStorageArea)
+            if (!isTouchingBuildingArea)
             {
                 return;
             }
-            
+
             if (BuildingHoverManager.Instance != null)
             {
-                if ((isTouchingBuildingArea || isTouchingStorageArea) && _buildingDataHolder != null && _buildingDataHolder.buildingData != null)
+                if (_buildingDataHolder != null && _buildingDataHolder.buildingData != null)
                 {
                     BuildingHoverManager.Instance.OnBuildingEnter(_buildingDataHolder);
                 }
-                if (isTouchingStorageArea && _storage != null)
+                if (_storage != null)
                 {
                     BuildingHoverManager.Instance.OnStorageEnter(_storage);
                 }
@@ -58,10 +55,9 @@ public class BuildingHoverTrigger : MonoBehaviour
     {
         if (other.CompareTag("MouseHoverDetector"))
         {
-            bool isTouchingBuildingArea = IsTouchingAnyCollider(other);
-            bool isTouchingStorageArea = _storage != null && IsTouchingCapsuleCollider(other);
+            bool isTouchingBuildingArea = IsTouchingCapsuleCollider(other);
 
-            if (isTouchingBuildingArea || isTouchingStorageArea)
+            if (isTouchingBuildingArea)
             {
                 return;
             }
@@ -94,40 +90,6 @@ public class BuildingHoverTrigger : MonoBehaviour
                 if (capsuleCollider.IsTouching(other))
                 {
                     return true;
-                }
-            }
-        }
-        
-        return false;
-    }
-
-    private bool IsTouchingAnyCollider(Collider2D other)
-    {
-        if (_boxColliders == null)
-        {
-            _boxColliders = GetComponentsInChildren<BoxCollider2D>();
-        }
-
-        Vector2 otherPosition = other.bounds.center;
-        
-        foreach (BoxCollider2D boxCollider in _boxColliders)
-        {
-            if (boxCollider != null && boxCollider.enabled)
-            {
-                if (boxCollider.isTrigger)
-                {
-                    if (boxCollider.IsTouching(other))
-                    {
-                        return true;
-                    }
-                }
-                else
-                {
-                    Bounds boxBounds = boxCollider.bounds;
-                    if (boxBounds.Contains(otherPosition))
-                    {
-                        return true;
-                    }
                 }
             }
         }

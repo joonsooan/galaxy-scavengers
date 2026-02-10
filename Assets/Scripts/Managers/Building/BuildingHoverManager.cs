@@ -71,7 +71,7 @@ public class BuildingHoverManager : MonoBehaviour
 
         if (GameManager.Instance != null && GameManager.Instance.IsDragging())
         {
-            ClearAllHovers();
+            ClearHoverStateOnly();
             return;
         }
 
@@ -176,6 +176,25 @@ public class BuildingHoverManager : MonoBehaviour
         ClearHover();
         ClearStorageHover();
         ClearResourceHover();
+    }
+
+    private void ClearHoverStateOnly()
+    {
+        _currentHoveredBuilding = null;
+        _currentHoveredStorage = null;
+        if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
+        {
+            GameManager.Instance.uiManager.HideStorageInfo();
+        }
+        if (_currentHoveredResource != null)
+        {
+            if (ResourceInfoPanel.Instance != null)
+            {
+                ResourceInfoPanel.Instance.CancelPreview();
+                ResourceInfoPanel.Instance.gameObject.SetActive(false);
+            }
+            _currentHoveredResource = null;
+        }
     }
 
     private void ShowBuildingInfo(BuildingDataHolder buildingDataHolder)
