@@ -53,7 +53,7 @@ public class Unit_Player : UnitBase
         }
 
         if (cameraController != null) {
-            cameraController.followTarget = transform;
+            cameraController.SetFollowTarget(transform);
         }
     }
 

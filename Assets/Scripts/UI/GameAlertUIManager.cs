@@ -65,6 +65,8 @@ public class GameAlertUIManager : MonoBehaviour
     private int _droneNoResourceCount;
     private int _storageFullCount;
     private int _aetherStorageFullCount;
+    [SerializeField] private CameraTargetController cameraTargetController;
+    private readonly Dictionary<GameAlertType, int> _alertFocusIndices = new Dictionary<GameAlertType, int>();
 
     private void Awake()
     {
@@ -437,6 +439,63 @@ public class GameAlertUIManager : MonoBehaviour
         BuildingDataHolder b = d.GetComponent<BuildingDataHolder>();
         if (b != null && b.buildingData != null) return b.buildingData.displayName;
         return d.gameObject.name;
+    }
+
+    public IReadOnlyList<Damageable> GetAlertSources(GameAlertType type)
+    {
+        List<Damageable> sources = GetSourcesForType(type);
+        if (sources == null || sources.Count == 0) return sources;
+        for (int i = sources.Count - 1; i >= 0; i--)
+        {
+            if (sources[i] == null)
+                sources.RemoveAt(i);
+        }
+        return sources;
+    }
+
+    public bool TryFocusAlert(GameAlertType type)
+    {
+        if (!IsFocusableAlertType(type))
+            return false;
+        if (cameraTargetController == null)
+            cameraTargetController = FindFirstObjectByType<CameraTargetController>();
+        if (cameraTargetController == null)
+            return false;
+        IReadOnlyList<Damageable> sources = GetAlertSources(type);
+        if (sources == null || sources.Count == 0)
+            return false;
+        int index;
+        if (!_alertFocusIndices.TryGetValue(type, out index))
+            index = 0;
+        if (index >= sources.Count)
+            index = 0;
+        Damageable target = sources[index];
+        int safety = 0;
+        while (target == null && safety < sources.Count)
+        {
+            index = (index + 1) % sources.Count;
+            target = sources[index];
+            safety++;
+        }
+        if (target == null)
+            return false;
+        _alertFocusIndices[type] = (index + 1) % sources.Count;
+        cameraTargetController.SetFollowTarget(target.transform);
+        return true;
+    }
+
+    private static bool IsFocusableAlertType(GameAlertType type)
+    {
+        switch (type)
+        {
+            case GameAlertType.MinerNoResource:
+            case GameAlertType.UnitUnderAttack:
+            case GameAlertType.BuildingUnderAttack:
+            case GameAlertType.DroneNoResource:
+                return true;
+            default:
+                return false;
+        }
     }
 }
 

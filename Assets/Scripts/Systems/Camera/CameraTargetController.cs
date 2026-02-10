@@ -36,6 +36,7 @@ public class CameraTargetController : MonoBehaviour
     private bool[] _zoomLevelInitialized;
     private Vector3[] _zoomLevelPositions;
     private Vector3 _currentVelocity;
+    private Transform _defaultFollowTarget;
 
     private void Awake()
     {
@@ -396,6 +397,31 @@ public class CameraTargetController : MonoBehaviour
         }
 
         ClampTargetPosition();
+    }
+
+    public void SetFollowTarget(Transform target)
+    {
+        followTarget = target;
+        if (target != null)
+        {
+            if (_defaultFollowTarget == null && target.GetComponent<Unit_Player>() != null)
+                _defaultFollowTarget = target;
+            _isManualMode = false;
+        }
+    }
+
+    public void ResetFollowTargetToPlayer()
+    {
+        if (_defaultFollowTarget == null)
+        {
+            Unit_Player player = FindFirstObjectByType<Unit_Player>();
+            if (player != null)
+                _defaultFollowTarget = player.transform;
+        }
+        if (_defaultFollowTarget == null)
+            return;
+        followTarget = _defaultFollowTarget;
+        _isManualMode = false;
     }
 
     private bool IsLoadingScreenActive()

@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class AlertCellTooltipTrigger : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class AlertCellTooltipTrigger : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     [SerializeField] private GameAlertType alertType;
     private AlertCellAppearance _appearance;
@@ -15,15 +15,18 @@ public class AlertCellTooltipTrigger : MonoBehaviour, IPointerEnterHandler, IPoi
     {
         if (GameAlertUIManager.Instance != null)
             GameAlertUIManager.Instance.ShowTooltip(alertType);
-        if (_appearance != null)
-            _appearance.SetHovered(true);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
         if (GameAlertUIManager.Instance != null)
             GameAlertUIManager.Instance.HideTooltip();
-        if (_appearance != null)
-            _appearance.SetHovered(false);
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (GameAlertUIManager.Instance == null)
+            return;
+        GameAlertUIManager.Instance.TryFocusAlert(alertType);
     }
 }
