@@ -143,6 +143,8 @@ public class GameAlertUIManager : MonoBehaviour
         }
 
         UpdateAlertState(type);
+        if (_currentTooltipType == type)
+            RefreshTooltipText(type);
     }
 
     private static void AddSource(List<Damageable> list, Damageable source)
