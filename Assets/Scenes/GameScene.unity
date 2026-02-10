@@ -570,6 +570,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Alert Panel (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 8067440897203084835, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
+      propertyPath: m_Colors.m_NormalColor.a
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8884695541414015742, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_text
       value: "\uC18C\uC74C \uB2E8\uACC4 : \uACBD\uACE0"
@@ -7339,6 +7343,10 @@ PrefabInstance:
     - target: {fileID: 7137143227214268094, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_Name
       value: Alert Panel (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8067440897203084835, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
+      propertyPath: m_Colors.m_NormalColor.a
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8884695541414015742, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_text
@@ -21948,7 +21956,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0.5, z: -20}
+  m_LocalPosition: {x: 0.5, y: 0.5, z: -40}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -40087,6 +40095,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Alert Panel (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 8067440897203084835, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
+      propertyPath: m_Colors.m_NormalColor.a
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8884695541414015742, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_text
       value: "\uC18C\uC74C \uB2E8\uACC4 : \uC704\uD5D8"
@@ -44171,7 +44183,6 @@ GameObject:
   - component: {fileID: 1078723812}
   - component: {fileID: 1078723811}
   - component: {fileID: 1078723814}
-  - component: {fileID: 1078723815}
   m_Layer: 5
   m_Name: Alert Panel Parent
   m_TagString: Untagged
@@ -44205,7 +44216,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: -8, y: 60}
-  m_SizeDelta: {x: 60, y: 0}
+  m_SizeDelta: {x: 60, y: 160}
   m_Pivot: {x: 1, y: 0}
 --- !u!114 &1078723811
 MonoBehaviour:
@@ -44337,20 +44348,6 @@ MonoBehaviour:
   tooltipPanel: {fileID: 1922431905}
   tooltipText: {fileID: 1158699060}
   cameraTargetController: {fileID: 0}
---- !u!114 &1078723815
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1078723809}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_HorizontalFit: 0
-  m_VerticalFit: 2
 --- !u!1 &1085667705
 GameObject:
   m_ObjectHideFlags: 0
@@ -47352,6 +47349,10 @@ PrefabInstance:
     - target: {fileID: 7137143227214268094, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_Name
       value: Alert Panel
+      objectReference: {fileID: 0}
+    - target: {fileID: 8067440897203084835, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
+      propertyPath: m_Colors.m_NormalColor.a
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8884695541414015742, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_text
@@ -54940,6 +54941,10 @@ PrefabInstance:
     - target: {fileID: 7137143227214268094, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_Name
       value: Alert Panel (4)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8067440897203084835, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
+      propertyPath: m_Colors.m_NormalColor.a
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8884695541414015742, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_text

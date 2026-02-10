@@ -30,38 +30,14 @@ public class AlertCellAppearance : MonoBehaviour
     {
         if (_rectTransform == null) return;
         _restPosition = _rectTransform.anchoredPosition;
-        Vector2 startPos = _restPosition + new Vector2(0f, dropOffset);
-        _rectTransform.anchoredPosition = startPos;
         if (_panelImage != null)
         {
             Color c = _panelImage.color;
             c.a = _defaultAlpha;
             _panelImage.color = c;
         }
-
         _sequence?.Kill();
-        _sequence = DOTween.Sequence();
-        _sequence.Append(_rectTransform.DOAnchorPos(_restPosition, dropDuration).SetEase(dropEase).SetUpdate(true));
-        _sequence.AppendCallback(() =>
-        {
-            if (_panelImage != null)
-            {
-                Color c = _panelImage.color;
-                c.a = _defaultAlpha;
-                _panelImage.color = c;
-            }
-        });
-        _sequence.AppendInterval(pulseAlphaDuration);
-        _sequence.Append(DOTween.To(() => _panelImage != null ? _panelImage.color.a : 1f, x =>
-        {
-            if (_panelImage != null)
-            {
-                Color c = _panelImage.color;
-                c.a = x;
-                _panelImage.color = c;
-            }
-        }, 0f, fadeOutDuration).SetUpdate(true));
-        _sequence.SetUpdate(true);
+        _sequence = null;
     }
 
     private void OnDisable()

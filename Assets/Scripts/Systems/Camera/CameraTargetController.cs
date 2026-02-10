@@ -192,10 +192,19 @@ public class CameraTargetController : MonoBehaviour
             float moveX = Input.GetAxisRaw("Horizontal");
             float moveY = Input.GetAxisRaw("Vertical");
 
-            if (moveX != 0f || moveY != 0f) {
+            if (moveX != 0f || moveY != 0f)
+            {
+                ResetFollowTargetToPlayer();
+                hasPlayerUnit = followTarget != null && followTarget.GetComponent<Unit_Player>() != null;
+                if (hasPlayerUnit)
+                {
+                    _direction = Vector3.zero;
+                    return;
+                }
                 _direction = new Vector3(moveX, moveY, 0).normalized;
             }
-            else {
+            else
+            {
                 _direction = Vector3.zero;
             }
         }
