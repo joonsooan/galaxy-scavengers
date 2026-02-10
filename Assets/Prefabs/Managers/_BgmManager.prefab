@@ -61,29 +61,29 @@ MonoBehaviour:
     Path: event:/BGM_Title
   gameBgms:
   - Guid:
-      Data1: -284459708
-      Data2: 1075504292
-      Data3: 1572043189
-      Data4: -1663156081
+      Data1: 603399768
+      Data2: 1136977568
+      Data3: 982965670
+      Data4: 2117449546
     Path: event:/BGM_InGame/BGM_InGame_1
   - Guid:
-      Data1: 207940615
-      Data2: 1177031973
-      Data3: -764822910
-      Data4: -311267768
+      Data1: 959137699
+      Data2: 1134007301
+      Data3: 989654201
+      Data4: 1412508845
     Path: event:/BGM_InGame/BGM_InGame_2
   - Guid:
-      Data1: 2135244225
-      Data2: 1077845702
-      Data3: -637141596
-      Data4: -1076731779
+      Data1: 1826372419
+      Data2: 1094983377
+      Data3: -1013242689
+      Data4: 927224795
     Path: event:/BGM_InGame/BGM_InGame_3
   tutorialBgm:
     Guid:
-      Data1: -284459708
-      Data2: 1075504292
-      Data3: 1572043189
-      Data4: -1663156081
+      Data1: 603399768
+      Data2: 1136977568
+      Data3: 982965670
+      Data4: 2117449546
     Path: event:/BGM_InGame/BGM_InGame_1
   loadingBgm:
     Guid:
@@ -110,7 +110,7 @@ MonoBehaviour:
   defaultFadeInTime: 1
   gameBgmFadeInTime: 3
   gameBgmFadeOutTime: 3
-  gameBgmCooldownTime: 10
+  gameBgmCooldownTime: 15
   gameBgmMaxWaitForEndTime: 30
 --- !u!114 &7245013787098741407
 MonoBehaviour:

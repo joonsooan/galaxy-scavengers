@@ -30,7 +30,7 @@ MonoBehaviour:
   unitType: 
   itemType: 
   showProgressBar: 1
-  enableUIPanels: 01000000
+  enableUIPanels: 
   spawnUnits: []
   grantResources: []
   completionSound:
