@@ -615,14 +615,8 @@ public class BuildingManager : MonoBehaviour
         }
         dataHolder.SetBuildingData(data);
 
-        BoxCollider2D[] triggerColliders = obj.GetComponentsInChildren<BoxCollider2D>();
-        foreach (BoxCollider2D collider in triggerColliders) {
-            if (collider.isTrigger) {
-                BuildingHoverTrigger hoverTrigger = collider.GetComponent<BuildingHoverTrigger>();
-                if (hoverTrigger == null) {
-                    collider.gameObject.AddComponent<BuildingHoverTrigger>();
-                }
-            }
+        if (obj.GetComponent<BuildingHoverTrigger>() == null) {
+            obj.AddComponent<BuildingHoverTrigger>();
         }
 
         switch (data.buildingType) {

@@ -29,7 +29,7 @@ public class BuildingHoverTrigger : MonoBehaviour
         if (other.CompareTag("MouseHoverDetector"))
         {
             Initialize();
-            
+
             bool isTouchingBuildingArea = IsTouchingCapsuleCollider(other);
 
             if (!isTouchingBuildingArea)
@@ -82,7 +82,7 @@ public class BuildingHoverTrigger : MonoBehaviour
         {
             _capsuleColliders = GetComponentsInChildren<CapsuleCollider2D>();
         }
-        
+
         foreach (CapsuleCollider2D capsuleCollider in _capsuleColliders)
         {
             if (capsuleCollider != null && capsuleCollider.enabled && capsuleCollider.isTrigger)
@@ -93,7 +93,6 @@ public class BuildingHoverTrigger : MonoBehaviour
                 }
             }
         }
-        
         return false;
     }
 }

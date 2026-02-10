@@ -22,6 +22,7 @@ public class BgmManager : MonoBehaviour
     [SerializeField] private float gameBgmFadeInTime = 1.0f;
     [SerializeField] private float gameBgmFadeOutTime = 1.0f;
     [SerializeField] private float gameBgmCooldownTime = 30f;
+    [SerializeField] private float gameBgmMaxWaitForEndTime = 600f;
 
     private EventInstance _currentInstance;
     private EventInstance _loadingInstance;
@@ -108,13 +109,16 @@ public class BgmManager : MonoBehaviour
 
     public void PlayGameBgm()
     {
+        UnityEngine.Debug.Log("[BGM] PlayGameBgm called");
         if (gameBgms == null || gameBgms.Length == 0)
         {
+            UnityEngine.Debug.Log("[BGM] PlayGameBgm early return: gameBgms null or empty");
             return;
         }
 
         if (_isGameBgmCooldownActive)
         {
+            UnityEngine.Debug.Log("[BGM] PlayGameBgm early return: _isGameBgmCooldownActive=true");
             return;
         }
 
@@ -139,6 +143,7 @@ public class BgmManager : MonoBehaviour
 
         if (availableBgms.Count == 0)
         {
+            UnityEngine.Debug.Log("[BGM] PlayGameBgm early return: availableBgms.Count=0");
             return;
         }
 
@@ -149,6 +154,7 @@ public class BgmManager : MonoBehaviour
         {
             StopCoroutine(_playGameBgmCoroutine);
         }
+        UnityEngine.Debug.Log("[BGM] PlayGameBgm starting PlayGameBgmWithFade");
         _playGameBgmCoroutine = StartCoroutine(PlayGameBgmWithFade(selectedBgm));
     }
 
@@ -173,6 +179,7 @@ public class BgmManager : MonoBehaviour
             StopCoroutine(_gameBgmEndFadeCoroutine);
             _gameBgmEndFadeCoroutine = null;
         }
+        UnityEngine.Debug.Log("[BGM] PlayGameBgmWithFade started BGM, starting GameBgmEndFadeOut and GameBgmCooldown");
         _gameBgmEndFadeCoroutine = StartCoroutine(GameBgmEndFadeOut());
         _gameBgmCooldownCoroutine = StartCoroutine(GameBgmCooldown());
     }
@@ -183,29 +190,34 @@ public class BgmManager : MonoBehaviour
         RESULT descResult = _currentInstance.getDescription(out desc);
         if (descResult != RESULT.OK)
         {
+            UnityEngine.Debug.Log($"[BGM] GameBgmEndFadeOut getDescription failed: {descResult}");
             _gameBgmEndFadeCoroutine = null;
             yield break;
         }
         int lengthMs;
         if (desc.getLength(out lengthMs) != RESULT.OK || lengthMs <= 0)
         {
+            UnityEngine.Debug.Log($"[BGM] GameBgmEndFadeOut getLength failed or lengthMs={lengthMs}");
             _gameBgmEndFadeCoroutine = null;
             yield break;
         }
         int fadeOutMs = Mathf.Max(0, (int)(gameBgmFadeOutTime * 1000f));
         int startFadeAtMs = Mathf.Max(0, lengthMs - fadeOutMs);
+        UnityEngine.Debug.Log($"[BGM] GameBgmEndFadeOut started: lengthMs={lengthMs}, startFadeAtMs={startFadeAtMs}");
         while (_hasInstance)
         {
             PLAYBACK_STATE state;
             _currentInstance.getPlaybackState(out state);
             if (state == PLAYBACK_STATE.STOPPED || state == PLAYBACK_STATE.STOPPING)
             {
+                UnityEngine.Debug.Log($"[BGM] GameBgmEndFadeOut exit: playback state={state}");
                 _gameBgmEndFadeCoroutine = null;
                 yield break;
             }
             int posMs;
             if (_currentInstance.getTimelinePosition(out posMs) == RESULT.OK && posMs >= startFadeAtMs)
             {
+                UnityEngine.Debug.Log($"[BGM] GameBgmEndFadeOut starting fade: posMs={posMs}");
                 yield return StartCoroutine(FadeOutBgm(gameBgmFadeOutTime));
                 _gameBgmEndFadeCoroutine = null;
                 yield break;
@@ -234,14 +246,23 @@ public class BgmManager : MonoBehaviour
 
     private IEnumerator GameBgmCooldown()
     {
+        UnityEngine.Debug.Log("[BGM] GameBgmCooldown started");
         _isGameBgmCooldownActive = true;
 
+        float waitElapsed = 0f;
         while (_hasInstance)
         {
             PLAYBACK_STATE state;
             _currentInstance.getPlaybackState(out state);
             if (state == PLAYBACK_STATE.STOPPED || state == PLAYBACK_STATE.STOPPING)
             {
+                UnityEngine.Debug.Log($"[BGM] GameBgmCooldown playback ended: state={state}");
+                break;
+            }
+            waitElapsed += Time.unscaledDeltaTime;
+            if (waitElapsed >= gameBgmMaxWaitForEndTime)
+            {
+                UnityEngine.Debug.Log($"[BGM] GameBgmCooldown max wait reached ({gameBgmMaxWaitForEndTime}s), forcing next BGM");
                 break;
             }
             yield return null;
@@ -258,16 +279,18 @@ public class BgmManager : MonoBehaviour
             _gameBgmEndFadeCoroutine = null;
         }
 
+        UnityEngine.Debug.Log("[BGM] GameBgmCooldown waiting cooldown");
         yield return _gameBgmCooldownWait;
 
         _isGameBgmCooldownActive = false;
-
+        UnityEngine.Debug.Log("[BGM] GameBgmCooldown finished, starting DeferredPlayNextGameBgm");
         StartCoroutine(DeferredPlayNextGameBgm());
     }
 
     private IEnumerator DeferredPlayNextGameBgm()
     {
         yield return null;
+        UnityEngine.Debug.Log("[BGM] DeferredPlayNextGameBgm calling PlayGameBgm");
         PlayGameBgm();
     }
 
@@ -441,6 +464,10 @@ public class BgmManager : MonoBehaviour
 
     private void StopGameBgmCooldown()
     {
+        if (_playGameBgmCoroutine != null || _gameBgmCooldownCoroutine != null || _gameBgmEndFadeCoroutine != null)
+        {
+            UnityEngine.Debug.Log("[BGM] StopGameBgmCooldown called");
+        }
         if (_playGameBgmCoroutine != null)
         {
             StopCoroutine(_playGameBgmCoroutine);
