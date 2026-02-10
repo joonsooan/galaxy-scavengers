@@ -19,6 +19,8 @@ public class BuildingInfoPanel : MonoBehaviour
     [SerializeField] private List<BuildingPieceData> allPieceDatabase;
 
     private BuildingData _selectedData;
+    private Damageable _currentDamageable;
+    private bool _showMaxHealthOnly;
 
     public static BuildingInfoPanel Instance { get; private set; }
 
@@ -33,46 +35,68 @@ public class BuildingInfoPanel : MonoBehaviour
         Instance = this;
         ClearAllInfo();
     }
+
+    private void OnDisable()
+    {
+        SetCurrentDamageable(null, false);
+    }
     
     public void SelectBuilding(BuildingData data)
     {
         _selectedData = data;
         UpdateUI(data);
-        if (data != null && data.buildingPrefab != null)
-        {
-            Damageable damageable = data.buildingPrefab.GetComponent<Damageable>();
-            if (damageable != null)
-            {
-                UpdateHealthDisplay(damageable, true);
-            }
-        }
+        Damageable damageable = data != null && data.buildingPrefab != null ? data.buildingPrefab.GetComponent<Damageable>() : null;
+        SetCurrentDamageable(damageable, true);
+        if (damageable != null)
+            UpdateHealthDisplay(damageable, true);
     }
-    
+
     public void PreviewInfo(BuildingData data, Damageable damageable = null, bool showMaxHealthOnly = false)
     {
         UpdateUI(data);
+        SetCurrentDamageable(damageable, showMaxHealthOnly);
         if (damageable != null)
-        {
             UpdateHealthDisplay(damageable, showMaxHealthOnly);
-        }
     }
-    
+
     public void CancelPreview()
     {
         if (_selectedData != null)
         {
             UpdateUI(_selectedData);
+            Damageable damageable = _selectedData.buildingPrefab != null ? _selectedData.buildingPrefab.GetComponent<Damageable>() : null;
+            SetCurrentDamageable(damageable, true);
+            if (damageable != null)
+                UpdateHealthDisplay(damageable, true);
         }
         else
         {
+            SetCurrentDamageable(null, false);
             ClearUI();
         }
     }
-    
+
     public void ClearAllInfo()
     {
         _selectedData = null;
+        SetCurrentDamageable(null, false);
         ClearUI();
+    }
+
+    private void SetCurrentDamageable(Damageable damageable, bool showMaxHealthOnly)
+    {
+        if (_currentDamageable != null)
+            _currentDamageable.HealthChanged -= OnCurrentDamageableHealthChanged;
+        _currentDamageable = damageable;
+        _showMaxHealthOnly = showMaxHealthOnly;
+        if (_currentDamageable != null)
+            _currentDamageable.HealthChanged += OnCurrentDamageableHealthChanged;
+    }
+
+    private void OnCurrentDamageableHealthChanged()
+    {
+        if (_currentDamageable != null)
+            UpdateHealthDisplay(_currentDamageable, _showMaxHealthOnly);
     }
     
     private void UpdateUI(BuildingData data)
@@ -201,6 +225,7 @@ public class BuildingInfoPanel : MonoBehaviour
     public void ClearInfo()
     {
         _selectedData = null;
+        SetCurrentDamageable(null, false);
 
         if (buildingName != null)
         {

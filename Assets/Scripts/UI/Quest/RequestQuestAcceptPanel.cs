@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,6 +21,7 @@ public class RequestQuestAcceptPanel : MonoBehaviour
     [SerializeField] private Button rejectButton;
 
     private int _currentQuestId = -1;
+    private Coroutine _rebuildCoroutine;
 
     private void Awake()
     {
@@ -103,6 +105,12 @@ public class RequestQuestAcceptPanel : MonoBehaviour
         {
             LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
         }
+
+        if (_rebuildCoroutine != null)
+        {
+            StopCoroutine(_rebuildCoroutine);
+        }
+        _rebuildCoroutine = StartCoroutine(RebuildAllLayouts());
     }
 
     public void ClearQuestInfo()
@@ -135,6 +143,40 @@ public class RequestQuestAcceptPanel : MonoBehaviour
 
         ClearRequiredResources();
         ClearQuestRewards();
+    }
+
+    private IEnumerator RebuildAllLayouts()
+    {
+        yield return new WaitForEndOfFrame();
+
+        RectTransform panelRect = GetComponent<RectTransform>();
+        if (panelRect != null)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
+        }
+
+        if (requiredResourcesGridContainer != null)
+        {
+            RectTransform requiredRect = requiredResourcesGridContainer.GetComponent<RectTransform>();
+            if (requiredRect != null)
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(requiredRect);
+            }
+        }
+
+        if (rewardGridContainer != null)
+        {
+            RectTransform rewardRect = rewardGridContainer.GetComponent<RectTransform>();
+            if (rewardRect != null)
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(rewardRect);
+            }
+        }
+
+        if (panelRect != null)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
+        }
     }
 
     private void UpdateRequiredResourceText(QuestData questData)

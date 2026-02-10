@@ -121,7 +121,7 @@ public class ResourceGenerator : Damageable
             {
                 if (!_wasAetherStorageFull && GameAlertUIManager.Instance != null)
                 {
-                    GameAlertUIManager.Instance.RegisterAlert(GameAlertType.AetherStorageFull);
+                    GameAlertUIManager.Instance.RegisterAlert(GameAlertType.AetherStorageFull, this);
                 }
                 _wasAetherStorageFull = true;
                 return;
@@ -129,7 +129,7 @@ public class ResourceGenerator : Damageable
             
             if (_wasAetherStorageFull && GameAlertUIManager.Instance != null)
             {
-                GameAlertUIManager.Instance.UnregisterAlert(GameAlertType.AetherStorageFull);
+                GameAlertUIManager.Instance.UnregisterAlert(GameAlertType.AetherStorageFull, this);
             }
             _wasAetherStorageFull = false;
         }

@@ -84,7 +84,7 @@ public class Unit_Drone : UnitBase
     protected override void OnDisable()
     {
         if (_noResourceAlertActive) {
-            GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.DroneNoResource);
+            GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.DroneNoResource, this);
             _noResourceAlertActive = false;
         }
         StopHover();
@@ -100,11 +100,11 @@ public class Unit_Drone : UnitBase
             UpdateIdle();
             bool shouldShowAlert = !IsAssigned;
             if (shouldShowAlert && !_noResourceAlertActive) {
-                GameAlertUIManager.Instance?.RegisterAlert(GameAlertType.DroneNoResource);
+                GameAlertUIManager.Instance?.RegisterAlert(GameAlertType.DroneNoResource, this);
                 _noResourceAlertActive = true;
             }
             else if (!shouldShowAlert && _noResourceAlertActive) {
-                GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.DroneNoResource);
+                GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.DroneNoResource, this);
                 _noResourceAlertActive = false;
             }
             break;

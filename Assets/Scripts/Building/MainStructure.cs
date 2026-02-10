@@ -75,7 +75,7 @@ public class MainStructure : BaseStorage, IClickable
         {
             if (GameAlertUIManager.Instance != null && !_wasStorageFull)
             {
-                GameAlertUIManager.Instance.RegisterAlert(GameAlertType.StorageFull);
+                GameAlertUIManager.Instance.RegisterAlert(GameAlertType.StorageFull, this);
             }
             _wasStorageFull = true;
             return;
@@ -91,11 +91,11 @@ public class MainStructure : BaseStorage, IClickable
         
         if (!wasFull && stillFull && GameAlertUIManager.Instance != null)
         {
-            GameAlertUIManager.Instance.RegisterAlert(GameAlertType.StorageFull);
+            GameAlertUIManager.Instance.RegisterAlert(GameAlertType.StorageFull, this);
         }
         else if (_wasStorageFull && !stillFull && GameAlertUIManager.Instance != null)
         {
-            GameAlertUIManager.Instance.UnregisterAlert(GameAlertType.StorageFull);
+            GameAlertUIManager.Instance.UnregisterAlert(GameAlertType.StorageFull, this);
         }
         
         _wasStorageFull = stillFull;

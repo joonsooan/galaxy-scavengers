@@ -43,7 +43,7 @@ public class BaseStorage : Damageable, IStorage
 
         if (isFull) {
             if (!_wasStorageFull && GameAlertUIManager.Instance != null) {
-                GameAlertUIManager.Instance.RegisterAlert(GameAlertType.StorageFull);
+                GameAlertUIManager.Instance.RegisterAlert(GameAlertType.StorageFull, this);
             }
             _wasStorageFull = true;
             return false;
@@ -58,7 +58,7 @@ public class BaseStorage : Damageable, IStorage
         bool stillFull = newTotalAmount >= maxStorageAmount;
 
         if (_wasStorageFull && !stillFull && GameAlertUIManager.Instance != null) {
-            GameAlertUIManager.Instance.UnregisterAlert(GameAlertType.StorageFull);
+            GameAlertUIManager.Instance.UnregisterAlert(GameAlertType.StorageFull, this);
         }
 
         _wasStorageFull = stillFull;

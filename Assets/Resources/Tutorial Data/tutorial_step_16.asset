@@ -38,6 +38,4 @@ MonoBehaviour:
   highlightTargetIDs:
   - unit_miner
   showArrowUI: 0
-  arrowUIPrefab: {fileID: 0}
-  arrowPosition: {x: 0, y: 0, z: 0}
-  arrowRotation: {x: 0, y: 0, z: 0}
+  arrowID: 

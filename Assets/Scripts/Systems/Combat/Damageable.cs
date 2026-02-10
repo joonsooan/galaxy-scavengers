@@ -109,12 +109,12 @@ public abstract class Damageable : MonoBehaviour, ICombo
         {
             if (this is UnitBase)
             {
-                GameAlertUIManager.Instance.RegisterAlert(GameAlertType.UnitUnderAttack);
+                GameAlertUIManager.Instance.RegisterAlert(GameAlertType.UnitUnderAttack, this);
                 _isAttackAlertRegistered = true;
             }
             else
             {
-                GameAlertUIManager.Instance.RegisterAlert(GameAlertType.BuildingUnderAttack);
+                GameAlertUIManager.Instance.RegisterAlert(GameAlertType.BuildingUnderAttack, this);
                 _isAttackAlertRegistered = true;
             }
         }
@@ -152,11 +152,11 @@ public abstract class Damageable : MonoBehaviour, ICombo
         
         if (this is UnitBase)
         {
-            GameAlertUIManager.Instance.UnregisterAlert(GameAlertType.UnitUnderAttack);
+            GameAlertUIManager.Instance.UnregisterAlert(GameAlertType.UnitUnderAttack, this);
         }
         else
         {
-            GameAlertUIManager.Instance.UnregisterAlert(GameAlertType.BuildingUnderAttack);
+            GameAlertUIManager.Instance.UnregisterAlert(GameAlertType.BuildingUnderAttack, this);
         }
         
         _isAttackAlertRegistered = false;
@@ -169,12 +169,15 @@ public abstract class Damageable : MonoBehaviour, ICombo
 
     public static event Action<Damageable> OnAnyDamageTaken;
 
+    public event Action HealthChanged;
+
     private void OnDamageTaken(int damage)
     {
     }
 
     protected virtual void OnHealthChanged()
     {
+        HealthChanged?.Invoke();
     }
 
     public void SetMaxHealth(int newMaxHealth)
@@ -182,6 +185,7 @@ public abstract class Damageable : MonoBehaviour, ICombo
         float healthRatio = maxHealth > 0 ? (float)currentHealth / maxHealth : 1f;
         maxHealth = newMaxHealth;
         currentHealth = Mathf.RoundToInt(maxHealth * healthRatio);
+        HealthChanged?.Invoke();
     }
 
     public void Heal(int amount)
