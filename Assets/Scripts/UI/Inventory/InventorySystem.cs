@@ -13,6 +13,7 @@ public class InventorySystem : MonoBehaviour
     [SerializeField] private GameObject inventoryGridContainer;
     [SerializeField] private GameObject currentResourcePanel;
     [SerializeField] private Button sortButton;
+    [SerializeField] private Button launchStartButton;
 
     [Header("Prefabs")]
     [SerializeField] private GameObject inventoryCellPrefab;
@@ -59,6 +60,11 @@ public class InventorySystem : MonoBehaviour
         if (sortButton != null)
         {
             sortButton.onClick.AddListener(SortInventory);
+        }
+
+        if (launchStartButton != null)
+        {
+            launchStartButton.onClick.AddListener(OnLaunchStartButtonClicked);
         }
 
         if (inventoryPanel != null)
@@ -471,6 +477,20 @@ public class InventorySystem : MonoBehaviour
     public int GetMaxUsableCells()
     {
         return _inventoryCells.Count(cell => cell != null && cell.gameObject != null && cell.gameObject.activeSelf);
+    }
+
+    private void OnLaunchStartButtonClicked()
+    {
+        if (inventoryPanel != null && inventoryPanel.activeSelf)
+        {
+            ToggleInventory();
+        }
+
+        LaunchUIController launchController = FindFirstObjectByType<LaunchUIController>();
+        if (launchController != null)
+        {
+            launchController.StartLaunchCountdown();
+        }
     }
 }
 

@@ -13,6 +13,7 @@ public class LaunchUIController : MonoBehaviour
     [SerializeField] private GameObject countdownPanel;
     [SerializeField] private TMP_Text countdownText;
     [SerializeField] private TMP_Text neededAetherText;
+    [SerializeField] private Button launchButton;
     [SerializeField] private LaunchCompleteUI launchCompleteUI;
 
     [Header("Launch Settings")]
@@ -52,6 +53,23 @@ public class LaunchUIController : MonoBehaviour
 
         UpdateNeededAetherText();
         UpdateCachedWaits();
+        UpdateLaunchAvailability();
+    }
+
+    private void OnEnable()
+    {
+        if (CoreRepairManager.Instance != null)
+        {
+            CoreRepairManager.Instance.OnRepairStatusChanged += UpdateLaunchAvailability;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (CoreRepairManager.Instance != null)
+        {
+            CoreRepairManager.Instance.OnRepairStatusChanged -= UpdateLaunchAvailability;
+        }
     }
 
     private void UpdateCachedWaits()
@@ -135,6 +153,7 @@ public class LaunchUIController : MonoBehaviour
         }
 
         UpdateNeededAetherText();
+        UpdateLaunchAvailability();
     }
 
     public void OnCancelLaunch()
@@ -162,14 +181,50 @@ public class LaunchUIController : MonoBehaviour
             RuntimeManager.PlayOneShot(buttonClickSound);
         }
 
-        if (CoreRepairManager.Instance != null && !CoreRepairManager.Instance.IsPartRepaired(CorePart.Engine))
+        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
+        if (mainStructure == null)
         {
-            Debug.LogWarning("LaunchUIController: Engine is not repaired! Cannot launch.");
             return;
         }
 
-        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
         InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
+        if (inventorySystem == null)
+        {
+            return;
+        }
+
+        if (launchPanel != null)
+        {
+            launchPanel.SetActive(false);
+        }
+
+        inventorySystem.ToggleInventory();
+    }
+
+    public void StartLaunchCountdown()
+    {
+        if (_isCountingDown)
+        {
+            return;
+        }
+
+        GameSceneQuestUIManager questUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
+        if (questUIManager != null)
+        {
+            questUIManager.HideQuestPanel();
+        }
+
+        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
+        if (mainStructure == null)
+        {
+            return;
+        }
+
+        InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
+        if (inventorySystem == null)
+        {
+            return;
+        }
 
         int occupiedCells = inventorySystem.GetOccupiedCellCount();
         int cellsRequiringAether = Mathf.Max(0, occupiedCells - freeLaunchCells);
@@ -191,11 +246,6 @@ public class LaunchUIController : MonoBehaviour
         }
 
         inventorySystem.SetTransferEnabled(false);
-
-        if (launchPanel != null)
-        {
-            launchPanel.SetActive(false);
-        }
 
         if (countdownPanel != null)
         {
@@ -336,6 +386,29 @@ public class LaunchUIController : MonoBehaviour
         int seconds = totalSeconds % 60;
 
         countdownText.text = $"{minutes:00} : {seconds:00}";
+    }
+
+    private void UpdateLaunchAvailability()
+    {
+        bool isEngineRepaired = CoreRepairManager.Instance != null && CoreRepairManager.Instance.IsPartRepaired(CorePart.Engine);
+        
+        if (launchButton != null)
+        {
+            launchButton.interactable = isEngineRepaired;
+
+            TMP_Text buttonText = launchButton.GetComponentInChildren<TMP_Text>();
+            if (buttonText != null)
+            {
+                if (isEngineRepaired)
+                {
+                    buttonText.text = "탈출";
+                }
+                else
+                {
+                    buttonText.text = "탈출\n불가";
+                }
+            }
+        }
     }
 }
 

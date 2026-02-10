@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour
     [Header("Audio")]
     [SerializeField] private EventReference pauseSound;
     [SerializeField] private EventReference resumeSound;
+    [SerializeField] private EventReference speedChangeSound;
 
     [HideInInspector] public UnityEvent<DisplayableData> onStartDrag;
     [HideInInspector] public UnityEvent onEndDrag;
@@ -103,6 +104,10 @@ public class GameManager : MonoBehaviour
 
         if (IsLoadingScreenActive()) return;
 
+        if (GameMenuManager.Instance != null && GameMenuManager.Instance.IsMenuOpen()) {
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.Space)) {
             TogglePause();
         }
@@ -158,6 +163,35 @@ public class GameManager : MonoBehaviour
 
         if (uiManager != null) {
             uiManager.SetPausePanelActive(IsPaused);
+        }
+    }
+
+    public void CycleGameSpeed()
+    {
+        float currentSpeed = _savedTimeScale;
+        
+        if (currentSpeed <= 1f)
+        {
+            _savedTimeScale = 2f;
+        }
+        else if (currentSpeed <= 2f)
+        {
+            _savedTimeScale = 3f;
+        }
+        else
+        {
+            _savedTimeScale = 1f;
+        }
+
+        bool canChangeActualTimeScale = !_isCombatSpeedLockActive && !IsPaused;
+        if (canChangeActualTimeScale)
+        {
+            Time.timeScale = _savedTimeScale;
+        }
+
+        if (!speedChangeSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(speedChangeSound);
         }
     }
 

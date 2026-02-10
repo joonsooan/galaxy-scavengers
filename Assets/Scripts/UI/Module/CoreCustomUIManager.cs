@@ -28,12 +28,14 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
     [SerializeField] private QuestProvider questProvider = QuestProvider.NPC_2;
     [SerializeField] private QuestUIHandler questUIHandler;
     [SerializeField] private GameObject newQuestIndicator;
+    [SerializeField] private Button launchButton;
 
     [SerializeField] private List<ModuleInventoryCell> moduleSelectionCells = new ();
 
     private CoreCustomizationManager _customizationManager;
     private BaseInventoryManager _inventoryManager;
     private BaseInventorySystem _baseInventorySystem;
+    private int _tutorialQuestId = 0;
 
     private void Start()
     {
@@ -42,6 +44,7 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
         SubscribeToEvents();
         InitializeSlots();
         StartCoroutine(WaitForModulesAndRefreshSlots());
+        StartCoroutine(InitializeTutorialQuestTracking());
     }
 
     private void FindManagers()
@@ -98,6 +101,11 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
         if (_inventoryManager != null) {
             _inventoryManager.OnModuleAdded -= OnModuleInventoryChanged;
             _inventoryManager.OnModuleRemoved -= OnModuleInventoryChanged;
+        }
+
+        if (QuestDataManager.Instance != null)
+        {
+            QuestDataManager.Instance.OnQuestStateChanged -= OnQuestStateChanged;
         }
     }
 
@@ -356,4 +364,52 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
     public GameObject GetNewQuestIndicator() => newQuestIndicator;
     
     public string GetUIName() => "Core Custom UI";
+
+    private IEnumerator InitializeTutorialQuestTracking()
+    {
+        while (QuestDataManager.Instance == null)
+        {
+            yield return null;
+        }
+
+        if (QuestDataManager.Instance != null)
+        {
+            QuestDataManager.Instance.OnQuestStateChanged += OnQuestStateChanged;
+        }
+
+        UpdateLaunchButtonState();
+    }
+
+    private void OnQuestStateChanged(int questId)
+    {
+        if (questId == _tutorialQuestId)
+        {
+            UpdateLaunchButtonState();
+        }
+    }
+
+    private void UpdateLaunchButtonState()
+    {
+        if (launchButton == null)
+        {
+            return;
+        }
+
+        if (QuestDataManager.Instance == null)
+        {
+            launchButton.interactable = true;
+            return;
+        }
+
+        QuestState questState = QuestDataManager.Instance.GetQuestState(_tutorialQuestId);
+
+        if (questState == QuestState.Available)
+        {
+            launchButton.interactable = false;
+        }
+        else
+        {
+            launchButton.interactable = true;
+        }
+    }
 }

@@ -32,35 +32,21 @@ public class BuildingHoverTrigger : MonoBehaviour
         {
             Initialize();
             
-            bool shouldTrigger = false;
-            
-            if (_storage != null)
-            {
-                if (IsTouchingCapsuleCollider(other))
-                {
-                    shouldTrigger = true;
-                }
-            }
-            else
-            {
-                if (IsTouchingAnyCollider(other))
-                {
-                    shouldTrigger = true;
-                }
-            }
-            
-            if (!shouldTrigger)
+            bool isTouchingBuildingArea = IsTouchingAnyCollider(other);
+            bool isTouchingStorageArea = _storage != null && IsTouchingCapsuleCollider(other);
+
+            if (!isTouchingBuildingArea && !isTouchingStorageArea)
             {
                 return;
             }
             
             if (BuildingHoverManager.Instance != null)
             {
-                if (_buildingDataHolder != null && _buildingDataHolder.buildingData != null)
+                if ((isTouchingBuildingArea || isTouchingStorageArea) && _buildingDataHolder != null && _buildingDataHolder.buildingData != null)
                 {
                     BuildingHoverManager.Instance.OnBuildingEnter(_buildingDataHolder);
                 }
-                if (_storage != null)
+                if (isTouchingStorageArea && _storage != null)
                 {
                     BuildingHoverManager.Instance.OnStorageEnter(_storage);
                 }
@@ -72,24 +58,10 @@ public class BuildingHoverTrigger : MonoBehaviour
     {
         if (other.CompareTag("MouseHoverDetector"))
         {
-            bool shouldKeepActive = false;
-            
-            if (_storage != null)
-            {
-                if (IsTouchingCapsuleCollider(other))
-                {
-                    shouldKeepActive = true;
-                }
-            }
-            else
-            {
-                if (IsTouchingAnyCollider(other))
-                {
-                    shouldKeepActive = true;
-                }
-            }
-            
-            if (shouldKeepActive)
+            bool isTouchingBuildingArea = IsTouchingAnyCollider(other);
+            bool isTouchingStorageArea = _storage != null && IsTouchingCapsuleCollider(other);
+
+            if (isTouchingBuildingArea || isTouchingStorageArea)
             {
                 return;
             }

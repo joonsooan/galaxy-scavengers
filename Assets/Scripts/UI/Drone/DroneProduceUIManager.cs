@@ -11,6 +11,7 @@ public class DroneProduceUIManager : MonoBehaviour
     [Header("Display UI")]
     [SerializeField] private TMP_Text droneHubName;
     [SerializeField] private TMP_Text droneHubInfo;
+    [SerializeField] private TMP_Text unitCountText;
 
     private List<UnitData> _allProducibleUnits;
     private DroneHubData _currentData;
@@ -35,6 +36,7 @@ public class DroneProduceUIManager : MonoBehaviour
 
         SetDroneHubInfo(_currentData);
         LoadAllProducibleUnits(_currentData);
+        UpdateUnitCountText();
     }
 
     private void SetDroneHubInfo(DroneHubData data)
@@ -47,6 +49,43 @@ public class DroneProduceUIManager : MonoBehaviour
 
         if (droneHubInfo != null) {
             droneHubInfo.text = data.DroneHubInfo;
+        }
+    }
+
+    private void UpdateUnitCountText()
+    {
+        if (unitCountText == null || UnitManager.Instance == null) return;
+
+        int current = UnitManager.Instance.AllyUnits.Count;
+        int max = UnitManager.Instance.GetMaxPopulation();
+
+        unitCountText.text = $"{current} / {max}";
+
+        if (current >= max)
+        {
+            unitCountText.color = Color.red;
+        }
+        else
+        {
+            unitCountText.color = Color.white;
+        }
+    }
+
+    private void OnEnable()
+    {
+        UnitManager.OnUnitCountChanged += OnUnitCountChanged;
+    }
+
+    private void OnDisable()
+    {
+        UnitManager.OnUnitCountChanged -= OnUnitCountChanged;
+    }
+
+    private void OnUnitCountChanged(UnitBase unit)
+    {
+        if (_currentDroneHub != null)
+        {
+            UpdateUnitCountText();
         }
     }
 

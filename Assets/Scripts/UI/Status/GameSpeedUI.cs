@@ -8,6 +8,7 @@ public class GameSpeedUI : MonoBehaviour
     [SerializeField] private Image pausePlayImage;
     [SerializeField] private TMP_Text speedText;
     [SerializeField] private Button pausePlayButton;
+    [SerializeField] private Button speedCycleButton;
 
     [Header("Sprites")]
     [SerializeField] private Sprite pauseSprite;
@@ -31,6 +32,11 @@ public class GameSpeedUI : MonoBehaviour
                 pausePlayButton.transition = Selectable.Transition.None;
             }
         }
+
+        if (speedCycleButton != null)
+        {
+            speedCycleButton.onClick.AddListener(OnSpeedCycleButtonClicked);
+        }
         
         UpdateDisplay();
     }
@@ -43,11 +49,24 @@ public class GameSpeedUI : MonoBehaviour
         }
     }
 
+    private void OnSpeedCycleButtonClicked()
+    {
+        if (_gameManager != null)
+        {
+            _gameManager.CycleGameSpeed();
+        }
+    }
+
     private void OnDestroy()
     {
         if (pausePlayButton != null)
         {
             pausePlayButton.onClick.RemoveAllListeners();
+        }
+
+        if (speedCycleButton != null)
+        {
+            speedCycleButton.onClick.RemoveAllListeners();
         }
     }
 

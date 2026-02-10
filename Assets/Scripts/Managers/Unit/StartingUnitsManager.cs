@@ -58,9 +58,6 @@ public class StartingUnitsManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
         _allStartingUnits = new List<StartingUnitConfig>();
-        if (startingUnits != null) {
-            _allStartingUnits.AddRange(startingUnits);
-        }
     }
 
     private void Start()
@@ -88,8 +85,6 @@ public class StartingUnitsManager : MonoBehaviour
             yield return null;
         }
 
-        QuestDataManager.Instance.OnQuestStateChanged += OnQuestStateChanged;
-
         foreach (QuestUnitMapping mapping in questUnitMappings) {
             if (mapping != null && QuestDataManager.Instance.IsQuestCompleted(mapping.questId)) {
                 AddUnitFromQuest(mapping);
@@ -103,7 +98,8 @@ public class StartingUnitsManager : MonoBehaviour
             return;
         }
 
-        if (!QuestDataManager.Instance.IsQuestCompleted(questId)) {
+        QuestState state = QuestDataManager.Instance.GetQuestState(questId);
+        if (state != QuestState.Completed) {
             return;
         }
 
@@ -150,6 +146,8 @@ public class StartingUnitsManager : MonoBehaviour
             return;
         }
 
+        RebuildAllStartingUnits();
+
         Vector3 centerPosition = mainStructure.transform.position;
 
         if (_allStartingUnits == null || _allStartingUnits.Count == 0) {
@@ -181,6 +179,36 @@ public class StartingUnitsManager : MonoBehaviour
                 }
 
                 yield return new WaitForSeconds(config.spawnInterval);
+            }
+        }
+    }
+
+    private void RebuildAllStartingUnits()
+    {
+        _allStartingUnits.Clear();
+
+        if (startingUnits != null) {
+            foreach (StartingUnitConfig config in startingUnits) {
+                if (config == null || config.unitData == null || config.count <= 0) {
+                    continue;
+                }
+
+                StartingUnitConfig copy = new StartingUnitConfig {
+                    unitData = config.unitData,
+                    count = config.count,
+                    spawnRadius = config.spawnRadius,
+                    spawnInterval = config.spawnInterval
+                };
+
+                _allStartingUnits.Add(copy);
+            }
+        }
+
+        if (QuestDataManager.Instance != null && questUnitMappings != null) {
+            foreach (QuestUnitMapping mapping in questUnitMappings) {
+                if (mapping != null && QuestDataManager.Instance.IsQuestCompleted(mapping.questId)) {
+                    AddUnitFromQuest(mapping);
+                }
             }
         }
     }

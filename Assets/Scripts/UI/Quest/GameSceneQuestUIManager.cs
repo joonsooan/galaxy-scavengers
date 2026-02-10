@@ -138,6 +138,19 @@ public class GameSceneQuestUIManager : MonoBehaviour
         {
             ToggleQuestPanel();
         }
+
+        if (Input.GetMouseButtonUp(1))
+        {
+            if (_isPanelOpen && questPanel != null && questPanel.activeSelf)
+            {
+                if (GameManager.Instance != null && GameManager.Instance.IsDragging())
+                {
+                    return;
+                }
+
+                HideQuestPanel();
+            }
+        }
     }
     
     private void Start()
@@ -370,7 +383,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
         }
     }
 
-    private void HideQuestPanel()
+    public void HideQuestPanel()
     {
         _isPanelOpen = false;
         

@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8181208960080871813}
   - component: {fileID: 5254277940681920834}
+  - component: {fileID: 7245013787098741407}
   m_Layer: 0
   m_Name: _BgmManager
   m_TagString: Untagged
@@ -77,6 +78,13 @@ MonoBehaviour:
       Data3: -637141596
       Data4: -1076731779
     Path: event:/BGM_InGame/BGM_InGame_3
+  tutorialBgm:
+    Guid:
+      Data1: -284459708
+      Data2: 1075504292
+      Data3: 1572043189
+      Data4: -1663156081
+    Path: event:/BGM_InGame/BGM_InGame_1
   loadingBgm:
     Guid:
       Data1: -1111977378
@@ -102,4 +110,22 @@ MonoBehaviour:
   defaultFadeInTime: 1
   gameBgmFadeInTime: 3
   gameBgmFadeOutTime: 3
-  gameBgmCooldownTime: 60
+  gameBgmCooldownTime: 30
+--- !u!114 &7245013787098741407
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4922650622587349759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff3d466975a069f42bb1a35e3f8af8e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  masterVCAPath: vca:/Master
+  musicVCAPath: vca:/Music
+  sfxVCAPath: vca:/SFX
+  defaultMasterVolume: 1
+  defaultMusicVolume: 1
+  defaultSFXVolume: 1

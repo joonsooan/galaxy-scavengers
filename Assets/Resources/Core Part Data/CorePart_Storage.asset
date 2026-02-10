@@ -28,4 +28,4 @@ MonoBehaviour:
     creditReward: 0
     unlockedBuildings: []
     newUnits: []
-  debuffValue: 0.75
+  debuffValue: 0.5

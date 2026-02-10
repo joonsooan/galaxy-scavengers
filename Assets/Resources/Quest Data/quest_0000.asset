@@ -20,8 +20,9 @@ MonoBehaviour:
   questInfo: "\uD0C8\uCD9C \uACFC\uC815\uC5D0\uC11C \uCF54\uC5B4 \uACA9\uB0A9\uACE0\uB294
     \uB2E4\uD589\uD788 \uBB34\uC0AC\uD588\uC9C0\uB9CC, \uD568\uC120\uC758 \uD575\uC2EC\uC801\uC778
     \uAD6C\uC870\uBB3C\uC5D0 \uC190\uC0C1\uC774 \uC0DD\uACA8 \uC5BC\uB9C8 \uBC84\uD2F0\uC9C0
-    \uBABB\uD560 \uAC83 \uAC19\uC2B5\uB2C8\uB2E4.\n\uD558\uB2E8\uC758 \uCF54\uC5B4
-    \uBC1C\uC0AC \uBC84\uD2BC\uC744 \uB20C\uB7EC \uCD9C\uBC1C\uD558\uC138\uC694."
+    \uBABB\uD560 \uAC83 \uAC19\uC2B5\uB2C8\uB2E4.\n\uD018\uC2A4\uD2B8 \uC218\uB77D
+    \uD6C4 \uD558\uB2E8\uC758 \uCF54\uC5B4 \uBC1C\uC0AC \uBC84\uD2BC\uC744 \uB20C\uB7EC
+    \uCD9C\uBC1C\uD558\uC138\uC694."
   requiredResources: []
   questCheckRequirements:
   - checkType: 6
@@ -33,6 +34,6 @@ MonoBehaviour:
   questFinishReward:
     resourceRewards: []
     moduleRewards: []
-    creditReward: 30
+    creditReward: 50
     unlockedBuildings: []
     newUnits: []

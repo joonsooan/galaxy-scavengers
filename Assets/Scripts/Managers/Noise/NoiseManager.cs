@@ -9,6 +9,7 @@ public class NoiseManager : MonoBehaviour
 
     [Header("Noise Settings")]
     [SerializeField] private float maxNoiseValue = 100f;
+    [SerializeField] private float timeBasedNoiseIncreasePerHour = 0f;
 
     [Header("Zone Thresholds (Percentage)")]
     [SerializeField] private float dangerThreshold = 100f;
@@ -26,6 +27,7 @@ public class NoiseManager : MonoBehaviour
     private readonly HashSet<UnitBase> _registeredUnits = new HashSet<UnitBase>();
     private float _barrierNoiseCoefficient;
     private float _totalNoise;
+    private float _lastCheckedElapsedHours = -1f;
 
     public bool IsCheatNoise100Active
     {
@@ -33,6 +35,8 @@ public class NoiseManager : MonoBehaviour
         {
 #if UNITY_EDITOR
             return useTestNoiseValue && testNoisePercentage >= 100f;
+#else
+            return false;
 #endif
         }
     }
@@ -49,9 +53,9 @@ public class NoiseManager : MonoBehaviour
         }
     }
 
-#if UNITY_EDITOR
     private void Update()
     {
+#if UNITY_EDITOR
         if (useTestNoiseValue)
         {
             if (Mathf.Abs(_lastTestNoisePercentage - testNoisePercentage) > 0.001f)
@@ -60,6 +64,7 @@ public class NoiseManager : MonoBehaviour
                 OnNoiseChanged?.Invoke(testNoisePercentage);
                 CheckAndLogZoneChange();
             }
+            return;
         }
         else if (_lastTestNoisePercentage >= 0f)
         {
@@ -68,8 +73,19 @@ public class NoiseManager : MonoBehaviour
             OnNoiseChanged?.Invoke(real);
             CheckAndLogZoneChange();
         }
-    }
 #endif
+
+        if (timeBasedNoiseIncreasePerHour > 0f && DayNightCycleManager.Instance != null)
+        {
+            float currentElapsedHours = DayNightCycleManager.Instance.GetTotalElapsedInGameHours();
+            
+            if (Mathf.Abs(currentElapsedHours - _lastCheckedElapsedHours) > 0.0001f)
+            {
+                RecalculateNoise();
+                _lastCheckedElapsedHours = currentElapsedHours;
+            }
+        }
+    }
 
     private void Awake()
     {
@@ -80,6 +96,14 @@ public class NoiseManager : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
+    }
+
+    private void Start()
+    {
+        if (timeBasedNoiseIncreasePerHour > 0f && DayNightCycleManager.Instance != null)
+        {
+            _lastCheckedElapsedHours = DayNightCycleManager.Instance.GetTotalElapsedInGameHours();
+        }
     }
 
     public void RegisterBuilding(Damageable building)
@@ -142,7 +166,14 @@ public class NoiseManager : MonoBehaviour
             }
         }
 
-        _totalNoise = buildingNoise + unitNoise + _barrierNoiseCoefficient;
+        float timeBasedNoise = 0f;
+        if (timeBasedNoiseIncreasePerHour > 0f && DayNightCycleManager.Instance != null)
+        {
+            float totalElapsedHours = DayNightCycleManager.Instance.GetTotalElapsedInGameHours();
+            timeBasedNoise = totalElapsedHours * timeBasedNoiseIncreasePerHour;
+        }
+
+        _totalNoise = buildingNoise + unitNoise + _barrierNoiseCoefficient + timeBasedNoise;
         _totalNoise = Mathf.Clamp(_totalNoise, 0f, maxNoiseValue);
 
         float pct = NoisePercentage;

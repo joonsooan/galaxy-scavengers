@@ -79,6 +79,7 @@ public class TutorialManager : MonoBehaviour
     private int _mouseWheelScrollCount;
 
     private int _numberKeyPressCount;
+    private float _lastTimeScale;
     private RectTransform _rect;
     private int _resourceBlockRevealCount;
     private int _resourceMinedAmount;
@@ -124,7 +125,9 @@ public class TutorialManager : MonoBehaviour
 
     private void Start()
     {
-        if (ShouldStartTutorial()) {
+        bool shouldStart = ShouldStartTutorial();
+
+        if (shouldStart) {
             InitializeTutorialSteps();
             StartCoroutine(WaitForGameInitialization());
         }
@@ -135,23 +138,58 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    public void CheckAndStartTutorialIfNeeded()
+    {
+        if (!_isTutorialActive && ShouldStartTutorial())
+        {
+            InitializeTutorialSteps();
+            StartCoroutine(WaitForGameInitialization());
+        }
+    }
+
     private void OnEnable()
     {
         UnitManager.OnMineableTypesChanged += OnMineableTypesChanged;
+        GameManager.OnGameSceneInitialized += OnGameSceneInitialized;
     }
 
     private void OnDisable()
     {
         UnitManager.OnMineableTypesChanged -= OnMineableTypesChanged;
+        GameManager.OnGameSceneInitialized -= OnGameSceneInitialized;
     }
 
-    private bool ShouldStartTutorial()
+    private void OnGameSceneInitialized()
+    {
+        if (!_isTutorialActive && ShouldStartTutorial())
+        {
+            InitializeTutorialSteps();
+            StartCoroutine(WaitForGameInitialization());
+        }
+    }
+
+    public bool ShouldStartTutorial()
     {
         if (QuestManager.Instance == null) {
+            Debug.LogWarning("[TutorialManager] ShouldStartTutorial: QuestManager.Instance is null");
             return false;
         }
 
-        return !QuestManager.Instance.IsQuestCompleted(firstQuestId);
+        if (firstQuestId < 0) {
+            Debug.LogWarning($"[TutorialManager] ShouldStartTutorial: firstQuestId is invalid ({firstQuestId})");
+            return false;
+        }
+
+        QuestData questData = QuestManager.Instance.GetQuestData(firstQuestId);
+        if (questData == null) {
+            Debug.LogWarning($"[TutorialManager] ShouldStartTutorial: Quest with ID {firstQuestId} not found");
+            return false;
+        }
+
+        bool isCompleted = QuestManager.Instance.IsQuestCompleted(firstQuestId);
+        bool shouldStart = !isCompleted;
+        
+        return shouldStart;
     }
 
     private IEnumerator WaitForGameInitialization()
@@ -202,6 +240,14 @@ public class TutorialManager : MonoBehaviour
 
     private void StartTutorial()
     {
+        if (CoreRepairManager.Instance != null) {
+            CoreRepairManager.Instance.ApplyDebuffsImmediately();
+        }
+
+        if (BgmManager.Instance != null) {
+            BgmManager.Instance.PlayTutorialBgm();
+        }
+
         _isTutorialActive = true;
         _currentStepIndex = 0;
 
@@ -332,12 +378,30 @@ public class TutorialManager : MonoBehaviour
         _lastMouseWheelValue = Input.mouseScrollDelta.y;
         if (GameManager.Instance != null) {
             _lastPausedState = GameManager.Instance.IsPaused;
+            _lastTimeScale = GameManager.Instance.GetTimeScale();
         }
     }
 
     private IEnumerator CheckStepCondition(TutorialStepData step)
     {
+        if (step == null)
+        {
+            yield break;
+        }
+
+        yield return null;
+
         while (_isWaitingForCondition) {
+            if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count)
+            {
+                yield break;
+            }
+
+            if (step != _tutorialSteps[_currentStepIndex])
+            {
+                yield break;
+            }
+
             bool conditionMet = false;
 
             switch (step.stepType) {
@@ -409,7 +473,18 @@ public class TutorialManager : MonoBehaviour
                 break;
 
             case TutorialStepType.NumberKeyPress:
-                if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Alpha3)) {
+                bool numberKeyPressed = Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Alpha3);
+                bool timeScaleChanged = false;
+
+                if (GameManager.Instance != null) {
+                    float currentTimeScale = GameManager.Instance.GetTimeScale();
+                    if (Mathf.Abs(currentTimeScale - _lastTimeScale) > 0.01f) {
+                        timeScaleChanged = true;
+                        _lastTimeScale = currentTimeScale;
+                    }
+                }
+
+                if (numberKeyPressed || timeScaleChanged) {
                     _numberKeyPressCount++;
                     if (_tutorialUI != null && step.showProgressBar) {
                         _tutorialUI.UpdateProgress((float)_numberKeyPressCount / step.count);
@@ -421,6 +496,9 @@ public class TutorialManager : MonoBehaviour
                 break;
 
             case TutorialStepType.ResourceMined:
+                if (step.count <= 0) {
+                    break;
+                }
                 if (_tutorialUI != null && step.showProgressBar) {
                     _tutorialUI.UpdateProgress((float)_resourceMinedAmount / step.count);
                 }
@@ -472,7 +550,10 @@ public class TutorialManager : MonoBehaviour
                 break;
 
             case TutorialStepType.UnitProduced:
-                if (_tutorialUI != null && step.showProgressBar && step.count > 0) {
+                if (step.count <= 0) {
+                    break;
+                }
+                if (_tutorialUI != null && step.showProgressBar) {
                     _tutorialUI.UpdateProgress((float)_unitProducedCount / step.count);
                 }
                 if (_unitProducedCount >= step.count) {
@@ -481,7 +562,10 @@ public class TutorialManager : MonoBehaviour
                 break;
 
             case TutorialStepType.ItemProduced:
-                if (_tutorialUI != null && step.showProgressBar && step.count > 0) {
+                if (step.count <= 0) {
+                    break;
+                }
+                if (_tutorialUI != null && step.showProgressBar) {
                     _tutorialUI.UpdateProgress((float)_itemProducedCount / step.count);
                 }
                 if (_itemProducedCount >= step.count) {
@@ -529,6 +613,7 @@ public class TutorialManager : MonoBehaviour
     public void OnResourceMined(ResourceType resourceType, int amount)
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
+        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
         if (currentStep.stepType == TutorialStepType.ResourceMined && currentStep.resourceType == resourceType) {
@@ -539,6 +624,7 @@ public class TutorialManager : MonoBehaviour
     public void OnBulletFired()
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
+        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
         if (currentStep.stepType == TutorialStepType.BulletFired) {
@@ -549,6 +635,7 @@ public class TutorialManager : MonoBehaviour
     public void OnResourceBlockRevealed()
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
+        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
         if (currentStep.stepType == TutorialStepType.ResourceBlockRevealed) {
@@ -559,6 +646,7 @@ public class TutorialManager : MonoBehaviour
     private void OnMineableTypesChanged(ResourceType[] newTypes)
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
+        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
         if (currentStep.stepType == TutorialStepType.MineableTypesChanged) {
@@ -569,6 +657,11 @@ public class TutorialManager : MonoBehaviour
     public bool IsTutorialActive()
     {
         return _isTutorialActive;
+    }
+
+    public int GetFirstQuestId()
+    {
+        return firstQuestId;
     }
 
     public TutorialStepData GetCurrentTutorialStep()
@@ -583,6 +676,7 @@ public class TutorialManager : MonoBehaviour
     public void OnBuildingPlaced(string buildingType)
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
+        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
         if (currentStep.stepType == TutorialStepType.BuildingPlaced && currentStep.buildingType == buildingType) {
@@ -593,6 +687,7 @@ public class TutorialManager : MonoBehaviour
     public void OnBuildingCompleted(string buildingType)
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
+        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
         if (currentStep.stepType == TutorialStepType.BuildingCompleted &&
@@ -604,6 +699,7 @@ public class TutorialManager : MonoBehaviour
     public void OnUnitProduced(string unitType)
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
+        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
         if (currentStep.stepType == TutorialStepType.UnitProduced && currentStep.unitType == unitType) {
@@ -614,6 +710,7 @@ public class TutorialManager : MonoBehaviour
     public void OnItemProduced(string itemType)
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
+        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
         if (currentStep.stepType == TutorialStepType.ItemProduced && currentStep.itemType == itemType) {
@@ -638,8 +735,8 @@ public class TutorialManager : MonoBehaviour
             _tutorialUI.HideTutorial();
         }
 
-        if (CoreRepairManager.Instance != null) {
-            CoreRepairManager.Instance.InitializeLanding();
+        if (BgmManager.Instance != null) {
+            BgmManager.Instance.PlayGameBgm();
         }
         
         OnTutorialEnded?.Invoke();
@@ -662,11 +759,7 @@ public class TutorialManager : MonoBehaviour
         if (_tutorialUI != null) {
             _tutorialUI.HideTutorial();
         }
-        
-        if (CoreRepairManager.Instance != null) {
-            CoreRepairManager.Instance.InitializeLanding();
-        }
-        
+
         OnTutorialEnded?.Invoke();
     }
 
@@ -756,7 +849,12 @@ public class TutorialManager : MonoBehaviour
 
     private void ShowAllUIPanels()
     {
-        foreach (GameObject panel in _uiPanels.Values) {
+        foreach (KeyValuePair<TutorialUIPanel, GameObject> entry in _uiPanels) {
+            if (entry.Key == TutorialUIPanel.ResourceInfoPanel) {
+                continue;
+            }
+
+            GameObject panel = entry.Value;
             if (panel != null) {
                 panel.SetActive(true);
             }
@@ -929,6 +1027,23 @@ public class TutorialManager : MonoBehaviour
             if (_currentArrowUI != null)
             {
                 _currentArrowUI.SetActive(true);
+            }
+        }
+        else
+        {
+            foreach (GameObject arrowObj in arrowUIObjects)
+            {
+                if (arrowObj != null)
+                {
+                    TutorialArrowUI arrowComponent = arrowObj.GetComponent<TutorialArrowUI>();
+                    if (arrowComponent != null && arrowComponent.ArrowID == step.arrowID)
+                    {
+                        _arrowUILookup[step.arrowID] = arrowObj;
+                        _currentArrowUI = arrowObj;
+                        _currentArrowUI.SetActive(true);
+                        break;
+                    }
+                }
             }
         }
     }

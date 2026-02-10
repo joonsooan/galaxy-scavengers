@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Free
   m_EditorClassIdentifier: 
   statModifiers:
-  - statType: 0
-    modifierValue: 0
+  - statType: 1
+    modifierValue: 0.1
     statIcon: {fileID: 0}
   effectDescription: "\uD6A8\uACFC \uC5C6\uC74C"

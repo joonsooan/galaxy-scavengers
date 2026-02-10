@@ -14,10 +14,10 @@ GameObject:
   - component: {fileID: -2104743701757568428}
   - component: {fileID: -6680051952931401167}
   - component: {fileID: 1036474081810028208}
-  - component: {fileID: -8380313627106497889}
   - component: {fileID: -1387882417002535567}
   - component: {fileID: -2937795073857346507}
   - component: {fileID: -4071401818300738447}
+  - component: {fileID: 847998970628725096}
   m_Layer: 0
   m_Name: Main Structure
   m_TagString: Untagged
@@ -214,57 +214,6 @@ MonoBehaviour:
   isActive: 1
   hasOffest: 0
   offest: {x: 0.5, y: 0.5, z: 0}
---- !u!114 &-8380313627106497889
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1574451153020646121}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9ec1df84bfb0b3a4692b5f929817cde3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  inventoryPanel: {fileID: 0}
-  inventoryGridContainer: {fileID: 0}
-  currentResourcePanel: {fileID: 0}
-  sortButton: {fileID: 0}
-  inventoryCellPrefab: {fileID: 3842191235755297668, guid: 0c93dfd6b41a96d4489a92b302206a7f, type: 3}
-  resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: 25b8419de43c1984fb45df6c7a910ba5, type: 3}
-  inventoryWidth: 4
-  inventoryHeight: 5
-  baseCellCount: 20
-  defaultMaxStackAmount: 100
-  customMaxStackAmounts:
-  - resourceType: 0
-    maxStackAmount: 200
-  - resourceType: 1
-    maxStackAmount: 100
-  - resourceType: 2
-    maxStackAmount: 100
-  - resourceType: 3
-    maxStackAmount: 100
-  - resourceType: 4
-    maxStackAmount: 100
-  - resourceType: 5
-    maxStackAmount: 50
-  - resourceType: 6
-    maxStackAmount: 50
-  - resourceType: 7
-    maxStackAmount: 50
-  - resourceType: 8
-    maxStackAmount: 50
-  - resourceType: 9
-    maxStackAmount: 50
-  - resourceType: 10
-    maxStackAmount: 50
-  - resourceType: 11
-    maxStackAmount: 50
-  - resourceType: 12
-    maxStackAmount: 50
-  - resourceType: 13
-    maxStackAmount: 50
 --- !u!114 &-1387882417002535567
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -302,6 +251,58 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1569e9822679a2e44beb718c5445e9f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &847998970628725096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1574451153020646121}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ec1df84bfb0b3a4692b5f929817cde3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventoryPanel: {fileID: 0}
+  inventoryGridContainer: {fileID: 0}
+  currentResourcePanel: {fileID: 0}
+  sortButton: {fileID: 0}
+  launchStartButton: {fileID: 0}
+  inventoryCellPrefab: {fileID: 3842191235755297668, guid: 0c93dfd6b41a96d4489a92b302206a7f, type: 3}
+  resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: 25b8419de43c1984fb45df6c7a910ba5, type: 3}
+  inventoryWidth: 4
+  inventoryHeight: 5
+  baseCellCount: 10
+  defaultMaxStackAmount: 100
+  customMaxStackAmounts:
+  - resourceType: 0
+    maxStackAmount: 200
+  - resourceType: 1
+    maxStackAmount: 100
+  - resourceType: 2
+    maxStackAmount: 100
+  - resourceType: 3
+    maxStackAmount: 100
+  - resourceType: 4
+    maxStackAmount: 100
+  - resourceType: 5
+    maxStackAmount: 50
+  - resourceType: 6
+    maxStackAmount: 50
+  - resourceType: 7
+    maxStackAmount: 50
+  - resourceType: 8
+    maxStackAmount: 50
+  - resourceType: 9
+    maxStackAmount: 50
+  - resourceType: 10
+    maxStackAmount: 50
+  - resourceType: 11
+    maxStackAmount: 50
+  - resourceType: 12
+    maxStackAmount: 50
+  - resourceType: 13
+    maxStackAmount: 50
 --- !u!1 &8824343039523175855
 GameObject:
   m_ObjectHideFlags: 0
