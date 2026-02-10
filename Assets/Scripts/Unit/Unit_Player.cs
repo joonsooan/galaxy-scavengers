@@ -65,14 +65,8 @@ public class Unit_Player : UnitBase
     private void Update()
     {
         if (!_isBulletFiringEnabled) {
-            if (TutorialManager.Instance == null || !TutorialManager.Instance.IsTutorialActive()) {
+            if (CanEnableBulletFiring()) {
                 _isBulletFiringEnabled = true;
-            }
-            else {
-                TutorialStepData currentStep = TutorialManager.Instance.GetCurrentTutorialStep();
-                if (currentStep != null && currentStep.stepType == TutorialStepType.BulletFired) {
-                    _isBulletFiringEnabled = true;
-                }
             }
         }
 
@@ -480,6 +474,27 @@ public class Unit_Player : UnitBase
         }
     }
 
+    private bool CanEnableBulletFiring()
+    {
+        if (TutorialManager.Instance == null) {
+            return true;
+        }
+
+        if (!TutorialManager.Instance.ShouldStartTutorial()) {
+            return true;
+        }
+
+        if (!TutorialManager.Instance.IsTutorialActive()) {
+            return false;
+        }
+
+        if (TutorialManager.Instance.HasReachedStepType(TutorialStepType.BulletFired)) {
+            return true;
+        }
+
+        return false;
+    }
+
     private void TryFireBullet(Vector3 targetPosition)
     {
         if (Time.time - _lastFireTime < fireInterval)
@@ -489,18 +504,11 @@ public class Unit_Player : UnitBase
             return;
 
         if (!_isBulletFiringEnabled) {
-            if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive()) {
-                TutorialStepData currentStep = TutorialManager.Instance.GetCurrentTutorialStep();
-                if (currentStep != null && currentStep.stepType == TutorialStepType.BulletFired) {
-                    _isBulletFiringEnabled = true;
-                }
-                else {
-                    return;
-                }
+            if (!CanEnableBulletFiring()) {
+                return;
             }
-            else {
-                _isBulletFiringEnabled = true;
-            }
+
+            _isBulletFiringEnabled = true;
         }
 
         Vector2 fireDirection = (targetPosition - transform.position).normalized;

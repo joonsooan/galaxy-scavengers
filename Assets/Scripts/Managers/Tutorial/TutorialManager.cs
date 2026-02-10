@@ -672,6 +672,27 @@ public class TutorialManager : MonoBehaviour
         }
         return null;
     }
+    
+    public bool HasReachedStepType(TutorialStepType stepType)
+    {
+        if (_tutorialSteps == null || _tutorialSteps.Count == 0) {
+            return false;
+        }
+        
+        if (_currentStepIndex < 0) {
+            return false;
+        }
+        
+        int lastIndex = Mathf.Min(_currentStepIndex, _tutorialSteps.Count - 1);
+        for (int i = 0; i <= lastIndex; i++) {
+            TutorialStepData step = _tutorialSteps[i];
+            if (step != null && step.stepType == stepType) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
 
     public void OnBuildingPlaced(string buildingType)
     {
