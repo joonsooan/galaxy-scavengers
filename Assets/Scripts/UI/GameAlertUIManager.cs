@@ -20,8 +20,6 @@ public enum GameAlertType
 
 public class GameAlertUIManager : MonoBehaviour
 {
-    public static GameAlertUIManager Instance { get; private set; }
-
     [SerializeField] private GameObject minerNoResourceCell;
     [SerializeField] private GameObject unitUnderAttackCell;
     [SerializeField] private GameObject buildingUnderAttackCell;
@@ -82,14 +80,6 @@ public class GameAlertUIManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-
-        Instance = this;
-
         SetAllInactive();
     }
 
@@ -242,7 +232,6 @@ public class GameAlertUIManager : MonoBehaviour
 
     public void SetAlertActive(GameAlertType type, bool active)
     {
-        if (Instance == null) return;
 
         switch (type)
         {

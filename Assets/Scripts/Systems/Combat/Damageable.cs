@@ -93,7 +93,8 @@ public abstract class Damageable : MonoBehaviour, ICombo
     
     private void RegisterAttackAlert()
     {
-        if (GameAlertUIManager.Instance == null) return;
+        var alertManager = FindFirstObjectByType<GameAlertUIManager>();
+        if (alertManager == null) return;
         
         if (this is UnitBase unitBase)
         {
@@ -109,12 +110,12 @@ public abstract class Damageable : MonoBehaviour, ICombo
         {
             if (this is UnitBase)
             {
-                GameAlertUIManager.Instance.RegisterAlert(GameAlertType.UnitUnderAttack, this);
+                alertManager.RegisterAlert(GameAlertType.UnitUnderAttack, this);
                 _isAttackAlertRegistered = true;
             }
             else
             {
-                GameAlertUIManager.Instance.RegisterAlert(GameAlertType.BuildingUnderAttack, this);
+                alertManager.RegisterAlert(GameAlertType.BuildingUnderAttack, this);
                 _isAttackAlertRegistered = true;
             }
         }
@@ -142,7 +143,8 @@ public abstract class Damageable : MonoBehaviour, ICombo
     
     private void UnregisterAttackAlert()
     {
-        if (GameAlertUIManager.Instance == null || !_isAttackAlertRegistered) return;
+        var alertManager = FindFirstObjectByType<GameAlertUIManager>();
+        if (alertManager == null || !_isAttackAlertRegistered) return;
         
         if (_attackAlertTimerCoroutine != null)
         {
@@ -152,11 +154,11 @@ public abstract class Damageable : MonoBehaviour, ICombo
         
         if (this is UnitBase)
         {
-            GameAlertUIManager.Instance.UnregisterAlert(GameAlertType.UnitUnderAttack, this);
+            alertManager.UnregisterAlert(GameAlertType.UnitUnderAttack, this);
         }
         else
         {
-            GameAlertUIManager.Instance.UnregisterAlert(GameAlertType.BuildingUnderAttack, this);
+            alertManager.UnregisterAlert(GameAlertType.BuildingUnderAttack, this);
         }
         
         _isAttackAlertRegistered = false;

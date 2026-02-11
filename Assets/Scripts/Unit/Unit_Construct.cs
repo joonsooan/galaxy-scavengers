@@ -616,10 +616,17 @@ public class Unit_Construct : UnitBase
         return 1f;
     }
 
+    public void NotifySiteDestroyed(ConstructionSite site)
+    {
+        if (_currentRequest == null || _currentRequest.site != site) return;
+        ReleaseFromConstruction();
+    }
+
     private void ReleaseFromConstruction()
     {
         StopConstructionParticles();
         StopSiteAnimation();
+        HideProgressBar();
 
         if (_currentRequest != null) {
             _currentRequest.site?.CancelRequest(_currentRequest);
@@ -631,9 +638,47 @@ public class Unit_Construct : UnitBase
             _currentConstructionSite = null;
         }
 
+        if (_carriedAmount > 0 && ResourceManager.Instance != null) {
+            ReturnCarriedResourcesToStorage();
+        }
+
+        _carriedAmount = 0;
+        _carriedResourceType = default;
+
         StopAllCoroutines();
         _loadingCoroutine = null;
         _unloadingCoroutine = null;
+    }
+
+    private void ReturnCarriedResourcesToStorage()
+    {
+        if (_carriedAmount <= 0 || ResourceManager.Instance == null) return;
+
+        List<IStorage> storages = ResourceManager.Instance.GetAllStorages();
+        if (storages == null || storages.Count == 0) return;
+
+        List<IStorage> availableStorages = new List<IStorage>();
+        foreach (IStorage s in storages) {
+            if (s != null && s.GetTotalCurrentAmount() < s.GetMaxCapacity())
+                availableStorages.Add(s);
+        }
+
+        availableStorages.Sort((a, b) => Vector3.Distance(transform.position, a.GetPosition())
+            .CompareTo(Vector3.Distance(transform.position, b.GetPosition())));
+
+        int remaining = _carriedAmount;
+        foreach (IStorage storage in availableStorages) {
+            if (remaining <= 0) break;
+
+            int beforeAmount = storage.GetCurrentResourceAmount(_carriedResourceType);
+            bool added = storage.TryAddResource(_carriedResourceType, remaining);
+            int afterAmount = storage.GetCurrentResourceAmount(_carriedResourceType);
+            int actuallyAdded = afterAmount - beforeAmount;
+
+            if (added && actuallyAdded > 0) {
+                remaining -= actuallyAdded;
+            }
+        }
     }
 
     private void AdjustConstructionDirection(Vector3 targetPosition)

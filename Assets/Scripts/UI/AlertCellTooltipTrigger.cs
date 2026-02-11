@@ -5,6 +5,7 @@ public class AlertCellTooltipTrigger : MonoBehaviour, IPointerEnterHandler, IPoi
 {
     [SerializeField] private GameAlertType alertType;
     private AlertCellAppearance _appearance;
+    private GameAlertUIManager _alertManager;
 
     private void Awake()
     {
@@ -13,20 +14,20 @@ public class AlertCellTooltipTrigger : MonoBehaviour, IPointerEnterHandler, IPoi
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (GameAlertUIManager.Instance != null)
-            GameAlertUIManager.Instance.ShowTooltip(alertType);
+        if ((_alertManager ??= FindFirstObjectByType<GameAlertUIManager>()) != null)
+            _alertManager.ShowTooltip(alertType);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        if (GameAlertUIManager.Instance != null)
-            GameAlertUIManager.Instance.HideTooltip();
+        if ((_alertManager ??= FindFirstObjectByType<GameAlertUIManager>()) != null)
+            _alertManager.HideTooltip();
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (GameAlertUIManager.Instance == null)
+        if ((_alertManager ??= FindFirstObjectByType<GameAlertUIManager>()) == null)
             return;
-        GameAlertUIManager.Instance.TryFocusAlert(alertType);
+        _alertManager.TryFocusAlert(alertType);
     }
 }

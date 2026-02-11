@@ -339,6 +339,45 @@ public class ConstructionSite : MonoBehaviour
         }
         return true;
     }
+
+    public bool HasAnyConstructedPieces()
+    {
+        foreach (var constructed in _constructedPieces.Values)
+        {
+            if (constructed) return true;
+        }
+        return false;
+    }
+
+    public Dictionary<ResourceType, int> GetConstructedPiecesCost()
+    {
+        Dictionary<ResourceType, int> result = new Dictionary<ResourceType, int>();
+        if (buildingData == null || buildingData.recipe == null) return result;
+
+        BuildingPieceData[] all = Resources.LoadAll<BuildingPieceData>("Building Pieces");
+        Dictionary<BuildingPieceType, BuildingPieceData> map = new Dictionary<BuildingPieceType, BuildingPieceData>();
+        foreach (var data in all)
+        {
+            if (data.buildingPieceType != BuildingPieceType.None && !map.ContainsKey(data.buildingPieceType))
+                map[data.buildingPieceType] = data;
+        }
+
+        foreach (var piece in buildingData.recipe)
+        {
+            Vector3Int pieceCell = cellPosition + piece.relativePosition;
+            if (!IsPieceConstructed(pieceCell)) continue;
+            if (!map.TryGetValue(piece.buildingPieceType, out BuildingPieceData pieceData) || pieceData.costs == null) continue;
+
+            foreach (var cost in pieceData.costs)
+            {
+                if (result.ContainsKey(cost.resourceType))
+                    result[cost.resourceType] += cost.amount;
+                else
+                    result[cost.resourceType] = cost.amount;
+            }
+        }
+        return result;
+    }
     
     public ConstructionRequest GetAndAssignNextResourceRequest(Unit_Construct drone, int droneCapacity)
     {

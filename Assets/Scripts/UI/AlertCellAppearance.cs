@@ -4,12 +4,6 @@ using UnityEngine.UI;
 
 public class AlertCellAppearance : MonoBehaviour
 {
-    [SerializeField] private float dropOffset = 80f;
-    [SerializeField] private float dropDuration = 0.4f;
-    [SerializeField] private Ease dropEase = Ease.OutQuad;
-    [SerializeField] private float pulseAlphaDuration = 0.15f;
-    [SerializeField] private float fadeOutDuration = 0.35f;
-
     private RectTransform _rectTransform;
     private Vector2 _restPosition;
     private Image _panelImage;

@@ -141,7 +141,18 @@ public class AreaBuildingDestroyer : MonoBehaviour
         if (_hasMoved)
         {
             _wasJustFinishedAreaDrag = true;
-            DestroyBuildingsInArea();
+            HashSet<Vector3Int> cellsCopy = new HashSet<Vector3Int>(_selectedCells);
+            List<DemolishTarget> targets = CollectDemolishTargets(cellsCopy, out List<ConstructionSite> sitesToDestroyImmediately);
+            DestroyEmptyConstructionSitesImmediately(sitesToDestroyImmediately);
+            DemolishConfirmUIManager demolishUI = FindFirstObjectByType<DemolishConfirmUIManager>();
+            if (targets.Count > 0 && demolishUI != null)
+            {
+                demolishUI.Show(cellsCopy, targets);
+            }
+            else if (targets.Count > 0)
+            {
+                ExecuteDemolish(cellsCopy);
+            }
         }
         
         ClearSelectionVisual();
@@ -246,22 +257,183 @@ public class AreaBuildingDestroyer : MonoBehaviour
         
         return false;
     }
+
+    public void ExecuteDemolish(HashSet<Vector3Int> cells)
+    {
+        DestroyBuildingsInArea(cells);
+    }
+
+    private List<DemolishTarget> CollectDemolishTargets(HashSet<Vector3Int> selectedCells, out List<ConstructionSite> sitesToDestroyImmediately)
+    {
+        sitesToDestroyImmediately = new List<ConstructionSite>();
+        List<DemolishTarget> targets = new List<DemolishTarget>();
+        HashSet<Vector3Int> seenAnchors = new HashSet<Vector3Int>();
+        HashSet<ConstructionSite> seenSites = new HashSet<ConstructionSite>();
+        HashSet<Vector3Int> seenPieceCells = new HashSet<Vector3Int>();
+
+        foreach (Vector3Int cell in selectedCells)
+        {
+            if (_buildingManager.IsMainStructureCell(cell))
+                continue;
+
+            if (_buildingManager.GetBuildingAt(cell, out _))
+            {
+                Vector3Int anchor = GetAnchorForCell(cell);
+                if (!seenAnchors.Add(anchor))
+                    continue;
+
+                BuildingPiece piece = _buildingManager.GetPieceAt(cell);
+                BuildingData data = null;
+                if (piece != null)
+                {
+                    BuildingDataHolder holder = piece.GetComponent<BuildingDataHolder>();
+                    if (holder != null && holder.buildingData != null)
+                        data = holder.buildingData;
+                }
+                if (data == null)
+                    data = _buildingManager.GetBuildingDataAt(anchor);
+
+                if (data != null)
+                {
+                    string name = !string.IsNullOrEmpty(data.displayName) ? data.displayName : data.name;
+                    targets.Add(new DemolishTarget
+                    {
+                        displayName = name,
+                        anchorCell = anchor,
+                        buildingData = data,
+                        isConstructionSite = false
+                    });
+                }
+                else if (piece != null && !seenPieceCells.Contains(cell))
+                {
+                    seenPieceCells.Add(cell);
+                    BuildingPieceData pieceData = GetBuildingPieceData(piece.buildingPieceType);
+                    if (pieceData != null)
+                    {
+                        string name = !string.IsNullOrEmpty(pieceData.displayName) ? pieceData.displayName : pieceData.name;
+                        targets.Add(new DemolishTarget
+                        {
+                            displayName = name,
+                            anchorCell = cell,
+                            buildingData = null,
+                            buildingPieceType = piece.buildingPieceType,
+                            isConstructionSite = false
+                        });
+                    }
+                }
+            }
+            else if (HasBuildingAt(cell))
+            {
+                BuildingPiece piece = _buildingManager.GetPieceAt(cell);
+                if (piece != null && !seenPieceCells.Contains(cell))
+                {
+                    seenPieceCells.Add(cell);
+                    BuildingPieceData pieceData = GetBuildingPieceData(piece.buildingPieceType);
+                    if (pieceData != null)
+                    {
+                        string name = !string.IsNullOrEmpty(pieceData.displayName) ? pieceData.displayName : pieceData.name;
+                        targets.Add(new DemolishTarget
+                        {
+                            displayName = name,
+                            anchorCell = cell,
+                            buildingData = null,
+                            buildingPieceType = piece.buildingPieceType,
+                            isConstructionSite = false
+                        });
+                    }
+                }
+            }
+        }
+
+        ConstructionSite[] allSites = FindObjectsByType<ConstructionSite>(FindObjectsSortMode.None);
+        foreach (ConstructionSite site in allSites)
+        {
+            if (site == null || seenSites.Contains(site)) continue;
+
+            bool overlap = false;
+            if (selectedCells.Contains(site.cellPosition))
+            {
+                overlap = true;
+            }
+            else if (site.buildingData != null && site.buildingData.recipe != null)
+            {
+                foreach (var piece in site.buildingData.recipe)
+                {
+                    Vector3Int pieceCell = site.cellPosition + piece.relativePosition;
+                    if (selectedCells.Contains(pieceCell))
+                    {
+                        overlap = true;
+                        break;
+                    }
+                }
+            }
+
+            if (overlap)
+            {
+                seenSites.Add(site);
+                if (!site.HasAnyConstructedPieces())
+                {
+                    sitesToDestroyImmediately.Add(site);
+                }
+                else
+                {
+                    string name = "Construction";
+                    if (site.buildingData != null)
+                        name = !string.IsNullOrEmpty(site.buildingData.displayName) ? site.buildingData.displayName : site.buildingData.name;
+                    Dictionary<ResourceType, int> refund = site.GetConstructedPiecesCost();
+                    targets.Add(new DemolishTarget
+                    {
+                        displayName = name,
+                        anchorCell = site.cellPosition,
+                        buildingData = site.buildingData,
+                        isConstructionSite = true,
+                        constructionSite = site,
+                        preCalculatedRefund = refund
+                    });
+                }
+            }
+        }
+
+        return targets;
+    }
+
+    private Vector3Int GetAnchorForCell(Vector3Int cell)
+    {
+        if (_buildingManager.GetBuildingAt(cell, out List<Vector3Int> _))
+        {
+            BuildingPiece piece = _buildingManager.GetPieceAt(cell);
+            if (piece != null)
+                return piece.cellPosition;
+        }
+        return default;
+    }
+
+    private static BuildingPieceData GetBuildingPieceData(BuildingPieceType type)
+    {
+        if (type == BuildingPieceType.None) return null;
+        BuildingPieceData[] all = Resources.LoadAll<BuildingPieceData>("Building Pieces");
+        foreach (var data in all)
+        {
+            if (data.buildingPieceType == type)
+                return data;
+        }
+        return null;
+    }
     
-    private void DestroyBuildingsInArea()
+    private void DestroyBuildingsInArea(HashSet<Vector3Int> selectedCells)
     {
         if (_buildingManager == null) return;
         
         HashSet<Vector3Int> buildingsToDestroy = new HashSet<Vector3Int>();
         HashSet<GameObject> storagesToClear = new HashSet<GameObject>();
         
-        foreach (Vector3Int cell in _selectedCells)
+        foreach (Vector3Int cell in selectedCells)
         {
             if (_buildingManager.IsMainStructureCell(cell))
             {
                 continue;
             }
             
-            // Storage 자원 버림
             if (HasBuildingAt(cell))
             {
                 BuildingPiece piece = _buildingManager.GetPieceAt(cell);
@@ -297,17 +469,17 @@ public class AreaBuildingDestroyer : MonoBehaviour
             }
         }
         
-        DestroyConstructionSitesInArea();
+        DestroyConstructionSitesInArea(selectedCells);
         
         foreach (Vector3Int cell in buildingsToDestroy)
         {
             _buildingManager.ClearBuildingDataAt(cell);
         }
         
-        DestroyBeaconsInArea();
+        DestroyBeaconsInArea(selectedCells);
     }
     
-    private void DestroyConstructionSitesInArea()
+    private void DestroyConstructionSitesInArea(HashSet<Vector3Int> cells)
     {
         if (_grid == null) return;
         
@@ -319,7 +491,7 @@ public class AreaBuildingDestroyer : MonoBehaviour
             if (site == null) continue;
             
             Vector3Int siteCell = site.cellPosition;
-            if (_selectedCells.Contains(siteCell))
+            if (cells.Contains(siteCell))
             {
                 sitesToDestroy.Add(site);
             }
@@ -330,7 +502,7 @@ public class AreaBuildingDestroyer : MonoBehaviour
                     foreach (var piece in site.buildingData.recipe)
                     {
                         Vector3Int pieceCell = siteCell + piece.relativePosition;
-                        if (_selectedCells.Contains(pieceCell))
+                        if (cells.Contains(pieceCell))
                         {
                             sitesToDestroy.Add(site);
                             break;
@@ -350,6 +522,19 @@ public class AreaBuildingDestroyer : MonoBehaviour
         }
     }
     
+    private void DestroyEmptyConstructionSitesImmediately(List<ConstructionSite> sites)
+    {
+        if (sites == null) return;
+        foreach (ConstructionSite site in sites)
+        {
+            if (site != null)
+            {
+                CancelConstructionSite(site);
+                Destroy(site.gameObject);
+            }
+        }
+    }
+
     private void CancelConstructionSite(ConstructionSite site)
     {
         Unit_Construct[] allConstructUnits = FindObjectsByType<Unit_Construct>(FindObjectsSortMode.None);
@@ -357,6 +542,7 @@ public class AreaBuildingDestroyer : MonoBehaviour
         {
             if (unit != null)
             {
+                unit.NotifySiteDestroyed(site);
                 site.ReleaseDrone(unit);
             }
         }
@@ -381,7 +567,7 @@ public class AreaBuildingDestroyer : MonoBehaviour
         }
     }
     
-    private void DestroyBeaconsInArea()
+    private void DestroyBeaconsInArea(HashSet<Vector3Int> cells)
     {
         List<Beacon> beaconsToDestroy = new List<Beacon>();
         Beacon[] allBeacons = FindObjectsByType<Beacon>(FindObjectsSortMode.None);
@@ -392,7 +578,7 @@ public class AreaBuildingDestroyer : MonoBehaviour
             
             Vector3Int beaconCell = _grid.WorldToCell(beacon.transform.position);
             
-            if (_selectedCells.Contains(beaconCell))
+            if (cells.Contains(beaconCell))
             {
                 beaconsToDestroy.Add(beacon);
             }

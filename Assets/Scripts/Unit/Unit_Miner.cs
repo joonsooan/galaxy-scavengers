@@ -91,7 +91,7 @@ public class Unit_Miner : UnitBase
         base.OnDisable();
         UnsubscribeEvents();
         if (_noResourceAlertActive) {
-            GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.MinerNoResource, this);
+            FindFirstObjectByType<GameAlertUIManager>()?.UnregisterAlert(GameAlertType.MinerNoResource, this);
             _noResourceAlertActive = false;
         }
     }
@@ -99,7 +99,7 @@ public class Unit_Miner : UnitBase
     protected override void OnDestroy()
     {
         if (_noResourceAlertActive) {
-            GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.MinerNoResource, this);
+            FindFirstObjectByType<GameAlertUIManager>()?.UnregisterAlert(GameAlertType.MinerNoResource, this);
             _noResourceAlertActive = false;
         }
         StopMiningVibration();
@@ -335,7 +335,7 @@ public class Unit_Miner : UnitBase
     {
         if (_currentCarryAmounts.Values.Sum() > 0) {
             if (_noResourceAlertActive) {
-                GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.MinerNoResource, this);
+                FindFirstObjectByType<GameAlertUIManager>()?.UnregisterAlert(GameAlertType.MinerNoResource, this);
                 _noResourceAlertActive = false;
             }
             GoToStorage();
@@ -356,7 +356,7 @@ public class Unit_Miner : UnitBase
                 if (unitMovement.SetNewTarget(BuildingManager.Instance.grid.GetCellCenterWorld(_targetMiningCell))) {
                     currentState = UnitState.Moving;
                     if (_noResourceAlertActive) {
-                        GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.MinerNoResource, this);
+                        FindFirstObjectByType<GameAlertUIManager>()?.UnregisterAlert(GameAlertType.MinerNoResource, this);
                         _noResourceAlertActive = false;
                     }
                 }
@@ -376,7 +376,7 @@ public class Unit_Miner : UnitBase
             _targetResourceNode = null;
             currentState = UnitState.Idle;
             if (!_noResourceAlertActive) {
-                GameAlertUIManager.Instance?.RegisterAlert(GameAlertType.MinerNoResource, this);
+                FindFirstObjectByType<GameAlertUIManager>()?.RegisterAlert(GameAlertType.MinerNoResource, this);
                 _noResourceAlertActive = true;
             }
         }
