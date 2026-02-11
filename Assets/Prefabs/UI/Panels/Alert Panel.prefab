@@ -150,6 +150,7 @@ GameObject:
   - component: {fileID: 8067440897203084835}
   - component: {fileID: 3864970575395246012}
   - component: {fileID: 3864970575395246013}
+  - component: {fileID: 1636966286080670921}
   m_Layer: 5
   m_Name: Alert Panel
   m_TagString: Untagged
@@ -289,3 +290,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   alertType: 0
+--- !u!114 &1636966286080670921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7137143227214268094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f773253efb55a164ba538a657419fd8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverSound:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  clickSound:
+    Guid:
+      Data1: 199913248
+      Data2: 1202326804
+      Data3: -537020530
+      Data4: 1684792045
+    Path: event:/SFX_UIHover

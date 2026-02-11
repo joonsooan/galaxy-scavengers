@@ -141,7 +141,8 @@ public class GameSceneQuestUIManager : MonoBehaviour
 
         if (Input.GetMouseButtonUp(1))
         {
-            if (_isPanelOpen && questPanel != null && questPanel.activeSelf)
+            bool listVisible = questCellGridParent != null && questCellGridParent.gameObject.activeSelf;
+            if (_isPanelOpen && listVisible)
             {
                 if (GameManager.Instance != null && GameManager.Instance.IsDragging())
                 {

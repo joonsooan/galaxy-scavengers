@@ -377,6 +377,7 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
             QuestDataManager.Instance.OnQuestStateChanged += OnQuestStateChanged;
         }
 
+        yield return null;
         UpdateLaunchButtonState();
     }
 

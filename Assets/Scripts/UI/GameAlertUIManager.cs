@@ -12,7 +12,10 @@ public enum GameAlertType
     BuildingUnderAttack,
     DroneNoResource,
     StorageFull,
-    AetherStorageFull
+    AetherStorageFull,
+    NoiseCaution,
+    NoiseWarning,
+    NoiseDanger
 }
 
 public class GameAlertUIManager : MonoBehaviour
@@ -36,6 +39,9 @@ public class GameAlertUIManager : MonoBehaviour
     [SerializeField] private EventReference droneNoResourceSound;
     [SerializeField] private EventReference storageFullSound;
     [SerializeField] private EventReference aetherStorageFullSound;
+    [SerializeField] private EventReference noiseCautionSound;
+    [SerializeField] private EventReference noiseWarningSound;
+    [SerializeField] private EventReference noiseDangerSound;
 
     [Header("Tooltip")]
     [SerializeField] private GameObject tooltipPanel;
@@ -47,6 +53,12 @@ public class GameAlertUIManager : MonoBehaviour
     private const string TooltipDroneNoResource = "가공 유닛이 가공할 자원이 없습니다.";
     private const string TooltipStorageFull = "모든 저장 공간이 가득 찼습니다!\n저장고를 더 건설해주세요.";
     private const string TooltipAetherStorageFull = "모든 에테르 저장고가 가득 찼습니다!\n저장고나 배터리를 더 건설해주세요.";
+    private const string ToolTipNoiseCaution = "소음 정도 : 주의\n적의 습격에 대비하세요!";
+    private const string ToolTipNoiseWarning = "소음 정도 : 경고\n적의 습격에 대비하세요!";
+    private const string ToolTipNoiseDanger = "소음 정도 : 위험\n적의 습격에 대비하세요!";
+
+    private const string ToolTipExtraTextUnit = "(클릭해서 유닛으로 이동)";
+    private const string ToolTipExtraTextBuilding = "(클릭해서 건물로 이동)";
 
     private GameAlertType? _currentTooltipType;
 
@@ -104,9 +116,27 @@ public class GameAlertUIManager : MonoBehaviour
         if (NoiseManager.Instance == null) return;
 
         NoiseManager.NoiseZone zone = NoiseManager.Instance.GetCurrentNoiseZone();
-        if (noiseCautionCell != null) noiseCautionCell.SetActive(zone == NoiseManager.NoiseZone.Caution);
-        if (noiseWarningCell != null) noiseWarningCell.SetActive(zone == NoiseManager.NoiseZone.Warning);
-        if (noiseDangerCell != null) noiseDangerCell.SetActive(zone == NoiseManager.NoiseZone.Danger);
+        if (noiseCautionCell != null)
+        {
+            bool cautionActive = zone == NoiseManager.NoiseZone.Caution;
+            if (cautionActive && !noiseCautionCell.activeSelf && !noiseCautionSound.IsNull)
+                RuntimeManager.PlayOneShot(noiseCautionSound);
+            noiseCautionCell.SetActive(cautionActive);
+        }
+        if (noiseWarningCell != null)
+        {
+            bool warningActive = zone == NoiseManager.NoiseZone.Warning;
+            if (warningActive && !noiseWarningCell.activeSelf && !noiseWarningSound.IsNull)
+                RuntimeManager.PlayOneShot(noiseWarningSound);
+            noiseWarningCell.SetActive(warningActive);
+        }
+        if (noiseDangerCell != null)
+        {
+            bool dangerActive = zone == NoiseManager.NoiseZone.Danger;
+            if (dangerActive && !noiseDangerCell.activeSelf && !noiseDangerSound.IsNull)
+                RuntimeManager.PlayOneShot(noiseDangerSound);
+            noiseDangerCell.SetActive(dangerActive);
+        }
     }
 
     public void RegisterAlert(GameAlertType type)
@@ -345,24 +375,29 @@ public class GameAlertUIManager : MonoBehaviour
     {
         if (tooltipText == null) return;
         string header = GetTooltipHeader(type);
+        string extraText = GetToolTipExtraText(type);
         List<Damageable> sources = GetSourcesForType(type);
         var names = new List<string>();
+        
         foreach (Damageable d in sources)
         {
             if (d == null) continue;
             string name = GetDisplayName(d);
             if (!string.IsNullOrEmpty(name)) names.Add(name);
         }
-        if (type == GameAlertType.StorageFull || type == GameAlertType.AetherStorageFull)
+        
+        if (type == GameAlertType.StorageFull || type == GameAlertType.AetherStorageFull ||
+            type == GameAlertType.NoiseCaution || type == GameAlertType.NoiseWarning || type == GameAlertType.NoiseDanger)
             tooltipText.text = header;
         else if (names.Count > 0)
-            tooltipText.text = header + "\n" + string.Join("\n", names.ConvertAll(n => "- " + n));
+            tooltipText.text = header + "\n" + string.Join("\n", names.ConvertAll(n => "- " + n)) + "\n" + extraText;
         else
             tooltipText.text = header;
+        
         RebuildTooltipLayout();
     }
 
-    private static string GetTooltipHeader(GameAlertType type)
+    private string GetTooltipHeader(GameAlertType type)
     {
         switch (type)
         {
@@ -372,6 +407,21 @@ public class GameAlertUIManager : MonoBehaviour
             case GameAlertType.DroneNoResource: return TooltipDroneNoResource;
             case GameAlertType.StorageFull: return TooltipStorageFull;
             case GameAlertType.AetherStorageFull: return TooltipAetherStorageFull;
+            case GameAlertType.NoiseCaution: return ToolTipNoiseCaution;
+            case GameAlertType.NoiseWarning: return ToolTipNoiseWarning;
+            case GameAlertType.NoiseDanger: return ToolTipNoiseDanger;
+            default: return string.Empty;
+        }
+    }
+    
+    private string GetToolTipExtraText(GameAlertType type)
+    {
+        switch (type)
+        {
+            case GameAlertType.MinerNoResource: return ToolTipExtraTextUnit;
+            case GameAlertType.UnitUnderAttack: return ToolTipExtraTextUnit;
+            case GameAlertType.DroneNoResource: return ToolTipExtraTextUnit;
+            case GameAlertType.BuildingUnderAttack: return ToolTipExtraTextBuilding;
             default: return string.Empty;
         }
     }
