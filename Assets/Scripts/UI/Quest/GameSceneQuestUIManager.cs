@@ -134,11 +134,6 @@ public class GameSceneQuestUIManager : MonoBehaviour
     
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            ToggleQuestPanel();
-        }
-
         if (Input.GetMouseButtonUp(1))
         {
             bool listVisible = questCellGridParent != null && questCellGridParent.gameObject.activeSelf;
@@ -151,6 +146,11 @@ public class GameSceneQuestUIManager : MonoBehaviour
 
                 HideQuestPanel();
             }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            ToggleQuestPanel();
         }
     }
     

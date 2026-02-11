@@ -5686,13 +5686,15 @@ MonoBehaviour:
   circleSpawnPercentage: 40
   maxCircles: 45
   maxResourcesPerCircle: 25
-  minSpawnRadius: 8
+  minSpawnRadius: 12
   startingAreaRadius: 12
   startingAreaCircleCount: 3
   startingAreaMinDistance: 1
   centerResourceCircleRadius: 1
-  centerResourceCircleDistanceFromCenter: 3
-  centerResourceCircleSpacing: 2
+  centerResourceCircleDistanceFromCenter: 5
+  centerResourceCircleMaxDistanceFromCenter: 7
+  centerResourceCircleMinSpacing: 4
+  centerResourceCirclePlacementAttempts: 50
   showGizmos: 1
   divisionCircleColor: {r: 1, g: 1, b: 0, a: 0.3}
   resourceCircleColor: {r: 0, g: 1, b: 0, a: 0.5}
@@ -21963,7 +21965,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0.5, z: -20}
+  m_LocalPosition: {x: 0.5, y: 0.5, z: -40}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -45445,7 +45447,7 @@ Transform:
   m_GameObject: {fileID: 1142142741}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.23, y: 3.44, z: 0}
+  m_LocalPosition: {x: 5, y: -6, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

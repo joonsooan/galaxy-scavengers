@@ -99,7 +99,9 @@ public class MapObjectSpawner : MonoBehaviour
     [Header("Center Resource Circles")]
     [SerializeField] private float centerResourceCircleRadius = 1f;
     [SerializeField] private int centerResourceCircleDistanceFromCenter = 3;
-    [SerializeField] private int centerResourceCircleSpacing = 2;
+    [SerializeField] private int centerResourceCircleMaxDistanceFromCenter = 8;
+    [SerializeField] private float centerResourceCircleMinSpacing = 2.5f;
+    [SerializeField] private int centerResourceCirclePlacementAttempts = 50;
     
     [Header("Debug")]
     [SerializeField] private bool showGizmos = true;
@@ -188,7 +190,7 @@ public class MapObjectSpawner : MonoBehaviour
             
             resourceCircles.AddRange(startingAreaCircles);
             
-            if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive())
+            if (TutorialManager.Instance != null && TutorialManager.Instance.ShouldStartTutorial())
             {
                 List<ResourceCircle> centerCircles = GenerateCenterResourceCircles();
                 resourceCircles.AddRange(centerCircles);
@@ -464,31 +466,51 @@ public class MapObjectSpawner : MonoBehaviour
     {
         List<ResourceCircle> circles = new List<ResourceCircle>();
         
-        if (resourceSettings == null || resourceSettings.Count == 0) {
+        if (resourceSettings == null || resourceSettings.Count == 0)
             return circles;
-        }
         
         Vector2Int mapCenter = Vector2Int.zero;
-        int halfCount = resourceSettings.Count / 2;
-        int startOffset = -halfCount;
+        int minRadius = centerResourceCircleDistanceFromCenter;
+        int maxRadius = Mathf.Max(minRadius, centerResourceCircleMaxDistanceFromCenter);
+        float minDistBetweenCircles = centerResourceCircleMinSpacing;
+        List<Vector2Int> usedCenters = new List<Vector2Int>();
         
         for (int i = 0; i < resourceSettings.Count; i++)
         {
             ResourceSpawnSettings settings = resourceSettings[i];
-            if (settings == null) {
+            if (settings == null)
                 continue;
+            
+            Vector2Int center;
+            int attempts = 0;
+            do
+            {
+                float angle = Random.Range(0f, Mathf.PI);
+                float radius = Random.Range(minRadius, maxRadius + 1f);
+                int x = Mathf.RoundToInt(Mathf.Cos(angle) * radius);
+                int y = Mathf.RoundToInt(Mathf.Sin(angle) * radius);
+                center = new Vector2Int(x, y);
+                
+                float distFromMapCenter = Vector2.Distance(center, mapCenter);
+                if (distFromMapCenter > 0.01f && distFromMapCenter < minRadius)
+                    center = new Vector2Int(Mathf.RoundToInt(center.x * minRadius / distFromMapCenter), Mathf.RoundToInt(center.y * minRadius / distFromMapCenter));
+                
+                bool tooClose = false;
+                foreach (var used in usedCenters)
+                {
+                    if (Vector2.Distance(center, used) < minDistBetweenCircles)
+                    {
+                        tooClose = true;
+                        break;
+                    }
+                }
+                if (!tooClose)
+                    break;
+                attempts++;
             }
+            while (attempts < centerResourceCirclePlacementAttempts);
             
-            int xOffset = startOffset + i;
-            int x = xOffset * centerResourceCircleSpacing;
-            int y = centerResourceCircleDistanceFromCenter;
-            Vector2Int center = new Vector2Int(x, y);
-            
-            float distanceFromCenter = Vector2.Distance(center, mapCenter);
-            if (distanceFromCenter < centerResourceCircleDistanceFromCenter) {
-                center = new Vector2Int(center.x, centerResourceCircleDistanceFromCenter);
-            }
-            
+            usedCenters.Add(center);
             circles.Add(new ResourceCircle
             {
                 center = center,
