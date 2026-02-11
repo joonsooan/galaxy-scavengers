@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class GameSceneQuestUIManager : MonoBehaviour
@@ -23,7 +24,6 @@ public class GameSceneQuestUIManager : MonoBehaviour
     private readonly List<QuestCell> _questCells = new ();
     private readonly HashSet<int> _viewedQuestIds = new ();
     private readonly HashSet<int> _acceptedRequestQuests = new ();
-    private bool _isPanelOpen;
 
     private QuestDetailPanel _questDetailPanel;
     private RequestQuestAcceptPanel _requestQuestAcceptPanel;
@@ -134,24 +134,17 @@ public class GameSceneQuestUIManager : MonoBehaviour
     
     private void Update()
     {
-        if (Input.GetMouseButtonUp(1))
+        if (Input.GetMouseButtonUp(1) && IsQuestPanelOpen())
         {
-            bool listVisible = questCellGridParent != null && questCellGridParent.gameObject.activeSelf;
-            if (_isPanelOpen && listVisible)
-            {
-                if (GameManager.Instance != null && GameManager.Instance.IsDragging())
-                {
-                    return;
-                }
-
-                HideQuestPanel();
-            }
+            if (GameManager.Instance != null && GameManager.Instance.IsDragging()) return;
+            HideQuestPanel();
         }
+    }
 
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            ToggleQuestPanel();
-        }
+    private bool IsQuestPanelOpen()
+    {
+        return (questCellGridParent != null && questCellGridParent.gameObject.activeSelf) ||
+               (questDetailPanelObject != null && questDetailPanelObject.activeSelf);
     }
     
     private void Start()
@@ -343,23 +336,17 @@ public class GameSceneQuestUIManager : MonoBehaviour
             }
         }
     }
-    
-    private void ToggleQuestPanel()
+
+    public void ToggleQuestPanel()
     {
-        if (_isPanelOpen)
-        {
+        if (IsQuestPanelOpen())
             HideQuestPanel();
-        }
         else
-        {
             ShowQuestPanel();
-        }
     }
 
     private void ShowQuestPanel()
     {
-        _isPanelOpen = true;
-        
         if (_questDetailPanel != null && questDetailPanelObject != null && questDetailPanelObject.activeSelf)
         {
             _questDetailPanel.ClearQuestInfo();
@@ -386,8 +373,13 @@ public class GameSceneQuestUIManager : MonoBehaviour
 
     public void HideQuestPanel()
     {
-        _isPanelOpen = false;
-        
+        if (EventSystem.current != null && EventSystem.current.currentSelectedGameObject != null)
+        {
+            Transform sel = EventSystem.current.currentSelectedGameObject.transform;
+            if ((questPanel != null && sel.IsChildOf(questPanel.transform)) ||
+                (questDetailPanelObject != null && sel.IsChildOf(questDetailPanelObject.transform)))
+                EventSystem.current.SetSelectedGameObject(null);
+        }
         if (questCellGridParent != null)
         {
             questCellGridParent.gameObject.SetActive(false);

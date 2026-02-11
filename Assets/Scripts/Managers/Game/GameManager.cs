@@ -108,6 +108,11 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        if (Input.GetKeyDown(KeyCode.Q)) {
+            GameSceneQuestUIManager questUI = FindFirstObjectByType<GameSceneQuestUIManager>();
+            if (questUI != null) questUI.ToggleQuestPanel();
+        }
+
         if (Input.GetKeyDown(KeyCode.Space)) {
             TogglePause();
         }

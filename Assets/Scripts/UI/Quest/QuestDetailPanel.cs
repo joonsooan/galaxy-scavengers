@@ -101,30 +101,10 @@ public class QuestDetailPanel : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonUp(1))
+        if (Input.GetMouseButtonUp(1) && gameObject.activeSelf && _currentQuestId != -1 && !_isGameSceneMode)
         {
-            if (gameObject.activeSelf && _currentQuestId != -1)
-            {
-                if (GameManager.Instance != null && GameManager.Instance.IsDragging())
-                {
-                    return;
-                }
-                
-                if (_isGameSceneMode)
-                {
-                    GameSceneQuestUIManager questUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
-                    if (questUIManager != null)
-                    {
-                        questUIManager.HideQuestPanel();
-                    }
-                }
-                else
-                {
-                    ClearQuestInfo();
-                }
-                
-                return;
-            }
+            if (GameManager.Instance != null && GameManager.Instance.IsDragging()) return;
+            ClearQuestInfo();
         }
     }
 
