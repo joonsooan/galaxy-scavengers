@@ -18,6 +18,7 @@ public class DemolishTarget
 public class DemolishConfirmUIManager : MonoBehaviour
 {
     [SerializeField] [Range(0f, 1f)] private float refundRatio = 0.25f;
+    [SerializeField] private string buildingPieceDisplayName = "건설 재료";
     [SerializeField] private GameObject panel;
     [SerializeField] private TMP_Text buildingListText;
     [SerializeField] private Transform resourceGridContainer;
@@ -65,9 +66,23 @@ public class DemolishConfirmUIManager : MonoBehaviour
 
         if (buildingListText != null)
         {
-            List<string> lines = new List<string>();
+            Dictionary<string, int> nameCounts = new Dictionary<string, int>();
             foreach (var t in targets)
-                lines.Add("- " + (t.displayName ?? "?"));
+            {
+                string name = GetDisplayNameForTarget(t);
+                if (nameCounts.ContainsKey(name))
+                    nameCounts[name]++;
+                else
+                    nameCounts[name] = 1;
+            }
+            List<string> lines = new List<string>();
+            foreach (var kvp in nameCounts)
+            {
+                string line = "- " + kvp.Key;
+                if (kvp.Value > 1)
+                    line += " " + kvp.Value;
+                lines.Add(line);
+            }
             buildingListText.text = string.Join("\n", lines);
         }
 
@@ -189,6 +204,12 @@ public class DemolishConfirmUIManager : MonoBehaviour
             }
         }
         return result;
+    }
+
+    private string GetDisplayNameForTarget(DemolishTarget target)
+    {
+        bool isBuildingPiece = target.buildingData == null && target.buildingPieceType != BuildingPieceType.None;
+        return isBuildingPiece ? buildingPieceDisplayName : (target.displayName ?? "?");
     }
 
     private static BuildingPieceData GetBuildingPieceData(BuildingPieceType type)

@@ -271,12 +271,17 @@ public class AreaBuildingDestroyer : MonoBehaviour
         HashSet<ConstructionSite> seenSites = new HashSet<ConstructionSite>();
         HashSet<Vector3Int> seenPieceCells = new HashSet<Vector3Int>();
 
+        HashSet<Vector3Int> constructionSiteCells = CollectConstructionSiteCells(selectedCells);
+
         foreach (Vector3Int cell in selectedCells)
         {
             if (_buildingManager.IsMainStructureCell(cell))
                 continue;
 
-            if (_buildingManager.GetBuildingAt(cell, out _))
+            if (constructionSiteCells.Contains(cell))
+                continue;
+
+            if (_buildingManager.GetBuildingAt(cell, out List<Vector3Int> occupiedCells))
             {
                 Vector3Int anchor = GetAnchorForCell(cell);
                 if (!seenAnchors.Add(anchor))
@@ -293,7 +298,9 @@ public class AreaBuildingDestroyer : MonoBehaviour
                 if (data == null)
                     data = _buildingManager.GetBuildingDataAt(anchor);
 
-                if (data != null)
+                bool isSingleCellStructure = occupiedCells != null && occupiedCells.Count == 1;
+
+                if (data != null && !isSingleCellStructure)
                 {
                     string name = !string.IsNullOrEmpty(data.displayName) ? data.displayName : data.name;
                     targets.Add(new DemolishTarget
@@ -395,6 +402,43 @@ public class AreaBuildingDestroyer : MonoBehaviour
         }
 
         return targets;
+    }
+
+    private HashSet<Vector3Int> CollectConstructionSiteCells(HashSet<Vector3Int> selectedCells)
+    {
+        HashSet<Vector3Int> result = new HashSet<Vector3Int>();
+        ConstructionSite[] allSites = FindObjectsByType<ConstructionSite>(FindObjectsSortMode.None);
+        foreach (ConstructionSite site in allSites)
+        {
+            if (site == null) continue;
+
+            bool overlap = false;
+            if (selectedCells.Contains(site.cellPosition))
+                overlap = true;
+            else if (site.buildingData != null && site.buildingData.recipe != null)
+            {
+                foreach (var piece in site.buildingData.recipe)
+                {
+                    Vector3Int pieceCell = site.cellPosition + piece.relativePosition;
+                    if (selectedCells.Contains(pieceCell))
+                    {
+                        overlap = true;
+                        break;
+                    }
+                }
+            }
+
+            if (overlap && site.HasAnyConstructedPieces())
+            {
+                result.Add(site.cellPosition);
+                if (site.buildingData != null && site.buildingData.recipe != null)
+                {
+                    foreach (var piece in site.buildingData.recipe)
+                        result.Add(site.cellPosition + piece.relativePosition);
+                }
+            }
+        }
+        return result;
     }
 
     private Vector3Int GetAnchorForCell(Vector3Int cell)

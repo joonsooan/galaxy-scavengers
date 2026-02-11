@@ -5,9 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2e9922bb-ccc6-4c6e-93bd-15fa8a8d7f34" name="변경" comment="">
-      <change beforePath="$PROJECT_DIR$/Assets/Normal Maps/Buildings/assembler.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Normal Maps/Buildings/assembler.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Normal Maps/Buildings/turret.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Normal Maps/Buildings/turret.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Normal Maps/Buildings/drone_hub.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Normal Maps/Buildings/drone_hub.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Building/AreaBuildingDestroyer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Building/AreaBuildingDestroyer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Building/DemolishConfirmUIManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Building/DemolishConfirmUIManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/Buildings/generator.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Sprites/Buildings/generator.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/Buildings/generator.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Sprites/Buildings/generator.png.meta" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -178,6 +181,7 @@
       <workItem from="1770597168734" duration="13333000" />
       <workItem from="1770776810558" duration="4280000" />
       <workItem from="1770788116577" duration="1782000" />
+      <workItem from="1770792337400" duration="3525000" />
     </task>
     <servers />
   </component>
