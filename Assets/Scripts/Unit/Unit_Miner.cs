@@ -56,7 +56,7 @@ public class Unit_Miner : UnitBase
     protected override void Awake()
     {
         base.Awake();
-        _canvas = GameObject.Find(canvasName)?.GetComponent<Canvas>();
+        _canvas = GameManager.Instance?.uiManager?.GetObjectUICanvas() ?? GameObject.Find(canvasName)?.GetComponent<Canvas>();
         _searchWait = CoroutineCache.GetWaitForSeconds(resourceSearchInterval);
         _resourceImageSpawnWait = CoroutineCache.GetWaitForSeconds(resourceImageSpawnInterval);
         InitializeCarryAmounts();

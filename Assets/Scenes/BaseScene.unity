@@ -5144,6 +5144,7 @@ MonoBehaviour:
   farmUIPanel: {fileID: 0}
   mapUIPanel: {fileID: 0}
   coreLaunchUIPanel: {fileID: 1837140246}
+  fadePanel: {fileID: 840868836}
   fadeInDuration: 1
 --- !u!114 &670148663
 MonoBehaviour:

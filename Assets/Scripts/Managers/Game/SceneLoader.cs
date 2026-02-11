@@ -134,6 +134,7 @@ public class SceneLoader : MonoBehaviour
 
         if (LoadingUIManager.Instance != null) yield return LoadingUIManager.Instance.HideLoadingScreenWithFadeAsync();
         
+        yield return StartCoroutine(FadeRoutine(0f, fadeDuration));
         yield return _gameScenePostFadeDelayWait;
         
         if (TutorialManager.Instance == null || (!TutorialManager.Instance.IsTutorialActive() && !TutorialManager.Instance.ShouldStartTutorial()))
@@ -221,7 +222,9 @@ public class SceneLoader : MonoBehaviour
 
     private IEnumerator FadeRoutine(float targetAlpha, float duration)
     {
-        GameObject fadeOverlay = GameObject.Find("FadeOverlay") ?? GameObject.Find("Fade Panel");
+        GameObject fadeOverlay = LoadingUIManager.Instance != null
+            ? LoadingUIManager.Instance.GetFadeOverlay()
+            : (GameObject.Find("FadeOverlay") ?? GameObject.Find("Fade Panel"));
         if (fadeOverlay != null) {
             fadeOverlay.SetActive(true);
             Image img = fadeOverlay.GetComponent<Image>();

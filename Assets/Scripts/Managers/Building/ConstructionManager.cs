@@ -7,7 +7,9 @@ public class ConstructionManager : MonoBehaviour
     private readonly List<Unit_Construct> _constructDrones = new ();
     
     public static ConstructionManager Instance { get; private set; }
-    
+    public IReadOnlyList<ConstructionSite> ConstructionSites => _constructionSites;
+    public IReadOnlyList<Unit_Construct> ConstructDrones => _constructDrones;
+
     private void Awake()
     {
         if (Instance == null)

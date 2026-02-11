@@ -19,6 +19,14 @@ public class Beacon : MonoBehaviour
         {
             spriteRenderer.color = defaultColor;
         }
+        if (BeaconManager.Instance != null)
+            BeaconManager.Instance.RegisterBeacon(this);
+    }
+
+    private void Start()
+    {
+        if (BeaconManager.Instance != null)
+            BeaconManager.Instance.RegisterBeacon(this);
     }
     
     public void AssignUnit(Unit_Scout unit)

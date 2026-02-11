@@ -352,7 +352,9 @@ public class AreaBuildingDestroyer : MonoBehaviour
             }
         }
 
-        ConstructionSite[] allSites = FindObjectsByType<ConstructionSite>(FindObjectsSortMode.None);
+        IReadOnlyList<ConstructionSite> allSites = ConstructionManager.Instance != null
+            ? ConstructionManager.Instance.ConstructionSites
+            : System.Array.Empty<ConstructionSite>();
         foreach (ConstructionSite site in allSites)
         {
             if (site == null || seenSites.Contains(site)) continue;
@@ -407,7 +409,9 @@ public class AreaBuildingDestroyer : MonoBehaviour
     private HashSet<Vector3Int> CollectConstructionSiteCells(HashSet<Vector3Int> selectedCells)
     {
         HashSet<Vector3Int> result = new HashSet<Vector3Int>();
-        ConstructionSite[] allSites = FindObjectsByType<ConstructionSite>(FindObjectsSortMode.None);
+        IReadOnlyList<ConstructionSite> allSites = ConstructionManager.Instance != null
+            ? ConstructionManager.Instance.ConstructionSites
+            : System.Array.Empty<ConstructionSite>();
         foreach (ConstructionSite site in allSites)
         {
             if (site == null) continue;
@@ -528,7 +532,9 @@ public class AreaBuildingDestroyer : MonoBehaviour
         if (_grid == null) return;
         
         List<ConstructionSite> sitesToDestroy = new List<ConstructionSite>();
-        ConstructionSite[] allSites = FindObjectsByType<ConstructionSite>(FindObjectsSortMode.None);
+        IReadOnlyList<ConstructionSite> allSites = ConstructionManager.Instance != null
+            ? ConstructionManager.Instance.ConstructionSites
+            : System.Array.Empty<ConstructionSite>();
         
         foreach (ConstructionSite site in allSites)
         {
@@ -581,7 +587,9 @@ public class AreaBuildingDestroyer : MonoBehaviour
 
     private void CancelConstructionSite(ConstructionSite site)
     {
-        Unit_Construct[] allConstructUnits = FindObjectsByType<Unit_Construct>(FindObjectsSortMode.None);
+        IReadOnlyList<Unit_Construct> allConstructUnits = ConstructionManager.Instance != null
+            ? ConstructionManager.Instance.ConstructDrones
+            : System.Array.Empty<Unit_Construct>();
         foreach (Unit_Construct unit in allConstructUnits)
         {
             if (unit != null)
@@ -613,8 +621,11 @@ public class AreaBuildingDestroyer : MonoBehaviour
     
     private void DestroyBeaconsInArea(HashSet<Vector3Int> cells)
     {
+        if (_grid == null) return;
         List<Beacon> beaconsToDestroy = new List<Beacon>();
-        Beacon[] allBeacons = FindObjectsByType<Beacon>(FindObjectsSortMode.None);
+        IReadOnlyList<Beacon> allBeacons = BeaconManager.Instance != null
+            ? BeaconManager.Instance.Beacons
+            : System.Array.Empty<Beacon>();
         
         foreach (Beacon beacon in allBeacons)
         {

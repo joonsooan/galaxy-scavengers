@@ -15,7 +15,35 @@ public class LoadingUIManager : MonoBehaviour
     
     private GameObject _currentLoadingScreen;
     private Canvas _loadingCanvas;
-    
+    private GameObject _fadeOverlay;
+
+    public GameObject GetFadeOverlay()
+    {
+        if (_fadeOverlay != null) return _fadeOverlay;
+        if (_loadingCanvas == null) InitializeCanvas();
+        if (_loadingCanvas != null)
+        {
+            Transform child = _loadingCanvas.transform.Find("FadeOverlay");
+            if (child != null)
+            {
+                _fadeOverlay = child.gameObject;
+                return _fadeOverlay;
+            }
+        }
+        _fadeOverlay = new GameObject("FadeOverlay");
+        if (_loadingCanvas != null)
+            _fadeOverlay.transform.SetParent(_loadingCanvas.transform, false);
+        RectTransform rect = _fadeOverlay.AddComponent<RectTransform>();
+        rect.anchorMin = Vector2.zero;
+        rect.anchorMax = Vector2.one;
+        rect.sizeDelta = Vector2.zero;
+        rect.anchoredPosition = Vector2.zero;
+        Image img = _fadeOverlay.AddComponent<Image>();
+        img.color = new Color(0f, 0f, 0f, 0f);
+        _fadeOverlay.SetActive(false);
+        return _fadeOverlay;
+    }
+
     public IInitializationProgress GetProgressTracker()
     {
         if (_currentLoadingScreen != null)

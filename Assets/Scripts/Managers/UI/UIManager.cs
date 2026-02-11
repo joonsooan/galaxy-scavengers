@@ -32,6 +32,10 @@ public class UIManager : MonoBehaviour
     [Header("Audio")]
     [SerializeField] private EventReference buildingUIClickSound;
 
+    [Header("Object UI")]
+    [SerializeField] private Canvas objectUICanvas;
+    private const string ObjectUICanvasName = "ObjectUI Canvas";
+
     private ActiveUIPanel _activeUIPanel = ActiveUIPanel.None;
     private AreaBuildingDestroyer _areaBuildingDestroyer;
 
@@ -40,6 +44,18 @@ public class UIManager : MonoBehaviour
     private ProcessorData _pinnedProcessorData;
     private Action<ResourceType, int, int> _storageResourceChangedHandler;
     private IStorage _trackedStorage;
+
+    public Canvas GetObjectUICanvas()
+    {
+        if (objectUICanvas != null) return objectUICanvas;
+        GameObject canvasObj = GameObject.Find(ObjectUICanvasName);
+        if (canvasObj != null)
+        {
+            objectUICanvas = canvasObj.GetComponent<Canvas>();
+            return objectUICanvas;
+        }
+        return null;
+    }
 
     private void Start()
     {

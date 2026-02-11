@@ -306,7 +306,7 @@ public class GameMenuManager : MonoBehaviour
             GameManager.Instance.TogglePause();
         }
 
-        if (!menuOpenSound.IsNull)
+        if (!IsGameScene() && !menuOpenSound.IsNull)
         {
             RuntimeManager.PlayOneShot(menuOpenSound);
         }
@@ -333,7 +333,7 @@ public class GameMenuManager : MonoBehaviour
             GameManager.Instance.TogglePause();
         }
 
-        if (!menuCloseSound.IsNull)
+        if (!IsGameScene() && !menuCloseSound.IsNull)
         {
             RuntimeManager.PlayOneShot(menuCloseSound);
         }

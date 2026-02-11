@@ -18,7 +18,6 @@ public class DemolishTarget
 public class DemolishConfirmUIManager : MonoBehaviour
 {
     [SerializeField] [Range(0f, 1f)] private float refundRatio = 0.25f;
-    [SerializeField] private string buildingPieceDisplayName = "건설 재료";
     [SerializeField] private GameObject panel;
     [SerializeField] private TMP_Text buildingListText;
     [SerializeField] private Transform resourceGridContainer;
@@ -30,7 +29,6 @@ public class DemolishConfirmUIManager : MonoBehaviour
     private HashSet<Vector3Int> _pendingCells;
     private List<DemolishTarget> _pendingTargets;
     private Dictionary<ResourceType, int> _pendingRefund;
-    private Coroutine _rebuildCoroutine;
 
     private void Awake()
     {
@@ -120,7 +118,16 @@ public class DemolishConfirmUIManager : MonoBehaviour
                         ResourceManager.Instance.AddResource(kvp.Key, kvp.Value);
                 }
             }
-            _areaBuildingDestroyer.ExecuteDemolish(_pendingCells);
+            HashSet<Vector3Int> cellsToDestroy = new HashSet<Vector3Int>(_pendingCells);
+            if (_pendingTargets != null)
+            {
+                foreach (var target in _pendingTargets)
+                {
+                    if (target.isConstructionSite)
+                        cellsToDestroy.Add(target.anchorCell);
+                }
+            }
+            _areaBuildingDestroyer.ExecuteDemolish(cellsToDestroy);
         }
         Hide();
     }
@@ -146,7 +153,8 @@ public class DemolishConfirmUIManager : MonoBehaviour
         {
             Dictionary<ResourceType, int> cost = t.preCalculatedRefund != null ? t.preCalculatedRefund : GetConstructionCost(t);
             bool isBuildingPiece = t.buildingData == null && t.buildingPieceType != BuildingPieceType.None;
-            float ratio = isBuildingPiece ? 1f : refundRatio;
+            bool isConstructionSitePiece = t.isConstructionSite;
+            float ratio = (isBuildingPiece || isConstructionSitePiece) ? 1f : refundRatio;
 
             foreach (var kvp in cost)
             {
@@ -208,8 +216,7 @@ public class DemolishConfirmUIManager : MonoBehaviour
 
     private string GetDisplayNameForTarget(DemolishTarget target)
     {
-        bool isBuildingPiece = target.buildingData == null && target.buildingPieceType != BuildingPieceType.None;
-        return isBuildingPiece ? buildingPieceDisplayName : (target.displayName ?? "?");
+        return target.displayName ?? "?";
     }
 
     private static BuildingPieceData GetBuildingPieceData(BuildingPieceType type)
@@ -226,28 +233,13 @@ public class DemolishConfirmUIManager : MonoBehaviour
 
     private void RebuildLayout()
     {
-        Canvas.ForceUpdateCanvases();
-
-        RectTransform panelRect = panel != null ? panel.GetComponent<RectTransform>() : null;
-        if (buildingListText != null)
-            LayoutRebuilder.ForceRebuildLayoutImmediate(buildingListText.rectTransform);
-        if (resourceGridContainer != null)
-            LayoutRebuilder.ForceRebuildLayoutImmediate(resourceGridContainer.GetComponent<RectTransform>());
-        if (panelRect != null)
-            LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
-        if (panelRect != null && panelRect.parent is RectTransform parentRect)
-            LayoutRebuilder.ForceRebuildLayoutImmediate(parentRect);
-
-        if (_rebuildCoroutine != null)
-            StopCoroutine(_rebuildCoroutine);
-        _rebuildCoroutine = StartCoroutine(DelayedRebuildLayout());
+        StartCoroutine(RebuildLayoutNextFrame());
     }
 
-    private IEnumerator DelayedRebuildLayout()
+    private IEnumerator RebuildLayoutNextFrame()
     {
-        yield return new WaitForEndOfFrame();
+        yield return null;
         Canvas.ForceUpdateCanvases();
-
         RectTransform panelRect = panel != null ? panel.GetComponent<RectTransform>() : null;
         if (buildingListText != null)
             LayoutRebuilder.ForceRebuildLayoutImmediate(buildingListText.rectTransform);
@@ -257,7 +249,5 @@ public class DemolishConfirmUIManager : MonoBehaviour
             LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
         if (panelRect != null && panelRect.parent is RectTransform parentRect)
             LayoutRebuilder.ForceRebuildLayoutImmediate(parentRect);
-
-        _rebuildCoroutine = null;
     }
 }

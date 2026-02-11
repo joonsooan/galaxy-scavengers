@@ -15,7 +15,6 @@ public class UnitHealthBar : MonoBehaviour
     private CanvasGroup _canvasGroup;
     private float _lastChangeTime;
     private bool _isVisible;
-    private const string ObjectUICanvasName = "ObjectUI Canvas";
 
     private void Awake()
     {
@@ -34,14 +33,8 @@ public class UnitHealthBar : MonoBehaviour
         if (_canvas != null) return;
 
         _canvas = GetComponentInParent<Canvas>();
-        if (_canvas == null)
-        {
-            GameObject canvasObj = GameObject.Find(ObjectUICanvasName);
-            if (canvasObj != null)
-            {
-                _canvas = canvasObj.GetComponent<Canvas>();
-            }
-        }
+        if (_canvas == null && GameManager.Instance?.uiManager != null)
+            _canvas = GameManager.Instance.uiManager.GetObjectUICanvas();
 
         if (_canvas != null && transform.parent != _canvas.transform)
         {

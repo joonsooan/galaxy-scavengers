@@ -54,87 +54,8 @@ public class ResourceUIManager : MonoBehaviour
     private IEnumerator DelayedSceneInitialization()
     {
         yield return null;
-        
-        FindAndConnectUI();
-        
         yield return null;
-        
         UpdateAllResourceUI();
-    }
-
-    private void FindAndConnectUI()
-    {
-        if (ferritePanel == null)
-            ferritePanel = GameObject.Find("Resource0_Panel") ?? GameObject.Find("FerritePanel");
-
-        if (aetherPanel == null)
-            aetherPanel = GameObject.Find("Resource1_Panel") ?? GameObject.Find("AetherPanel");
-
-        if (biomassPanel == null)
-            biomassPanel = GameObject.Find("Resource2_Panel") ?? GameObject.Find("BiomassPanel");
-
-        if (cryoCrystalPanel == null)
-            cryoCrystalPanel = GameObject.Find("Resource3_Panel") ?? GameObject.Find("CryoCrystalPanel");
-
-        if (alloyPlatePanel == null)
-            alloyPlatePanel = GameObject.Find("Resource4_Panel") ?? GameObject.Find("AlloyPlatePanel");
-
-        if (compositeFramePanel == null)
-            compositeFramePanel = GameObject.Find("Resource5_Panel") ?? GameObject.Find("CompositeFramePanel");
-
-        if (eChipPanel == null)
-            eChipPanel = GameObject.Find("Resource6_Panel") ?? GameObject.Find("EChipPanel");
-
-        if (bioCablePanel == null)
-            bioCablePanel = GameObject.Find("Resource7_Panel") ?? GameObject.Find("BioCablePanel");
-
-        if (powerCubePanel == null)
-            powerCubePanel = GameObject.Find("Resource8_Panel") ?? GameObject.Find("PowerCubePanel");
-
-        if (bioFuelPanel == null)
-            bioFuelPanel = GameObject.Find("Resource9_Panel") ?? GameObject.Find("BioFuelPanel");
-
-        if (cryoGelPanel == null)
-            cryoGelPanel = GameObject.Find("Resource10_Panel") ?? GameObject.Find("CryoGelPanel");
-
-        if (solanaPanel == null)
-            solanaPanel = GameObject.Find("Resource11_Panel") ?? GameObject.Find("SolanaPanel");
-
-        if (corePanel == null)
-            corePanel = GameObject.Find("Resource12_Panel") ?? GameObject.Find("CorePanel");
-
-        if (ammunitionPanel == null)
-            ammunitionPanel = GameObject.Find("Resource13_Panel") ?? GameObject.Find("AmmunitionPanel");
-
-        if (heavyPlatingPanel == null)
-            heavyPlatingPanel = GameObject.Find("Resource14_Panel") ?? GameObject.Find("HeavyPlatingPanel");
-
-        if (actuatorPanel == null)
-            actuatorPanel = GameObject.Find("Resource15_Panel") ?? GameObject.Find("ActuatorPanel");
-
-        if (genomeChipPanel == null)
-            genomeChipPanel = GameObject.Find("Resource16_Panel") ?? GameObject.Find("GenomeChipPanel");
-
-        if (patchKitPanel == null)
-            patchKitPanel = GameObject.Find("Resource17_Panel") ?? GameObject.Find("PatchKitPanel");
-
-        if (sensorUnitPanel == null)
-            sensorUnitPanel = GameObject.Find("Resource18_Panel") ?? GameObject.Find("SensorUnitPanel");
-
-        if (plasmaCubePanel == null)
-            plasmaCubePanel = GameObject.Find("Resource19_Panel") ?? GameObject.Find("PlasmaCubePanel");
-
-        if (cryoConduitPanel == null)
-            cryoConduitPanel = GameObject.Find("Resource20_Panel") ?? GameObject.Find("CryoConduitPanel");
-
-        if (seekerMissilePanel == null)
-            seekerMissilePanel = GameObject.Find("Resource21_Panel") ?? GameObject.Find("SeekerMissilePanel");
-
-        if (nexusDataPanel == null)
-            nexusDataPanel = GameObject.Find("Resource22_Panel") ?? GameObject.Find("NexusDataPanel");
-
-        if (neuralMatrixPanel == null)
-            neuralMatrixPanel = GameObject.Find("Resource23_Panel") ?? GameObject.Find("NeuralMatrixPanel");
     }
 
     private void OnResourceAmountChanged(ResourceType type, int amount)

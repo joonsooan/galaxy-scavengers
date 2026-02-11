@@ -19,6 +19,7 @@ public class ObjectPooler : MonoBehaviour
     public List<Pool> pools;
     private Dictionary<string, Queue<GameObject>> _poolDictionary;
     private Dictionary<string, GameObject> _prefabMap;
+    private Dictionary<string, Transform> _poolParentCache;
     private bool _isInitialized;
 
     private void Awake()
@@ -40,6 +41,10 @@ public class ObjectPooler : MonoBehaviour
         if (_prefabMap == null)
         {
             _prefabMap = new Dictionary<string, GameObject>();
+        }
+        if (_poolParentCache == null)
+        {
+            _poolParentCache = new Dictionary<string, Transform>();
         }
 
         RegisterEnemyPoolsFromSpawners();
@@ -153,6 +158,8 @@ public class ObjectPooler : MonoBehaviour
     
     private Transform GetOrCreatePoolParent(string poolTag)
     {
+        if (_poolParentCache != null && _poolParentCache.TryGetValue(poolTag, out Transform cached) && cached != null)
+            return cached;
         Transform poolParent = transform.Find(poolTag);
         if (poolParent == null)
         {
@@ -161,6 +168,8 @@ public class ObjectPooler : MonoBehaviour
             parentObj.SetActive(true);
             poolParent = parentObj.transform;
         }
+        if (_poolParentCache != null)
+            _poolParentCache[poolTag] = poolParent;
         return poolParent;
     }
 
