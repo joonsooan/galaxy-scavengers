@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2e9922bb-ccc6-4c6e-93bd-15fa8a8d7f34" name="변경" comment="" />
+    <list default="true" id="2e9922bb-ccc6-4c6e-93bd-15fa8a8d7f34" name="변경" comment="">
+      <change beforePath="$PROJECT_DIR$/Assets/Normal Maps/Buildings/assembler.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Normal Maps/Buildings/assembler.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Normal Maps/Buildings/turret.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Normal Maps/Buildings/turret.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -173,6 +177,7 @@
       <workItem from="1770562631487" duration="641000" />
       <workItem from="1770597168734" duration="13333000" />
       <workItem from="1770776810558" duration="4280000" />
+      <workItem from="1770788116577" duration="1782000" />
     </task>
     <servers />
   </component>
