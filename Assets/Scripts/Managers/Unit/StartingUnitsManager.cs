@@ -258,26 +258,9 @@ public class StartingUnitsManager : MonoBehaviour
 
     private bool IsValidSpawnPosition(Vector3Int cellPosition)
     {
-        if (BuildingManager.Instance == null) {
-            return false;
-        }
-
-        // Check if cell is walkable (not a building tile, not a resource tile, can place building)
-        if (BuildingManager.Instance.IsBuildingTile(cellPosition) ||
-            BuildingManager.Instance.IsResourceTile(cellPosition)) {
-            return false;
-        }
-
-        // Check if we can place a building here (indicates walkable terrain)
-        if (!BuildingManager.Instance.CanPlaceBuilding(cellPosition)) {
-            return false;
-        }
-
-        // Check if there's already a building at this position
-        if (BuildingManager.Instance.GetBuildingAt(cellPosition, out _)) {
-            return false;
-        }
-
+        if (BuildingManager.Instance == null) return false;
+        if (!BuildingManager.Instance.IsCellWalkable(cellPosition)) return false;
+        if (FogOfWarManager.Instance != null && !FogOfWarManager.Instance.CanPlaceBuilding(cellPosition)) return false;
         return true;
     }
 

@@ -246,7 +246,7 @@ public class ConstructionSite : MonoBehaviour
     private bool IsCellWalkable(Vector3Int cell)
     {
         if (BuildingManager.Instance == null) return false;
-        return BuildingManager.Instance.CanPlaceBuilding(cell) || BuildingManager.Instance.IsTemporaryTile(cell);
+        return BuildingManager.Instance.IsCellWalkable(cell, true);
     }
     
     public void ReleaseDrone(Unit_Construct drone)

@@ -141,6 +141,12 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
+    public BoundsInt GetMapBounds()
+    {
+        Vector3Int mapOrigin = new Vector3Int(-_mapCenterXOffset, -_mapCenterYOffset, 0);
+        return new BoundsInt(mapOrigin, new Vector3Int(width, height, 1));
+    }
+
     public Tilemap GroundTilemap {
         get {
             return groundTilemap;

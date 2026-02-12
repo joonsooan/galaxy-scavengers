@@ -261,14 +261,10 @@ public class GameManager : MonoBehaviour
             Time.timeScale = 1f;
             IsGameSceneInitialized = false;
             IsGameplayReady = false;
+            if (BuildingManager.Instance != null) {
+                BuildingManager.Instance.ClearWalkableCellCache();
+            }
             InitializeGameScene();
-        }
-        if (scene.name == "LightTestScene") {
-            IsPaused = false;
-            _savedTimeScale = 1f;
-            Time.timeScale = 1f;
-
-            StartCoroutine(DelayedInitialization());
         }
     }
 
@@ -318,9 +314,12 @@ public class GameManager : MonoBehaviour
 
         yield return null;
 
-        // Step 1: Generate Map
         if (mapGenerator != null) {
             yield return StartCoroutine(mapGenerator.GenerateMapAsync(progress));
+        }
+
+        if (BuildingManager.Instance != null && mapGenerator != null) {
+            BuildingManager.Instance.InitializeWalkableCellCache(mapGenerator.GetMapBounds());
         }
 
         CameraTargetController cameraController = FindFirstObjectByType<CameraTargetController>();
@@ -329,8 +328,6 @@ public class GameManager : MonoBehaviour
         }
 
         yield return StartCoroutine(InitializeSpawnersAndUnitsAsync(progress));
-
-        // Step 3: Wait for Fog of War
         yield return StartCoroutine(WaitForFogOfWarInitializationAsync(progress));
 
         if (progress != null) {
@@ -504,7 +501,6 @@ public class GameManager : MonoBehaviour
 
     public void SpawnUnitsAfterLoading()
     {
-        // Spawn starting units after MainStructure is registered
         StartingUnitsManager startingUnitsManager = FindFirstObjectByType<StartingUnitsManager>();
         if (startingUnitsManager != null) {
             startingUnitsManager.SpawnStartingUnits();

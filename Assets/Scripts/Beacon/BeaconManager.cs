@@ -98,26 +98,7 @@ public class BeaconManager : MonoBehaviour
     private bool IsCellWalkable(Vector3Int cell)
     {
         if (BuildingManager.Instance == null) return true;
-        
-        if (BuildingManager.Instance.IsTerrainCell(cell) ||
-            BuildingManager.Instance.IsResourceTile(cell) || 
-            BuildingManager.Instance.IsBuildingTile(cell))
-        {
-            return false;
-        }
-        
-        if (BuildingManager.Instance.GetBuildingAt(cell, out _))
-        {
-            return false;
-        }
-        
-        BuildingPiece piece = BuildingManager.Instance.GetPieceAt(cell);
-        if (piece != null)
-        {
-            return false;
-        }
-        
-        return true;
+        return BuildingManager.Instance.IsCellWalkable(cell);
     }
     
     private void PlaceWaypointBeacon()

@@ -603,7 +603,7 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         foreach (Vector3Int occupiedCell in occupiedSet) {
             foreach (Vector3Int offset in cardinalOffsets) {
                 Vector3Int neighbor = occupiedCell + offset;
-                if (!occupiedSet.Contains(neighbor) && IsCellWalkable(neighbor)) {
+                if (!occupiedSet.Contains(neighbor) && BuildingManager.Instance.IsCellWalkable(neighbor)) {
                     interactionCells.Add(neighbor);
                 }
             }
@@ -613,7 +613,7 @@ public class Processor : Damageable, IClickable, IAetherConsumer
             foreach (Vector3Int occupiedCell in occupiedSet) {
                 foreach (Vector3Int offset in diagonalOffsets) {
                     Vector3Int neighbor = occupiedCell + offset;
-                    if (!occupiedSet.Contains(neighbor) && IsCellWalkable(neighbor)) {
+                    if (!occupiedSet.Contains(neighbor) && BuildingManager.Instance.IsCellWalkable(neighbor)) {
                         interactionCells.Add(neighbor);
                     }
                 }
@@ -626,7 +626,7 @@ public class Processor : Damageable, IClickable, IAetherConsumer
                     for (int dy = -2; dy <= 2; dy++) {
                         if (dx == 0 && dy == 0) continue;
                         Vector3Int neighbor = occupiedCell + new Vector3Int(dx, dy, 0);
-                        if (!occupiedSet.Contains(neighbor) && IsCellWalkable(neighbor)) {
+                        if (!occupiedSet.Contains(neighbor) && BuildingManager.Instance.IsCellWalkable(neighbor)) {
                             interactionCells.Add(neighbor);
                         }
                     }
@@ -666,7 +666,7 @@ public class Processor : Damageable, IClickable, IAetherConsumer
                     if (visited.Contains(neighbor)) continue;
                     visited.Add(neighbor);
 
-                    if (!occupiedSet.Contains(neighbor) && IsCellWalkable(neighbor)) {
+                    if (!occupiedSet.Contains(neighbor) && BuildingManager.Instance.IsCellWalkable(neighbor)) {
                         float dist = Vector3.Distance(fromPos, BuildingManager.Instance.grid.GetCellCenterWorld(neighbor));
                         if (dist < minDistance) {
                             minDistance = dist;
@@ -679,21 +679,6 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         }
 
         return bestCell;
-    }
-
-    private bool IsCellWalkable(Vector3Int cell)
-    {
-        if (BuildingManager.Instance == null) {
-            return false;
-        }
-        if (BuildingManager.Instance.IsBuildingTile(cell)) return false;
-        if (BuildingManager.Instance.IsResourceTile(cell)) return false;
-        if (BuildingManager.Instance.IsTerrainCell(cell)) return false;
-        if (BuildingManager.Instance.IsMainStructureCell(cell) ||
-            BuildingManager.Instance.GetBuildingAt(cell, out _)) {
-            return false;
-        }
-        return true;
     }
 
     public void CancelRequest(ResourceRequest request)

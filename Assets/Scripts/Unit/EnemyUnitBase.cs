@@ -385,15 +385,9 @@ public abstract class EnemyUnitBase : UnitBase
             Vector2 randomDir = Random.insideUnitCircle.normalized;
             Vector3 candidatePos = _spawnPosition + (Vector3)randomDir * Random.Range(0f, _homeRadius);
             Vector3Int candidateCell = grid.WorldToCell(candidatePos);
-            if (IsCellWalkable(candidateCell)) return grid.GetCellCenterWorld(candidateCell);
+            if (BuildingManager.Instance.IsCellWalkable(candidateCell)) return grid.GetCellCenterWorld(candidateCell);
         }
         return _spawnPosition;
-    }
-
-    private bool IsCellWalkable(Vector3Int cell)
-    {
-        if (BuildingManager.Instance == null) return false;
-        return !BuildingManager.Instance.IsTerrainCell(cell) && !BuildingManager.Instance.IsBuildingTile(cell) && !BuildingManager.Instance.IsResourceTile(cell) && BuildingManager.Instance.GetPieceAt(cell) == null;
     }
 
     private void MoveToCurrentTarget()
