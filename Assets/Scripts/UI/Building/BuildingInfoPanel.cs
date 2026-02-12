@@ -1,7 +1,8 @@
+using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
 
 public class BuildingInfoPanel : MonoBehaviour
 {
@@ -15,6 +16,12 @@ public class BuildingInfoPanel : MonoBehaviour
     [SerializeField] private GameObject processorResourceIconPrefab;
     [SerializeField] private TMP_Text producibleResourceLabel;
     [SerializeField] private GameObject processorResourceGroup;
+
+    [Header("Aether & Noise")]
+    [SerializeField] private GameObject aetherSpendPanel;
+    [SerializeField] private TMP_Text aetherConsumptionText;
+    [SerializeField] private GameObject noisePanel;
+    [SerializeField] private TMP_Text noiseText;
 
     [SerializeField] private List<BuildingPieceData> allPieceDatabase;
 
@@ -108,8 +115,15 @@ public class BuildingInfoPanel : MonoBehaviour
         if (resourcePanel != null)
         {
             gameObject.SetActive(true);
-            resourcePanel.SetActive(true);
-            UpdateResourceDisplay(data);
+            if (data.buildingType == BuildingType.MainStructure)
+            {
+                resourcePanel.SetActive(false);
+            }
+            else
+            {
+                resourcePanel.SetActive(true);
+                UpdateResourceDisplay(data);
+            }
         }
 
         if (IsProcessorBuilding(data))
@@ -120,6 +134,39 @@ public class BuildingInfoPanel : MonoBehaviour
         else
         {
             ClearProcessorResourceDisplay();
+        }
+
+        UpdateAetherAndNoiseDisplay(data);
+    }
+
+    private void UpdateAetherAndNoiseDisplay(BuildingData data)
+    {
+        int aetherConsumption = 0;
+        IAetherConsumer aetherConsumer = data != null && data.buildingPrefab != null ? data.buildingPrefab.GetComponent<IAetherConsumer>() : null;
+        if (aetherConsumer != null)
+        {
+            aetherConsumption = aetherConsumer.AetherConsumptionPerSecond;
+        }
+
+        if (aetherSpendPanel != null)
+        {
+            aetherSpendPanel.SetActive(aetherConsumption > 0);
+        }
+
+        if (aetherConsumptionText != null && aetherConsumption > 0)
+        {
+            aetherConsumptionText.text = $"소모량 : {aetherConsumption}";
+        }
+
+        float noiseCoefficient = data != null ? data.noiseCoefficient : 0f;
+        if (noisePanel != null)
+        {
+            noisePanel.SetActive(true);
+        }
+
+        if (noiseText != null)
+        {
+            noiseText.text = $"소음 정도 : {noiseCoefficient}";
         }
     }
 
@@ -156,6 +203,7 @@ public class BuildingInfoPanel : MonoBehaviour
             resourcePanel.SetActive(false);
         }
         ClearProcessorResourceDisplay();
+        HideAetherAndNoiseDisplay();
     }
     
     private void UpdateResourceDisplay(BuildingData data)
@@ -195,7 +243,7 @@ public class BuildingInfoPanel : MonoBehaviour
             }
         }
 
-        foreach (var kvp in totalCosts)
+        foreach (var kvp in totalCosts.OrderBy(x => (int)x.Key))
         {
             ResourceType type = kvp.Key;
             int amount = kvp.Value;
@@ -247,6 +295,15 @@ public class BuildingInfoPanel : MonoBehaviour
             resourcePanel.SetActive(false);
         }
         ClearProcessorResourceDisplay();
+        HideAetherAndNoiseDisplay();
+    }
+
+    private void HideAetherAndNoiseDisplay()
+    {
+        if (aetherSpendPanel != null) aetherSpendPanel.SetActive(false);
+        if (noisePanel != null) noisePanel.SetActive(false);
+        if (aetherConsumptionText != null) aetherConsumptionText.text = string.Empty;
+        if (noiseText != null) noiseText.text = string.Empty;
     }
 
     private bool IsProcessorBuilding(BuildingData data)

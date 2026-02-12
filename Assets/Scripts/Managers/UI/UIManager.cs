@@ -441,7 +441,7 @@ public class UIManager : MonoBehaviour
                 GameObject cell = Instantiate(resourceInfoCellPrefab, parent);
                 ResourceInfoCell cellScript = cell.GetComponent<ResourceInfoCell>();
                 if (cellScript != null) {
-                    cellScript.SetInfo(kvp.Key, kvp.Value);
+                    cellScript.SetInfoDisplayOnly(kvp.Key, kvp.Value);
                     totalAmount += kvp.Value;
                 }
             }

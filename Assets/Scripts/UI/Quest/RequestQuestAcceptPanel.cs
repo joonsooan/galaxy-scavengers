@@ -74,37 +74,6 @@ public class RequestQuestAcceptPanel : MonoBehaviour
 
         DisplayRequiredResources(questData);
         DisplayQuestRewards(questData);
-        
-        Canvas.ForceUpdateCanvases();
-        
-        RectTransform panelRect = GetComponent<RectTransform>();
-        if (panelRect != null)
-        {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
-        }
-        
-        if (requiredResourcesGridContainer != null)
-        {
-            RectTransform requiredRect = requiredResourcesGridContainer.GetComponent<RectTransform>();
-            if (requiredRect != null)
-            {
-                LayoutRebuilder.ForceRebuildLayoutImmediate(requiredRect);
-            }
-        }
-        
-        if (rewardGridContainer != null)
-        {
-            RectTransform rewardRect = rewardGridContainer.GetComponent<RectTransform>();
-            if (rewardRect != null)
-            {
-                LayoutRebuilder.ForceRebuildLayoutImmediate(rewardRect);
-            }
-        }
-        
-        if (panelRect != null)
-        {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
-        }
 
         if (_rebuildCoroutine != null)
         {
@@ -147,36 +116,78 @@ public class RequestQuestAcceptPanel : MonoBehaviour
 
     private IEnumerator RebuildAllLayouts()
     {
-        yield return new WaitForEndOfFrame();
+        yield return null;
+        Canvas.ForceUpdateCanvases();
+
+        if (questInfoText != null)
+        {
+            questInfoText.ForceMeshUpdate(true);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(questInfoText.rectTransform);
+        }
+        if (questNameText != null)
+        {
+            questNameText.ForceMeshUpdate(true);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(questNameText.rectTransform);
+        }
+        if (requiredResourceText != null)
+        {
+            requiredResourceText.ForceMeshUpdate(true);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(requiredResourceText.rectTransform);
+        }
+        if (rewardText != null)
+        {
+            rewardText.ForceMeshUpdate(true);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rewardText.rectTransform);
+        }
+
+        if (requiredResourcesGridContainer != null)
+        {
+            foreach (Transform child in requiredResourcesGridContainer.transform)
+            {
+                RectTransform childRect = child.GetComponent<RectTransform>();
+                if (childRect != null)
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(childRect);
+            }
+            LayoutRebuilder.ForceRebuildLayoutImmediate(requiredResourcesGridContainer.GetComponent<RectTransform>());
+        }
+
+        if (rewardGridContainer != null)
+        {
+            foreach (Transform child in rewardGridContainer.transform)
+            {
+                RectTransform childRect = child.GetComponent<RectTransform>();
+                if (childRect != null)
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(childRect);
+            }
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rewardGridContainer.GetComponent<RectTransform>());
+        }
 
         RectTransform panelRect = GetComponent<RectTransform>();
         if (panelRect != null)
         {
             LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
         }
+        if (panelRect != null && panelRect.parent is RectTransform parentRect)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(parentRect);
+        }
 
+        yield return new WaitForEndOfFrame();
+        Canvas.ForceUpdateCanvases();
+        if (questInfoText != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(questInfoText.rectTransform);
+        if (questNameText != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(questNameText.rectTransform);
         if (requiredResourcesGridContainer != null)
-        {
-            RectTransform requiredRect = requiredResourcesGridContainer.GetComponent<RectTransform>();
-            if (requiredRect != null)
-            {
-                LayoutRebuilder.ForceRebuildLayoutImmediate(requiredRect);
-            }
-        }
-
+            LayoutRebuilder.ForceRebuildLayoutImmediate(requiredResourcesGridContainer.GetComponent<RectTransform>());
         if (rewardGridContainer != null)
-        {
-            RectTransform rewardRect = rewardGridContainer.GetComponent<RectTransform>();
-            if (rewardRect != null)
-            {
-                LayoutRebuilder.ForceRebuildLayoutImmediate(rewardRect);
-            }
-        }
-
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rewardGridContainer.GetComponent<RectTransform>());
         if (panelRect != null)
-        {
             LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
-        }
+        if (panelRect != null && panelRect.parent is RectTransform parentRect2)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(parentRect2);
+
+        _rebuildCoroutine = null;
     }
 
     private void UpdateRequiredResourceText(QuestData questData)

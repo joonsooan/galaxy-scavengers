@@ -73,12 +73,10 @@ public class ResourceInfoCell : MonoBehaviour
             resourceImage.sprite = null; 
         }
         
-        if (rebuildImmediately)
-        {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
-        }
-        
         UpdateColor();
+        
+        if (rebuildImmediately)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
         
         if (gameObject.activeInHierarchy)
         {

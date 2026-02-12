@@ -5248,7 +5248,7 @@ MonoBehaviour:
   postInitWaitDuration: 1
   imageExitDuration: 0.75
   contentFadeOutDuration: 0.5
-  imageExitDelay: 1
+  imageExitDelay: 0.5
   fadeOutDuration: 1
   resumeDelay: 0
   imageShakeStrength: 3

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -91,7 +92,7 @@ public class DemolishConfirmUIManager : MonoBehaviour
 
             if (resourceInfoCellPrefab != null && _pendingRefund != null)
             {
-                foreach (var kvp in _pendingRefund)
+                foreach (var kvp in _pendingRefund.OrderBy(x => (int)x.Key))
                 {
                     if (kvp.Value <= 0) continue;
                     GameObject cellObj = Instantiate(resourceInfoCellPrefab, resourceGridContainer);

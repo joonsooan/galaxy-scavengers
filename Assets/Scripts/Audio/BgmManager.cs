@@ -103,6 +103,7 @@ public class BgmManager : MonoBehaviour
             StopCurrent(false);
         }
 
+        _lastGameBgm = tutorialBgm;
         _playGameBgmCoroutine = StartCoroutine(PlayGameBgmWithFade(tutorialBgm));
     }
 
