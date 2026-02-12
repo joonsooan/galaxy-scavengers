@@ -600,8 +600,8 @@ public class GameSceneQuestUIManager : MonoBehaviour
             gameManager.TogglePause();
         }
         
-        _requestQuestAcceptPanel.DisplayQuestInfo(questData);
         requestQuestAcceptPanelObject.SetActive(true);
+        _requestQuestAcceptPanel.DisplayQuestInfo(questData);
     }
     
     public void OnRequestQuestAccepted(int questId)

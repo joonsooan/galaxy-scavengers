@@ -190,14 +190,19 @@ public class SceneLoader : MonoBehaviour
 
         yield return _baseSceneBgmStopDelayWait;
 
-        if (_returnState == ReturnFromGameState.Success && LoadingUIManager.Instance != null) {
-            var successScreen = LoadingUIManager.Instance.GetSuccessLoadingScreenComponent();
-            if (successScreen != null) {
-                yield return successScreen.GetBackgroundImage().DOFade(0f, successScreen.GetFadeOutDuration()).SetUpdate(true).WaitForCompletion();
+        LoadingUIManager.Instance?.HideLoadingScreen();
+        GameObject fadeOverlay = LoadingUIManager.Instance != null
+            ? LoadingUIManager.Instance.GetFadeOverlay()
+            : (GameObject.Find("FadeOverlay") ?? GameObject.Find("Fade Panel"));
+        if (fadeOverlay != null)
+        {
+            Image overlayImg = fadeOverlay.GetComponent<Image>();
+            if (overlayImg != null)
+            {
+                overlayImg.color = new Color(0f, 0f, 0f, 1f);
+                fadeOverlay.SetActive(true);
             }
         }
-
-        LoadingUIManager.Instance?.HideLoadingScreen();
         yield return StartCoroutine(FadeRoutine(0f, fadeDuration));
 
         _returnState = ReturnFromGameState.None;

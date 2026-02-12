@@ -343,7 +343,6 @@ public class GameManager : MonoBehaviour
         }
 
         IsGameSceneInitialized = true;
-        Debug.Log("[GameManager] Invoking OnGameSceneInitialized, subscriberCount=" + (OnGameSceneInitialized?.GetInvocationList()?.Length ?? 0));
         OnGameSceneInitialized?.Invoke();
 
         if (LoadingUIManager.Instance != null) {

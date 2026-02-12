@@ -19,29 +19,64 @@ public class LoadingUIManager : MonoBehaviour
 
     public GameObject GetFadeOverlay()
     {
-        if (_fadeOverlay != null) return _fadeOverlay;
         if (_loadingCanvas == null) InitializeCanvas();
         if (_loadingCanvas != null)
         {
+            RemoveDuplicateFadeOverlays();
+            if (_fadeOverlay != null) return _fadeOverlay;
             Transform child = _loadingCanvas.transform.Find("FadeOverlay");
             if (child != null)
             {
                 _fadeOverlay = child.gameObject;
+                EnsureFadeOverlayState(_fadeOverlay, 0f, false);
                 return _fadeOverlay;
             }
-        }
-        _fadeOverlay = new GameObject("FadeOverlay");
-        if (_loadingCanvas != null)
+            _fadeOverlay = new GameObject("FadeOverlay");
             _fadeOverlay.transform.SetParent(_loadingCanvas.transform, false);
-        RectTransform rect = _fadeOverlay.AddComponent<RectTransform>();
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.sizeDelta = Vector2.zero;
-        rect.anchoredPosition = Vector2.zero;
-        Image img = _fadeOverlay.AddComponent<Image>();
-        img.color = new Color(0f, 0f, 0f, 0f);
-        _fadeOverlay.SetActive(false);
+            RectTransform rect = _fadeOverlay.AddComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.sizeDelta = Vector2.zero;
+            rect.anchoredPosition = Vector2.zero;
+            Image img = _fadeOverlay.AddComponent<Image>();
+            img.color = new Color(0f, 0f, 0f, 0f);
+            _fadeOverlay.SetActive(false);
+        }
         return _fadeOverlay;
+    }
+
+    private void RemoveDuplicateFadeOverlays()
+    {
+        if (_loadingCanvas == null) return;
+        Transform[] all = _loadingCanvas.GetComponentsInChildren<Transform>(true);
+        GameObject toKeep = null;
+        int count = 0;
+        foreach (Transform t in all)
+        {
+            if (t.name != "FadeOverlay") continue;
+            count++;
+            if (toKeep == null)
+            {
+                toKeep = t.gameObject;
+            }
+            else if (t.gameObject != toKeep)
+            {
+                Destroy(t.gameObject);
+            }
+        }
+        if (toKeep != null)
+        {
+            _fadeOverlay = toKeep;
+            if (count > 1) EnsureFadeOverlayState(toKeep, 0f, false);
+        }
+    }
+
+    private void EnsureFadeOverlayState(GameObject overlay, float alpha, bool active)
+    {
+        if (overlay == null) return;
+        Image img = overlay.GetComponent<Image>();
+        if (img != null) img.color = new Color(0f, 0f, 0f, alpha);
+        overlay.SetActive(active);
     }
 
     public IInitializationProgress GetProgressTracker()

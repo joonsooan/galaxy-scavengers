@@ -115,13 +115,14 @@ public class BuildingInfoPanel : MonoBehaviour
         if (resourcePanel != null)
         {
             gameObject.SetActive(true);
+            resourcePanel.SetActive(true);
             if (data.buildingType == BuildingType.MainStructure)
             {
-                resourcePanel.SetActive(false);
+                if (noisePanel != null) noisePanel.SetActive(false);
+                if (processorResourceGroup != null) processorResourceGroup.SetActive(false);
             }
             else
             {
-                resourcePanel.SetActive(true);
                 UpdateResourceDisplay(data);
             }
         }
@@ -155,18 +156,21 @@ public class BuildingInfoPanel : MonoBehaviour
 
         if (aetherConsumptionText != null && aetherConsumption > 0)
         {
-            aetherConsumptionText.text = $"소모량 : {aetherConsumption}";
+            aetherConsumptionText.text = $"소모량 : {aetherConsumption:F1}";
         }
 
-        float noiseCoefficient = data != null ? data.noiseCoefficient : 0f;
-        if (noisePanel != null)
+        if (data == null || data.buildingType != BuildingType.MainStructure)
         {
-            noisePanel.SetActive(true);
-        }
+            float noiseCoefficient = data != null ? data.noiseCoefficient : 0f;
+            if (noisePanel != null)
+            {
+                noisePanel.SetActive(true);
+            }
 
-        if (noiseText != null)
-        {
-            noiseText.text = $"소음 정도 : {noiseCoefficient}";
+            if (noiseText != null)
+            {
+                noiseText.text = $"소음 정도 : {noiseCoefficient:F1}";
+            }
         }
     }
 
