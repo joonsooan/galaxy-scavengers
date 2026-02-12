@@ -62,6 +62,11 @@ public class UnitManager : MonoBehaviour
     {
         RegisterExistingUnits();
     }
+
+    private void Update()
+    {
+        UnitMovement.ProcessPathfindingQueues();
+    }
     
     private void RegisterExistingUnits()
     {

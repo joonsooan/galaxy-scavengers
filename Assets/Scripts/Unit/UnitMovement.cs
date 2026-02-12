@@ -50,6 +50,7 @@ public class UnitMovement : MonoBehaviour
     private Rigidbody2D _rb;
     private UnitSpriteController _spriteController;
     private UnitBase _unitBase;
+    private bool _isEnemy;
 
     public bool IsMoving {
         get {
@@ -69,6 +70,7 @@ public class UnitMovement : MonoBehaviour
         _rb = GetComponent<Rigidbody2D>();
         _unitBase = GetComponent<UnitBase>();
         _spriteController = GetComponent<UnitSpriteController>();
+        _isEnemy = _unitBase != null && _unitBase.unitType == UnitBase.UnitType.Enemy;
     }
 
     private void Start()
@@ -76,7 +78,7 @@ public class UnitMovement : MonoBehaviour
         _grid = BuildingManager.Instance.grid;
     }
 
-    private void Update()
+    public static void ProcessPathfindingQueues()
     {
         if (Time.frameCount == _lastProcessedFrame) return;
         _lastProcessedFrame = Time.frameCount;
@@ -103,8 +105,14 @@ public class UnitMovement : MonoBehaviour
             return;
         }
 
-        bool isEnemy = _unitBase != null && _unitBase.unitType == UnitBase.UnitType.Enemy;
-        if (!isEnemy && _grid != null && FogOfWarManager.Instance != null) {
+        if (_currentWaypoint == default) {
+            if (_rb.linearVelocity.sqrMagnitude > 0.01f) {
+                StopMovement();
+            }
+            return;
+        }
+
+        if (!_isEnemy && _grid != null && FogOfWarManager.Instance != null) {
             Vector3Int currentCell = _grid.WorldToCell(transform.position);
             if (currentCell != _lastExploredCell) {
                 FogOfWarManager.Instance.ExploreTile(currentCell);
@@ -115,13 +123,6 @@ public class UnitMovement : MonoBehaviour
         if (_rb.linearVelocity.sqrMagnitude > 0.01f) {
             Vector2 normalizedVelocity = _rb.linearVelocity.normalized;
             _spriteController?.UpdateSpriteDirection(normalizedVelocity);
-        }
-
-        if (_currentWaypoint == default) {
-            if (_rb.linearVelocity.sqrMagnitude > 0.01f) {
-                StopMovement();
-            }
-            return;
         }
 
         float distanceToWaypoint = Vector3.Distance(transform.position, _currentWaypoint);
