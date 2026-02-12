@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -50,6 +51,12 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         }
 
         DroneHub.OnDroneHubClicked += OnDroneHubStatusChanged;
+        if (buildingData != null && buildingData.buildingType == BuildingType.DroneHub) {
+            ConstructionManager.OnConstructionSiteRegistered += OnDroneHubConstructionChanged;
+            ConstructionManager.OnConstructionSiteUnregistered += OnDroneHubConstructionChanged;
+            BuildingManager.OnBuildingConstructed += OnBuildingConstructed;
+            AreaBuildingDestroyer.OnDemolishComplete += OnDemolishComplete;
+        }
     }
 
     private void OnDisable()
@@ -59,6 +66,37 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         }
 
         DroneHub.OnDroneHubClicked -= OnDroneHubStatusChanged;
+        if (buildingData != null && buildingData.buildingType == BuildingType.DroneHub) {
+            ConstructionManager.OnConstructionSiteRegistered -= OnDroneHubConstructionChanged;
+            ConstructionManager.OnConstructionSiteUnregistered -= OnDroneHubConstructionChanged;
+            BuildingManager.OnBuildingConstructed -= OnBuildingConstructed;
+            AreaBuildingDestroyer.OnDemolishComplete -= OnDemolishComplete;
+        }
+    }
+
+    private void OnDroneHubConstructionChanged(ConstructionSite site)
+    {
+        if (site != null && site.buildingData != null && site.buildingData.buildingType == BuildingType.DroneHub) {
+            UpdateUnlockStatus();
+        }
+    }
+
+    private void OnBuildingConstructed(BuildingData data)
+    {
+        if (data != null && data.buildingType == BuildingType.DroneHub) {
+            UpdateUnlockStatus();
+        }
+    }
+
+    private void OnDemolishComplete()
+    {
+        StartCoroutine(UpdateUnlockStatusNextFrame());
+    }
+
+    private IEnumerator UpdateUnlockStatusNextFrame()
+    {
+        yield return null;
+        UpdateUnlockStatus();
     }
 
     private void OnDestroy()
@@ -139,16 +177,17 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         if (buildingData.buildingType == BuildingType.DroneHub) {
             int existingDroneHubCount = FindObjectsByType<DroneHub>(FindObjectsSortMode.None)
                 .Count(dh => dh != null && BuildingManager.IsBuildingProperlyPlaced(dh.transform));
-
-            if (existingDroneHubCount >= 1) {
-                if (_button != null) {
-                    _button.interactable = false;
+            int droneHubConstructionCount = 0;
+            if (ConstructionManager.Instance != null) {
+                foreach (ConstructionSite site in ConstructionManager.Instance.ConstructionSites) {
+                    if (site != null && site.buildingData != null && site.buildingData.buildingType == BuildingType.DroneHub) {
+                        droneHubConstructionCount++;
+                    }
                 }
             }
-            else {
-                if (_button != null) {
-                    _button.interactable = true;
-                }
+            bool shouldDisable = existingDroneHubCount >= 1 || droneHubConstructionCount >= 1;
+            if (_button != null) {
+                _button.interactable = !shouldDisable;
             }
         }
 

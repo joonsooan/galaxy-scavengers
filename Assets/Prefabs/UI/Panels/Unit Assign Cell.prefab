@@ -88,6 +88,7 @@ GameObject:
   - component: {fileID: 8754805069060548411}
   - component: {fileID: 4113288312921380297}
   - component: {fileID: -8629858683669164493}
+  - component: {fileID: 5940882722103498637}
   m_Layer: 5
   m_Name: Unit Assign Cell
   m_TagString: Untagged
@@ -214,6 +215,32 @@ MonoBehaviour:
   emptySlotIcon: {fileID: 3270293437597525463}
   cellButton: {fileID: 4113288312921380297}
   glowMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
+--- !u!114 &5940882722103498637
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5644447303132800839}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f773253efb55a164ba538a657419fd8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverSound:
+    Guid:
+      Data1: 199913248
+      Data2: 1202326804
+      Data3: -537020530
+      Data4: 1684792045
+    Path: event:/SFX_UIHover
+  clickSound:
+    Guid:
+      Data1: -345895807
+      Data2: 1210214295
+      Data3: -73339495
+      Data4: 1624008095
+    Path: event:/SFX_UIClick
 --- !u!1 &7893659078431901417
 GameObject:
   m_ObjectHideFlags: 0

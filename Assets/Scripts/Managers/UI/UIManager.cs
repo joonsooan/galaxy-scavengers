@@ -239,6 +239,21 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    public void HideProcessorAndDroneHubPanels()
+    {
+        _pinnedProcessorData = null;
+        if (processorInfoPanel != null) {
+            processorInfoPanel.SetActive(false);
+        }
+        _pinnedDroneHubData = null;
+        if (droneHubInfoPanel != null) {
+            droneHubInfoPanel.SetActive(false);
+        }
+        if (_activeUIPanel == ActiveUIPanel.Processor || _activeUIPanel == ActiveUIPanel.DroneHub) {
+            _activeUIPanel = ActiveUIPanel.None;
+        }
+    }
+
     public void DisplayCardInfo(BuildingPieceData data)
     {
         if (data == null) return;

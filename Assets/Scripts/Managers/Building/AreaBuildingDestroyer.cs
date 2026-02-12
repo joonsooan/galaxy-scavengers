@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -5,6 +6,7 @@ using FMODUnity;
 
 public class AreaBuildingDestroyer : MonoBehaviour
 {
+    public static event Action OnDemolishComplete;
     [Header("References")]
     [SerializeField] private Camera mainCamera;
     [SerializeField] private Tilemap selectionTilemap;
@@ -261,6 +263,10 @@ public class AreaBuildingDestroyer : MonoBehaviour
     public void ExecuteDemolish(HashSet<Vector3Int> cells)
     {
         DestroyBuildingsInArea(cells);
+        if (GameManager.Instance != null && GameManager.Instance.uiManager != null) {
+            GameManager.Instance.uiManager.HideProcessorAndDroneHubPanels();
+        }
+        OnDemolishComplete?.Invoke();
     }
 
     private List<DemolishTarget> CollectDemolishTargets(HashSet<Vector3Int> selectedCells, out List<ConstructionSite> sitesToDestroyImmediately)
