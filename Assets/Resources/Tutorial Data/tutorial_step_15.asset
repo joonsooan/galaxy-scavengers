@@ -40,12 +40,10 @@ MonoBehaviour:
       Data2: 1210214295
       Data3: -73339495
       Data4: 1624008095
-    Path: event:/SFX_UIClick
+    Path: event:/SFX_UI/SFX_UIClick
   enableMaterialHighlight: 1
   highlightTargetIDs:
   - mainControl_baseBuilding
   - baseBuilding_droneHub
   showArrowUI: 0
-  arrowUIPrefab: {fileID: 0}
-  arrowPosition: {x: 0, y: 0, z: 0}
-  arrowRotation: {x: 0, y: 0, z: 0}
+  arrowID: 

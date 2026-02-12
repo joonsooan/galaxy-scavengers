@@ -272,11 +272,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a119a09c40c87f499e082c702540f53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dropOffset: 80
-  dropDuration: 0.5
-  dropEase: 4
-  pulseAlphaDuration: 0.15
-  fadeOutDuration: 0.35
 --- !u!114 &3864970575395246013
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -315,4 +310,4 @@ MonoBehaviour:
       Data2: 1202326804
       Data3: -537020530
       Data4: 1684792045
-    Path: event:/SFX_UIHover
+    Path: event:/SFX_UI/SFX_UIHover

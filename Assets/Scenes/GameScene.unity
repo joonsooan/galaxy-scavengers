@@ -1774,6 +1774,13 @@ MonoBehaviour:
   requestQuestAcceptPanelObject: {fileID: 6394633008225565772}
   toggleQuestPanelButton: {fileID: 53596321}
   notifierIcon: {fileID: 990474923}
+  newQuestSound:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
   shaderMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
   shaderMaterialResourcePath: 
 --- !u!114 &53596319
@@ -1876,14 +1883,14 @@ MonoBehaviour:
       Data2: 1202326804
       Data3: -537020530
       Data4: 1684792045
-    Path: event:/SFX_UIHover
+    Path: event:/SFX_UI/SFX_UIHover
   clickSound:
     Guid:
       Data1: -345895807
       Data2: 1210214295
       Data3: -73339495
       Data4: 1624008095
-    Path: event:/SFX_UIClick
+    Path: event:/SFX_UI/SFX_UIClick
 --- !u!1 &59790003
 GameObject:
   m_ObjectHideFlags: 0
@@ -5142,6 +5149,13 @@ MonoBehaviour:
   requestQuestAcceptPanelObject: {fileID: 6394633008225565772}
   toggleQuestPanelButton: {fileID: 53596321}
   notifierIcon: {fileID: 990474923}
+  newQuestSound:
+    Guid:
+      Data1: -764205619
+      Data2: 1245126956
+      Data3: -82076744
+      Data4: -1037771725
+    Path: event:/SFX_UI/SFX_NewQuest
   shaderMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
   shaderMaterialResourcePath: 
 --- !u!1001 &301385255
@@ -36096,14 +36110,14 @@ MonoBehaviour:
       Data2: 1202326804
       Data3: -537020530
       Data4: 1684792045
-    Path: event:/SFX_UIHover
+    Path: event:/SFX_UI/SFX_UIHover
   clickSound:
     Guid:
       Data1: -345895807
       Data2: 1210214295
       Data3: -73339495
       Data4: 1624008095
-    Path: event:/SFX_UIClick
+    Path: event:/SFX_UI/SFX_UIClick
 --- !u!1 &668126145
 GameObject:
   m_ObjectHideFlags: 0
@@ -40777,14 +40791,14 @@ MonoBehaviour:
       Data2: 1202326804
       Data3: -537020530
       Data4: 1684792045
-    Path: event:/SFX_UIHover
+    Path: event:/SFX_UI/SFX_UIHover
   clickSound:
     Guid:
       Data1: -345895807
       Data2: 1210214295
       Data3: -73339495
       Data4: 1624008095
-    Path: event:/SFX_UIClick
+    Path: event:/SFX_UI/SFX_UIClick
 --- !u!1 &899945891
 GameObject:
   m_ObjectHideFlags: 0
@@ -44550,63 +44564,63 @@ MonoBehaviour:
       Data2: 1309150458
       Data3: 252300438
       Data4: 785069632
-    Path: event:/SFX_Warning_Default
+    Path: event:/SFX_UI/SFX_Warning_Default
   unitUnderAttackSound:
     Guid:
       Data1: -1829503663
       Data2: 1137387125
       Data3: 662628754
       Data4: 1274777674
-    Path: event:/SFX_Warning_Critical
+    Path: event:/SFX_UI/SFX_Warning_Critical
   buildingUnderAttackSound:
     Guid:
       Data1: -1829503663
       Data2: 1137387125
       Data3: 662628754
       Data4: 1274777674
-    Path: event:/SFX_Warning_Critical
+    Path: event:/SFX_UI/SFX_Warning_Critical
   droneNoResourceSound:
     Guid:
       Data1: -552389696
       Data2: 1309150458
       Data3: 252300438
       Data4: 785069632
-    Path: event:/SFX_Warning_Default
+    Path: event:/SFX_UI/SFX_Warning_Default
   storageFullSound:
     Guid:
       Data1: -552389696
       Data2: 1309150458
       Data3: 252300438
       Data4: 785069632
-    Path: event:/SFX_Warning_Default
+    Path: event:/SFX_UI/SFX_Warning_Default
   aetherStorageFullSound:
     Guid:
       Data1: -552389696
       Data2: 1309150458
       Data3: 252300438
       Data4: 785069632
-    Path: event:/SFX_Warning_Default
+    Path: event:/SFX_UI/SFX_Warning_Default
   noiseCautionSound:
     Guid:
       Data1: -1829503663
       Data2: 1137387125
       Data3: 662628754
       Data4: 1274777674
-    Path: event:/SFX_Warning_Critical
+    Path: event:/SFX_UI/SFX_Warning_Critical
   noiseWarningSound:
     Guid:
       Data1: -1829503663
       Data2: 1137387125
       Data3: 662628754
       Data4: 1274777674
-    Path: event:/SFX_Warning_Critical
+    Path: event:/SFX_UI/SFX_Warning_Critical
   noiseDangerSound:
     Guid:
       Data1: -1829503663
       Data2: 1137387125
       Data3: 662628754
       Data4: 1274777674
-    Path: event:/SFX_Warning_Critical
+    Path: event:/SFX_UI/SFX_Warning_Critical
   tooltipPanel: {fileID: 1922431905}
   tooltipText: {fileID: 1158699060}
   cameraTargetController: {fileID: 0}
@@ -47564,7 +47578,7 @@ MonoBehaviour:
       Data2: 1268745534
       Data3: -891360632
       Data4: -818067828
-    Path: event:/SFX_ConstructStart
+    Path: event:/SFX_InGame/SFX_ConstructStart
 --- !u!4 &1272048963
 Transform:
   m_ObjectHideFlags: 0
@@ -51530,14 +51544,14 @@ MonoBehaviour:
       Data2: 1202326804
       Data3: -537020530
       Data4: 1684792045
-    Path: event:/SFX_UIHover
+    Path: event:/SFX_UI/SFX_UIHover
   clickSound:
     Guid:
       Data1: -345895807
       Data2: 1210214295
       Data3: -73339495
       Data4: 1624008095
-    Path: event:/SFX_UIClick
+    Path: event:/SFX_UI/SFX_UIClick
 --- !u!1 &1512528153
 GameObject:
   m_ObjectHideFlags: 0
@@ -52059,7 +52073,7 @@ MonoBehaviour:
       Data2: 1210214295
       Data3: -73339495
       Data4: 1624008095
-    Path: event:/SFX_UIClick
+    Path: event:/SFX_UI/SFX_UIClick
   objectUICanvas: {fileID: 1170139635}
 --- !u!114 &1538527378
 MonoBehaviour:
@@ -52106,7 +52120,7 @@ MonoBehaviour:
       Data2: 1210214295
       Data3: -73339495
       Data4: 1624008095
-    Path: event:/SFX_UIClick
+    Path: event:/SFX_UI/SFX_UIClick
   bgmFadeOutTime: 1
 --- !u!114 &1538527380
 MonoBehaviour:
@@ -52141,7 +52155,7 @@ MonoBehaviour:
       Data2: 1202326804
       Data3: -537020530
       Data4: 1684792045
-    Path: event:/SFX_UIHover
+    Path: event:/SFX_UI/SFX_UIHover
   dragSoundCooldown: 0.05
 --- !u!114 &1538527383
 MonoBehaviour:
@@ -52774,14 +52788,14 @@ MonoBehaviour:
       Data2: 1202326804
       Data3: -537020530
       Data4: 1684792045
-    Path: event:/SFX_UIHover
+    Path: event:/SFX_UI/SFX_UIHover
   clickSound:
     Guid:
       Data1: -345895807
       Data2: 1210214295
       Data3: -73339495
       Data4: 1624008095
-    Path: event:/SFX_UIClick
+    Path: event:/SFX_UI/SFX_UIClick
 --- !u!1001 &1595281991
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -53641,14 +53655,14 @@ MonoBehaviour:
       Data2: 1202326804
       Data3: -537020530
       Data4: 1684792045
-    Path: event:/SFX_UIHover
+    Path: event:/SFX_UI/SFX_UIHover
   clickSound:
     Guid:
       Data1: -345895807
       Data2: 1210214295
       Data3: -73339495
       Data4: 1624008095
-    Path: event:/SFX_UIClick
+    Path: event:/SFX_UI/SFX_UIClick
 --- !u!1 &1630035889
 GameObject:
   m_ObjectHideFlags: 0
@@ -57718,7 +57732,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 160, y: 16}
+  m_SizeDelta: {x: 160, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1938097735
 MonoBehaviour:
@@ -57773,7 +57787,7 @@ MonoBehaviour:
   m_Padding:
     m_Left: 0
     m_Right: 0
-    m_Top: 0
+    m_Top: 4
     m_Bottom: 0
   m_ChildAlignment: 1
   m_Spacing: 12

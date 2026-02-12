@@ -685,7 +685,7 @@ public class QuestDetailPanel : MonoBehaviour
                                 {
                                     questUIManager.LoadActiveQuests();
                                     if (_isGameSceneMode)
-                                        questUIManager.HideQuestPanel();
+                                        questUIManager.HideQuestDetailPanel();
                                 }
                                 
                                 return;
@@ -848,7 +848,7 @@ public class QuestDetailPanel : MonoBehaviour
         {
             GameSceneQuestUIManager questUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
             if (questUIManager != null)
-                questUIManager.HideQuestPanel();
+                questUIManager.HideQuestDetailPanel();
         }
     }
 

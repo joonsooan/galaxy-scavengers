@@ -5265,7 +5265,7 @@ MonoBehaviour:
       Data2: 1281061976
       Data3: -817715557
       Data4: -466499267
-    Path: event:/SFX_LoadingEnter
+    Path: event:/SFX_UI/SFX_LoadingEnter
   loadingBgmFadeInTime: 1
   loadingBgmFadeOutTime: 1
 --- !u!114 &4486388738195986149

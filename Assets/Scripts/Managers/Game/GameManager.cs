@@ -17,7 +17,9 @@ public class GameManager : MonoBehaviour
     [Header("Audio")]
     [SerializeField] private EventReference pauseSound;
     [SerializeField] private EventReference resumeSound;
-    [SerializeField] private EventReference speedChangeSound;
+    [SerializeField] private EventReference speed1Sound;
+    [SerializeField] private EventReference speed2Sound;
+    [SerializeField] private EventReference speed3Sound;
 
     [HideInInspector] public UnityEvent<DisplayableData> onStartDrag;
     [HideInInspector] public UnityEvent onEndDrag;
@@ -117,19 +119,14 @@ public class GameManager : MonoBehaviour
             TogglePause();
         }
 
-        bool canChangeActualTimeScale = !_isCombatSpeedLockActive && !IsPaused;
-
         if (Input.GetKeyDown(KeyCode.Alpha1)) {
-            _savedTimeScale = 1f;
-            if (canChangeActualTimeScale) Time.timeScale = 1f;
+            SetGameSpeed(1f);
         }
         else if (Input.GetKeyDown(KeyCode.Alpha2)) {
-            _savedTimeScale = 2f;
-            if (canChangeActualTimeScale) Time.timeScale = 2f;
+            SetGameSpeed(2f);
         }
         else if (Input.GetKeyDown(KeyCode.Alpha3)) {
-            _savedTimeScale = 3f;
-            if (canChangeActualTimeScale) Time.timeScale = 3f;
+            SetGameSpeed(3f);
         }
 
         if (IsPaused) return;
@@ -180,29 +177,39 @@ public class GameManager : MonoBehaviour
     public void CycleGameSpeed()
     {
         float currentSpeed = _savedTimeScale;
-        
-        if (currentSpeed <= 1f)
-        {
-            _savedTimeScale = 2f;
+        float newSpeed;
+
+        if (currentSpeed <= 1f) {
+            newSpeed = 2f;
         }
-        else if (currentSpeed <= 2f)
-        {
-            _savedTimeScale = 3f;
+        else if (currentSpeed <= 2f) {
+            newSpeed = 3f;
         }
-        else
-        {
-            _savedTimeScale = 1f;
+        else {
+            newSpeed = 1f;
         }
 
+        SetGameSpeed(newSpeed);
+    }
+
+    private void SetGameSpeed(float newSpeed)
+    {
+        if (Mathf.Approximately(_savedTimeScale, newSpeed)) return;
+
+        _savedTimeScale = newSpeed;
         bool canChangeActualTimeScale = !_isCombatSpeedLockActive && !IsPaused;
-        if (canChangeActualTimeScale)
-        {
-            Time.timeScale = _savedTimeScale;
+        if (canChangeActualTimeScale) {
+            Time.timeScale = newSpeed;
         }
 
-        if (!speedChangeSound.IsNull)
-        {
-            RuntimeManager.PlayOneShot(speedChangeSound);
+        if (Mathf.Approximately(newSpeed, 1f) && !speed1Sound.IsNull) {
+            RuntimeManager.PlayOneShot(speed1Sound);
+        }
+        else if (Mathf.Approximately(newSpeed, 2f) && !speed2Sound.IsNull) {
+            RuntimeManager.PlayOneShot(speed2Sound);
+        }
+        else if (Mathf.Approximately(newSpeed, 3f) && !speed3Sound.IsNull) {
+            RuntimeManager.PlayOneShot(speed3Sound);
         }
     }
 

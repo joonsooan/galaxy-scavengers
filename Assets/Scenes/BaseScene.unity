@@ -4214,14 +4214,14 @@ MonoBehaviour:
       Data2: 1202326804
       Data3: -537020530
       Data4: 1684792045
-    Path: event:/SFX_UIHover
+    Path: event:/SFX_UI/SFX_UIHover
   clickSound:
     Guid:
       Data1: -345895807
       Data2: 1210214295
       Data3: -73339495
       Data4: 1624008095
-    Path: event:/SFX_UIClick
+    Path: event:/SFX_UI/SFX_UIClick
 --- !u!1 &547807518
 GameObject:
   m_ObjectHideFlags: 0
@@ -5137,7 +5137,7 @@ MonoBehaviour:
       Data2: 1210214295
       Data3: -73339495
       Data4: 1624008095
-    Path: event:/SFX_UIClick
+    Path: event:/SFX_UI/SFX_UIClick
   inventoryUIPanel: {fileID: 1518650514}
   moduleUIPanel: {fileID: 1578248362}
   laboratoryUIPanel: {fileID: 0}
@@ -8204,14 +8204,14 @@ MonoBehaviour:
       Data2: 1202326804
       Data3: -537020530
       Data4: 1684792045
-    Path: event:/SFX_UIHover
+    Path: event:/SFX_UI/SFX_UIHover
   clickSound:
     Guid:
       Data1: -345895807
       Data2: 1210214295
       Data3: -73339495
       Data4: 1624008095
-    Path: event:/SFX_UIClick
+    Path: event:/SFX_UI/SFX_UIClick
 --- !u!1 &1001279498
 GameObject:
   m_ObjectHideFlags: 0
@@ -8734,7 +8734,7 @@ MonoBehaviour:
       Data2: 1136950431
       Data3: -19323986
       Data4: 932237408
-    Path: event:/SFX_LaunchCore
+    Path: event:/SFX_UI/SFX_LaunchCore
   fadeCanvasGroup: {fileID: 840868840}
   fadeDuration: 0.4
 --- !u!1 &1106158777
@@ -10642,14 +10642,14 @@ MonoBehaviour:
       Data2: 1202326804
       Data3: -537020530
       Data4: 1684792045
-    Path: event:/SFX_UIHover
+    Path: event:/SFX_UI/SFX_UIHover
   clickSound:
     Guid:
       Data1: -345895807
       Data2: 1210214295
       Data3: -73339495
       Data4: 1624008095
-    Path: event:/SFX_UIClick
+    Path: event:/SFX_UI/SFX_UIClick
 --- !u!1001 &1463161460
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11621,14 +11621,14 @@ MonoBehaviour:
       Data2: 1202326804
       Data3: -537020530
       Data4: 1684792045
-    Path: event:/SFX_UIHover
+    Path: event:/SFX_UI/SFX_UIHover
   clickSound:
     Guid:
       Data1: -345895807
       Data2: 1210214295
       Data3: -73339495
       Data4: 1624008095
-    Path: event:/SFX_UIClick
+    Path: event:/SFX_UI/SFX_UIClick
 --- !u!1 &1623798672
 GameObject:
   m_ObjectHideFlags: 0
@@ -15836,14 +15836,14 @@ MonoBehaviour:
       Data2: 1202326804
       Data3: -537020530
       Data4: 1684792045
-    Path: event:/SFX_UIHover
+    Path: event:/SFX_UI/SFX_UIHover
   clickSound:
     Guid:
       Data1: -345895807
       Data2: 1210214295
       Data3: -73339495
       Data4: 1624008095
-    Path: event:/SFX_UIClick
+    Path: event:/SFX_UI/SFX_UIClick
 --- !u!1001 &135859146302922316
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -16132,7 +16132,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4993965286891211911, guid: 2174fafcdb5da504bb2dcf537c0b99b5, type: 3}
       propertyPath: clickSound.Path
-      value: event:/SFX_UIClick
+      value: event:/SFX_UI/SFX_UIClick
       objectReference: {fileID: 0}
     - target: {fileID: 4993965286891211911, guid: 2174fafcdb5da504bb2dcf537c0b99b5, type: 3}
       propertyPath: clickSound.Guid.Data1

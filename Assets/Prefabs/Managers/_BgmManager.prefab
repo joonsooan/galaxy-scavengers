@@ -51,14 +51,14 @@ MonoBehaviour:
       Data2: 1103131406
       Data3: 251409027
       Data4: 1233819289
-    Path: event:/BGM_Title
+    Path: event:/BGM_UI/BGM_Title
   baseBgm:
     Guid:
       Data1: -1052388172
       Data2: 1103131406
       Data3: 251409027
       Data4: 1233819289
-    Path: event:/BGM_Title
+    Path: event:/BGM_UI/BGM_Title
   gameBgms:
   - Guid:
       Data1: 603399768
@@ -91,27 +91,26 @@ MonoBehaviour:
       Data2: 1164406713
       Data3: 228087483
       Data4: 511340017
-    Path: event:/BGM_Loading
+    Path: event:/BGM_UI/BGM_Loading
   successLoadingBgm:
     Guid:
       Data1: -637866130
       Data2: 1333146692
       Data3: 836448936
       Data4: 1739704841
-    Path: event:/BGM_EscapeSuccess
+    Path: event:/BGM_UI/BGM_EscapeSuccess
   failureLoadingBgm:
     Guid:
       Data1: -2113190679
       Data2: 1119183929
       Data3: -912586345
       Data4: -699956491
-    Path: event:/BGM_EscapeFail
+    Path: event:/BGM_UI/BGM_EscapeFail
   defaultFadeOutTime: 0.5
   defaultFadeInTime: 1
   gameBgmFadeInTime: 3
   gameBgmFadeOutTime: 3
   gameBgmCooldownTime: 15
-  gameBgmMaxWaitForEndTime: 30
 --- !u!114 &7245013787098741407
 MonoBehaviour:
   m_ObjectHideFlags: 0

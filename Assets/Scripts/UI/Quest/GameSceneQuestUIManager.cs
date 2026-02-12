@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using FMODUnity;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -18,6 +19,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
     
     [Header("Notification Settings")]
     [SerializeField] private GameObject notifierIcon;
+    [SerializeField] private EventReference newQuestSound;
     [SerializeField] private Material shaderMaterial;
     [SerializeField] private string shaderMaterialResourcePath;
     
@@ -230,7 +232,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
                 bool shouldShow = (state == QuestState.Active || state == QuestState.Completable) && !isViewed;
                 if (shouldShow)
                 {
-                    ShowNotifierForNewQuest(questId);
+                    ShowNotifierForNewQuest(questId, false);
                 }
             }
             
@@ -244,7 +246,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
                 }
                 if (state == QuestState.Available && !_viewedQuestIds.Contains(questId) && !_acceptedRequestQuests.Contains(questId))
                 {
-                    ShowNotifierForNewQuest(questId);
+                    ShowNotifierForNewQuest(questId, true);
                 }
             }
         }
@@ -263,7 +265,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
     {
         if (questData != null)
         {
-            ShowNotifierForNewQuest(questData.questId);
+            ShowNotifierForNewQuest(questData.questId, true);
             StartCoroutine(RefreshQuestListAfterSpawn());
         }
     }
@@ -337,7 +339,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
                     isNew = !_viewedQuestIds.Contains(quest.questId);
                     if (isNew)
                     {
-                        ShowNotifierForNewQuest(quest.questId);
+                        ShowNotifierForNewQuest(quest.questId, false);
                     }
                 }
                 questCell.Initialize(quest, _questDetailPanel, isNew, null, this);
@@ -429,8 +431,26 @@ public class GameSceneQuestUIManager : MonoBehaviour
             questDetailPanelObject.SetActive(false);
         }
     }
+
+    public void HideQuestDetailPanel()
+    {
+        if (EventSystem.current != null && EventSystem.current.currentSelectedGameObject != null)
+        {
+            Transform sel = EventSystem.current.currentSelectedGameObject.transform;
+            if (questDetailPanelObject != null && sel.IsChildOf(questDetailPanelObject.transform))
+                EventSystem.current.SetSelectedGameObject(null);
+        }
+        if (questDetailPanelObject != null)
+        {
+            if (_questDetailPanel != null)
+            {
+                _questDetailPanel.ClearQuestInfo();
+            }
+            questDetailPanelObject.SetActive(false);
+        }
+    }
     
-    private void ShowNotifierForNewQuest(int questId)
+    private void ShowNotifierForNewQuest(int questId, bool playSound = false)
     {
         if (notifierIcon != null)
         {
@@ -447,6 +467,11 @@ public class GameSceneQuestUIManager : MonoBehaviour
             {
                 shaderMaterial.SetFloat("_Intensity", 1f);
             }
+        }
+        
+        if (playSound && !newQuestSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(newQuestSound);
         }
     }
     

@@ -7913,6 +7913,11 @@ MonoBehaviour:
   startingAreaRadius: 12
   startingAreaCircleCount: 3
   startingAreaMinDistance: 1
+  centerResourceCircleRadius: 1
+  centerResourceCircleDistanceFromCenter: 3
+  centerResourceCircleMaxDistanceFromCenter: 8
+  centerResourceCircleMinSpacing: 2.5
+  centerResourceCirclePlacementAttempts: 50
   showGizmos: 1
   divisionCircleColor: {r: 1, g: 1, b: 0, a: 0.3}
   resourceCircleColor: {r: 0, g: 1, b: 0, a: 0.5}
@@ -23248,11 +23253,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
       propertyPath: pauseSound.Path
-      value: event:/SFX_GamePause
+      value: event:/SFX_UI/SFX_GamePause
       objectReference: {fileID: 0}
     - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
       propertyPath: resumeSound.Path
-      value: event:/SFX_GameStart
+      value: event:/SFX_UI/SFX_GameStart
       objectReference: {fileID: 0}
     - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
       propertyPath: pauseSound.Guid.Data1

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="AudioFile" id="{7abbf85b-734e-4b0a-8ba6-620bce08f32e}">
+		<property name="assetPath">
+			<value>soundreality-pop-atmos-312646.mp3</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>48</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>1.536</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{a7a75309-85f1-4e1f-8f6d-60f7d7d8a7a3}</destination>
+		</relationship>
+	</object>
+</objects>

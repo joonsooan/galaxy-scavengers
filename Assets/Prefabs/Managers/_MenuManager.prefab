@@ -45,6 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mainPanel: {fileID: 0}
+  overlayPanel: {fileID: 0}
   continueButton: {fileID: 0}
   returnToTitleButton: {fileID: 0}
   quitGameButton: {fileID: 0}
@@ -60,18 +61,18 @@ MonoBehaviour:
       Data2: 1287107820
       Data3: 1616156851
       Data4: 765321994
-    Path: event:/SFX_GamePause
+    Path: event:/SFX_UI/SFX_GamePause
   menuCloseSound:
     Guid:
       Data1: -765664001
       Data2: 1302141166
       Data3: 995189914
       Data4: -85904115
-    Path: event:/SFX_GameStart
+    Path: event:/SFX_UI/SFX_GameStart
   buttonClickSound:
     Guid:
       Data1: 199913248
       Data2: 1202326804
       Data3: -537020530
       Data4: 1684792045
-    Path: event:/SFX_UIHover
+    Path: event:/SFX_UI/SFX_UIHover
