@@ -145,6 +145,12 @@ public class GameManager : MonoBehaviour
                 TutorialManager.Instance.SkipAllTutorials();
             }
         }
+        if (Input.GetKeyDown(KeyCode.G)) {
+            UnitData constructUnit = Resources.Load<UnitData>("Unit Data/Unit_Construct");
+            if (constructUnit != null && StartingUnitsManager.Instance != null) {
+                StartingUnitsManager.Instance.SpawnUnitsForEditor(constructUnit, 1);
+            }
+        }
 #endif
     }
 

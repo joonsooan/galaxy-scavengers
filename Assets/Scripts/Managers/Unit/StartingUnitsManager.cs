@@ -280,4 +280,23 @@ public class StartingUnitsManager : MonoBehaviour
 
         return true;
     }
+
+#if UNITY_EDITOR
+    public void SpawnUnitsForEditor(UnitData unitData, int count = 1)
+    {
+        if (unitData == null || unitData.unitPrefab == null || count <= 0) return;
+
+        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
+        if (mainStructure == null) return;
+
+        if (UnitManager.Instance == null || UnitManager.Instance.unitParent == null) return;
+
+        Vector3 centerPosition = mainStructure.transform.position;
+        for (int i = 0; i < count; i++)
+        {
+            Vector3 spawnPosition = GetSpawnPositionAroundMainStructure(centerPosition, 3f);
+            Instantiate(unitData.unitPrefab, spawnPosition, Quaternion.identity, UnitManager.Instance.unitParent);
+        }
+    }
+#endif
 }
