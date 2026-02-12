@@ -399,9 +399,13 @@ public class UnitMovement : MonoBehaviour
 
     private bool IsCellWalkable(Vector3Int cell)
     {
-        if (BuildingManager.Instance.IsBuildingTile(cell)) return false;
-        if (BuildingManager.Instance.IsResourceTile(cell)) return false;
-        if (BuildingManager.Instance.IsTerrainCell(cell)) return false;
+        if (BuildingManager.Instance.IsBuildingTile(cell)) {
+            if (!(_unitBase is Unit_Construct && BuildingManager.Instance.IsTemporaryTile(cell))) {
+                return false;
+            }
+        }
+        else if (BuildingManager.Instance.IsResourceTile(cell)) return false;
+        else if (BuildingManager.Instance.IsTerrainCell(cell)) return false;
 
         if (BuildingManager.Instance.IsMainStructureCell(cell) ||
             BuildingManager.Instance.GetBuildingAt(cell, out _)) {

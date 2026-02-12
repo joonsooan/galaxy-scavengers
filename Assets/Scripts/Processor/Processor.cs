@@ -545,6 +545,10 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         List<Vector3Int> availableCells = GetAvailableInteractionCells(occupiedCells);
 
         if (availableCells.Count == 0) {
+            Vector3Int fallbackCell = FindClosestWalkableCell(occupiedCells, drone.transform.position);
+            if (fallbackCell != new Vector3Int(int.MinValue, int.MinValue, int.MinValue)) {
+                return BuildingManager.Instance.grid.GetCellCenterWorld(fallbackCell);
+            }
             return transform.position;
         }
 
@@ -562,6 +566,9 @@ public class Processor : Damageable, IClickable, IAetherConsumer
 
         foreach (Vector3Int cell in availableCells) {
             bool isUnassigned = !assignedCells.Contains(cell);
+            bool isGloballyAssigned = UnitMovement.IsCellAssigned(cell);
+            if (isGloballyAssigned && isUnassigned) continue;
+
             float distance = Vector3.Distance(dronePos, BuildingManager.Instance.grid.GetCellCenterWorld(cell));
 
             if (isUnassigned && assignedCells.Contains(bestCell)) {
@@ -589,13 +596,40 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         Vector3Int[] cardinalOffsets = {
             new Vector3Int(1, 0, 0), new Vector3Int(-1, 0, 0), new Vector3Int(0, 1, 0), new Vector3Int(0, -1, 0)
         };
+        Vector3Int[] diagonalOffsets = {
+            new Vector3Int(1, 1, 0), new Vector3Int(1, -1, 0), new Vector3Int(-1, 1, 0), new Vector3Int(-1, -1, 0)
+        };
 
         foreach (Vector3Int occupiedCell in occupiedSet) {
             foreach (Vector3Int offset in cardinalOffsets) {
                 Vector3Int neighbor = occupiedCell + offset;
-
                 if (!occupiedSet.Contains(neighbor) && IsCellWalkable(neighbor)) {
                     interactionCells.Add(neighbor);
+                }
+            }
+        }
+
+        if (interactionCells.Count == 0) {
+            foreach (Vector3Int occupiedCell in occupiedSet) {
+                foreach (Vector3Int offset in diagonalOffsets) {
+                    Vector3Int neighbor = occupiedCell + offset;
+                    if (!occupiedSet.Contains(neighbor) && IsCellWalkable(neighbor)) {
+                        interactionCells.Add(neighbor);
+                    }
+                }
+            }
+        }
+
+        if (interactionCells.Count == 0) {
+            foreach (Vector3Int occupiedCell in occupiedSet) {
+                for (int dx = -2; dx <= 2; dx++) {
+                    for (int dy = -2; dy <= 2; dy++) {
+                        if (dx == 0 && dy == 0) continue;
+                        Vector3Int neighbor = occupiedCell + new Vector3Int(dx, dy, 0);
+                        if (!occupiedSet.Contains(neighbor) && IsCellWalkable(neighbor)) {
+                            interactionCells.Add(neighbor);
+                        }
+                    }
                 }
             }
         }
@@ -603,13 +637,63 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         return interactionCells.ToList();
     }
 
+    private Vector3Int FindClosestWalkableCell(List<Vector3Int> occupiedCells, Vector3 fromPos)
+    {
+        if (BuildingManager.Instance == null) return new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
+
+        HashSet<Vector3Int> occupiedSet = new HashSet<Vector3Int>(occupiedCells);
+        HashSet<Vector3Int> visited = new HashSet<Vector3Int>(occupiedSet);
+        Queue<Vector3Int> queue = new Queue<Vector3Int>();
+        foreach (Vector3Int cell in occupiedCells) {
+            queue.Enqueue(cell);
+        }
+
+        Vector3Int[] allOffsets = {
+            new Vector3Int(1, 0, 0), new Vector3Int(-1, 0, 0), new Vector3Int(0, 1, 0), new Vector3Int(0, -1, 0),
+            new Vector3Int(1, 1, 0), new Vector3Int(1, -1, 0), new Vector3Int(-1, 1, 0), new Vector3Int(-1, -1, 0)
+        };
+
+        Vector3Int bestCell = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
+        float minDistance = float.MaxValue;
+        const int maxSearchRadius = 8;
+
+        for (int i = 0; i < maxSearchRadius && queue.Count > 0; i++) {
+            int levelCount = queue.Count;
+            for (int j = 0; j < levelCount; j++) {
+                Vector3Int current = queue.Dequeue();
+                foreach (Vector3Int offset in allOffsets) {
+                    Vector3Int neighbor = current + offset;
+                    if (visited.Contains(neighbor)) continue;
+                    visited.Add(neighbor);
+
+                    if (!occupiedSet.Contains(neighbor) && IsCellWalkable(neighbor)) {
+                        float dist = Vector3.Distance(fromPos, BuildingManager.Instance.grid.GetCellCenterWorld(neighbor));
+                        if (dist < minDistance) {
+                            minDistance = dist;
+                            bestCell = neighbor;
+                        }
+                    }
+                    queue.Enqueue(neighbor);
+                }
+            }
+        }
+
+        return bestCell;
+    }
+
     private bool IsCellWalkable(Vector3Int cell)
     {
         if (BuildingManager.Instance == null) {
             return false;
         }
-        return !BuildingManager.Instance.IsResourceTile(cell) &&
-            !BuildingManager.Instance.IsBuildingTile(cell);
+        if (BuildingManager.Instance.IsBuildingTile(cell)) return false;
+        if (BuildingManager.Instance.IsResourceTile(cell)) return false;
+        if (BuildingManager.Instance.IsTerrainCell(cell)) return false;
+        if (BuildingManager.Instance.IsMainStructureCell(cell) ||
+            BuildingManager.Instance.GetBuildingAt(cell, out _)) {
+            return false;
+        }
+        return true;
     }
 
     public void CancelRequest(ResourceRequest request)
