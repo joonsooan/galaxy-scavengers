@@ -565,6 +565,7 @@ MonoBehaviour:
   questIdText: {fileID: 3884863510617793911}
   cellButton: {fileID: 4407997240673077720}
   configureIcon: {fileID: 2613250169957899930}
+  notifierIcon: {fileID: 2613250169957899930}
 --- !u!114 &-3059361073330713778
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -227,12 +227,12 @@ public class QuestCell : MonoBehaviour
             
             _questDetailPanel.DisplayQuestInfo(_questData, _questData.questId);
             
-            MarkAsViewed();
-            
             if (_gameSceneQuestUIManager != null)
             {
                 _gameSceneQuestUIManager.MarkQuestAsViewed(_questData.questId);
             }
+            
+            MarkAsViewed();
             
             if (_questUIHandler != null)
             {

@@ -104,7 +104,6 @@ public class CoreRepairManager : MonoBehaviour
             _partRepairStatus[part] = false;
             CreateRepairQuest(part);
         }
-        UnityEngine.Debug.Log("[CoreRepairManager] InitializeLanding - created " + partsToDamage.Count + " repair quests");
 
         ApplyDebuffs();
         OnRepairStatusChanged?.Invoke();
@@ -141,7 +140,6 @@ public class CoreRepairManager : MonoBehaviour
             else
             {
                 QuestDataManager.Instance.StartQuest(questData.questId);
-                UnityEngine.Debug.Log("[CoreRepairManager] CreateRepairQuest - registered and started quest " + questData.questId + " for " + part);
             }
         }
     }
