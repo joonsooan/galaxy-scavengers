@@ -8,7 +8,6 @@ public abstract class EnemyUnitBase : UnitBase
     private const float InfiniteAttackTargetUpdateInterval = 0.5f;
     private const float TerritoryCheckIntervalIdle = 1.0f;
     private const float TerritoryCheckIntervalWarning = 0.3f;
-    private const float PathUpdateInterval = 0.25f;
     private const float AttackHysteresisBuffer = 0.5f;
 
     [Header("Zones")]
@@ -67,7 +66,7 @@ public abstract class EnemyUnitBase : UnitBase
         _spawnPosition = Vector3.zero;
         aiState = AIState.Idle;
         _isInInfiniteAttackState = false;
-        _aiUpdateWait = CoroutineCache.GetWaitForSeconds(0.1f);
+        _aiUpdateWait = CoroutineCache.GetWaitForSeconds(0.15f);
     }
 
     protected void Start()
@@ -89,7 +88,7 @@ public abstract class EnemyUnitBase : UnitBase
         base.OnEnable();
         if (_currentRoamInterval <= 0f) SetNewRoamInterval();
         _roamTimer = _currentRoamInterval;
-        _pathUpdateTimer = Time.time + Random.Range(0f, PathUpdateInterval);
+        _pathUpdateTimer = Time.time + Random.Range(0f, 1f) + (GetInstanceID() % 20) * 0.05f;
         if (_aiUpdateWait != null) {
             _aiUpdateCoroutine = StartCoroutine(AIUpdateRoutine());
         }
@@ -113,7 +112,7 @@ public abstract class EnemyUnitBase : UnitBase
 
     private IEnumerator AIUpdateRoutine()
     {
-        int initialDelayFrames = Random.Range(0, 12);
+        int initialDelayFrames = Random.Range(0, 30);
         for (int i = 0; i < initialDelayFrames; i++) yield return null;
         while (true) {
             UpdateStateLogic();
@@ -405,7 +404,7 @@ public abstract class EnemyUnitBase : UnitBase
         if (Time.time < _pathUpdateTimer) return;
         if ((targetPos - _lastTargetPos).sqrMagnitude > minTargetMoveDistance * minTargetMoveDistance || !unitMovement.IsMoving) {
             float dist = Vector3.Distance(transform.position, targetPos);
-            float interval = dist < 5f ? 0.2f : dist < 15f ? 0.35f : 0.5f;
+            float interval = dist < 5f ? 0.3f : dist < 15f ? 0.5f : 0.7f;
             _pathUpdateTimer = Time.time + interval;
             _lastTargetPos = targetPos;
             unitMovement.SetNewTarget(targetPos, unitMovement.waypointTolerance);

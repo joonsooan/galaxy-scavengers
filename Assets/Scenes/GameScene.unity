@@ -60868,9 +60868,9 @@ Transform:
   - {fileID: 558756079}
   - {fileID: 467045576}
   - {fileID: 2121692771}
-  - {fileID: 2119450979}
   - {fileID: 1829347662}
   - {fileID: 860813981}
+  - {fileID: 2119450979}
   - {fileID: 2116328955}
   - {fileID: 1184097865}
   - {fileID: 80026091}
@@ -61188,8 +61188,8 @@ TilemapRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 292294805
-  m_SortingLayer: 2
+  m_SortingLayerID: -1027114353
+  m_SortingLayer: 3
   m_SortingOrder: 0
   m_ChunkSize: {x: 32, y: 32, z: 32}
   m_ChunkCullingBounds: {x: 0, y: 0, z: 0}

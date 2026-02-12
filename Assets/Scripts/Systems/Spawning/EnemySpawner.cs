@@ -78,6 +78,7 @@ public class EnemySpawner : MonoBehaviour
         if (noisePercentage < 100f)
         {
             SpawnWaveFromBudget();
+            _lastNoise100WaveTime = Time.time;
         }
 
         NoiseManager.NoiseZone zone = NoiseManager.Instance.GetCurrentNoiseZone();

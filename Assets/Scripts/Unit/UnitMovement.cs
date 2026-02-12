@@ -21,6 +21,12 @@ public class UnitMovement : MonoBehaviour
     private static readonly MinHeap OpenSet = new MinHeap(1000);
     private static readonly Dictionary<Vector3Int, HashSet<UnitMovement>> _cellAssignments = new Dictionary<Vector3Int, HashSet<UnitMovement>>();
 
+    private static int _pathfindingCallsThisFrame;
+    private static int _lastProcessedFrame = -1;
+    private const int MaxPathfindingPerFrame = 5;
+    private static readonly Queue<(UnitMovement unit, Vector3 targetPos, float stoppingDistance)> _pendingRepathRequests = new Queue<(UnitMovement, Vector3, float)>();
+    private static readonly Queue<(UnitMovement unit, Vector2 targetPos, float stoppingDistance, bool isDirect)> _deferredPathfindingRequests = new Queue<(UnitMovement, Vector2, float, bool)>();
+
     private static readonly float D = 1f;
     private static readonly float D2 = 1.41421356f;
 
@@ -68,6 +74,26 @@ public class UnitMovement : MonoBehaviour
     private void Start()
     {
         _grid = BuildingManager.Instance.grid;
+    }
+
+    private void Update()
+    {
+        if (Time.frameCount == _lastProcessedFrame) return;
+        _lastProcessedFrame = Time.frameCount;
+        _pathfindingCallsThisFrame = 0;
+        while (_pathfindingCallsThisFrame < MaxPathfindingPerFrame && _pendingRepathRequests.Count > 0) {
+            var (unit, targetPos, stoppingDistance) = _pendingRepathRequests.Dequeue();
+            if (unit != null && unit.isActiveAndEnabled) {
+                unit.SetNewTarget(targetPos, stoppingDistance);
+            }
+        }
+        while (_pathfindingCallsThisFrame < MaxPathfindingPerFrame && _deferredPathfindingRequests.Count > 0) {
+            var (unit, targetPos, stoppingDistance, isDirect) = _deferredPathfindingRequests.Dequeue();
+            if (unit != null && unit.isActiveAndEnabled) {
+                if (isDirect) unit.SetNewTargetDirect(targetPos, stoppingDistance);
+                else unit.SetNewTarget(targetPos, stoppingDistance);
+            }
+        }
     }
 
     private void FixedUpdate()
@@ -201,6 +227,11 @@ public class UnitMovement : MonoBehaviour
             return true;
         }
 
+        if (!TryConsumePathfindingBudget()) {
+            _deferredPathfindingRequests.Enqueue((this, targetPosition, stoppingDistance, true));
+            return false;
+        }
+
         _path = FindPath(transform.position, FinalTargetPosition);
 
         if (_path.Count > 1) {
@@ -263,6 +294,11 @@ public class UnitMovement : MonoBehaviour
             return true;
         }
 
+        if (!TryConsumePathfindingBudget()) {
+            _deferredPathfindingRequests.Enqueue((this, (Vector2)FinalTargetPosition, stoppingDistance, false));
+            return false;
+        }
+
         _path = FindPath(transform.position, FinalTargetPosition);
 
         if (_path.Count > 1) {
@@ -280,6 +316,13 @@ public class UnitMovement : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    private static bool TryConsumePathfindingBudget()
+    {
+        if (_pathfindingCallsThisFrame >= MaxPathfindingPerFrame) return false;
+        _pathfindingCallsThisFrame++;
+        return true;
     }
 
     public void StopMovement()
@@ -317,7 +360,7 @@ public class UnitMovement : MonoBehaviour
         }
 
         if (pathIsBlocked) {
-            SetNewTarget(FinalTargetPosition, _finalStoppingDistance);
+            _pendingRepathRequests.Enqueue((this, FinalTargetPosition, _finalStoppingDistance));
         }
     }
 
