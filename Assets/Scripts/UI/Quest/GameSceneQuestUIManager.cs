@@ -66,10 +66,10 @@ public class GameSceneQuestUIManager : MonoBehaviour
     
     private void OnEnable()
     {
+        Debug.Log("[GameSceneQuestUIManager] OnEnable - QuestDataManager.Instance=" + (QuestDataManager.Instance != null) + ", GameSceneQuestUIManager.activeInHierarchy=" + gameObject.activeInHierarchy);
         if (QuestDataManager.Instance != null)
-        {
             QuestDataManager.Instance.OnQuestStateChanged += OnQuestStateChanged;
-        }
+        SubscribeToGameSceneInitialized();
         
         if (RequestQuestManager.Instance != null)
         {
@@ -125,11 +125,56 @@ public class GameSceneQuestUIManager : MonoBehaviour
     private void OnDisable()
     {
         if (QuestDataManager.Instance != null)
-        {
             QuestDataManager.Instance.OnQuestStateChanged -= OnQuestStateChanged;
-        }
-        
         RequestQuestManager.OnRequestQuestSpawned -= OnRequestQuestSpawned;
+        GameManager.OnGameSceneInitialized -= OnGameSceneInitialized;
+    }
+
+    private void SubscribeToGameSceneInitialized()
+    {
+        GameManager.OnGameSceneInitialized -= OnGameSceneInitialized;
+        GameManager.OnGameSceneInitialized += OnGameSceneInitialized;
+        bool alreadyInitialized = GameManager.Instance != null && GameManager.Instance.IsGameSceneInitialized;
+        Debug.Log("[GameSceneQuestUIManager] SubscribeToGameSceneInitialized - subscribed, GameManager.Instance=" + (GameManager.Instance != null) + ", alreadyInitialized=" + alreadyInitialized);
+        if (alreadyInitialized)
+        {
+            Debug.Log("[GameSceneQuestUIManager] SubscribeToGameSceneInitialized - game already initialized, calling OnGameSceneInitialized immediately");
+            OnGameSceneInitialized();
+        }
+    }
+
+    private void OnGameSceneInitialized()
+    {
+        Debug.Log("[GameSceneQuestUIManager] OnGameSceneInitialized called");
+        LoadActiveQuests();
+        RefreshNotifierForCoreRepairQuests();
+    }
+
+    private void RefreshNotifierForCoreRepairQuests()
+    {
+        if (QuestDataManager.Instance == null)
+        {
+            Debug.Log("[GameSceneQuestUIManager] RefreshNotifierForCoreRepairQuests - QuestDataManager.Instance is null");
+            return;
+        }
+        List<QuestData> coreRepairQuests = QuestDataManager.Instance.GetAllQuests()
+            .Where(q => q != null && q.questType == QuestType.CoreRepairQuest)
+            .ToList();
+        Debug.Log("[GameSceneQuestUIManager] RefreshNotifierForCoreRepairQuests - coreRepairQuests.Count=" + coreRepairQuests.Count + ", notifierIcon=" + (notifierIcon != null) + ", _viewedQuestIds.Count=" + _viewedQuestIds.Count);
+        foreach (QuestData quest in coreRepairQuests)
+        {
+            QuestState state = QuestDataManager.Instance.GetQuestState(quest.questId);
+            bool isViewed = _viewedQuestIds.Contains(quest.questId);
+            bool shouldShow = (state == QuestState.Active || state == QuestState.Completable) && !isViewed;
+            Debug.Log("[GameSceneQuestUIManager] RefreshNotifier - questId=" + quest.questId + ", state=" + state + ", isViewed=" + isViewed + ", shouldShow=" + shouldShow);
+            if (shouldShow)
+            {
+                ShowNotifierForNewQuest(quest.questId);
+                return;
+            }
+        }
+        Debug.Log("[GameSceneQuestUIManager] RefreshNotifierForCoreRepairQuests - no quest to show, calling UpdateNotifierIcons");
+        UpdateNotifierIcons();
     }
     
     private void Update()
@@ -158,24 +203,22 @@ public class GameSceneQuestUIManager : MonoBehaviour
         {
             yield return null;
         }
-        
         List<QuestData> coreRepairQuests = QuestDataManager.Instance.GetAllQuests()
             .Where(q => q != null && q.questType == QuestType.CoreRepairQuest)
             .ToList();
-        
+        Debug.Log("[GameSceneQuestUIManager] InitializeWhenReady - coreRepairQuests.Count=" + coreRepairQuests.Count + ", GameManager.IsGameSceneInitialized=" + (GameManager.Instance != null && GameManager.Instance.IsGameSceneInitialized));
         foreach (QuestData quest in coreRepairQuests)
         {
             _viewedQuestIds.Remove(quest.questId);
         }
-        
         yield return null;
-        
         LoadActiveQuests();
     }
     
     private void OnQuestStateChanged(int questId)
     {
         QuestData questData = QuestDataManager.Instance?.GetQuestData(questId);
+        Debug.Log("[GameSceneQuestUIManager] OnQuestStateChanged - questId=" + questId + ", questData=" + (questData != null ? questData.questType.ToString() : "null") + ", active=" + gameObject.activeInHierarchy);
         if (questData != null)
         {
             if (questData.questType == QuestType.RequestQuest && _acceptedRequestQuests.Contains(questId))
@@ -193,7 +236,10 @@ public class GameSceneQuestUIManager : MonoBehaviour
             if (questData.questType == QuestType.CoreRepairQuest)
             {
                 QuestState state = QuestDataManager.Instance.GetQuestState(questId);
-                if ((state == QuestState.Active || state == QuestState.Completable) && !_viewedQuestIds.Contains(questId))
+                bool isViewed = _viewedQuestIds.Contains(questId);
+                bool shouldShow = (state == QuestState.Active || state == QuestState.Completable) && !isViewed;
+                Debug.Log("[GameSceneQuestUIManager] OnQuestStateChanged CoreRepairQuest - questId=" + questId + ", state=" + state + ", isViewed=" + isViewed + ", shouldShow=" + shouldShow);
+                if (shouldShow)
                 {
                     ShowNotifierForNewQuest(questId);
                 }
@@ -397,6 +443,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
     
     private void ShowNotifierForNewQuest(int questId)
     {
+        Debug.Log("[GameSceneQuestUIManager] ShowNotifierForNewQuest - questId=" + questId + ", notifierIcon=" + (notifierIcon != null) + ", notifierIcon.activeSelf will be set to true");
         if (notifierIcon != null)
         {
             notifierIcon.SetActive(true);

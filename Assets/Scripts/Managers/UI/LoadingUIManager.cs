@@ -207,6 +207,22 @@ public class LoadingUIManager : MonoBehaviour
         return null;
     }
 
+    private void OnApplicationQuit()
+    {
+        if (_currentLoadingScreen != null)
+        {
+            DestroyImmediate(_currentLoadingScreen);
+            _currentLoadingScreen = null;
+        }
+        if (_loadingCanvas != null && _loadingCanvas.gameObject != null)
+        {
+            DestroyImmediate(_loadingCanvas.gameObject);
+            _loadingCanvas = null;
+        }
+        if (Instance == this)
+            Instance = null;
+    }
+
     private void OnDestroy()
     {
         if (_currentLoadingScreen != null)
@@ -214,11 +230,12 @@ public class LoadingUIManager : MonoBehaviour
             Destroy(_currentLoadingScreen);
             _currentLoadingScreen = null;
         }
-
         if (_loadingCanvas != null && _loadingCanvas.gameObject != null)
         {
             Destroy(_loadingCanvas.gameObject);
             _loadingCanvas = null;
         }
+        if (Instance == this)
+            Instance = null;
     }
 }
