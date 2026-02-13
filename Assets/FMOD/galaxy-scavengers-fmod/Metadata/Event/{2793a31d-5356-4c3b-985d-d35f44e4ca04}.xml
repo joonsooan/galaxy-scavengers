@@ -5,7 +5,7 @@
 			<value>Red Light 1</value>
 		</property>
 		<property name="name">
-			<value>SFX_Mining_Main</value>
+			<value>SFX_Mining</value>
 		</property>
 		<property name="outputFormat">
 			<value>2</value>
@@ -76,8 +76,11 @@
 	</object>
 	<object class="EventMixerMaster" id="{ec28621c-3cf5-4cfa-a1e8-e90b6ffcf253}">
 		<property name="volume">
-			<value>-20</value>
+			<value>-2.5</value>
 		</property>
+		<relationship name="modulators">
+			<destination>{f0e113b4-779e-46a3-bfc7-bf73d7ae8988}</destination>
+		</relationship>
 		<relationship name="effectChain">
 			<destination>{4cb50a20-154c-4747-80bc-fa08871571ba}</destination>
 		</relationship>
@@ -90,7 +93,7 @@
 	</object>
 	<object class="MultiSound" id="{dd508566-8991-4be8-a3b2-deff789c14df}">
 		<relationship name="sounds">
-			<destination>{f15c6ce7-9db3-4440-854d-c746544ae37a}</destination>
+			<destination>{ee353836-fde4-441b-a815-1982540d86dd}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusEffectChain" id="{30a3df56-3b4d-418c-b6f7-aa85eda9cd01}">
@@ -99,6 +102,23 @@
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{b4e8e725-c4e2-4f06-b347-c2035da5f430}" />
+	<object class="ADSRModulator" id="{f0e113b4-779e-46a3-bfc7-bf73d7ae8988}">
+		<property name="nameOfPropertyBeingModulated">
+			<value>volume</value>
+		</property>
+		<property name="initialValue">
+			<value>-80</value>
+		</property>
+		<property name="attackTime">
+			<value>250</value>
+		</property>
+		<property name="releaseTime">
+			<value>250</value>
+		</property>
+		<property name="finalValue">
+			<value>-80</value>
+		</property>
+	</object>
 	<object class="MixerBusEffectChain" id="{4cb50a20-154c-4747-80bc-fa08871571ba}">
 		<relationship name="effects">
 			<destination>{8b7a9fe0-8bba-46a5-b94e-f4dcbe0d2c7d}</destination>
@@ -106,15 +126,25 @@
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{93fb46a3-bcba-4d0a-b829-8a5059e96903}" />
-	<object class="SingleSound" id="{f15c6ce7-9db3-4440-854d-c746544ae37a}">
-		<property name="pitch">
-			<value>-3</value>
+	<object class="SingleSound" id="{ee353836-fde4-441b-a815-1982540d86dd}">
+		<property name="looping">
+			<value>true</value>
 		</property>
 		<relationship name="audioFile">
-			<destination>{05ef53a9-a9e5-4800-a9c7-f191cff7e9e8}</destination>
+			<destination>{dcb7e0f7-72f9-423f-9caa-8fb520d0a1d3}</destination>
 		</relationship>
 	</object>
 	<object class="MixerBusFader" id="{4325f85b-bd0f-47e4-817d-e3d6d5a1538c}" />
 	<object class="MixerBusFader" id="{8b7a9fe0-8bba-46a5-b94e-f4dcbe0d2c7d}" />
-	<object class="SpatialiserEffect" id="{46722a8b-629f-4769-8443-eaccd82e1d53}" />
+	<object class="SpatialiserEffect" id="{46722a8b-629f-4769-8443-eaccd82e1d53}">
+		<property name="minimumDistance">
+			<value>2.5</value>
+		</property>
+		<property name="maximumDistance">
+			<value>30</value>
+		</property>
+		<property name="overrideRange">
+			<value>true</value>
+		</property>
+	</object>
 </objects>

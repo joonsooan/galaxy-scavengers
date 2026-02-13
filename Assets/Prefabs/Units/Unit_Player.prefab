@@ -348,6 +348,13 @@ MonoBehaviour:
   bulletPrefab: {fileID: 3852804536807886205, guid: 933f41a701d217545b74b41d4962a20a, type: 3}
   playerMovement: {fileID: -7343223670657477598}
   cameraController: {fileID: 0}
+  miningSound:
+    Guid:
+      Data1: 663986973
+      Data2: 1278956374
+      Data3: 1607687576
+      Data4: 80405572
+    Path: event:/SFX_InGame/SFX_Mining
   laserMaterial: {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
   laserWidth: 0.2
   miningParticleSystem: {fileID: 1571686775330981254}

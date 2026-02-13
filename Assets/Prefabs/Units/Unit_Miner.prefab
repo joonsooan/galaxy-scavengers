@@ -259,9 +259,16 @@ MonoBehaviour:
   healthBarYOffset: 0.75
   currentState: 0
   unitMovement: {fileID: 4483249089817793867}
+  miningSound:
+    Guid:
+      Data1: 663986973
+      Data2: 1278956374
+      Data3: 1607687576
+      Data4: 80405572
+    Path: event:/SFX_InGame/SFX_Mining
   unloadingTime: 1
   mineAmountPerAction: 1
-  maxCarryAmount: 25
+  maxCarryAmount: 50
   resourceSearchInterval: 1
   maxSearchRadius: 100
   mineableResourceTypes: 

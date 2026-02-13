@@ -68,6 +68,7 @@ public class GameManager : MonoBehaviour
     }
 
     public static event Action OnGameSceneInitialized;
+    public static event Action<bool> OnPauseStateChanged;
 
     public float GetTimeScale()
     {
@@ -172,6 +173,8 @@ public class GameManager : MonoBehaviour
         if (uiManager != null) {
             uiManager.SetPausePanelActive(IsPaused);
         }
+
+        OnPauseStateChanged?.Invoke(IsPaused);
     }
 
     public void CycleGameSpeed()
@@ -259,6 +262,7 @@ public class GameManager : MonoBehaviour
             IsPaused = false;
             _savedTimeScale = 1f;
             Time.timeScale = 1f;
+            OnPauseStateChanged?.Invoke(false);
             IsGameSceneInitialized = false;
             IsGameplayReady = false;
             if (BuildingManager.Instance != null) {

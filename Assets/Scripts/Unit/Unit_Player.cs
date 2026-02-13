@@ -1,8 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using FMOD.Studio;
+using FMODUnity;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using STOP_MODE = FMOD.Studio.STOP_MODE;
 
 public class Unit_Player : UnitBase
 {
@@ -16,6 +19,9 @@ public class Unit_Player : UnitBase
     [Header("References")]
     [SerializeField] private PlayerMovement playerMovement;
     [SerializeField] private CameraTargetController cameraController;
+
+    [Header("Audio")]
+    [SerializeField] private EventReference miningSound;
 
     [Header("Visual Effects")]
     [SerializeField] private Material laserMaterial;
@@ -32,6 +38,7 @@ public class Unit_Player : UnitBase
     private float _lastFireTime;
     private float _lookAtFireDirectionEndTime;
     private Camera _mainCamera;
+    private EventInstance _miningSoundInstance;
     private Coroutine _mineCoroutine;
     private WaitForSeconds _miningDelay;
     private UnitSpriteController _spriteController;
@@ -62,6 +69,18 @@ public class Unit_Player : UnitBase
         _grid = BuildingManager.Instance.grid;
     }
 
+    private void OnEnable()
+    {
+        base.OnEnable();
+        GameManager.OnPauseStateChanged += HandlePauseStateChanged;
+    }
+
+    private void OnDisable()
+    {
+        GameManager.OnPauseStateChanged -= HandlePauseStateChanged;
+        base.OnDisable();
+    }
+
     private void Update()
     {
         if (!_isBulletFiringEnabled) {
@@ -82,6 +101,7 @@ public class Unit_Player : UnitBase
     protected override void OnDestroy()
     {
         StopMiningParticles();
+        StopMiningSound();
 
         if (_laserRenderer != null) {
             Destroy(_laserRenderer.gameObject);
@@ -341,6 +361,7 @@ public class Unit_Player : UnitBase
         }
 
         StartMiningParticles();
+        StartMiningSound();
     }
 
     private void StopMining()
@@ -351,6 +372,7 @@ public class Unit_Player : UnitBase
         }
         currentState = UnitState.Idle;
         StopMiningParticles();
+        StopMiningSound();
 
         if (_spriteController != null) {
             _spriteController.ClearTarget();
@@ -606,6 +628,48 @@ public class Unit_Player : UnitBase
                 miningParticleSystem.Stop();
             }
             miningParticleSystem.Clear();
+        }
+    }
+
+    private void StartMiningSound()
+    {
+        StopMiningSound();
+        if (!miningSound.IsNull)
+        {
+            _miningSoundInstance = RuntimeManager.CreateInstance(miningSound);
+            Rigidbody2D rb = GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                RuntimeManager.AttachInstanceToGameObject(_miningSoundInstance, gameObject, rb);
+            }
+            else
+            {
+                RuntimeManager.AttachInstanceToGameObject(_miningSoundInstance, gameObject);
+            }
+            _miningSoundInstance.start();
+            if (GameManager.Instance != null && GameManager.Instance.IsPaused)
+            {
+                _miningSoundInstance.setPaused(true);
+            }
+        }
+    }
+
+    private void StopMiningSound()
+    {
+        if (_miningSoundInstance.isValid())
+        {
+            RuntimeManager.DetachInstanceFromGameObject(_miningSoundInstance);
+            _miningSoundInstance.stop(STOP_MODE.ALLOWFADEOUT);
+            _miningSoundInstance.release();
+            _miningSoundInstance = default;
+        }
+    }
+
+    private void HandlePauseStateChanged(bool isPaused)
+    {
+        if (_miningSoundInstance.isValid())
+        {
+            _miningSoundInstance.setPaused(isPaused);
         }
     }
 

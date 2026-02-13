@@ -278,6 +278,14 @@ public class TutorialManager : MonoBehaviour
 
         ProcessStepStartActions(currentStep);
         EnableUIPanelsForStep(currentStep);
+        if (currentStep.stepType == TutorialStepType.MineableTypesChanged && mainControlPanel != null)
+        {
+            MainControlPanel mainControl = mainControlPanel.GetComponent<MainControlPanel>();
+            if (mainControl != null)
+            {
+                mainControl.ShowResourceStatPanelForTutorial();
+            }
+        }
         EnableMaterialHighlights(currentStep);
         ShowArrowUI(currentStep);
 
@@ -936,7 +944,7 @@ public class TutorialManager : MonoBehaviour
     {
         if (uiObject == null || highlightMaterial == null) return;
 
-        Image targetImage = FindButtonImage(uiObject);
+        Image targetImage = FindHighlightableImage(uiObject);
         if (targetImage != null)
         {
             GameObject buttonObject = targetImage.gameObject;
@@ -954,7 +962,7 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
-    private Image FindButtonImage(GameObject parentObject)
+    private Image FindHighlightableImage(GameObject parentObject)
     {
         Button[] buttons = parentObject.GetComponentsInChildren<Button>(true);
         if (buttons != null && buttons.Length > 0)
@@ -965,7 +973,13 @@ public class TutorialManager : MonoBehaviour
                 return image;
             }
         }
-        return null;
+        Image directImage = parentObject.GetComponent<Image>();
+        if (directImage != null)
+        {
+            return directImage;
+        }
+        Image childImage = parentObject.GetComponentInChildren<Image>(true);
+        return childImage;
     }
 
     private void EnableMaterialHighlights(TutorialStepData step)
@@ -986,7 +1000,7 @@ public class TutorialManager : MonoBehaviour
                     continue;
                 }
 
-                Image targetImage = FindButtonImage(entry.uiObject);
+                Image targetImage = FindHighlightableImage(entry.uiObject);
                 if (targetImage != null)
                 {
                     GameObject buttonObject = targetImage.gameObject;

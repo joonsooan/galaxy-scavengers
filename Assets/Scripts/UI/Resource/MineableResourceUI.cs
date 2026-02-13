@@ -1,10 +1,12 @@
 using System.Collections.Generic;
+using FMODUnity;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class MineableResourceUI : MonoBehaviour
 {
     [SerializeField] private List<Toggle> resourceToggles;
+    [SerializeField] private EventReference toggleSound;
 
     private readonly List<ResourceType> _selectedTypes = new();
 
@@ -41,6 +43,11 @@ public class MineableResourceUI : MonoBehaviour
         else
         {
             _selectedTypes.Remove(type);
+        }
+
+        if (!toggleSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(toggleSound);
         }
 
         ApplyChanges();

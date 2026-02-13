@@ -307,7 +307,8 @@ public abstract class EnemyUnitBase : UnitBase
             else { _targetUnit = null; FindClosestTargetForInfiniteAttack(); }
             return;
         }
-        if ((transform.position - targetPos).sqrMagnitude <= attackRange * attackRange) { EnterAttackState(); return; }
+        Vector3 closestTargetPos = GetClosestTargetPosition(currentBuilding, currentUnit);
+        if ((transform.position - closestTargetPos).sqrMagnitude <= attackRange * attackRange) { EnterAttackState(); return; }
         if ((_spawnPosition - targetPos).sqrMagnitude > _territoryRadius * _territoryRadius) {
             _outOfTerritoryTimer += Time.deltaTime;
             if (_outOfTerritoryTimer > outOfTerritoryChaseTime) {
@@ -337,11 +338,16 @@ public abstract class EnemyUnitBase : UnitBase
             return;
         }
 
-        Vector3 targetPos = currentBuilding != null ? currentBuilding.transform.position : currentUnit.transform.position;
+        Vector3 targetPos = GetClosestTargetPosition(currentBuilding, currentUnit);
         float distanceToTargetSquared = (transform.position - targetPos).sqrMagnitude;
         float attackRangeSquared = attackRange * attackRange;
 
         if (distanceToTargetSquared > attackRangeSquared) {
+            MoveToCurrentTarget();
+            return;
+        }
+
+        if (RequiresLineOfSight() && !HasLineOfSightToTarget(currentBuilding, currentUnit)) {
             MoveToCurrentTarget();
             return;
         }
@@ -444,6 +450,38 @@ public abstract class EnemyUnitBase : UnitBase
         }
     }
     
+    protected virtual bool RequiresLineOfSight() => false;
+
+    protected virtual bool HasLineOfSightToTarget(Damageable building, UnitBase unit)
+    {
+        return true;
+    }
+
+    protected Vector3 GetClosestTargetPosition(Damageable building, UnitBase unit)
+    {
+        if (unit != null) return unit.transform.position;
+        if (building == null) return Vector3.zero;
+
+        Grid grid = BuildingManager.Instance?.grid;
+        if (grid == null) return building.transform.position;
+
+        Vector3Int buildingCell = grid.WorldToCell(building.transform.position);
+        if (BuildingManager.Instance.GetBuildingAt(buildingCell, out List<Vector3Int> occupiedCells) && occupiedCells != null && occupiedCells.Count > 0)
+        {
+            Vector3 enemyPos = transform.position;
+            Vector3 closestPos = grid.GetCellCenterWorld(occupiedCells[0]);
+            float minDistSq = (enemyPos - closestPos).sqrMagnitude;
+            for (int i = 1; i < occupiedCells.Count; i++)
+            {
+                Vector3 cellPos = grid.GetCellCenterWorld(occupiedCells[i]);
+                float dSq = (enemyPos - cellPos).sqrMagnitude;
+                if (dSq < minDistSq) { minDistSq = dSq; closestPos = cellPos; }
+            }
+            return closestPos;
+        }
+        return building.transform.position;
+    }
+
     protected virtual void PerformAttackLogic(Damageable building, UnitBase unit)
     {
         if (building != null) building.TakeDamage(attackDamage);
@@ -458,7 +496,7 @@ public abstract class EnemyUnitBase : UnitBase
             
             if (currentT == null && currentU == null) break;
 
-            Vector3 tPos = currentT != null ? currentT.transform.position : currentU.transform.position;
+            Vector3 tPos = GetClosestTargetPosition(currentT, currentU);
             
             if ((transform.position - tPos).sqrMagnitude > attackRange * attackRange) {
                 break; 
