@@ -221,11 +221,18 @@ public class Unit_Player : UnitBase
                 return;
             }
 
-            if (currentState != UnitState.Mining) {
-                Vector3 mouseWorldPos = GetMouseWorldPosition();
-                if (mouseWorldPos != Vector3.zero) {
-                    TryFireBullet(mouseWorldPos);
+            Vector3 mouseWorldPos = GetMouseWorldPosition();
+            if (mouseWorldPos != Vector3.zero) {
+                float distanceToClick = Vector3.Distance(transform.position, mouseWorldPos);
+                ResourceNode clickedResource = GetResourceAtPosition(mouseWorldPos);
+                if (distanceToClick <= interactionRange && clickedResource != null) {
+                    return;
                 }
+
+                if (currentState == UnitState.Mining) {
+                    StopMining();
+                }
+                TryFireBullet(mouseWorldPos);
             }
         }
     }

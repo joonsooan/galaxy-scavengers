@@ -79,6 +79,15 @@ public class Player_Bullet : MonoBehaviour
         {
             enemy.TakeDamage(_damage);
             Deactivate();
+            return;
+        }
+
+        if (other is not BoxCollider2D) return;
+
+        Damageable building = other.GetComponentInParent<Damageable>();
+        if (building != null && building.GetComponent<UnitBase>() == null)
+        {
+            Deactivate();
         }
     }
 
