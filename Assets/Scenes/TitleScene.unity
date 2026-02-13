@@ -1164,6 +1164,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: _CoreRepairManager
       objectReference: {fileID: 0}
+    - target: {fileID: 996856154134558205, guid: 21d34af5d0d04b142af12198761fac33, type: 3}
+      propertyPath: debuffEffectColor.b
+      value: 0.2627451
+      objectReference: {fileID: 0}
+    - target: {fileID: 996856154134558205, guid: 21d34af5d0d04b142af12198761fac33, type: 3}
+      propertyPath: debuffEffectColor.g
+      value: 0.4392157
+      objectReference: {fileID: 0}
     - target: {fileID: 3312360782986358736, guid: 21d34af5d0d04b142af12198761fac33, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

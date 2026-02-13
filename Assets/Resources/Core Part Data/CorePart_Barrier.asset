@@ -15,9 +15,9 @@ MonoBehaviour:
   partType: 2
   partName: "\uCC28\uD3D0\uAE30"
   partDescription: "\uC2DC\uB4DC\uCF54\uC5B4\uC5D0\uC11C \uBC1C\uC0DD\uD558\uB294
-    \uC18C\uC74C\uC744 \uCC28\uB2E8\uD558\uB294 \uD30C\uCE20\uC785\uB2C8\uB2E4. \uD30C\uC190\uB41C
+    \uC18C\uC74C\uC744 \uCC28\uB2E8\uD558\uB294 \uD30C\uCE20\uC785\uB2C8\uB2E4.\n\uD30C\uC190\uB41C
     \uACBD\uC6B0 \uC18C\uC74C\uC774 \uCC28\uB2E8\uB418\uC9C0 \uC54A\uC544 \uC18C\uC74C
-    \uACC4\uC218\uAC00 \uC99D\uAC00\uD569\uB2C8\uB2E4."
+    \uC815\uB3C4\uAC00 \uC99D\uAC00\uD569\uB2C8\uB2E4."
   requiredResources:
   - resourceType: 2
     amount: 300
@@ -30,3 +30,4 @@ MonoBehaviour:
     unlockedBuildings: []
     newUnits: []
   debuffValue: 0.15
+  debuffIcon: {fileID: -6305827081838823626, guid: a4eebf007e7d79649baac3ab7d16b7c4, type: 3}

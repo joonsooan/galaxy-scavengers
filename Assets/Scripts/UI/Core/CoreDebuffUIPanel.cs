@@ -1,14 +1,19 @@
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CoreDebuffUIPanel : MonoBehaviour
 {
     [Header("UI References")]
     [SerializeField] private GameObject debuffContainer;
-    [SerializeField] private GameObject debuffTextPrefab;
+    [SerializeField] private GameObject debuffImagePrefab;
+    [SerializeField] private GameObject debuffInfoPanel;
+    [SerializeField] private GameObject debuffInfoText;
 
-    private readonly List<GameObject> _debuffTexts = new List<GameObject>();
+    private readonly List<GameObject> _debuffIcons = new List<GameObject>();
+    private Coroutine _debuffInfoRebuildCoroutine;
 
     private void OnEnable()
     {
@@ -25,20 +30,23 @@ public class CoreDebuffUIPanel : MonoBehaviour
         {
             CoreRepairManager.Instance.OnRepairStatusChanged -= UpdateDebuffDisplay;
         }
+        HideDebuffInfo();
     }
 
     private void UpdateDebuffDisplay()
     {
         if (CoreRepairManager.Instance == null || debuffContainer == null) return;
 
-        foreach (GameObject textObj in _debuffTexts)
+        foreach (GameObject iconObj in _debuffIcons)
         {
-            if (textObj != null)
+            if (iconObj != null)
             {
-                Destroy(textObj);
+                Destroy(iconObj);
             }
         }
-        _debuffTexts.Clear();
+        _debuffIcons.Clear();
+
+        if (debuffImagePrefab == null) return;
 
         foreach (CorePart part in System.Enum.GetValues(typeof(CorePart)))
         {
@@ -47,35 +55,88 @@ public class CoreDebuffUIPanel : MonoBehaviour
                 string debuffDesc = CoreRepairManager.Instance.GetDebuffDescription(part);
                 if (!string.IsNullOrEmpty(debuffDesc))
                 {
-                    GameObject textObj = debuffTextPrefab != null ? 
-                        Instantiate(debuffTextPrefab, debuffContainer.transform) :
-                        CreateDefaultText(debuffDesc);
-                    
-                    if (textObj != null)
-                    {
-                        TMP_Text textComponent = textObj.GetComponent<TMP_Text>();
-                        if (textComponent == null)
-                        {
-                            textComponent = textObj.GetComponentInChildren<TMP_Text>();
-                        }
-                        if (textComponent != null)
-                        {
-                            textComponent.text = debuffDesc;
-                        }
-                        _debuffTexts.Add(textObj);
-                    }
+                    CorePartData partData = CoreRepairManager.Instance.GetPartData(part);
+                    GameObject iconObj = Instantiate(debuffImagePrefab, debuffContainer.transform);
+
+                    Image image = iconObj.GetComponent<Image>();
+                    if (image == null)
+                        image = iconObj.GetComponentInChildren<Image>();
+                    if (image != null && partData != null && partData.debuffIcon != null)
+                        image.sprite = partData.debuffIcon;
+
+                    DebuffIconHover hover = iconObj.GetComponent<DebuffIconHover>();
+                    if (hover == null)
+                        hover = iconObj.GetComponentInChildren<DebuffIconHover>();
+                    if (hover != null)
+                        hover.Initialize(part, this);
+
+                    _debuffIcons.Add(iconObj);
                 }
             }
         }
     }
 
-    private GameObject CreateDefaultText(string text)
+    public void ShowDebuffInfo(CorePart part)
     {
-        GameObject textObj = new GameObject("DebuffText");
-        textObj.transform.SetParent(debuffContainer.transform);
-        TMP_Text textComponent = textObj.AddComponent<TextMeshProUGUI>();
-        textComponent.text = text;
-        textComponent.fontSize = 14;
-        return textObj;
+        if (CoreRepairManager.Instance == null) return;
+        if (debuffInfoText != null)
+        {
+            TMP_Text textComponent = debuffInfoText.GetComponent<TMP_Text>();
+            if (textComponent == null)
+                textComponent = debuffInfoText.GetComponentInChildren<TMP_Text>();
+            if (textComponent != null)
+                textComponent.text = CoreRepairManager.Instance.GetDebuffDescription(part);
+        }
+        if (debuffInfoPanel != null)
+        {
+            debuffInfoPanel.SetActive(true);
+            RebuildDebuffInfoLayout();
+        }
+    }
+
+    private void RebuildDebuffInfoLayout()
+    {
+        Canvas.ForceUpdateCanvases();
+
+        TMP_Text tmpText = debuffInfoText != null ? debuffInfoText.GetComponentInChildren<TMP_Text>() : null;
+        RectTransform textRect = tmpText != null ? tmpText.rectTransform : (debuffInfoText != null ? debuffInfoText.GetComponent<RectTransform>() : null);
+        RectTransform panelRect = debuffInfoPanel != null ? debuffInfoPanel.GetComponent<RectTransform>() : null;
+
+        if (textRect != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(textRect);
+        if (panelRect != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
+        if (panelRect != null && panelRect.parent is RectTransform parentRect)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(parentRect);
+
+        if (_debuffInfoRebuildCoroutine != null)
+            StopCoroutine(_debuffInfoRebuildCoroutine);
+        _debuffInfoRebuildCoroutine = StartCoroutine(DelayedRebuildDebuffInfoLayout());
+    }
+
+    private IEnumerator DelayedRebuildDebuffInfoLayout()
+    {
+        yield return new WaitForEndOfFrame();
+
+        Canvas.ForceUpdateCanvases();
+
+        TMP_Text tmpText = debuffInfoText != null ? debuffInfoText.GetComponentInChildren<TMP_Text>() : null;
+        RectTransform textRect = tmpText != null ? tmpText.rectTransform : (debuffInfoText != null ? debuffInfoText.GetComponent<RectTransform>() : null);
+        RectTransform panelRect = debuffInfoPanel != null ? debuffInfoPanel.GetComponent<RectTransform>() : null;
+
+        if (textRect != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(textRect);
+        if (panelRect != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
+        if (panelRect != null && panelRect.parent is RectTransform parentRect)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(parentRect);
+
+        _debuffInfoRebuildCoroutine = null;
+    }
+
+    public void HideDebuffInfo()
+    {
+        if (debuffInfoPanel != null)
+            debuffInfoPanel.SetActive(false);
     }
 }
