@@ -22,6 +22,7 @@ public class Unit_Player : UnitBase
 
     [Header("Audio")]
     [SerializeField] private EventReference miningSound;
+    [SerializeField] private EventReference fireSound;
 
     [Header("Visual Effects")]
     [SerializeField] private Material laserMaterial;
@@ -566,6 +567,9 @@ public class Unit_Player : UnitBase
         _isAttacking = true;
         _attackStateEndTime = Time.time + fireInterval * 0.5f;
         currentState = UnitState.Attacking;
+
+        if (!fireSound.IsNull)
+            RuntimeManager.PlayOneShot(fireSound);
 
         _lastFireDirection = fireDirection;
         _isLookingAtFireDirection = true;

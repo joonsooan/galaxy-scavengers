@@ -381,8 +381,9 @@ public class BuildingHoverManager : MonoBehaviour
         {
             _keepPanelVisible = true;
         }
-        
-        ClearAllHovers();
+
+        ClearHover();
+        ClearStorageHover();
     }
 
     public void NotifyPanelsClosed()

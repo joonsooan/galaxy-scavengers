@@ -1,9 +1,11 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ResourceInfoPanel : MonoBehaviour
 {
     [Header("UI References")]
+    [SerializeField] private Image resourceIconImage;
     [SerializeField] private TMP_Text resourceNameText;
     [SerializeField] private TMP_Text resourceAmountText;
     [SerializeField] private TMP_Text resourceDescText;
@@ -81,7 +83,14 @@ public class ResourceInfoPanel : MonoBehaviour
                 resourceDescText.text = ResourceManager.Instance.GetResourceDescription(_currentResourceNode.resourceType);
             }
         }
+        Sprite icon = GetResourceIcon(_currentResourceNode.resourceType);
+        if (resourceIconImage != null)
+        {
+            resourceIconImage.sprite = icon;
+            resourceIconImage.enabled = icon != null;
+        }
         RefreshAmountText();
+        RebuildLayout();
     }
 
     private void RefreshAmountText()
@@ -97,6 +106,11 @@ public class ResourceInfoPanel : MonoBehaviour
 
     private void ClearUI()
     {
+        if (resourceIconImage != null)
+        {
+            resourceIconImage.sprite = null;
+            resourceIconImage.enabled = false;
+        }
         if (resourceNameText != null)
         {
             resourceNameText.text = string.Empty;
@@ -109,5 +123,40 @@ public class ResourceInfoPanel : MonoBehaviour
         {
             resourceDescText.text = string.Empty;
         }
+    }
+
+    private void RebuildLayout()
+    {
+        Canvas.ForceUpdateCanvases();
+
+        if (resourceNameText != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(resourceNameText.rectTransform);
+        if (resourceIconImage != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(resourceIconImage.rectTransform);
+        if (resourceDescText != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(resourceDescText.rectTransform);
+
+        if (resourceNameText != null && resourceNameText.transform.parent is RectTransform headerRect)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(headerRect);
+
+        RectTransform panelRect = GetComponent<RectTransform>();
+        if (panelRect != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
+        if (panelRect != null && panelRect.parent is RectTransform parentRect)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(parentRect);
+    }
+
+    private Sprite GetResourceIcon(ResourceType type)
+    {
+        BaseResourceDataManager resourceDataManager = FindFirstObjectByType<BaseResourceDataManager>();
+        if (resourceDataManager != null)
+        {
+            return resourceDataManager.GetResourceIcon(type);
+        }
+        if (ResourceManager.Instance != null)
+        {
+            return ResourceManager.Instance.GetResourceIcon(type);
+        }
+        return null;
     }
 }

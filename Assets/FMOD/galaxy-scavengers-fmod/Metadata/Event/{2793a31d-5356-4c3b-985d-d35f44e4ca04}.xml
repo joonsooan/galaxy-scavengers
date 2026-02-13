@@ -141,10 +141,10 @@
 			<value>1</value>
 		</property>
 		<property name="minimumDistance">
-			<value>2.5</value>
+			<value>1.5</value>
 		</property>
 		<property name="maximumDistance">
-			<value>30</value>
+			<value>40</value>
 		</property>
 		<property name="overrideRange">
 			<value>true</value>

@@ -27,7 +27,9 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject storageInfoPanel;
     [SerializeField] private GameObject storageResourceListParent;
     [SerializeField] private TMP_Text storageAmountText;
-    [SerializeField] private Vector2 storageUIPanelOffset = new Vector2(100f, 0f);
+    [SerializeField] private float storageBatteryPanelOffsetX = 150f;
+    [SerializeField] private float mainStructurePanelOffsetX = 200f;
+    [SerializeField] private float storagePanelOffsetY = 0f;
 
     [Header("Audio")]
     [SerializeField] private EventReference buildingUIClickSound;
@@ -479,8 +481,9 @@ public class UIManager : MonoBehaviour
         Vector3 worldPos = _trackedStorage.GetPosition();
         Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos);
 
-        screenPos.x += storageUIPanelOffset.x;
-        screenPos.y += storageUIPanelOffset.y;
+        float offsetX = _trackedStorage is MainStructure ? mainStructurePanelOffsetX : storageBatteryPanelOffsetX;
+        screenPos.x += offsetX;
+        screenPos.y += storagePanelOffsetY;
 
         storageInfoPanel.transform.position = screenPos;
     }

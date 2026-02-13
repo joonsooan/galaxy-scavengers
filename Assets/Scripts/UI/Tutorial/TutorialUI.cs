@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,6 +10,10 @@ public class TutorialUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI tutorialText;
     [SerializeField] private Slider progressSlider;
     [SerializeField] private GameObject progressBarContainer;
+    [SerializeField] private Graphic flashTarget;
+    [SerializeField] private float flashFadeOutTime = 0.5f;
+
+    private Coroutine _flashRoutine;
 
     private void Awake()
     {
@@ -25,6 +30,13 @@ public class TutorialUI : MonoBehaviour
     {
         if (tutorialPanel != null) {
             tutorialPanel.SetActive(true);
+        }
+
+        if (flashTarget != null) {
+            if (_flashRoutine != null) {
+                StopCoroutine(_flashRoutine);
+            }
+            _flashRoutine = StartCoroutine(FlashRoutine());
         }
 
         if (tutorialText != null) {
@@ -53,6 +65,11 @@ public class TutorialUI : MonoBehaviour
 
     public void HideTutorial()
     {
+        if (_flashRoutine != null) {
+            StopCoroutine(_flashRoutine);
+            _flashRoutine = null;
+        }
+
         if (tutorialPanel != null) {
             tutorialPanel.SetActive(false);
         }
@@ -60,5 +77,21 @@ public class TutorialUI : MonoBehaviour
         if (progressBarContainer != null) {
             progressBarContainer.SetActive(false);
         }
+    }
+
+    private IEnumerator FlashRoutine()
+    {
+        Material mat = flashTarget.material;
+        mat.SetFloat("_FlashIntensity", 1f);
+        float currentFlash = 1.0f;
+
+        while (currentFlash > 0) {
+            currentFlash -= Time.deltaTime / flashFadeOutTime;
+            mat.SetFloat("_FlashIntensity", Mathf.Max(0, currentFlash));
+            yield return null;
+        }
+
+        mat.SetFloat("_FlashIntensity", 0f);
+        _flashRoutine = null;
     }
 }
