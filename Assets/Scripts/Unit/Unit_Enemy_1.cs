@@ -8,6 +8,11 @@ public class Unit_Enemy_1 : EnemyUnitBase
 
     protected override bool RequiresLineOfSight() => true;
 
+    protected override bool CanPerformAttack()
+    {
+        return HasLineOfSightToTarget(_targetDamageable, _targetUnit);
+    }
+
     protected override bool HasLineOfSightToTarget(Damageable building, UnitBase unit)
     {
         Transform targetT = building != null ? building.transform : (unit != null ? unit.transform : null);

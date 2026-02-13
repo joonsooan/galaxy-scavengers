@@ -45,8 +45,8 @@ public abstract class EnemyUnitBase : UnitBase
     private float _roamTimer;
     private Vector3 _spawnPosition;
     private UnitSpriteController _spriteController;
-    private Damageable _targetDamageable;
-    private UnitBase _targetUnit;
+    protected Damageable _targetDamageable;
+    protected UnitBase _targetUnit;
     private float _territoryRadius;
     private float _warningTimer;
     private bool _isEnhanced;
@@ -482,6 +482,11 @@ public abstract class EnemyUnitBase : UnitBase
         return building.transform.position;
     }
 
+    protected virtual bool CanPerformAttack()
+    {
+        return true;
+    }
+
     protected virtual void PerformAttackLogic(Damageable building, UnitBase unit)
     {
         if (building != null) building.TakeDamage(attackDamage);
@@ -500,6 +505,10 @@ public abstract class EnemyUnitBase : UnitBase
             
             if ((transform.position - tPos).sqrMagnitude > attackRange * attackRange) {
                 break; 
+            }
+
+            if (!CanPerformAttack()) {
+                break;
             }
 
             if (_spriteController != null) {

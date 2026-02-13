@@ -74420,6 +74420,26 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8616928248141874852, guid: 81b7a3fb9af1e1d4b9cdeadc1ff10e67, type: 3}
+      propertyPath: clickSound.Path
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 8616928248141874852, guid: 81b7a3fb9af1e1d4b9cdeadc1ff10e67, type: 3}
+      propertyPath: clickSound.Guid.Data1
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8616928248141874852, guid: 81b7a3fb9af1e1d4b9cdeadc1ff10e67, type: 3}
+      propertyPath: clickSound.Guid.Data2
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8616928248141874852, guid: 81b7a3fb9af1e1d4b9cdeadc1ff10e67, type: 3}
+      propertyPath: clickSound.Guid.Data3
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8616928248141874852, guid: 81b7a3fb9af1e1d4b9cdeadc1ff10e67, type: 3}
+      propertyPath: clickSound.Guid.Data4
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
