@@ -19,10 +19,10 @@ MonoBehaviour:
     \uACBD\uC6B0 \uC18C\uC74C\uC774 \uCC28\uB2E8\uB418\uC9C0 \uC54A\uC544 \uC18C\uC74C
     \uACC4\uC218\uAC00 \uC99D\uAC00\uD569\uB2C8\uB2E4."
   requiredResources:
-  - resourceType: 6
-    amount: 10
-  - resourceType: 10
-    amount: 10
+  - resourceType: 2
+    amount: 300
+  - resourceType: 5
+    amount: 50
   repairReward:
     resourceRewards: []
     moduleRewards: []

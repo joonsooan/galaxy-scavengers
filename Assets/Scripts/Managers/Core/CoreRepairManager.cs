@@ -117,7 +117,7 @@ public class CoreRepairManager : MonoBehaviour
         QuestData questData = ScriptableObject.CreateInstance<QuestData>();
         questData.questId = _nextQuestId++;
         questData.questType = QuestType.CoreRepairQuest;
-        questData.questName = partData.partName + " 수리";
+        questData.questName = $"[{partData.partName}] 수리";
         questData.questInfo = partData.partDescription;
         questData.requiredResources = partData.requiredResources != null ? 
             (ResourceCost[])partData.requiredResources.Clone() : new ResourceCost[0];

@@ -320,6 +320,12 @@ public class GameSceneQuestUIManager : MonoBehaviour
             bool shouldInclude = (isActive || isRequestQuestAvailable || isRequestQuestAccepted) && !isRequestQuestFinished;
             
             return shouldInclude;
+        }).OrderBy(quest => quest.questType switch
+        {
+            QuestType.CoreRepairQuest => 0,
+            QuestType.BaseQuest => 1,
+            QuestType.RequestQuest => 2,
+            _ => 3
         }).ToList();
         
         foreach (QuestData quest in activeQuests)

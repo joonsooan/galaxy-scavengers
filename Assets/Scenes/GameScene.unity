@@ -1724,7 +1724,6 @@ GameObject:
   - component: {fileID: 53596320}
   - component: {fileID: 53596319}
   - component: {fileID: 53596321}
-  - component: {fileID: 53596318}
   - component: {fileID: 53596322}
   m_Layer: 5
   m_Name: Quest Panel
@@ -1755,34 +1754,6 @@ RectTransform:
   m_AnchoredPosition: {x: -4, y: -46}
   m_SizeDelta: {x: 50, y: 16}
   m_Pivot: {x: 1, y: 1}
---- !u!114 &53596318
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 53596316}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0c236392cc3a06042aba64af4cb6a621, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  questPanel: {fileID: 733751478}
-  questCellPrefab: {fileID: 8886172208372129132, guid: 6f1043346251c12469ccc8bdacb4db59, type: 3}
-  questCellGridParent: {fileID: 1396283560}
-  questDetailPanelObject: {fileID: 733751478}
-  requestQuestAcceptPanelObject: {fileID: 6394633008225565772}
-  toggleQuestPanelButton: {fileID: 53596321}
-  notifierIcon: {fileID: 990474923}
-  newQuestSound:
-    Guid:
-      Data1: 0
-      Data2: 0
-      Data3: 0
-      Data4: 0
-    Path: 
-  shaderMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
-  shaderMaterialResourcePath: 
 --- !u!114 &53596319
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5355,6 +5326,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   questPanel: {fileID: 53596316}
   questCellPrefab: {fileID: 8886172208372129132, guid: 6f1043346251c12469ccc8bdacb4db59, type: 3}
+  coreRepairQuestCellPrefab: {fileID: 8886172208372129132, guid: ca8b1569b029de242b3b02f3b1a0da13, type: 3}
   questCellGridParent: {fileID: 1396283560}
   questDetailPanelObject: {fileID: 733751478}
   requestQuestAcceptPanelObject: {fileID: 6394633008225565772}
@@ -22126,7 +22098,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0.5, z: -20}
+  m_LocalPosition: {x: 0.5, y: 0.5, z: -40}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
