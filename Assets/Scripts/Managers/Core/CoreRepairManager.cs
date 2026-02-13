@@ -334,6 +334,6 @@ public class CoreRepairManager : MonoBehaviour
 
         string coloredEffect = $"<color=#{ColorUtility.ToHtmlStringRGB(debuffEffectColor)}>{debuffEffect}</color>";
         string partDesc = partData != null && !string.IsNullOrEmpty(partData.partDescription) ? partData.partDescription : string.Empty;
-        return string.IsNullOrEmpty(partDesc) ? coloredEffect : $"{partDesc}\n\n{coloredEffect}";
+        return string.IsNullOrEmpty(partDesc) ? coloredEffect : $"{partData.partName}\n\n{partDesc}\n\n{coloredEffect}";
     }
 }

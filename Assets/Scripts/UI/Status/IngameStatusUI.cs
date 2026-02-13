@@ -35,16 +35,16 @@ public class IngameStatusUI : MonoBehaviour
         float netAether = _aetherConsumptionManager.NetAetherPerSecond;
         if (netAether > 0) {
             aetherStatusText.color = Color.green;
-            aetherStatusText.text = $"+ {netAether:F1}";
+            aetherStatusText.text = $"변화량 : + {netAether:F1}/s";
         }
         else if (netAether < 0) {
             netAether = Mathf.Abs(netAether);
             aetherStatusText.color = Color.red;
-            aetherStatusText.text = $"- {netAether:F1}";
+            aetherStatusText.text = $"변화량 : - {netAether:F1}/s";
         }
         else {
             aetherStatusText.color = _originalColor;
-            aetherStatusText.text = $"{netAether:F1}";
+            aetherStatusText.text = $"변화량 : {netAether:F1}/s";
         }
     }
 
@@ -63,7 +63,7 @@ public class IngameStatusUI : MonoBehaviour
         int current = _storageTrackerManager.CurrentTotalStoredResourceAmount;
         int max = _storageTrackerManager.MaxStorableResourceAmount;
 
-        storageText.text = $"현재 자원 저장량 : {current} / {max}";
+        storageText.text = $"자원 저장량 : {current} / {max}";
     }
 
     private void UpdateAetherText()
@@ -79,6 +79,6 @@ public class IngameStatusUI : MonoBehaviour
         else {
             aetherText.color = _originalColor;
         }
-        aetherText.text = $"{current} / {max}";
+        aetherText.text = $"저장량 : {current} / {max}";
     }
 }
