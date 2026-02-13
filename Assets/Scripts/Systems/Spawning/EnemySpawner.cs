@@ -92,10 +92,13 @@ public class EnemySpawner : MonoBehaviour
         }
     }
 
+    private static bool _noise100SpawnEnabled = false;
+
     private void OnNoiseChanged(float noisePercentage)
     {
         if (noisePercentage >= 100f)
         {
+            if (!_noise100SpawnEnabled) return;
             if (!_wasNoise100)
             {
                 _wasNoise100 = true;
@@ -154,7 +157,6 @@ public class EnemySpawner : MonoBehaviour
             candidates.RemoveAt(idx);
             selected.ActivateInfiniteAttackState();
         }
-        Debug.Log($"[EnemySpawner] Zone rush: activated {toActivate} existing enemies (total={totalSpawned}, targetAttack={targetAttackCount}, multiplier={multiplier})");
         LogEnemyStats();
     }
 
@@ -186,8 +188,8 @@ public class EnemySpawner : MonoBehaviour
         float rawResult = (basePoints + (noise * noiseAlpha)) * (1f + (totalElapsedHours * timeBeta));
         float result = rawResult * multiplier;
 
-        Debug.Log($"[EnemySpawner] Budget calc: basePoints={basePoints}, noise={noise}, totalElapsedInGameHours={totalElapsedHours}, \n"
-            + $"noiseAlpha={noiseAlpha}, timeBeta={timeBeta}, rawResult={rawResult}, multiplier={multiplier}, finalBudget={result}");
+        // Debug.Log($"[EnemySpawner] Budget calc: basePoints={basePoints}, noise={noise}, totalElapsedInGameHours={totalElapsedHours}, \n"
+        //     + $"noiseAlpha={noiseAlpha}, timeBeta={timeBeta}, rawResult={rawResult}, multiplier={multiplier}, finalBudget={result}");
 
         return result;
     }

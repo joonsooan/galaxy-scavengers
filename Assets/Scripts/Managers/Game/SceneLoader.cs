@@ -175,12 +175,15 @@ public class SceneLoader : MonoBehaviour
         }
 
         _baseSceneLoadOperation = SceneManager.LoadSceneAsync(baseSceneName);
-        _baseSceneLoadOperation.allowSceneActivation = false;
-
-        while (_baseSceneLoadOperation.progress < 0.9f || _waitingForContinue) yield return null;
-
-        _baseSceneLoadOperation.allowSceneActivation = true;
-        while (!_baseSceneLoadOperation.isDone) yield return null;
+        if (_baseSceneLoadOperation == null) {
+            SceneManager.LoadScene(baseSceneName);
+        }
+        else {
+            _baseSceneLoadOperation.allowSceneActivation = false;
+            while (_baseSceneLoadOperation.progress < 0.9f || _waitingForContinue) yield return null;
+            _baseSceneLoadOperation.allowSceneActivation = true;
+            while (!_baseSceneLoadOperation.isDone) yield return null;
+        }
 
         if (BgmManager.Instance != null) {
             if (_returnState == ReturnFromGameState.Success) BgmManager.Instance.StopSuccessLoadingBgm(baseSceneBgmFadeOutTime);
