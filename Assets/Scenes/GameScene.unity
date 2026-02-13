@@ -5889,7 +5889,7 @@ MonoBehaviour:
   gradientCenter: {x: 0.5, y: 0.5}
   falloffExponent: 1.6
   terrainThreshold: 0.2
-  lowWallThreshold: 0.4
+  lowWallThreshold: 0.425
   highWallThreshold: 0.6
   enableCenterCircle: 1
   centerCircleRadius: 10
@@ -22101,7 +22101,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 11.25
+  orthographic size: 662.501
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -43413,8 +43413,8 @@ MonoBehaviour:
   fogTilemap: {fileID: 80026093}
   fogTile: {fileID: 11400000, guid: 10bd3c981c2104842b1ff71688283ee8, type: 2}
   fullyVisibleColor: {r: 1, g: 1, b: 1, a: 0}
-  partlyVisibleColor: {r: 0, g: 0, b: 0, a: 0.7058824}
-  invisibleColor: {r: 0, g: 0, b: 0, a: 0.8627451}
+  partlyVisibleColor: {r: 0, g: 0, b: 0, a: 0.6862745}
+  invisibleColor: {r: 0, g: 0, b: 0, a: 0.8235294}
 --- !u!4 &1022667848
 Transform:
   m_ObjectHideFlags: 0
@@ -46435,7 +46435,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5924001916525588525, guid: 34d215b8b4184924396a78a31c8a245c, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 34.666656
+      value: 37.333313
       objectReference: {fileID: 0}
     - target: {fileID: 5924001916525588525, guid: 34d215b8b4184924396a78a31c8a245c, type: 3}
       propertyPath: m_AnchoredPosition.y

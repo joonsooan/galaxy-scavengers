@@ -175,6 +175,7 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
 
         int rangeInCells = Mathf.CeilToInt(radius);
         Vector3Int centerCell = _grid.WorldToCell(center);
+        Vector3 visionOrigin = hasOffest ? transform.position + offest : transform.position;
 
         for (int x = -rangeInCells; x <= rangeInCells; x++) {
             int xSquared = x * x;
@@ -192,20 +193,39 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
                     continue;
                 }
 
-                if (_mapGenerator != null) {
-                    bool isTerrainCell = _mapGenerator.IsTerrainCell(cell);
-                    if (isTerrainCell) {
-                        outputTiles.Add(cell);
-                    }
-                    else {
-                        outputTiles.Add(cell);
-                    }
+                if (!HasLineOfSightToTile(visionOrigin, cell)) {
+                    continue;
                 }
-                else {
-                    outputTiles.Add(cell);
-                }
+
+                outputTiles.Add(cell);
             }
         }
+    }
+
+    private bool HasLineOfSightToTile(Vector3 from, Vector3Int targetCell)
+    {
+        Vector3 to = _grid.GetCellCenterWorld(targetCell);
+        Vector3Int startCell = _grid.WorldToCell(from);
+        Vector3Int endCell = targetCell;
+        int dx = Mathf.Abs(endCell.x - startCell.x);
+        int dy = Mathf.Abs(endCell.y - startCell.y);
+        int steps = Mathf.Max(dx, dy, 1);
+
+        for (int i = 1; i <= steps; i++) {
+            float t = (float)i / steps;
+            Vector3 point = Vector3.Lerp(from, to, t);
+            Vector3Int cell = _grid.WorldToCell(point);
+
+            if (cell == targetCell) {
+                return true;
+            }
+
+            if (_mapGenerator != null && _mapGenerator.IsTerrainCell(cell)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 
