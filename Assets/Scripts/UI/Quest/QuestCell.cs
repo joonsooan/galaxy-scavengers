@@ -13,6 +13,7 @@ public class QuestCell : MonoBehaviour
 
     private QuestData _questData;
     private QuestDetailPanel _questDetailPanel;
+    private QuestBriefPanel _questBriefPanel;
     private QuestUIHandler _questUIHandler;
     private GameSceneQuestUIManager _gameSceneQuestUIManager;
     private bool _isNew;
@@ -80,10 +81,36 @@ public class QuestCell : MonoBehaviour
         UpdateConfigureIcon(isNew, _questData);
     }
 
+    public void Initialize(QuestData questData, QuestBriefPanel questBriefPanel, bool isNew, QuestUIHandler questUIHandler = null, GameSceneQuestUIManager gameSceneQuestUIManager = null)
+    {
+        _questData = questData;
+        _questDetailPanel = null;
+        _questBriefPanel = questBriefPanel;
+        _questUIHandler = questUIHandler;
+        _gameSceneQuestUIManager = gameSceneQuestUIManager;
+        _isNew = isNew;
+
+
+        if (questNameText != null && questData != null)
+        {
+            questNameText.text = questData.questName;
+        }
+
+        if (questIdText != null && questData != null)
+        {
+            questIdText.text = $"#{questData.questId:D4}";
+        }
+
+        UpdateConfigureIcon(isNew, questData);
+
+        SubscribeToResourceChanges();
+    }
+
     public void Initialize(QuestData questData, QuestDetailPanel questDetailPanel, bool isNew, QuestUIHandler questUIHandler = null, GameSceneQuestUIManager gameSceneQuestUIManager = null)
     {
         _questData = questData;
         _questDetailPanel = questDetailPanel;
+        _questBriefPanel = null;
         _questUIHandler = questUIHandler;
         _gameSceneQuestUIManager = gameSceneQuestUIManager;
         _isNew = isNew;
@@ -208,32 +235,63 @@ public class QuestCell : MonoBehaviour
             }
         }
 
-        if (_questDetailPanel != null)
+        if (_questBriefPanel != null)
         {
             if (_gameSceneQuestUIManager == null)
             {
                 _gameSceneQuestUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
             }
-            
+
             if (_gameSceneQuestUIManager != null)
             {
                 _gameSceneQuestUIManager.ShowQuestDetailPanel();
             }
-            
-            if (_questDetailPanel.gameObject != null)
+
+            if (_questBriefPanel.gameObject != null)
             {
-                _questDetailPanel.gameObject.SetActive(true);
+                _questBriefPanel.gameObject.SetActive(true);
             }
-            
-            _questDetailPanel.DisplayQuestInfo(_questData, _questData.questId);
-            
+
+            _questBriefPanel.DisplayQuestInfo(_questData, _questData.questId);
+
             if (_gameSceneQuestUIManager != null)
             {
                 _gameSceneQuestUIManager.MarkQuestAsViewed(_questData.questId);
             }
-            
+
             MarkAsViewed();
-            
+
+            if (_questUIHandler != null)
+            {
+                _questUIHandler.OnQuestViewed(_questData.questId);
+            }
+        }
+        else if (_questDetailPanel != null)
+        {
+            if (_gameSceneQuestUIManager == null)
+            {
+                _gameSceneQuestUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
+            }
+
+            if (_gameSceneQuestUIManager != null)
+            {
+                _gameSceneQuestUIManager.ShowQuestDetailPanel();
+            }
+
+            if (_questDetailPanel.gameObject != null)
+            {
+                _questDetailPanel.gameObject.SetActive(true);
+            }
+
+            _questDetailPanel.DisplayQuestInfo(_questData, _questData.questId);
+
+            if (_gameSceneQuestUIManager != null)
+            {
+                _gameSceneQuestUIManager.MarkQuestAsViewed(_questData.questId);
+            }
+
+            MarkAsViewed();
+
             if (_questUIHandler != null)
             {
                 _questUIHandler.OnQuestViewed(_questData.questId);

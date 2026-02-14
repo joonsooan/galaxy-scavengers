@@ -27,17 +27,17 @@ public class GameSceneQuestUIManager : MonoBehaviour
     private readonly HashSet<int> _viewedQuestIds = new ();
     private readonly HashSet<int> _acceptedRequestQuests = new ();
 
-    private QuestDetailPanel _questDetailPanel;
+    private QuestBriefPanel _questBriefPanel;
     private RequestQuestAcceptPanel _requestQuestAcceptPanel;
-    
+
     private void Awake()
     {
         if (questDetailPanelObject != null)
         {
-            _questDetailPanel = questDetailPanelObject.GetComponent<QuestDetailPanel>();
-            if (_questDetailPanel != null)
+            _questBriefPanel = questDetailPanelObject.GetComponent<QuestBriefPanel>();
+            if (_questBriefPanel != null)
             {
-                _questDetailPanel.SetGameSceneMode(true);
+                _questBriefPanel.SetGameSceneMode(true);
             }
         }
 
@@ -97,9 +97,9 @@ public class GameSceneQuestUIManager : MonoBehaviour
             }
         }
         
-        if (_questDetailPanel != null)
+        if (_questBriefPanel != null)
         {
-            _questDetailPanel.SetGameSceneMode(true);
+            _questBriefPanel.SetGameSceneMode(true);
         }
         
         if (questCellGridParent != null)
@@ -253,9 +253,9 @@ public class GameSceneQuestUIManager : MonoBehaviour
         
         LoadActiveQuests();
         
-        if (_questDetailPanel != null)
+        if (_questBriefPanel != null)
         {
-            _questDetailPanel.RefreshQuestState(questId);
+            _questBriefPanel.RefreshQuestState(questId);
         }
         
         UpdateNotifierIcons();
@@ -294,7 +294,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
     
     public void LoadActiveQuests()
     {
-        if (questCellPrefab == null || questCellGridParent == null || _questDetailPanel == null)
+        if (questCellPrefab == null || questCellGridParent == null || _questBriefPanel == null)
         {
             return;
         }
@@ -348,7 +348,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
                         ShowNotifierForNewQuest(quest.questId, false);
                     }
                 }
-                questCell.Initialize(quest, _questDetailPanel, isNew, null, this);
+                questCell.Initialize(quest, _questBriefPanel, isNew, null, this);
                 _questCells.Add(questCell);
             }
             else
@@ -390,9 +390,9 @@ public class GameSceneQuestUIManager : MonoBehaviour
 
     private void ShowQuestPanel()
     {
-        if (_questDetailPanel != null && questDetailPanelObject != null && questDetailPanelObject.activeSelf)
+        if (_questBriefPanel != null && questDetailPanelObject != null && questDetailPanelObject.activeSelf)
         {
-            _questDetailPanel.ClearQuestInfo();
+            _questBriefPanel.ClearQuestInfo();
             questDetailPanelObject.SetActive(false);
         }
         
@@ -430,9 +430,9 @@ public class GameSceneQuestUIManager : MonoBehaviour
         
         if (questDetailPanelObject != null)
         {
-            if (_questDetailPanel != null)
+            if (_questBriefPanel != null)
             {
-                _questDetailPanel.ClearQuestInfo();
+                _questBriefPanel.ClearQuestInfo();
             }
             questDetailPanelObject.SetActive(false);
         }
@@ -448,14 +448,14 @@ public class GameSceneQuestUIManager : MonoBehaviour
         }
         if (questDetailPanelObject != null)
         {
-            if (_questDetailPanel != null)
+            if (_questBriefPanel != null)
             {
-                _questDetailPanel.ClearQuestInfo();
+                _questBriefPanel.ClearQuestInfo();
             }
             questDetailPanelObject.SetActive(false);
         }
     }
-    
+
     private void ShowNotifierForNewQuest(int questId, bool playSound = false)
     {
         if (notifierIcon != null)
@@ -594,9 +594,9 @@ public class GameSceneQuestUIManager : MonoBehaviour
             return;
         }
         
-        if (questDetailPanelObject != null && questDetailPanelObject.activeSelf && _questDetailPanel != null)
+        if (questDetailPanelObject != null && questDetailPanelObject.activeSelf && _questBriefPanel != null)
         {
-            _questDetailPanel.ClearQuestInfo();
+            _questBriefPanel.ClearQuestInfo();
             questDetailPanelObject.SetActive(false);
         }
         

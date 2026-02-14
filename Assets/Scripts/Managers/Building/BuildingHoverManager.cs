@@ -353,6 +353,15 @@ public class BuildingHoverManager : MonoBehaviour
         {
             return;
         }
+        if (!node.gameObject.activeInHierarchy)
+        {
+            return;
+        }
+        if (FogOfWarManager.Instance != null && FogOfWarManager.Instance.IsInitialized &&
+            !FogOfWarManager.Instance.CanSeeResources(node.cellPosition))
+        {
+            return;
+        }
         if (IsProcessorOrDroneHubPanelActive() || _panelsJustClosed)
         {
             return;
