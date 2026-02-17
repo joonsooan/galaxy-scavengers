@@ -1,61 +1,61 @@
 fileFormatVersion: 2
-guid: 1fe0559ee18d06640b81e5eac3dfa20d
+guid: bc3bf8e6942af274da6856a6274a0ced
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3333382987119021128
-    second: unit-player-mining-left_0
+      213: 7450851423699986209
+    second: unit-player-idle-up-normal_0
   - first:
-      213: 414151543059925105
-    second: unit-player-mining-left_1
+      213: 6984092779033821128
+    second: unit-player-idle-up-normal_1
   - first:
-      213: -5891967590501222729
-    second: unit-player-mining-left_2
+      213: 3505532242517498231
+    second: unit-player-idle-up-normal_2
   - first:
-      213: 5980160991410493519
-    second: unit-player-mining-left_3
+      213: 8803933999497061502
+    second: unit-player-idle-up-normal_3
   - first:
-      213: -5683968129279662818
-    second: unit-player-mining-left_4
+      213: -7825521718850357134
+    second: unit-player-idle-up-normal_4
   - first:
-      213: -4673859292773208345
-    second: unit-player-mining-left_5
+      213: 1163188501827205249
+    second: unit-player-idle-up-normal_5
   - first:
-      213: -8942316837448287168
-    second: unit-player-mining-left_6
+      213: 4212384613278791126
+    second: unit-player-idle-up-normal_6
   - first:
-      213: -740035601611267404
-    second: unit-player-mining-left_7
+      213: -4942366512049466556
+    second: unit-player-idle-up-normal_7
   - first:
-      213: -2744809610933970472
-    second: unit-player-mining-left_8
+      213: -9052748225787374593
+    second: unit-player-idle-up-normal_8
   - first:
-      213: -257170641573723247
-    second: unit-player-mining-left_9
+      213: 3570286502123202557
+    second: unit-player-idle-up-normal_9
   - first:
-      213: -3182327402801227607
-    second: unit-player-mining-left_10
+      213: 8449393234615567829
+    second: unit-player-idle-up-normal_10
   - first:
-      213: -4958165178317399052
-    second: unit-player-mining-left_11
+      213: -4375404086653408430
+    second: unit-player-idle-up-normal_11
   - first:
-      213: -7081101141404214723
-    second: unit-player-mining-left_12
+      213: -7716478851731366542
+    second: unit-player-idle-up-normal_12
   - first:
-      213: 3299372657715117317
-    second: unit-player-mining-left_13
+      213: -1623131142190851320
+    second: unit-player-idle-up-normal_13
   - first:
-      213: -4085920060298607501
-    second: unit-player-mining-left_14
+      213: 3656949824796482699
+    second: unit-player-idle-up-normal_14
   - first:
-      213: 7781678716090490486
-    second: unit-player-mining-left_15
+      213: 8397957166419495142
+    second: unit-player-idle-up-normal_15
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 0
-    sRGBTexture: 1
+    enableMipMap: 1
+    sRGBTexture: 0
     linearTexture: 0
     fadeOut: 0
     borderMipMap: 0
@@ -96,13 +96,13 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 16
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
-  alphaIsTransparency: 1
+  alphaIsTransparency: 0
   spriteTessellationDetail: -1
-  textureType: 8
+  textureType: 1
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 1
@@ -146,7 +146,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -158,353 +158,353 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: unit-player-mining-left_0
+      name: unit-player-idle-up-normal_0
       rect:
         serializedVersion: 2
-        x: 0
+        x: 1
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8b3b07095d17db1d0800000000000000
-      internalID: -3333382987119021128
+      spriteID: 127e9dfb4edb66760800000000000000
+      internalID: 7450851423699986209
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-player-mining-left_1
+      name: unit-player-idle-up-normal_1
       rect:
         serializedVersion: 2
-        x: 17
+        x: 18
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 178444752ac5fb500800000000000000
-      internalID: 414151543059925105
+      spriteID: 8cf7ea4116b7ce060800000000000000
+      internalID: 6984092779033821128
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-player-mining-left_2
+      name: unit-player-idle-up-normal_2
       rect:
         serializedVersion: 2
-        x: 34
+        x: 35
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7b67f0481b68b3ea0800000000000000
-      internalID: -5891967590501222729
+      spriteID: 7791fef500726a030800000000000000
+      internalID: 3505532242517498231
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-player-mining-left_3
+      name: unit-player-idle-up-normal_3
       rect:
         serializedVersion: 2
-        x: 51
+        x: 52
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: f489ba8ccbccdf250800000000000000
-      internalID: 5980160991410493519
+      spriteID: e74a10ac35bdd2a70800000000000000
+      internalID: 8803933999497061502
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-player-mining-left_4
+      name: unit-player-idle-up-normal_4
       rect:
         serializedVersion: 2
-        x: 68
+        x: 69
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e15e4a3f91d7e11b0800000000000000
-      internalID: -5683968129279662818
+      spriteID: 278f1d54579266390800000000000000
+      internalID: -7825521718850357134
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-player-mining-left_5
+      name: unit-player-idle-up-normal_5
       rect:
         serializedVersion: 2
-        x: 85
+        x: 86
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7ee28148cbd132fb0800000000000000
-      internalID: -4673859292773208345
+      spriteID: 188ba3297c9742010800000000000000
+      internalID: 1163188501827205249
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-player-mining-left_6
+      name: unit-player-idle-up-normal_6
       rect:
         serializedVersion: 2
-        x: 102
+        x: 103
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 04c76eaf63286e380800000000000000
-      internalID: -8942316837448287168
+      spriteID: 6d5bdc3dc75657a30800000000000000
+      internalID: 4212384613278791126
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-player-mining-left_7
+      name: unit-player-idle-up-normal_7
       rect:
         serializedVersion: 2
-        x: 119
+        x: 120
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4b261dc8a8ddab5f0800000000000000
-      internalID: -740035601611267404
+      spriteID: 4435183d7df296bb0800000000000000
+      internalID: -4942366512049466556
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-player-mining-left_8
+      name: unit-player-idle-up-normal_8
       rect:
         serializedVersion: 2
-        x: 136
+        x: 137
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8d9d334933a78e9d0800000000000000
-      internalID: -2744809610933970472
+      spriteID: ff355e0c37d2e5280800000000000000
+      internalID: -9052748225787374593
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-player-mining-left_9
+      name: unit-player-idle-up-normal_9
       rect:
         serializedVersion: 2
-        x: 153
+        x: 154
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 193c65ef9a85e6cf0800000000000000
-      internalID: -257170641573723247
+      spriteID: df7ec6158a43c8130800000000000000
+      internalID: 3570286502123202557
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-player-mining-left_10
+      name: unit-player-idle-up-normal_10
       rect:
         serializedVersion: 2
-        x: 170
+        x: 171
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9a89a0d761a16d3d0800000000000000
-      internalID: -3182327402801227607
+      spriteID: 5d589dc4166424570800000000000000
+      internalID: 8449393234615567829
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-player-mining-left_11
+      name: unit-player-idle-up-normal_11
       rect:
         serializedVersion: 2
-        x: 187
+        x: 188
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4fb1ea03a0f013bb0800000000000000
-      internalID: -4958165178317399052
+      spriteID: 25b2b324a217743c0800000000000000
+      internalID: -4375404086653408430
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-player-mining-left_12
+      name: unit-player-idle-up-normal_12
       rect:
         serializedVersion: 2
-        x: 204
+        x: 205
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d3a1df77700eabd90800000000000000
-      internalID: -7081101141404214723
+      spriteID: 27ddcb53e5f89e490800000000000000
+      internalID: -7716478851731366542
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-player-mining-left_13
+      name: unit-player-idle-up-normal_13
       rect:
         serializedVersion: 2
-        x: 221
+        x: 222
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 50dfebc83f9b9cd20800000000000000
-      internalID: 3299372657715117317
+      spriteID: 80b17dd63da7979e0800000000000000
+      internalID: -1623131142190851320
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-player-mining-left_14
+      name: unit-player-idle-up-normal_14
       rect:
         serializedVersion: 2
-        x: 238
+        x: 239
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 37442417a55eb47c0800000000000000
-      internalID: -4085920060298607501
+      spriteID: b8cdb648d7810c230800000000000000
+      internalID: 3656949824796482699
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: unit-player-mining-left_15
+      name: unit-player-idle-up-normal_15
       rect:
         serializedVersion: 2
-        x: 255
+        x: 256
         y: 0
         width: 16
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 67e9acc20931efb60800000000000000
-      internalID: 7781678716090490486
+      spriteID: 6e8416f6c898b8470800000000000000
+      internalID: 8397957166419495142
       vertices: []
       indices: 
       edges: []
@@ -513,34 +513,32 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: de4967b0dce56e34a93519a8b5374962
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: d906d60515646ea4b8730d779ede1507, type: 3}
-      name: _NormalMap
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      unit-player-mining-left_0: -3333382987119021128
-      unit-player-mining-left_1: 414151543059925105
-      unit-player-mining-left_10: -3182327402801227607
-      unit-player-mining-left_11: -4958165178317399052
-      unit-player-mining-left_12: -7081101141404214723
-      unit-player-mining-left_13: 3299372657715117317
-      unit-player-mining-left_14: -4085920060298607501
-      unit-player-mining-left_15: 7781678716090490486
-      unit-player-mining-left_2: -5891967590501222729
-      unit-player-mining-left_3: 5980160991410493519
-      unit-player-mining-left_4: -5683968129279662818
-      unit-player-mining-left_5: -4673859292773208345
-      unit-player-mining-left_6: -8942316837448287168
-      unit-player-mining-left_7: -740035601611267404
-      unit-player-mining-left_8: -2744809610933970472
-      unit-player-mining-left_9: -257170641573723247
+      unit-player-idle-up-normal_0: 7450851423699986209
+      unit-player-idle-up-normal_1: 6984092779033821128
+      unit-player-idle-up-normal_10: 8449393234615567829
+      unit-player-idle-up-normal_11: -4375404086653408430
+      unit-player-idle-up-normal_12: -7716478851731366542
+      unit-player-idle-up-normal_13: -1623131142190851320
+      unit-player-idle-up-normal_14: 3656949824796482699
+      unit-player-idle-up-normal_15: 8397957166419495142
+      unit-player-idle-up-normal_2: 3505532242517498231
+      unit-player-idle-up-normal_3: 8803933999497061502
+      unit-player-idle-up-normal_4: -7825521718850357134
+      unit-player-idle-up-normal_5: 1163188501827205249
+      unit-player-idle-up-normal_6: 4212384613278791126
+      unit-player-idle-up-normal_7: -4942366512049466556
+      unit-player-idle-up-normal_8: -9052748225787374593
+      unit-player-idle-up-normal_9: 3570286502123202557
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
