@@ -80,6 +80,7 @@ public class Unit_Construct : UnitBase
         DecideNextAction();
         UpdateAnimationState();
         UpdateHoverAnimation();
+        UpdateUnitLightAlpha();
 
         if (currentState == UnitState.Constructing) {
             UpdateParticlePosition();

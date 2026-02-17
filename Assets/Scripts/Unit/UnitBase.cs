@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public abstract class UnitBase : Damageable
 {
@@ -32,6 +33,10 @@ public abstract class UnitBase : Damageable
 
     public UnitState currentState;
     private bool _isRegisteredToNoiseManager;
+    private Light2D _unitLight2D;
+    private Color _unitLightBaseColor;
+    private float _unitLightCurrentAlpha = 1f;
+    private const float UnitLightAlphaLerpSpeed = 5f;
     protected UnitProgressBar progressBar;
     protected UnitHealthBar healthBar;
     private int _previousHealth;
@@ -42,6 +47,23 @@ public abstract class UnitBase : Damageable
             NoiseManager.Instance.RegisterUnit(this);
             _isRegisteredToNoiseManager = true;
         }
+    }
+
+    protected void UpdateUnitLightAlpha()
+    {
+        if (DayNightCycleManager.Instance == null) return;
+
+        if (_unitLight2D == null) {
+            _unitLight2D = GetComponentInChildren<Light2D>();
+            if (_unitLight2D == null) return;
+            Color c = _unitLight2D.color;
+            _unitLightBaseColor = new Color(c.r, c.g, c.b, 1f);
+            _unitLightCurrentAlpha = c.a;
+        }
+
+        float targetAlpha = DayNightCycleManager.Instance.IsDay() ? 0.2f : 1f;
+        _unitLightCurrentAlpha = Mathf.Lerp(_unitLightCurrentAlpha, targetAlpha, UnitLightAlphaLerpSpeed * Time.deltaTime);
+        _unitLight2D.color = new Color(_unitLightBaseColor.r, _unitLightBaseColor.g, _unitLightBaseColor.b, _unitLightCurrentAlpha);
     }
 
     protected override void OnEnable()

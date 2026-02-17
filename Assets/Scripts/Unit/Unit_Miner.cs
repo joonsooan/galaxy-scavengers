@@ -81,6 +81,7 @@ public class Unit_Miner : UnitBase
     {
         DecideNextAction();
         UpdateAnimationState();
+        UpdateUnitLightAlpha();
 
         if (currentState == UnitState.Mining) {
             UpdateParticlePosition();

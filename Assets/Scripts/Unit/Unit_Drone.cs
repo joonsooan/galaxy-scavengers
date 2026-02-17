@@ -73,6 +73,7 @@ public class Unit_Drone : UnitBase
         UpdateAnimationState();
         DecideNextAction();
         UpdateHoverAnimation();
+        UpdateUnitLightAlpha();
     }
 
     protected override void OnEnable()

@@ -97,6 +97,7 @@ public class Unit_Player : UnitBase
         UpdateSpriteDirection();
         UpdateLaser();
         UpdateParticlePosition();
+        UpdateUnitLightAlpha();
     }
 
     protected override void OnDestroy()

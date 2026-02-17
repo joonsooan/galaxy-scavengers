@@ -57,6 +57,7 @@ public class Unit_Scout : UnitBase
 
         UpdateAnimationState();
         UpdateHoverAnimation();
+        UpdateUnitLightAlpha();
     }
 
     protected override void OnDisable()
