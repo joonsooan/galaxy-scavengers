@@ -210,10 +210,12 @@ public class Unit_Construct : UnitBase
     private void UpdateIdle()
     {
         if (Time.time < _nextTaskRequestTime) {
+            UpdateIdleRoam();
             return;
         }
 
         ConstructionManager.Instance?.RequestTask(this);
+        UpdateIdleRoam();
     }
 
     private void UpdateFetching()
@@ -581,6 +583,7 @@ public class Unit_Construct : UnitBase
                                 _storageRouteIndex = i;
                                 _targetStorage = storage;
                                 _currentState = ConstructState.FetchingResource;
+                                ResetIdleRoam();
                                 return;
                             }
                         }

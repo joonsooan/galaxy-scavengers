@@ -308,8 +308,12 @@ public class Unit_Drone : UnitBase
 
     private void UpdateIdle()
     {
-        if (_currentProcessor == null)
+        if (_currentProcessor == null) {
+            UpdateIdleRoam();
             return;
+        }
+
+        ResetIdleRoam();
 
         if (!HasCheckedIn) {
             if (_assignmentCoroutine != null) {

@@ -70,13 +70,13 @@ public class Unit_Player : UnitBase
         _grid = BuildingManager.Instance.grid;
     }
 
-    private void OnEnable()
+    protected override void OnEnable()
     {
         base.OnEnable();
         GameManager.OnPauseStateChanged += HandlePauseStateChanged;
     }
 
-    private void OnDisable()
+    protected override void OnDisable()
     {
         GameManager.OnPauseStateChanged -= HandlePauseStateChanged;
         base.OnDisable();

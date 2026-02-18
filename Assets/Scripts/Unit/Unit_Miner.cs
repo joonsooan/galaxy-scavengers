@@ -130,6 +130,7 @@ public class Unit_Miner : UnitBase
                 }
                 TryStartActions();
             }
+            UpdateIdleRoam();
             break;
 
         case UnitState.Moving:
@@ -365,6 +366,7 @@ public class Unit_Miner : UnitBase
             if (_targetResourceNode.Reserve(this)) {
                 if (unitMovement.SetNewTarget(BuildingManager.Instance.grid.GetCellCenterWorld(_targetMiningCell))) {
                     currentState = UnitState.Moving;
+                    ResetIdleRoam();
                     if (_noResourceAlertActive) {
                         FindFirstObjectByType<GameAlertUIManager>()?.UnregisterAlert(GameAlertType.MinerNoResource, this);
                         _noResourceAlertActive = false;
@@ -446,7 +448,7 @@ public class Unit_Miner : UnitBase
                     continue;
                 }
 
-                if (BuildingManager.Instance.CanPlaceBuilding(neighborCell)) {
+                if (BuildingManager.Instance.CanPlaceBuilding(neighborCell) && !UnitMovement.IsCellAssigned(neighborCell)) {
                     if (distanceToNeighbor < bestTarget.distance) {
                         bestTarget.resourceNode = resourceNode;
                         bestTarget.miningCell = neighborCell;
