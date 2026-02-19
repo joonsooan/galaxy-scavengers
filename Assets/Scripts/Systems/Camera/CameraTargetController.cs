@@ -416,6 +416,9 @@ public class CameraTargetController : MonoBehaviour
             if (_defaultFollowTarget == null && target.GetComponent<Unit_Player>() != null)
                 _defaultFollowTarget = target;
             _isManualMode = false;
+
+            if (target.GetComponent<Unit_Player>() != null)
+                TargetBracketEffect.Hide();
         }
     }
 
@@ -431,6 +434,7 @@ public class CameraTargetController : MonoBehaviour
             return;
         followTarget = _defaultFollowTarget;
         _isManualMode = false;
+        TargetBracketEffect.Hide();
     }
 
     private bool IsLoadingScreenActive()

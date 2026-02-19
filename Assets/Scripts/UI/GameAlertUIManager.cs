@@ -521,6 +521,7 @@ public class GameAlertUIManager : MonoBehaviour
             return false;
         _alertFocusIndices[type] = (index + 1) % sources.Count;
         cameraTargetController.SetFollowTarget(target.transform);
+        TargetBracketEffect.Show(target.transform);
         return true;
     }
 

@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2e9922bb-ccc6-4c6e-93bd-15fa8a8d7f34" name="변경" comment="" />
+    <list default="true" id="2e9922bb-ccc6-4c6e-93bd-15fa8a8d7f34" name="변경" comment="">
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/GameAlertUIManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/GameAlertUIManager.cs" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -71,7 +74,7 @@
       <method v="2" />
     </configuration>
     <configuration name="독립실행형 플레이어" type="RunUnityExe" factoryName="Unity Executable">
-      <option name="EXE_PATH" value="$PROJECT_DIR$/../Builds/galaxy-scavengers/galaxy-scavengers_26.02.17\Galaxy Scavengers.exe" />
+      <option name="EXE_PATH" value="$PROJECT_DIR$/../Builds/galaxy-scavengers/galaxy-scavengers_26.02.13\Galaxy Scavengers.exe" />
       <option name="PROGRAM_PARAMETERS" value="" />
       <option name="WORKING_DIRECTORY" value="C:\Unity Projects\Builds\galaxy-scavengers\galaxy-scavengers_26.02.05" />
       <option name="PASS_PARENT_ENVS" value="1" />
@@ -178,6 +181,7 @@
       <workItem from="1770862090018" duration="1074000" />
       <workItem from="1770878950793" duration="1669000" />
       <workItem from="1771333884566" duration="1240000" />
+      <workItem from="1771480308463" duration="295000" />
     </task>
     <servers />
   </component>

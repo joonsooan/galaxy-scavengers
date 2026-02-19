@@ -7763,6 +7763,8 @@ MonoBehaviour:
   lowGroundTilemap: {fileID: 0}
   lowWallTilemap: {fileID: 1829347667}
   highWallTilemap: {fileID: 860813986}
+  enemyHomeTilemap: {fileID: 0}
+  enemyTerritoryTilemap: {fileID: 0}
   grid: {fileID: 2115591665}
   groundTile: {fileID: 11400000, guid: 7d463f590028a4e46a4251ccd769d5d4, type: 2}
   lowGroundTile: {fileID: 11400000, guid: 23531461cdf2566488fc91181d0b4214, type: 2}
@@ -7862,7 +7864,7 @@ MonoBehaviour:
   timeBeta: 0.1
   noise100WaveCooldown: 60
   noise100AreaCount: 3
-  noise100BudgetMultiplier: 1.5
+  noise100BudgetMultiplier: 1
   noiseCautionBudgetMultiplier: 0.5
   noiseWarningBudgetMultiplier: 1
 --- !u!114 &313771330
@@ -8253,7 +8255,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 662.501
+  orthographic size: 11.25
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
