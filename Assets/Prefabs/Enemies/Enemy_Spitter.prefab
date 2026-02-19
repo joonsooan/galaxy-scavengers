@@ -315,12 +315,18 @@ MonoBehaviour:
   targetRenderer: {fileID: 7262163600464621280}
   spriteRoot: {fileID: 7600100152802156651}
   sinkParticle: {fileID: 4748206210543782321}
-  duration: 1
   clipStart: 0
   clipEnd: 1.5
+  idleClipHeight: -1
+  sinkDuration: 0.8
   sinkDistance: 1.5
+  playRiseOnEnable: 1
+  riseDuration: 0.8
+  riseDistance: 1.5
   shakeAmplitude: 0.05
   shakeFrequency: 28
+  waitForParticleFadeOut: 1
+  particleFadeOutMaxWait: 0.35
 --- !u!1001 &7856275187934033847
 PrefabInstance:
   m_ObjectHideFlags: 0

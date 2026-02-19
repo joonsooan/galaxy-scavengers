@@ -53,6 +53,7 @@ public abstract class EnemyUnitBase : UnitBase
     private float _enhancementMoveSpeedMult = 1f;
     private float _enhancementAttackMult = 1f;
     private float _enhancementHealthMult = 1f;
+    private bool _isBehaviorPaused;
     protected AIState aiState;
 
     public bool IsEnhanced => _isEnhanced;
@@ -147,6 +148,68 @@ public abstract class EnemyUnitBase : UnitBase
 
     public bool IsInInfiniteAttackState() => _isInInfiniteAttackState;
 
+    public void SetBehaviorPaused(bool paused)
+    {
+        if (_isBehaviorPaused == paused)
+        {
+            return;
+        }
+
+        _isBehaviorPaused = paused;
+
+        if (_isBehaviorPaused)
+        {
+            if (_attackCoroutine != null)
+            {
+                StopCoroutine(_attackCoroutine);
+                _attackCoroutine = null;
+            }
+
+            if (unitMovement != null)
+            {
+                unitMovement.StopMovement();
+                unitMovement.ForceStopAllMovement();
+            }
+        }
+        else
+        {
+            if (unitMovement != null)
+            {
+                unitMovement.ResumeMovement();
+            }
+        }
+    }
+
+    public void ForceResetStateForSinking()
+    {
+        _isInInfiniteAttackState = false;
+        aiState = AIState.Idle;
+        currentState = UnitState.Idle;
+        _targetDamageable = null;
+        _targetUnit = null;
+        _warningTimer = 0f;
+        _outOfTerritoryTimer = 0f;
+        _lastTargetPos = Vector3.zero;
+
+        if (_attackCoroutine != null)
+        {
+            StopCoroutine(_attackCoroutine);
+            _attackCoroutine = null;
+        }
+
+        if (unitMovement != null)
+        {
+            unitMovement.StopMovement();
+            unitMovement.ForceStopAllMovement();
+        }
+
+        if (_spriteController != null)
+        {
+            _spriteController.UpdateAnimationState(currentState, isAttacking: false);
+            _spriteController.ClearTarget();
+        }
+    }
+
     public void SetTerritoryCenter(Vector3 territoryCenter, float hRadius, float tRadius)
     {
         _spawnPosition = territoryCenter;
@@ -194,6 +257,11 @@ public abstract class EnemyUnitBase : UnitBase
 
     private void UpdateStateLogic()
     {
+        if (_isBehaviorPaused)
+        {
+            return;
+        }
+
         switch (aiState) {
             case AIState.Idle:
                 HandleIdle();
@@ -218,6 +286,13 @@ public abstract class EnemyUnitBase : UnitBase
     private void UpdateAnimationState()
     {
         if (_spriteController == null) return;
+        if (_isBehaviorPaused)
+        {
+            currentState = UnitState.Idle;
+            _spriteController.UpdateAnimationState(currentState, isAttacking: false);
+            _spriteController.ClearTarget();
+            return;
+        }
         bool isMoving = unitMovement != null && unitMovement.IsMoving;
         if (isMoving) currentState = UnitState.Moving;
         else if (aiState == AIState.Attack) currentState = UnitState.Attacking;
