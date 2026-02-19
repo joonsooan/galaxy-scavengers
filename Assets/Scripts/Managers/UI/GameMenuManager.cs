@@ -271,6 +271,12 @@ public class GameMenuManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
+            if (HelpUIManager.Instance != null && HelpUIManager.Instance.IsHelpOpen())
+            {
+                HelpUIManager.Instance.CloseHelp();
+                return;
+            }
+
             if (_isMenuOpen)
             {
                 CloseMenu();
