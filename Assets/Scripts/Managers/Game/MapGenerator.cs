@@ -19,6 +19,8 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private Tilemap lowGroundTilemap;
     [SerializeField] private Tilemap lowWallTilemap;
     [SerializeField] private Tilemap highWallTilemap;
+    [SerializeField] private Tilemap enemyHomeTilemap;
+    [SerializeField] private Tilemap enemyTerritoryTilemap;
     [SerializeField] private Grid grid;
 
     [Header("Tiles")]
@@ -157,6 +159,25 @@ public class MapGenerator : MonoBehaviour
         get {
             return lowWallTilemap;
         }
+    }
+
+    public Tilemap EnemyHomeTilemap {
+        get {
+            return enemyHomeTilemap;
+        }
+    }
+
+    public Tilemap EnemyTerritoryTilemap {
+        get {
+            return enemyTerritoryTilemap;
+        }
+    }
+
+    public bool IsEnemyTerritoryCell(Vector3Int cellPosition)
+    {
+        if (enemyHomeTilemap != null && enemyHomeTilemap.HasTile(cellPosition)) return true;
+        if (enemyTerritoryTilemap != null && enemyTerritoryTilemap.HasTile(cellPosition)) return true;
+        return false;
     }
 
     public IReadOnlyList<Vector2Int> EnemySpawnHolePositions {
@@ -746,7 +767,7 @@ public class MapGenerator : MonoBehaviour
                     continue;
                 }
 
-                if (groundTileAtPos == enemyHomeTile || groundTileAtPos == enemyTerritoryTile) {
+                if (IsEnemyTerritoryCell(cellPos)) {
                     decorationTiles[index] = null;
                     continue;
                 }
@@ -866,7 +887,7 @@ public class MapGenerator : MonoBehaviour
                     continue;
                 }
 
-                if (groundTileAtPos == enemyHomeTile || groundTileAtPos == enemyTerritoryTile) {
+                if (IsEnemyTerritoryCell(cellPos)) {
                     decorationTiles[index] = null;
                     processed++;
                     if (processed >= polishOperationsPerFrame) {
@@ -1840,7 +1861,11 @@ public class MapGenerator : MonoBehaviour
             return;
         }
 
-        if (lowGroundTilemap == null || grid == null) {
+        if (grid == null) {
+            return;
+        }
+
+        if (enemyHomeTilemap == null || enemyTerritoryTilemap == null) {
             return;
         }
 
@@ -1851,6 +1876,9 @@ public class MapGenerator : MonoBehaviour
         if (_holeRadiusValues.Count == 0) {
             GenerateEnemyTerritoryRadiusValues();
         }
+
+        enemyHomeTilemap.ClearAllTiles();
+        enemyTerritoryTilemap.ClearAllTiles();
 
         HashSet<Vector3Int> homeTileCells = new HashSet<Vector3Int>();
 
@@ -1875,8 +1903,10 @@ public class MapGenerator : MonoBehaviour
                     float distance = Vector3.Distance(worldPos, cellWorldPos);
 
                     if (distance <= _enemyHomeRadius) {
-                        if (lowGroundTilemap.HasTile(cell)) {
-                            lowGroundTilemap.SetTile(cell, enemyHomeTile);
+                        bool hasGround = (groundTilemap != null && groundTilemap.HasTile(cell))
+                            || (lowGroundTilemap != null && lowGroundTilemap.HasTile(cell));
+                        if (hasGround && !IsTerrainCell(cell)) {
+                            enemyHomeTilemap.SetTile(cell, enemyHomeTile);
                             homeTileCells.Add(cell);
                         }
                     }
@@ -1889,80 +1919,22 @@ public class MapGenerator : MonoBehaviour
             for (int x = -territoryRadiusCells; x <= territoryRadiusCells; x++) {
                 for (int y = -territoryRadiusCells; y <= territoryRadiusCells; y++) {
                     Vector3Int cell = centerCell + new Vector3Int(x, y, 0);
-
-                    if (homeTileCells.Contains(cell)) {
-                        continue;
-                    }
-
                     Vector3 cellWorldPos = grid.GetCellCenterWorld(cell);
                     float distance = Vector3.Distance(worldPos, cellWorldPos);
 
-                    if (distance <= _enemyTerritoryRadius && distance > _enemyHomeRadius) {
-                        if (lowGroundTilemap.HasTile(cell)) {
-                            TileBase existingTile = lowGroundTilemap.GetTile(cell);
-                            if (existingTile != enemyHomeTile) {
-                                lowGroundTilemap.SetTile(cell, enemyTerritoryTile);
-                            }
+                    if (distance <= _enemyTerritoryRadius) {
+                        bool hasGround = (groundTilemap != null && groundTilemap.HasTile(cell))
+                            || (lowGroundTilemap != null && lowGroundTilemap.HasTile(cell));
+                        if (hasGround && !IsTerrainCell(cell)) {
+                            enemyTerritoryTilemap.SetTile(cell, enemyTerritoryTile);
                         }
                     }
                 }
             }
         }
 
-        if (BuildingManager.Instance != null && BuildingManager.Instance.GroundTilemap != null) {
-            Tilemap buildingManagerGroundTilemap = BuildingManager.Instance.GroundTilemap;
-            foreach (Vector2Int holePos in _enemySpawnHolePositions) {
-                if (!_holeRadiusValues.TryGetValue(holePos, out (float homeRadius, float territoryRadius) radiusValues)) {
-                    continue;
-                }
-
-                float homeRadius = radiusValues.homeRadius;
-                float territoryRadius = radiusValues.territoryRadius;
-
-                Vector3 worldPos = GetEnemySpawnHoleWorldPosition(holePos);
-                Vector3Int centerCell = grid.WorldToCell(worldPos);
-
-                int homeRadiusCells = Mathf.CeilToInt(homeRadius);
-                for (int x = -homeRadiusCells; x <= homeRadiusCells; x++) {
-                    for (int y = -homeRadiusCells; y <= homeRadiusCells; y++) {
-                        Vector3Int cell = centerCell + new Vector3Int(x, y, 0);
-                        Vector3 cellWorldPos = grid.GetCellCenterWorld(cell);
-                        float distance = Vector3.Distance(worldPos, cellWorldPos);
-
-                        if (distance <= homeRadius && buildingManagerGroundTilemap.HasTile(cell)) {
-                            buildingManagerGroundTilemap.SetTile(cell, enemyHomeTile);
-                        }
-                    }
-                }
-
-                int territoryRadiusCells = Mathf.CeilToInt(territoryRadius);
-                for (int x = -territoryRadiusCells; x <= territoryRadiusCells; x++) {
-                    for (int y = -territoryRadiusCells; y <= territoryRadiusCells; y++) {
-                        Vector3Int cell = centerCell + new Vector3Int(x, y, 0);
-
-                        if (homeTileCells.Contains(cell)) {
-                            continue;
-                        }
-
-                        TileBase existingTile = buildingManagerGroundTilemap.GetTile(cell);
-                        if (existingTile == enemyHomeTile) {
-                            continue;
-                        }
-
-                        Vector3 cellWorldPos = grid.GetCellCenterWorld(cell);
-                        float distance = Vector3.Distance(worldPos, cellWorldPos);
-
-                        if (distance <= territoryRadius && distance > homeRadius && buildingManagerGroundTilemap.HasTile(cell)) {
-                            buildingManagerGroundTilemap.SetTile(cell, enemyTerritoryTile);
-                        }
-                    }
-                }
-            }
-        }
-
-        if (lowGroundTilemap != null) {
-            lowGroundTilemap.RefreshAllTiles();
-        }
+        enemyHomeTilemap.CompressBounds();
+        enemyTerritoryTilemap.CompressBounds();
     }
 
     private void DisposeAllNativeArrays()
