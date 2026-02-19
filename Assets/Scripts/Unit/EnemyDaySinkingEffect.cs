@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyDaySinkingEffect : MonoBehaviour
@@ -34,6 +35,7 @@ public class EnemyDaySinkingEffect : MonoBehaviour
     private static readonly int ClipHeightId = Shader.PropertyToID("_ClipHeight");
 
     private MaterialPropertyBlock _propertyBlock;
+    private readonly List<Renderer> _clipRenderers = new List<Renderer>();
     private Coroutine _sinkingCoroutine;
     private Coroutine _risingCoroutine;
     private Action _onComplete;
@@ -51,31 +53,31 @@ public class EnemyDaySinkingEffect : MonoBehaviour
         _unitMovement = GetComponent<UnitMovement>();
         _rigidbody2D = GetComponent<Rigidbody2D>();
         _enemyUnitBase = GetComponent<EnemyUnitBase>();
-
-        targetRenderer = ResolveTargetRenderer(targetRenderer);
-        if (spriteRoot == null && targetRenderer != null)
-        {
-            spriteRoot = targetRenderer.transform;
-        }
+        RefreshClipRenderers();
 
         if (spriteRoot != null)
         {
             _startLocalPosition = spriteRoot.localPosition;
         }
+        else if (targetRenderer != null)
+        {
+            _startLocalPosition = targetRenderer.transform.localPosition;
+        }
     }
 
     private void OnEnable()
     {
-        targetRenderer = ResolveTargetRenderer(targetRenderer);
-        ResetVisualState();
+        RefreshClipRenderers();
 
         if (playRiseOnEnable)
         {
+            PreSetupRisingState(); 
             _risingCoroutine = StartCoroutine(RisingRoutine());
         }
-        else if (_unitMovement != null)
+        else
         {
-            _unitMovement.ResumeMovement();
+            ResetVisualState();
+            _unitMovement?.ResumeMovement();
         }
     }
 
@@ -84,6 +86,19 @@ public class EnemyDaySinkingEffect : MonoBehaviour
         StopAllRunningRoutines();
         _enemyUnitBase?.SetBehaviorPaused(false);
         ResetVisualState();
+    }
+
+    private void PreSetupRisingState()
+    {
+        IsRising = true;
+        _enemyUnitBase?.SetBehaviorPaused(true);
+        _unitMovement?.ForceStopAllMovement();
+
+        if (spriteRoot != null)
+        {
+            spriteRoot.localPosition = new Vector3(_startLocalPosition.x, _startLocalPosition.y - riseDistance, _startLocalPosition.z);
+        }
+        SetClipHeight(clipEnd);
     }
 
     public void StartSinking(Action onComplete = null)
@@ -145,11 +160,8 @@ public class EnemyDaySinkingEffect : MonoBehaviour
         IsRising = true;
         _enemyUnitBase?.SetBehaviorPaused(true);
         _unitMovement?.ForceStopAllMovement();
-        if (_rigidbody2D != null)
-        {
-            _rigidbody2D.linearVelocity = Vector2.zero;
-        }
 
+        if (_rigidbody2D != null) _rigidbody2D.linearVelocity = Vector2.zero;
         if (spriteRoot != null)
         {
             spriteRoot.localPosition = new Vector3(_startLocalPosition.x, _startLocalPosition.y - riseDistance, _startLocalPosition.z);
@@ -157,14 +169,16 @@ public class EnemyDaySinkingEffect : MonoBehaviour
 
         PlayParticle();
         SetClipHeight(clipEnd);
+        
         yield return AnimateRising();
-        yield return StopParticleWithFadeOut();
 
         SetClipHeight(idleClipHeight);
         if (spriteRoot != null)
         {
             spriteRoot.localPosition = _startLocalPosition;
         }
+
+        yield return StopParticleWithFadeOut();
 
         _unitMovement?.ResumeMovement();
         _enemyUnitBase?.SetBehaviorPaused(false);
@@ -247,14 +261,19 @@ public class EnemyDaySinkingEffect : MonoBehaviour
 
     private void SetClipHeight(float value)
     {
-        if (targetRenderer == null || _propertyBlock == null)
-        {
-            return;
-        }
+        if (_propertyBlock == null) _propertyBlock = new MaterialPropertyBlock();
 
-        targetRenderer.GetPropertyBlock(_propertyBlock);
-        _propertyBlock.SetFloat(ClipHeightId, value);
-        targetRenderer.SetPropertyBlock(_propertyBlock);
+        if (_clipRenderers.Count == 0) RefreshClipRenderers();
+
+        for (int i = 0; i < _clipRenderers.Count; i++)
+        {
+            Renderer r = _clipRenderers[i];
+            if (r == null) continue;
+
+            r.GetPropertyBlock(_propertyBlock);
+            _propertyBlock.SetFloat(ClipHeightId, value);
+            r.SetPropertyBlock(_propertyBlock);
+        }
     }
 
     private IEnumerator StopParticleWithFadeOut()
@@ -305,23 +324,44 @@ public class EnemyDaySinkingEffect : MonoBehaviour
         _onComplete = null;
     }
 
-    private Renderer ResolveTargetRenderer(Renderer current)
+    private void RefreshClipRenderers()
     {
-        if (HasClipHeightProperty(current))
+        _clipRenderers.Clear();
+
+        if (HasClipHeightProperty(targetRenderer))
         {
-            return current;
+            _clipRenderers.Add(targetRenderer);
         }
 
         SpriteRenderer[] sprites = GetComponentsInChildren<SpriteRenderer>(true);
         for (int i = 0; i < sprites.Length; i++)
         {
-            if (HasClipHeightProperty(sprites[i]))
+            SpriteRenderer sprite = sprites[i];
+            if (HasClipHeightProperty(sprite) && !_clipRenderers.Contains(sprite))
             {
-                return sprites[i];
+                _clipRenderers.Add(sprite);
             }
         }
 
-        return null;
+        if (_clipRenderers.Count == 0)
+        {
+            Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                Renderer renderer = renderers[i];
+                if (HasClipHeightProperty(renderer) && !_clipRenderers.Contains(renderer))
+                {
+                    _clipRenderers.Add(renderer);
+                }
+            }
+        }
+
+        if (spriteRoot == null && _clipRenderers.Count > 0)
+        {
+            spriteRoot = _clipRenderers[0].transform;
+        }
+
+        targetRenderer = _clipRenderers.Count > 0 ? _clipRenderers[0] : null;
     }
 
     private bool HasClipHeightProperty(Renderer renderer)

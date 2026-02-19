@@ -316,10 +316,10 @@ MonoBehaviour:
   clipStart: 0
   clipEnd: 1
   idleClipHeight: -1
-  sinkDuration: 0.8
+  sinkDuration: 1
   sinkDistance: 1
   playRiseOnEnable: 1
-  riseDuration: 0.8
+  riseDuration: 1
   riseDistance: 1
   shakeAmplitude: 0.05
   shakeFrequency: 28
@@ -339,6 +339,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8467215045887265157, guid: 33058bfb29128a84a951e51255daaeee, type: 3}
       propertyPath: m_LocalScale.x
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8467215045887265157, guid: 33058bfb29128a84a951e51255daaeee, type: 3}
+      propertyPath: m_LocalScale.y
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8467215045887265157, guid: 33058bfb29128a84a951e51255daaeee, type: 3}
