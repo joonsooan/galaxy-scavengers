@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3234179147207147014}
   - component: {fileID: 8070600376242278380}
   m_Layer: 0
-  m_Name: Mining Particle Effect 1
+  m_Name: Disappear Particle Effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

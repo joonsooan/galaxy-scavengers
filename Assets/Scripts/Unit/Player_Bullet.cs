@@ -77,7 +77,7 @@ public class Player_Bullet : MonoBehaviour
         UnitBase enemy = other.GetComponent<UnitBase>();
         if (enemy != null && enemy.unitType == UnitBase.UnitType.Enemy)
         {
-            enemy.TakeDamage(_damage);
+            enemy.TakeDamage(_damage, DamageContext.From(DamageAttackType.Projectile, DamageAttackerFaction.Ally, gameObject));
             Deactivate();
             return;
         }

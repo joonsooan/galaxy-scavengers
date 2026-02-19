@@ -63,7 +63,13 @@ public abstract class Damageable : MonoBehaviour, ICombo
 
     public virtual void TakeDamage(int damage)
     {
+        TakeDamage(damage, DamageContext.Default);
+    }
+
+    public virtual void TakeDamage(int damage, DamageContext context)
+    {
         currentHealth -= damage;
+        HitAudioRouter.PlayHit(this, context);
         OnDamageTaken(damage);
         OnAnyDamageTaken?.Invoke(this);
         OnHealthChanged();

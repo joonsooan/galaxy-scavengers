@@ -1186,6 +1186,7 @@ MonoBehaviour:
   questNameText: {fileID: 8637120680628462273}
   requiredResourceText: {fileID: 4222773738674009269}
   rewardText: {fileID: 4180599703194365537}
+  rewardPanel: {fileID: 6411817669249085710}
   requiredResourcesGridContainer: {fileID: 2193416021508958440}
   rewardGridContainer: {fileID: 2304933594906312899}
   baseInventoryCellPrefab: {fileID: 3842191235755297668, guid: 0c93dfd6b41a96d4489a92b302206a7f, type: 3}
@@ -1213,7 +1214,7 @@ MonoBehaviour:
     m_Left: 4
     m_Right: 8
     m_Top: 0
-    m_Bottom: 8
+    m_Bottom: 4
   m_ChildAlignment: 0
   m_Spacing: 4
   m_ChildForceExpandWidth: 0

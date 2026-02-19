@@ -489,8 +489,9 @@ public abstract class EnemyUnitBase : UnitBase
 
     protected virtual void PerformAttackLogic(Damageable building, UnitBase unit)
     {
-        if (building != null) building.TakeDamage(attackDamage);
-        else if (unit != null) unit.TakeDamage(attackDamage);
+        DamageContext context = DamageContext.From(unitType, DamageAttackType.Melee, gameObject);
+        if (building != null) building.TakeDamage(attackDamage, context);
+        else if (unit != null) unit.TakeDamage(attackDamage, context);
     }
 
     private IEnumerator AttackCoroutine()

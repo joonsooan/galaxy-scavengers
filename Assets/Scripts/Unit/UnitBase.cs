@@ -61,6 +61,10 @@ public abstract class UnitBase : Damageable
             NoiseManager.Instance.RegisterUnit(this);
             _isRegisteredToNoiseManager = true;
         }
+
+        if (currentState == UnitState.Idle && progressBar != null) {
+            HideProgressBar();
+        }
     }
 
     protected void UpdateUnitLightAlpha()

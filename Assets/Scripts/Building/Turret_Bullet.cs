@@ -44,7 +44,7 @@ public class Turret_Bullet : MonoBehaviour
             var enemyHealth = other.GetComponent<UnitBase>();
             if (enemyHealth != null)
             {
-                enemyHealth.TakeDamage(_damage);
+                enemyHealth.TakeDamage(_damage, DamageContext.From(DamageAttackType.Projectile, DamageAttackerFaction.Ally, gameObject));
             }
             
             Deactivate();

@@ -8,6 +8,7 @@ public class QuestBriefPanel : MonoBehaviour
     [SerializeField] private TMP_Text questNameText;
     [SerializeField] private TMP_Text requiredResourceText;
     [SerializeField] private TMP_Text rewardText;
+    [SerializeField] private GameObject rewardPanel;
     [SerializeField] private GameObject requiredResourcesGridContainer;
     [SerializeField] private GameObject rewardGridContainer;
     [SerializeField] private GameObject baseInventoryCellPrefab;
@@ -126,8 +127,32 @@ public class QuestBriefPanel : MonoBehaviour
             rewardText.gameObject.SetActive(true);
         }
 
+        bool showRewardPanel = questData.questType != QuestType.CoreRepairQuest;
+        if (rewardPanel != null)
+        {
+            rewardPanel.SetActive(showRewardPanel);
+        }
+        else
+        {
+            if (rewardText != null)
+            {
+                rewardText.gameObject.SetActive(showRewardPanel);
+            }
+            if (rewardGridContainer != null)
+            {
+                rewardGridContainer.SetActive(showRewardPanel);
+            }
+        }
+
         DisplayRequiredResources(questData);
-        DisplayQuestRewards(questData);
+        if (showRewardPanel)
+        {
+            DisplayQuestRewards(questData);
+        }
+        else
+        {
+            ClearQuestRewards();
+        }
         UpdateButtonVisibility();
 
         RebuildLayoutImmediate();

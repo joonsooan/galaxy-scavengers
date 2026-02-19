@@ -177,7 +177,22 @@ public class EnemySpawner : MonoBehaviour
             {
                 damageable.RestoreToFullHealth();
             }
-            unit.gameObject.SetActive(false);
+
+            EnemyDaySinkingEffect sinkingEffect = unit.GetComponent<EnemyDaySinkingEffect>();
+            if (sinkingEffect != null)
+            {
+                sinkingEffect.StartSinking(() =>
+                {
+                    if (unit != null && unit.gameObject != null)
+                    {
+                        unit.gameObject.SetActive(false);
+                    }
+                });
+            }
+            else
+            {
+                unit.gameObject.SetActive(false);
+            }
         }
     }
 
