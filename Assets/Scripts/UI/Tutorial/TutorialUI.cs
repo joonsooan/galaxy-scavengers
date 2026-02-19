@@ -86,7 +86,7 @@ public class TutorialUI : MonoBehaviour
         float currentFlash = 1.0f;
 
         while (currentFlash > 0) {
-            currentFlash -= Time.deltaTime / flashFadeOutTime;
+            currentFlash -= Time.unscaledDeltaTime / flashFadeOutTime;
             mat.SetFloat("_FlashIntensity", Mathf.Max(0, currentFlash));
             yield return null;
         }
