@@ -78,7 +78,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1027114353
   m_SortingLayer: 3
-  m_SortingOrder: 0
+  m_SortingOrder: 10
   m_Sprite: {fileID: 4246698446789957178, guid: e7ddcc5dff23d6a41a3149087e8653ef, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -318,10 +318,10 @@ MonoBehaviour:
   clipStart: 0
   clipEnd: 1.5
   idleClipHeight: -1
-  sinkDuration: 1
+  sinkDuration: 2
   sinkDistance: 1.5
   playRiseOnEnable: 1
-  riseDuration: 1
+  riseDuration: 2
   riseDistance: 1.5
   shakeAmplitude: 0.05
   shakeFrequency: 28

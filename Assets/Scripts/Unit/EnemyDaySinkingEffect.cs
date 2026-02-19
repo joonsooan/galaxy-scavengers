@@ -69,6 +69,8 @@ public class EnemyDaySinkingEffect : MonoBehaviour
     {
         RefreshClipRenderers();
 
+        if (_propertyBlock != null) _propertyBlock.Clear();
+
         if (playRiseOnEnable)
         {
             PreSetupRisingState(); 
@@ -78,6 +80,18 @@ public class EnemyDaySinkingEffect : MonoBehaviour
         {
             ResetVisualState();
             _unitMovement?.ResumeMovement();
+        }
+
+        ForceUpdateBounds();
+    }
+
+    private void ForceUpdateBounds()
+    {
+        for (int i = 0; i < _clipRenderers.Count; i++)
+        {
+            if (_clipRenderers[i] == null) continue;
+            _clipRenderers[i].enabled = false;
+            _clipRenderers[i].enabled = true;
         }
     }
 
