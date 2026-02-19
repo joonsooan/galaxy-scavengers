@@ -10,6 +10,7 @@ public class BuildingHoverManager : MonoBehaviour
     private BuildingDataHolder _currentHoveredBuilding;
     private IStorage _currentHoveredStorage;
     private ResourceNode _currentHoveredResource;
+    private UnitBase _currentHoveredUnit;
     private bool _keepPanelVisible = false;
     private bool _panelsJustClosed = false;
     private float _panelsClosedTime = 0f;
@@ -171,11 +172,38 @@ public class BuildingHoverManager : MonoBehaviour
         }
     }
 
+    public void OnUnitEnter(UnitBase unit)
+    {
+        if (unit == null)
+        {
+            return;
+        }
+        if (unit == _currentHoveredUnit)
+        {
+            return;
+        }
+        if (_currentHoveredUnit != null && _currentHoveredUnit != unit)
+        {
+            ClearUnitHover();
+        }
+        _currentHoveredUnit = unit;
+        ShowUnitInfo(unit);
+    }
+
+    public void OnUnitExit(UnitBase unit)
+    {
+        if (unit == _currentHoveredUnit)
+        {
+            ClearUnitHover();
+        }
+    }
+
     private void ClearAllHovers()
     {
         ClearHover();
         ClearStorageHover();
         ClearResourceHover();
+        ClearUnitHover();
     }
 
     private void ClearHoverStateOnly()
@@ -194,6 +222,15 @@ public class BuildingHoverManager : MonoBehaviour
                 ResourceInfoPanel.Instance.gameObject.SetActive(false);
             }
             _currentHoveredResource = null;
+        }
+        if (_currentHoveredUnit != null)
+        {
+            if (UnitInfoPanel.Instance != null)
+            {
+                UnitInfoPanel.Instance.CancelPreview();
+                UnitInfoPanel.Instance.gameObject.SetActive(false);
+            }
+            _currentHoveredUnit = null;
         }
     }
 
@@ -380,6 +417,45 @@ public class BuildingHoverManager : MonoBehaviour
                 ResourceInfoPanel.Instance.gameObject.SetActive(false);
             }
             _currentHoveredResource = null;
+        }
+    }
+
+    private void ShowUnitInfo(UnitBase unit)
+    {
+        if (UnitInfoPanel.Instance == null)
+        {
+            return;
+        }
+        if (unit == null)
+        {
+            return;
+        }
+        if (!unit.gameObject.activeInHierarchy)
+        {
+            return;
+        }
+        if (unit.CurrentHealth <= 0)
+        {
+            return;
+        }
+        if (IsProcessorOrDroneHubPanelActive() || _panelsJustClosed)
+        {
+            return;
+        }
+        UnitInfoPanel.Instance.gameObject.SetActive(true);
+        UnitInfoPanel.Instance.PreviewInfo(unit);
+    }
+
+    private void ClearUnitHover()
+    {
+        if (_currentHoveredUnit != null)
+        {
+            if (UnitInfoPanel.Instance != null)
+            {
+                UnitInfoPanel.Instance.CancelPreview();
+                UnitInfoPanel.Instance.gameObject.SetActive(false);
+            }
+            _currentHoveredUnit = null;
         }
     }
 

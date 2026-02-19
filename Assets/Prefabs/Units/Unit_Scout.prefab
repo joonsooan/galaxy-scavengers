@@ -99,6 +99,7 @@ GameObject:
   - component: {fileID: 4483249089817793867}
   - component: {fileID: 1616897775811544138}
   - component: {fileID: -297290674602724703}
+  - component: {fileID: -2645967069624448828}
   m_Layer: 7
   m_Name: Unit_Scout
   m_TagString: Untagged
@@ -262,6 +263,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f24fb6c816cc06a458323d470112366d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &-2645967069624448828
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6649466925040614564}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 42d3cc28f087d6543a0c45f7c0f3cefe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &9188471241572248418

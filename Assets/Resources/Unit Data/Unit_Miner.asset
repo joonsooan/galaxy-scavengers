@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: Unit_Miner
   m_EditorClassIdentifier: 
   unitName: "\uCC44\uAD74 \uC720\uB2DB"
+  description: "\uAE30\uBCF8 \uC790\uC6D0\uC744 \uCC44\uAD74\uD558\uB294 \uC720\uB2DB\uC785\uB2C8\uB2E4.\n\uD55C
+    \uBC88 \uB208\uB3C5 \uB4E4\uC778 \uAD11\uB9E5\uC740 \uBA3C\uC9C0 \uD55C \uD1A8
+    \uB0A8\uAE30\uC9C0 \uC54A\uACE0 \uD0C8\uD0C8 \uD138\uC5B4\uBC84\uB9AC\uB294 \uC218\uC9D1\uAC00\uC774\uAE30\uB3C4
+    \uD569\uB2C8\uB2E4."
   tutorialKey: unit_miner
   unitIcon: {fileID: -5932265281250941504, guid: b2344e19305fc3140bc7ee8cae2166c3, type: 3}
   unitPrefab: {fileID: 6649466925040614564, guid: 5a38edecd5297e84d9adb4995b37971b, type: 3}
