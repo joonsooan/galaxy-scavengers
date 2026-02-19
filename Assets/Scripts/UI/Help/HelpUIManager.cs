@@ -9,6 +9,7 @@ public class HelpUIManager : MonoBehaviour
 {
     [Header("Panel References")]
     [SerializeField] private GameObject helpPanel;
+    [SerializeField] private Button openButton;
     [SerializeField] private Button closeButton;
 
     [Header("Cell List")]
@@ -39,6 +40,11 @@ public class HelpUIManager : MonoBehaviour
             return;
         }
 
+        if (openButton != null)
+        {
+            openButton.onClick.AddListener(OpenHelp);
+        }
+
         if (closeButton != null)
         {
             closeButton.onClick.AddListener(CloseHelp);
@@ -58,6 +64,11 @@ public class HelpUIManager : MonoBehaviour
         if (Instance == this)
         {
             Instance = null;
+        }
+
+        if (openButton != null)
+        {
+            openButton.onClick.RemoveAllListeners();
         }
 
         if (closeButton != null)
@@ -141,6 +152,15 @@ public class HelpUIManager : MonoBehaviour
         {
             detailImage.sprite = data.image;
             detailImage.gameObject.SetActive(data.image != null);
+            if (data.image != null)
+            {
+                RectTransform imageRect = detailImage.rectTransform;
+                float currentWidth = imageRect.rect.width;
+                float nativeWidth = data.image.rect.width;
+                float nativeHeight = data.image.rect.height;
+                float scaledHeight = currentWidth * (nativeHeight / nativeWidth);
+                imageRect.sizeDelta = new Vector2(currentWidth, scaledHeight);
+            }
         }
 
         if (detailDescription != null)
