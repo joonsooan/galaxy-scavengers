@@ -32,6 +32,9 @@ public class EnemyDaySinkingEffect : MonoBehaviour
     private UnitMovement _unitMovement;
     private Rigidbody2D _rigidbody2D;
     private EnemyUnitBase _enemyUnitBase;
+    private SpriteRenderer[] _spriteRenderers;
+    private Color[] _spriteColorsBeforeHide;
+    private bool _isSpriteAlphaHidden;
     private Vector3 _startLocalPosition;
 
     public bool IsSinking { get; private set; }
@@ -42,6 +45,8 @@ public class EnemyDaySinkingEffect : MonoBehaviour
         _unitMovement = GetComponent<UnitMovement>();
         _rigidbody2D = GetComponent<Rigidbody2D>();
         _enemyUnitBase = GetComponent<EnemyUnitBase>();
+        _spriteRenderers = GetComponentsInChildren<SpriteRenderer>(true);
+        _spriteColorsBeforeHide = new Color[_spriteRenderers.Length];
 
         if (spriteRoot == null && targetRenderer != null)
         {
@@ -58,6 +63,7 @@ public class EnemyDaySinkingEffect : MonoBehaviour
     {
         StopAllRunningRoutines();
         StopParticleImmediate();
+        RestoreSpriteAlpha();
 
         if (spriteRoot != null)
         {
@@ -137,6 +143,7 @@ public class EnemyDaySinkingEffect : MonoBehaviour
 
         PlayParticle();
         yield return AnimateSinking();
+        HideSpriteAlphaForParticleOnly();
         yield return StopParticleWithFadeOut();
 
         IsSinking = false;
@@ -209,7 +216,7 @@ public class EnemyDaySinkingEffect : MonoBehaviour
     {
         if (riseDuration <= 0f)
         {
-            ApplyRisingFrame(1f);
+            ApplyRisingFrame(1f, 0f);
             yield break;
         }
 
@@ -218,7 +225,7 @@ public class EnemyDaySinkingEffect : MonoBehaviour
         {
             elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / riseDuration);
-            ApplyRisingFrame(t);
+            ApplyRisingFrame(t, elapsed);
             yield return null;
         }
     }
@@ -237,26 +244,88 @@ public class EnemyDaySinkingEffect : MonoBehaviour
         spriteRoot.localPosition = pos;
     }
 
-    private void ApplyRisingFrame(float t)
+    private void ApplyRisingFrame(float t, float elapsed)
     {
         if (spriteRoot == null)
         {
             return;
         }
 
+        float shakeOffsetX = Mathf.Sin(elapsed * shakeFrequency) * shakeAmplitude * (1f - t);
         Vector3 pos = _startLocalPosition;
+        pos.x += shakeOffsetX;
         pos.y -= riseDistance * (1f - t);
         spriteRoot.localPosition = pos;
     }
 
     private void ResetVisualState()
     {
+        RestoreSpriteAlpha();
+
         if (spriteRoot != null)
         {
             spriteRoot.localPosition = _startLocalPosition;
         }
 
         StopParticleImmediate();
+    }
+
+    private void EnsureSpriteRendererCache()
+    {
+        if (_spriteRenderers == null || _spriteRenderers.Length == 0)
+        {
+            _spriteRenderers = GetComponentsInChildren<SpriteRenderer>(true);
+        }
+
+        if (_spriteColorsBeforeHide == null || _spriteColorsBeforeHide.Length != _spriteRenderers.Length)
+        {
+            _spriteColorsBeforeHide = new Color[_spriteRenderers.Length];
+        }
+    }
+
+    private void HideSpriteAlphaForParticleOnly()
+    {
+        if (_isSpriteAlphaHidden)
+        {
+            return;
+        }
+
+        EnsureSpriteRendererCache();
+
+        for (int i = 0; i < _spriteRenderers.Length; i++)
+        {
+            SpriteRenderer sr = _spriteRenderers[i];
+            if (sr != null)
+            {
+                _spriteColorsBeforeHide[i] = sr.color;
+                Color c = sr.color;
+                c.a = 0f;
+                sr.color = c;
+            }
+        }
+
+        _isSpriteAlphaHidden = true;
+    }
+
+    private void RestoreSpriteAlpha()
+    {
+        if (!_isSpriteAlphaHidden)
+        {
+            return;
+        }
+
+        EnsureSpriteRendererCache();
+
+        for (int i = 0; i < _spriteRenderers.Length; i++)
+        {
+            SpriteRenderer sr = _spriteRenderers[i];
+            if (sr != null)
+            {
+                sr.color = _spriteColorsBeforeHide[i];
+            }
+        }
+
+        _isSpriteAlphaHidden = false;
     }
 
     private IEnumerator StopParticleWithFadeOut()

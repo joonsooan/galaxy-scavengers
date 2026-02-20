@@ -314,11 +314,11 @@ MonoBehaviour:
   spriteRoot: {fileID: 6028558441747133069}
   sinkParticle: {fileID: 8315779303383471766}
   sinkDuration: 2
-  sinkDistance: 1
+  sinkDistance: 0.5
   playRiseOnEnable: 1
   riseDuration: 2
-  riseDistance: 1
-  shakeAmplitude: 0.1
+  riseDistance: 0.5
+  shakeAmplitude: 0.08
   shakeFrequency: 28
   waitForParticleFadeOut: 1
   particleFadeOutMaxWait: 0.5
@@ -340,7 +340,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3234179147207147014, guid: 68dd2c2e8dec0df4c9043f055fd28aab, type: 3}
       propertyPath: InitialModule.startSize.scalar
-      value: 0.6
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3234179147207147014, guid: 68dd2c2e8dec0df4c9043f055fd28aab, type: 3}
       propertyPath: InitialModule.startSpeed.scalar
@@ -348,7 +348,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3234179147207147014, guid: 68dd2c2e8dec0df4c9043f055fd28aab, type: 3}
       propertyPath: InitialModule.startSize.minScalar
-      value: 0.4
+      value: 0.6
       objectReference: {fileID: 0}
     - target: {fileID: 3234179147207147014, guid: 68dd2c2e8dec0df4c9043f055fd28aab, type: 3}
       propertyPath: InitialModule.startLifetime.scalar
@@ -364,7 +364,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8467215045887265157, guid: 68dd2c2e8dec0df4c9043f055fd28aab, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.5
+      value: -0.75
       objectReference: {fileID: 0}
     - target: {fileID: 8467215045887265157, guid: 68dd2c2e8dec0df4c9043f055fd28aab, type: 3}
       propertyPath: m_LocalPosition.z
