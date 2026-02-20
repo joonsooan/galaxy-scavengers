@@ -321,10 +321,10 @@ MonoBehaviour:
   playRiseOnEnable: 1
   riseDuration: 2
   riseDistance: 1
-  shakeAmplitude: 0.05
+  shakeAmplitude: 0.1
   shakeFrequency: 28
   waitForParticleFadeOut: 1
-  particleFadeOutMaxWait: 0.35
+  particleFadeOutMaxWait: 0.5
 --- !u!1001 &6883059317607917712
 PrefabInstance:
   m_ObjectHideFlags: 0

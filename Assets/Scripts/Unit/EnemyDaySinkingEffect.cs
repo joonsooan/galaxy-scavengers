@@ -43,6 +43,7 @@ public class EnemyDaySinkingEffect : MonoBehaviour
     private Rigidbody2D _rigidbody2D;
     private EnemyUnitBase _enemyUnitBase;
     private Vector3 _startLocalPosition;
+    private float _currentClipHeight;
 
     public bool IsSinking { get; private set; }
     public bool IsRising { get; private set; }
@@ -63,6 +64,8 @@ public class EnemyDaySinkingEffect : MonoBehaviour
         {
             _startLocalPosition = targetRenderer.transform.localPosition;
         }
+
+        _currentClipHeight = idleClipHeight;
     }
 
     private void OnEnable()
@@ -273,6 +276,7 @@ public class EnemyDaySinkingEffect : MonoBehaviour
     private void SetClipHeight(float value)
     {
         if (_propertyBlock == null) _propertyBlock = new MaterialPropertyBlock();
+        _currentClipHeight = value;
 
         if (_clipRenderers.Count == 0) RefreshClipRenderers();
 
@@ -284,6 +288,14 @@ public class EnemyDaySinkingEffect : MonoBehaviour
             r.GetPropertyBlock(_propertyBlock);
             _propertyBlock.SetFloat(ClipHeightId, value);
             r.SetPropertyBlock(_propertyBlock);
+        }
+    }
+
+    private void LateUpdate()
+    {
+        if (IsRising || IsSinking)
+        {
+            SetClipHeight(_currentClipHeight);
         }
     }
 
@@ -349,7 +361,7 @@ public class EnemyDaySinkingEffect : MonoBehaviour
     {
         _clipRenderers.Clear();
 
-        if (HasClipHeightProperty(targetRenderer))
+        if (targetRenderer != null)
         {
             _clipRenderers.Add(targetRenderer);
         }
@@ -358,7 +370,7 @@ public class EnemyDaySinkingEffect : MonoBehaviour
         for (int i = 0; i < sprites.Length; i++)
         {
             SpriteRenderer sprite = sprites[i];
-            if (HasClipHeightProperty(sprite) && !_clipRenderers.Contains(sprite))
+            if (!_clipRenderers.Contains(sprite))
             {
                 _clipRenderers.Add(sprite);
             }
@@ -370,7 +382,7 @@ public class EnemyDaySinkingEffect : MonoBehaviour
             for (int i = 0; i < renderers.Length; i++)
             {
                 Renderer renderer = renderers[i];
-                if (HasClipHeightProperty(renderer) && !_clipRenderers.Contains(renderer))
+                if (!_clipRenderers.Contains(renderer))
                 {
                     _clipRenderers.Add(renderer);
                 }
@@ -383,10 +395,5 @@ public class EnemyDaySinkingEffect : MonoBehaviour
         }
 
         targetRenderer = _clipRenderers.Count > 0 ? _clipRenderers[0] : null;
-    }
-
-    private bool HasClipHeightProperty(Renderer renderer)
-    {
-        return renderer != null && renderer.sharedMaterial != null && renderer.sharedMaterial.HasProperty(ClipHeightId);
     }
 }
