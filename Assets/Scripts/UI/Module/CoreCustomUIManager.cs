@@ -14,6 +14,7 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
     [SerializeField] private GameObject moduleSelectionPanel;
     [SerializeField] private Transform moduleSelectionGridContainer;
     [SerializeField] private GameObject moduleSelectionCellPrefab;
+    [SerializeField] private GameObject emptyModuleText;
 
     [Header("Core Detail Panel")]
     [SerializeField] private CoreDetailPanel coreDetailPanel;
@@ -226,6 +227,8 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
 
             CreateModuleCell(module);
         }
+
+        UpdateEmptyModuleTextVisibility();
     }
 
     private void CreateModuleCell(Module module)
@@ -308,6 +311,8 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
         if (IsPanelOpen()) {
             StartCoroutine(RefreshModuleSelectionGridDelayed());
         }
+
+        UpdateEmptyModuleTextVisibility();
     }
 
     private IEnumerator RefreshModuleSelectionGridDelayed()
@@ -343,6 +348,7 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
             moduleSelectionPanel.SetActive(true);
         }
         RefreshModuleSelectionGrid();
+        UpdateEmptyModuleTextVisibility();
     }
     
     public void HideShopUI()
@@ -351,6 +357,34 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
         {
             moduleSelectionPanel.SetActive(false);
         }
+        UpdateEmptyModuleTextVisibility();
+    }
+
+    private void UpdateEmptyModuleTextVisibility()
+    {
+        if (emptyModuleText == null)
+        {
+            return;
+        }
+
+        bool isModulePanelVisible = moduleSelectionPanel != null && moduleSelectionPanel.activeInHierarchy;
+        int moduleCount = 0;
+
+        if (_inventoryManager == null)
+        {
+            FindManagers();
+        }
+
+        if (_inventoryManager != null)
+        {
+            List<Module> modules = _inventoryManager.GetAllModules();
+            if (modules != null)
+            {
+                moduleCount = modules.Count;
+            }
+        }
+
+        emptyModuleText.SetActive(isModulePanelVisible && moduleCount == 0);
     }
     
     public void ClearDetailPanel()
