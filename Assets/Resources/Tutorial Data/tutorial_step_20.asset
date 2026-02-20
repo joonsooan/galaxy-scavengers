@@ -28,9 +28,9 @@ MonoBehaviour:
   spawnUnits: []
   grantResources:
   - resourceType: 0
-    amount: 100
+    amount: 200
   - resourceType: 1
-    amount: 100
+    amount: 200
   completionSound:
     Guid:
       Data1: -345895807

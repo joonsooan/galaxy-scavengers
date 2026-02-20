@@ -327,6 +327,7 @@ public class TutorialManager : MonoBehaviour
             UnitBase unitBase = unitObj.GetComponent<UnitBase>();
             if (unitBase != null) {
                 unitBase.unitType = UnitBase.UnitType.Ally;
+                unitBase.unitData = unitData;
             }
         }
     }

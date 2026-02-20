@@ -5556,7 +5556,7 @@ MonoBehaviour:
   centerResourceCircleRadius: 1
   centerResourceCircleDistanceFromCenter: 4
   centerResourceCircleMaxDistanceFromCenter: 6
-  centerResourceCircleMinSpacing: 4
+  centerResourceCircleMinSpacing: 3
   centerResourceCirclePlacementAttempts: 50
   showGizmos: 1
   divisionCircleColor: {r: 1, g: 1, b: 0, a: 0.3}
@@ -44238,7 +44238,6 @@ GameObject:
   - component: {fileID: 1078723812}
   - component: {fileID: 1078723811}
   - component: {fileID: 1078723814}
-  - component: {fileID: 1078723815}
   m_Layer: 5
   m_Name: Alert Panel Parent
   m_TagString: Untagged
@@ -44425,27 +44424,6 @@ MonoBehaviour:
   tooltipPanel: {fileID: 1922431905}
   tooltipText: {fileID: 1158699060}
   cameraTargetController: {fileID: 0}
---- !u!114 &1078723815
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1078723809}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d8762761f204a0c4881bacaad2e5cecd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  bracketSprite: {fileID: -712190682943068949, guid: 6abf8f4ef28eefb4897b585e40f284a6, type: 3}
-  sortingLayerName: Objects
-  sortingOrder: 100
-  padding: 0.25
-  heartbeatDuration: 0.8
-  maxBounceOffset: 0.1
-  bounceUpPeak: 1.5
-  bounceDownPeak: 0.8
-  bounceUp2Peak: 1.2
 --- !u!1 &1085667705
 GameObject:
   m_ObjectHideFlags: 0
@@ -52454,6 +52432,7 @@ GameObject:
   - component: {fileID: 1538527381}
   - component: {fileID: 1538527383}
   - component: {fileID: 1538527384}
+  - component: {fileID: 1538527385}
   m_Layer: 0
   m_Name: _UIManager
   m_TagString: Untagged
@@ -52649,6 +52628,27 @@ MonoBehaviour:
   detailTitle: {fileID: 1464770247}
   detailImage: {fileID: 2114987426}
   detailDescription: {fileID: 186291776}
+--- !u!114 &1538527385
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1538527375}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8762761f204a0c4881bacaad2e5cecd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bracketSprite: {fileID: -712190682943068949, guid: 6abf8f4ef28eefb4897b585e40f284a6, type: 3}
+  sortingLayerName: Objects
+  sortingOrder: 100
+  padding: 0.25
+  heartbeatDuration: 0.8
+  maxBounceOffset: 0.1
+  bounceUpPeak: 1.5
+  bounceDownPeak: 0.8
+  bounceUp2Peak: 1.2
 --- !u!1 &1539729019
 GameObject:
   m_ObjectHideFlags: 0
