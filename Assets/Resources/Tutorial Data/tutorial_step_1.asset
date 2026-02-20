@@ -37,3 +37,6 @@ MonoBehaviour:
   highlightTargetIDs: []
   showArrowUI: 0
   arrowID: 
+  showTargetBracket: 0
+  targetBracketBuildingType: 
+  includeConstructionSiteForTargetBracket: 1

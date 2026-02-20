@@ -357,11 +357,11 @@ MonoBehaviour:
     Path: event:/SFX_InGame/SFX_Mining
   fireSound:
     Guid:
-      Data1: 0
-      Data2: 0
-      Data3: 0
-      Data4: 0
-    Path: 
+      Data1: 565609416
+      Data2: 1141336050
+      Data3: -1107084657
+      Data4: -1982655955
+    Path: event:/SFX_InGame/SFX_PlayerShoot
   laserMaterial: {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
   laserWidth: 0.2
   miningParticleSystem: {fileID: 1571686775330981254}

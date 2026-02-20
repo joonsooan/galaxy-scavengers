@@ -43,3 +43,6 @@ MonoBehaviour:
   highlightTargetIDs: []
   showArrowUI: 1
   arrowID: storage_stats
+  showTargetBracket: 1
+  targetBracketBuildingType: Storage
+  includeConstructionSiteForTargetBracket: 0

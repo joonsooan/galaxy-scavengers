@@ -62,4 +62,9 @@ public class TutorialStepData : ScriptableObject
     [Header("Arrow UI Settings")]
     public bool showArrowUI;
     public string arrowID;
+
+    [Header("Target Bracket Settings")]
+    public bool showTargetBracket;
+    public string targetBracketBuildingType;
+    public bool includeConstructionSiteForTargetBracket = true;
 }

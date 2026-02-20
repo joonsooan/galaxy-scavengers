@@ -49,3 +49,6 @@ MonoBehaviour:
   - unit_assign_cell
   showArrowUI: 0
   arrowID: 
+  showTargetBracket: 1
+  targetBracketBuildingType: Smelter
+  includeConstructionSiteForTargetBracket: 0

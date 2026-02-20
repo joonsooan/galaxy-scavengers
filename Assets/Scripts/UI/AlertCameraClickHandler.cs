@@ -40,6 +40,8 @@ public class AlertCameraClickHandler : MonoBehaviour
             cameraTargetController = FindFirstObjectByType<CameraTargetController>();
         if (cameraTargetController == null)
             return;
+        if (TutorialManager.Instance != null && TutorialManager.Instance.IsTargetBracketLocked())
+            return;
         cameraTargetController.ResetFollowTargetToPlayer();
     }
 }

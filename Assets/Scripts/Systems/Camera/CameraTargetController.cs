@@ -417,7 +417,7 @@ public class CameraTargetController : MonoBehaviour
                 _defaultFollowTarget = target;
             _isManualMode = false;
 
-            if (target.GetComponent<Unit_Player>() != null)
+            if (target.GetComponent<Unit_Player>() != null && !ShouldPreserveTutorialTargetBracket())
                 TargetBracketEffect.Hide();
         }
     }
@@ -434,7 +434,14 @@ public class CameraTargetController : MonoBehaviour
             return;
         followTarget = _defaultFollowTarget;
         _isManualMode = false;
-        TargetBracketEffect.Hide();
+        if (!ShouldPreserveTutorialTargetBracket()) {
+            TargetBracketEffect.Hide();
+        }
+    }
+
+    private bool ShouldPreserveTutorialTargetBracket()
+    {
+        return TutorialManager.Instance != null && TutorialManager.Instance.IsTargetBracketLocked();
     }
 
     private bool IsLoadingScreenActive()

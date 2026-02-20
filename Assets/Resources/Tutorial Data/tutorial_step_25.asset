@@ -44,3 +44,6 @@ MonoBehaviour:
   highlightTargetIDs: []
   showArrowUI: 1
   arrowID: noise_panel
+  showTargetBracket: 0
+  targetBracketBuildingType: 
+  includeConstructionSiteForTargetBracket: 1

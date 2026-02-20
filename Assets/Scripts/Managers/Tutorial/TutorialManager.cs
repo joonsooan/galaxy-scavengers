@@ -90,6 +90,7 @@ public class TutorialManager : MonoBehaviour
     private TutorialUI _tutorialUI;
     private int _unitProducedCount;
     private GameObject _currentArrowUI;
+    private Transform _currentTargetBracketTransform;
 
     private float _wasdInputTime;
     public static TutorialManager Instance { get; private set; }
@@ -288,6 +289,7 @@ public class TutorialManager : MonoBehaviour
         }
         EnableMaterialHighlights(currentStep);
         ShowArrowUI(currentStep);
+        ShowTargetBracket(currentStep);
 
         _isWaitingForCondition = true;
         StartCoroutine(CheckStepCondition(currentStep));
@@ -587,6 +589,7 @@ public class TutorialManager : MonoBehaviour
                 PlayCompletionSound(step);
                 DisableCurrentHighlights();
                 HideArrowUI();
+                HideTargetBracket();
                 _currentStepIndex++;
                 NextStep();
                 yield break;
@@ -702,6 +705,24 @@ public class TutorialManager : MonoBehaviour
         return false;
     }
 
+    public bool IsTargetBracketLocked()
+    {
+        if (!_isTutorialActive || !_isWaitingForCondition) {
+            return false;
+        }
+
+        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) {
+            return false;
+        }
+
+        TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
+        if (currentStep == null) {
+            return false;
+        }
+
+        return currentStep.showTargetBracket && !string.IsNullOrEmpty(currentStep.targetBracketBuildingType);
+    }
+
     public void OnBuildingPlaced(string buildingType)
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
@@ -759,6 +780,7 @@ public class TutorialManager : MonoBehaviour
         EnableAllEnemyUnits();
         ShowAllUIPanels();
         HideArrowUI();
+        HideTargetBracket();
 
         if (_tutorialUI != null) {
             _tutorialUI.HideTutorial();
@@ -784,6 +806,7 @@ public class TutorialManager : MonoBehaviour
         EnableAllEnemyUnits();
         ShowAllUIPanels();
         HideArrowUI();
+        HideTargetBracket();
 
         if (_tutorialUI != null) {
             _tutorialUI.HideTutorial();
@@ -806,6 +829,7 @@ public class TutorialManager : MonoBehaviour
             EnableAllEnemyUnits();
             ShowAllUIPanels();
             HideArrowUI();
+            HideTargetBracket();
 
             if (_tutorialUI != null) {
                 _tutorialUI.HideTutorial();
@@ -887,6 +911,10 @@ public class TutorialManager : MonoBehaviour
             if (panel != null) {
                 panel.SetActive(true);
             }
+        }
+
+        if (alertPanel != null) {
+            alertPanel.SetActive(true);
         }
     }
 
@@ -1090,6 +1118,98 @@ public class TutorialManager : MonoBehaviour
             _currentArrowUI.SetActive(false);
             _currentArrowUI = null;
         }
+    }
+
+    private void ShowTargetBracket(TutorialStepData step)
+    {
+        HideTargetBracket();
+
+        if (step == null || !step.showTargetBracket || string.IsNullOrEmpty(step.targetBracketBuildingType))
+        {
+            return;
+        }
+
+        Transform target = FindTargetBracketTransform(step);
+        if (target == null)
+        {
+            return;
+        }
+
+        _currentTargetBracketTransform = target;
+        TargetBracketEffect.Show(_currentTargetBracketTransform);
+    }
+
+    private Transform FindTargetBracketTransform(TutorialStepData step)
+    {
+        if (step == null || string.IsNullOrEmpty(step.targetBracketBuildingType))
+        {
+            return null;
+        }
+
+        string requestedType = step.targetBracketBuildingType;
+        bool hasEnum = Enum.TryParse(requestedType, true, out BuildingType parsedType);
+
+        if (hasEnum && parsedType == BuildingType.MainStructure)
+        {
+            MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
+            if (mainStructure != null)
+            {
+                return mainStructure.transform;
+            }
+        }
+
+        BuildingDataHolder[] holders = FindObjectsByType<BuildingDataHolder>(FindObjectsSortMode.None);
+        foreach (BuildingDataHolder holder in holders)
+        {
+            if (holder == null || holder.buildingData == null)
+            {
+                continue;
+            }
+
+            if (IsTargetBuildingType(holder.buildingData, requestedType, hasEnum, parsedType))
+            {
+                return holder.transform;
+            }
+        }
+
+        if (step.includeConstructionSiteForTargetBracket && ConstructionManager.Instance != null)
+        {
+            foreach (ConstructionSite site in ConstructionManager.Instance.ConstructionSites)
+            {
+                if (site == null || site.buildingData == null)
+                {
+                    continue;
+                }
+
+                if (IsTargetBuildingType(site.buildingData, requestedType, hasEnum, parsedType))
+                {
+                    return site.transform;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private bool IsTargetBuildingType(BuildingData buildingData, string requestedType, bool hasEnum, BuildingType parsedType)
+    {
+        if (buildingData == null || string.IsNullOrEmpty(requestedType))
+        {
+            return false;
+        }
+
+        if (hasEnum)
+        {
+            return buildingData.buildingType == parsedType;
+        }
+
+        return string.Equals(buildingData.buildingType.ToString(), requestedType, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void HideTargetBracket()
+    {
+        _currentTargetBracketTransform = null;
+        TargetBracketEffect.Hide();
     }
 
 }

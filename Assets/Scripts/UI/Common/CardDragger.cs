@@ -259,6 +259,11 @@ public class CardDragger : MonoBehaviour
         {
             BuildingManager.Instance.CreateConstructionSite(_activeBuildingData, cellPos);
             _placedCellsInDrag.Add(cellPos);
+
+            if (_activeBuildingData.buildingType == BuildingType.DroneHub && GameManager.Instance != null)
+            {
+                GameManager.Instance.EndDrag();
+            }
         }
     }
 

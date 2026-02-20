@@ -43,3 +43,6 @@ MonoBehaviour:
   - unit_processor
   showArrowUI: 0
   arrowID: 
+  showTargetBracket: 1
+  targetBracketBuildingType: DroneHub
+  includeConstructionSiteForTargetBracket: 0

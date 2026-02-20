@@ -28,6 +28,7 @@ public class GameManager : MonoBehaviour
     private float _combatLockTimer;
 
     private bool _isCombatSpeedLockActive;
+    private float _lastDragEndUnscaledTime = -999f;
 
     private float _savedTimeScale = 1f;
     private static readonly WaitForSeconds _wait05 = CoroutineCache.GetWaitForSeconds(0.5f);
@@ -243,7 +244,13 @@ public class GameManager : MonoBehaviour
             cardDragger.EndDrag();
         }
         _activeCardData = null;
+        _lastDragEndUnscaledTime = Time.unscaledTime;
         onEndDrag?.Invoke();
+    }
+
+    public bool WasDragEndedRecently(float duration)
+    {
+        return Time.unscaledTime - _lastDragEndUnscaledTime <= duration;
     }
 
     public bool IsDragging()

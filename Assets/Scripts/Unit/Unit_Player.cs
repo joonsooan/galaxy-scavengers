@@ -201,6 +201,10 @@ public class Unit_Player : UnitBase
             return;
         }
 
+        if (GameManager.Instance != null && GameManager.Instance.WasDragEndedRecently(0.12f)) {
+            return;
+        }
+
         if (Input.GetMouseButtonDown(0)) {
             if (IsPointerOverUI()) {
                 return;
