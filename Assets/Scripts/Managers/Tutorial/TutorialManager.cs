@@ -90,6 +90,7 @@ public class TutorialManager : MonoBehaviour
     private TutorialUI _tutorialUI;
     private int _unitProducedCount;
     private GameObject _currentArrowUI;
+    private Transform _currentTargetBracketTransform;
 
     private float _wasdInputTime;
     public static TutorialManager Instance { get; private set; }
@@ -278,8 +279,17 @@ public class TutorialManager : MonoBehaviour
 
         ProcessStepStartActions(currentStep);
         EnableUIPanelsForStep(currentStep);
+        if (currentStep.stepType == TutorialStepType.MineableTypesChanged && mainControlPanel != null)
+        {
+            MainControlPanel mainControl = mainControlPanel.GetComponent<MainControlPanel>();
+            if (mainControl != null)
+            {
+                mainControl.ShowResourceStatPanelForTutorial();
+            }
+        }
         EnableMaterialHighlights(currentStep);
         ShowArrowUI(currentStep);
+        ShowTargetBracket(currentStep);
 
         _isWaitingForCondition = true;
         StartCoroutine(CheckStepCondition(currentStep));
@@ -317,6 +327,7 @@ public class TutorialManager : MonoBehaviour
             UnitBase unitBase = unitObj.GetComponent<UnitBase>();
             if (unitBase != null) {
                 unitBase.unitType = UnitBase.UnitType.Ally;
+                unitBase.unitData = unitData;
             }
         }
     }
@@ -579,6 +590,7 @@ public class TutorialManager : MonoBehaviour
                 PlayCompletionSound(step);
                 DisableCurrentHighlights();
                 HideArrowUI();
+                HideTargetBracket();
                 _currentStepIndex++;
                 NextStep();
                 yield break;
@@ -672,6 +684,45 @@ public class TutorialManager : MonoBehaviour
         }
         return null;
     }
+    
+    public bool HasReachedStepType(TutorialStepType stepType)
+    {
+        if (_tutorialSteps == null || _tutorialSteps.Count == 0) {
+            return false;
+        }
+        
+        if (_currentStepIndex < 0) {
+            return false;
+        }
+        
+        int lastIndex = Mathf.Min(_currentStepIndex, _tutorialSteps.Count - 1);
+        for (int i = 0; i <= lastIndex; i++) {
+            TutorialStepData step = _tutorialSteps[i];
+            if (step != null && step.stepType == stepType) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    public bool IsTargetBracketLocked()
+    {
+        if (!_isTutorialActive || !_isWaitingForCondition) {
+            return false;
+        }
+
+        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) {
+            return false;
+        }
+
+        TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
+        if (currentStep == null) {
+            return false;
+        }
+
+        return currentStep.showTargetBracket && !string.IsNullOrEmpty(currentStep.targetBracketBuildingType);
+    }
 
     public void OnBuildingPlaced(string buildingType)
     {
@@ -730,6 +781,7 @@ public class TutorialManager : MonoBehaviour
         EnableAllEnemyUnits();
         ShowAllUIPanels();
         HideArrowUI();
+        HideTargetBracket();
 
         if (_tutorialUI != null) {
             _tutorialUI.HideTutorial();
@@ -755,6 +807,7 @@ public class TutorialManager : MonoBehaviour
         EnableAllEnemyUnits();
         ShowAllUIPanels();
         HideArrowUI();
+        HideTargetBracket();
 
         if (_tutorialUI != null) {
             _tutorialUI.HideTutorial();
@@ -777,6 +830,7 @@ public class TutorialManager : MonoBehaviour
             EnableAllEnemyUnits();
             ShowAllUIPanels();
             HideArrowUI();
+            HideTargetBracket();
 
             if (_tutorialUI != null) {
                 _tutorialUI.HideTutorial();
@@ -859,6 +913,10 @@ public class TutorialManager : MonoBehaviour
                 panel.SetActive(true);
             }
         }
+
+        if (alertPanel != null) {
+            alertPanel.SetActive(true);
+        }
     }
 
     private void EnableUIPanelsForStep(TutorialStepData step)
@@ -915,7 +973,7 @@ public class TutorialManager : MonoBehaviour
     {
         if (uiObject == null || highlightMaterial == null) return;
 
-        Image targetImage = FindButtonImage(uiObject);
+        Image targetImage = FindHighlightableImage(uiObject);
         if (targetImage != null)
         {
             GameObject buttonObject = targetImage.gameObject;
@@ -933,7 +991,7 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
-    private Image FindButtonImage(GameObject parentObject)
+    private Image FindHighlightableImage(GameObject parentObject)
     {
         Button[] buttons = parentObject.GetComponentsInChildren<Button>(true);
         if (buttons != null && buttons.Length > 0)
@@ -944,7 +1002,13 @@ public class TutorialManager : MonoBehaviour
                 return image;
             }
         }
-        return null;
+        Image directImage = parentObject.GetComponent<Image>();
+        if (directImage != null)
+        {
+            return directImage;
+        }
+        Image childImage = parentObject.GetComponentInChildren<Image>(true);
+        return childImage;
     }
 
     private void EnableMaterialHighlights(TutorialStepData step)
@@ -965,7 +1029,7 @@ public class TutorialManager : MonoBehaviour
                     continue;
                 }
 
-                Image targetImage = FindButtonImage(entry.uiObject);
+                Image targetImage = FindHighlightableImage(entry.uiObject);
                 if (targetImage != null)
                 {
                     GameObject buttonObject = targetImage.gameObject;
@@ -1055,6 +1119,98 @@ public class TutorialManager : MonoBehaviour
             _currentArrowUI.SetActive(false);
             _currentArrowUI = null;
         }
+    }
+
+    private void ShowTargetBracket(TutorialStepData step)
+    {
+        HideTargetBracket();
+
+        if (step == null || !step.showTargetBracket || string.IsNullOrEmpty(step.targetBracketBuildingType))
+        {
+            return;
+        }
+
+        Transform target = FindTargetBracketTransform(step);
+        if (target == null)
+        {
+            return;
+        }
+
+        _currentTargetBracketTransform = target;
+        TargetBracketEffect.Show(_currentTargetBracketTransform);
+    }
+
+    private Transform FindTargetBracketTransform(TutorialStepData step)
+    {
+        if (step == null || string.IsNullOrEmpty(step.targetBracketBuildingType))
+        {
+            return null;
+        }
+
+        string requestedType = step.targetBracketBuildingType;
+        bool hasEnum = Enum.TryParse(requestedType, true, out BuildingType parsedType);
+
+        if (hasEnum && parsedType == BuildingType.MainStructure)
+        {
+            MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
+            if (mainStructure != null)
+            {
+                return mainStructure.transform;
+            }
+        }
+
+        BuildingDataHolder[] holders = FindObjectsByType<BuildingDataHolder>(FindObjectsSortMode.None);
+        foreach (BuildingDataHolder holder in holders)
+        {
+            if (holder == null || holder.buildingData == null)
+            {
+                continue;
+            }
+
+            if (IsTargetBuildingType(holder.buildingData, requestedType, hasEnum, parsedType))
+            {
+                return holder.transform;
+            }
+        }
+
+        if (step.includeConstructionSiteForTargetBracket && ConstructionManager.Instance != null)
+        {
+            foreach (ConstructionSite site in ConstructionManager.Instance.ConstructionSites)
+            {
+                if (site == null || site.buildingData == null)
+                {
+                    continue;
+                }
+
+                if (IsTargetBuildingType(site.buildingData, requestedType, hasEnum, parsedType))
+                {
+                    return site.transform;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private bool IsTargetBuildingType(BuildingData buildingData, string requestedType, bool hasEnum, BuildingType parsedType)
+    {
+        if (buildingData == null || string.IsNullOrEmpty(requestedType))
+        {
+            return false;
+        }
+
+        if (hasEnum)
+        {
+            return buildingData.buildingType == parsedType;
+        }
+
+        return string.Equals(buildingData.buildingType.ToString(), requestedType, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void HideTargetBracket()
+    {
+        _currentTargetBracketTransform = null;
+        TargetBracketEffect.Hide();
     }
 
 }

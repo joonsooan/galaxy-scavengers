@@ -26,6 +26,9 @@ public class BuildingManager : MonoBehaviour
 
     private readonly HashSet<Vector3Int> _temporaryTiles = new HashSet<Vector3Int>();
 
+    private readonly HashSet<Vector3Int> _walkableCells = new HashSet<Vector3Int>();
+    private readonly HashSet<Vector3Int> _terrainCells = new HashSet<Vector3Int>();
+
     [Header("Buildings")]
     private List<BuildingData> _buildingDataList;
 
@@ -111,6 +114,7 @@ public class BuildingManager : MonoBehaviour
                         node.cellPosition = grid.WorldToCell(node.transform.position);
                     }
                     _resourceCellCache.Add(node.cellPosition);
+                    _walkableCells.Remove(node.cellPosition);
                 }
             }
         }
@@ -123,6 +127,7 @@ public class BuildingManager : MonoBehaviour
                 node.cellPosition = grid.WorldToCell(node.transform.position);
             }
             _resourceCellCache.Add(node.cellPosition);
+            _walkableCells.Remove(node.cellPosition);
         }
     }
 
@@ -130,7 +135,16 @@ public class BuildingManager : MonoBehaviour
     {
         if (node != null) {
             _resourceCellCache.Remove(node.cellPosition);
+            TryAddCellToWalkable(node.cellPosition);
         }
+    }
+
+    private void TryAddCellToWalkable(Vector3Int cell)
+    {
+        if (_terrainCells.Contains(cell) || _mainStructureCells.Contains(cell)) return;
+        if (_cellToStructureMap.ContainsKey(cell) || _resourceCellCache.Contains(cell)) return;
+        if (groundTilemap == null || !groundTilemap.HasTile(cell)) return;
+        _walkableCells.Add(cell);
     }
 
     private void RegisterExistingBuildings()
@@ -257,6 +271,10 @@ public class BuildingManager : MonoBehaviour
 
     public bool IsTerrainCell(Vector3Int cellPosition)
     {
+        if (_terrainCells.Count > 0) {
+            return _terrainCells.Contains(cellPosition);
+        }
+
         MapGenerator mapGenerator = GetMapGenerator();
         if (mapGenerator != null) {
             if (mapGenerator.IsTerrainCell(cellPosition)) {
@@ -311,6 +329,59 @@ public class BuildingManager : MonoBehaviour
         return _mainStructureCells.Contains(cellPosition);
     }
 
+    public void ClearWalkableCellCache()
+    {
+        _walkableCells.Clear();
+        _terrainCells.Clear();
+    }
+
+    public void InitializeWalkableCellCache(BoundsInt mapBounds)
+    {
+        _walkableCells.Clear();
+        _terrainCells.Clear();
+
+        MapGenerator mapGenerator = GetMapGenerator();
+        if (mapGenerator == null || groundTilemap == null) return;
+
+        foreach (Vector3Int pos in mapBounds.allPositionsWithin) {
+            if (!groundTilemap.HasTile(pos)) continue;
+
+            bool isTerrain = mapGenerator.IsTerrainCell(pos);
+            if (!isTerrain && groundTilemap != null) {
+                TileBase tile = groundTilemap.GetTile(pos);
+                if (tile != null && mapGenerator.IsTerrainTile(tile)) {
+                    isTerrain = true;
+                }
+            }
+
+            if (isTerrain) {
+                _terrainCells.Add(pos);
+            }
+            else {
+                _walkableCells.Add(pos);
+            }
+        }
+    }
+
+    public bool IsCellWalkable(Vector3Int cell, bool allowTemporaryForConstruct = false)
+    {
+        if (_walkableCells.Count > 0) {
+            if (_walkableCells.Contains(cell)) return true;
+            if (allowTemporaryForConstruct && _temporaryTiles.Contains(cell)) return true;
+            return false;
+        }
+
+        if (IsBuildingTile(cell)) {
+            if (!(allowTemporaryForConstruct && IsTemporaryTile(cell))) return false;
+        }
+        else if (IsResourceTile(cell)) return false;
+        else if (IsTerrainCell(cell)) return false;
+
+        if (IsMainStructureCell(cell) || GetBuildingAt(cell, out _)) return false;
+
+        return true;
+    }
+
     public void CreateConstructionSite(
         BuildingData buildingData,
         Vector3Int anchorCellPosition
@@ -339,6 +410,7 @@ public class BuildingManager : MonoBehaviour
             if (temporaryTile != null && buildingTilemap != null) {
                 buildingTilemap.SetTile(cellPos, temporaryTile);
                 _temporaryTiles.Add(cellPos);
+                _walkableCells.Remove(cellPos);
                 OnTilemapChanged?.Invoke(cellPos);
             }
         }
@@ -615,14 +687,8 @@ public class BuildingManager : MonoBehaviour
         }
         dataHolder.SetBuildingData(data);
 
-        BoxCollider2D[] triggerColliders = obj.GetComponentsInChildren<BoxCollider2D>();
-        foreach (BoxCollider2D collider in triggerColliders) {
-            if (collider.isTrigger) {
-                BuildingHoverTrigger hoverTrigger = collider.GetComponent<BuildingHoverTrigger>();
-                if (hoverTrigger == null) {
-                    collider.gameObject.AddComponent<BuildingHoverTrigger>();
-                }
-            }
+        if (obj.GetComponent<BuildingHoverTrigger>() == null) {
+            obj.AddComponent<BuildingHoverTrigger>();
         }
 
         switch (data.buildingType) {
@@ -675,6 +741,7 @@ public class BuildingManager : MonoBehaviour
             buildingTilemap.SetTile(cellPosition, null);
             OnTilemapChanged?.Invoke(cellPosition);
             _placedPieces.Remove(cellPosition);
+            TryAddCellToWalkable(cellPosition);
         }
     }
 
@@ -699,6 +766,7 @@ public class BuildingManager : MonoBehaviour
                     buildingTilemap.SetTile(cellPos, null);
                     OnTilemapChanged?.Invoke(cellPos);
                 }
+                TryAddCellToWalkable(cellPos);
             }
 
             if (_placedPieces.TryGetValue(cellPos, out BuildingPiece pieceObj)) {
@@ -788,6 +856,7 @@ public class BuildingManager : MonoBehaviour
         _buildingStructuresByAnchor[structure.anchor] = structure;
         foreach (Vector3Int cell in structure.occupiedCells) {
             _cellToStructureMap[cell] = structure;
+            _walkableCells.Remove(cell);
         }
     }
 
@@ -818,6 +887,7 @@ public class BuildingManager : MonoBehaviour
         if (_buildingStructuresByAnchor.Remove(anchor, out BuildingStructure structure)) {
             foreach (Vector3Int cell in structure.occupiedCells) {
                 _cellToStructureMap.Remove(cell);
+                TryAddCellToWalkable(cell);
             }
         }
     }

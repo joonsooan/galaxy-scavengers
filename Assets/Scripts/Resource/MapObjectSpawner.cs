@@ -96,6 +96,13 @@ public class MapObjectSpawner : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] private float startingAreaMinDistance = 0.3f;
     
+    [Header("Center Resource Circles")]
+    [SerializeField] private float centerResourceCircleRadius = 1f;
+    [SerializeField] private int centerResourceCircleDistanceFromCenter = 3;
+    [SerializeField] private int centerResourceCircleMaxDistanceFromCenter = 8;
+    [SerializeField] private float centerResourceCircleMinSpacing = 2.5f;
+    [SerializeField] private int centerResourceCirclePlacementAttempts = 50;
+    
     [Header("Debug")]
     [SerializeField] private bool showGizmos = true;
     [SerializeField] private Color divisionCircleColor = new(1f, 1f, 0f, 0.3f);
@@ -183,13 +190,10 @@ public class MapObjectSpawner : MonoBehaviour
             
             resourceCircles.AddRange(startingAreaCircles);
             
-            if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive())
+            if (TutorialManager.Instance != null && TutorialManager.Instance.ShouldStartTutorial())
             {
-                ResourceCircle tutorialFerriteCircle = GenerateTutorialFerriteCircle();
-                if (tutorialFerriteCircle.center != Vector2Int.zero)
-                {
-                    resourceCircles.Add(tutorialFerriteCircle);
-                }
+                List<ResourceCircle> centerCircles = GenerateCenterResourceCircles();
+                resourceCircles.AddRange(centerCircles);
             }
             
             _cachedResourceCircles = new List<ResourceCircle>(resourceCircles);
@@ -458,6 +462,66 @@ public class MapObjectSpawner : MonoBehaviour
         }
     }
     
+    private List<ResourceCircle> GenerateCenterResourceCircles()
+    {
+        List<ResourceCircle> circles = new List<ResourceCircle>();
+        
+        if (resourceSettings == null || resourceSettings.Count == 0)
+            return circles;
+        
+        Vector2Int mapCenter = Vector2Int.zero;
+        int minRadius = centerResourceCircleDistanceFromCenter;
+        int maxRadius = Mathf.Max(minRadius, centerResourceCircleMaxDistanceFromCenter);
+        float minDistBetweenCircles = centerResourceCircleMinSpacing;
+        List<Vector2Int> usedCenters = new List<Vector2Int>();
+        
+        for (int i = 0; i < resourceSettings.Count; i++)
+        {
+            ResourceSpawnSettings settings = resourceSettings[i];
+            if (settings == null)
+                continue;
+            
+            Vector2Int center;
+            int attempts = 0;
+            do
+            {
+                float angle = Random.Range(0f, Mathf.PI);
+                float radius = Random.Range(minRadius, maxRadius + 1f);
+                int x = Mathf.RoundToInt(Mathf.Cos(angle) * radius);
+                int y = Mathf.RoundToInt(Mathf.Sin(angle) * radius);
+                center = new Vector2Int(x, y);
+                
+                float distFromMapCenter = Vector2.Distance(center, mapCenter);
+                if (distFromMapCenter > 0.01f && distFromMapCenter < minRadius)
+                    center = new Vector2Int(Mathf.RoundToInt(center.x * minRadius / distFromMapCenter), Mathf.RoundToInt(center.y * minRadius / distFromMapCenter));
+                
+                bool tooClose = false;
+                foreach (var used in usedCenters)
+                {
+                    if (Vector2.Distance(center, used) < minDistBetweenCircles)
+                    {
+                        tooClose = true;
+                        break;
+                    }
+                }
+                if (!tooClose)
+                    break;
+                attempts++;
+            }
+            while (attempts < centerResourceCirclePlacementAttempts);
+            
+            usedCenters.Add(center);
+            circles.Add(new ResourceCircle
+            {
+                center = center,
+                radius = centerResourceCircleRadius,
+                resourceType = settings.resourceType
+            });
+        }
+        
+        return circles;
+    }
+    
     public void UpdateResourceTileVisibility()
     {
         _tileManager?.UpdateResourceTileVisibility();
@@ -524,30 +588,5 @@ public class MapObjectSpawner : MonoBehaviour
     public void UpdateNearbyRuleTiles(Vector3Int minedPosition)
     {
         _tileManager?.UpdateNearbyRuleTiles(minedPosition);
-    }
-    
-    private ResourceCircle GenerateTutorialFerriteCircle()
-    {
-        if (BuildingManager.Instance == null || grid == null)
-        {
-            return new ResourceCircle { center = Vector2Int.zero, radius = 0f, resourceType = ResourceType.Ferrite };
-        }
-        
-        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
-        if (mainStructure == null)
-        {
-            return new ResourceCircle { center = Vector2Int.zero, radius = 0f, resourceType = ResourceType.Ferrite };
-        }
-        
-        Vector3Int mainStructureCell = grid.WorldToCell(mainStructure.transform.position);
-        Vector2Int center = new Vector2Int(mainStructureCell.x + 3, mainStructureCell.y + 3);
-        float radius = 3f;
-        
-        return new ResourceCircle
-        {
-            center = center,
-            radius = radius,
-            resourceType = ResourceType.Ferrite
-        };
     }
 }

@@ -7,6 +7,7 @@ public class BeaconManager : MonoBehaviour
 {
     public static BeaconManager Instance { get; private set; }
     public static event Action<Beacon> OnBeaconPlacedForScout;
+    public IReadOnlyList<Beacon> Beacons => _beacons;
     
     [Header("Beacon Settings")]
     [SerializeField] private GameObject beaconPrefab;
@@ -36,6 +37,12 @@ public class BeaconManager : MonoBehaviour
         {
             _grid = BuildingManager.Instance.grid;
         }
+    }
+
+    public void RegisterBeacon(Beacon beacon)
+    {
+        if (beacon != null && !_beacons.Contains(beacon))
+            _beacons.Add(beacon);
     }
     
     private void Update()
@@ -91,26 +98,7 @@ public class BeaconManager : MonoBehaviour
     private bool IsCellWalkable(Vector3Int cell)
     {
         if (BuildingManager.Instance == null) return true;
-        
-        if (BuildingManager.Instance.IsTerrainCell(cell) ||
-            BuildingManager.Instance.IsResourceTile(cell) || 
-            BuildingManager.Instance.IsBuildingTile(cell))
-        {
-            return false;
-        }
-        
-        if (BuildingManager.Instance.GetBuildingAt(cell, out _))
-        {
-            return false;
-        }
-        
-        BuildingPiece piece = BuildingManager.Instance.GetPieceAt(cell);
-        if (piece != null)
-        {
-            return false;
-        }
-        
-        return true;
+        return BuildingManager.Instance.IsCellWalkable(cell);
     }
     
     private void PlaceWaypointBeacon()

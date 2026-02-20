@@ -58,7 +58,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: 0d7643660942c2444aaa8f0ad062ef96, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -78,7 +78,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1027114353
   m_SortingLayer: 3
-  m_SortingOrder: 0
+  m_SortingOrder: 10
   m_Sprite: {fileID: 6150808516666299658, guid: 32571226b7a3f4b4eb477c649ff5ffe0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -150,6 +150,7 @@ GameObject:
   - component: {fileID: 3132766170232860239}
   - component: {fileID: -5060092193258834609}
   - component: {fileID: -5414244451522802995}
+  - component: {fileID: 588603574117501104}
   m_Layer: 6
   m_Name: Enemy_Behemoth
   m_TagString: Untagged
@@ -171,6 +172,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5324015598699234893}
+  - {fileID: 841092478128746013}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!50 &952973934286858722
@@ -296,3 +298,109 @@ MonoBehaviour:
   minRoamInterval: 2
   maxRoamInterval: 3
   unitMovement: {fileID: 3132766170232860239}
+--- !u!114 &588603574117501104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7944764008120523387}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3de0f2e2f637bd848bdbc5d51250b18e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetRenderer: {fileID: 362622655439221978}
+  spriteRoot: {fileID: 5324015598699234893}
+  sinkParticle: {fileID: 5967167056559741342}
+  clipStart: 0
+  clipEnd: 2
+  idleClipHeight: -1
+  sinkDuration: 2
+  sinkDistance: 2
+  playRiseOnEnable: 1
+  riseDuration: 2
+  riseDistance: 2
+  shakeAmplitude: 0.05
+  shakeFrequency: 28
+  waitForParticleFadeOut: 1
+  particleFadeOutMaxWait: 0.35
+--- !u!1001 &9092132259207178136
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 407409324728012381}
+    m_Modifications:
+    - target: {fileID: 1474325436666169639, guid: 33058bfb29128a84a951e51255daaeee, type: 3}
+      propertyPath: m_Name
+      value: Disappear Particle Effect
+      objectReference: {fileID: 0}
+    - target: {fileID: 8467215045887265157, guid: 33058bfb29128a84a951e51255daaeee, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8467215045887265157, guid: 33058bfb29128a84a951e51255daaeee, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8467215045887265157, guid: 33058bfb29128a84a951e51255daaeee, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8467215045887265157, guid: 33058bfb29128a84a951e51255daaeee, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8467215045887265157, guid: 33058bfb29128a84a951e51255daaeee, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8467215045887265157, guid: 33058bfb29128a84a951e51255daaeee, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.25881898
+      objectReference: {fileID: 0}
+    - target: {fileID: 8467215045887265157, guid: 33058bfb29128a84a951e51255daaeee, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.9659259
+      objectReference: {fileID: 0}
+    - target: {fileID: 8467215045887265157, guid: 33058bfb29128a84a951e51255daaeee, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8467215045887265157, guid: 33058bfb29128a84a951e51255daaeee, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8467215045887265157, guid: 33058bfb29128a84a951e51255daaeee, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 210
+      objectReference: {fileID: 0}
+    - target: {fileID: 8467215045887265157, guid: 33058bfb29128a84a951e51255daaeee, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8467215045887265157, guid: 33058bfb29128a84a951e51255daaeee, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8467215045887265157, guid: 33058bfb29128a84a951e51255daaeee, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 33058bfb29128a84a951e51255daaeee, type: 3}
+--- !u!4 &841092478128746013 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8467215045887265157, guid: 33058bfb29128a84a951e51255daaeee, type: 3}
+  m_PrefabInstance: {fileID: 9092132259207178136}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &5967167056559741342 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 3234179147207147014, guid: 33058bfb29128a84a951e51255daaeee, type: 3}
+  m_PrefabInstance: {fileID: 9092132259207178136}
+  m_PrefabAsset: {fileID: 0}

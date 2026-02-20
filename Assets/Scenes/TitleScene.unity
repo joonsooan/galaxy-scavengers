@@ -260,14 +260,14 @@ MonoBehaviour:
       Data2: 1202326804
       Data3: -537020530
       Data4: 1684792045
-    Path: event:/SFX_UIHover
+    Path: event:/SFX_UI/SFX_UIHover
   clickSound:
     Guid:
       Data1: -345895807
       Data2: 1210214295
       Data3: -73339495
       Data4: 1624008095
-    Path: event:/SFX_UIClick
+    Path: event:/SFX_UI/SFX_UIClick
 --- !u!1001 &34701778
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1163,6 +1163,14 @@ PrefabInstance:
     - target: {fileID: 464675866223239798, guid: 21d34af5d0d04b142af12198761fac33, type: 3}
       propertyPath: m_Name
       value: _CoreRepairManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 996856154134558205, guid: 21d34af5d0d04b142af12198761fac33, type: 3}
+      propertyPath: debuffEffectColor.b
+      value: 0.2627451
+      objectReference: {fileID: 0}
+    - target: {fileID: 996856154134558205, guid: 21d34af5d0d04b142af12198761fac33, type: 3}
+      propertyPath: debuffEffectColor.g
+      value: 0.4392157
       objectReference: {fileID: 0}
     - target: {fileID: 3312360782986358736, guid: 21d34af5d0d04b142af12198761fac33, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2775,6 +2783,66 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: speed1Sound.Path
+      value: event:/SFX_UI/SFX_GameSpeed_1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: speed2Sound.Path
+      value: event:/SFX_UI/SFX_GameSpeed_2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: speed3Sound.Path
+      value: event:/SFX_UI/SFX_GameSpeed_3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: speed1Sound.Guid.Data1
+      value: 820238353
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: speed1Sound.Guid.Data2
+      value: 1298527870
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: speed1Sound.Guid.Data3
+      value: -1860479049
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: speed1Sound.Guid.Data4
+      value: 120280484
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: speed2Sound.Guid.Data1
+      value: -1956939189
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: speed2Sound.Guid.Data2
+      value: 1183510592
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: speed2Sound.Guid.Data3
+      value: -521281104
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: speed2Sound.Guid.Data4
+      value: 1577924100
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: speed3Sound.Guid.Data1
+      value: 705958486
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: speed3Sound.Guid.Data2
+      value: 1114890044
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: speed3Sound.Guid.Data3
+      value: -1905310291
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: speed3Sound.Guid.Data4
+      value: -2046773714
+      objectReference: {fileID: 0}
     - target: {fileID: 8256486884244902839, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -3589,14 +3657,14 @@ MonoBehaviour:
       Data2: 1202326804
       Data3: -537020530
       Data4: 1684792045
-    Path: event:/SFX_UIHover
+    Path: event:/SFX_UI/SFX_UIHover
   clickSound:
     Guid:
       Data1: -345895807
       Data2: 1210214295
       Data3: -73339495
       Data4: 1624008095
-    Path: event:/SFX_UIClick
+    Path: event:/SFX_UI/SFX_UIClick
 --- !u!1001 &1163903897
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4111,14 +4179,14 @@ MonoBehaviour:
       Data2: 1202326804
       Data3: -537020530
       Data4: 1684792045
-    Path: event:/SFX_UIHover
+    Path: event:/SFX_UI/SFX_UIHover
   clickSound:
     Guid:
       Data1: -345895807
       Data2: 1210214295
       Data3: -73339495
       Data4: 1624008095
-    Path: event:/SFX_UIClick
+    Path: event:/SFX_UI/SFX_UIClick
 --- !u!114 &1396266987
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5283,14 +5351,14 @@ MonoBehaviour:
       Data2: 1202326804
       Data3: -537020530
       Data4: 1684792045
-    Path: event:/SFX_UIHover
+    Path: event:/SFX_UI/SFX_UIHover
   clickSound:
     Guid:
       Data1: -345895807
       Data2: 1210214295
       Data3: -73339495
       Data4: 1624008095
-    Path: event:/SFX_UIClick
+    Path: event:/SFX_UI/SFX_UIClick
 --- !u!1 &2034979321
 GameObject:
   m_ObjectHideFlags: 0
@@ -5647,8 +5715,38 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4922650622587349759, guid: 3acf6f37444d3874fb225fea5b8d8dbe, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1067897029404503776}
   m_SourcePrefab: {fileID: 100100000, guid: 3acf6f37444d3874fb225fea5b8d8dbe, type: 3}
+--- !u!1 &1067897029404503775 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4922650622587349759, guid: 3acf6f37444d3874fb225fea5b8d8dbe, type: 3}
+  m_PrefabInstance: {fileID: 1067897029404503774}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1067897029404503776
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1067897029404503775}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfbff72b56c5219419b3a395d45bd5da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hitEvent:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  targetTypeParameter: TargetType
+  attackTypeParameter: AttackType
+  attackerFactionParameter: AttackerFaction
 --- !u!1001 &1559389661764047923
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -32,8 +32,11 @@ MonoBehaviour:
       Data2: 1210214295
       Data3: -73339495
       Data4: 1624008095
-    Path: event:/SFX_UIClick
+    Path: event:/SFX_UI/SFX_UIClick
   enableMaterialHighlight: 0
   highlightTargetIDs: []
   showArrowUI: 0
   arrowID: 
+  showTargetBracket: 0
+  targetBracketBuildingType: 
+  includeConstructionSiteForTargetBracket: 1

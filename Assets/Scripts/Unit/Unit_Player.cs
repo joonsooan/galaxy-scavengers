@@ -1,8 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using FMOD.Studio;
+using FMODUnity;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using STOP_MODE = FMOD.Studio.STOP_MODE;
 
 public class Unit_Player : UnitBase
 {
@@ -16,6 +19,10 @@ public class Unit_Player : UnitBase
     [Header("References")]
     [SerializeField] private PlayerMovement playerMovement;
     [SerializeField] private CameraTargetController cameraController;
+
+    [Header("Audio")]
+    [SerializeField] private EventReference miningSound;
+    [SerializeField] private EventReference fireSound;
 
     [Header("Visual Effects")]
     [SerializeField] private Material laserMaterial;
@@ -32,6 +39,7 @@ public class Unit_Player : UnitBase
     private float _lastFireTime;
     private float _lookAtFireDirectionEndTime;
     private Camera _mainCamera;
+    private EventInstance _miningSoundInstance;
     private Coroutine _mineCoroutine;
     private WaitForSeconds _miningDelay;
     private UnitSpriteController _spriteController;
@@ -53,7 +61,7 @@ public class Unit_Player : UnitBase
         }
 
         if (cameraController != null) {
-            cameraController.followTarget = transform;
+            cameraController.SetFollowTarget(transform);
         }
     }
 
@@ -62,17 +70,23 @@ public class Unit_Player : UnitBase
         _grid = BuildingManager.Instance.grid;
     }
 
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        GameManager.OnPauseStateChanged += HandlePauseStateChanged;
+    }
+
+    protected override void OnDisable()
+    {
+        GameManager.OnPauseStateChanged -= HandlePauseStateChanged;
+        base.OnDisable();
+    }
+
     private void Update()
     {
         if (!_isBulletFiringEnabled) {
-            if (TutorialManager.Instance == null || !TutorialManager.Instance.IsTutorialActive()) {
+            if (CanEnableBulletFiring()) {
                 _isBulletFiringEnabled = true;
-            }
-            else {
-                TutorialStepData currentStep = TutorialManager.Instance.GetCurrentTutorialStep();
-                if (currentStep != null && currentStep.stepType == TutorialStepType.BulletFired) {
-                    _isBulletFiringEnabled = true;
-                }
             }
         }
 
@@ -83,11 +97,13 @@ public class Unit_Player : UnitBase
         UpdateSpriteDirection();
         UpdateLaser();
         UpdateParticlePosition();
+        UpdateUnitLightAlpha();
     }
 
     protected override void OnDestroy()
     {
         StopMiningParticles();
+        StopMiningSound();
 
         if (_laserRenderer != null) {
             Destroy(_laserRenderer.gameObject);
@@ -185,6 +201,10 @@ public class Unit_Player : UnitBase
             return;
         }
 
+        if (GameManager.Instance != null && GameManager.Instance.WasDragEndedRecently(0.12f)) {
+            return;
+        }
+
         if (Input.GetMouseButtonDown(0)) {
             if (IsPointerOverUI()) {
                 return;
@@ -207,11 +227,18 @@ public class Unit_Player : UnitBase
                 return;
             }
 
-            if (currentState != UnitState.Mining) {
-                Vector3 mouseWorldPos = GetMouseWorldPosition();
-                if (mouseWorldPos != Vector3.zero) {
-                    TryFireBullet(mouseWorldPos);
+            Vector3 mouseWorldPos = GetMouseWorldPosition();
+            if (mouseWorldPos != Vector3.zero) {
+                float distanceToClick = Vector3.Distance(transform.position, mouseWorldPos);
+                ResourceNode clickedResource = GetResourceAtPosition(mouseWorldPos);
+                if (distanceToClick <= interactionRange && clickedResource != null) {
+                    return;
                 }
+
+                if (currentState == UnitState.Mining) {
+                    StopMining();
+                }
+                TryFireBullet(mouseWorldPos);
             }
         }
     }
@@ -347,6 +374,7 @@ public class Unit_Player : UnitBase
         }
 
         StartMiningParticles();
+        StartMiningSound();
     }
 
     private void StopMining()
@@ -357,6 +385,7 @@ public class Unit_Player : UnitBase
         }
         currentState = UnitState.Idle;
         StopMiningParticles();
+        StopMiningSound();
 
         if (_spriteController != null) {
             _spriteController.ClearTarget();
@@ -480,6 +509,27 @@ public class Unit_Player : UnitBase
         }
     }
 
+    private bool CanEnableBulletFiring()
+    {
+        if (TutorialManager.Instance == null) {
+            return true;
+        }
+
+        if (!TutorialManager.Instance.ShouldStartTutorial()) {
+            return true;
+        }
+
+        if (!TutorialManager.Instance.IsTutorialActive()) {
+            return false;
+        }
+
+        if (TutorialManager.Instance.HasReachedStepType(TutorialStepType.BulletFired)) {
+            return true;
+        }
+
+        return false;
+    }
+
     private void TryFireBullet(Vector3 targetPosition)
     {
         if (Time.time - _lastFireTime < fireInterval)
@@ -489,18 +539,11 @@ public class Unit_Player : UnitBase
             return;
 
         if (!_isBulletFiringEnabled) {
-            if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive()) {
-                TutorialStepData currentStep = TutorialManager.Instance.GetCurrentTutorialStep();
-                if (currentStep != null && currentStep.stepType == TutorialStepType.BulletFired) {
-                    _isBulletFiringEnabled = true;
-                }
-                else {
-                    return;
-                }
+            if (!CanEnableBulletFiring()) {
+                return;
             }
-            else {
-                _isBulletFiringEnabled = true;
-            }
+
+            _isBulletFiringEnabled = true;
         }
 
         Vector2 fireDirection = (targetPosition - transform.position).normalized;
@@ -529,6 +572,9 @@ public class Unit_Player : UnitBase
         _isAttacking = true;
         _attackStateEndTime = Time.time + fireInterval * 0.5f;
         currentState = UnitState.Attacking;
+
+        if (!fireSound.IsNull)
+            RuntimeManager.PlayOneShot(fireSound);
 
         _lastFireDirection = fireDirection;
         _isLookingAtFireDirection = true;
@@ -598,6 +644,48 @@ public class Unit_Player : UnitBase
                 miningParticleSystem.Stop();
             }
             miningParticleSystem.Clear();
+        }
+    }
+
+    private void StartMiningSound()
+    {
+        StopMiningSound();
+        if (!miningSound.IsNull)
+        {
+            _miningSoundInstance = RuntimeManager.CreateInstance(miningSound);
+            Rigidbody2D rb = GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                RuntimeManager.AttachInstanceToGameObject(_miningSoundInstance, gameObject, rb);
+            }
+            else
+            {
+                RuntimeManager.AttachInstanceToGameObject(_miningSoundInstance, gameObject);
+            }
+            _miningSoundInstance.start();
+            if (GameManager.Instance != null && GameManager.Instance.IsPaused)
+            {
+                _miningSoundInstance.setPaused(true);
+            }
+        }
+    }
+
+    private void StopMiningSound()
+    {
+        if (_miningSoundInstance.isValid())
+        {
+            RuntimeManager.DetachInstanceFromGameObject(_miningSoundInstance);
+            _miningSoundInstance.stop(STOP_MODE.ALLOWFADEOUT);
+            _miningSoundInstance.release();
+            _miningSoundInstance = default;
+        }
+    }
+
+    private void HandlePauseStateChanged(bool isPaused)
+    {
+        if (_miningSoundInstance.isValid())
+        {
+            _miningSoundInstance.setPaused(isPaused);
         }
     }
 

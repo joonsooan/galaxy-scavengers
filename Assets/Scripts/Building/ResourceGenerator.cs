@@ -116,20 +116,21 @@ public class ResourceGenerator : Damageable
         if (resourceType == ResourceType.Aether)
         {
             FindAndCacheAetherManager();
+            var alertManager = FindFirstObjectByType<GameAlertUIManager>();
             
             if (_aetherConsumptionManager != null && _aetherConsumptionManager.IsAetherCapacityFull)
             {
-                if (!_wasAetherStorageFull && GameAlertUIManager.Instance != null)
+                if (!_wasAetherStorageFull && alertManager != null)
                 {
-                    GameAlertUIManager.Instance.RegisterAlert(GameAlertType.AetherStorageFull);
+                    alertManager.RegisterAlert(GameAlertType.AetherStorageFull, this);
                 }
                 _wasAetherStorageFull = true;
                 return;
             }
             
-            if (_wasAetherStorageFull && GameAlertUIManager.Instance != null)
+            if (_wasAetherStorageFull && alertManager != null)
             {
-                GameAlertUIManager.Instance.UnregisterAlert(GameAlertType.AetherStorageFull);
+                alertManager.UnregisterAlert(GameAlertType.AetherStorageFull, this);
             }
             _wasAetherStorageFull = false;
         }

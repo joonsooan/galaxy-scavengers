@@ -134,6 +134,7 @@ public class SceneLoader : MonoBehaviour
 
         if (LoadingUIManager.Instance != null) yield return LoadingUIManager.Instance.HideLoadingScreenWithFadeAsync();
         
+        yield return StartCoroutine(FadeRoutine(0f, fadeDuration));
         yield return _gameScenePostFadeDelayWait;
         
         if (TutorialManager.Instance == null || (!TutorialManager.Instance.IsTutorialActive() && !TutorialManager.Instance.ShouldStartTutorial()))
@@ -174,12 +175,15 @@ public class SceneLoader : MonoBehaviour
         }
 
         _baseSceneLoadOperation = SceneManager.LoadSceneAsync(baseSceneName);
-        _baseSceneLoadOperation.allowSceneActivation = false;
-
-        while (_baseSceneLoadOperation.progress < 0.9f || _waitingForContinue) yield return null;
-
-        _baseSceneLoadOperation.allowSceneActivation = true;
-        while (!_baseSceneLoadOperation.isDone) yield return null;
+        if (_baseSceneLoadOperation == null) {
+            SceneManager.LoadScene(baseSceneName);
+        }
+        else {
+            _baseSceneLoadOperation.allowSceneActivation = false;
+            while (_baseSceneLoadOperation.progress < 0.9f || _waitingForContinue) yield return null;
+            _baseSceneLoadOperation.allowSceneActivation = true;
+            while (!_baseSceneLoadOperation.isDone) yield return null;
+        }
 
         if (BgmManager.Instance != null) {
             if (_returnState == ReturnFromGameState.Success) BgmManager.Instance.StopSuccessLoadingBgm(baseSceneBgmFadeOutTime);
@@ -189,14 +193,19 @@ public class SceneLoader : MonoBehaviour
 
         yield return _baseSceneBgmStopDelayWait;
 
-        if (_returnState == ReturnFromGameState.Success && LoadingUIManager.Instance != null) {
-            var successScreen = LoadingUIManager.Instance.GetSuccessLoadingScreenComponent();
-            if (successScreen != null) {
-                yield return successScreen.GetBackgroundImage().DOFade(0f, successScreen.GetFadeOutDuration()).SetUpdate(true).WaitForCompletion();
+        LoadingUIManager.Instance?.HideLoadingScreen();
+        GameObject fadeOverlay = LoadingUIManager.Instance != null
+            ? LoadingUIManager.Instance.GetFadeOverlay()
+            : (GameObject.Find("FadeOverlay") ?? GameObject.Find("Fade Panel"));
+        if (fadeOverlay != null)
+        {
+            Image overlayImg = fadeOverlay.GetComponent<Image>();
+            if (overlayImg != null)
+            {
+                overlayImg.color = new Color(0f, 0f, 0f, 1f);
+                fadeOverlay.SetActive(true);
             }
         }
-
-        LoadingUIManager.Instance?.HideLoadingScreen();
         yield return StartCoroutine(FadeRoutine(0f, fadeDuration));
 
         _returnState = ReturnFromGameState.None;
@@ -221,7 +230,9 @@ public class SceneLoader : MonoBehaviour
 
     private IEnumerator FadeRoutine(float targetAlpha, float duration)
     {
-        GameObject fadeOverlay = GameObject.Find("FadeOverlay") ?? GameObject.Find("Fade Panel");
+        GameObject fadeOverlay = LoadingUIManager.Instance != null
+            ? LoadingUIManager.Instance.GetFadeOverlay()
+            : (GameObject.Find("FadeOverlay") ?? GameObject.Find("Fade Panel"));
         if (fadeOverlay != null) {
             fadeOverlay.SetActive(true);
             Image img = fadeOverlay.GetComponent<Image>();

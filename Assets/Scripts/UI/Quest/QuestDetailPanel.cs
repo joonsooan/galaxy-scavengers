@@ -24,6 +24,7 @@ public class QuestDetailPanel : MonoBehaviour
 
     private int _currentQuestId = -1;
     private bool _isGameSceneMode = false;
+    private Coroutine _rebuildCoroutine;
 
     public void SetQuestUIHandler(QuestUIHandler handler)
     {
@@ -101,30 +102,10 @@ public class QuestDetailPanel : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonUp(1))
+        if (Input.GetMouseButtonUp(1) && gameObject.activeSelf && _currentQuestId != -1 && !_isGameSceneMode)
         {
-            if (gameObject.activeSelf && _currentQuestId != -1)
-            {
-                if (GameManager.Instance != null && GameManager.Instance.IsDragging())
-                {
-                    return;
-                }
-                
-                if (_isGameSceneMode)
-                {
-                    GameSceneQuestUIManager questUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
-                    if (questUIManager != null)
-                    {
-                        questUIManager.HideQuestPanel();
-                    }
-                }
-                else
-                {
-                    ClearQuestInfo();
-                }
-                
-                return;
-            }
+            if (GameManager.Instance != null && GameManager.Instance.IsDragging()) return;
+            ClearQuestInfo();
         }
     }
 
@@ -174,8 +155,16 @@ public class QuestDetailPanel : MonoBehaviour
         DisplayRequiredResources(questData);
         DisplayQuestRewards(questData);
         UpdateButtonVisibility();
-        
-        RebuildAllLayouts();
+
+        RebuildLayoutImmediate();
+        if (_rebuildCoroutine != null)
+        {
+            StopCoroutine(_rebuildCoroutine);
+        }
+        if (gameObject.activeInHierarchy)
+        {
+            _rebuildCoroutine = StartCoroutine(RebuildAllLayouts());
+        }
     }
     
     public void ClearQuestInfo()
@@ -208,8 +197,16 @@ public class QuestDetailPanel : MonoBehaviour
         ClearRequiredResources();
         ClearQuestRewards();
         UpdateButtonVisibility();
-        
-        RebuildAllLayouts();
+
+        RebuildLayoutImmediate();
+        if (_rebuildCoroutine != null)
+        {
+            StopCoroutine(_rebuildCoroutine);
+        }
+        if (gameObject.activeInHierarchy)
+        {
+            _rebuildCoroutine = StartCoroutine(RebuildAllLayouts());
+        }
     }
 
     private void UpdateRequiredResourceText(QuestData questData)
@@ -704,6 +701,8 @@ public class QuestDetailPanel : MonoBehaviour
                                 if (questUIManager != null)
                                 {
                                     questUIManager.LoadActiveQuests();
+                                    if (_isGameSceneMode)
+                                        questUIManager.HideQuestDetailPanel();
                                 }
                                 
                                 return;
@@ -861,6 +860,13 @@ public class QuestDetailPanel : MonoBehaviour
         }
         
         ClearQuestInfo();
+        
+        if (_isGameSceneMode)
+        {
+            GameSceneQuestUIManager questUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
+            if (questUIManager != null)
+                questUIManager.HideQuestDetailPanel();
+        }
     }
 
     public void RefreshQuestState(int questId)
@@ -877,11 +883,151 @@ public class QuestDetailPanel : MonoBehaviour
         UpdateButtonVisibility();
     }
 
+    private void RebuildLayoutImmediate()
+    {
+        Canvas.ForceUpdateCanvases();
+
+        if (questNameText != null)
+        {
+            questNameText.ForceMeshUpdate(true);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(questNameText.rectTransform);
+        }
+        if (questIdText != null)
+        {
+            questIdText.ForceMeshUpdate(true);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(questIdText.rectTransform);
+        }
+        if (questDescriptionText != null)
+        {
+            questDescriptionText.ForceMeshUpdate(true);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(questDescriptionText.rectTransform);
+        }
+        if (requiredResourceText != null)
+        {
+            requiredResourceText.ForceMeshUpdate(true);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(requiredResourceText.rectTransform);
+        }
+        if (rewardText != null)
+        {
+            rewardText.ForceMeshUpdate(true);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rewardText.rectTransform);
+        }
+
+        if (requiredResourcesGridContainer != null)
+        {
+            foreach (Transform child in requiredResourcesGridContainer.transform)
+            {
+                RectTransform childRect = child.GetComponent<RectTransform>();
+                if (childRect != null)
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(childRect);
+            }
+            LayoutRebuilder.ForceRebuildLayoutImmediate(requiredResourcesGridContainer.GetComponent<RectTransform>());
+        }
+
+        if (rewardGridContainer != null)
+        {
+            foreach (Transform child in rewardGridContainer.transform)
+            {
+                RectTransform childRect = child.GetComponent<RectTransform>();
+                if (childRect != null)
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(childRect);
+            }
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rewardGridContainer.GetComponent<RectTransform>());
+        }
+
+        RectTransform panelRect = GetComponent<RectTransform>();
+        if (panelRect != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
+        if (panelRect != null && panelRect.parent is RectTransform parentRect)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(parentRect);
+
+        Canvas.ForceUpdateCanvases();
+    }
+
     private IEnumerator RebuildAllLayouts()
     {
+        yield return null;
+        Canvas.ForceUpdateCanvases();
+
+        if (questNameText != null)
+        {
+            questNameText.ForceMeshUpdate(true);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(questNameText.rectTransform);
+        }
+        if (questIdText != null)
+        {
+            questIdText.ForceMeshUpdate(true);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(questIdText.rectTransform);
+        }
+        if (questDescriptionText != null)
+        {
+            questDescriptionText.ForceMeshUpdate(true);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(questDescriptionText.rectTransform);
+        }
+        if (requiredResourceText != null)
+        {
+            requiredResourceText.ForceMeshUpdate(true);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(requiredResourceText.rectTransform);
+        }
+        if (rewardText != null)
+        {
+            rewardText.ForceMeshUpdate(true);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rewardText.rectTransform);
+        }
+
+        if (requiredResourcesGridContainer != null)
+        {
+            foreach (Transform child in requiredResourcesGridContainer.transform)
+            {
+                RectTransform childRect = child.GetComponent<RectTransform>();
+                if (childRect != null)
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(childRect);
+            }
+            LayoutRebuilder.ForceRebuildLayoutImmediate(requiredResourcesGridContainer.GetComponent<RectTransform>());
+        }
+
+        if (rewardGridContainer != null)
+        {
+            foreach (Transform child in rewardGridContainer.transform)
+            {
+                RectTransform childRect = child.GetComponent<RectTransform>();
+                if (childRect != null)
+                    LayoutRebuilder.ForceRebuildLayoutImmediate(childRect);
+            }
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rewardGridContainer.GetComponent<RectTransform>());
+        }
+
+        RectTransform panelRect = GetComponent<RectTransform>();
+        if (panelRect != null)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
+        }
+        if (panelRect != null && panelRect.parent is RectTransform parentRect)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(parentRect);
+        }
+
         yield return new WaitForEndOfFrame();
-        
-        LayoutRebuilder.ForceRebuildLayoutImmediate(requiredResourcesGridContainer.GetComponent<RectTransform>());
-        LayoutRebuilder.ForceRebuildLayoutImmediate(rewardGridContainer.GetComponent<RectTransform>());
+        Canvas.ForceUpdateCanvases();
+        if (questNameText != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(questNameText.rectTransform);
+        if (questIdText != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(questIdText.rectTransform);
+        if (questDescriptionText != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(questDescriptionText.rectTransform);
+        if (requiredResourceText != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(requiredResourceText.rectTransform);
+        if (rewardText != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rewardText.rectTransform);
+        if (requiredResourcesGridContainer != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(requiredResourcesGridContainer.GetComponent<RectTransform>());
+        if (rewardGridContainer != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rewardGridContainer.GetComponent<RectTransform>());
+        if (panelRect != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
+        if (panelRect != null && panelRect.parent is RectTransform parentRect2)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(parentRect2);
+
+        _rebuildCoroutine = null;
     }
 }

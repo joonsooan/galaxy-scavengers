@@ -17,7 +17,9 @@ public class GameManager : MonoBehaviour
     [Header("Audio")]
     [SerializeField] private EventReference pauseSound;
     [SerializeField] private EventReference resumeSound;
-    [SerializeField] private EventReference speedChangeSound;
+    [SerializeField] private EventReference speed1Sound;
+    [SerializeField] private EventReference speed2Sound;
+    [SerializeField] private EventReference speed3Sound;
 
     [HideInInspector] public UnityEvent<DisplayableData> onStartDrag;
     [HideInInspector] public UnityEvent onEndDrag;
@@ -26,6 +28,7 @@ public class GameManager : MonoBehaviour
     private float _combatLockTimer;
 
     private bool _isCombatSpeedLockActive;
+    private float _lastDragEndUnscaledTime = -999f;
 
     private float _savedTimeScale = 1f;
     private static readonly WaitForSeconds _wait05 = CoroutineCache.GetWaitForSeconds(0.5f);
@@ -66,6 +69,7 @@ public class GameManager : MonoBehaviour
     }
 
     public static event Action OnGameSceneInitialized;
+    public static event Action<bool> OnPauseStateChanged;
 
     public float GetTimeScale()
     {
@@ -108,23 +112,23 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        if (Input.GetKeyDown(KeyCode.Q)) {
+            GameSceneQuestUIManager questUI = FindFirstObjectByType<GameSceneQuestUIManager>();
+            if (questUI != null) questUI.ToggleQuestPanel();
+        }
+
         if (Input.GetKeyDown(KeyCode.Space)) {
             TogglePause();
         }
 
-        bool canChangeActualTimeScale = !_isCombatSpeedLockActive && !IsPaused;
-
         if (Input.GetKeyDown(KeyCode.Alpha1)) {
-            _savedTimeScale = 1f;
-            if (canChangeActualTimeScale) Time.timeScale = 1f;
+            SetGameSpeed(1f);
         }
         else if (Input.GetKeyDown(KeyCode.Alpha2)) {
-            _savedTimeScale = 2f;
-            if (canChangeActualTimeScale) Time.timeScale = 2f;
+            SetGameSpeed(2f);
         }
         else if (Input.GetKeyDown(KeyCode.Alpha3)) {
-            _savedTimeScale = 3f;
-            if (canChangeActualTimeScale) Time.timeScale = 3f;
+            SetGameSpeed(3f);
         }
 
         if (IsPaused) return;
@@ -138,6 +142,12 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.T)) {
             if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive()) {
                 TutorialManager.Instance.SkipAllTutorials();
+            }
+        }
+        if (Input.GetKeyDown(KeyCode.G)) {
+            UnitData constructUnit = Resources.Load<UnitData>("Unit Data/Unit_Construct");
+            if (constructUnit != null && StartingUnitsManager.Instance != null) {
+                StartingUnitsManager.Instance.SpawnUnitsForEditor(constructUnit, 1);
             }
         }
 #endif
@@ -164,34 +174,46 @@ public class GameManager : MonoBehaviour
         if (uiManager != null) {
             uiManager.SetPausePanelActive(IsPaused);
         }
+
+        OnPauseStateChanged?.Invoke(IsPaused);
     }
 
     public void CycleGameSpeed()
     {
         float currentSpeed = _savedTimeScale;
-        
-        if (currentSpeed <= 1f)
-        {
-            _savedTimeScale = 2f;
+        float newSpeed;
+
+        if (currentSpeed <= 1f) {
+            newSpeed = 2f;
         }
-        else if (currentSpeed <= 2f)
-        {
-            _savedTimeScale = 3f;
+        else if (currentSpeed <= 2f) {
+            newSpeed = 3f;
         }
-        else
-        {
-            _savedTimeScale = 1f;
+        else {
+            newSpeed = 1f;
         }
 
+        SetGameSpeed(newSpeed);
+    }
+
+    private void SetGameSpeed(float newSpeed)
+    {
+        if (Mathf.Approximately(_savedTimeScale, newSpeed)) return;
+
+        _savedTimeScale = newSpeed;
         bool canChangeActualTimeScale = !_isCombatSpeedLockActive && !IsPaused;
-        if (canChangeActualTimeScale)
-        {
-            Time.timeScale = _savedTimeScale;
+        if (canChangeActualTimeScale) {
+            Time.timeScale = newSpeed;
         }
 
-        if (!speedChangeSound.IsNull)
-        {
-            RuntimeManager.PlayOneShot(speedChangeSound);
+        if (Mathf.Approximately(newSpeed, 1f) && !speed1Sound.IsNull) {
+            RuntimeManager.PlayOneShot(speed1Sound);
+        }
+        else if (Mathf.Approximately(newSpeed, 2f) && !speed2Sound.IsNull) {
+            RuntimeManager.PlayOneShot(speed2Sound);
+        }
+        else if (Mathf.Approximately(newSpeed, 3f) && !speed3Sound.IsNull) {
+            RuntimeManager.PlayOneShot(speed3Sound);
         }
     }
 
@@ -222,7 +244,13 @@ public class GameManager : MonoBehaviour
             cardDragger.EndDrag();
         }
         _activeCardData = null;
+        _lastDragEndUnscaledTime = Time.unscaledTime;
         onEndDrag?.Invoke();
+    }
+
+    public bool WasDragEndedRecently(float duration)
+    {
+        return Time.unscaledTime - _lastDragEndUnscaledTime <= duration;
     }
 
     public bool IsDragging()
@@ -241,16 +269,13 @@ public class GameManager : MonoBehaviour
             IsPaused = false;
             _savedTimeScale = 1f;
             Time.timeScale = 1f;
+            OnPauseStateChanged?.Invoke(false);
             IsGameSceneInitialized = false;
             IsGameplayReady = false;
+            if (BuildingManager.Instance != null) {
+                BuildingManager.Instance.ClearWalkableCellCache();
+            }
             InitializeGameScene();
-        }
-        if (scene.name == "LightTestScene") {
-            IsPaused = false;
-            _savedTimeScale = 1f;
-            Time.timeScale = 1f;
-
-            StartCoroutine(DelayedInitialization());
         }
     }
 
@@ -300,9 +325,12 @@ public class GameManager : MonoBehaviour
 
         yield return null;
 
-        // Step 1: Generate Map
         if (mapGenerator != null) {
             yield return StartCoroutine(mapGenerator.GenerateMapAsync(progress));
+        }
+
+        if (BuildingManager.Instance != null && mapGenerator != null) {
+            BuildingManager.Instance.InitializeWalkableCellCache(mapGenerator.GetMapBounds());
         }
 
         CameraTargetController cameraController = FindFirstObjectByType<CameraTargetController>();
@@ -311,8 +339,6 @@ public class GameManager : MonoBehaviour
         }
 
         yield return StartCoroutine(InitializeSpawnersAndUnitsAsync(progress));
-
-        // Step 3: Wait for Fog of War
         yield return StartCoroutine(WaitForFogOfWarInitializationAsync(progress));
 
         if (progress != null) {
@@ -486,7 +512,6 @@ public class GameManager : MonoBehaviour
 
     public void SpawnUnitsAfterLoading()
     {
-        // Spawn starting units after MainStructure is registered
         StartingUnitsManager startingUnitsManager = FindFirstObjectByType<StartingUnitsManager>();
         if (startingUnitsManager != null) {
             startingUnitsManager.SpawnStartingUnits();

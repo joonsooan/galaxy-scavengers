@@ -3,14 +3,20 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
+using FMOD.Studio;
+using FMODUnity;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
+using STOP_MODE = FMOD.Studio.STOP_MODE;
 
 public class Unit_Miner : UnitBase
 {
     [Header("References")]
     [SerializeField] private UnitMovement unitMovement;
+
+    [Header("Audio")]
+    [SerializeField] private EventReference miningSound;
 
     [Header("Gathering Stats")]
     [SerializeField] private float unloadingTime = 1f;
@@ -41,6 +47,7 @@ public class Unit_Miner : UnitBase
 
     private Coroutine _mineCoroutine;
     private WaitForSeconds _miningDelay;
+    private EventInstance _miningSoundInstance;
     private Tween _miningVibrationTween;
     private bool _noResourceAlertActive;
     private WaitForSeconds _searchWait;
@@ -56,7 +63,7 @@ public class Unit_Miner : UnitBase
     protected override void Awake()
     {
         base.Awake();
-        _canvas = GameObject.Find(canvasName)?.GetComponent<Canvas>();
+        _canvas = GameManager.Instance?.uiManager?.GetObjectUICanvas() ?? GameObject.Find(canvasName)?.GetComponent<Canvas>();
         _searchWait = CoroutineCache.GetWaitForSeconds(resourceSearchInterval);
         _resourceImageSpawnWait = CoroutineCache.GetWaitForSeconds(resourceImageSpawnInterval);
         InitializeCarryAmounts();
@@ -74,6 +81,7 @@ public class Unit_Miner : UnitBase
     {
         DecideNextAction();
         UpdateAnimationState();
+        UpdateUnitLightAlpha();
 
         if (currentState == UnitState.Mining) {
             UpdateParticlePosition();
@@ -91,7 +99,7 @@ public class Unit_Miner : UnitBase
         base.OnDisable();
         UnsubscribeEvents();
         if (_noResourceAlertActive) {
-            GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.MinerNoResource);
+            FindFirstObjectByType<GameAlertUIManager>()?.UnregisterAlert(GameAlertType.MinerNoResource, this);
             _noResourceAlertActive = false;
         }
     }
@@ -99,11 +107,12 @@ public class Unit_Miner : UnitBase
     protected override void OnDestroy()
     {
         if (_noResourceAlertActive) {
-            GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.MinerNoResource);
+            FindFirstObjectByType<GameAlertUIManager>()?.UnregisterAlert(GameAlertType.MinerNoResource, this);
             _noResourceAlertActive = false;
         }
         StopMiningVibration();
         StopMiningParticles();
+        StopMiningSound();
         if (_targetResourceNode != null && _targetResourceNode.IsReserved && _targetResourceNode.GetReservedUnit() == this) {
             _targetResourceNode.Unreserve();
         }
@@ -121,6 +130,7 @@ public class Unit_Miner : UnitBase
                 }
                 TryStartActions();
             }
+            UpdateIdleRoam();
             break;
 
         case UnitState.Moving:
@@ -215,6 +225,7 @@ public class Unit_Miner : UnitBase
         StartMining(_targetResourceNode);
         StartMiningVibration();
         StartMiningParticles();
+        StartMiningSound();
     }
 
     private void StartUnloadingAction()
@@ -335,7 +346,7 @@ public class Unit_Miner : UnitBase
     {
         if (_currentCarryAmounts.Values.Sum() > 0) {
             if (_noResourceAlertActive) {
-                GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.MinerNoResource);
+                FindFirstObjectByType<GameAlertUIManager>()?.UnregisterAlert(GameAlertType.MinerNoResource, this);
                 _noResourceAlertActive = false;
             }
             GoToStorage();
@@ -355,8 +366,9 @@ public class Unit_Miner : UnitBase
             if (_targetResourceNode.Reserve(this)) {
                 if (unitMovement.SetNewTarget(BuildingManager.Instance.grid.GetCellCenterWorld(_targetMiningCell))) {
                     currentState = UnitState.Moving;
+                    ResetIdleRoam();
                     if (_noResourceAlertActive) {
-                        GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.MinerNoResource);
+                        FindFirstObjectByType<GameAlertUIManager>()?.UnregisterAlert(GameAlertType.MinerNoResource, this);
                         _noResourceAlertActive = false;
                     }
                 }
@@ -376,7 +388,7 @@ public class Unit_Miner : UnitBase
             _targetResourceNode = null;
             currentState = UnitState.Idle;
             if (!_noResourceAlertActive) {
-                GameAlertUIManager.Instance?.RegisterAlert(GameAlertType.MinerNoResource);
+                FindFirstObjectByType<GameAlertUIManager>()?.RegisterAlert(GameAlertType.MinerNoResource, this);
                 _noResourceAlertActive = true;
             }
         }
@@ -436,7 +448,7 @@ public class Unit_Miner : UnitBase
                     continue;
                 }
 
-                if (BuildingManager.Instance.CanPlaceBuilding(neighborCell)) {
+                if (BuildingManager.Instance.CanPlaceBuilding(neighborCell) && !UnitMovement.IsCellAssigned(neighborCell)) {
                     if (distanceToNeighbor < bestTarget.distance) {
                         bestTarget.resourceNode = resourceNode;
                         bestTarget.miningCell = neighborCell;
@@ -573,6 +585,7 @@ public class Unit_Miner : UnitBase
         StopMining();
         StopMiningVibration();
         StopMiningParticles();
+        StopMiningSound();
         _targetResourceNode?.Unreserve();
         _targetResourceNode = null;
         currentState = UnitState.Idle;
@@ -592,6 +605,7 @@ public class Unit_Miner : UnitBase
         ResourceManager.OnStorageRemoved += HandleStorageRemoved;
         UnitManager.OnMineableTypesChanged += HandleMineableTypesChanged;
         SceneManager.sceneUnloaded += OnSceneUnloaded;
+        GameManager.OnPauseStateChanged += HandlePauseStateChanged;
     }
 
     private void UnsubscribeEvents()
@@ -601,6 +615,15 @@ public class Unit_Miner : UnitBase
         ResourceManager.OnStorageRemoved -= HandleStorageRemoved;
         UnitManager.OnMineableTypesChanged -= HandleMineableTypesChanged;
         SceneManager.sceneUnloaded -= OnSceneUnloaded;
+        GameManager.OnPauseStateChanged -= HandlePauseStateChanged;
+    }
+
+    private void HandlePauseStateChanged(bool isPaused)
+    {
+        if (_miningSoundInstance.isValid())
+        {
+            _miningSoundInstance.setPaused(isPaused);
+        }
     }
 
     private void HandleResourceMined(ResourceType type, int amount)
@@ -613,6 +636,7 @@ public class Unit_Miner : UnitBase
             StopMining();
             StopMiningVibration();
             StopMiningParticles();
+            StopMiningSound();
             _targetResourceNode?.Unreserve();
             _targetResourceNode = null;
 
@@ -850,6 +874,40 @@ public class Unit_Miner : UnitBase
     {
         if (miningParticleSystem != null && miningParticleSystem.isPlaying) {
             miningParticleSystem.Stop();
+        }
+    }
+
+    private void StartMiningSound()
+    {
+        StopMiningSound();
+        if (!miningSound.IsNull)
+        {
+            _miningSoundInstance = RuntimeManager.CreateInstance(miningSound);
+            Rigidbody2D rb = GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                RuntimeManager.AttachInstanceToGameObject(_miningSoundInstance, gameObject, rb);
+            }
+            else
+            {
+                RuntimeManager.AttachInstanceToGameObject(_miningSoundInstance, gameObject);
+            }
+            _miningSoundInstance.start();
+            if (GameManager.Instance != null && GameManager.Instance.IsPaused)
+            {
+                _miningSoundInstance.setPaused(true);
+            }
+        }
+    }
+
+    private void StopMiningSound()
+    {
+        if (_miningSoundInstance.isValid())
+        {
+            RuntimeManager.DetachInstanceFromGameObject(_miningSoundInstance);
+            _miningSoundInstance.stop(STOP_MODE.ALLOWFADEOUT);
+            _miningSoundInstance.release();
+            _miningSoundInstance = default;
         }
     }
 

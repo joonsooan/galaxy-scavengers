@@ -258,26 +258,28 @@ public class StartingUnitsManager : MonoBehaviour
 
     private bool IsValidSpawnPosition(Vector3Int cellPosition)
     {
-        if (BuildingManager.Instance == null) {
-            return false;
-        }
-
-        // Check if cell is walkable (not a building tile, not a resource tile, can place building)
-        if (BuildingManager.Instance.IsBuildingTile(cellPosition) ||
-            BuildingManager.Instance.IsResourceTile(cellPosition)) {
-            return false;
-        }
-
-        // Check if we can place a building here (indicates walkable terrain)
-        if (!BuildingManager.Instance.CanPlaceBuilding(cellPosition)) {
-            return false;
-        }
-
-        // Check if there's already a building at this position
-        if (BuildingManager.Instance.GetBuildingAt(cellPosition, out _)) {
-            return false;
-        }
-
+        if (BuildingManager.Instance == null) return false;
+        if (!BuildingManager.Instance.IsCellWalkable(cellPosition)) return false;
+        if (FogOfWarManager.Instance != null && !FogOfWarManager.Instance.CanPlaceBuilding(cellPosition)) return false;
         return true;
     }
+
+#if UNITY_EDITOR
+    public void SpawnUnitsForEditor(UnitData unitData, int count = 1)
+    {
+        if (unitData == null || unitData.unitPrefab == null || count <= 0) return;
+
+        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
+        if (mainStructure == null) return;
+
+        if (UnitManager.Instance == null || UnitManager.Instance.unitParent == null) return;
+
+        Vector3 centerPosition = mainStructure.transform.position;
+        for (int i = 0; i < count; i++)
+        {
+            Vector3 spawnPosition = GetSpawnPositionAroundMainStructure(centerPosition, 3f);
+            Instantiate(unitData.unitPrefab, spawnPosition, Quaternion.identity, UnitManager.Instance.unitParent);
+        }
+    }
+#endif
 }

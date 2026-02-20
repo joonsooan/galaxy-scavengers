@@ -36,6 +36,7 @@ public class CameraTargetController : MonoBehaviour
     private bool[] _zoomLevelInitialized;
     private Vector3[] _zoomLevelPositions;
     private Vector3 _currentVelocity;
+    private Transform _defaultFollowTarget;
 
     private void Awake()
     {
@@ -191,10 +192,19 @@ public class CameraTargetController : MonoBehaviour
             float moveX = Input.GetAxisRaw("Horizontal");
             float moveY = Input.GetAxisRaw("Vertical");
 
-            if (moveX != 0f || moveY != 0f) {
+            if (moveX != 0f || moveY != 0f)
+            {
+                ResetFollowTargetToPlayer();
+                hasPlayerUnit = followTarget != null && followTarget.GetComponent<Unit_Player>() != null;
+                if (hasPlayerUnit)
+                {
+                    _direction = Vector3.zero;
+                    return;
+                }
                 _direction = new Vector3(moveX, moveY, 0).normalized;
             }
-            else {
+            else
+            {
                 _direction = Vector3.zero;
             }
         }
@@ -396,6 +406,42 @@ public class CameraTargetController : MonoBehaviour
         }
 
         ClampTargetPosition();
+    }
+
+    public void SetFollowTarget(Transform target)
+    {
+        followTarget = target;
+        if (target != null)
+        {
+            if (_defaultFollowTarget == null && target.GetComponent<Unit_Player>() != null)
+                _defaultFollowTarget = target;
+            _isManualMode = false;
+
+            if (target.GetComponent<Unit_Player>() != null && !ShouldPreserveTutorialTargetBracket())
+                TargetBracketEffect.Hide();
+        }
+    }
+
+    public void ResetFollowTargetToPlayer()
+    {
+        if (_defaultFollowTarget == null)
+        {
+            Unit_Player player = FindFirstObjectByType<Unit_Player>();
+            if (player != null)
+                _defaultFollowTarget = player.transform;
+        }
+        if (_defaultFollowTarget == null)
+            return;
+        followTarget = _defaultFollowTarget;
+        _isManualMode = false;
+        if (!ShouldPreserveTutorialTargetBracket()) {
+            TargetBracketEffect.Hide();
+        }
+    }
+
+    private bool ShouldPreserveTutorialTargetBracket()
+    {
+        return TutorialManager.Instance != null && TutorialManager.Instance.IsTargetBracketLocked();
     }
 
     private bool IsLoadingScreenActive()

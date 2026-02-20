@@ -26,4 +26,5 @@ public class CorePartData : ScriptableObject
 
     [Header("Debuff Effects")]
     public float debuffValue = 0.3f;
+    public Sprite debuffIcon;
 }

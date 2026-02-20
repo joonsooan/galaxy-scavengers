@@ -1,13 +1,18 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class ConstructionManager : MonoBehaviour
 {
+    public static event Action<ConstructionSite> OnConstructionSiteRegistered;
+    public static event Action<ConstructionSite> OnConstructionSiteUnregistered;
     private readonly List<ConstructionSite> _constructionSites = new ();
     private readonly List<Unit_Construct> _constructDrones = new ();
     
     public static ConstructionManager Instance { get; private set; }
-    
+    public IReadOnlyList<ConstructionSite> ConstructionSites => _constructionSites;
+    public IReadOnlyList<Unit_Construct> ConstructDrones => _constructDrones;
+
     private void Awake()
     {
         if (Instance == null)
@@ -56,13 +61,18 @@ public class ConstructionManager : MonoBehaviour
         if (!_constructionSites.Contains(site))
         {
             _constructionSites.Add(site);
+            OnConstructionSiteRegistered?.Invoke(site);
             AssignDronesToSites();
         }
     }
     
+    
     public void UnregisterConstructionSite(ConstructionSite site)
     {
-        _constructionSites.Remove(site);
+        if (_constructionSites.Remove(site))
+        {
+            OnConstructionSiteUnregistered?.Invoke(site);
+        }
     }
     
     public void RegisterConstructDrone(Unit_Construct drone)

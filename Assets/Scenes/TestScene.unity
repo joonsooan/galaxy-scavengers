@@ -7763,6 +7763,8 @@ MonoBehaviour:
   lowGroundTilemap: {fileID: 0}
   lowWallTilemap: {fileID: 1829347667}
   highWallTilemap: {fileID: 860813986}
+  enemyHomeTilemap: {fileID: 0}
+  enemyTerritoryTilemap: {fileID: 0}
   grid: {fileID: 2115591665}
   groundTile: {fileID: 11400000, guid: 7d463f590028a4e46a4251ccd769d5d4, type: 2}
   lowGroundTile: {fileID: 11400000, guid: 23531461cdf2566488fc91181d0b4214, type: 2}
@@ -7862,7 +7864,7 @@ MonoBehaviour:
   timeBeta: 0.1
   noise100WaveCooldown: 60
   noise100AreaCount: 3
-  noise100BudgetMultiplier: 1.5
+  noise100BudgetMultiplier: 1
   noiseCautionBudgetMultiplier: 0.5
   noiseWarningBudgetMultiplier: 1
 --- !u!114 &313771330
@@ -7913,6 +7915,11 @@ MonoBehaviour:
   startingAreaRadius: 12
   startingAreaCircleCount: 3
   startingAreaMinDistance: 1
+  centerResourceCircleRadius: 1
+  centerResourceCircleDistanceFromCenter: 3
+  centerResourceCircleMaxDistanceFromCenter: 8
+  centerResourceCircleMinSpacing: 2.5
+  centerResourceCirclePlacementAttempts: 50
   showGizmos: 1
   divisionCircleColor: {r: 1, g: 1, b: 0, a: 0.3}
   resourceCircleColor: {r: 0, g: 1, b: 0, a: 0.5}
@@ -8365,6 +8372,68 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   m_MaxRayIntersections: 0
+--- !u!1001 &540953210
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1774035406}
+    m_Modifications:
+    - target: {fileID: 6649466925040614564, guid: 20209a0e29d055c4b8ec63641b9ca28e, type: 3}
+      propertyPath: m_Name
+      value: Unit_Construct
+      objectReference: {fileID: 0}
+    - target: {fileID: 8588832122909675608, guid: 20209a0e29d055c4b8ec63641b9ca28e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8588832122909675608, guid: 20209a0e29d055c4b8ec63641b9ca28e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8588832122909675608, guid: 20209a0e29d055c4b8ec63641b9ca28e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8588832122909675608, guid: 20209a0e29d055c4b8ec63641b9ca28e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8588832122909675608, guid: 20209a0e29d055c4b8ec63641b9ca28e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8588832122909675608, guid: 20209a0e29d055c4b8ec63641b9ca28e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8588832122909675608, guid: 20209a0e29d055c4b8ec63641b9ca28e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8588832122909675608, guid: 20209a0e29d055c4b8ec63641b9ca28e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8588832122909675608, guid: 20209a0e29d055c4b8ec63641b9ca28e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8588832122909675608, guid: 20209a0e29d055c4b8ec63641b9ca28e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 20209a0e29d055c4b8ec63641b9ca28e, type: 3}
+--- !u!4 &540953211 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8588832122909675608, guid: 20209a0e29d055c4b8ec63641b9ca28e, type: 3}
+  m_PrefabInstance: {fileID: 540953210}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &558756078
 GameObject:
   m_ObjectHideFlags: 0
@@ -22368,7 +22437,7 @@ MonoBehaviour:
   m_LightType: 4
   m_BlendStyleIndex: 0
   m_FalloffIntensity: 0.5
-  m_Color: {r: 0.88048553, g: 0.8804864, b: 0.8804878, a: 1}
+  m_Color: {r: 0.13962269, g: 0.13962269, b: 0.13962269, a: 1}
   m_Intensity: 1
   m_LightVolumeIntensity: 1
   m_LightVolumeEnabled: 0
@@ -23186,11 +23255,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
       propertyPath: pauseSound.Path
-      value: event:/SFX_GamePause
+      value: event:/SFX_UI/SFX_GamePause
       objectReference: {fileID: 0}
     - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
       propertyPath: resumeSound.Path
-      value: event:/SFX_GameStart
+      value: event:/SFX_UI/SFX_GameStart
       objectReference: {fileID: 0}
     - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
       propertyPath: pauseSound.Guid.Data1
@@ -23493,6 +23562,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2648886844119613040}
+  - {fileID: 540953211}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1829347661

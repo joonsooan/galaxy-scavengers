@@ -14,6 +14,9 @@ public class CoreRepairManager : MonoBehaviour
     [SerializeField] private bool alwaysDamageEngine = true;
     [SerializeField] private int randomDamagedPartsCount = 2;
 
+    [Header("Debuff UI")]
+    [SerializeField] private Color debuffEffectColor = new Color(1f, 0.4f, 0.4f);
+
     private readonly Dictionary<CorePart, bool> _partRepairStatus = new Dictionary<CorePart, bool>();
     private readonly Dictionary<CorePart, CorePartData> _partDataDict = new Dictionary<CorePart, CorePartData>();
     private readonly Dictionary<CorePart, int> _partQuestIds = new Dictionary<CorePart, int>();
@@ -117,7 +120,7 @@ public class CoreRepairManager : MonoBehaviour
         QuestData questData = ScriptableObject.CreateInstance<QuestData>();
         questData.questId = _nextQuestId++;
         questData.questType = QuestType.CoreRepairQuest;
-        questData.questName = partData.partName + " 수리";
+        questData.questName = $"[{partData.partName}] 수리";
         questData.questInfo = partData.partDescription;
         questData.requiredResources = partData.requiredResources != null ? 
             (ResourceCost[])partData.requiredResources.Clone() : new ResourceCost[0];
@@ -308,26 +311,29 @@ public class CoreRepairManager : MonoBehaviour
 
         CorePartData partData = GetPartData(part);
         string partLabel = partData != null && !string.IsNullOrEmpty(partData.partName) ? partData.partName : part.ToString();
+        string debuffEffect;
 
         if (part == CorePart.Engine)
         {
-            return $"{partLabel} 파손 : 시드 코어 발사를 위해 수리 필수";
+            debuffEffect = $"시드 코어 발사를 위해 수리 필수";
         }
-
-        float debuffPercent = partData != null ? Mathf.RoundToInt(partData.debuffValue * 100f) : 0f;
-
-        switch (part)
+        else
         {
-            case CorePart.Barrier:
-                return $"{partLabel} 파손 : 소음 정도 {debuffPercent}% 증가";
-            case CorePart.Controller:
-                return $"{partLabel} 파손 : 최대 유닛 제한 {debuffPercent}% 감소";
-            case CorePart.Repeater:
-                return $"{partLabel} 파손 : 건물 생산 속도, 유닛 작업 속도 {debuffPercent}% 감소";
-            case CorePart.Storage:
-                return $"{partLabel} 파손 : 시드 코어 저장 공간 {debuffPercent}% 감소";
-            default:
-                return string.Empty;
+            float debuffPercent = partData != null ? Mathf.RoundToInt(partData.debuffValue * 100f) : 0f;
+            debuffEffect = part switch
+            {
+                CorePart.Barrier => $"소음 정도 {debuffPercent}% 증가",
+                CorePart.Controller => $"최대 유닛 제한 {debuffPercent}% 감소",
+                CorePart.Repeater => $"건물 생산 속도, 유닛 작업 속도 {debuffPercent}% 감소",
+                CorePart.Storage => $"시드 코어 저장 공간 {debuffPercent}% 감소",
+                _ => string.Empty
+            };
         }
+
+        if (string.IsNullOrEmpty(debuffEffect)) return string.Empty;
+
+        string coloredEffect = $"<color=#{ColorUtility.ToHtmlStringRGB(debuffEffectColor)}>{debuffEffect}</color>";
+        string partDesc = partData != null && !string.IsNullOrEmpty(partData.partDescription) ? partData.partDescription : string.Empty;
+        return string.IsNullOrEmpty(partDesc) ? coloredEffect : $"{partData.partName}\n\n{partDesc}\n\n{coloredEffect}";
     }
 }

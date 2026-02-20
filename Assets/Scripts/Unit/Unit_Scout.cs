@@ -55,8 +55,13 @@ public class Unit_Scout : UnitBase
             CheckBeaconArrival();
         }
 
+        if (currentState == UnitState.Idle && !IsAssignedToBeacon && !_isReturningHome) {
+            UpdateIdleRoam();
+        }
+
         UpdateAnimationState();
         UpdateHoverAnimation();
+        UpdateUnitLightAlpha();
     }
 
     protected override void OnDisable()
@@ -109,6 +114,7 @@ public class Unit_Scout : UnitBase
         _assignedBeacon = beacon;
         _isReturningHome = false;
         currentState = UnitState.Moving;
+        ResetIdleRoam();
 
         if (unitMovement != null) {
             unitMovement.SetNewTarget(beacon.Position);
@@ -124,6 +130,7 @@ public class Unit_Scout : UnitBase
         _assignedWaypointGroup = group;
         _isReturningHome = false;
         currentState = UnitState.Moving;
+        ResetIdleRoam();
 
         Beacon firstWaypoint = group.Waypoints[0];
         if (unitMovement != null) {

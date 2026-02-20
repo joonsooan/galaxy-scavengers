@@ -10,6 +10,7 @@ public class BuildingHoverManager : MonoBehaviour
     private BuildingDataHolder _currentHoveredBuilding;
     private IStorage _currentHoveredStorage;
     private ResourceNode _currentHoveredResource;
+    private UnitBase _currentHoveredUnit;
     private bool _keepPanelVisible = false;
     private bool _panelsJustClosed = false;
     private float _panelsClosedTime = 0f;
@@ -71,7 +72,7 @@ public class BuildingHoverManager : MonoBehaviour
 
         if (GameManager.Instance != null && GameManager.Instance.IsDragging())
         {
-            ClearAllHovers();
+            ClearHoverStateOnly();
             return;
         }
 
@@ -171,11 +172,66 @@ public class BuildingHoverManager : MonoBehaviour
         }
     }
 
+    public void OnUnitEnter(UnitBase unit)
+    {
+        if (unit == null)
+        {
+            return;
+        }
+        if (unit == _currentHoveredUnit)
+        {
+            return;
+        }
+        if (_currentHoveredUnit != null && _currentHoveredUnit != unit)
+        {
+            ClearUnitHover();
+        }
+        _currentHoveredUnit = unit;
+        ShowUnitInfo(unit);
+    }
+
+    public void OnUnitExit(UnitBase unit)
+    {
+        if (unit == _currentHoveredUnit)
+        {
+            ClearUnitHover();
+        }
+    }
+
     private void ClearAllHovers()
     {
         ClearHover();
         ClearStorageHover();
         ClearResourceHover();
+        ClearUnitHover();
+    }
+
+    private void ClearHoverStateOnly()
+    {
+        _currentHoveredBuilding = null;
+        _currentHoveredStorage = null;
+        if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
+        {
+            GameManager.Instance.uiManager.HideStorageInfo();
+        }
+        if (_currentHoveredResource != null)
+        {
+            if (ResourceInfoPanel.Instance != null)
+            {
+                ResourceInfoPanel.Instance.CancelPreview();
+                ResourceInfoPanel.Instance.gameObject.SetActive(false);
+            }
+            _currentHoveredResource = null;
+        }
+        if (_currentHoveredUnit != null)
+        {
+            if (UnitInfoPanel.Instance != null)
+            {
+                UnitInfoPanel.Instance.CancelPreview();
+                UnitInfoPanel.Instance.gameObject.SetActive(false);
+            }
+            _currentHoveredUnit = null;
+        }
     }
 
     private void ShowBuildingInfo(BuildingDataHolder buildingDataHolder)
@@ -334,6 +390,15 @@ public class BuildingHoverManager : MonoBehaviour
         {
             return;
         }
+        if (!node.gameObject.activeInHierarchy)
+        {
+            return;
+        }
+        if (FogOfWarManager.Instance != null && FogOfWarManager.Instance.IsInitialized &&
+            !FogOfWarManager.Instance.CanSeeResources(node.cellPosition))
+        {
+            return;
+        }
         if (IsProcessorOrDroneHubPanelActive() || _panelsJustClosed)
         {
             return;
@@ -355,6 +420,45 @@ public class BuildingHoverManager : MonoBehaviour
         }
     }
 
+    private void ShowUnitInfo(UnitBase unit)
+    {
+        if (UnitInfoPanel.Instance == null)
+        {
+            return;
+        }
+        if (unit == null)
+        {
+            return;
+        }
+        if (!unit.gameObject.activeInHierarchy)
+        {
+            return;
+        }
+        if (unit.CurrentHealth <= 0)
+        {
+            return;
+        }
+        if (IsProcessorOrDroneHubPanelActive() || _panelsJustClosed)
+        {
+            return;
+        }
+        UnitInfoPanel.Instance.gameObject.SetActive(true);
+        UnitInfoPanel.Instance.PreviewInfo(unit);
+    }
+
+    private void ClearUnitHover()
+    {
+        if (_currentHoveredUnit != null)
+        {
+            if (UnitInfoPanel.Instance != null)
+            {
+                UnitInfoPanel.Instance.CancelPreview();
+                UnitInfoPanel.Instance.gameObject.SetActive(false);
+            }
+            _currentHoveredUnit = null;
+        }
+    }
+
     public void ClearHoverOnClick()
     {
         bool panelsActive = IsProcessorOrDroneHubPanelActive();
@@ -362,8 +466,9 @@ public class BuildingHoverManager : MonoBehaviour
         {
             _keepPanelVisible = true;
         }
-        
-        ClearAllHovers();
+
+        ClearHover();
+        ClearStorageHover();
     }
 
     public void NotifyPanelsClosed()

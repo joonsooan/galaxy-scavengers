@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using FMOD;
 using FMOD.Studio;
 using FMODUnity;
 using UnityEngine;
@@ -34,6 +35,7 @@ public class BgmManager : MonoBehaviour
     private EventReference _lastGameBgm;
     private Coroutine _gameBgmCooldownCoroutine;
     private Coroutine _playGameBgmCoroutine;
+    private Coroutine _gameBgmEndFadeCoroutine;
     private bool _isGameBgmCooldownActive;
     private WaitForSecondsRealtime _gameBgmCooldownWait;
     public static BgmManager Instance { get; private set; }
@@ -101,6 +103,7 @@ public class BgmManager : MonoBehaviour
             StopCurrent(false);
         }
 
+        _lastGameBgm = tutorialBgm;
         _playGameBgmCoroutine = StartCoroutine(PlayGameBgmWithFade(tutorialBgm));
     }
 
@@ -166,7 +169,51 @@ public class BgmManager : MonoBehaviour
         yield return StartCoroutine(FadeInGameBgm(gameBgmFadeInTime));
 
         _playGameBgmCoroutine = null;
+        if (_gameBgmEndFadeCoroutine != null)
+        {
+            StopCoroutine(_gameBgmEndFadeCoroutine);
+            _gameBgmEndFadeCoroutine = null;
+        }
+        _gameBgmEndFadeCoroutine = StartCoroutine(GameBgmEndFadeOut());
         _gameBgmCooldownCoroutine = StartCoroutine(GameBgmCooldown());
+    }
+
+    private IEnumerator GameBgmEndFadeOut()
+    {
+        EventDescription desc;
+        RESULT descResult = _currentInstance.getDescription(out desc);
+        if (descResult != RESULT.OK)
+        {
+            _gameBgmEndFadeCoroutine = null;
+            yield break;
+        }
+        int lengthMs;
+        if (desc.getLength(out lengthMs) != RESULT.OK || lengthMs <= 0)
+        {
+            _gameBgmEndFadeCoroutine = null;
+            yield break;
+        }
+        int fadeOutMs = Mathf.Max(0, (int)(gameBgmFadeOutTime * 1000f));
+        int startFadeAtMs = Mathf.Max(0, lengthMs - fadeOutMs);
+        while (_hasInstance)
+        {
+            PLAYBACK_STATE state;
+            _currentInstance.getPlaybackState(out state);
+            if (state == PLAYBACK_STATE.STOPPED || state == PLAYBACK_STATE.STOPPING)
+            {
+                _gameBgmEndFadeCoroutine = null;
+                yield break;
+            }
+            int posMs;
+            if (_currentInstance.getTimelinePosition(out posMs) == RESULT.OK && posMs >= startFadeAtMs)
+            {
+                yield return StartCoroutine(FadeOutBgm(gameBgmFadeOutTime));
+                _gameBgmEndFadeCoroutine = null;
+                yield break;
+            }
+            yield return null;
+        }
+        _gameBgmEndFadeCoroutine = null;
     }
 
     private IEnumerator FadeInGameBgm(float duration)
@@ -201,19 +248,26 @@ public class BgmManager : MonoBehaviour
             yield return null;
         }
 
-        if (_hasInstance && gameBgmFadeOutTime > 0f)
+        if (_hasInstance)
         {
-            yield return StartCoroutine(FadeOutBgm(gameBgmFadeOutTime));
+            StopCurrentInstanceOnly();
         }
-        else if (_hasInstance)
+
+        if (_gameBgmEndFadeCoroutine != null)
         {
-            StopCurrent(true);
+            StopCoroutine(_gameBgmEndFadeCoroutine);
+            _gameBgmEndFadeCoroutine = null;
         }
 
         yield return _gameBgmCooldownWait;
 
         _isGameBgmCooldownActive = false;
+        StartCoroutine(DeferredPlayNextGameBgm());
+    }
 
+    private IEnumerator DeferredPlayNextGameBgm()
+    {
+        yield return null;
         PlayGameBgm();
     }
 
@@ -385,6 +439,22 @@ public class BgmManager : MonoBehaviour
         }
     }
 
+    private void StopCurrentInstanceOnly()
+    {
+        if (!_hasInstance) {
+            return;
+        }
+
+        try {
+            _currentInstance.stop(STOP_MODE.IMMEDIATE);
+            _currentInstance.release();
+        }
+        finally {
+            _hasInstance = false;
+            _currentBgm = default;
+        }
+    }
+
     private void StopGameBgmCooldown()
     {
         if (_playGameBgmCoroutine != null)
@@ -396,6 +466,11 @@ public class BgmManager : MonoBehaviour
         {
             StopCoroutine(_gameBgmCooldownCoroutine);
             _gameBgmCooldownCoroutine = null;
+        }
+        if (_gameBgmEndFadeCoroutine != null)
+        {
+            StopCoroutine(_gameBgmEndFadeCoroutine);
+            _gameBgmEndFadeCoroutine = null;
         }
         _isGameBgmCooldownActive = false;
     }

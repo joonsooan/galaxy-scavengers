@@ -10,7 +10,6 @@ public class UnitProgressBar : MonoBehaviour
     private Transform _targetUnit;
     private Camera _mainCamera;
     private Canvas _canvas;
-    private const string ObjectUICanvasName = "ObjectUI Canvas";
 
     private void Awake()
     {
@@ -22,14 +21,8 @@ public class UnitProgressBar : MonoBehaviour
         if (_canvas != null) return;
 
         _canvas = GetComponentInParent<Canvas>();
-        if (_canvas == null)
-        {
-            GameObject canvasObj = GameObject.Find(ObjectUICanvasName);
-            if (canvasObj != null)
-            {
-                _canvas = canvasObj.GetComponent<Canvas>();
-            }
-        }
+        if (_canvas == null && GameManager.Instance?.uiManager != null)
+            _canvas = GameManager.Instance.uiManager.GetObjectUICanvas();
 
         if (_canvas != null && transform.parent != _canvas.transform)
         {

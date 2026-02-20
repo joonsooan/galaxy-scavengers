@@ -70,12 +70,13 @@ public class MainStructure : BaseStorage, IClickable
     {
         int totalAmount = GetTotalCurrentAmount();
         bool wasFull = totalAmount >= maxStorageAmount;
+        var alertManager = FindFirstObjectByType<GameAlertUIManager>();
         
         if (wasFull) 
         {
-            if (GameAlertUIManager.Instance != null && !_wasStorageFull)
+            if (alertManager != null && !_wasStorageFull)
             {
-                GameAlertUIManager.Instance.RegisterAlert(GameAlertType.StorageFull);
+                alertManager.RegisterAlert(GameAlertType.StorageFull, this);
             }
             _wasStorageFull = true;
             return;
@@ -89,13 +90,13 @@ public class MainStructure : BaseStorage, IClickable
         int newTotalAmount = GetTotalCurrentAmount();
         bool stillFull = newTotalAmount >= maxStorageAmount;
         
-        if (!wasFull && stillFull && GameAlertUIManager.Instance != null)
+        if (!wasFull && stillFull && alertManager != null)
         {
-            GameAlertUIManager.Instance.RegisterAlert(GameAlertType.StorageFull);
+            alertManager.RegisterAlert(GameAlertType.StorageFull, this);
         }
-        else if (_wasStorageFull && !stillFull && GameAlertUIManager.Instance != null)
+        else if (_wasStorageFull && !stillFull && alertManager != null)
         {
-            GameAlertUIManager.Instance.UnregisterAlert(GameAlertType.StorageFull);
+            alertManager.UnregisterAlert(GameAlertType.StorageFull, this);
         }
         
         _wasStorageFull = stillFull;

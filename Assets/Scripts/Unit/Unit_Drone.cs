@@ -73,6 +73,7 @@ public class Unit_Drone : UnitBase
         UpdateAnimationState();
         DecideNextAction();
         UpdateHoverAnimation();
+        UpdateUnitLightAlpha();
     }
 
     protected override void OnEnable()
@@ -84,7 +85,7 @@ public class Unit_Drone : UnitBase
     protected override void OnDisable()
     {
         if (_noResourceAlertActive) {
-            GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.DroneNoResource);
+            FindFirstObjectByType<GameAlertUIManager>()?.UnregisterAlert(GameAlertType.DroneNoResource, this);
             _noResourceAlertActive = false;
         }
         StopHover();
@@ -99,12 +100,13 @@ public class Unit_Drone : UnitBase
         case DroneState.Idle:
             UpdateIdle();
             bool shouldShowAlert = !IsAssigned;
+            var alertManager = FindFirstObjectByType<GameAlertUIManager>();
             if (shouldShowAlert && !_noResourceAlertActive) {
-                GameAlertUIManager.Instance?.RegisterAlert(GameAlertType.DroneNoResource);
+                alertManager?.RegisterAlert(GameAlertType.DroneNoResource, this);
                 _noResourceAlertActive = true;
             }
             else if (!shouldShowAlert && _noResourceAlertActive) {
-                GameAlertUIManager.Instance?.UnregisterAlert(GameAlertType.DroneNoResource);
+                alertManager?.UnregisterAlert(GameAlertType.DroneNoResource, this);
                 _noResourceAlertActive = false;
             }
             break;
@@ -306,8 +308,12 @@ public class Unit_Drone : UnitBase
 
     private void UpdateIdle()
     {
-        if (_currentProcessor == null)
+        if (_currentProcessor == null) {
+            UpdateIdleRoam();
             return;
+        }
+
+        ResetIdleRoam();
 
         if (!HasCheckedIn) {
             if (_assignmentCoroutine != null) {

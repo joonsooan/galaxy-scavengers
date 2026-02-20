@@ -215,7 +215,9 @@ public class SuccessLoadingScreen : MonoBehaviour
 
         Time.timeScale = 0f;
 
-        GameObject fadeOverlay = GameObject.Find("FadeOverlay");
+        GameObject fadeOverlay = LoadingUIManager.Instance != null
+            ? LoadingUIManager.Instance.GetFadeOverlay()
+            : GameObject.Find("FadeOverlay");
         if (fadeOverlay != null)
         {
             Image fadeImage = fadeOverlay.GetComponent<Image>();

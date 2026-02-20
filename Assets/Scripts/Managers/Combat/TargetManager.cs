@@ -45,7 +45,7 @@ public class TargetManager : MonoBehaviour
         foreach (Damageable target in _allTargets)
         {
             if (target == null) continue;
-            if (target.GetComponent<UnitBase>() != null) continue;
+            if (target is UnitBase) continue;
             float distSquared = (center - target.transform.position).sqrMagnitude;
             if (distSquared <= radiusSquared)
             {

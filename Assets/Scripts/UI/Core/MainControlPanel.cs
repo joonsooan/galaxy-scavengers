@@ -172,6 +172,17 @@ public class MainControlPanel : MonoBehaviour
         
         _currentlyActivePanel = null;
     }
+
+    public void ShowResourceStatPanelForTutorial()
+    {
+        if (resourceStatPanel != null)
+        {
+            if (baseBuildingPanel != null) baseBuildingPanel.SetActive(false);
+            if (processorPanel != null) processorPanel.SetActive(false);
+            resourceStatPanel.SetActive(true);
+            _currentlyActivePanel = resourceStatPanel;
+        }
+    }
     
     private void OnDestroy()
     {

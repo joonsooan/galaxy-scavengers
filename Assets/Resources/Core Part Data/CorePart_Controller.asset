@@ -15,14 +15,14 @@ MonoBehaviour:
   partType: 3
   partName: "\uC81C\uC5B4\uAE30"
   partDescription: "\uB4DC\uB860\uC744 \uC81C\uC5B4\uD558\uB294 \uCF54\uC5B4\uC758
-    \uB0B4\uC7A5 \uC7A5\uCE58\uC785\uB2C8\uB2E4. \uD30C\uC190\uB41C \uACBD\uC6B0
+    \uB0B4\uC7A5 \uC7A5\uCE58\uC785\uB2C8\uB2E4.\n\uD30C\uC190\uB41C \uACBD\uC6B0
     \uC81C\uC5B4\uD560 \uC218 \uC788\uB294 \uC720\uB2DB\uC758 \uC22B\uC790\uAC00
     \uD06C\uAC8C \uAC10\uC18C\uD569\uB2C8\uB2E4."
   requiredResources:
-  - resourceType: 9
-    amount: 10
-  - resourceType: 12
-    amount: 10
+  - resourceType: 6
+    amount: 50
+  - resourceType: 7
+    amount: 50
   repairReward:
     resourceRewards: []
     moduleRewards: []
@@ -30,3 +30,4 @@ MonoBehaviour:
     unlockedBuildings: []
     newUnits: []
   debuffValue: 0.5
+  debuffIcon: {fileID: 5683463893972356355, guid: a4eebf007e7d79649baac3ab7d16b7c4, type: 3}

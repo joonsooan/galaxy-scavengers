@@ -271,6 +271,12 @@ public class GameMenuManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
+            if (HelpUIManager.Instance != null && HelpUIManager.Instance.IsHelpOpen())
+            {
+                HelpUIManager.Instance.CloseHelp();
+                return;
+            }
+
             if (_isMenuOpen)
             {
                 CloseMenu();
@@ -306,7 +312,7 @@ public class GameMenuManager : MonoBehaviour
             GameManager.Instance.TogglePause();
         }
 
-        if (!menuOpenSound.IsNull)
+        if (!IsGameScene() && !menuOpenSound.IsNull)
         {
             RuntimeManager.PlayOneShot(menuOpenSound);
         }
@@ -333,7 +339,7 @@ public class GameMenuManager : MonoBehaviour
             GameManager.Instance.TogglePause();
         }
 
-        if (!menuCloseSound.IsNull)
+        if (!IsGameScene() && !menuCloseSound.IsNull)
         {
             RuntimeManager.PlayOneShot(menuCloseSound);
         }

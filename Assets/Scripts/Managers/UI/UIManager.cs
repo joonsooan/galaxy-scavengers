@@ -27,10 +27,16 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject storageInfoPanel;
     [SerializeField] private GameObject storageResourceListParent;
     [SerializeField] private TMP_Text storageAmountText;
-    [SerializeField] private Vector2 storageUIPanelOffset = new Vector2(100f, 0f);
+    [SerializeField] private float storageBatteryPanelOffsetX = 150f;
+    [SerializeField] private float mainStructurePanelOffsetX = 200f;
+    [SerializeField] private float storagePanelOffsetY = 0f;
 
     [Header("Audio")]
     [SerializeField] private EventReference buildingUIClickSound;
+
+    [Header("Object UI")]
+    [SerializeField] private Canvas objectUICanvas;
+    private const string ObjectUICanvasName = "ObjectUI Canvas";
 
     private ActiveUIPanel _activeUIPanel = ActiveUIPanel.None;
     private AreaBuildingDestroyer _areaBuildingDestroyer;
@@ -40,6 +46,18 @@ public class UIManager : MonoBehaviour
     private ProcessorData _pinnedProcessorData;
     private Action<ResourceType, int, int> _storageResourceChangedHandler;
     private IStorage _trackedStorage;
+
+    public Canvas GetObjectUICanvas()
+    {
+        if (objectUICanvas != null) return objectUICanvas;
+        GameObject canvasObj = GameObject.Find(ObjectUICanvasName);
+        if (canvasObj != null)
+        {
+            objectUICanvas = canvasObj.GetComponent<Canvas>();
+            return objectUICanvas;
+        }
+        return null;
+    }
 
     private void Start()
     {
@@ -220,6 +238,21 @@ public class UIManager : MonoBehaviour
 
         if (BuildingHoverManager.Instance != null) {
             BuildingHoverManager.Instance.NotifyPanelsClosed();
+        }
+    }
+
+    public void HideProcessorAndDroneHubPanels()
+    {
+        _pinnedProcessorData = null;
+        if (processorInfoPanel != null) {
+            processorInfoPanel.SetActive(false);
+        }
+        _pinnedDroneHubData = null;
+        if (droneHubInfoPanel != null) {
+            droneHubInfoPanel.SetActive(false);
+        }
+        if (_activeUIPanel == ActiveUIPanel.Processor || _activeUIPanel == ActiveUIPanel.DroneHub) {
+            _activeUIPanel = ActiveUIPanel.None;
         }
     }
 
@@ -410,7 +443,7 @@ public class UIManager : MonoBehaviour
                 GameObject cell = Instantiate(resourceInfoCellPrefab, parent);
                 ResourceInfoCell cellScript = cell.GetComponent<ResourceInfoCell>();
                 if (cellScript != null) {
-                    cellScript.SetInfo(kvp.Key, kvp.Value);
+                    cellScript.SetInfoDisplayOnly(kvp.Key, kvp.Value);
                     totalAmount += kvp.Value;
                 }
             }
@@ -448,8 +481,9 @@ public class UIManager : MonoBehaviour
         Vector3 worldPos = _trackedStorage.GetPosition();
         Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos);
 
-        screenPos.x += storageUIPanelOffset.x;
-        screenPos.y += storageUIPanelOffset.y;
+        float offsetX = _trackedStorage is MainStructure ? mainStructurePanelOffsetX : storageBatteryPanelOffsetX;
+        screenPos.x += offsetX;
+        screenPos.y += storagePanelOffsetY;
 
         storageInfoPanel.transform.position = screenPos;
     }

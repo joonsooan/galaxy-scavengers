@@ -19,6 +19,8 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private Tilemap lowGroundTilemap;
     [SerializeField] private Tilemap lowWallTilemap;
     [SerializeField] private Tilemap highWallTilemap;
+    [SerializeField] private Tilemap enemyHomeTilemap;
+    [SerializeField] private Tilemap enemyTerritoryTilemap;
     [SerializeField] private Grid grid;
 
     [Header("Tiles")]
@@ -99,20 +101,14 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private TileBase rockTiles;
     [SerializeField] private TileBase debrisTiles;
     [SerializeField] private bool autoRegenerateDecorationsInPlayMode;
-    [SerializeField] private bool useMapNoiseForDecorations;
-    [SerializeField] private float densityScale = 50f;
-    [SerializeField] private Vector2 densityOffset = Vector2.zero;
-    [SerializeField] private Vector2 typeOffset = Vector2.zero;
-    [Range(0f, 1f)]
-    [SerializeField] private float densityThreshold = 0.4f;
-    [Range(0f, 1f)]
-    [SerializeField] private float grassyThreshold = 0.6f;
-    [Range(0f, 1f)]
-    [SerializeField] private float rockyThreshold = 0.4f;
     [Range(0f, 1f)]
     [SerializeField] private float grassSpawnChance = 1f;
     [Range(0f, 1f)]
     [SerializeField] private float rockSpawnChance = 0.7f;
+    [Range(0f, 1f)]
+    [SerializeField] private float rockBoostNoiseThreshold = 0.7f;
+    [Range(0f, 1f)]
+    [SerializeField] private float rockSpawnChanceBoost = 0.1f;
     [Range(0f, 1f)]
     [SerializeField] private float debrisSpawnChanceInRocky = 0.3f;
     [Range(0f, 1f)]
@@ -141,6 +137,12 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
+    public BoundsInt GetMapBounds()
+    {
+        Vector3Int mapOrigin = new Vector3Int(-_mapCenterXOffset, -_mapCenterYOffset, 0);
+        return new BoundsInt(mapOrigin, new Vector3Int(width, height, 1));
+    }
+
     public Tilemap GroundTilemap {
         get {
             return groundTilemap;
@@ -151,6 +153,25 @@ public class MapGenerator : MonoBehaviour
         get {
             return lowWallTilemap;
         }
+    }
+
+    public Tilemap EnemyHomeTilemap {
+        get {
+            return enemyHomeTilemap;
+        }
+    }
+
+    public Tilemap EnemyTerritoryTilemap {
+        get {
+            return enemyTerritoryTilemap;
+        }
+    }
+
+    public bool IsEnemyTerritoryCell(Vector3Int cellPosition)
+    {
+        if (enemyHomeTilemap != null && enemyHomeTilemap.HasTile(cellPosition)) return true;
+        if (enemyTerritoryTilemap != null && enemyTerritoryTilemap.HasTile(cellPosition)) return true;
+        return false;
     }
 
     public IReadOnlyList<Vector2Int> EnemySpawnHolePositions {
@@ -322,6 +343,7 @@ public class MapGenerator : MonoBehaviour
     public IEnumerator GenerateMapAsync(IInitializationProgress progress = null)
     {
         CalculateMapDimensions();
+        ClearEnemyTerritoryTilemaps();
 
         if (progress != null) {
             progress.UpdateProgress(0.0f, "지표면 고도 데이터 동기화 중...");
@@ -602,6 +624,7 @@ public class MapGenerator : MonoBehaviour
     public void GenerateMap()
     {
         CalculateMapDimensions();
+        ClearEnemyTerritoryTilemaps();
 
         if (randomSeed) {
             seed = Random.Range(int.MinValue, int.MaxValue);
@@ -677,6 +700,17 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
+    private void ClearEnemyTerritoryTilemaps()
+    {
+        if (enemyHomeTilemap != null) {
+            enemyHomeTilemap.ClearAllTiles();
+        }
+
+        if (enemyTerritoryTilemap != null) {
+            enemyTerritoryTilemap.ClearAllTiles();
+        }
+    }
+
     private float GetNoiseValueAt(int x, int y)
     {
         if (!useProceduralTerrain || _noiseMap == null) return 0f;
@@ -709,12 +743,6 @@ public class MapGenerator : MonoBehaviour
             return;
         }
 
-        System.Random prng = new System.Random(seed);
-        float densityOffsetX = prng.Next(-100000, 100000) + densityOffset.x;
-        float densityOffsetY = prng.Next(-100000, 100000) + densityOffset.y;
-        float typeOffsetX = prng.Next(-100000, 100000) + typeOffset.x;
-        float typeOffsetY = prng.Next(-100000, 100000) + typeOffset.y;
-
         Vector3Int mapOrigin = new Vector3Int(-_mapCenterXOffset, -_mapCenterYOffset, 0);
         BoundsInt mapBounds = new BoundsInt(mapOrigin, new Vector3Int(width, height, 1));
         TileBase[] decorationTiles = new TileBase[width * height];
@@ -740,7 +768,7 @@ public class MapGenerator : MonoBehaviour
                     continue;
                 }
 
-                if (groundTileAtPos == enemyHomeTile || groundTileAtPos == enemyTerritoryTile) {
+                if (IsEnemyTerritoryCell(cellPos)) {
                     decorationTiles[index] = null;
                     continue;
                 }
@@ -750,48 +778,7 @@ public class MapGenerator : MonoBehaviour
                     continue;
                 }
 
-                float densityNoise;
-                if (useMapNoiseForDecorations && _noiseMap != null) {
-                    densityNoise = 1f - _noiseMap[x, y];
-                }
-                else {
-                    float densitySampleX = x / densityScale + densityOffsetX;
-                    float densitySampleY = y / densityScale + densityOffsetY;
-                    densityNoise = Mathf.PerlinNoise(densitySampleX, densitySampleY);
-                }
-
-                bool isLowGround = lowGroundTileAtPos == lowGroundTile;
-                float effectiveDensityThreshold = isLowGround ? densityThreshold * 0.5f : densityThreshold;
-
-                if (densityNoise < effectiveDensityThreshold) {
-                    decorationTiles[index] = null;
-                    continue;
-                }
-
-                float heightValue = GetNoiseValueAt(x, y);
-
-                TileBase decorationTile = null;
-
-                if (heightValue >= rockyThreshold) {
-                    if (rockTiles != null && Random.value < rockSpawnChance) {
-                        decorationTile = rockTiles;
-                    }
-
-                    if (debrisTiles != null && Random.value < debrisSpawnChanceInRocky) {
-                        decorationTile = debrisTiles;
-                    }
-                }
-                else if (heightValue >= grassyThreshold) {
-                    if (grassTiles != null && Random.value < grassSpawnChance) {
-                        decorationTile = grassTiles;
-                    }
-
-                    if (debrisTiles != null && Random.value < debrisSpawnChanceInGrassy) {
-                        decorationTile = debrisTiles;
-                    }
-                }
-
-                decorationTiles[index] = decorationTile;
+                decorationTiles[index] = SelectDecorationTile(x, y);
             }
         }
 
@@ -817,12 +804,6 @@ public class MapGenerator : MonoBehaviour
         if (decorationTilemap == null) {
             yield break;
         }
-
-        System.Random prng = new System.Random(seed);
-        float densityOffsetX = prng.Next(-100000, 100000) + densityOffset.x;
-        float densityOffsetY = prng.Next(-100000, 100000) + densityOffset.y;
-        float typeOffsetX = prng.Next(-100000, 100000) + typeOffset.x;
-        float typeOffsetY = prng.Next(-100000, 100000) + typeOffset.y;
 
         Vector3Int mapOrigin = new Vector3Int(-_mapCenterXOffset, -_mapCenterYOffset, 0);
         BoundsInt mapBounds = new BoundsInt(mapOrigin, new Vector3Int(width, height, 1));
@@ -860,7 +841,7 @@ public class MapGenerator : MonoBehaviour
                     continue;
                 }
 
-                if (groundTileAtPos == enemyHomeTile || groundTileAtPos == enemyTerritoryTile) {
+                if (IsEnemyTerritoryCell(cellPos)) {
                     decorationTiles[index] = null;
                     processed++;
                     if (processed >= polishOperationsPerFrame) {
@@ -880,53 +861,7 @@ public class MapGenerator : MonoBehaviour
                     continue;
                 }
 
-                float densityNoise;
-                if (useMapNoiseForDecorations && _noiseMap != null) {
-                    densityNoise = 1f - _noiseMap[x, y];
-                }
-                else {
-                    float densitySampleX = x / densityScale + densityOffsetX;
-                    float densitySampleY = y / densityScale + densityOffsetY;
-                    densityNoise = Mathf.PerlinNoise(densitySampleX, densitySampleY);
-                }
-
-                bool isLowGround = lowGroundTileAtPos == lowGroundTile;
-                float effectiveDensityThreshold = isLowGround ? densityThreshold * 0.5f : densityThreshold;
-
-                if (densityNoise < effectiveDensityThreshold) {
-                    decorationTiles[index] = null;
-                    processed++;
-                    if (processed >= polishOperationsPerFrame) {
-                        processed = 0;
-                        yield return null;
-                    }
-                    continue;
-                }
-
-                float heightValue = GetNoiseValueAt(x, y);
-
-                TileBase decorationTile = null;
-
-                if (heightValue >= rockyThreshold) {
-                    if (rockTiles != null && Random.value < rockSpawnChance) {
-                        decorationTile = rockTiles;
-                    }
-
-                    if (debrisTiles != null && Random.value < debrisSpawnChanceInRocky) {
-                        decorationTile = debrisTiles;
-                    }
-                }
-                else if (heightValue >= grassyThreshold) {
-                    if (grassTiles != null && Random.value < grassSpawnChance) {
-                        decorationTile = grassTiles;
-                    }
-
-                    if (debrisTiles != null && Random.value < debrisSpawnChanceInGrassy) {
-                        decorationTile = debrisTiles;
-                    }
-                }
-
-                decorationTiles[index] = decorationTile;
+                decorationTiles[index] = SelectDecorationTile(x, y);
 
                 processed++;
                 if (processed >= polishOperationsPerFrame) {
@@ -959,6 +894,49 @@ public class MapGenerator : MonoBehaviour
             decorationTilemap.SetTilesBlock(chunkBounds, decorationChunk);
             yield return null;
         }
+    }
+
+    private TileBase SelectDecorationTile(int x, int y)
+    {
+        float finalGrassChance = Mathf.Clamp01(grassSpawnChance);
+        float finalRockChance = Mathf.Clamp01(rockSpawnChance);
+
+        if (_noiseMap != null) {
+            float terrainNoise = 1f - _noiseMap[x, y];
+            if (terrainNoise >= rockBoostNoiseThreshold) {
+                finalRockChance = Mathf.Clamp01(finalRockChance + rockSpawnChanceBoost);
+            }
+        }
+
+        bool grassSelected = grassTiles != null && Random.value < finalGrassChance;
+        bool rockSelected = rockTiles != null && Random.value < finalRockChance;
+
+        if (!grassSelected && !rockSelected) {
+            return null;
+        }
+
+        bool chooseGrass = grassSelected;
+        if (grassSelected && rockSelected) {
+            float total = finalGrassChance + finalRockChance;
+            chooseGrass = total > 0f && Random.value < (finalGrassChance / total);
+        }
+        else if (rockSelected) {
+            chooseGrass = false;
+        }
+
+        if (chooseGrass) {
+            if (debrisTiles != null && Random.value < debrisSpawnChanceInGrassy) {
+                return debrisTiles;
+            }
+
+            return grassTiles;
+        }
+
+        if (debrisTiles != null && Random.value < debrisSpawnChanceInRocky) {
+            return debrisTiles;
+        }
+
+        return rockTiles;
     }
 
     private TileBase GetTileForSmoothTransition(int x, int y, float transitionFactor, TileBase originalTile)
@@ -1834,7 +1812,11 @@ public class MapGenerator : MonoBehaviour
             return;
         }
 
-        if (lowGroundTilemap == null || grid == null) {
+        if (grid == null) {
+            return;
+        }
+
+        if (enemyHomeTilemap == null || enemyTerritoryTilemap == null) {
             return;
         }
 
@@ -1845,6 +1827,9 @@ public class MapGenerator : MonoBehaviour
         if (_holeRadiusValues.Count == 0) {
             GenerateEnemyTerritoryRadiusValues();
         }
+
+        enemyHomeTilemap.ClearAllTiles();
+        enemyTerritoryTilemap.ClearAllTiles();
 
         HashSet<Vector3Int> homeTileCells = new HashSet<Vector3Int>();
 
@@ -1869,8 +1854,10 @@ public class MapGenerator : MonoBehaviour
                     float distance = Vector3.Distance(worldPos, cellWorldPos);
 
                     if (distance <= _enemyHomeRadius) {
-                        if (lowGroundTilemap.HasTile(cell)) {
-                            lowGroundTilemap.SetTile(cell, enemyHomeTile);
+                        bool hasGround = (groundTilemap != null && groundTilemap.HasTile(cell))
+                            || (lowGroundTilemap != null && lowGroundTilemap.HasTile(cell));
+                        if (hasGround && !IsTerrainCell(cell)) {
+                            enemyHomeTilemap.SetTile(cell, enemyHomeTile);
                             homeTileCells.Add(cell);
                         }
                     }
@@ -1883,80 +1870,22 @@ public class MapGenerator : MonoBehaviour
             for (int x = -territoryRadiusCells; x <= territoryRadiusCells; x++) {
                 for (int y = -territoryRadiusCells; y <= territoryRadiusCells; y++) {
                     Vector3Int cell = centerCell + new Vector3Int(x, y, 0);
-
-                    if (homeTileCells.Contains(cell)) {
-                        continue;
-                    }
-
                     Vector3 cellWorldPos = grid.GetCellCenterWorld(cell);
                     float distance = Vector3.Distance(worldPos, cellWorldPos);
 
-                    if (distance <= _enemyTerritoryRadius && distance > _enemyHomeRadius) {
-                        if (lowGroundTilemap.HasTile(cell)) {
-                            TileBase existingTile = lowGroundTilemap.GetTile(cell);
-                            if (existingTile != enemyHomeTile) {
-                                lowGroundTilemap.SetTile(cell, enemyTerritoryTile);
-                            }
+                    if (distance <= _enemyTerritoryRadius) {
+                        bool hasGround = (groundTilemap != null && groundTilemap.HasTile(cell))
+                            || (lowGroundTilemap != null && lowGroundTilemap.HasTile(cell));
+                        if (hasGround && !IsTerrainCell(cell)) {
+                            enemyTerritoryTilemap.SetTile(cell, enemyTerritoryTile);
                         }
                     }
                 }
             }
         }
 
-        if (BuildingManager.Instance != null && BuildingManager.Instance.GroundTilemap != null) {
-            Tilemap buildingManagerGroundTilemap = BuildingManager.Instance.GroundTilemap;
-            foreach (Vector2Int holePos in _enemySpawnHolePositions) {
-                if (!_holeRadiusValues.TryGetValue(holePos, out (float homeRadius, float territoryRadius) radiusValues)) {
-                    continue;
-                }
-
-                float homeRadius = radiusValues.homeRadius;
-                float territoryRadius = radiusValues.territoryRadius;
-
-                Vector3 worldPos = GetEnemySpawnHoleWorldPosition(holePos);
-                Vector3Int centerCell = grid.WorldToCell(worldPos);
-
-                int homeRadiusCells = Mathf.CeilToInt(homeRadius);
-                for (int x = -homeRadiusCells; x <= homeRadiusCells; x++) {
-                    for (int y = -homeRadiusCells; y <= homeRadiusCells; y++) {
-                        Vector3Int cell = centerCell + new Vector3Int(x, y, 0);
-                        Vector3 cellWorldPos = grid.GetCellCenterWorld(cell);
-                        float distance = Vector3.Distance(worldPos, cellWorldPos);
-
-                        if (distance <= homeRadius && buildingManagerGroundTilemap.HasTile(cell)) {
-                            buildingManagerGroundTilemap.SetTile(cell, enemyHomeTile);
-                        }
-                    }
-                }
-
-                int territoryRadiusCells = Mathf.CeilToInt(territoryRadius);
-                for (int x = -territoryRadiusCells; x <= territoryRadiusCells; x++) {
-                    for (int y = -territoryRadiusCells; y <= territoryRadiusCells; y++) {
-                        Vector3Int cell = centerCell + new Vector3Int(x, y, 0);
-
-                        if (homeTileCells.Contains(cell)) {
-                            continue;
-                        }
-
-                        TileBase existingTile = buildingManagerGroundTilemap.GetTile(cell);
-                        if (existingTile == enemyHomeTile) {
-                            continue;
-                        }
-
-                        Vector3 cellWorldPos = grid.GetCellCenterWorld(cell);
-                        float distance = Vector3.Distance(worldPos, cellWorldPos);
-
-                        if (distance <= territoryRadius && distance > homeRadius && buildingManagerGroundTilemap.HasTile(cell)) {
-                            buildingManagerGroundTilemap.SetTile(cell, enemyTerritoryTile);
-                        }
-                    }
-                }
-            }
-        }
-
-        if (lowGroundTilemap != null) {
-            lowGroundTilemap.RefreshAllTiles();
-        }
+        enemyHomeTilemap.CompressBounds();
+        enemyTerritoryTilemap.CompressBounds();
     }
 
     private void DisposeAllNativeArrays()

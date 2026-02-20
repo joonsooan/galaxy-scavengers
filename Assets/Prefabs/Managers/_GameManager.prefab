@@ -54,21 +54,35 @@ MonoBehaviour:
       Data2: 1287107820
       Data3: 1616156851
       Data4: 765321994
-    Path: event:/SFX_GamePause
+    Path: event:/SFX_UI/SFX_GamePause
   resumeSound:
     Guid:
       Data1: -765664001
       Data2: 1302141166
       Data3: 995189914
       Data4: -85904115
-    Path: event:/SFX_GameStart
-  speedChangeSound:
+    Path: event:/SFX_UI/SFX_GameStart
+  speed1Sound:
     Guid:
       Data1: -765664001
       Data2: 1302141166
       Data3: 995189914
       Data4: -85904115
-    Path: event:/SFX_GameStart
+    Path: event:/SFX_UI/SFX_GameStart
+  speed2Sound:
+    Guid:
+      Data1: -765664001
+      Data2: 1302141166
+      Data3: 995189914
+      Data4: -85904115
+    Path: event:/SFX_UI/SFX_GameStart
+  speed3Sound:
+    Guid:
+      Data1: -765664001
+      Data2: 1302141166
+      Data3: 995189914
+      Data4: -85904115
+    Path: event:/SFX_UI/SFX_GameStart
   onStartDrag:
     m_PersistentCalls:
       m_Calls: []

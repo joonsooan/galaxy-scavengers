@@ -63,7 +63,13 @@ public abstract class Damageable : MonoBehaviour, ICombo
 
     public virtual void TakeDamage(int damage)
     {
+        TakeDamage(damage, DamageContext.Default);
+    }
+
+    public virtual void TakeDamage(int damage, DamageContext context)
+    {
         currentHealth -= damage;
+        HitAudioRouter.PlayHit(this, context);
         OnDamageTaken(damage);
         OnAnyDamageTaken?.Invoke(this);
         OnHealthChanged();
@@ -93,7 +99,8 @@ public abstract class Damageable : MonoBehaviour, ICombo
     
     private void RegisterAttackAlert()
     {
-        if (GameAlertUIManager.Instance == null) return;
+        var alertManager = FindFirstObjectByType<GameAlertUIManager>();
+        if (alertManager == null) return;
         
         if (this is UnitBase unitBase)
         {
@@ -109,12 +116,12 @@ public abstract class Damageable : MonoBehaviour, ICombo
         {
             if (this is UnitBase)
             {
-                GameAlertUIManager.Instance.RegisterAlert(GameAlertType.UnitUnderAttack);
+                alertManager.RegisterAlert(GameAlertType.UnitUnderAttack, this);
                 _isAttackAlertRegistered = true;
             }
             else
             {
-                GameAlertUIManager.Instance.RegisterAlert(GameAlertType.BuildingUnderAttack);
+                alertManager.RegisterAlert(GameAlertType.BuildingUnderAttack, this);
                 _isAttackAlertRegistered = true;
             }
         }
@@ -142,7 +149,8 @@ public abstract class Damageable : MonoBehaviour, ICombo
     
     private void UnregisterAttackAlert()
     {
-        if (GameAlertUIManager.Instance == null || !_isAttackAlertRegistered) return;
+        var alertManager = FindFirstObjectByType<GameAlertUIManager>();
+        if (alertManager == null || !_isAttackAlertRegistered) return;
         
         if (_attackAlertTimerCoroutine != null)
         {
@@ -152,11 +160,11 @@ public abstract class Damageable : MonoBehaviour, ICombo
         
         if (this is UnitBase)
         {
-            GameAlertUIManager.Instance.UnregisterAlert(GameAlertType.UnitUnderAttack);
+            alertManager.UnregisterAlert(GameAlertType.UnitUnderAttack, this);
         }
         else
         {
-            GameAlertUIManager.Instance.UnregisterAlert(GameAlertType.BuildingUnderAttack);
+            alertManager.UnregisterAlert(GameAlertType.BuildingUnderAttack, this);
         }
         
         _isAttackAlertRegistered = false;
@@ -169,12 +177,15 @@ public abstract class Damageable : MonoBehaviour, ICombo
 
     public static event Action<Damageable> OnAnyDamageTaken;
 
+    public event Action HealthChanged;
+
     private void OnDamageTaken(int damage)
     {
     }
 
     protected virtual void OnHealthChanged()
     {
+        HealthChanged?.Invoke();
     }
 
     public void SetMaxHealth(int newMaxHealth)
@@ -182,6 +193,7 @@ public abstract class Damageable : MonoBehaviour, ICombo
         float healthRatio = maxHealth > 0 ? (float)currentHealth / maxHealth : 1f;
         maxHealth = newMaxHealth;
         currentHealth = Mathf.RoundToInt(maxHealth * healthRatio);
+        HealthChanged?.Invoke();
     }
 
     public void Heal(int amount)

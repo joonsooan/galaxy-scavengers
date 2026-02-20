@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2509758888267798217}
   - component: {fileID: -2250877402167082711}
   - component: {fileID: -1306528510335811972}
+  - component: {fileID: 7722848369731429237}
   m_Layer: 0
   m_Name: 9_Radar
   m_TagString: Untagged
@@ -134,3 +135,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d1e266f63b995c4a9aae9c09a1ebcb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &7722848369731429237
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1574451153020646121}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00cc167c3a83a00479cf54bfd89aaa29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buildingData: {fileID: 0}

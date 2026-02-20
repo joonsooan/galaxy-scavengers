@@ -42,10 +42,13 @@ MonoBehaviour:
       Data2: 1210214295
       Data3: -73339495
       Data4: 1624008095
-    Path: event:/SFX_UIClick
+    Path: event:/SFX_UI/SFX_UIClick
   enableMaterialHighlight: 1
   highlightTargetIDs:
   - processor_AlloyPlate
   - unit_assign_cell
   showArrowUI: 0
   arrowID: 
+  showTargetBracket: 1
+  targetBracketBuildingType: Smelter
+  includeConstructionSiteForTargetBracket: 0

@@ -18,7 +18,7 @@ MonoBehaviour:
     \uD574\uBCF4\uC2DC\uC8E0!"
   stepType: 5
   duration: 0
-  count: 3
+  count: 6
   resourceType: 0
   buildingType: 
   unitType: 
@@ -33,7 +33,7 @@ MonoBehaviour:
       Data2: 1210214295
       Data3: -73339495
       Data4: 1624008095
-    Path: event:/SFX_UIClick
+    Path: event:/SFX_UI/SFX_UIClick
   enableMaterialHighlight: 0
   highlightTargetIDs: []
   showArrowUI: 1

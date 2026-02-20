@@ -5,6 +5,7 @@ public class UnitData : ScriptableObject
 {
     [Header("Base Information")]
     public string unitName;
+    [TextArea] public string description;
     public string tutorialKey;
     public Sprite unitIcon;
     public GameObject unitPrefab;

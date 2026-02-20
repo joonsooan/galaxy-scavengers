@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using FMODUnity;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class GameSceneQuestUIManager : MonoBehaviour
@@ -17,25 +19,25 @@ public class GameSceneQuestUIManager : MonoBehaviour
     
     [Header("Notification Settings")]
     [SerializeField] private GameObject notifierIcon;
+    [SerializeField] private EventReference newQuestSound;
     [SerializeField] private Material shaderMaterial;
     [SerializeField] private string shaderMaterialResourcePath;
     
     private readonly List<QuestCell> _questCells = new ();
     private readonly HashSet<int> _viewedQuestIds = new ();
     private readonly HashSet<int> _acceptedRequestQuests = new ();
-    private bool _isPanelOpen;
 
-    private QuestDetailPanel _questDetailPanel;
+    private QuestBriefPanel _questBriefPanel;
     private RequestQuestAcceptPanel _requestQuestAcceptPanel;
-    
+
     private void Awake()
     {
         if (questDetailPanelObject != null)
         {
-            _questDetailPanel = questDetailPanelObject.GetComponent<QuestDetailPanel>();
-            if (_questDetailPanel != null)
+            _questBriefPanel = questDetailPanelObject.GetComponent<QuestBriefPanel>();
+            if (_questBriefPanel != null)
             {
-                _questDetailPanel.SetGameSceneMode(true);
+                _questBriefPanel.SetGameSceneMode(true);
             }
         }
 
@@ -67,9 +69,8 @@ public class GameSceneQuestUIManager : MonoBehaviour
     private void OnEnable()
     {
         if (QuestDataManager.Instance != null)
-        {
             QuestDataManager.Instance.OnQuestStateChanged += OnQuestStateChanged;
-        }
+        SubscribeToGameSceneInitialized();
         
         if (RequestQuestManager.Instance != null)
         {
@@ -96,9 +97,9 @@ public class GameSceneQuestUIManager : MonoBehaviour
             }
         }
         
-        if (_questDetailPanel != null)
+        if (_questBriefPanel != null)
         {
-            _questDetailPanel.SetGameSceneMode(true);
+            _questBriefPanel.SetGameSceneMode(true);
         }
         
         if (questCellGridParent != null)
@@ -125,32 +126,64 @@ public class GameSceneQuestUIManager : MonoBehaviour
     private void OnDisable()
     {
         if (QuestDataManager.Instance != null)
-        {
             QuestDataManager.Instance.OnQuestStateChanged -= OnQuestStateChanged;
-        }
-        
         RequestQuestManager.OnRequestQuestSpawned -= OnRequestQuestSpawned;
+        GameManager.OnGameSceneInitialized -= OnGameSceneInitialized;
+    }
+
+    private void SubscribeToGameSceneInitialized()
+    {
+        GameManager.OnGameSceneInitialized -= OnGameSceneInitialized;
+        GameManager.OnGameSceneInitialized += OnGameSceneInitialized;
+        bool alreadyInitialized = GameManager.Instance != null && GameManager.Instance.IsGameSceneInitialized;
+        if (alreadyInitialized)
+        {
+            OnGameSceneInitialized();
+        }
+    }
+
+    private void OnGameSceneInitialized()
+    {
+        LoadActiveQuests();
+        RefreshNotifierForCoreRepairQuests();
+    }
+
+    private void RefreshNotifierForCoreRepairQuests()
+    {
+        if (QuestDataManager.Instance == null)
+        {
+            return;
+        }
+        List<QuestData> coreRepairQuests = QuestDataManager.Instance.GetAllQuests()
+            .Where(q => q != null && q.questType == QuestType.CoreRepairQuest)
+            .ToList();
+        foreach (QuestData quest in coreRepairQuests)
+        {
+            QuestState state = QuestDataManager.Instance.GetQuestState(quest.questId);
+            bool isViewed = _viewedQuestIds.Contains(quest.questId);
+            bool shouldShow = (state == QuestState.Active || state == QuestState.Completable) && !isViewed;
+            if (shouldShow)
+            {
+                ShowNotifierForNewQuest(quest.questId);
+                return;
+            }
+        }
+        UpdateNotifierIcons();
     }
     
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Q))
+        if (Input.GetMouseButtonUp(1) && IsQuestPanelOpen())
         {
-            ToggleQuestPanel();
+            if (GameManager.Instance != null && GameManager.Instance.IsDragging()) return;
+            HideQuestPanel();
         }
+    }
 
-        if (Input.GetMouseButtonUp(1))
-        {
-            if (_isPanelOpen && questPanel != null && questPanel.activeSelf)
-            {
-                if (GameManager.Instance != null && GameManager.Instance.IsDragging())
-                {
-                    return;
-                }
-
-                HideQuestPanel();
-            }
-        }
+    private bool IsQuestPanelOpen()
+    {
+        return (questCellGridParent != null && questCellGridParent.gameObject.activeSelf) ||
+               (questDetailPanelObject != null && questDetailPanelObject.activeSelf);
     }
     
     private void Start()
@@ -164,18 +197,14 @@ public class GameSceneQuestUIManager : MonoBehaviour
         {
             yield return null;
         }
-        
         List<QuestData> coreRepairQuests = QuestDataManager.Instance.GetAllQuests()
             .Where(q => q != null && q.questType == QuestType.CoreRepairQuest)
             .ToList();
-        
         foreach (QuestData quest in coreRepairQuests)
         {
             _viewedQuestIds.Remove(quest.questId);
         }
-        
         yield return null;
-        
         LoadActiveQuests();
     }
     
@@ -199,9 +228,11 @@ public class GameSceneQuestUIManager : MonoBehaviour
             if (questData.questType == QuestType.CoreRepairQuest)
             {
                 QuestState state = QuestDataManager.Instance.GetQuestState(questId);
-                if ((state == QuestState.Active || state == QuestState.Completable) && !_viewedQuestIds.Contains(questId))
+                bool isViewed = _viewedQuestIds.Contains(questId);
+                bool shouldShow = (state == QuestState.Active || state == QuestState.Completable) && !isViewed;
+                if (shouldShow)
                 {
-                    ShowNotifierForNewQuest(questId);
+                    ShowNotifierForNewQuest(questId, false);
                 }
             }
             
@@ -215,16 +246,16 @@ public class GameSceneQuestUIManager : MonoBehaviour
                 }
                 if (state == QuestState.Available && !_viewedQuestIds.Contains(questId) && !_acceptedRequestQuests.Contains(questId))
                 {
-                    ShowNotifierForNewQuest(questId);
+                    ShowNotifierForNewQuest(questId, true);
                 }
             }
         }
         
         LoadActiveQuests();
         
-        if (_questDetailPanel != null)
+        if (_questBriefPanel != null)
         {
-            _questDetailPanel.RefreshQuestState(questId);
+            _questBriefPanel.RefreshQuestState(questId);
         }
         
         UpdateNotifierIcons();
@@ -234,7 +265,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
     {
         if (questData != null)
         {
-            ShowNotifierForNewQuest(questData.questId);
+            ShowNotifierForNewQuest(questData.questId, true);
             StartCoroutine(RefreshQuestListAfterSpawn());
         }
     }
@@ -263,7 +294,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
     
     public void LoadActiveQuests()
     {
-        if (questCellPrefab == null || questCellGridParent == null || _questDetailPanel == null)
+        if (questCellPrefab == null || questCellGridParent == null || _questBriefPanel == null)
         {
             return;
         }
@@ -289,6 +320,12 @@ public class GameSceneQuestUIManager : MonoBehaviour
             bool shouldInclude = (isActive || isRequestQuestAvailable || isRequestQuestAccepted) && !isRequestQuestFinished;
             
             return shouldInclude;
+        }).OrderBy(quest => quest.questType switch
+        {
+            QuestType.CoreRepairQuest => 0,
+            QuestType.BaseQuest => 1,
+            QuestType.RequestQuest => 2,
+            _ => 3
         }).ToList();
         
         foreach (QuestData quest in activeQuests)
@@ -308,10 +345,10 @@ public class GameSceneQuestUIManager : MonoBehaviour
                     isNew = !_viewedQuestIds.Contains(quest.questId);
                     if (isNew)
                     {
-                        ShowNotifierForNewQuest(quest.questId);
+                        ShowNotifierForNewQuest(quest.questId, false);
                     }
                 }
-                questCell.Initialize(quest, _questDetailPanel, isNew, null, this);
+                questCell.Initialize(quest, _questBriefPanel, isNew, null, this);
                 _questCells.Add(questCell);
             }
             else
@@ -342,26 +379,20 @@ public class GameSceneQuestUIManager : MonoBehaviour
             }
         }
     }
-    
-    private void ToggleQuestPanel()
+
+    public void ToggleQuestPanel()
     {
-        if (_isPanelOpen)
-        {
+        if (IsQuestPanelOpen())
             HideQuestPanel();
-        }
         else
-        {
             ShowQuestPanel();
-        }
     }
 
     private void ShowQuestPanel()
     {
-        _isPanelOpen = true;
-        
-        if (_questDetailPanel != null && questDetailPanelObject != null && questDetailPanelObject.activeSelf)
+        if (_questBriefPanel != null && questDetailPanelObject != null && questDetailPanelObject.activeSelf)
         {
-            _questDetailPanel.ClearQuestInfo();
+            _questBriefPanel.ClearQuestInfo();
             questDetailPanelObject.SetActive(false);
         }
         
@@ -385,8 +416,13 @@ public class GameSceneQuestUIManager : MonoBehaviour
 
     public void HideQuestPanel()
     {
-        _isPanelOpen = false;
-        
+        if (EventSystem.current != null && EventSystem.current.currentSelectedGameObject != null)
+        {
+            Transform sel = EventSystem.current.currentSelectedGameObject.transform;
+            if ((questPanel != null && sel.IsChildOf(questPanel.transform)) ||
+                (questDetailPanelObject != null && sel.IsChildOf(questDetailPanelObject.transform)))
+                EventSystem.current.SetSelectedGameObject(null);
+        }
         if (questCellGridParent != null)
         {
             questCellGridParent.gameObject.SetActive(false);
@@ -394,15 +430,33 @@ public class GameSceneQuestUIManager : MonoBehaviour
         
         if (questDetailPanelObject != null)
         {
-            if (_questDetailPanel != null)
+            if (_questBriefPanel != null)
             {
-                _questDetailPanel.ClearQuestInfo();
+                _questBriefPanel.ClearQuestInfo();
             }
             questDetailPanelObject.SetActive(false);
         }
     }
-    
-    private void ShowNotifierForNewQuest(int questId)
+
+    public void HideQuestDetailPanel()
+    {
+        if (EventSystem.current != null && EventSystem.current.currentSelectedGameObject != null)
+        {
+            Transform sel = EventSystem.current.currentSelectedGameObject.transform;
+            if (questDetailPanelObject != null && sel.IsChildOf(questDetailPanelObject.transform))
+                EventSystem.current.SetSelectedGameObject(null);
+        }
+        if (questDetailPanelObject != null)
+        {
+            if (_questBriefPanel != null)
+            {
+                _questBriefPanel.ClearQuestInfo();
+            }
+            questDetailPanelObject.SetActive(false);
+        }
+    }
+
+    private void ShowNotifierForNewQuest(int questId, bool playSound = false)
     {
         if (notifierIcon != null)
         {
@@ -419,6 +473,11 @@ public class GameSceneQuestUIManager : MonoBehaviour
             {
                 shaderMaterial.SetFloat("_Intensity", 1f);
             }
+        }
+        
+        if (playSound && !newQuestSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(newQuestSound);
         }
     }
     
@@ -535,9 +594,9 @@ public class GameSceneQuestUIManager : MonoBehaviour
             return;
         }
         
-        if (questDetailPanelObject != null && questDetailPanelObject.activeSelf && _questDetailPanel != null)
+        if (questDetailPanelObject != null && questDetailPanelObject.activeSelf && _questBriefPanel != null)
         {
-            _questDetailPanel.ClearQuestInfo();
+            _questBriefPanel.ClearQuestInfo();
             questDetailPanelObject.SetActive(false);
         }
         
@@ -547,8 +606,8 @@ public class GameSceneQuestUIManager : MonoBehaviour
             gameManager.TogglePause();
         }
         
-        _requestQuestAcceptPanel.DisplayQuestInfo(questData);
         requestQuestAcceptPanelObject.SetActive(true);
+        _requestQuestAcceptPanel.DisplayQuestInfo(questData);
     }
     
     public void OnRequestQuestAccepted(int questId)

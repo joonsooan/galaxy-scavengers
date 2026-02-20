@@ -8,7 +8,6 @@ public class ProductionProgressSlider : MonoBehaviour
     [SerializeField] private float yOffset = 2.0f;
     
     private Transform _targetTransform;
-    private const string ObjectUICanvasName = "ObjectUI Canvas";
 
     public void Initialize(Transform target)
     {
@@ -20,11 +19,9 @@ public class ProductionProgressSlider : MonoBehaviour
     
     private void FindAndSetParentCanvas()
     {
-        GameObject canvasObj = GameObject.Find(ObjectUICanvasName);
-        if (canvasObj != null)
-        {
-            transform.SetParent(canvasObj.transform, false);
-        }
+        Canvas canvas = GameManager.Instance?.uiManager?.GetObjectUICanvas();
+        if (canvas != null)
+            transform.SetParent(canvas.transform, false);
     }
     
     public void SetProgress(float value)

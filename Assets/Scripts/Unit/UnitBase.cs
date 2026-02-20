@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public abstract class UnitBase : Damageable
 {
@@ -32,6 +33,24 @@ public abstract class UnitBase : Damageable
 
     public UnitState currentState;
     private bool _isRegisteredToNoiseManager;
+    private Light2D _unitLight2D;
+    private Color _unitLightBaseColor;
+    private float _unitLightCurrentAlpha = 1f;
+    private const float UnitLightAlphaLerpSpeed = 5f;
+
+    private UnitMovement _idleRoamMovement;
+    private UnitSpriteController _idleRoamSpriteController;
+    private float _idleRoamTimer;
+    private float _currentIdleRoamInterval;
+    private bool _lastIdleActionWasMove;
+    private bool _idleRoamOriginSet;
+    private Vector3 _idleRoamOrigin;
+    private float _idleRoamOriginalSpeed;
+    private bool _idleRoamSpeedReduced;
+    private const float IdleRoamMinInterval = 2f;
+    private const float IdleRoamMaxInterval = 4f;
+    private const float IdleRoamRadius = 3f;
+
     protected UnitProgressBar progressBar;
     protected UnitHealthBar healthBar;
     private int _previousHealth;
@@ -42,6 +61,113 @@ public abstract class UnitBase : Damageable
             NoiseManager.Instance.RegisterUnit(this);
             _isRegisteredToNoiseManager = true;
         }
+
+        if (currentState == UnitState.Idle && progressBar != null) {
+            HideProgressBar();
+        }
+    }
+
+    protected void UpdateUnitLightAlpha()
+    {
+        if (DayNightCycleManager.Instance == null) return;
+
+        if (_unitLight2D == null) {
+            _unitLight2D = GetComponentInChildren<Light2D>();
+            if (_unitLight2D == null) return;
+            Color c = _unitLight2D.color;
+            _unitLightBaseColor = new Color(c.r, c.g, c.b, 1f);
+            _unitLightCurrentAlpha = c.a;
+        }
+
+        float targetAlpha = DayNightCycleManager.Instance.IsDay() ? 0.2f : 1f;
+        _unitLightCurrentAlpha = Mathf.Lerp(_unitLightCurrentAlpha, targetAlpha, UnitLightAlphaLerpSpeed * Time.deltaTime);
+        _unitLight2D.color = new Color(_unitLightBaseColor.r, _unitLightBaseColor.g, _unitLightBaseColor.b, _unitLightCurrentAlpha);
+    }
+
+    protected void UpdateIdleRoam()
+    {
+        if (BuildingManager.Instance == null || BuildingManager.Instance.grid == null) return;
+
+        if (_idleRoamMovement == null) {
+            _idleRoamMovement = GetComponent<UnitMovement>();
+            if (_idleRoamMovement == null) return;
+            _currentIdleRoamInterval = Random.Range(IdleRoamMinInterval, IdleRoamMaxInterval);
+        }
+
+        if (_idleRoamSpriteController == null) {
+            _idleRoamSpriteController = GetComponentInChildren<UnitSpriteController>();
+        }
+
+        if (!_idleRoamOriginSet) {
+            _idleRoamOrigin = transform.position;
+            _idleRoamOriginSet = true;
+        }
+
+        if (!_idleRoamSpeedReduced) {
+            _idleRoamOriginalSpeed = _idleRoamMovement.moveSpeed;
+            _idleRoamMovement.moveSpeed = _idleRoamOriginalSpeed * 0.5f;
+            _idleRoamSpeedReduced = true;
+        }
+
+        if (_idleRoamMovement.IsMoving && _idleRoamSpriteController != null) {
+            Vector3 moveDir = _idleRoamMovement.GetMoveDirection();
+            _idleRoamSpriteController.UpdateSpriteDirection(moveDir);
+        }
+
+        _idleRoamTimer += Time.deltaTime;
+        if (_idleRoamTimer < _currentIdleRoamInterval) return;
+
+        _idleRoamTimer = 0f;
+        _currentIdleRoamInterval = Random.Range(IdleRoamMinInterval, IdleRoamMaxInterval);
+
+        if (!_lastIdleActionWasMove) {
+            Vector3 destination = FindWalkableIdleDestination();
+            if (destination != Vector3.zero) {
+                _idleRoamMovement.SetNewTargetDirect(destination, _idleRoamMovement.waypointTolerance);
+            }
+            _lastIdleActionWasMove = true;
+        }
+        else {
+            if (Random.value < 0.5f) {
+                _idleRoamMovement.StopMovement();
+                _lastIdleActionWasMove = false;
+            }
+            else {
+                Vector3 destination = FindWalkableIdleDestination();
+                if (destination != Vector3.zero) {
+                    _idleRoamMovement.SetNewTargetDirect(destination, _idleRoamMovement.waypointTolerance);
+                }
+                _lastIdleActionWasMove = true;
+            }
+        }
+    }
+
+    protected void ResetIdleRoam()
+    {
+        _idleRoamTimer = 0f;
+        _lastIdleActionWasMove = false;
+        _idleRoamOriginSet = false;
+
+        if (_idleRoamSpeedReduced && _idleRoamMovement != null) {
+            _idleRoamMovement.moveSpeed = _idleRoamOriginalSpeed;
+            _idleRoamSpeedReduced = false;
+        }
+    }
+
+    private Vector3 FindWalkableIdleDestination()
+    {
+        Grid grid = BuildingManager.Instance.grid;
+
+        for (int attempt = 0; attempt < 50; attempt++) {
+            Vector2 randomDir = Random.insideUnitCircle.normalized;
+            Vector3 candidatePos = _idleRoamOrigin + (Vector3)randomDir * Random.Range(0.5f, IdleRoamRadius);
+            Vector3Int candidateCell = grid.WorldToCell(candidatePos);
+            if (BuildingManager.Instance.IsCellWalkable(candidateCell)) {
+                return grid.GetCellCenterWorld(candidateCell);
+            }
+        }
+
+        return Vector3.zero;
     }
 
     protected override void OnEnable()

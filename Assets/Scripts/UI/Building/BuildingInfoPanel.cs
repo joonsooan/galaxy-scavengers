@@ -1,7 +1,8 @@
+using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
 
 public class BuildingInfoPanel : MonoBehaviour
 {
@@ -16,9 +17,17 @@ public class BuildingInfoPanel : MonoBehaviour
     [SerializeField] private TMP_Text producibleResourceLabel;
     [SerializeField] private GameObject processorResourceGroup;
 
+    [Header("Aether & Noise")]
+    [SerializeField] private GameObject aetherSpendPanel;
+    [SerializeField] private TMP_Text aetherConsumptionText;
+    [SerializeField] private GameObject noisePanel;
+    [SerializeField] private TMP_Text noiseText;
+
     [SerializeField] private List<BuildingPieceData> allPieceDatabase;
 
     private BuildingData _selectedData;
+    private Damageable _currentDamageable;
+    private bool _showMaxHealthOnly;
 
     public static BuildingInfoPanel Instance { get; private set; }
 
@@ -33,46 +42,68 @@ public class BuildingInfoPanel : MonoBehaviour
         Instance = this;
         ClearAllInfo();
     }
+
+    private void OnDisable()
+    {
+        SetCurrentDamageable(null, false);
+    }
     
     public void SelectBuilding(BuildingData data)
     {
         _selectedData = data;
         UpdateUI(data);
-        if (data != null && data.buildingPrefab != null)
-        {
-            Damageable damageable = data.buildingPrefab.GetComponent<Damageable>();
-            if (damageable != null)
-            {
-                UpdateHealthDisplay(damageable, false);
-            }
-        }
+        Damageable damageable = data != null && data.buildingPrefab != null ? data.buildingPrefab.GetComponent<Damageable>() : null;
+        SetCurrentDamageable(damageable, true);
+        if (damageable != null)
+            UpdateHealthDisplay(damageable, true);
     }
-    
-    public void PreviewInfo(BuildingData data, Damageable damageable = null)
+
+    public void PreviewInfo(BuildingData data, Damageable damageable = null, bool showMaxHealthOnly = false)
     {
         UpdateUI(data);
+        SetCurrentDamageable(damageable, showMaxHealthOnly);
         if (damageable != null)
-        {
-            UpdateHealthDisplay(damageable, false);
-        }
+            UpdateHealthDisplay(damageable, showMaxHealthOnly);
     }
-    
+
     public void CancelPreview()
     {
         if (_selectedData != null)
         {
             UpdateUI(_selectedData);
+            Damageable damageable = _selectedData.buildingPrefab != null ? _selectedData.buildingPrefab.GetComponent<Damageable>() : null;
+            SetCurrentDamageable(damageable, true);
+            if (damageable != null)
+                UpdateHealthDisplay(damageable, true);
         }
         else
         {
+            SetCurrentDamageable(null, false);
             ClearUI();
         }
     }
-    
+
     public void ClearAllInfo()
     {
         _selectedData = null;
+        SetCurrentDamageable(null, false);
         ClearUI();
+    }
+
+    private void SetCurrentDamageable(Damageable damageable, bool showMaxHealthOnly)
+    {
+        if (_currentDamageable != null)
+            _currentDamageable.HealthChanged -= OnCurrentDamageableHealthChanged;
+        _currentDamageable = damageable;
+        _showMaxHealthOnly = showMaxHealthOnly;
+        if (_currentDamageable != null)
+            _currentDamageable.HealthChanged += OnCurrentDamageableHealthChanged;
+    }
+
+    private void OnCurrentDamageableHealthChanged()
+    {
+        if (_currentDamageable != null)
+            UpdateHealthDisplay(_currentDamageable, _showMaxHealthOnly);
     }
     
     private void UpdateUI(BuildingData data)
@@ -85,7 +116,15 @@ public class BuildingInfoPanel : MonoBehaviour
         {
             gameObject.SetActive(true);
             resourcePanel.SetActive(true);
-            UpdateResourceDisplay(data);
+            if (data.buildingType == BuildingType.MainStructure)
+            {
+                if (noisePanel != null) noisePanel.SetActive(false);
+                if (processorResourceGroup != null) processorResourceGroup.SetActive(false);
+            }
+            else
+            {
+                UpdateResourceDisplay(data);
+            }
         }
 
         if (IsProcessorBuilding(data))
@@ -96,6 +135,42 @@ public class BuildingInfoPanel : MonoBehaviour
         else
         {
             ClearProcessorResourceDisplay();
+        }
+
+        UpdateAetherAndNoiseDisplay(data);
+    }
+
+    private void UpdateAetherAndNoiseDisplay(BuildingData data)
+    {
+        int aetherConsumption = 0;
+        IAetherConsumer aetherConsumer = data != null && data.buildingPrefab != null ? data.buildingPrefab.GetComponent<IAetherConsumer>() : null;
+        if (aetherConsumer != null)
+        {
+            aetherConsumption = aetherConsumer.AetherConsumptionPerSecond;
+        }
+
+        if (aetherSpendPanel != null)
+        {
+            aetherSpendPanel.SetActive(aetherConsumption > 0);
+        }
+
+        if (aetherConsumptionText != null && aetherConsumption > 0)
+        {
+            aetherConsumptionText.text = $"소모량 : {aetherConsumption:F1}";
+        }
+
+        if (data == null || data.buildingType != BuildingType.MainStructure)
+        {
+            float noiseCoefficient = data != null ? data.noiseCoefficient : 0f;
+            if (noisePanel != null)
+            {
+                noisePanel.SetActive(true);
+            }
+
+            if (noiseText != null)
+            {
+                noiseText.text = $"소음 정도 : {noiseCoefficient:F1}";
+            }
         }
     }
 
@@ -132,6 +207,7 @@ public class BuildingInfoPanel : MonoBehaviour
             resourcePanel.SetActive(false);
         }
         ClearProcessorResourceDisplay();
+        HideAetherAndNoiseDisplay();
     }
     
     private void UpdateResourceDisplay(BuildingData data)
@@ -171,7 +247,7 @@ public class BuildingInfoPanel : MonoBehaviour
             }
         }
 
-        foreach (var kvp in totalCosts)
+        foreach (var kvp in totalCosts.OrderBy(x => (int)x.Key))
         {
             ResourceType type = kvp.Key;
             int amount = kvp.Value;
@@ -201,6 +277,7 @@ public class BuildingInfoPanel : MonoBehaviour
     public void ClearInfo()
     {
         _selectedData = null;
+        SetCurrentDamageable(null, false);
 
         if (buildingName != null)
         {
@@ -222,6 +299,15 @@ public class BuildingInfoPanel : MonoBehaviour
             resourcePanel.SetActive(false);
         }
         ClearProcessorResourceDisplay();
+        HideAetherAndNoiseDisplay();
+    }
+
+    private void HideAetherAndNoiseDisplay()
+    {
+        if (aetherSpendPanel != null) aetherSpendPanel.SetActive(false);
+        if (noisePanel != null) noisePanel.SetActive(false);
+        if (aetherConsumptionText != null) aetherConsumptionText.text = string.Empty;
+        if (noiseText != null) noiseText.text = string.Empty;
     }
 
     private bool IsProcessorBuilding(BuildingData data)

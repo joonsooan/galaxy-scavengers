@@ -14,6 +14,10 @@ public class QuestUIHandler : MonoBehaviour
     private readonly HashSet<int> _finishedQuestIds = new ();
     
     private bool _indicatorUpdatePending = false;
+    private Sprite _questNormalSprite;
+    private Sprite _shopNormalSprite;
+    private Sprite _questSelectedSprite;
+    private Sprite _shopSelectedSprite;
 
     public void Initialize(IQuestUIProvider uiProvider)
     {
@@ -21,6 +25,7 @@ public class QuestUIHandler : MonoBehaviour
         
         Button questButton = _uiProvider.GetQuestButton();
         Button shopButton = _uiProvider.GetShopButton();
+        CacheModeButtonSprites(questButton, shopButton);
         
         questButton.onClick.RemoveAllListeners();
         questButton.onClick.AddListener(OnQuestButtonClicked);
@@ -101,6 +106,17 @@ public class QuestUIHandler : MonoBehaviour
         {
             inventoryManager.OnResourceChanged -= OnBaseInventoryResourceChanged;
         }
+    }
+
+    private void LateUpdate()
+    {
+        if (Input.GetMouseButton(0))
+        {
+            ApplyFixedCurrentModeButtonSpriteOnly();
+            return;
+        }
+
+        ApplyFixedModeButtonSprites();
     }
     
     private void OnQuestStateChanged(int questId)
@@ -288,6 +304,77 @@ public class QuestUIHandler : MonoBehaviour
                 shopButton.Select();
             }
         }
+
+        ApplyFixedModeButtonSprites();
+    }
+
+    private void CacheModeButtonSprites(Button questButton, Button shopButton)
+    {
+        if (questButton != null && questButton.image != null)
+        {
+            _questNormalSprite = questButton.image.sprite;
+            _questSelectedSprite = questButton.spriteState.selectedSprite != null ? questButton.spriteState.selectedSprite : _questNormalSprite;
+        }
+
+        if (shopButton != null && shopButton.image != null)
+        {
+            _shopNormalSprite = shopButton.image.sprite;
+            _shopSelectedSprite = shopButton.spriteState.selectedSprite != null ? shopButton.spriteState.selectedSprite : _shopNormalSprite;
+        }
+    }
+
+    private void ApplyFixedModeButtonSprites()
+    {
+        if (_uiProvider == null || !IsCurrentModeUIVisible())
+        {
+            return;
+        }
+
+        Button questButton = _uiProvider.GetQuestButton();
+        Button shopButton = _uiProvider.GetShopButton();
+
+        if (questButton != null && questButton.image != null)
+        {
+            questButton.image.overrideSprite = _isQuestMode ? _questSelectedSprite : _questNormalSprite;
+        }
+
+        if (shopButton != null && shopButton.image != null)
+        {
+            shopButton.image.overrideSprite = _isQuestMode ? _shopNormalSprite : _shopSelectedSprite;
+        }
+    }
+
+    private void ApplyFixedCurrentModeButtonSpriteOnly()
+    {
+        if (_uiProvider == null || !IsCurrentModeUIVisible())
+        {
+            return;
+        }
+
+        Button modeButton = _isQuestMode ? _uiProvider.GetQuestButton() : _uiProvider.GetShopButton();
+        if (modeButton == null || modeButton.image == null)
+        {
+            return;
+        }
+
+        modeButton.image.overrideSprite = _isQuestMode ? _questSelectedSprite : _shopSelectedSprite;
+    }
+
+    private bool IsCurrentModeUIVisible()
+    {
+        if (_uiProvider == null)
+        {
+            return false;
+        }
+
+        if (_isQuestMode)
+        {
+            GameObject questGridPanel = _uiProvider.GetQuestGridPanel();
+            return questGridPanel != null && questGridPanel.activeInHierarchy;
+        }
+
+        GameObject shopContainer = _uiProvider.GetShopUIContainer();
+        return shopContainer != null && shopContainer.activeInHierarchy;
     }
     
     private void LoadQuestCells()

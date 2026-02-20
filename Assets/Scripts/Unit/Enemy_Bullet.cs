@@ -76,7 +76,7 @@ public class Enemy_Bullet : MonoBehaviour
             
             if (shouldDamage)
             {
-                damageable.TakeDamage(_damage);
+                damageable.TakeDamage(_damage, DamageContext.From(DamageAttackType.Projectile, DamageAttackerFaction.Enemy, gameObject));
                 Deactivate();
             }
         }

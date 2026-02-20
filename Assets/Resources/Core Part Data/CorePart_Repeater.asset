@@ -15,14 +15,14 @@ MonoBehaviour:
   partType: 4
   partName: "\uC911\uACC4\uAE30"
   partDescription: "\uC2DC\uB4DC \uCF54\uC5B4\uC758 \uBA85\uB839 \uC2E0\uD638\uB97C
-    \uC99D\uD3ED\uD574 \uC804\uC1A1\uD558\uB294 \uD1B5\uC2E0 \uC7A5\uCE58\uC785\uB2C8\uB2E4.
-    \uD30C\uC190\uB41C \uACBD\uC6B0 \uAC74\uBB3C\uC758 \uC0DD\uC0B0 \uC18D\uB3C4,
-    \uC720\uB2DB\uC758 \uC791\uC5C5 \uC18D\uB3C4\uAC00 \uAC10\uC18C\uD569\uB2C8\uB2E4."
+    \uC99D\uD3ED\uD574 \uC804\uC1A1\uD558\uB294 \uD1B5\uC2E0 \uC7A5\uCE58\uC785\uB2C8\uB2E4.\n\uD30C\uC190\uB41C
+    \uACBD\uC6B0 \uAC74\uBB3C\uC758 \uC0DD\uC0B0 \uC18D\uB3C4, \uC720\uB2DB\uC758
+    \uC791\uC5C5 \uC18D\uB3C4\uAC00 \uAC10\uC18C\uD569\uB2C8\uB2E4."
   requiredResources:
-  - resourceType: 6
-    amount: 10
-  - resourceType: 11
-    amount: 10
+  - resourceType: 1
+    amount: 1000
+  - resourceType: 8
+    amount: 50
   repairReward:
     resourceRewards: []
     moduleRewards: []
@@ -30,3 +30,4 @@ MonoBehaviour:
     unlockedBuildings: []
     newUnits: []
   debuffValue: 0.5
+  debuffIcon: {fileID: -1289070501367566007, guid: a4eebf007e7d79649baac3ab7d16b7c4, type: 3}

@@ -20,8 +20,8 @@ public class InventorySystem : MonoBehaviour
     [SerializeField] private GameObject resourceInfoCellPrefab;
 
     [Header("Inventory Settings")]
-    [SerializeField] private int inventoryWidth = 5;
-    [SerializeField] private int inventoryHeight = 5;
+    // [SerializeField] private int inventoryWidth = 5;
+    // [SerializeField] private int inventoryHeight = 5;
     [SerializeField] private int baseCellCount = 25;
     [SerializeField] private int defaultMaxStackAmount = 100;
     [SerializeField] private List<ResourceStackData> customMaxStackAmounts = new ();

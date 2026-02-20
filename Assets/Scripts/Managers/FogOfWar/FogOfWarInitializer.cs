@@ -218,7 +218,8 @@ public class FogOfWarInitializer
             return;
         }
         
-        GameObject fogTilemapObj = GameObject.Find("Fog Tilemap");
+        Transform fogTransform = _grid.transform.Find("Fog Tilemap");
+        GameObject fogTilemapObj = fogTransform != null ? fogTransform.gameObject : null;
         if (fogTilemapObj == null)
         {
             fogTilemapObj = new GameObject("Fog Tilemap");

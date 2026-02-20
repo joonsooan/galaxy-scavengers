@@ -31,6 +31,24 @@ public class ResourceInfoCell : MonoBehaviour
     {
         SetInfo(type, amount, true);
     }
+
+    public void SetInfoDisplayOnly(ResourceType type, int amount)
+    {
+        _resourceType = type;
+        _requiredAmount = amount;
+        _isTrackingResources = false;
+
+        if (resourceAmount != null && _originalTextColor == Color.clear)
+            _originalTextColor = resourceAmount.color;
+
+        resourceAmount.text = amount.ToString();
+        Sprite resourceIcon = GetResourceIcon(type);
+        resourceImage.sprite = resourceIcon != null ? resourceIcon : null;
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
+        if (resourceAmount != null)
+            resourceAmount.color = _originalTextColor;
+    }
     
     public void SetInfo(ResourceType type, int amount, bool rebuildImmediately)
     {
@@ -55,12 +73,10 @@ public class ResourceInfoCell : MonoBehaviour
             resourceImage.sprite = null; 
         }
         
-        if (rebuildImmediately)
-        {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
-        }
-        
         UpdateColor();
+        
+        if (rebuildImmediately)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
         
         if (gameObject.activeInHierarchy)
         {

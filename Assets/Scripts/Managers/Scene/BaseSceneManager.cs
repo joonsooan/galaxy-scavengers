@@ -25,9 +25,9 @@ public class BaseSceneManager : MonoBehaviour
     [SerializeField] private GameObject farmUIPanel;
     [SerializeField] private GameObject mapUIPanel;
     [SerializeField] private GameObject coreLaunchUIPanel;
+    [SerializeField] private GameObject fadePanel;
     [SerializeField] private float fadeInDuration = 1f;
     private BaseInventorySystem _baseInventorySystem;
-    private GameObject _fadePanel;
     private int _currentPanelIndex = -1;
 
     private void Awake()
@@ -72,7 +72,7 @@ public class BaseSceneManager : MonoBehaviour
         yield return null;
         yield return null;
 
-        GameObject fadePanelObj = FindFadePanel();
+        GameObject fadePanelObj = GetFadePanel();
         if (fadePanelObj != null)
         {
             Image fadeImage = fadePanelObj.GetComponent<Image>();
@@ -95,15 +95,13 @@ public class BaseSceneManager : MonoBehaviour
         }
     }
 
-    private GameObject FindFadePanel()
+    private GameObject GetFadePanel()
     {
-        Transform[] allTransforms = FindObjectsOfType<Transform>(true);
-        foreach (Transform t in allTransforms)
+        if (fadePanel != null) return fadePanel;
+        foreach (Canvas c in FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None))
         {
-            if (t.name == "Fade Panel")
-            {
-                return t.gameObject;
-            }
+            Transform child = c.transform.Find("Fade Panel");
+            if (child != null) return child.gameObject;
         }
         return null;
     }

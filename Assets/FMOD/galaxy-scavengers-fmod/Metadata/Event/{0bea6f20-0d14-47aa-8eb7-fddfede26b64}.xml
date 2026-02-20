@@ -11,7 +11,7 @@
 			<value>1</value>
 		</property>
 		<relationship name="folder">
-			<destination>{ec3f57f1-2c56-4b51-8b43-b20e47761bdf}</destination>
+			<destination>{da5c71e0-5895-4c92-a718-a7c8dfc4ad75}</destination>
 		</relationship>
 		<relationship name="mixer">
 			<destination>{8b5463c1-b85f-4bf4-9440-b844faf95df3}</destination>
@@ -62,11 +62,7 @@
 			<destination>{4cc9d956-114d-409e-a748-e72d620b6a33}</destination>
 		</relationship>
 	</object>
-	<object class="EventAutomatableProperties" id="{91cc8adf-d7d6-4c55-8ea4-3f729c1006fe}">
-		<property name="maxVoices">
-			<value>1</value>
-		</property>
-	</object>
+	<object class="EventAutomatableProperties" id="{91cc8adf-d7d6-4c55-8ea4-3f729c1006fe}" />
 	<object class="MarkerTrack" id="{df2ae0bb-389d-4bce-a671-f940c7e80e0d}" />
 	<object class="Timeline" id="{ef9822d2-14c7-4d4a-bc1e-774da815d437}">
 		<property name="isProxyEnabled">
@@ -79,6 +75,9 @@
 		</relationship>
 	</object>
 	<object class="EventMixerMaster" id="{f27db00b-e56c-4e4e-b4c5-258b671e06a0}">
+		<property name="volume">
+			<value>-2.5</value>
+		</property>
 		<relationship name="effectChain">
 			<destination>{a34ac043-fd6a-46ad-9e08-5dfac86f45fd}</destination>
 		</relationship>
