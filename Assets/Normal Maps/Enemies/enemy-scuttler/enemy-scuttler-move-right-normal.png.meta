@@ -1,37 +1,37 @@
 fileFormatVersion: 2
-guid: 493fe3abad882884496e7cc095ce3014
+guid: 81c83a282ac4cbc4d94e3db1ca31a075
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1248806321510513995
-    second: enemy-scuttler-move-down_0
+      213: -4252291196729475200
+    second: enemy-scuttler-move-right-normal_0
   - first:
-      213: 9088797161348145563
-    second: enemy-scuttler-move-down_1
+      213: -2096943837038522585
+    second: enemy-scuttler-move-right-normal_1
   - first:
-      213: -6986164724914908866
-    second: enemy-scuttler-move-down_2
+      213: 8559387816461163542
+    second: enemy-scuttler-move-right-normal_2
   - first:
-      213: 4671696227459043422
-    second: enemy-scuttler-move-down_3
+      213: -8926558108338274439
+    second: enemy-scuttler-move-right-normal_3
   - first:
-      213: -2432163175420509703
-    second: enemy-scuttler-move-down_4
+      213: 8902299312573157727
+    second: enemy-scuttler-move-right-normal_4
   - first:
-      213: -5962121952558176003
-    second: enemy-scuttler-move-down_5
+      213: -5454725683991532270
+    second: enemy-scuttler-move-right-normal_5
   - first:
-      213: -6799208144279199525
-    second: enemy-scuttler-move-down_6
+      213: -930164817048921074
+    second: enemy-scuttler-move-right-normal_6
   - first:
-      213: -6996504254803549878
-    second: enemy-scuttler-move-down_7
+      213: -3014413684472242127
+    second: enemy-scuttler-move-right-normal_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 0
-    sRGBTexture: 1
+    enableMipMap: 1
+    sRGBTexture: 0
     linearTexture: 0
     fadeOut: 0
     borderMipMap: 0
@@ -69,16 +69,16 @@ TextureImporter:
   compressionQuality: 50
   spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 0
+  spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 16
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
-  alphaIsTransparency: 1
+  alphaIsTransparency: 0
   spriteTessellationDetail: -1
-  textureType: 8
+  textureType: 1
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 1
@@ -122,7 +122,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -134,177 +134,177 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: enemy-scuttler-move-down_0
+      name: enemy-scuttler-move-right-normal_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        width: 26
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5b28a1d54495baee0800000000000000
-      internalID: -1248806321510513995
+      spriteID: 08f3b69afa3dcf4c0800000000000000
+      internalID: -4252291196729475200
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-move-down_1
+      name: enemy-scuttler-move-right-normal_1
       rect:
         serializedVersion: 2
-        x: 17
+        x: 26
         y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        width: 27
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b912cbd1dd4e12e70800000000000000
-      internalID: 9088797161348145563
+      spriteID: 72fcf57b0b826e2e0800000000000000
+      internalID: -2096943837038522585
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-move-down_2
+      name: enemy-scuttler-move-right-normal_2
       rect:
         serializedVersion: 2
-        x: 34
+        x: 55
         y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        width: 24
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e31151d62382c0f90800000000000000
-      internalID: -6986164724914908866
+      spriteID: 61c59f69edd09c670800000000000000
+      internalID: 8559387816461163542
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-move-down_3
+      name: enemy-scuttler-move-right-normal_3
       rect:
         serializedVersion: 2
-        x: 51
+        x: 83
         y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        width: 22
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e509a3897f235d040800000000000000
-      internalID: 4671696227459043422
+      spriteID: 97f3d9502be7e1480800000000000000
+      internalID: -8926558108338274439
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-move-down_4
+      name: enemy-scuttler-move-right-normal_4
       rect:
         serializedVersion: 2
-        x: 68
+        x: 111
         y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        width: 20
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9f146456a783f3ed0800000000000000
-      internalID: -2432163175420509703
+      spriteID: f519022fe025b8b70800000000000000
+      internalID: 8902299312573157727
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-move-down_5
+      name: enemy-scuttler-move-right-normal_5
       rect:
         serializedVersion: 2
-        x: 85
+        x: 138
         y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        width: 20
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: df8263e3ca9424da0800000000000000
-      internalID: -5962121952558176003
+      spriteID: 21d2c7a04ebec44b0800000000000000
+      internalID: -5454725683991532270
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-move-down_6
+      name: enemy-scuttler-move-right-normal_6
       rect:
         serializedVersion: 2
-        x: 102
+        x: 164
         y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        width: 22
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bd0ab4e673c54a1a0800000000000000
-      internalID: -6799208144279199525
+      spriteID: e0c9b31f6046713f0800000000000000
+      internalID: -930164817048921074
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-move-down_7
+      name: enemy-scuttler-move-right-normal_7
       rect:
         serializedVersion: 2
-        x: 119
+        x: 190
         y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        width: 24
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a41ece6037c67ee90800000000000000
-      internalID: -6996504254803549878
+      spriteID: 130a4fa99b6aa26d0800000000000000
+      internalID: -3014413684472242127
       vertices: []
       indices: 
       edges: []
@@ -313,26 +313,24 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 49d5414f6f2d75948a68ee51c9aecd09
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: 4c0b1e8133d6bed4fb0f6d28a8955003, type: 3}
-      name: _NormalMap
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      enemy-scuttler-move-down_0: -1248806321510513995
-      enemy-scuttler-move-down_1: 9088797161348145563
-      enemy-scuttler-move-down_2: -6986164724914908866
-      enemy-scuttler-move-down_3: 4671696227459043422
-      enemy-scuttler-move-down_4: -2432163175420509703
-      enemy-scuttler-move-down_5: -5962121952558176003
-      enemy-scuttler-move-down_6: -6799208144279199525
-      enemy-scuttler-move-down_7: -6996504254803549878
+      enemy-scuttler-move-right-normal_0: -4252291196729475200
+      enemy-scuttler-move-right-normal_1: -2096943837038522585
+      enemy-scuttler-move-right-normal_2: 8559387816461163542
+      enemy-scuttler-move-right-normal_3: -8926558108338274439
+      enemy-scuttler-move-right-normal_4: 8902299312573157727
+      enemy-scuttler-move-right-normal_5: -5454725683991532270
+      enemy-scuttler-move-right-normal_6: -930164817048921074
+      enemy-scuttler-move-right-normal_7: -3014413684472242127
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

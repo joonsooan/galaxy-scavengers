@@ -14,9 +14,18 @@ public class TutorialUI : MonoBehaviour
     [SerializeField] private float flashFadeOutTime = 0.5f;
 
     private Coroutine _flashRoutine;
+    private RectTransform _tutorialPanelRect;
+    private Vector2 _tutorialPanelBaseAnchoredPosition;
 
     private void Awake()
     {
+        if (tutorialPanel != null) {
+            _tutorialPanelRect = tutorialPanel.GetComponent<RectTransform>();
+            if (_tutorialPanelRect != null) {
+                _tutorialPanelBaseAnchoredPosition = _tutorialPanelRect.anchoredPosition;
+            }
+        }
+
         if (tutorialPanel != null) {
             tutorialPanel.SetActive(false);
         }
@@ -31,6 +40,8 @@ public class TutorialUI : MonoBehaviour
         if (tutorialPanel != null) {
             tutorialPanel.SetActive(true);
         }
+
+        ApplyTutorialPanelOffset(step);
 
         if (flashTarget != null) {
             if (_flashRoutine != null) {
@@ -70,6 +81,8 @@ public class TutorialUI : MonoBehaviour
             _flashRoutine = null;
         }
 
+        ResetTutorialPanelPosition();
+
         if (tutorialPanel != null) {
             tutorialPanel.SetActive(false);
         }
@@ -93,5 +106,24 @@ public class TutorialUI : MonoBehaviour
 
         mat.SetFloat("_FlashIntensity", 0f);
         _flashRoutine = null;
+    }
+
+    private void ApplyTutorialPanelOffset(TutorialStepData step)
+    {
+        if (_tutorialPanelRect == null || step == null) {
+            return;
+        }
+
+        float moveDownOffset = Mathf.Max(0f, step.tutorialPanelMoveDownOffset);
+        _tutorialPanelRect.anchoredPosition = _tutorialPanelBaseAnchoredPosition + Vector2.down * moveDownOffset;
+    }
+
+    private void ResetTutorialPanelPosition()
+    {
+        if (_tutorialPanelRect == null) {
+            return;
+        }
+
+        _tutorialPanelRect.anchoredPosition = _tutorialPanelBaseAnchoredPosition;
     }
 }

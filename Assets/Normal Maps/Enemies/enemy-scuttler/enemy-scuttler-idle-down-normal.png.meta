@@ -1,37 +1,37 @@
 fileFormatVersion: 2
-guid: 493fe3abad882884496e7cc095ce3014
+guid: ae5e1937b9ec472459bba0449622067e
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1248806321510513995
-    second: enemy-scuttler-move-down_0
+      213: 5518570035382540707
+    second: enemy-scuttler-idle-donw-normal_0
   - first:
-      213: 9088797161348145563
-    second: enemy-scuttler-move-down_1
+      213: 6773638384044652567
+    second: enemy-scuttler-idle-donw-normal_1
   - first:
-      213: -6986164724914908866
-    second: enemy-scuttler-move-down_2
+      213: 7385715739562608333
+    second: enemy-scuttler-idle-donw-normal_2
   - first:
-      213: 4671696227459043422
-    second: enemy-scuttler-move-down_3
+      213: 3569065764313769319
+    second: enemy-scuttler-idle-donw-normal_3
   - first:
-      213: -2432163175420509703
-    second: enemy-scuttler-move-down_4
+      213: 1103746906393982354
+    second: enemy-scuttler-idle-donw-normal_4
   - first:
-      213: -5962121952558176003
-    second: enemy-scuttler-move-down_5
+      213: -7667932545158446854
+    second: enemy-scuttler-idle-donw-normal_5
   - first:
-      213: -6799208144279199525
-    second: enemy-scuttler-move-down_6
+      213: 1534550651989443650
+    second: enemy-scuttler-idle-donw-normal_6
   - first:
-      213: -6996504254803549878
-    second: enemy-scuttler-move-down_7
+      213: -4602466683112745646
+    second: enemy-scuttler-idle-donw-normal_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 0
-    sRGBTexture: 1
+    enableMipMap: 1
+    sRGBTexture: 0
     linearTexture: 0
     fadeOut: 0
     borderMipMap: 0
@@ -69,16 +69,16 @@ TextureImporter:
   compressionQuality: 50
   spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 0
+  spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 16
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
-  alphaIsTransparency: 1
+  alphaIsTransparency: 0
   spriteTessellationDetail: -1
-  textureType: 8
+  textureType: 1
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 1
@@ -122,7 +122,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -134,177 +134,177 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: enemy-scuttler-move-down_0
+      name: enemy-scuttler-idle-donw-normal_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        width: 17
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5b28a1d54495baee0800000000000000
-      internalID: -1248806321510513995
+      spriteID: 3a957136536e59c40800000000000000
+      internalID: 5518570035382540707
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-move-down_1
+      name: enemy-scuttler-idle-donw-normal_1
       rect:
         serializedVersion: 2
-        x: 17
+        x: 16
         y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        width: 18
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b912cbd1dd4e12e70800000000000000
-      internalID: 9088797161348145563
+      spriteID: 718bee5d83cc00e50800000000000000
+      internalID: 6773638384044652567
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-move-down_2
+      name: enemy-scuttler-idle-donw-normal_2
       rect:
         serializedVersion: 2
-        x: 34
+        x: 33
         y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        width: 18
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e31151d62382c0f90800000000000000
-      internalID: -6986164724914908866
+      spriteID: dc604ac75555f7660800000000000000
+      internalID: 7385715739562608333
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-move-down_3
+      name: enemy-scuttler-idle-donw-normal_3
       rect:
         serializedVersion: 2
-        x: 51
+        x: 50
         y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        width: 18
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e509a3897f235d040800000000000000
-      internalID: 4671696227459043422
+      spriteID: 7652ee5276ed78130800000000000000
+      internalID: 3569065764313769319
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-move-down_4
+      name: enemy-scuttler-idle-donw-normal_4
       rect:
         serializedVersion: 2
-        x: 68
+        x: 67
         y: 0
-        width: 16
+        width: 18
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9f146456a783f3ed0800000000000000
-      internalID: -2432163175420509703
+      spriteID: 295bc85a6fb415f00800000000000000
+      internalID: 1103746906393982354
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-move-down_5
+      name: enemy-scuttler-idle-donw-normal_5
       rect:
         serializedVersion: 2
-        x: 85
+        x: 84
         y: 0
-        width: 16
+        width: 18
         height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: df8263e3ca9424da0800000000000000
-      internalID: -5962121952558176003
+      spriteID: af08c240af7069590800000000000000
+      internalID: -7667932545158446854
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-move-down_6
+      name: enemy-scuttler-idle-donw-normal_6
       rect:
         serializedVersion: 2
-        x: 102
+        x: 101
         y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        width: 18
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bd0ab4e673c54a1a0800000000000000
-      internalID: -6799208144279199525
+      spriteID: 244cca500b1db4510800000000000000
+      internalID: 1534550651989443650
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-move-down_7
+      name: enemy-scuttler-idle-donw-normal_7
       rect:
         serializedVersion: 2
-        x: 119
+        x: 118
         y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        width: 17
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a41ece6037c67ee90800000000000000
-      internalID: -6996504254803549878
+      spriteID: 2559e76cfe0c020c0800000000000000
+      internalID: -4602466683112745646
       vertices: []
       indices: 
       edges: []
@@ -313,26 +313,24 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 49d5414f6f2d75948a68ee51c9aecd09
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: 4c0b1e8133d6bed4fb0f6d28a8955003, type: 3}
-      name: _NormalMap
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      enemy-scuttler-move-down_0: -1248806321510513995
-      enemy-scuttler-move-down_1: 9088797161348145563
-      enemy-scuttler-move-down_2: -6986164724914908866
-      enemy-scuttler-move-down_3: 4671696227459043422
-      enemy-scuttler-move-down_4: -2432163175420509703
-      enemy-scuttler-move-down_5: -5962121952558176003
-      enemy-scuttler-move-down_6: -6799208144279199525
-      enemy-scuttler-move-down_7: -6996504254803549878
+      enemy-scuttler-idle-donw-normal_0: 5518570035382540707
+      enemy-scuttler-idle-donw-normal_1: 6773638384044652567
+      enemy-scuttler-idle-donw-normal_2: 7385715739562608333
+      enemy-scuttler-idle-donw-normal_3: 3569065764313769319
+      enemy-scuttler-idle-donw-normal_4: 1103746906393982354
+      enemy-scuttler-idle-donw-normal_5: -7667932545158446854
+      enemy-scuttler-idle-donw-normal_6: 1534550651989443650
+      enemy-scuttler-idle-donw-normal_7: -4602466683112745646
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

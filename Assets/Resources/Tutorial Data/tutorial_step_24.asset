@@ -27,6 +27,7 @@ MonoBehaviour:
   itemType: 
   showProgressBar: 0
   enableUIPanels: 0b000000
+  tutorialPanelMoveDownOffset: 100
   spawnUnits: []
   grantResources: []
   completionSound:
@@ -40,3 +41,6 @@ MonoBehaviour:
   highlightTargetIDs: []
   showArrowUI: 1
   arrowID: quest_panel
+  showTargetBracket: 0
+  targetBracketBuildingType: 
+  includeConstructionSiteForTargetBracket: 1

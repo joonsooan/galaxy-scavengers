@@ -29,6 +29,7 @@ MonoBehaviour:
   itemType: 
   showProgressBar: 0
   enableUIPanels: 03000000
+  tutorialPanelMoveDownOffset: 100
   spawnUnits: []
   grantResources: []
   completionSound:
@@ -42,3 +43,6 @@ MonoBehaviour:
   highlightTargetIDs: []
   showArrowUI: 1
   arrowID: debuff_panel
+  showTargetBracket: 0
+  targetBracketBuildingType: 
+  includeConstructionSiteForTargetBracket: 1

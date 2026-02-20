@@ -204,6 +204,7 @@ public class Unit_Drone : UnitBase
     private void ReleaseFromProcessor()
     {
         ReleaseFromRecipeTask();
+        HideProgressBar();
 
         if (_loadingCoroutine != null) {
             StopCoroutine(_loadingCoroutine);
@@ -750,6 +751,7 @@ public class Unit_Drone : UnitBase
     private void SetTask_ReturnHome(bool stopMovement = false)
     {
         ReleaseFromRecipeTask();
+        HideProgressBar();
 
         if (_currentRequest != null) {
             _currentProcessor?.CancelRequest(_currentRequest);
