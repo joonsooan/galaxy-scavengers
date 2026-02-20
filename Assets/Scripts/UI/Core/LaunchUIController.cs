@@ -158,7 +158,7 @@ public class LaunchUIController : MonoBehaviour
 
     public void OnCancelLaunch()
     {
-        if (!buttonClickSound.IsNull)
+        if (!FMODUIButton.HasPlayedClickSoundThisFrame && !buttonClickSound.IsNull)
         {
             RuntimeManager.PlayOneShot(buttonClickSound);
         }
@@ -176,7 +176,7 @@ public class LaunchUIController : MonoBehaviour
             return;
         }
 
-        if (!buttonClickSound.IsNull)
+        if (!FMODUIButton.HasPlayedClickSoundThisFrame && !buttonClickSound.IsNull)
         {
             RuntimeManager.PlayOneShot(buttonClickSound);
         }

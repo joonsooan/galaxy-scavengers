@@ -130,6 +130,10 @@ public class BaseSceneManager : MonoBehaviour
 
     private void PlayButtonSound()
     {
+        if (FMODUIButton.HasPlayedClickSoundThisFrame) {
+            return;
+        }
+
         if (!buttonClickSound.IsNull) {
             RuntimeManager.PlayOneShot(buttonClickSound);
         }

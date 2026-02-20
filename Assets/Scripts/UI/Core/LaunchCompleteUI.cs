@@ -65,7 +65,7 @@ public class LaunchCompleteUI : MonoBehaviour
 
     private void OnContinueClicked()
     {
-        if (!buttonClickSound.IsNull)
+        if (!FMODUIButton.HasPlayedClickSoundThisFrame && !buttonClickSound.IsNull)
         {
             RuntimeManager.PlayOneShot(buttonClickSound);
         }

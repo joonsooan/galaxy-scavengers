@@ -1275,6 +1275,7 @@ MonoBehaviour:
       Data3: -73339495
       Data4: 1624008095
     Path: event:/SFX_UI/SFX_UIClick
+  clickType: Default
 --- !u!1 &59790003
 GameObject:
   m_ObjectHideFlags: 0
@@ -35552,6 +35553,7 @@ MonoBehaviour:
       Data3: -73339495
       Data4: 1624008095
     Path: event:/SFX_UI/SFX_UIClick
+  clickType: Default
 --- !u!1 &668126145
 GameObject:
   m_ObjectHideFlags: 0
@@ -40371,6 +40373,7 @@ MonoBehaviour:
       Data3: -73339495
       Data4: 1624008095
     Path: event:/SFX_UI/SFX_UIClick
+  clickType: Default
 --- !u!1 &899945891
 GameObject:
   m_ObjectHideFlags: 0
@@ -51962,6 +51965,7 @@ MonoBehaviour:
       Data3: -73339495
       Data4: 1624008095
     Path: event:/SFX_UI/SFX_UIClick
+  clickType: Default
 --- !u!1 &1512528153
 GameObject:
   m_ObjectHideFlags: 0
@@ -53191,6 +53195,7 @@ MonoBehaviour:
       Data3: -73339495
       Data4: 1624008095
     Path: event:/SFX_UI/SFX_UIClick
+  clickType: Default
 --- !u!1001 &1595281991
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -65739,6 +65744,7 @@ MonoBehaviour:
       Data3: -73339495
       Data4: 1624008095
     Path: event:/SFX_UI/SFX_UIClick
+  clickType: Default
 --- !u!1 &1630035889
 GameObject:
   m_ObjectHideFlags: 0

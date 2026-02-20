@@ -431,6 +431,11 @@ public class GameMenuManager : MonoBehaviour
 
     private void PlayButtonSound()
     {
+        if (FMODUIButton.HasPlayedClickSoundThisFrame)
+        {
+            return;
+        }
+
         if (!buttonClickSound.IsNull)
         {
             RuntimeManager.PlayOneShot(buttonClickSound);
