@@ -58,7 +58,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 0d7643660942c2444aaa8f0ad062ef96, type: 2}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -78,7 +78,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1027114353
   m_SortingLayer: 3
-  m_SortingOrder: 10
+  m_SortingOrder: 0
   m_Sprite: {fileID: 4246698446789957178, guid: e7ddcc5dff23d6a41a3149087e8653ef, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -89,7 +89,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
 --- !u!95 &6266697623783724910
 Animator:
   serializedVersion: 7
@@ -131,7 +131,7 @@ SortingGroup:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6351257733188319420}
-  m_Enabled: 1
+  m_Enabled: 0
   m_SortingLayerID: -1027114353
   m_SortingLayer: 3
   m_SortingOrder: 10
@@ -315,9 +315,6 @@ MonoBehaviour:
   targetRenderer: {fileID: 7262163600464621280}
   spriteRoot: {fileID: 7600100152802156651}
   sinkParticle: {fileID: 5029393362290521043}
-  clipStart: 0
-  clipEnd: 1.5
-  idleClipHeight: -1
   sinkDuration: 2
   sinkDistance: 1.5
   playRiseOnEnable: 1

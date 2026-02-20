@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyDaySinkingEffect : MonoBehaviour
@@ -9,11 +8,6 @@ public class EnemyDaySinkingEffect : MonoBehaviour
     [SerializeField] private Renderer targetRenderer;
     [SerializeField] private Transform spriteRoot;
     [SerializeField] private ParticleSystem sinkParticle;
-
-    [Header("Clip")]
-    [SerializeField] private float clipStart = -1f;
-    [SerializeField] private float clipEnd = 1f;
-    [SerializeField] private float idleClipHeight = -1f;
 
     [Header("Sinking")]
     [SerializeField] private float sinkDuration = 0.6f;
@@ -32,10 +26,6 @@ public class EnemyDaySinkingEffect : MonoBehaviour
     [SerializeField] private bool waitForParticleFadeOut = true;
     [SerializeField] private float particleFadeOutMaxWait = 0.35f;
 
-    private static readonly int ClipHeightId = Shader.PropertyToID("_ClipHeight");
-
-    private MaterialPropertyBlock _propertyBlock;
-    private readonly List<Renderer> _clipRenderers = new List<Renderer>();
     private Coroutine _sinkingCoroutine;
     private Coroutine _risingCoroutine;
     private Action _onComplete;
@@ -43,37 +33,31 @@ public class EnemyDaySinkingEffect : MonoBehaviour
     private Rigidbody2D _rigidbody2D;
     private EnemyUnitBase _enemyUnitBase;
     private Vector3 _startLocalPosition;
-    private float _currentClipHeight;
 
     public bool IsSinking { get; private set; }
     public bool IsRising { get; private set; }
 
     private void Awake()
     {
-        _propertyBlock = new MaterialPropertyBlock();
         _unitMovement = GetComponent<UnitMovement>();
         _rigidbody2D = GetComponent<Rigidbody2D>();
         _enemyUnitBase = GetComponent<EnemyUnitBase>();
-        RefreshClipRenderers();
+
+        if (spriteRoot == null && targetRenderer != null)
+        {
+            spriteRoot = targetRenderer.transform;
+        }
 
         if (spriteRoot != null)
         {
             _startLocalPosition = spriteRoot.localPosition;
         }
-        else if (targetRenderer != null)
-        {
-            _startLocalPosition = targetRenderer.transform.localPosition;
-        }
-
-        _currentClipHeight = idleClipHeight;
     }
 
     private void OnEnable()
     {
         StopAllRunningRoutines();
-        RefreshClipRenderers();
         StopParticleImmediate();
-        SetClipHeight(idleClipHeight);
 
         if (spriteRoot != null)
         {
@@ -82,7 +66,7 @@ public class EnemyDaySinkingEffect : MonoBehaviour
 
         if (playRiseOnEnable)
         {
-            PreSetupRisingState(); 
+            PreSetupRisingState();
             _risingCoroutine = StartCoroutine(RisingRoutine());
         }
         else
@@ -109,7 +93,6 @@ public class EnemyDaySinkingEffect : MonoBehaviour
         {
             spriteRoot.localPosition = new Vector3(_startLocalPosition.x, _startLocalPosition.y - riseDistance, _startLocalPosition.z);
         }
-        SetClipHeight(clipEnd);
     }
 
     public void StartSinking(Action onComplete = null)
@@ -139,7 +122,6 @@ public class EnemyDaySinkingEffect : MonoBehaviour
             spriteRoot.localPosition = _startLocalPosition;
         }
 
-        SetClipHeight(clipStart);
         _onComplete = onComplete;
         _sinkingCoroutine = StartCoroutine(SinkingRoutine());
     }
@@ -178,18 +160,19 @@ public class EnemyDaySinkingEffect : MonoBehaviour
         _enemyUnitBase?.SetBehaviorPaused(true);
         _unitMovement?.ForceStopAllMovement();
 
-        if (_rigidbody2D != null) _rigidbody2D.linearVelocity = Vector2.zero;
+        if (_rigidbody2D != null)
+        {
+            _rigidbody2D.linearVelocity = Vector2.zero;
+        }
+
         if (spriteRoot != null)
         {
             spriteRoot.localPosition = new Vector3(_startLocalPosition.x, _startLocalPosition.y - riseDistance, _startLocalPosition.z);
         }
 
         PlayParticle();
-        SetClipHeight(clipEnd);
-        
         yield return AnimateRising();
 
-        SetClipHeight(idleClipHeight);
         if (spriteRoot != null)
         {
             spriteRoot.localPosition = _startLocalPosition;
@@ -242,8 +225,10 @@ public class EnemyDaySinkingEffect : MonoBehaviour
 
     private void ApplySinkingFrame(float t, float elapsed)
     {
-        SetClipHeight(Mathf.Lerp(clipStart, clipEnd, t));
-        if (spriteRoot == null) return;
+        if (spriteRoot == null)
+        {
+            return;
+        }
 
         float shakeOffsetX = Mathf.Sin(elapsed * shakeFrequency) * shakeAmplitude * (1f - t);
         Vector3 pos = _startLocalPosition;
@@ -254,8 +239,10 @@ public class EnemyDaySinkingEffect : MonoBehaviour
 
     private void ApplyRisingFrame(float t)
     {
-        SetClipHeight(Mathf.Lerp(clipEnd, clipStart, t));
-        if (spriteRoot == null) return;
+        if (spriteRoot == null)
+        {
+            return;
+        }
 
         Vector3 pos = _startLocalPosition;
         pos.y -= riseDistance * (1f - t);
@@ -264,39 +251,12 @@ public class EnemyDaySinkingEffect : MonoBehaviour
 
     private void ResetVisualState()
     {
-        SetClipHeight(idleClipHeight);
         if (spriteRoot != null)
         {
             spriteRoot.localPosition = _startLocalPosition;
         }
 
         StopParticleImmediate();
-    }
-
-    private void SetClipHeight(float value)
-    {
-        if (_propertyBlock == null) _propertyBlock = new MaterialPropertyBlock();
-        _currentClipHeight = value;
-
-        if (_clipRenderers.Count == 0) RefreshClipRenderers();
-
-        for (int i = 0; i < _clipRenderers.Count; i++)
-        {
-            Renderer r = _clipRenderers[i];
-            if (r == null) continue;
-
-            r.GetPropertyBlock(_propertyBlock);
-            _propertyBlock.SetFloat(ClipHeightId, value);
-            r.SetPropertyBlock(_propertyBlock);
-        }
-    }
-
-    private void LateUpdate()
-    {
-        if (IsRising || IsSinking)
-        {
-            SetClipHeight(_currentClipHeight);
-        }
     }
 
     private IEnumerator StopParticleWithFadeOut()
@@ -355,45 +315,5 @@ public class EnemyDaySinkingEffect : MonoBehaviour
         IsSinking = false;
         IsRising = false;
         _onComplete = null;
-    }
-
-    private void RefreshClipRenderers()
-    {
-        _clipRenderers.Clear();
-
-        if (targetRenderer != null)
-        {
-            _clipRenderers.Add(targetRenderer);
-        }
-
-        SpriteRenderer[] sprites = GetComponentsInChildren<SpriteRenderer>(true);
-        for (int i = 0; i < sprites.Length; i++)
-        {
-            SpriteRenderer sprite = sprites[i];
-            if (!_clipRenderers.Contains(sprite))
-            {
-                _clipRenderers.Add(sprite);
-            }
-        }
-
-        if (_clipRenderers.Count == 0)
-        {
-            Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
-            for (int i = 0; i < renderers.Length; i++)
-            {
-                Renderer renderer = renderers[i];
-                if (!_clipRenderers.Contains(renderer))
-                {
-                    _clipRenderers.Add(renderer);
-                }
-            }
-        }
-
-        if (spriteRoot == null && _clipRenderers.Count > 0)
-        {
-            spriteRoot = _clipRenderers[0].transform;
-        }
-
-        targetRenderer = _clipRenderers.Count > 0 ? _clipRenderers[0] : null;
     }
 }
