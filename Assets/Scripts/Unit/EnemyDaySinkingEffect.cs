@@ -67,7 +67,15 @@ public class EnemyDaySinkingEffect : MonoBehaviour
 
     private void OnEnable()
     {
+        StopAllRunningRoutines();
         RefreshClipRenderers();
+        StopParticleImmediate();
+        SetClipHeight(idleClipHeight);
+
+        if (spriteRoot != null)
+        {
+            spriteRoot.localPosition = _startLocalPosition;
+        }
 
         if (playRiseOnEnable)
         {
@@ -121,6 +129,11 @@ public class EnemyDaySinkingEffect : MonoBehaviour
         if (_rigidbody2D != null)
         {
             _rigidbody2D.linearVelocity = Vector2.zero;
+        }
+
+        if (spriteRoot != null)
+        {
+            spriteRoot.localPosition = _startLocalPosition;
         }
 
         SetClipHeight(clipStart);
@@ -254,10 +267,7 @@ public class EnemyDaySinkingEffect : MonoBehaviour
             spriteRoot.localPosition = _startLocalPosition;
         }
 
-        if (sinkParticle != null)
-        {
-            sinkParticle.Stop(true, ParticleSystemStopBehavior.StopEmitting);
-        }
+        StopParticleImmediate();
     }
 
     private void SetClipHeight(float value)
@@ -304,6 +314,16 @@ public class EnemyDaySinkingEffect : MonoBehaviour
         {
             sinkParticle.Play();
         }
+    }
+
+    private void StopParticleImmediate()
+    {
+        if (sinkParticle == null)
+        {
+            return;
+        }
+
+        sinkParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
     }
 
     private void StopAllRunningRoutines()

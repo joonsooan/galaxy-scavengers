@@ -41,33 +41,34 @@ public class EnemySpawner : MonoBehaviour
     private float _lastNoise100WaveTime = -1f;
     private bool _isWaveFromNoise100 = false;
     private bool _wasNoise100 = false;
+    private bool _isSubscribedToEvents;
 
-    private void Start()
+    private void OnEnable()
     {
-        if (DayNightCycleManager.Instance != null)
+        if (_isSubscribedToEvents)
         {
-            DayNightCycleManager.OnNightStarted += OnNightStarted;
-            DayNightCycleManager.OnDayStarted += OnDayStarted;
+            return;
         }
 
-        if (NoiseManager.Instance != null)
-        {
-            NoiseManager.Instance.OnNoiseChanged += OnNoiseChanged;
-        }
+        DayNightCycleManager.OnNightStarted += OnNightStarted;
+        DayNightCycleManager.OnDayStarted += OnDayStarted;
+
+        if (NoiseManager.Instance != null) NoiseManager.Instance.OnNoiseChanged += OnNoiseChanged;
+        _isSubscribedToEvents = true;
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
-        if (DayNightCycleManager.Instance != null)
+        if (!_isSubscribedToEvents)
         {
-            DayNightCycleManager.OnNightStarted -= OnNightStarted;
-            DayNightCycleManager.OnDayStarted -= OnDayStarted;
+            return;
         }
 
-        if (NoiseManager.Instance != null)
-        {
-            NoiseManager.Instance.OnNoiseChanged -= OnNoiseChanged;
-        }
+        DayNightCycleManager.OnNightStarted -= OnNightStarted;
+        DayNightCycleManager.OnDayStarted -= OnDayStarted;
+
+        if (NoiseManager.Instance != null) NoiseManager.Instance.OnNoiseChanged -= OnNoiseChanged;
+        _isSubscribedToEvents = false;
     }
 
     private void OnNightStarted()

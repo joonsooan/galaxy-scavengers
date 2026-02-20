@@ -5,27 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2e9922bb-ccc6-4c6e-93bd-15fa8a8d7f34" name="변경" comment="">
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{37371be6-51ff-4f0d-889e-8997cdb7efa8}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{37371be6-51ff-4f0d-889e-8997cdb7efa8}.pdc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{5f83db6f-744f-4fb2-8f1e-cb7f2847fb4c}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{5f83db6f-744f-4fb2-8f1e-cb7f2847fb4c}.pdc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{7159b27d-e1c0-4077-bea9-414f5a7a8ef5}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{7159b27d-e1c0-4077-bea9-414f5a7a8ef5}.pdc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{e573231b-88c9-4be7-94de-be7f3f596c7d}.pdc" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FMOD/galaxy-scavengers-fmod/.cache/{e573231b-88c9-4be7-94de-be7f3f596c7d}.pdc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/Particle System/Mining Particle Effect 1.prefab" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/Particle System/Mining Particle Effect 1.prefab.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.galaxy-scavengers/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.galaxy-scavengers/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Materials/Particle System/Disappear Particle Effect.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Particle System/Disappear Particle Effect.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Materials/Particle System/Disappear Particle Effect.prefab.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Particle System/Disappear Particle Effect.prefab.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Materials/Shader Materials/Flash.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Shader Materials/Flash.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Materials/Shaders/Unit Disappear.shadergraph" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Shaders/Unit Disappear.shadergraph" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Enemies/Enemy_Behemoth.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Enemies/Enemy_Behemoth.prefab" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Enemies/Enemy_Scuttler.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Enemies/Enemy_Scuttler.prefab" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Enemies/Enemy_Spitter.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Enemies/Enemy_Spitter.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/UI/Panels/Quest Brief Panel.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/UI/Panels/Quest Brief Panel.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/UI/Panels/Request Quest Detail Panel.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/UI/Panels/Request Quest Detail Panel.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/TitleScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/TitleScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Building/Turret_Bullet.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Building/Turret_Bullet.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Systems/Combat/Damageable.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Systems/Combat/Damageable.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Systems/Spawning/EnemySpawner.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Systems/Spawning/EnemySpawner.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestBriefPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Quest/QuestBriefPanel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Unit/EnemyUnitBase.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Unit/EnemyUnitBase.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Unit/Enemy_Bullet.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Unit/Enemy_Bullet.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Unit/Player_Bullet.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Unit/Player_Bullet.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Unit/UnitBase.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Unit/UnitBase.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Systems/Vision/VisibilityController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Systems/Vision/VisibilityController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Unit/EnemyDaySinkingEffect.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Unit/EnemyDaySinkingEffect.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,7 +40,7 @@
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/Temp/GeneratedFromGraph-Atmosphere_3D.shader" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.render-pipelines.universal@2a2241f53fcd/Shaders/2D/Sprite-Lit-Default.shader" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
@@ -61,26 +50,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;Unity 에디터에 연결.Attach to Unity Editor.executor&quot;: &quot;Debug&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feature-game-ux-improvement&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "Unity 에디터에 연결.Attach to Unity Editor.executor": "Debug",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "feature-game-ux-improvement-2",
+    "ignore.virus.scanning.warn.message": "true",
+    "junie.onboarding.icon.badge.shown": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Unity 에디터에 연결.Attach to Unity Editor">
     <configuration name="유닛 테스트(배치 모드)" type="RunUnityExe" factoryName="Unity Executable">
       <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.0.59f2\Editor\Unity.exe" />
@@ -93,7 +82,7 @@
       <method v="2" />
     </configuration>
     <configuration name="독립실행형 플레이어" type="RunUnityExe" factoryName="Unity Executable">
-      <option name="EXE_PATH" value="$PROJECT_DIR$/../Builds/galaxy-scavengers/galaxy-scavengers_26.02.13\Galaxy Scavengers.exe" />
+      <option name="EXE_PATH" value="$PROJECT_DIR$/../Builds/galaxy-scavengers/galaxy-scavengers_26.02.20\Galaxy Scavengers.exe" />
       <option name="PROGRAM_PARAMETERS" value="" />
       <option name="WORKING_DIRECTORY" value="C:\Unity Projects\Builds\galaxy-scavengers\galaxy-scavengers_26.02.05" />
       <option name="PASS_PARENT_ENVS" value="1" />
@@ -202,6 +191,7 @@
       <workItem from="1771333884566" duration="1240000" />
       <workItem from="1771480308463" duration="295000" />
       <workItem from="1771494496049" duration="704000" />
+      <workItem from="1771569623132" duration="1197000" />
     </task>
     <servers />
   </component>
