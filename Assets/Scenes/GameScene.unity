@@ -70867,7 +70867,7 @@ MonoBehaviour:
     amountToMine: 100
     timeToMinePerUnit: 0.1
   - resourceType: 1
-    amountToMine: 50
+    amountToMine: 100
     timeToMinePerUnit: 0.2
   - resourceType: 2
     amountToMine: 50
@@ -70929,7 +70929,6 @@ MonoBehaviour:
   inventoryPanel: {fileID: 2037369537}
   inventoryGridContainer: {fileID: 1185129392}
   currentResourcePanel: {fileID: 471620567}
-  sortButton: {fileID: 0}
   launchStartButton: {fileID: 1627937981}
   inventoryCellPrefab: {fileID: 3842191235755297668, guid: 0c93dfd6b41a96d4489a92b302206a7f, type: 3}
   resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: 25b8419de43c1984fb45df6c7a910ba5, type: 3}
