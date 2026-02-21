@@ -43,6 +43,7 @@ public class GameMenuManager : MonoBehaviour
     private FMODVolumeController _volumeController;
     private Button _currentMenuOpenButton;
     private bool _isMenuOpen;
+    private MainControlPanel _mainControlPanel;
 
     public static GameMenuManager Instance { get; private set; }
 
@@ -80,6 +81,8 @@ public class GameMenuManager : MonoBehaviour
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         FindAndSetupMenuUI();
+        _mainControlPanel = null;
+        TryCacheMainControlPanel();
     }
 
     private void InitializeUIReferences()
@@ -277,6 +280,13 @@ public class GameMenuManager : MonoBehaviour
                 return;
             }
 
+            MainControlPanel mainControlPanel = TryCacheMainControlPanel();
+            if (mainControlPanel != null && mainControlPanel.IsResourceStatPanelActive())
+            {
+                mainControlPanel.CloseResourceStatPanel();
+                return;
+            }
+
             if (_isMenuOpen)
             {
                 CloseMenu();
@@ -445,6 +455,16 @@ public class GameMenuManager : MonoBehaviour
     public bool IsMenuOpen()
     {
         return _isMenuOpen;
+    }
+
+    private MainControlPanel TryCacheMainControlPanel()
+    {
+        if (_mainControlPanel == null)
+        {
+            _mainControlPanel = FindFirstObjectByType<MainControlPanel>();
+        }
+
+        return _mainControlPanel;
     }
 
     private void OnDestroy()

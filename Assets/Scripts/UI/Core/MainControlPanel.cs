@@ -59,6 +59,15 @@ public class MainControlPanel : MonoBehaviour
     
     private void Update()
     {
+        if (IsResourceStatPanelActive())
+        {
+            if (Input.GetMouseButtonUp(1))
+            {
+                CloseResourceStatPanel();
+                return;
+            }
+        }
+
         if (Input.GetMouseButtonUp(1))
         {
             if (UIUtils.IsPointerOverUI())
@@ -118,6 +127,14 @@ public class MainControlPanel : MonoBehaviour
         }
 
         HideAllPanels();
+        if (_buildingInfoPanelComponent != null)
+        {
+            _buildingInfoPanelComponent.ClearAllInfo();
+        }
+        if (buildingInfoPanel != null)
+        {
+            buildingInfoPanel.SetActive(false);
+        }
         ShowPanel(resourceStatPanel);
     }
 
@@ -173,15 +190,41 @@ public class MainControlPanel : MonoBehaviour
         _currentlyActivePanel = null;
     }
 
+    public void CloseResourceStatPanel()
+    {
+        if (resourceStatPanel != null)
+        {
+            resourceStatPanel.SetActive(false);
+        }
+
+        if (_currentlyActivePanel == resourceStatPanel)
+        {
+            _currentlyActivePanel = null;
+        }
+    }
+
     public void ShowResourceStatPanelForTutorial()
     {
         if (resourceStatPanel != null)
         {
             if (baseBuildingPanel != null) baseBuildingPanel.SetActive(false);
             if (processorPanel != null) processorPanel.SetActive(false);
+            if (_buildingInfoPanelComponent != null)
+            {
+                _buildingInfoPanelComponent.ClearAllInfo();
+            }
+            if (buildingInfoPanel != null)
+            {
+                buildingInfoPanel.SetActive(false);
+            }
             resourceStatPanel.SetActive(true);
             _currentlyActivePanel = resourceStatPanel;
         }
+    }
+
+    public bool IsResourceStatPanelActive()
+    {
+        return resourceStatPanel != null && resourceStatPanel.activeSelf;
     }
     
     private void OnDestroy()

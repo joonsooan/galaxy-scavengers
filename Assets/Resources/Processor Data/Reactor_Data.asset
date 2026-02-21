@@ -34,7 +34,7 @@ MonoBehaviour:
     - resourceType: 1
       amount: 10
     - resourceType: 2
-      amount: 3
+      amount: 5
     processingTime: 5
     produceAmount: 1
     priority: 0
@@ -44,7 +44,7 @@ MonoBehaviour:
     - resourceType: 1
       amount: 10
     - resourceType: 3
-      amount: 2
+      amount: 5
     processingTime: 5
     produceAmount: 1
     priority: 0
