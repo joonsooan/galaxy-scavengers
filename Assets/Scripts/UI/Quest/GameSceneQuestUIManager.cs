@@ -22,13 +22,17 @@ public class GameSceneQuestUIManager : MonoBehaviour
     [SerializeField] private EventReference newQuestSound;
     [SerializeField] private Material shaderMaterial;
     [SerializeField] private string shaderMaterialResourcePath;
+    [SerializeField] private float shaderWaveSpeedOnValue = 1f;
     
     private readonly List<QuestCell> _questCells = new ();
     private readonly HashSet<int> _viewedQuestIds = new ();
     private readonly HashSet<int> _acceptedRequestQuests = new ();
+    private bool _questPanelShaderSuppressed;
 
     private QuestBriefPanel _questBriefPanel;
     private RequestQuestAcceptPanel _requestQuestAcceptPanel;
+    private float _cachedShaderWaveSpeed = 1f;
+    private bool _hasCachedShaderWaveSpeed;
 
     private void Awake()
     {
@@ -64,6 +68,17 @@ public class GameSceneQuestUIManager : MonoBehaviour
         {
             shaderMaterial = Resources.Load<Material>(shaderMaterialResourcePath);
         }
+
+        if (shaderMaterial == null && toggleQuestPanelButton != null)
+        {
+            Image buttonImage = toggleQuestPanelButton.GetComponent<Image>();
+            if (buttonImage != null)
+            {
+                shaderMaterial = buttonImage.material;
+            }
+        }
+
+        CacheShaderDefaults();
     }
     
     private void OnEnable()
@@ -71,6 +86,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
         if (QuestDataManager.Instance != null)
             QuestDataManager.Instance.OnQuestStateChanged += OnQuestStateChanged;
         SubscribeToGameSceneInitialized();
+        TutorialManager.OnTutorialEnded += OnTutorialEnded;
         
         if (RequestQuestManager.Instance != null)
         {
@@ -119,7 +135,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
         
         if (shaderMaterial != null)
         {
-            shaderMaterial.SetFloat("_Enabled", 0f);
+            DisableShaderMaterial();
         }
     }
     
@@ -129,6 +145,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
             QuestDataManager.Instance.OnQuestStateChanged -= OnQuestStateChanged;
         RequestQuestManager.OnRequestQuestSpawned -= OnRequestQuestSpawned;
         GameManager.OnGameSceneInitialized -= OnGameSceneInitialized;
+        TutorialManager.OnTutorialEnded -= OnTutorialEnded;
     }
 
     private void SubscribeToGameSceneInitialized()
@@ -150,6 +167,17 @@ public class GameSceneQuestUIManager : MonoBehaviour
 
     private void RefreshNotifierForCoreRepairQuests()
     {
+        if (IsTutorialActive())
+        {
+            if (notifierIcon != null)
+            {
+                notifierIcon.SetActive(false);
+            }
+            _questPanelShaderSuppressed = true;
+            DisableShaderMaterial();
+            return;
+        }
+
         if (QuestDataManager.Instance == null)
         {
             return;
@@ -269,6 +297,12 @@ public class GameSceneQuestUIManager : MonoBehaviour
             StartCoroutine(RefreshQuestListAfterSpawn());
         }
     }
+
+    private void OnTutorialEnded()
+    {
+        LoadActiveQuests();
+        UpdateNotifierIcons();
+    }
     
     private void DisableShaderMaterial()
     {
@@ -282,7 +316,73 @@ public class GameSceneQuestUIManager : MonoBehaviour
             {
                 shaderMaterial.SetFloat("_Intensity", 0f);
             }
+            else if (shaderMaterial.HasProperty("_WaveSpeed"))
+            {
+                shaderMaterial.SetFloat("_WaveSpeed", 0f);
+            }
         }
+    }
+
+    private void EnableShaderMaterial()
+    {
+        if (shaderMaterial != null)
+        {
+            if (shaderMaterial.HasProperty("_Enabled"))
+            {
+                shaderMaterial.SetFloat("_Enabled", 1f);
+            }
+            else if (shaderMaterial.HasProperty("_Intensity"))
+            {
+                shaderMaterial.SetFloat("_Intensity", 1f);
+            }
+            else if (shaderMaterial.HasProperty("_WaveSpeed"))
+            {
+                float activeWaveSpeed = _hasCachedShaderWaveSpeed && _cachedShaderWaveSpeed > 0f
+                    ? _cachedShaderWaveSpeed
+                    : shaderWaveSpeedOnValue;
+                shaderMaterial.SetFloat("_WaveSpeed", activeWaveSpeed);
+            }
+        }
+    }
+
+    private void CacheShaderDefaults()
+    {
+        if (shaderMaterial == null)
+        {
+            return;
+        }
+
+        if (shaderMaterial.HasProperty("_WaveSpeed"))
+        {
+            _cachedShaderWaveSpeed = shaderMaterial.GetFloat("_WaveSpeed");
+            _hasCachedShaderWaveSpeed = true;
+        }
+    }
+
+    private void ConsumeQuestPanelShaderHighlight()
+    {
+        if (_questPanelShaderSuppressed)
+        {
+            return;
+        }
+
+        _questPanelShaderSuppressed = true;
+        DisableShaderMaterial();
+    }
+
+    private bool IsTutorialActive()
+    {
+        return TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive();
+    }
+
+    private bool IsQuestVisibleDuringTutorial(QuestData quest)
+    {
+        if (!IsTutorialActive())
+        {
+            return true;
+        }
+        
+        return false;
     }
     
     private IEnumerator RefreshQuestListAfterSpawn()
@@ -311,6 +411,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
         List<QuestData> activeQuests = allQuests.Where(quest =>
         {
             if (quest == null) return false;
+            if (!IsQuestVisibleDuringTutorial(quest)) return false;
             
             QuestState state = QuestDataManager.Instance.GetQuestState(quest.questId);
             bool isActive = state == QuestState.Active || state == QuestState.Completable;
@@ -382,6 +483,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
 
     public void ToggleQuestPanel()
     {
+        ConsumeQuestPanelShaderHighlight();
         if (IsQuestPanelOpen())
             HideQuestPanel();
         else
@@ -399,18 +501,6 @@ public class GameSceneQuestUIManager : MonoBehaviour
         if (questCellGridParent != null)
         {
             questCellGridParent.gameObject.SetActive(true);
-        }
-        
-        if (shaderMaterial != null)
-        {
-            if (shaderMaterial.HasProperty("_Enabled"))
-            {
-                shaderMaterial.SetFloat("_Enabled", 0f);
-            }
-            else if (shaderMaterial.HasProperty("_Intensity"))
-            {
-                shaderMaterial.SetFloat("_Intensity", 0f);
-            }
         }
     }
 
@@ -458,22 +548,24 @@ public class GameSceneQuestUIManager : MonoBehaviour
 
     private void ShowNotifierForNewQuest(int questId, bool playSound = false)
     {
+        if (IsTutorialActive())
+        {
+            if (notifierIcon != null)
+            {
+                notifierIcon.SetActive(false);
+            }
+            _questPanelShaderSuppressed = true;
+            DisableShaderMaterial();
+            return;
+        }
+
         if (notifierIcon != null)
         {
             notifierIcon.SetActive(true);
         }
-        
-        if (shaderMaterial != null)
-        {
-            if (shaderMaterial.HasProperty("_Enabled"))
-            {
-                shaderMaterial.SetFloat("_Enabled", 1f);
-            }
-            else if (shaderMaterial.HasProperty("_Intensity"))
-            {
-                shaderMaterial.SetFloat("_Intensity", 1f);
-            }
-        }
+
+        _questPanelShaderSuppressed = false;
+        EnableShaderMaterial();
         
         if (playSound && !newQuestSound.IsNull)
         {
@@ -483,6 +575,17 @@ public class GameSceneQuestUIManager : MonoBehaviour
     
     private void UpdateNotifierIcons()
     {
+        if (IsTutorialActive())
+        {
+            if (notifierIcon != null)
+            {
+                notifierIcon.SetActive(false);
+            }
+            _questPanelShaderSuppressed = true;
+            DisableShaderMaterial();
+            return;
+        }
+
         bool hasActiveNotifier = false;
         
         foreach (QuestCell cell in _questCells)
@@ -530,31 +633,14 @@ public class GameSceneQuestUIManager : MonoBehaviour
         {
             notifierIcon.SetActive(hasActiveNotifier);
         }
-        
-        if (shaderMaterial != null)
+
+        if (!hasActiveNotifier)
         {
-            if (hasActiveNotifier)
-            {
-                if (shaderMaterial.HasProperty("_Enabled"))
-                {
-                    shaderMaterial.SetFloat("_Enabled", 1f);
-                }
-                else if (shaderMaterial.HasProperty("_Intensity"))
-                {
-                    shaderMaterial.SetFloat("_Intensity", 1f);
-                }
-            }
-            else
-            {
-                if (shaderMaterial.HasProperty("_Enabled"))
-                {
-                    shaderMaterial.SetFloat("_Enabled", 0f);
-                }
-                else if (shaderMaterial.HasProperty("_Intensity"))
-                {
-                    shaderMaterial.SetFloat("_Intensity", 0f);
-                }
-            }
+            DisableShaderMaterial();
+        }
+        else if (!_questPanelShaderSuppressed)
+        {
+            EnableShaderMaterial();
         }
     }
     
@@ -620,6 +706,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
         _acceptedRequestQuests.Add(questId);
         _viewedQuestIds.Add(questId);
         
+        _questPanelShaderSuppressed = true;
         DisableShaderMaterial();
         
         CloseRequestQuestAcceptPanel();
@@ -640,6 +727,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
         
         _viewedQuestIds.Add(questId);
         
+        _questPanelShaderSuppressed = true;
         DisableShaderMaterial();
         
         CloseRequestQuestAcceptPanel();

@@ -1,5 +1,7 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class IngameStatusUI : MonoBehaviour
 {
@@ -7,10 +9,15 @@ public class IngameStatusUI : MonoBehaviour
     [SerializeField] private TMP_Text aetherStatusText;
     [SerializeField] private TMP_Text storageText;
     [SerializeField] private TMP_Text aetherText;
+    [SerializeField] private GameObject creditPanel;
+    [SerializeField] private Image creditIconImage;
+    [SerializeField] private TMP_Text creditAmountText;
 
     private AetherConsumptionManager _aetherConsumptionManager;
     private Color _originalColor;
     private StorageTrackerManager _storageTrackerManager;
+    private bool _isCreditSubscribed;
+    private Coroutine _bindCreditManagerCoroutine;
 
     private void Start()
     {
@@ -23,6 +30,7 @@ public class IngameStatusUI : MonoBehaviour
         }
 
         _originalColor = aetherStatusText.color;
+        _bindCreditManagerCoroutine = StartCoroutine(BindCreditManagerWhenReady());
 
         UpdateStorageText();
         UpdateAetherText();
@@ -54,6 +62,12 @@ public class IngameStatusUI : MonoBehaviour
             _storageTrackerManager.OnStorageChanged -= UpdateStorageText;
             _storageTrackerManager.OnAetherChanged -= UpdateAetherText;
         }
+
+        if (_isCreditSubscribed && CreditManager.Instance != null)
+        {
+            CreditManager.Instance.OnCreditsChanged -= UpdateCreditText;
+        }
+        _isCreditSubscribed = false;
     }
 
     private void UpdateStorageText()
@@ -80,5 +94,40 @@ public class IngameStatusUI : MonoBehaviour
             aetherText.color = _originalColor;
         }
         aetherText.text = $"저장량 : {current} / {max}";
+    }
+
+    private IEnumerator BindCreditManagerWhenReady()
+    {
+        while (CreditManager.Instance == null)
+        {
+            yield return null;
+        }
+
+        if (!_isCreditSubscribed)
+        {
+            CreditManager.Instance.OnCreditsChanged += UpdateCreditText;
+            _isCreditSubscribed = true;
+        }
+        UpdateCreditText(CreditManager.Instance.GetCredits());
+        _bindCreditManagerCoroutine = null;
+    }
+
+    private void UpdateCreditText(int credits)
+    {
+        if (creditAmountText == null)
+        {
+            return;
+        }
+
+        creditAmountText.text = credits.ToString();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(creditAmountText.rectTransform);
+        if (creditPanel != null)
+        {
+            RectTransform panelRect = creditPanel.GetComponent<RectTransform>();
+            if (panelRect != null)
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
+            }
+        }
     }
 }

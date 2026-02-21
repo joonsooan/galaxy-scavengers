@@ -274,7 +274,7 @@ MonoBehaviour:
   defaultMaxStackAmount: 100
   customMaxStackAmounts:
   - resourceType: 0
-    maxStackAmount: 200
+    maxStackAmount: 100
   - resourceType: 1
     maxStackAmount: 100
   - resourceType: 2
