@@ -4,18 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2e9922bb-ccc6-4c6e-93bd-15fa8a8d7f34" name="변경" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.galaxy-scavengers/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.galaxy-scavengers/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/Particle System/Disappear Particle Effect.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Particle System/Disappear Particle Effect.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/Particle System/Disappear Particle Effect.prefab.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Particle System/Disappear Particle Effect.prefab.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/Shader Materials/Flash.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Shader Materials/Flash.mat" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/Shaders/Unit Disappear.shadergraph" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Shaders/Unit Disappear.shadergraph" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Enemies/Enemy_Behemoth.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Enemies/Enemy_Behemoth.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Enemies/Enemy_Scuttler.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Enemies/Enemy_Scuttler.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Enemies/Enemy_Spitter.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Enemies/Enemy_Spitter.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Systems/Vision/VisibilityController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Systems/Vision/VisibilityController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Unit/EnemyDaySinkingEffect.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Unit/EnemyDaySinkingEffect.cs" afterDir="false" />
-    </list>
+    <list default="true" id="2e9922bb-ccc6-4c6e-93bd-15fa8a8d7f34" name="변경" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -193,6 +182,7 @@
       <workItem from="1771494496049" duration="704000" />
       <workItem from="1771569623132" duration="1197000" />
       <workItem from="1771657136468" duration="3000" />
+      <workItem from="1771660851912" duration="674000" />
     </task>
     <servers />
   </component>
@@ -201,6 +191,7 @@
   </component>
   <component name="UnityProjectConfiguration" hasMinimizedUI="true" />
   <component name="UnityProjectDiscoverer">
+    <option name="hasUnityReference" value="true" />
     <option name="unityProject" value="true" />
     <option name="unityProjectFolder" value="true" />
   </component>
