@@ -12,6 +12,11 @@ public class DroneProduceUIManager : MonoBehaviour
     [SerializeField] private TMP_Text droneHubName;
     [SerializeField] private TMP_Text droneHubInfo;
     [SerializeField] private TMP_Text unitCountText;
+    [SerializeField] private UnitInfoPanel unitInfoPanel;
+    
+    [Header("Unit Info Panel Layout")]
+    [SerializeField] private Vector2 unitInfoPanelAnchor = new Vector2(0.5f, 0.5f);
+    [SerializeField] private Vector2 unitInfoPanelAnchoredPosition;
 
     private List<UnitData> _allProducibleUnits;
     private DroneHubData _currentData;
@@ -33,6 +38,10 @@ public class DroneProduceUIManager : MonoBehaviour
     {
         _currentDroneHub = droneHub;
         _currentData = droneHub.DroneHubData;
+        if (unitInfoPanel != null)
+        {
+            unitInfoPanel.ApplyFixedAnchorLayout(unitInfoPanelAnchor, unitInfoPanelAnchoredPosition);
+        }
 
         SetDroneHubInfo(_currentData);
         LoadAllProducibleUnits(_currentData);
@@ -79,6 +88,11 @@ public class DroneProduceUIManager : MonoBehaviour
     private void OnDisable()
     {
         UnitManager.OnUnitCountChanged -= OnUnitCountChanged;
+        ClearUnitInfo();
+        if (unitInfoPanel != null)
+        {
+            unitInfoPanel.RestoreDefaultLayout();
+        }
     }
 
     private void OnUnitCountChanged(UnitBase unit)
@@ -126,8 +140,45 @@ public class DroneProduceUIManager : MonoBehaviour
             DroneProduceCell newCell = newCellObject.GetComponent<DroneProduceCell>();
 
             if (newCell != null) {
-                newCell.Initialize(unitData, _currentDroneHub, i);
+                newCell.Initialize(unitData, _currentDroneHub, i, this);
             }
         }
+    }
+
+    public void OnProduceCellHover(UnitData unitData)
+    {
+        ShowUnitInfo(unitData);
+    }
+
+    public void OnProduceCellHoverExit(UnitData unitData)
+    {
+        ClearUnitInfo();
+    }
+
+    public void OnProduceCellClicked(UnitData unitData)
+    {
+        ShowUnitInfo(unitData);
+    }
+
+    public void ClearUnitInfo()
+    {
+        if (unitInfoPanel != null)
+        {
+            unitInfoPanel.ClearAllInfo();
+        }
+    }
+
+    private void ShowUnitInfo(UnitData unitData)
+    {
+        if (unitInfoPanel == null)
+        {
+            return;
+        }
+        if (unitData == null)
+        {
+            unitInfoPanel.ClearAllInfo();
+            return;
+        }
+        unitInfoPanel.PreviewInfo(unitData);
     }
 }
