@@ -13,9 +13,10 @@ MonoBehaviour:
   m_Name: tutorial_step_20
   m_EditorClassIdentifier: 
   stepIndex: 20
-  text: "\uB2E4\uC74C\uC73C\uB85C \uC790\uC6D0 \uAC00\uACF5\uC744 \uB2F4\uB2F9\uD560
-    <color=#FFC107>\uAC00\uACF5 \uC720\uB2DB</color>\uC744 <color=#FFC107>\uB4DC\uB860
-    \uD5C8\uBE0C</color>\uC5D0\uC11C \uD558\uB098 \uC0DD\uC0B0\uD574\uBCF4\uC138\uC694!"
+  text: "\uC0DD\uC0B0 \uAC74\uBB3C\uC740 <color=#FFC107>\uAC00\uACF5 \uC720\uB2DB</color>\uC774
+    \uBC30\uC815\uB418\uC5B4\uC57C \uC790\uC6D0 \uAC00\uACF5\uC744 \uC9C4\uD589\uD569\uB2C8\uB2E4.\n\uB4DC\uB860
+    \uD5C8\uBE0C\uC5D0\uC11C <color=#FFC107>\uAC00\uACF5 \uC720\uB2DB</color>\uC744
+    \uD558\uB098 \uC0DD\uC0B0\uD574\uBCF4\uC138\uC694!"
   stepType: 11
   duration: 0
   count: 1
@@ -25,6 +26,7 @@ MonoBehaviour:
   itemType: 
   showProgressBar: 0
   enableUIPanels: 
+  tutorialPanelMoveDownOffset: 0
   spawnUnits: []
   grantResources:
   - resourceType: 0

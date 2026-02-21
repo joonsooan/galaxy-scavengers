@@ -12,7 +12,6 @@ public class InventorySystem : MonoBehaviour
     [SerializeField] private GameObject inventoryPanel;
     [SerializeField] private GameObject inventoryGridContainer;
     [SerializeField] private GameObject currentResourcePanel;
-    [SerializeField] private Button sortButton;
     [SerializeField] private Button launchStartButton;
 
     [Header("Prefabs")]
@@ -57,11 +56,6 @@ public class InventorySystem : MonoBehaviour
         InitializeInventory();
         InitializeResourcePanel();
         
-        if (sortButton != null)
-        {
-            sortButton.onClick.AddListener(SortInventory);
-        }
-
         if (launchStartButton != null)
         {
             launchStartButton.onClick.AddListener(OnLaunchStartButtonClicked);
@@ -325,7 +319,13 @@ public class InventorySystem : MonoBehaviour
             UpdateResourceInfoCells(type, currentAmount);
         }
 
-        return remainingToMove < amountToMove;
+        bool addedAnyResource = remainingToMove < amountToMove;
+        if (addedAnyResource)
+        {
+            SortInventory();
+        }
+
+        return addedAnyResource;
     }
 
     public void ReturnResourceToManager(ResourceType type, int amount)
