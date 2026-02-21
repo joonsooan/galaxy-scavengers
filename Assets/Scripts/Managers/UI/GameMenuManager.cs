@@ -272,6 +272,11 @@ public class GameMenuManager : MonoBehaviour
 
     private void Update()
     {
+        if (IsLoadingScreenActive())
+        {
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (HelpUIManager.Instance != null && HelpUIManager.Instance.IsHelpOpen())
@@ -465,6 +470,22 @@ public class GameMenuManager : MonoBehaviour
         }
 
         return _mainControlPanel;
+    }
+
+    private bool IsLoadingScreenActive()
+    {
+        if (LoadingUIManager.Instance == null)
+        {
+            return false;
+        }
+
+        LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
+        if (loadingScreen == null)
+        {
+            return false;
+        }
+
+        return loadingScreen.gameObject.activeSelf;
     }
 
     private void OnDestroy()

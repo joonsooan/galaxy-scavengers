@@ -9,6 +9,7 @@ public class MainControlPanel : MonoBehaviour
     [SerializeField] private Button baseBuildingBtn;
     [SerializeField] private Button processorBtn;
     [SerializeField] private Button resourceStatBtn;
+    [SerializeField] private Button resourceStatCloseBtn;
 
     [Header("UI Panels")]
     [SerializeField] private GameObject buildingInfoPanel;
@@ -52,6 +53,11 @@ public class MainControlPanel : MonoBehaviour
         if (resourceStatBtn != null)
         {
             resourceStatBtn.onClick.AddListener(OnResourceStatBtnClicked);
+        }
+
+        if (resourceStatCloseBtn != null)
+        {
+            resourceStatCloseBtn.onClick.AddListener(OnResourceStatCloseBtnClicked);
         }
         
         HideAllPanels();
@@ -124,6 +130,12 @@ public class MainControlPanel : MonoBehaviour
         if (TutorialManager.Instance != null)
         {
             TutorialManager.Instance.DisableHighlightForTarget(resourceStatBtn.gameObject);
+        }
+
+        if (IsResourceStatPanelActive())
+        {
+            CloseResourceStatPanel();
+            return;
         }
 
         HideAllPanels();
@@ -203,6 +215,11 @@ public class MainControlPanel : MonoBehaviour
         }
     }
 
+    private void OnResourceStatCloseBtnClicked()
+    {
+        CloseResourceStatPanel();
+    }
+
     public void ShowResourceStatPanelForTutorial()
     {
         if (resourceStatPanel != null)
@@ -242,6 +259,11 @@ public class MainControlPanel : MonoBehaviour
         if (resourceStatBtn != null)
         {
             resourceStatBtn.onClick.RemoveListener(OnResourceStatBtnClicked);
+        }
+
+        if (resourceStatCloseBtn != null)
+        {
+            resourceStatCloseBtn.onClick.RemoveListener(OnResourceStatCloseBtnClicked);
         }
     }
 }

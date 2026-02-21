@@ -687,6 +687,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6910935580785934813}
     m_Modifications:
+    - target: {fileID: -6674992460788162431, guid: 34d215b8b4184924396a78a31c8a245c, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5915218168167444899, guid: 34d215b8b4184924396a78a31c8a245c, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1060488276189768622, guid: 34d215b8b4184924396a78a31c8a245c, type: 3}
       propertyPath: m_Name
       value: Tutorial Arrow
@@ -1017,6 +1025,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5219858170843305465}
     m_Modifications:
+    - target: {fileID: -6674992460788162431, guid: 34d215b8b4184924396a78a31c8a245c, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5915218168167444899, guid: 34d215b8b4184924396a78a31c8a245c, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1060488276189768622, guid: 34d215b8b4184924396a78a31c8a245c, type: 3}
       propertyPath: m_Name
       value: Tutorial Arrow
@@ -1153,7 +1169,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6665679389509004878, guid: ed21b05a2b3584547b9ad2e2681c52f6, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 20
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 6665679389509004878, guid: ed21b05a2b3584547b9ad2e2681c52f6, type: 3}
       propertyPath: m_SizeDelta.y
