@@ -113,10 +113,10 @@ public class ResourceGenerator : Damageable
 
     private void GenerateResource()
     {
+        var alertManager = FindFirstObjectByType<GameAlertUIManager>();
         if (resourceType == ResourceType.Aether)
         {
             FindAndCacheAetherManager();
-            var alertManager = FindFirstObjectByType<GameAlertUIManager>();
             
             if (_aetherConsumptionManager != null && _aetherConsumptionManager.IsAetherCapacityFull)
             {
@@ -127,15 +127,24 @@ public class ResourceGenerator : Damageable
                 _wasAetherStorageFull = true;
                 return;
             }
-            
-            if (_wasAetherStorageFull && alertManager != null)
-            {
-                alertManager.UnregisterAlert(GameAlertType.AetherStorageFull, this);
-            }
-            _wasAetherStorageFull = false;
         }
         
         ResourceManager.Instance.AddResource(resourceType, resourceAmount);
+
+        if (resourceType == ResourceType.Aether && _aetherConsumptionManager != null)
+        {
+            bool isNowFull = _aetherConsumptionManager.IsAetherCapacityFull;
+            if (isNowFull && !_wasAetherStorageFull && alertManager != null)
+            {
+                alertManager.RegisterAlert(GameAlertType.AetherStorageFull, this);
+            }
+            else if (!isNowFull && _wasAetherStorageFull && alertManager != null)
+            {
+                alertManager.UnregisterAlert(GameAlertType.AetherStorageFull, this);
+            }
+            _wasAetherStorageFull = isNowFull;
+        }
+
         ShowResourceImage();
     }
     

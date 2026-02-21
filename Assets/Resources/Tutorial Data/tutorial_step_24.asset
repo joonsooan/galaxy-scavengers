@@ -27,7 +27,7 @@ MonoBehaviour:
   itemType: 
   showProgressBar: 0
   enableUIPanels: 0b000000
-  tutorialPanelMoveDownOffset: 100
+  tutorialPanelMoveDownOffset: 110
   spawnUnits: []
   grantResources: []
   completionSound:

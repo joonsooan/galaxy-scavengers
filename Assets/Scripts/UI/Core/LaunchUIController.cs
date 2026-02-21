@@ -18,8 +18,6 @@ public class LaunchUIController : MonoBehaviour
 
     [Header("Launch Settings")]
     [SerializeField] private float countdownDurationSeconds = 10f;
-    [SerializeField] private int neededAetherPerCell = 10;
-    [SerializeField] private int freeLaunchCells = 0;
     [SerializeField] private float launchCompleteDisplayDuration = 2f;
     [SerializeField] private float fadeToBlackDuration = 1f;
     [SerializeField] private float blackScreenWaitDuration = 1f;
@@ -38,6 +36,7 @@ public class LaunchUIController : MonoBehaviour
     private float _cachedTutorialPanelHideDelay;
     private float _cachedFadeToBlackDuration;
     private GameObject _fadeOverlay;
+    private bool _isMainEngineRepairAlertActive;
 
     private void Awake()
     {
@@ -62,6 +61,12 @@ public class LaunchUIController : MonoBehaviour
         {
             CoreRepairManager.Instance.OnRepairStatusChanged += UpdateLaunchAvailability;
         }
+        TutorialManager.OnTutorialEnded += UpdateLaunchAvailability;
+    }
+
+    private void Start()
+    {
+        StartCoroutine(SyncLaunchAvailabilityWhenGameplayReady());
     }
 
     private void OnDisable()
@@ -70,6 +75,7 @@ public class LaunchUIController : MonoBehaviour
         {
             CoreRepairManager.Instance.OnRepairStatusChanged -= UpdateLaunchAvailability;
         }
+        TutorialManager.OnTutorialEnded -= UpdateLaunchAvailability;
     }
 
     private void UpdateCachedWaits()
@@ -226,25 +232,6 @@ public class LaunchUIController : MonoBehaviour
             return;
         }
 
-        int occupiedCells = inventorySystem.GetOccupiedCellCount();
-        int cellsRequiringAether = Mathf.Max(0, occupiedCells - freeLaunchCells);
-        int neededAether = neededAetherPerCell * cellsRequiringAether;
-
-        if (ResourceManager.Instance != null)
-        {
-            int currentAether = ResourceManager.Instance.GetResourceAmount(ResourceType.Aether);
-            if (currentAether < neededAether)
-            {
-                Debug.LogWarning($"LaunchUIController: Not enough aether! Need {neededAether}, have {currentAether}");
-                return;
-            }
-
-            if (neededAether > 0)
-            {
-                ResourceManager.Instance.RemoveResource(ResourceType.Aether, neededAether);
-            }
-        }
-
         inventorySystem.SetTransferEnabled(false);
 
         if (countdownPanel != null)
@@ -351,27 +338,16 @@ public class LaunchUIController : MonoBehaviour
         {
             return;
         }
-
-        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
-        if (mainStructure == null)
+        
+        neededAetherText.text = "0";
+        if (requiredAetherPanel != null)
         {
-            neededAetherText.text = "0";
-            return;
+            RectTransform panelRect = requiredAetherPanel.GetComponent<RectTransform>();
+            if (panelRect != null)
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
+            }
         }
-
-        InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
-        if (inventorySystem == null)
-        {
-            neededAetherText.text = "0";
-            return;
-        }
-
-        int occupiedCells = inventorySystem.GetOccupiedCellCount();
-        int cellsRequiringAether = Mathf.Max(0, occupiedCells - freeLaunchCells);
-        int neededAether = neededAetherPerCell * cellsRequiringAether;
-
-        neededAetherText.text = neededAether.ToString();
-        LayoutRebuilder.ForceRebuildLayoutImmediate(requiredAetherPanel.GetComponent<RectTransform>());
     }
 
     private void UpdateCountdownText(float remainingSeconds)
@@ -391,6 +367,26 @@ public class LaunchUIController : MonoBehaviour
     private void UpdateLaunchAvailability()
     {
         bool isEngineRepaired = CoreRepairManager.Instance != null && CoreRepairManager.Instance.IsPartRepaired(CorePart.Engine);
+        bool isTutorialActive = TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive();
+        GameAlertUIManager alertManager = FindFirstObjectByType<GameAlertUIManager>();
+        bool shouldShowEngineRepairAlert = !isEngineRepaired && GameManager.IsGameplayReady && !isTutorialActive;
+        if (alertManager != null)
+        {
+            if (shouldShowEngineRepairAlert && !_isMainEngineRepairAlertActive)
+            {
+                alertManager.RegisterAlert(GameAlertType.MainEngineRepair);
+                _isMainEngineRepairAlertActive = true;
+            }
+            else if (!shouldShowEngineRepairAlert && _isMainEngineRepairAlertActive)
+            {
+                alertManager.UnregisterAlert(GameAlertType.MainEngineRepair);
+                _isMainEngineRepairAlertActive = false;
+            }
+        }
+        else
+        {
+            _isMainEngineRepairAlertActive = false;
+        }
         
         if (launchButton != null)
         {
@@ -409,6 +405,16 @@ public class LaunchUIController : MonoBehaviour
                 }
             }
         }
+    }
+
+    private IEnumerator SyncLaunchAvailabilityWhenGameplayReady()
+    {
+        while (!GameManager.IsGameplayReady)
+        {
+            yield return null;
+        }
+
+        UpdateLaunchAvailability();
     }
 }
 

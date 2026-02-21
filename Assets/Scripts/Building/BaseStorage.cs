@@ -58,6 +58,10 @@ public class BaseStorage : Damageable, IStorage
         int newTotalAmount = GetTotalCurrentAmount();
         bool stillFull = newTotalAmount >= maxStorageAmount;
 
+        if (!_wasStorageFull && stillFull && alertManager != null) {
+            alertManager.RegisterAlert(GameAlertType.StorageFull, this);
+        }
+
         if (_wasStorageFull && !stillFull && alertManager != null) {
             alertManager.UnregisterAlert(GameAlertType.StorageFull, this);
         }
@@ -82,6 +86,14 @@ public class BaseStorage : Damageable, IStorage
         if (ResourceManager.Instance != null) {
             ResourceManager.Instance.RemoveResource(type, amountWithdrawn);
         }
+        
+        int newTotalAmount = GetTotalCurrentAmount();
+        bool stillFull = newTotalAmount >= maxStorageAmount;
+        var alertManager = FindFirstObjectByType<GameAlertUIManager>();
+        if (_wasStorageFull && !stillFull && alertManager != null) {
+            alertManager.UnregisterAlert(GameAlertType.StorageFull, this);
+        }
+        _wasStorageFull = stillFull;
 
         return true;
     }
