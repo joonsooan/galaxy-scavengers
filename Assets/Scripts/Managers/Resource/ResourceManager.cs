@@ -100,8 +100,12 @@ public class ResourceManager : MonoBehaviour
 
     private void Update()
     {
+        if (IsLoadingScreenActive()) {
+            return;
+        }
+
 #if UNITY_EDITOR
-        if (Input.GetKeyDown(KeyCode.C)) {
+        if (Input.GetKeyDown(KeyCode.F1)) {
             AddCheatResources();
         }
 #endif
@@ -128,6 +132,20 @@ public class ResourceManager : MonoBehaviour
         ResourceDataManager.OnResourceAmountChanged -= ForwardOnResourceAmountChanged;
         ResourceDataManager.OnResourceNodeAdded -= ForwardOnResourceNodeAdded;
         ResourceDataManager.OnResourceNodeRemoved -= ForwardOnResourceNodeRemoved;
+    }
+
+    private bool IsLoadingScreenActive()
+    {
+        if (LoadingUIManager.Instance == null) {
+            return false;
+        }
+
+        LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
+        if (loadingScreen == null) {
+            return false;
+        }
+
+        return loadingScreen.gameObject.activeSelf;
     }
 
     // Forward events from ResourceDataManager for backward compatibility

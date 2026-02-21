@@ -65,6 +65,27 @@ public class MainControlPanel : MonoBehaviour
     
     private void Update()
     {
+        if (IsLoadingScreenActive())
+        {
+            return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            PlayShortcutClickSound(baseBuildingBtn);
+            OnBaseBuildingBtnClicked();
+        }
+        else if (Input.GetKeyDown(KeyCode.R))
+        {
+            PlayShortcutClickSound(processorBtn);
+            OnProcessorBtnClicked();
+        }
+        else if (Input.GetKeyDown(KeyCode.F))
+        {
+            PlayShortcutClickSound(resourceStatBtn);
+            OnResourceStatBtnClicked();
+        }
+
         if (IsResourceStatPanelActive())
         {
             if (Input.GetMouseButtonUp(1))
@@ -220,6 +241,23 @@ public class MainControlPanel : MonoBehaviour
         CloseResourceStatPanel();
     }
 
+    private void PlayShortcutClickSound(Button button)
+    {
+        if (button == null)
+        {
+            return;
+        }
+
+        FMODUIButton fmodButton = button.GetComponent<FMODUIButton>();
+        if (fmodButton == null)
+        {
+            return;
+        }
+
+        PointerEventData eventData = EventSystem.current != null ? new PointerEventData(EventSystem.current) : null;
+        fmodButton.OnPointerUp(eventData);
+    }
+
     public void ShowResourceStatPanelForTutorial()
     {
         if (resourceStatPanel != null)
@@ -242,6 +280,22 @@ public class MainControlPanel : MonoBehaviour
     public bool IsResourceStatPanelActive()
     {
         return resourceStatPanel != null && resourceStatPanel.activeSelf;
+    }
+
+    private bool IsLoadingScreenActive()
+    {
+        if (LoadingUIManager.Instance == null)
+        {
+            return false;
+        }
+
+        LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
+        if (loadingScreen == null)
+        {
+            return false;
+        }
+
+        return loadingScreen.gameObject.activeSelf;
     }
     
     private void OnDestroy()

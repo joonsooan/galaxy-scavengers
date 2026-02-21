@@ -114,7 +114,7 @@ public class GameManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Q)) {
             GameSceneQuestUIManager questUI = FindFirstObjectByType<GameSceneQuestUIManager>();
-            if (questUI != null) questUI.ToggleQuestPanel();
+            if (questUI != null) questUI.ToggleQuestPanelWithShortcut();
         }
 
         if (Input.GetKeyDown(KeyCode.Space)) {
@@ -134,7 +134,7 @@ public class GameManager : MonoBehaviour
         if (IsPaused) return;
 
 #if UNITY_EDITOR
-        if (Input.GetKeyDown(KeyCode.F)) {
+        if (Input.GetKeyDown(KeyCode.F2)) {
             if (FogOfWarManager.Instance != null) {
                 FogOfWarManager.Instance.ToggleFogVisibility();
             }

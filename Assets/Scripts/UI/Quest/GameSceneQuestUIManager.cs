@@ -490,6 +490,29 @@ public class GameSceneQuestUIManager : MonoBehaviour
             ShowQuestPanel();
     }
 
+    public void ToggleQuestPanelWithShortcut()
+    {
+        PlayToggleQuestPanelClickSound();
+        ToggleQuestPanel();
+    }
+
+    private void PlayToggleQuestPanelClickSound()
+    {
+        if (toggleQuestPanelButton == null)
+        {
+            return;
+        }
+
+        FMODUIButton fmodButton = toggleQuestPanelButton.GetComponent<FMODUIButton>();
+        if (fmodButton == null)
+        {
+            return;
+        }
+
+        PointerEventData eventData = EventSystem.current != null ? new PointerEventData(EventSystem.current) : null;
+        fmodButton.OnPointerUp(eventData);
+    }
+
     private void ShowQuestPanel()
     {
         if (_questBriefPanel != null && questDetailPanelObject != null && questDetailPanelObject.activeSelf)
