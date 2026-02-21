@@ -8,6 +8,7 @@ public class AlertCellAppearance : MonoBehaviour
     private Vector2 _restPosition;
     private Image _panelImage;
     private float _defaultAlpha = 1f;
+    private Material _defaultMaterial;
     private Sequence _sequence;
 
     private void Awake()
@@ -17,7 +18,10 @@ public class AlertCellAppearance : MonoBehaviour
             _restPosition = _rectTransform.anchoredPosition;
         _panelImage = GetComponent<Image>();
         if (_panelImage != null)
+        {
             _defaultAlpha = _panelImage.color.a;
+            _defaultMaterial = _panelImage.material;
+        }
     }
 
     private void OnEnable()
@@ -29,6 +33,7 @@ public class AlertCellAppearance : MonoBehaviour
             Color c = _panelImage.color;
             c.a = _defaultAlpha;
             _panelImage.color = c;
+            _panelImage.material = _defaultMaterial;
         }
         _sequence?.Kill();
         _sequence = null;
@@ -45,6 +50,7 @@ public class AlertCellAppearance : MonoBehaviour
             Color c = _panelImage.color;
             c.a = _defaultAlpha;
             _panelImage.color = c;
+            _panelImage.material = _defaultMaterial;
         }
     }
 
@@ -62,4 +68,5 @@ public class AlertCellAppearance : MonoBehaviour
         c.a = hovered ? _defaultAlpha : 0f;
         _panelImage.color = c;
     }
+
 }

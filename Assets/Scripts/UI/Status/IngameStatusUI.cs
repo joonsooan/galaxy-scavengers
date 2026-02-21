@@ -119,7 +119,7 @@ public class IngameStatusUI : MonoBehaviour
             return;
         }
 
-        creditAmountText.text = credits.ToString();
+        creditAmountText.text = $"보유량 : {credits.ToString()}";
         LayoutRebuilder.ForceRebuildLayoutImmediate(creditAmountText.rectTransform);
         if (creditPanel != null)
         {

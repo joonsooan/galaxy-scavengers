@@ -3409,7 +3409,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8067440897203084835, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_Colors.m_NormalColor.a
-      value: 0.39215687
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8884695541414015742, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_text
@@ -38639,7 +38639,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8067440897203084835, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_Colors.m_NormalColor.a
-      value: 0.39215687
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8884695541414015742, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_text
@@ -44766,9 +44766,6 @@ MonoBehaviour:
     Path: event:/SFX_UI/SFX_Warning_Critical
   tooltipPanel: {fileID: 1922431905}
   tooltipText: {fileID: 1158699060}
-  shaderMaterial: {fileID: 0}
-  shaderMaterialResourcePath: 
-  shaderWaveSpeedOnValue: 1
   cameraTargetController: {fileID: 0}
 --- !u!1 &1085667705
 GameObject:
@@ -53953,7 +53950,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8067440897203084835, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_Colors.m_NormalColor.a
-      value: 0.39215687
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8884695541414015742, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_text
@@ -69359,7 +69356,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8067440897203084835, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_Colors.m_NormalColor.a
-      value: 0.39215687
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8884695541414015742, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_text

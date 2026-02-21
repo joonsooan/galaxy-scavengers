@@ -4,13 +4,7 @@ using UnityEngine.EventSystems;
 public class AlertCellTooltipTrigger : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     [SerializeField] private GameAlertType alertType;
-    private AlertCellAppearance _appearance;
     private GameAlertUIManager _alertManager;
-
-    private void Awake()
-    {
-        _appearance = GetComponent<AlertCellAppearance>();
-    }
 
     public void OnPointerEnter(PointerEventData eventData)
     {

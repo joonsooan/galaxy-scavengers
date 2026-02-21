@@ -47,11 +47,6 @@ public class GameAlertUIManager : MonoBehaviour
     [Header("Tooltip")]
     [SerializeField] private GameObject tooltipPanel;
     [SerializeField] private TMP_Text tooltipText;
-    
-    [Header("Alert Shader")]
-    [SerializeField] private Material shaderMaterial;
-    [SerializeField] private string shaderMaterialResourcePath;
-    [SerializeField] private float shaderWaveSpeedOnValue = 1f;
 
     private const string TooltipMinerNoResource = "채굴 유닛이 캘 자원이 없습니다.";
     private const string TooltipUnitUnderAttack = "유닛이 공격당하고 있습니다!";
@@ -78,9 +73,6 @@ public class GameAlertUIManager : MonoBehaviour
     private readonly List<Damageable> _mainEngineRepairSources = new List<Damageable>();
     private const int MaxSourcesPerType = 5;
     private Coroutine _tooltipRebuildCoroutine;
-    private bool _alertShaderSuppressed;
-    private float _cachedShaderWaveSpeed = 1f;
-    private bool _hasCachedShaderWaveSpeed;
     private StorageTrackerManager _storageTrackerManager;
     private Coroutine _bindStorageTrackerCoroutine;
     private bool _isStorageFullByTracker;
@@ -98,22 +90,11 @@ public class GameAlertUIManager : MonoBehaviour
 
     private void Awake()
     {
-        if (shaderMaterial == null && !string.IsNullOrEmpty(shaderMaterialResourcePath))
-            shaderMaterial = Resources.Load<Material>(shaderMaterialResourcePath);
-        if (shaderMaterial == null)
-        {
-            Image panelImage = GetComponent<Image>();
-            if (panelImage != null)
-                shaderMaterial = panelImage.material;
-        }
-        CacheShaderDefaults();
         SetAllInactive();
     }
 
     private void OnEnable()
     {
-        _alertShaderSuppressed = false;
-        DisableShaderMaterial();
         _isStorageFullByTracker = false;
         _isAetherFullByTracker = false;
         if (_bindStorageTrackerCoroutine != null)
@@ -143,7 +124,6 @@ public class GameAlertUIManager : MonoBehaviour
         {
             NoiseManager.Instance.OnNoiseChanged -= OnNoiseChanged;
         }
-        DisableShaderMaterial();
         HideTooltip();
     }
 
@@ -157,8 +137,6 @@ public class GameAlertUIManager : MonoBehaviour
             bool cautionActive = zone == NoiseManager.NoiseZone.Caution;
             if (cautionActive && !noiseCautionCell.activeSelf && !noiseCautionSound.IsNull)
                 RuntimeManager.PlayOneShot(noiseCautionSound);
-            if (cautionActive && !noiseCautionCell.activeSelf)
-                OnNewAlertCellActivated();
             noiseCautionCell.SetActive(cautionActive);
         }
         if (noiseWarningCell != null)
@@ -166,8 +144,6 @@ public class GameAlertUIManager : MonoBehaviour
             bool warningActive = zone == NoiseManager.NoiseZone.Warning;
             if (warningActive && !noiseWarningCell.activeSelf && !noiseWarningSound.IsNull)
                 RuntimeManager.PlayOneShot(noiseWarningSound);
-            if (warningActive && !noiseWarningCell.activeSelf)
-                OnNewAlertCellActivated();
             noiseWarningCell.SetActive(warningActive);
         }
         if (noiseDangerCell != null)
@@ -175,11 +151,8 @@ public class GameAlertUIManager : MonoBehaviour
             bool dangerActive = zone == NoiseManager.NoiseZone.Danger;
             if (dangerActive && !noiseDangerCell.activeSelf && !noiseDangerSound.IsNull)
                 RuntimeManager.PlayOneShot(noiseDangerSound);
-            if (dangerActive && !noiseDangerCell.activeSelf)
-                OnNewAlertCellActivated();
             noiseDangerCell.SetActive(dangerActive);
         }
-        RefreshAlertShaderState();
     }
 
     private IEnumerator BindStorageTrackerWhenReady()
@@ -359,9 +332,6 @@ public class GameAlertUIManager : MonoBehaviour
 
     public void SetAlertActive(GameAlertType type, bool active)
     {
-        GameObject targetCell = GetAlertCell(type);
-        bool wasActive = targetCell != null && targetCell.activeSelf;
-
         switch (type)
         {
             case GameAlertType.MinerNoResource:
@@ -386,9 +356,6 @@ public class GameAlertUIManager : MonoBehaviour
                 if (mainEngineRepairCell != null) mainEngineRepairCell.SetActive(active);
                 break;
         }
-        if (active && !wasActive)
-            OnNewAlertCellActivated();
-        RefreshAlertShaderState();
 
         if (!active && _currentTooltipType == type)
             HideTooltip();
@@ -404,8 +371,6 @@ public class GameAlertUIManager : MonoBehaviour
                     bool active = _minerNoResourceCount > 0;
                     if (active && !minerNoResourceCell.activeSelf && !minerNoResourceSound.IsNull)
                         RuntimeManager.PlayOneShot(minerNoResourceSound);
-                    if (active && !minerNoResourceCell.activeSelf)
-                        OnNewAlertCellActivated();
                     minerNoResourceCell.SetActive(active);
                     if (!active && _currentTooltipType == GameAlertType.MinerNoResource)
                         HideTooltip();
@@ -417,8 +382,6 @@ public class GameAlertUIManager : MonoBehaviour
                     bool active = _unitUnderAttackCount > 0;
                     if (active && !unitUnderAttackCell.activeSelf && !unitUnderAttackSound.IsNull)
                         RuntimeManager.PlayOneShot(unitUnderAttackSound);
-                    if (active && !unitUnderAttackCell.activeSelf)
-                        OnNewAlertCellActivated();
                     unitUnderAttackCell.SetActive(active);
                     if (!active && _currentTooltipType == GameAlertType.UnitUnderAttack)
                         HideTooltip();
@@ -430,8 +393,6 @@ public class GameAlertUIManager : MonoBehaviour
                     bool active = _buildingUnderAttackCount > 0;
                     if (active && !buildingUnderAttackCell.activeSelf && !buildingUnderAttackSound.IsNull)
                         RuntimeManager.PlayOneShot(buildingUnderAttackSound);
-                    if (active && !buildingUnderAttackCell.activeSelf)
-                        OnNewAlertCellActivated();
                     buildingUnderAttackCell.SetActive(active);
                     if (!active && _currentTooltipType == GameAlertType.BuildingUnderAttack)
                         HideTooltip();
@@ -443,8 +404,6 @@ public class GameAlertUIManager : MonoBehaviour
                     bool active = _droneNoResourceCount > 0;
                     if (active && !droneNoResourceCell.activeSelf && !droneNoResourceSound.IsNull)
                         RuntimeManager.PlayOneShot(droneNoResourceSound);
-                    if (active && !droneNoResourceCell.activeSelf)
-                        OnNewAlertCellActivated();
                     droneNoResourceCell.SetActive(active);
                     if (!active && _currentTooltipType == GameAlertType.DroneNoResource)
                         HideTooltip();
@@ -456,8 +415,6 @@ public class GameAlertUIManager : MonoBehaviour
                     bool active = _storageFullCount > 0;
                     if (active && !storageFullCell.activeSelf && !storageFullSound.IsNull)
                         RuntimeManager.PlayOneShot(storageFullSound);
-                    if (active && !storageFullCell.activeSelf)
-                        OnNewAlertCellActivated();
                     storageFullCell.SetActive(active);
                     if (!active && _currentTooltipType == GameAlertType.StorageFull)
                         HideTooltip();
@@ -469,8 +426,6 @@ public class GameAlertUIManager : MonoBehaviour
                     bool active = _aetherStorageFullCount > 0;
                     if (active && !aetherStorageFullCell.activeSelf && !aetherStorageFullSound.IsNull)
                         RuntimeManager.PlayOneShot(aetherStorageFullSound);
-                    if (active && !aetherStorageFullCell.activeSelf)
-                        OnNewAlertCellActivated();
                     aetherStorageFullCell.SetActive(active);
                     if (!active && _currentTooltipType == GameAlertType.AetherStorageFull)
                         HideTooltip();
@@ -482,15 +437,12 @@ public class GameAlertUIManager : MonoBehaviour
                     bool active = _mainEngineRepairCount > 0;
                     if (active && !mainEngineRepairCell.activeSelf && !mainEngineRepairSound.IsNull)
                         RuntimeManager.PlayOneShot(mainEngineRepairSound);
-                    if (active && !mainEngineRepairCell.activeSelf)
-                        OnNewAlertCellActivated();
                     mainEngineRepairCell.SetActive(active);
                     if (!active && _currentTooltipType == GameAlertType.MainEngineRepair)
                         HideTooltip();
                 }
                 break;
         }
-        RefreshAlertShaderState();
     }
 
     private void SetAllInactive()
@@ -505,13 +457,11 @@ public class GameAlertUIManager : MonoBehaviour
         if (noiseCautionCell != null) noiseCautionCell.SetActive(false);
         if (noiseWarningCell != null) noiseWarningCell.SetActive(false);
         if (noiseDangerCell != null) noiseDangerCell.SetActive(false);
-        DisableShaderMaterial();
     }
 
     public void ShowTooltip(GameAlertType type)
     {
         if (tooltipPanel == null || tooltipText == null) return;
-        ConsumeAlertShaderHighlight();
         _currentTooltipType = type;
         RefreshTooltipText(type);
         tooltipPanel.SetActive(true);
@@ -705,108 +655,5 @@ public class GameAlertUIManager : MonoBehaviour
         }
     }
 
-    private void ConsumeAlertShaderHighlight()
-    {
-        if (_alertShaderSuppressed)
-            return;
-        _alertShaderSuppressed = true;
-        DisableShaderMaterial();
-    }
-
-    private void OnNewAlertCellActivated()
-    {
-        _alertShaderSuppressed = false;
-        EnableShaderMaterial();
-    }
-
-    private void RefreshAlertShaderState()
-    {
-        if (!HasAnyActiveAlertCell())
-        {
-            DisableShaderMaterial();
-            return;
-        }
-        if (!_alertShaderSuppressed)
-            EnableShaderMaterial();
-    }
-
-    private bool HasAnyActiveAlertCell()
-    {
-        return (minerNoResourceCell != null && minerNoResourceCell.activeSelf) ||
-               (unitUnderAttackCell != null && unitUnderAttackCell.activeSelf) ||
-               (buildingUnderAttackCell != null && buildingUnderAttackCell.activeSelf) ||
-               (droneNoResourceCell != null && droneNoResourceCell.activeSelf) ||
-               (storageFullCell != null && storageFullCell.activeSelf) ||
-               (aetherStorageFullCell != null && aetherStorageFullCell.activeSelf) ||
-               (mainEngineRepairCell != null && mainEngineRepairCell.activeSelf) ||
-               (noiseCautionCell != null && noiseCautionCell.activeSelf) ||
-               (noiseWarningCell != null && noiseWarningCell.activeSelf) ||
-               (noiseDangerCell != null && noiseDangerCell.activeSelf);
-    }
-
-    private GameObject GetAlertCell(GameAlertType type)
-    {
-        switch (type)
-        {
-            case GameAlertType.MinerNoResource: return minerNoResourceCell;
-            case GameAlertType.UnitUnderAttack: return unitUnderAttackCell;
-            case GameAlertType.BuildingUnderAttack: return buildingUnderAttackCell;
-            case GameAlertType.DroneNoResource: return droneNoResourceCell;
-            case GameAlertType.StorageFull: return storageFullCell;
-            case GameAlertType.AetherStorageFull: return aetherStorageFullCell;
-            case GameAlertType.MainEngineRepair: return mainEngineRepairCell;
-            default: return null;
-        }
-    }
-
-    private void EnableShaderMaterial()
-    {
-        if (shaderMaterial == null)
-            return;
-        if (shaderMaterial.HasProperty("_Enabled"))
-        {
-            shaderMaterial.SetFloat("_Enabled", 1f);
-        }
-        else if (shaderMaterial.HasProperty("_Intensity"))
-        {
-            shaderMaterial.SetFloat("_Intensity", 1f);
-        }
-        else if (shaderMaterial.HasProperty("_WaveSpeed"))
-        {
-            float activeWaveSpeed = _hasCachedShaderWaveSpeed && _cachedShaderWaveSpeed > 0f
-                ? _cachedShaderWaveSpeed
-                : shaderWaveSpeedOnValue;
-            shaderMaterial.SetFloat("_WaveSpeed", activeWaveSpeed);
-        }
-    }
-
-    private void DisableShaderMaterial()
-    {
-        if (shaderMaterial == null)
-            return;
-        if (shaderMaterial.HasProperty("_Enabled"))
-        {
-            shaderMaterial.SetFloat("_Enabled", 0f);
-        }
-        else if (shaderMaterial.HasProperty("_Intensity"))
-        {
-            shaderMaterial.SetFloat("_Intensity", 0f);
-        }
-        else if (shaderMaterial.HasProperty("_WaveSpeed"))
-        {
-            shaderMaterial.SetFloat("_WaveSpeed", 0f);
-        }
-    }
-
-    private void CacheShaderDefaults()
-    {
-        if (shaderMaterial == null)
-            return;
-        if (shaderMaterial.HasProperty("_WaveSpeed"))
-        {
-            _cachedShaderWaveSpeed = shaderMaterial.GetFloat("_WaveSpeed");
-            _hasCachedShaderWaveSpeed = true;
-        }
-    }
 }
 
