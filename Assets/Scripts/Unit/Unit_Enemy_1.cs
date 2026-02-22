@@ -36,6 +36,20 @@ public class Unit_Enemy_1 : EnemyUnitBase
             if (BuildingManager.Instance.IsTerrainCell(cell)) return false;
             if (BuildingManager.Instance.IsResourceTile(cell)) return false;
         }
+
+        RaycastHit2D[] hits = Physics2D.LinecastAll(from, to);
+        for (int i = 0; i < hits.Length; i++)
+        {
+            Collider2D hitCollider = hits[i].collider;
+            if (hitCollider == null) continue;
+            Transform hitTransform = hitCollider.transform;
+            if (hitTransform == transform || hitTransform.IsChildOf(transform)) continue;
+            if (hitTransform == targetT || hitTransform.IsChildOf(targetT)) continue;
+
+            if (hitCollider.GetComponentInParent<ResourceNode>() != null) return false;
+            if (hitCollider.GetComponentInParent<BuildingPiece>() != null) return false;
+            if (hitCollider.GetComponentInParent<MainStructure>() != null) return false;
+        }
         return true;
     }
 

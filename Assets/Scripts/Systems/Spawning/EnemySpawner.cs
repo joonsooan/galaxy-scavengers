@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 [Serializable]
@@ -35,10 +36,15 @@ public class EnemySpawner : MonoBehaviour
     [Header("Wave Budget Settings")]
     [SerializeField] private float noise100WaveCooldown = 30f;
     [SerializeField] private int noise100AreaCount = 3;
-    [SerializeField] [Range(0f, 1f)] private float noise100BudgetMultiplier = 1.5f;
-    [SerializeField] [Range(0f, 5f)] private float emergencyWaveMultiplierIncrement = 0.1f;
-    [SerializeField] [Range(0f, 1f)] private float noiseCautionBudgetMultiplier = 0.5f;
-    [SerializeField] [Range(0f, 1f)] private float noiseWarningBudgetMultiplier = 1f;
+    [FormerlySerializedAs("noise100BudgetMultiplier")]
+    [SerializeField] [Range(0f, 100f)] private float noise100BudgetMultiplierPercent = 10f;
+    [FormerlySerializedAs("emergencyWaveMultiplierIncrement")]
+    [SerializeField] [Range(0f, 100f)] private float emergencyWaveMultiplierIncrementPercent = 10f;
+    [FormerlySerializedAs("noiseCautionBudgetMultiplier")]
+    [SerializeField] [Range(0f, 100f)] private float noiseCautionBudgetMultiplierPercent = 10f;
+    [FormerlySerializedAs("noiseWarningBudgetMultiplier")]
+    [SerializeField] [Range(0f, 100f)] private float noiseWarningBudgetMultiplierPercent = 10f;
+    [SerializeField] [HideInInspector] private bool percentValueMigrationDone;
 
     private bool _isEmergencyWaveSpawn;
     private bool _wasNoise100 = false;
@@ -50,6 +56,39 @@ public class EnemySpawner : MonoBehaviour
     private readonly HashSet<int> _persistentEnemyInstanceIds = new HashSet<int>();
     private string _currentEmergencyTriggerSource = string.Empty;
     private bool _isSubscribedToEvents;
+
+    private void OnValidate()
+    {
+        if (percentValueMigrationDone) return;
+
+        bool migrated = false;
+        if (ShouldMigrateLegacyDecimal(noise100BudgetMultiplierPercent))
+        {
+            noise100BudgetMultiplierPercent *= 100f;
+            migrated = true;
+        }
+        if (ShouldMigrateLegacyDecimal(emergencyWaveMultiplierIncrementPercent))
+        {
+            emergencyWaveMultiplierIncrementPercent *= 100f;
+            migrated = true;
+        }
+        if (ShouldMigrateLegacyDecimal(noiseCautionBudgetMultiplierPercent))
+        {
+            noiseCautionBudgetMultiplierPercent *= 100f;
+            migrated = true;
+        }
+        if (ShouldMigrateLegacyDecimal(noiseWarningBudgetMultiplierPercent))
+        {
+            noiseWarningBudgetMultiplierPercent *= 100f;
+            migrated = true;
+        }
+
+        if (migrated || noise100BudgetMultiplierPercent > 5f || emergencyWaveMultiplierIncrementPercent > 5f ||
+            noiseCautionBudgetMultiplierPercent > 5f || noiseWarningBudgetMultiplierPercent > 5f)
+        {
+            percentValueMigrationDone = true;
+        }
+    }
 
     private void OnEnable()
     {
@@ -98,11 +137,11 @@ public class EnemySpawner : MonoBehaviour
         NoiseManager.NoiseZone zone = NoiseManager.Instance.GetCurrentNoiseZone();
         if (zone == NoiseManager.NoiseZone.Caution)
         {
-            ActivateExistingEnemiesFromBudget(noiseCautionBudgetMultiplier);
+            ActivateExistingEnemiesFromBudget(ConvertPercentToMultiplier(noiseCautionBudgetMultiplierPercent));
         }
         else if (zone == NoiseManager.NoiseZone.Warning)
         {
-            ActivateExistingEnemiesFromBudget(noiseWarningBudgetMultiplier);
+            ActivateExistingEnemiesFromBudget(ConvertPercentToMultiplier(noiseWarningBudgetMultiplierPercent));
         }
     }
 
@@ -165,7 +204,7 @@ public class EnemySpawner : MonoBehaviour
 
     private void ActivateExistingEnemiesFromBudget()
     {
-        ActivateExistingEnemiesFromBudget(noise100BudgetMultiplier, false);
+        ActivateExistingEnemiesFromBudget(ConvertPercentToMultiplier(noise100BudgetMultiplierPercent), false);
     }
 
     private void OnDayStarted()
@@ -219,6 +258,16 @@ public class EnemySpawner : MonoBehaviour
         float multiplier = _isEmergencyWaveSpawn ? GetCurrentEmergencyMultiplier() : 1f;
         float totalBudget = CalculateWaveBudget(multiplier);
         int spawnedEnemyCount = 0;
+        int emergencyRemainingSlots = int.MaxValue;
+        if (_isEmergencyWaveSpawn)
+        {
+            emergencyRemainingSlots = Mathf.Max(0, maxSpawnCountPerWave - GetActiveEnemyCount());
+            if (emergencyRemainingSlots <= 0)
+            {
+                Debug.Log($"[EnemySpawner] Emergency wave skipped. Active enemies already at cap ({maxSpawnCountPerWave}).");
+                return;
+            }
+        }
 
         List<EnemySpawnData> validEnemies = enemyPrefabs
             .Where(e => e != null && e.enemyPrefab != null && e.cost > 0)
@@ -252,6 +301,19 @@ public class EnemySpawner : MonoBehaviour
         }
 
         float budgetPerHole = selectedHoles.Count > 0 ? totalBudget / selectedHoles.Count : 0f;
+        if (_isEmergencyWaveSpawn)
+        {
+            float noise = NoiseManager.Instance != null ? NoiseManager.Instance.NoisePercentage : 0f;
+            float totalElapsedHours = DayNightCycleManager.Instance != null ? DayNightCycleManager.Instance.GetTotalElapsedInGameHours() : 0f;
+            float rawBudget = (basePoints + (noise * noiseAlpha)) * (1f + (totalElapsedHours * timeBeta));
+            Debug.Log(
+                $"[EnemySpawner] Emergency budget calc | Trigger={_currentEmergencyTriggerSource}, " +
+                $"basePoints={basePoints:0.##}, noise={noise:0.##}, noiseAlpha={noiseAlpha:0.###}, " +
+                $"hours={totalElapsedHours:0.##}, timeBeta={timeBeta:0.###}, rawBudget={rawBudget:0.##}, " +
+                $"multiplier={multiplier:0.###}, finalBudget={totalBudget:0.##}, " +
+                $"areaCount={selectedHoles.Count}, budgetPerArea={budgetPerHole:0.##}, " +
+                $"countdownBonus={_countdownEmergencyMultiplierBonus:0.###}, noiseBonus={_noiseEmergencyMultiplierBonus:0.###}");
+        }
 
         if (BuildingManager.Instance == null) return;
         Grid grid = BuildingManager.Instance.grid;
@@ -261,11 +323,19 @@ public class EnemySpawner : MonoBehaviour
 
         for (int holeIdx = 0; holeIdx < selectedHoles.Count; holeIdx++)
         {
+            if (_isEmergencyWaveSpawn && allSpawnsUncapped.Count >= emergencyRemainingSlots)
+            {
+                break;
+            }
             Vector2Int holePos = selectedHoles[holeIdx];
             float remainingBudget = budgetPerHole;
 
             while (remainingBudget > 0f)
             {
+                if (_isEmergencyWaveSpawn && allSpawnsUncapped.Count >= emergencyRemainingSlots)
+                {
+                    break;
+                }
                 List<EnemySpawnData> affordable = validEnemies.Where(e => e.cost <= remainingBudget).ToList();
                 if (affordable.Count == 0) break;
 
@@ -302,6 +372,11 @@ public class EnemySpawner : MonoBehaviour
         else
         {
             finalSpawns = new List<(EnemySpawnData, Vector2Int)>(allSpawnsUncapped);
+        }
+
+        if (_isEmergencyWaveSpawn && finalSpawns.Count > emergencyRemainingSlots)
+        {
+            finalSpawns = finalSpawns.Take(emergencyRemainingSlots).ToList();
         }
 
         for (int i = finalSpawns.Count - 1; i > 0; i--)
@@ -391,6 +466,21 @@ public class EnemySpawner : MonoBehaviour
         LogEnemyStats();
     }
 
+    private int GetActiveEnemyCount()
+    {
+        if (UnitManager.Instance == null || UnitManager.Instance.EnemyUnits == null) return 0;
+
+        int activeCount = 0;
+        foreach (UnitBase unit in UnitManager.Instance.EnemyUnits)
+        {
+            if (unit == null || unit.gameObject == null) continue;
+            if (!unit.gameObject.activeInHierarchy) continue;
+            activeCount++;
+        }
+
+        return activeCount;
+    }
+
     private void OnLaunchCountdownStarted()
     {
         Debug.Log("[EnemySpawner] Emergency trigger: Launch countdown started. Starting emergency spawn.");
@@ -412,7 +502,7 @@ public class EnemySpawner : MonoBehaviour
 
         _noiseEmergencyActive = true;
         _currentEmergencyTriggerSource = "Noise100";
-        ActivateExistingEnemiesFromBudget(noise100BudgetMultiplier, true);
+        ActivateExistingEnemiesFromBudget(ConvertPercentToMultiplier(noise100BudgetMultiplierPercent), true);
         SpawnEmergencyWave();
         EnsureEmergencyWaveLoopRunning();
     }
@@ -432,7 +522,7 @@ public class EnemySpawner : MonoBehaviour
 
         _countdownEmergencyActive = true;
         _currentEmergencyTriggerSource = "LaunchCountdown";
-        ActivateExistingEnemiesFromBudget(noise100BudgetMultiplier, true);
+        ActivateExistingEnemiesFromBudget(ConvertPercentToMultiplier(noise100BudgetMultiplierPercent), true);
         SpawnEmergencyWave();
         EnsureEmergencyWaveLoopRunning();
     }
@@ -494,17 +584,17 @@ public class EnemySpawner : MonoBehaviour
 
         if (_countdownEmergencyActive)
         {
-            _countdownEmergencyMultiplierBonus += emergencyWaveMultiplierIncrement;
+            _countdownEmergencyMultiplierBonus += ConvertPercentToIncrement(emergencyWaveMultiplierIncrementPercent);
         }
         if (_noiseEmergencyActive)
         {
-            _noiseEmergencyMultiplierBonus += emergencyWaveMultiplierIncrement;
+            _noiseEmergencyMultiplierBonus += ConvertPercentToIncrement(emergencyWaveMultiplierIncrementPercent);
         }
     }
 
     private float GetCurrentEmergencyMultiplier()
     {
-        float multiplier = noise100BudgetMultiplier;
+        float multiplier = ConvertPercentToMultiplier(noise100BudgetMultiplierPercent);
         if (_countdownEmergencyActive)
         {
             multiplier += _countdownEmergencyMultiplierBonus;
@@ -515,6 +605,21 @@ public class EnemySpawner : MonoBehaviour
         }
 
         return Mathf.Max(0f, multiplier);
+    }
+
+    private static float ConvertPercentToMultiplier(float value)
+    {
+        return value * 0.01f;
+    }
+
+    private static float ConvertPercentToIncrement(float value)
+    {
+        return value * 0.01f;
+    }
+
+    private static bool ShouldMigrateLegacyDecimal(float value)
+    {
+        return value > 0f && value <= 5f;
     }
 
     private bool IsAnyEmergencyActive()

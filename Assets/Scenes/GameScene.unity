@@ -5781,13 +5781,14 @@ MonoBehaviour:
   spawnRadiusOffset: 5
   basePoints: 30
   noiseAlpha: 0.25
-  timeBeta: 0.4
+  timeBeta: 0.3
   noise100WaveCooldown: 20
   noise100AreaCount: 5
-  noise100BudgetMultiplier: 0.1
-  emergencyWaveMultiplierIncrement: 0.05
-  noiseCautionBudgetMultiplier: 0.2
-  noiseWarningBudgetMultiplier: 0.4
+  noise100BudgetMultiplierPercent: 10
+  emergencyWaveMultiplierIncrementPercent: 2
+  noiseCautionBudgetMultiplierPercent: 10
+  noiseWarningBudgetMultiplierPercent: 20
+  percentValueMigrationDone: 1
 --- !u!114 &313771330
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22127,7 +22128,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 662.501
+  orthographic size: 11.25
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -85142,7 +85143,7 @@ GameObject:
   - component: {fileID: 2116328959}
   - component: {fileID: 2116328960}
   - component: {fileID: 2116328958}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Resource Tilemap
   m_TagString: Untagged
   m_Icon: {fileID: 0}

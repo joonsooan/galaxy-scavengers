@@ -97,11 +97,11 @@ public class MainStructure : BaseStorage, IClickable
     
     protected override void OnDestroy()
     {
-        base.OnDestroy();
-        
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.GameOver();
+            GameManager.Instance.GameOver(transform);
         }
+
+        base.OnDestroy();
     }
 }

@@ -97,7 +97,6 @@ public class SceneLoader : MonoBehaviour
         string currentScene = SceneManager.GetActiveScene().name;
         if (currentScene == gameSceneName) {
             _returnState = returnState;
-            UnitManager.Instance?.RemoveAllUnits();
             StartCoroutine(LoadBaseSceneFromGameAsync());
         }
         else {
@@ -170,7 +169,19 @@ public class SceneLoader : MonoBehaviour
                 yield return StartCoroutine(WaitForLoadingEntry(LoadingUIManager.Instance.GetSuccessLoadingScreenComponent()));
             } else {
                 LoadingUIManager.Instance.ShowGameOverLoadingScreen();
-                yield return _gameOverLoadingScreenDelayWait;
+                GameOverLoadingScreen gameOverLoadingScreen = LoadingUIManager.Instance.GetGameOverLoadingScreenComponent();
+                while (gameOverLoadingScreen == null || !gameOverLoadingScreen.IsEntryAnimationComplete)
+                {
+                    yield return null;
+                    if (LoadingUIManager.Instance != null)
+                    {
+                        gameOverLoadingScreen = LoadingUIManager.Instance.GetGameOverLoadingScreenComponent();
+                    }
+                }
+                if (GameManager.Instance != null)
+                {
+                    GameManager.Instance.OnGameOverScreenFullyShown();
+                }
             }
         }
 

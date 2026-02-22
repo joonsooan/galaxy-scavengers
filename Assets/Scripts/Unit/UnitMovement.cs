@@ -376,18 +376,27 @@ public class UnitMovement : MonoBehaviour
         Vector3Int endCell = _grid.WorldToCell(endPos);
 
         Node startNode = GetNodeFromPool(startCell, null, 0, GetDistance(startCell, endCell));
+        Node closestNode = startNode;
+        float bestHeuristic = startNode.hCost;
 
         AllNodes.Add(startCell, startNode);
         OpenSet.Push(startNode);
 
         int iterations = 0;
-        const int maxIterations = 2000;
+        int dx = Mathf.Abs(endCell.x - startCell.x);
+        int dy = Mathf.Abs(endCell.y - startCell.y);
+        int maxIterations = Mathf.Clamp((dx + dy) * 20, 2000, 12000);
 
         while (OpenSet.Count > 0 && iterations < maxIterations) {
             iterations++;
             Node currentNode = OpenSet.Pop();
             if (ClosedSet.Contains(currentNode.position)) continue;
             ClosedSet.Add(currentNode.position);
+            if (currentNode.hCost < bestHeuristic)
+            {
+                bestHeuristic = currentNode.hCost;
+                closestNode = currentNode;
+            }
 
             if (currentNode.position == endCell) {
                 return ReconstructPath(currentNode);
@@ -419,7 +428,12 @@ public class UnitMovement : MonoBehaviour
         if (iterations >= maxIterations) {
         }
 
-        Debug.LogWarning("Path not found");
+        if (closestNode != null && closestNode.position != startCell)
+        {
+            return ReconstructPath(closestNode);
+        }
+
+        Debug.LogWarning($"Path not found. start={startCell}, end={endCell}, iter={iterations}/{maxIterations}");
         return new Queue<Vector3>();
     }
 
