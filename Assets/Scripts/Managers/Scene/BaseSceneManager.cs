@@ -108,6 +108,11 @@ public class BaseSceneManager : MonoBehaviour
 
     private void Update()
     {
+        if (IsLoadingScreenActive())
+        {
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.Escape)) {
             CloseUIPanel(_currentPanelIndex);
         }
@@ -242,5 +247,15 @@ public class BaseSceneManager : MonoBehaviour
         if (farmUIPanel != null) farmUIPanel.SetActive(false);
         if (mapUIPanel != null) mapUIPanel.SetActive(false);
         if (coreLaunchUIPanel != null) coreLaunchUIPanel.SetActive(false);
+    }
+
+    private bool IsLoadingScreenActive()
+    {
+        if (LoadingUIManager.Instance == null)
+        {
+            return false;
+        }
+
+        return LoadingUIManager.Instance.IsAnyLoadingScreenActive();
     }
 }

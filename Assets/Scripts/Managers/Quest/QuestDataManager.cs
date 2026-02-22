@@ -32,6 +32,8 @@ public class QuestDataManager : MonoBehaviour
     private BaseInventoryManager _baseInventoryManager;
     private InventorySystem _inventorySystem;
     public static QuestDataManager Instance { get; private set; }
+    public bool IsInitialized { get; private set; }
+    public event Action OnInitialized;
 
     private void Awake()
     {
@@ -48,6 +50,8 @@ public class QuestDataManager : MonoBehaviour
         LoadQuestsFromResources();
         InitializeQuests();
         LoadQuestProgress();
+        IsInitialized = true;
+        OnInitialized?.Invoke();
 
         StartCoroutine(SubscribeToInventoryEvents());
 

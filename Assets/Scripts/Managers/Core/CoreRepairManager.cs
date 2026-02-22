@@ -242,10 +242,14 @@ public class CoreRepairManager : MonoBehaviour
 
     private void ApplyStorageDebuff()
     {
-        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
-        if (mainStructure == null) return;
+        UIManager uiManager = GameManager.Instance != null ? GameManager.Instance.uiManager : null;
+        if (uiManager == null)
+        {
+            uiManager = FindFirstObjectByType<UIManager>(FindObjectsInactive.Include);
+        }
+        if (uiManager == null) return;
 
-        InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
+        InventorySystem inventorySystem = uiManager.GetInventorySystem();
         if (inventorySystem == null) return;
 
         bool isStorageDamaged = !IsPartRepaired(CorePart.Storage);

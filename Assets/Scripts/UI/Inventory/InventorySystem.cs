@@ -486,7 +486,7 @@ public class InventorySystem : MonoBehaviour
             ToggleInventory();
         }
 
-        LaunchUIController launchController = FindFirstObjectByType<LaunchUIController>();
+        LaunchUIController launchController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
         if (launchController != null)
         {
             launchController.StartLaunchCountdown();

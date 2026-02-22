@@ -277,6 +277,11 @@ public class GameMenuManager : MonoBehaviour
             return;
         }
 
+        if (IsLaunchMenuInputBlocked())
+        {
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (HelpUIManager.Instance != null && HelpUIManager.Instance.IsHelpOpen())
@@ -306,6 +311,7 @@ public class GameMenuManager : MonoBehaviour
     public void OpenMenu()
     {
         if (_isMenuOpen) return;
+        if (IsLaunchMenuInputBlocked()) return;
 
         if (_currentMainPanel == null)
         {
@@ -478,14 +484,14 @@ public class GameMenuManager : MonoBehaviour
         {
             return false;
         }
+        
+        return LoadingUIManager.Instance.IsAnyLoadingScreenActive();
+    }
 
-        LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
-        if (loadingScreen == null)
-        {
-            return false;
-        }
-
-        return loadingScreen.gameObject.activeSelf;
+    private bool IsLaunchMenuInputBlocked()
+    {
+        LaunchUIController launchUIController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
+        return launchUIController != null && launchUIController.IsMenuInputBlocked();
     }
 
     private void OnDestroy()

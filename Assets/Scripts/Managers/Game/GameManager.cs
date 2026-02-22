@@ -112,22 +112,26 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.Q)) {
+        LaunchUIController launchUIController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
+        bool isPauseInputLocked = launchUIController != null && launchUIController.IsPauseInputLocked();
+        bool isLaunchMenuInputBlocked = launchUIController != null && launchUIController.IsMenuInputBlocked();
+
+        if (!isLaunchMenuInputBlocked && Input.GetKeyDown(KeyCode.Q)) {
             GameSceneQuestUIManager questUI = FindFirstObjectByType<GameSceneQuestUIManager>();
             if (questUI != null) questUI.ToggleQuestPanelWithShortcut();
         }
 
-        if (Input.GetKeyDown(KeyCode.Space)) {
+        if (!isPauseInputLocked && Input.GetKeyDown(KeyCode.Space)) {
             TogglePause();
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha1)) {
+        if (!isLaunchMenuInputBlocked && Input.GetKeyDown(KeyCode.Alpha1)) {
             SetGameSpeed(1f);
         }
-        else if (Input.GetKeyDown(KeyCode.Alpha2)) {
+        else if (!isLaunchMenuInputBlocked && Input.GetKeyDown(KeyCode.Alpha2)) {
             SetGameSpeed(2f);
         }
-        else if (Input.GetKeyDown(KeyCode.Alpha3)) {
+        else if (!isLaunchMenuInputBlocked && Input.GetKeyDown(KeyCode.Alpha3)) {
             SetGameSpeed(3f);
         }
 
@@ -523,12 +527,7 @@ public class GameManager : MonoBehaviour
         if (LoadingUIManager.Instance == null) {
             return false;
         }
-
-        LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
-        if (loadingScreen == null) {
-            return false;
-        }
-
-        return loadingScreen.gameObject.activeSelf;
+        
+        return LoadingUIManager.Instance.IsAnyLoadingScreenActive();
     }
 }
