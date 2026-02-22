@@ -20,7 +20,7 @@ RenderSettings:
   m_FogDensity: 0.01
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.12941176, g: 0.12941176, b: 0.14509803, a: 1}
+  m_AmbientSkyColor: {r: 0.78430355, g: 0.7843044, b: 0.7843057, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
@@ -2365,7 +2365,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   RealSecondsPerInGameHour: 1
-  currentTime: 24
+  currentTime: 6
   gameStartTime: 6
   autoAdvanceTime: 1
   dayStartPercent: 15
@@ -2373,14 +2373,14 @@ MonoBehaviour:
   globalLight2D: {fileID: 619394801}
   ambientLightGradient:
     serializedVersion: 2
-    key0: {r: 0.12964275, g: 0.12964275, b: 0.14465404, a: 1}
+    key0: {r: 0.08955334, g: 0.08955334, b: 0.10062885, a: 1}
     key1: {r: 0.3790317, g: 0.3790317, b: 0.3962264, a: 1}
     key2: {r: 0.6504094, g: 0.66150016, b: 0.6792453, a: 0}
     key3: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0}
     key4: {r: 0.7843138, g: 0.7843138, b: 0.7843138, a: 0}
     key5: {r: 0.6509804, g: 0.6627451, b: 0.6784314, a: 0}
     key6: {r: 0.3803922, g: 0.3803922, b: 0.39607847, a: 0}
-    key7: {r: 0.12941177, g: 0.12941177, b: 0.14509805, a: 0}
+    key7: {r: 0.09019608, g: 0.09019608, b: 0.10196079, a: 0}
     ctime0: 9830
     ctime1: 11469
     ctime2: 13107
@@ -34796,7 +34796,7 @@ MonoBehaviour:
   m_LightType: 4
   m_BlendStyleIndex: 0
   m_FalloffIntensity: 0.5
-  m_Color: {r: 0.12941176, g: 0.12941176, b: 0.14509803, a: 1}
+  m_Color: {r: 0.78430355, g: 0.7843044, b: 0.7843057, a: 1}
   m_Intensity: 1
   m_LightVolumeIntensity: 1
   m_LightVolumeEnabled: 0

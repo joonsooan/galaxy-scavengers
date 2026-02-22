@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public abstract class Damageable : MonoBehaviour, ICombo
 {
@@ -16,6 +17,12 @@ public abstract class Damageable : MonoBehaviour, ICombo
     private Color _originalColor;
 
     private SpriteRenderer _sr;
+    private Light2D[] _buildingLights2D;
+    private float[] _buildingLightBaseAlphas;
+    private float _buildingLightTargetMultiplier = 1f;
+    private Coroutine _waitForDayNightCoroutine;
+    private Coroutine _buildingLightTransitionCoroutine;
+    private const float BuildingLightAlphaLerpSpeed = 2f;
 
     public int CurrentHealth {
         get {
@@ -43,6 +50,18 @@ public abstract class Damageable : MonoBehaviour, ICombo
         {
             NoiseManager.Instance.RegisterBuilding(this);
         }
+
+        if (this is UnitBase == false)
+        {
+            DayNightCycleManager.OnNightStarted += OnNightStarted;
+            DayNightCycleManager.OnDayStarted += OnDayStarted;
+            ApplyBuildingLightState(true);
+
+            if (DayNightCycleManager.Instance == null && gameObject.activeInHierarchy)
+            {
+                _waitForDayNightCoroutine = StartCoroutine(WaitForDayNightAndApplyBuildingLights());
+            }
+        }
     }
 
     protected virtual void OnDisable()
@@ -52,6 +71,24 @@ public abstract class Damageable : MonoBehaviour, ICombo
         if (this is UnitBase == false && NoiseManager.Instance != null)
         {
             NoiseManager.Instance.UnregisterBuilding(this);
+        }
+
+        if (this is UnitBase == false)
+        {
+            DayNightCycleManager.OnNightStarted -= OnNightStarted;
+            DayNightCycleManager.OnDayStarted -= OnDayStarted;
+        }
+
+        if (_waitForDayNightCoroutine != null)
+        {
+            StopCoroutine(_waitForDayNightCoroutine);
+            _waitForDayNightCoroutine = null;
+        }
+
+        if (_buildingLightTransitionCoroutine != null)
+        {
+            StopCoroutine(_buildingLightTransitionCoroutine);
+            _buildingLightTransitionCoroutine = null;
         }
     }
 
@@ -173,6 +210,8 @@ public abstract class Damageable : MonoBehaviour, ICombo
     protected virtual void OnDestroy()
     {
         UnregisterAttackAlert();
+        DayNightCycleManager.OnNightStarted -= OnNightStarted;
+        DayNightCycleManager.OnDayStarted -= OnDayStarted;
     }
 
     public static event Action<Damageable> OnAnyDamageTaken;
@@ -235,5 +274,114 @@ public abstract class Damageable : MonoBehaviour, ICombo
         yield return _flashWait;
 
         _sr.color = _originalColor;
+    }
+
+    private IEnumerator WaitForDayNightAndApplyBuildingLights()
+    {
+        while (DayNightCycleManager.Instance == null)
+        {
+            yield return null;
+        }
+
+        _waitForDayNightCoroutine = null;
+        ApplyBuildingLightState(true);
+    }
+
+    private void ApplyBuildingLightState(bool immediate)
+    {
+        if (this is UnitBase)
+        {
+            return;
+        }
+
+        if (DayNightCycleManager.Instance == null)
+        {
+            return;
+        }
+
+        if (_buildingLights2D == null)
+        {
+            _buildingLights2D = GetComponentsInChildren<Light2D>(true);
+            if (_buildingLights2D != null && _buildingLights2D.Length > 0)
+            {
+                _buildingLightBaseAlphas = new float[_buildingLights2D.Length];
+                for (int i = 0; i < _buildingLights2D.Length; i++)
+                {
+                    Light2D light2D = _buildingLights2D[i];
+                    _buildingLightBaseAlphas[i] = light2D != null ? light2D.color.a : 0f;
+                }
+            }
+        }
+
+        if (_buildingLights2D == null || _buildingLights2D.Length == 0)
+        {
+            return;
+        }
+
+        _buildingLightTargetMultiplier = DayNightCycleManager.Instance.IsDay() ? 0f : 1f;
+
+        if (_buildingLightTransitionCoroutine != null)
+        {
+            StopCoroutine(_buildingLightTransitionCoroutine);
+            _buildingLightTransitionCoroutine = null;
+        }
+
+        if (immediate)
+        {
+            for (int i = 0; i < _buildingLights2D.Length; i++)
+            {
+                Light2D light2D = _buildingLights2D[i];
+                if (light2D == null) continue;
+
+                Color color = light2D.color;
+                float targetAlpha = _buildingLightBaseAlphas[i] * _buildingLightTargetMultiplier;
+                light2D.color = new Color(color.r, color.g, color.b, targetAlpha);
+            }
+            return;
+        }
+
+        _buildingLightTransitionCoroutine = StartCoroutine(SmoothUpdateBuildingLights());
+    }
+
+    private IEnumerator SmoothUpdateBuildingLights()
+    {
+        while (true)
+        {
+            bool hasPendingUpdate = false;
+            for (int i = 0; i < _buildingLights2D.Length; i++)
+            {
+                Light2D light2D = _buildingLights2D[i];
+                if (light2D == null) continue;
+
+                Color color = light2D.color;
+                float targetAlpha = _buildingLightBaseAlphas[i] * _buildingLightTargetMultiplier;
+                float nextAlpha = Mathf.Lerp(color.a, targetAlpha, BuildingLightAlphaLerpSpeed * Time.deltaTime);
+                light2D.color = new Color(color.r, color.g, color.b, nextAlpha);
+
+                if (Mathf.Abs(nextAlpha - targetAlpha) > 0.01f)
+                {
+                    hasPendingUpdate = true;
+                }
+            }
+
+            if (!hasPendingUpdate)
+            {
+                break;
+            }
+
+            yield return null;
+        }
+
+        _buildingLightTransitionCoroutine = null;
+    }
+
+    private void OnNightStarted()
+    {
+        ApplyBuildingLightState(false);
+    }
+
+    private void OnDayStarted()
+    {
+        ApplyBuildingLightState(false);
     }
 }
