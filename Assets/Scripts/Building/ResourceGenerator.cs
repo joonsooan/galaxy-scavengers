@@ -112,6 +112,11 @@ public class ResourceGenerator : Damageable
 
     private void GenerateResource()
     {
+        if (ResourceManager.Instance == null)
+        {
+            return;
+        }
+
         if (resourceType == ResourceType.Aether)
         {
             FindAndCacheAetherManager();
@@ -121,8 +126,12 @@ public class ResourceGenerator : Damageable
                 return;
             }
         }
-        
-        ResourceManager.Instance.AddResource(resourceType, resourceAmount);
+
+        int addedAmount = ResourceManager.Instance.AddGeneratedResource(resourceType, resourceAmount, transform.position);
+        if (addedAmount <= 0)
+        {
+            return;
+        }
 
         ShowResourceImage();
     }

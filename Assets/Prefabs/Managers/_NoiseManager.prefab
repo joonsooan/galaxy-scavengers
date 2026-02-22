@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxNoiseValue: 100
-  timeBasedNoiseIncreasePerHour: 0.5
+  timeBasedNoiseIncreasePerHour: 0.2
   dangerThreshold: 90
   warningThreshold: 60
   cautionThreshold: 30
