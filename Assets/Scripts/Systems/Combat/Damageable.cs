@@ -19,10 +19,13 @@ public abstract class Damageable : MonoBehaviour, ICombo
     private SpriteRenderer _sr;
     private Light2D[] _buildingLights2D;
     private float[] _buildingLightBaseAlphas;
+    private bool[] _buildingLightUseDayNightRule;
     private float _buildingLightTargetMultiplier = 1f;
     private Coroutine _waitForDayNightCoroutine;
     private Coroutine _buildingLightTransitionCoroutine;
     private const float BuildingLightAlphaLerpSpeed = 2f;
+    private bool _isNoiseBuildingRegistered;
+    private bool _isBuildingLightEventsRegistered;
 
     public int CurrentHealth {
         get {
@@ -46,15 +49,17 @@ public abstract class Damageable : MonoBehaviour, ICombo
         currentHealth = maxHealth;
         TargetManager.Instance?.RegisterTarget(this);
         
-        if (this is UnitBase == false && NoiseManager.Instance != null)
+        if (this is UnitBase == false && ShouldRegisterBuildingSystems())
         {
-            NoiseManager.Instance.RegisterBuilding(this);
-        }
+            if (NoiseManager.Instance != null)
+            {
+                NoiseManager.Instance.RegisterBuilding(this);
+                _isNoiseBuildingRegistered = true;
+            }
 
-        if (this is UnitBase == false)
-        {
             DayNightCycleManager.OnNightStarted += OnNightStarted;
             DayNightCycleManager.OnDayStarted += OnDayStarted;
+            _isBuildingLightEventsRegistered = true;
             ApplyBuildingLightState(true);
 
             if (DayNightCycleManager.Instance == null && gameObject.activeInHierarchy)
@@ -68,15 +73,17 @@ public abstract class Damageable : MonoBehaviour, ICombo
     {
         TargetManager.Instance?.UnregisterTarget(this);
         
-        if (this is UnitBase == false && NoiseManager.Instance != null)
+        if (_isNoiseBuildingRegistered && NoiseManager.Instance != null)
         {
             NoiseManager.Instance.UnregisterBuilding(this);
+            _isNoiseBuildingRegistered = false;
         }
 
-        if (this is UnitBase == false)
+        if (_isBuildingLightEventsRegistered)
         {
             DayNightCycleManager.OnNightStarted -= OnNightStarted;
             DayNightCycleManager.OnDayStarted -= OnDayStarted;
+            _isBuildingLightEventsRegistered = false;
         }
 
         if (_waitForDayNightCoroutine != null)
@@ -305,10 +312,12 @@ public abstract class Damageable : MonoBehaviour, ICombo
             if (_buildingLights2D != null && _buildingLights2D.Length > 0)
             {
                 _buildingLightBaseAlphas = new float[_buildingLights2D.Length];
+                _buildingLightUseDayNightRule = new bool[_buildingLights2D.Length];
                 for (int i = 0; i < _buildingLights2D.Length; i++)
                 {
                     Light2D light2D = _buildingLights2D[i];
                     _buildingLightBaseAlphas[i] = light2D != null ? light2D.color.a : 0f;
+                    _buildingLightUseDayNightRule[i] = light2D != null && light2D.lightType != Light2D.LightType.Sprite;
                 }
             }
         }
@@ -334,7 +343,9 @@ public abstract class Damageable : MonoBehaviour, ICombo
                 if (light2D == null) continue;
 
                 Color color = light2D.color;
-                float targetAlpha = _buildingLightBaseAlphas[i] * _buildingLightTargetMultiplier;
+                float targetAlpha = _buildingLightUseDayNightRule != null && i < _buildingLightUseDayNightRule.Length && _buildingLightUseDayNightRule[i]
+                    ? _buildingLightBaseAlphas[i] * _buildingLightTargetMultiplier
+                    : _buildingLightBaseAlphas[i];
                 light2D.color = new Color(color.r, color.g, color.b, targetAlpha);
             }
             return;
@@ -354,7 +365,9 @@ public abstract class Damageable : MonoBehaviour, ICombo
                 if (light2D == null) continue;
 
                 Color color = light2D.color;
-                float targetAlpha = _buildingLightBaseAlphas[i] * _buildingLightTargetMultiplier;
+                float targetAlpha = _buildingLightUseDayNightRule != null && i < _buildingLightUseDayNightRule.Length && _buildingLightUseDayNightRule[i]
+                    ? _buildingLightBaseAlphas[i] * _buildingLightTargetMultiplier
+                    : _buildingLightBaseAlphas[i];
                 float nextAlpha = Mathf.Lerp(color.a, targetAlpha, BuildingLightAlphaLerpSpeed * Time.deltaTime);
                 light2D.color = new Color(color.r, color.g, color.b, nextAlpha);
 
@@ -383,5 +396,11 @@ public abstract class Damageable : MonoBehaviour, ICombo
     private void OnDayStarted()
     {
         ApplyBuildingLightState(false);
+    }
+
+    private bool ShouldRegisterBuildingSystems()
+    {
+        if (BuildingManager.Instance == null) return true;
+        return BuildingManager.IsBuildingProperlyPlaced(transform);
     }
 }

@@ -87,6 +87,8 @@ public class GameAlertUIManager : MonoBehaviour
     private int _mainEngineRepairCount;
     [SerializeField] private CameraTargetController cameraTargetController;
     private readonly Dictionary<GameAlertType, int> _alertFocusIndices = new Dictionary<GameAlertType, int>();
+    private bool _unitUnderAttackAlertActive;
+    private bool _buildingUnderAttackAlertActive;
 
     private void Awake()
     {
@@ -380,9 +382,10 @@ public class GameAlertUIManager : MonoBehaviour
                 if (unitUnderAttackCell != null)
                 {
                     bool active = _unitUnderAttackCount > 0;
-                    if (active && !unitUnderAttackCell.activeSelf && !unitUnderAttackSound.IsNull)
+                    if (active && !_unitUnderAttackAlertActive && !unitUnderAttackSound.IsNull)
                         RuntimeManager.PlayOneShot(unitUnderAttackSound);
                     unitUnderAttackCell.SetActive(active);
+                    _unitUnderAttackAlertActive = active;
                     if (!active && _currentTooltipType == GameAlertType.UnitUnderAttack)
                         HideTooltip();
                 }
@@ -391,9 +394,10 @@ public class GameAlertUIManager : MonoBehaviour
                 if (buildingUnderAttackCell != null)
                 {
                     bool active = _buildingUnderAttackCount > 0;
-                    if (active && !buildingUnderAttackCell.activeSelf && !buildingUnderAttackSound.IsNull)
+                    if (active && !_buildingUnderAttackAlertActive && !buildingUnderAttackSound.IsNull)
                         RuntimeManager.PlayOneShot(buildingUnderAttackSound);
                     buildingUnderAttackCell.SetActive(active);
+                    _buildingUnderAttackAlertActive = active;
                     if (!active && _currentTooltipType == GameAlertType.BuildingUnderAttack)
                         HideTooltip();
                 }
@@ -457,6 +461,8 @@ public class GameAlertUIManager : MonoBehaviour
         if (noiseCautionCell != null) noiseCautionCell.SetActive(false);
         if (noiseWarningCell != null) noiseWarningCell.SetActive(false);
         if (noiseDangerCell != null) noiseDangerCell.SetActive(false);
+        _unitUnderAttackAlertActive = false;
+        _buildingUnderAttackAlertActive = false;
     }
 
     public void ShowTooltip(GameAlertType type)

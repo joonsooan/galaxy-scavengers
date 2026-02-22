@@ -5781,7 +5781,7 @@ MonoBehaviour:
   spawnRadiusOffset: 5
   basePoints: 30
   noiseAlpha: 0.25
-  timeBeta: 0.3
+  timeBeta: 0.1
   noise100WaveCooldown: 20
   noise100AreaCount: 5
   noise100BudgetMultiplierPercent: 10
