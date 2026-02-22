@@ -1,61 +1,61 @@
 fileFormatVersion: 2
-guid: 0e2e932ee06d95744b2a596e498070d9
+guid: a38c8cd3d45f89945b88aabf8853401b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7869161389668433303
-    second: enemy-scuttler-attack-up_0
+      213: 2566248089090174754
+    second: enemy-scuttler-attack-left-normal_0
   - first:
-      213: -8055876891744138910
-    second: enemy-scuttler-attack-up_1
+      213: 3731805241363822725
+    second: enemy-scuttler-attack-left-normal_1
   - first:
-      213: 6932869196343428065
-    second: enemy-scuttler-attack-up_2
+      213: 9010404996142177523
+    second: enemy-scuttler-attack-left-normal_2
   - first:
-      213: -7634220759108505235
-    second: enemy-scuttler-attack-up_3
+      213: 6323608060500733052
+    second: enemy-scuttler-attack-left-normal_3
   - first:
-      213: -9067760787723218319
-    second: enemy-scuttler-attack-up_4
+      213: 768734525339236789
+    second: enemy-scuttler-attack-left-normal_4
   - first:
-      213: 3987514332752689
-    second: enemy-scuttler-attack-up_5
+      213: 6532002311410145027
+    second: enemy-scuttler-attack-left-normal_5
   - first:
-      213: -3766222042826381093
-    second: enemy-scuttler-attack-up_6
+      213: 8981521317005370659
+    second: enemy-scuttler-attack-left-normal_6
   - first:
-      213: -7958275588027767158
-    second: enemy-scuttler-attack-up_7
+      213: 1418878182833152379
+    second: enemy-scuttler-attack-left-normal_7
   - first:
-      213: -5749359529724237423
-    second: enemy-scuttler-attack-up_8
+      213: -4625716563538282859
+    second: enemy-scuttler-attack-left-normal_8
   - first:
-      213: 2682713678842072530
-    second: enemy-scuttler-attack-up_9
+      213: 3750697623675203344
+    second: enemy-scuttler-attack-left-normal_9
   - first:
-      213: -7845284792092937648
-    second: enemy-scuttler-attack-up_10
+      213: 4914844463481112260
+    second: enemy-scuttler-attack-left-normal_10
   - first:
-      213: -888125545626190310
-    second: enemy-scuttler-attack-up_11
+      213: 1417477884548798880
+    second: enemy-scuttler-attack-left-normal_11
   - first:
-      213: 4982312129084148123
-    second: enemy-scuttler-attack-up_12
+      213: -3606929287125909289
+    second: enemy-scuttler-attack-left-normal_12
   - first:
-      213: 4412948997285589789
-    second: enemy-scuttler-attack-up_13
+      213: -6775333091256279787
+    second: enemy-scuttler-attack-left-normal_13
   - first:
-      213: -8795074783301002835
-    second: enemy-scuttler-attack-up_14
+      213: 189711970546774752
+    second: enemy-scuttler-attack-left-normal_14
   - first:
-      213: -8362577459627674199
-    second: enemy-scuttler-attack-up_15
+      213: -3826272608285444224
+    second: enemy-scuttler-attack-left-normal_15
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 0
-    sRGBTexture: 1
+    enableMipMap: 1
+    sRGBTexture: 0
     linearTexture: 0
     fadeOut: 0
     borderMipMap: 0
@@ -93,16 +93,16 @@ TextureImporter:
   compressionQuality: 50
   spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 0
+  spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 16
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
-  alphaIsTransparency: 1
+  alphaIsTransparency: 0
   spriteTessellationDetail: -1
-  textureType: 8
+  textureType: 1
   textureShape: 1
   singleChannelComponent: 0
   flipbookRows: 1
@@ -146,7 +146,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -158,353 +158,353 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: enemy-scuttler-attack-up_0
+      name: enemy-scuttler-attack-left-normal_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        width: 26
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 79df76f5790e43d60800000000000000
-      internalID: 7869161389668433303
+      spriteID: 22faebb5a052d9320800000000000000
+      internalID: 2566248089090174754
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-attack-up_1
+      name: enemy-scuttler-attack-left-normal_1
       rect:
         serializedVersion: 2
-        x: 17
+        x: 25
         y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        width: 27
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 269005916a6c33090800000000000000
-      internalID: -8055876891744138910
+      spriteID: 5887e6658190ac330800000000000000
+      internalID: 3731805241363822725
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-attack-up_2
-      rect:
-        serializedVersion: 2
-        x: 34
-        y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 1e34c4a5dcf763060800000000000000
-      internalID: 6932869196343428065
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: enemy-scuttler-attack-up_3
+      name: enemy-scuttler-attack-left-normal_2
       rect:
         serializedVersion: 2
         x: 51
         y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        width: 27
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d61bc6cdaaccd0690800000000000000
-      internalID: -7634220759108505235
+      spriteID: 3fc9575da936b0d70800000000000000
+      internalID: 9010404996142177523
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-attack-up_4
+      name: enemy-scuttler-attack-left-normal_3
       rect:
         serializedVersion: 2
-        x: 68
-        y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        x: 78
+        y: 1
+        width: 26
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1729a8b4b97d82280800000000000000
-      internalID: -9067760787723218319
+      spriteID: c7c61f0f608f1c750800000000000000
+      internalID: 6323608060500733052
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-attack-up_5
+      name: enemy-scuttler-attack-left-normal_4
       rect:
         serializedVersion: 2
-        x: 85
-        y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        x: 104
+        y: 1
+        width: 25
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 13b27578f9a2e0000800000000000000
-      internalID: 3987514332752689
+      spriteID: 5b97c655af71baa00800000000000000
+      internalID: 768734525339236789
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-attack-up_6
+      name: enemy-scuttler-attack-left-normal_5
       rect:
         serializedVersion: 2
-        x: 102
-        y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        x: 130
+        y: 1
+        width: 25
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: bd86610a101bbbbc0800000000000000
-      internalID: -3766222042826381093
+      spriteID: 307d1a38e7556aa50800000000000000
+      internalID: 6532002311410145027
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-attack-up_7
+      name: enemy-scuttler-attack-left-normal_6
       rect:
         serializedVersion: 2
-        x: 119
-        y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        x: 156
+        y: 1
+        width: 25
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a8621f674868e8190800000000000000
-      internalID: -7958275588027767158
+      spriteID: 32524ba3d06c4ac70800000000000000
+      internalID: 8981521317005370659
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-attack-up_8
+      name: enemy-scuttler-attack-left-normal_7
       rect:
         serializedVersion: 2
-        x: 136
-        y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        x: 183
+        y: 2
+        width: 23
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 199a7c818fb2630b0800000000000000
-      internalID: -5749359529724237423
+      spriteID: b716253903ed0b310800000000000000
+      internalID: 1418878182833152379
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-attack-up_9
+      name: enemy-scuttler-attack-left-normal_8
       rect:
         serializedVersion: 2
-        x: 153
-        y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        x: 211
+        y: 1
+        width: 22
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2dd867590e9ea3520800000000000000
-      internalID: 2682713678842072530
+      spriteID: 596f8a62b472ecfb0800000000000000
+      internalID: -4625716563538282859
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-attack-up_10
-      rect:
-        serializedVersion: 2
-        x: 170
-        y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 052b6853c03ff1390800000000000000
-      internalID: -7845284792092937648
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: enemy-scuttler-attack-up_11
-      rect:
-        serializedVersion: 2
-        x: 187
-        y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a1e3001958ebca3f0800000000000000
-      internalID: -888125545626190310
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: enemy-scuttler-attack-up_12
-      rect:
-        serializedVersion: 2
-        x: 204
-        y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b994e26eb7ab42540800000000000000
-      internalID: 4982312129084148123
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: enemy-scuttler-attack-up_13
-      rect:
-        serializedVersion: 2
-        x: 221
-        y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d13bf137bb1fd3d30800000000000000
-      internalID: 4412948997285589789
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: enemy-scuttler-attack-up_14
+      name: enemy-scuttler-attack-left-normal_9
       rect:
         serializedVersion: 2
         x: 238
         y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        width: 22
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: da91958351e91f580800000000000000
-      internalID: -8795074783301002835
+      spriteID: 01fef0fdd972d0430800000000000000
+      internalID: 3750697623675203344
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: enemy-scuttler-attack-up_15
+      name: enemy-scuttler-attack-left-normal_10
       rect:
         serializedVersion: 2
-        x: 255
+        x: 264
         y: 0
-        width: 16
-        height: 16
-      alignment: 7
-      pivot: {x: 0.5, y: 0}
+        width: 22
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9a534387b1822fb80800000000000000
-      internalID: -8362577459627674199
+      spriteID: 4c64614eff8053440800000000000000
+      internalID: 4914844463481112260
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-attack-left-normal_11
+      rect:
+        serializedVersion: 2
+        x: 290
+        y: 0
+        width: 22
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a9d08930a4eba310800000000000000
+      internalID: 1417477884548798880
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-attack-left-normal_12
+      rect:
+        serializedVersion: 2
+        x: 314
+        y: 0
+        width: 24
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7d048e67cec91fdc0800000000000000
+      internalID: -3606929287125909289
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-attack-left-normal_13
+      rect:
+        serializedVersion: 2
+        x: 338
+        y: 0
+        width: 26
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 51d58b4637e29f1a0800000000000000
+      internalID: -6775333091256279787
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-attack-left-normal_14
+      rect:
+        serializedVersion: 2
+        x: 364
+        y: 1
+        width: 26
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e27416380ef1a200800000000000000
+      internalID: 189711970546774752
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-attack-left-normal_15
+      rect:
+        serializedVersion: 2
+        x: 390
+        y: 0
+        width: 25
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 087b651d55956eac0800000000000000
+      internalID: -3826272608285444224
       vertices: []
       indices: 
       edges: []
@@ -513,34 +513,32 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 98f3e5ae78f4ebf4d9c89d12b0f4b45b
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: fe3091c0a1210444887bff7d0761bf3e, type: 3}
-      name: _NormalMap
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      enemy-scuttler-attack-up_0: 7869161389668433303
-      enemy-scuttler-attack-up_1: -8055876891744138910
-      enemy-scuttler-attack-up_10: -7845284792092937648
-      enemy-scuttler-attack-up_11: -888125545626190310
-      enemy-scuttler-attack-up_12: 4982312129084148123
-      enemy-scuttler-attack-up_13: 4412948997285589789
-      enemy-scuttler-attack-up_14: -8795074783301002835
-      enemy-scuttler-attack-up_15: -8362577459627674199
-      enemy-scuttler-attack-up_2: 6932869196343428065
-      enemy-scuttler-attack-up_3: -7634220759108505235
-      enemy-scuttler-attack-up_4: -9067760787723218319
-      enemy-scuttler-attack-up_5: 3987514332752689
-      enemy-scuttler-attack-up_6: -3766222042826381093
-      enemy-scuttler-attack-up_7: -7958275588027767158
-      enemy-scuttler-attack-up_8: -5749359529724237423
-      enemy-scuttler-attack-up_9: 2682713678842072530
+      enemy-scuttler-attack-left-normal_0: 2566248089090174754
+      enemy-scuttler-attack-left-normal_1: 3731805241363822725
+      enemy-scuttler-attack-left-normal_10: 4914844463481112260
+      enemy-scuttler-attack-left-normal_11: 1417477884548798880
+      enemy-scuttler-attack-left-normal_12: -3606929287125909289
+      enemy-scuttler-attack-left-normal_13: -6775333091256279787
+      enemy-scuttler-attack-left-normal_14: 189711970546774752
+      enemy-scuttler-attack-left-normal_15: -3826272608285444224
+      enemy-scuttler-attack-left-normal_2: 9010404996142177523
+      enemy-scuttler-attack-left-normal_3: 6323608060500733052
+      enemy-scuttler-attack-left-normal_4: 768734525339236789
+      enemy-scuttler-attack-left-normal_5: 6532002311410145027
+      enemy-scuttler-attack-left-normal_6: 8981521317005370659
+      enemy-scuttler-attack-left-normal_7: 1418878182833152379
+      enemy-scuttler-attack-left-normal_8: -4625716563538282859
+      enemy-scuttler-attack-left-normal_9: 3750697623675203344
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

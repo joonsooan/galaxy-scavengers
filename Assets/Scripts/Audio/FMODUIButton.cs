@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using FMODUnity;
 
-public class FMODUIButton : MonoBehaviour, IPointerEnterHandler, IPointerUpHandler
+public class FMODUIButton : MonoBehaviour, IPointerEnterHandler, IPointerClickHandler
 {
     [Header("FMOD Events")]
     [SerializeField] private EventReference hoverSound;
@@ -21,7 +21,17 @@ public class FMODUIButton : MonoBehaviour, IPointerEnterHandler, IPointerUpHandl
         }
     }
 
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        PlayClickSound();
+    }
+
     public void OnPointerUp(PointerEventData eventData)
+    {
+        PlayClickSound();
+    }
+
+    private void PlayClickSound()
     {
         if (!clickSound.IsNull)
         {

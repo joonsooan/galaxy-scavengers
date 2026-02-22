@@ -280,14 +280,6 @@ public class TutorialManager : MonoBehaviour
 
         ProcessStepStartActions(currentStep);
         EnableUIPanelsForStep(currentStep);
-        if (currentStep.stepType == TutorialStepType.MineableTypesChanged && mainControlPanel != null)
-        {
-            MainControlPanel mainControl = mainControlPanel.GetComponent<MainControlPanel>();
-            if (mainControl != null)
-            {
-                mainControl.ShowResourceStatPanelForTutorial();
-            }
-        }
         EnableMaterialHighlights(currentStep);
         ShowArrowUI(currentStep);
         ShowTargetBracket(currentStep);

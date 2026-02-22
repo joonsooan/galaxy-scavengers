@@ -516,12 +516,14 @@ public class QuestBriefPanel : MonoBehaviour
         if (_currentQuestId == -1)
         {
             if (questButtonPanel != null) questButtonPanel.SetActive(false);
+            if (questActionButton != null) questActionButton.interactable = false;
             return;
         }
 
         if (QuestDataManager.Instance == null)
         {
             if (questButtonPanel != null) questButtonPanel.SetActive(false);
+            if (questActionButton != null) questActionButton.interactable = false;
             return;
         }
 
@@ -533,6 +535,7 @@ public class QuestBriefPanel : MonoBehaviour
         if (isRequestQuest && questState == QuestState.Available)
         {
             if (questButtonPanel != null) questButtonPanel.SetActive(false);
+            questActionButton.interactable = false;
             return;
         }
 
@@ -561,6 +564,7 @@ public class QuestBriefPanel : MonoBehaviour
         if (questState == QuestState.Available)
         {
             if (questButtonPanel != null) questButtonPanel.SetActive(true);
+            questActionButton.interactable = true;
             if (questActionButtonText != null)
             {
                 questActionButtonText.text = "수락";
@@ -572,6 +576,7 @@ public class QuestBriefPanel : MonoBehaviour
             if (canFinish)
             {
                 if (questButtonPanel != null) questButtonPanel.SetActive(true);
+                questActionButton.interactable = true;
                 if (questActionButtonText != null)
                 {
                     questActionButtonText.text = "완료";
@@ -579,12 +584,18 @@ public class QuestBriefPanel : MonoBehaviour
             }
             else
             {
-                if (questButtonPanel != null) questButtonPanel.SetActive(false);
+                if (questButtonPanel != null) questButtonPanel.SetActive(true);
+                questActionButton.interactable = false;
+                if (questActionButtonText != null)
+                {
+                    questActionButtonText.text = "진행 중";
+                }
             }
         }
         else if (questState == QuestState.Completable)
         {
             if (questButtonPanel != null) questButtonPanel.SetActive(true);
+            questActionButton.interactable = true;
             if (questActionButtonText != null)
             {
                 questActionButtonText.text = "완료";
@@ -593,6 +604,7 @@ public class QuestBriefPanel : MonoBehaviour
         else if (questState == QuestState.Completed)
         {
             if (questButtonPanel != null) questButtonPanel.SetActive(true);
+            questActionButton.interactable = true;
             if (questActionButtonText != null)
             {
                 questActionButtonText.text = "완료";
@@ -601,6 +613,7 @@ public class QuestBriefPanel : MonoBehaviour
         else
         {
             if (questButtonPanel != null) questButtonPanel.SetActive(false);
+            questActionButton.interactable = false;
         }
     }
 
