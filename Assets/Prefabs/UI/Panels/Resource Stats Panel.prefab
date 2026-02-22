@@ -619,12 +619,12 @@ RectTransform:
   - {fileID: 2814460031432146796}
   - {fileID: 3981944988208555706}
   - {fileID: 4110880989622268136}
+  - {fileID: 4267771434335168916}
   - {fileID: 8678828326455604744}
   - {fileID: 1837109087426259925}
   - {fileID: 8512600025615750578}
   - {fileID: 667707488088192524}
   - {fileID: 8372744225852452512}
-  - {fileID: 4267771434335168916}
   m_Father: {fileID: 9103345074969141216}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -3274,7 +3274,7 @@ PrefabInstance:
     - target: {fileID: 419013329473583688, guid: b55a2c0589b5c614e8e69efa522a1a57, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 5303534084345622160, guid: f6c185f52157ec74e9e1d690c2fcbece, type: 3}
+      objectReference: {fileID: 1703963130801174446, guid: 67571c1aa1e6b8e4183c8b5ac344b231, type: 3}
     - target: {fileID: 1752386822653613811, guid: b55a2c0589b5c614e8e69efa522a1a57, type: 3}
       propertyPath: m_Name
       value: Resource Stat Cell (8)
