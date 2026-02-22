@@ -115,13 +115,14 @@ public class GameManager : MonoBehaviour
         LaunchUIController launchUIController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
         bool isPauseInputLocked = launchUIController != null && launchUIController.IsPauseInputLocked();
         bool isLaunchMenuInputBlocked = launchUIController != null && launchUIController.IsMenuInputBlocked();
+        bool isCountdownSequenceActive = launchUIController != null && launchUIController.IsCountdownSequenceActive();
 
         if (!isLaunchMenuInputBlocked && Input.GetKeyDown(KeyCode.Q)) {
             GameSceneQuestUIManager questUI = FindFirstObjectByType<GameSceneQuestUIManager>();
             if (questUI != null) questUI.ToggleQuestPanelWithShortcut();
         }
 
-        if (!isPauseInputLocked && Input.GetKeyDown(KeyCode.Space)) {
+        if (!isPauseInputLocked && !isCountdownSequenceActive && Input.GetKeyDown(KeyCode.Space)) {
             TogglePause();
         }
 

@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
@@ -30,14 +29,11 @@ public class LaunchUIController : MonoBehaviour
     [SerializeField] private EventReference countdownBgm;
     [SerializeField] private float bgmFadeOutTime = 0.5f;
     
-    [Header("Countdown UI Visibility")]
-    [SerializeField] private Transform uiVisibilityRoot;
-    [SerializeField] private GameObject timeUI;
+    [Header("Countdown Hidden UI")]
+    [SerializeField] private GameObject speedUI;
+    [SerializeField] private GameObject questPanel;
     [SerializeField] private GameObject menuButton;
-    [SerializeField] private GameObject helpButton;
-    [SerializeField] private GameObject noisePanel;
-    [SerializeField] private GameObject debuffPanel;
-    [SerializeField] private GameObject alertPanel;
+    [SerializeField] private GameObject launchButtonObject;
 
     private bool _isCountingDown;
     private Coroutine _countdownCoroutine;
@@ -454,78 +450,18 @@ public class LaunchUIController : MonoBehaviour
 
     private void HideUiForLaunchCountdown()
     {
-        Transform root = uiVisibilityRoot;
-        if (root == null)
-        {
-            if (launchPanel != null && launchPanel.transform.parent != null)
-            {
-                root = launchPanel.transform.parent;
-            }
-            else if (countdownPanel != null && countdownPanel.transform.parent != null)
-            {
-                root = countdownPanel.transform.parent;
-            }
-        }
-
-        if (root == null)
-        {
-            return;
-        }
-
-        HashSet<Transform> keepSet = new HashSet<Transform>();
-        AddKeepTransform(keepSet, countdownPanel);
-        AddKeepTransform(keepSet, timeUI);
-        AddKeepTransform(keepSet, menuButton);
-        AddKeepTransform(keepSet, helpButton);
-        AddKeepTransform(keepSet, noisePanel);
-        AddKeepTransform(keepSet, debuffPanel);
-        AddKeepTransform(keepSet, alertPanel);
-
-        for (int i = 0; i < root.childCount; i++)
-        {
-            Transform child = root.GetChild(i);
-            if (child == null)
-            {
-                continue;
-            }
-
-            if (ShouldKeepVisible(child, keepSet))
-            {
-                continue;
-            }
-
-            GameObject target = child.gameObject;
-            if (target.activeSelf)
-            {
-                target.SetActive(false);
-            }
-        }
+        HideTargetUi(speedUI);
+        HideTargetUi(questPanel);
+        HideTargetUi(menuButton);
+        HideTargetUi(launchButtonObject);
     }
 
-    private static void AddKeepTransform(HashSet<Transform> keepSet, GameObject target)
+    private static void HideTargetUi(GameObject target)
     {
-        if (target != null)
+        if (target != null && target.activeSelf)
         {
-            keepSet.Add(target.transform);
+            target.SetActive(false);
         }
-    }
-
-    private static bool ShouldKeepVisible(Transform candidate, HashSet<Transform> keepSet)
-    {
-        foreach (Transform keep in keepSet)
-        {
-            if (keep == null)
-            {
-                continue;
-            }
-
-            if (candidate == keep || keep.IsChildOf(candidate))
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private void UpdateNeededAetherText()

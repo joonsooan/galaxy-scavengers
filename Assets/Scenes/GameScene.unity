@@ -7773,17 +7773,12 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6356563479771380629, guid: 81b7a3fb9af1e1d4b9cdeadc1ff10e67, type: 3}
   m_PrefabInstance: {fileID: 404634692}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 404634695}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &404634695 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 581064492340481447, guid: 81b7a3fb9af1e1d4b9cdeadc1ff10e67, type: 3}
-  m_PrefabInstance: {fileID: 404634692}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &409130218
 GameObject:
   m_ObjectHideFlags: 0
@@ -9301,7 +9296,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 0
-  m_Spacing: 1
+  m_Spacing: 0
   m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 1
@@ -22131,7 +22126,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 11.25
+  orthographic size: 662.501
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -52949,13 +52944,10 @@ MonoBehaviour:
       Data4: 1658255786
     Path: event:/BGM_InGame/BGM_CountDown
   bgmFadeOutTime: 1
-  uiVisibilityRoot: {fileID: 1490465122}
-  timeUI: {fileID: 432427245}
+  speedUI: {fileID: 1029636134}
+  questPanel: {fileID: 53596316}
   menuButton: {fileID: 6465018715673569242}
-  helpButton: {fileID: 404634695}
-  noisePanel: {fileID: 850145275}
-  debuffPanel: {fileID: 2111770750}
-  alertPanel: {fileID: 1078723809}
+  launchButtonObject: {fileID: 1085667705}
 --- !u!114 &1538527380
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -53087,7 +53079,7 @@ MonoBehaviour:
   launchStartButton: {fileID: 1627937981}
   inventoryCellPrefab: {fileID: 3842191235755297668, guid: 0c93dfd6b41a96d4489a92b302206a7f, type: 3}
   resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: 25b8419de43c1984fb45df6c7a910ba5, type: 3}
-  baseCellCount: 10
+  baseCellCount: 20
   defaultMaxStackAmount: 100
   customMaxStackAmounts:
   - resourceType: 0
@@ -54028,7 +54020,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -5, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1613902179
 MonoBehaviour:
@@ -66387,7 +66379,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 5, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &1634437490
 MonoBehaviour:
