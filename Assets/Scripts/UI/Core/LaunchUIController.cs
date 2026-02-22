@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using DG.Tweening;
 using TMPro;
@@ -7,6 +8,9 @@ using FMODUnity;
 
 public class LaunchUIController : MonoBehaviour
 {
+    public static event Action OnLaunchCountdownStarted;
+    public static event Action OnLaunchCountdownFinished;
+
     [Header("UI References")]
     [SerializeField] private GameObject launchPanel;
     [SerializeField] private GameObject requiredAetherPanel;
@@ -267,6 +271,7 @@ public class LaunchUIController : MonoBehaviour
         HideUiForLaunchCountdown();
 
         _isCountingDown = true;
+        OnLaunchCountdownStarted?.Invoke();
 
         if (_countdownCoroutine != null)
         {
@@ -420,6 +425,7 @@ public class LaunchUIController : MonoBehaviour
         _isCountingDown = false;
         _isPreparingCountdown = false;
         _countdownCoroutine = null;
+        OnLaunchCountdownFinished?.Invoke();
 
         SceneLoader.Instance.LoadBaseScene(SceneLoader.ReturnFromGameState.Success);
     }
