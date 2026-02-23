@@ -45215,15 +45215,15 @@ MonoBehaviour:
     \uC544\uC774\uCF58\uC744 \uD074\uB9AD\uD574 \uD65C\uC131\uD654\uD558\uC138\uC694!"
   tooltipMinerNoResource: "\uCC44\uAD74 \uC720\uB2DB\uC774 \uCE98 \uC790\uC6D0\uC774
     \uC5C6\uC2B5\uB2C8\uB2E4.\n\uC0C8\uB85C\uC6B4 \uC790\uC6D0 \uBE14\uB85D\uC744
-    \uCC3E\uC73C\uC138\uC694!"
+    \uCC3E\uAC70\uB098\n\uC790\uC6D0 \uC544\uC774\uCF58\uC744 \uD074\uB9AD\uD574
+    \uD65C\uC131\uD654\uD558\uC138\uC694!"
   tooltipMinerIsFull: "\uCC44\uAD74 \uC720\uB2DB\uC774 \uC790\uC6D0\uC744 \uC800\uC7A5\uD560
     \uACF5\uAC04\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.\n\uC800\uC7A5\uACE0\uB97C \uB354
     \uAC74\uC124\uD558\uC138\uC694!"
   tooltipUnitUnderAttack: "\uC720\uB2DB\uC774 \uACF5\uACA9\uBC1B\uACE0 \uC788\uC2B5\uB2C8\uB2E4!"
   tooltipBuildingUnderAttack: "\uAC74\uBB3C\uC774 \uACF5\uACA9\uBC1B\uACE0 \uC788\uC2B5\uB2C8\uB2E4!"
-  tooltipDroneIsNotAssigned: "\uAC00\uACF5 \uC720\uB2DB\uC774 \uC0DD\uC0B0 \uAC74\uBB3C\uC5D0
-    \uBC30\uC815\uB418\uC9C0 \uC54A\uC558\uC2B5\uB2C8\uB2E4.\n\uC0DD\uC0B0 \uAC74\uBB3C\uC5D0
-    \uBC30\uC815\uD574\uC8FC\uC138\uC694!"
+  tooltipDroneIsNotAssigned: "\uAC00\uACF5 \uC720\uB2DB\uC774 \uC0DD\uC0B0 \uAC74\uBB3C\uC5D0\n\uBC30\uC815\uB418\uC9C0
+    \uC54A\uC558\uC2B5\uB2C8\uB2E4.\n\uC0DD\uC0B0 \uAC74\uBB3C\uC5D0 \uBC30\uC815\uD574\uC8FC\uC138\uC694!"
   tooltipDroneNoResource: "\uAC00\uACF5 \uC720\uB2DB\uC774 \uAC00\uACF5\uD560 \uC790\uC6D0\uC774
     \uBD80\uC871\uD569\uB2C8\uB2E4."
   tooltipConstructNoResource: "\uAC74\uC124 \uC720\uB2DB\uC774 \uAC74\uC124\uD560
@@ -71759,8 +71759,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 163725887cf43a3418506d1a895ccbed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ferriteInitialAmount: 200
-  aetherInitialAmount: 200
+  ferriteInitialAmount: 300
+  aetherInitialAmount: 300
   biomassInitialAmount: 0
   cryoCrystalInitialAmount: 0
   tutorialFerriteInitialAmount: 0
