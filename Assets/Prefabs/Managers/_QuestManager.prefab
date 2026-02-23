@@ -57,5 +57,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6597dc5e18a3f6543b4577ad0e2e3388, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  initialQuestDelay: 30
-  timeBetweenQuests: 30
+  initialQuestDelay: 60
+  timeBetweenQuests: 60
