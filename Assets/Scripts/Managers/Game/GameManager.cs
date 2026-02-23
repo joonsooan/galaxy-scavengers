@@ -8,7 +8,6 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
-    private const float CombatLockDuration = 5f;
     public MapGenerator mapGenerator;
     public UIManager uiManager;
     public CardDragger cardDragger;
@@ -26,9 +25,6 @@ public class GameManager : MonoBehaviour
     [HideInInspector] public UnityEvent onEndDrag;
 
     private DisplayableData _activeCardData;
-    private float _combatLockTimer;
-
-    private bool _isCombatSpeedLockActive;
     private float _lastDragEndUnscaledTime = -999f;
 
     private float _savedTimeScale = 1f;
@@ -55,7 +51,6 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         HandleGameInput();
-        UpdateCombatSpeedLock();
     }
 
     private void OnEnable()
@@ -80,26 +75,6 @@ public class GameManager : MonoBehaviour
 
     private void HandleAnyDamageTaken(Damageable damageable)
     {
-        _isCombatSpeedLockActive = true;
-        _combatLockTimer = CombatLockDuration;
-
-        if (!IsPaused && Time.timeScale != 1f) {
-            Time.timeScale = 1f;
-        }
-    }
-
-    private void UpdateCombatSpeedLock()
-    {
-        if (!_isCombatSpeedLockActive) return;
-
-        _combatLockTimer -= Time.unscaledDeltaTime;
-        if (_combatLockTimer <= 0f) {
-            _isCombatSpeedLockActive = false;
-
-            if (!IsPaused) {
-                Time.timeScale = _savedTimeScale;
-            }
-        }
     }
 
     private void HandleGameInput()
@@ -208,7 +183,7 @@ public class GameManager : MonoBehaviour
         if (Mathf.Approximately(_savedTimeScale, newSpeed)) return;
 
         _savedTimeScale = newSpeed;
-        bool canChangeActualTimeScale = !_isCombatSpeedLockActive && !IsPaused;
+        bool canChangeActualTimeScale = !IsPaused;
         if (canChangeActualTimeScale) {
             Time.timeScale = newSpeed;
         }

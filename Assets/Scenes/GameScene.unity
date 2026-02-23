@@ -2365,7 +2365,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c90e03b4b8f687648b584f96455ef6ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RealSecondsPerInGameHour: 7
+  RealSecondsPerInGameHour: 8
   currentTime: 6
   gameStartTime: 6
   autoAdvanceTime: 1
@@ -22526,7 +22526,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 11.25
+  orthographic size: 662.501
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -53581,23 +53581,23 @@ MonoBehaviour:
   - resourceType: 4
     maxStackAmount: 100
   - resourceType: 5
-    maxStackAmount: 50
+    maxStackAmount: 100
   - resourceType: 6
-    maxStackAmount: 50
+    maxStackAmount: 100
   - resourceType: 7
-    maxStackAmount: 50
+    maxStackAmount: 100
   - resourceType: 8
-    maxStackAmount: 50
+    maxStackAmount: 100
   - resourceType: 9
-    maxStackAmount: 50
+    maxStackAmount: 100
   - resourceType: 10
-    maxStackAmount: 50
+    maxStackAmount: 100
   - resourceType: 11
-    maxStackAmount: 50
-  - resourceType: 12
-    maxStackAmount: 50
+    maxStackAmount: 100
   - resourceType: 13
-    maxStackAmount: 50
+    maxStackAmount: 100
+  - resourceType: 12
+    maxStackAmount: 100
 --- !u!1 &1539729019
 GameObject:
   m_ObjectHideFlags: 0

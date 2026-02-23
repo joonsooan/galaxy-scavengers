@@ -331,6 +331,8 @@ public class QuestDataManager : MonoBehaviour
     {
         if (questData == null) return;
 
+        ResetQuestCheckRuntimeState(questData);
+
         if (!allQuests.Contains(questData)) {
             allQuests.Add(questData);
         }
@@ -464,6 +466,17 @@ public class QuestDataManager : MonoBehaviour
             return false;
         }
 
+        if (_questDataDict.TryGetValue(questId, out QuestData questToStart))
+        {
+            ResetQuestCheckRuntimeState(questToStart);
+        }
+
+        QuestTracker questTracker = FindFirstObjectByType<QuestTracker>();
+        if (questTracker != null)
+        {
+            questTracker.ResetQuestProgressForQuest(questId);
+        }
+
         string currentScene = SceneManager.GetActiveScene().name;
         _activeQuestIds.Add(questId);
         _questStates[questId] = QuestState.Active;
@@ -485,6 +498,20 @@ public class QuestDataManager : MonoBehaviour
         }
 
         return true;
+    }
+
+    private static void ResetQuestCheckRuntimeState(QuestData quest)
+    {
+        if (quest == null || quest.questCheckRequirements == null)
+        {
+            return;
+        }
+
+        foreach (QuestCheckData checkData in quest.questCheckRequirements)
+        {
+            if (checkData == null) continue;
+            checkData.ResetProgress();
+        }
     }
 
     private void CheckSingleQuestCompletion(int questId)

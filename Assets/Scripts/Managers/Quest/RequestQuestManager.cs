@@ -22,6 +22,7 @@ public class RequestQuestManager : MonoBehaviour
     private readonly Dictionary<int, float> _prerequisiteSatisfiedAt = new ();
     private Coroutine _questSpawnCoroutine;
     private bool _isInitialized = false;
+    private bool _eventsSubscribed;
     
     public static event Action<QuestData> OnRequestQuestSpawned;
     
@@ -39,26 +40,40 @@ public class RequestQuestManager : MonoBehaviour
     private void Start()
     {
         LoadRequestQuestsFromResources();
-        TutorialManager.OnTutorialEnded += OnTutorialEnded;
-        SceneManager.sceneLoaded += OnSceneLoaded;
     }
     
     private void OnEnable()
     {
+        if (_eventsSubscribed)
+        {
+            return;
+        }
+
         TutorialManager.OnTutorialEnded += OnTutorialEnded;
         SceneManager.sceneLoaded += OnSceneLoaded;
+        _eventsSubscribed = true;
     }
     
     private void OnDisable()
     {
+        if (!_eventsSubscribed)
+        {
+            return;
+        }
+
         TutorialManager.OnTutorialEnded -= OnTutorialEnded;
         SceneManager.sceneLoaded -= OnSceneLoaded;
+        _eventsSubscribed = false;
     }
     
     private void OnDestroy()
     {
-        TutorialManager.OnTutorialEnded -= OnTutorialEnded;
-        SceneManager.sceneLoaded -= OnSceneLoaded;
+        if (_eventsSubscribed)
+        {
+            TutorialManager.OnTutorialEnded -= OnTutorialEnded;
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+            _eventsSubscribed = false;
+        }
     }
     
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)

@@ -28,7 +28,7 @@ MonoBehaviour:
   questCheckRequirements:
   - checkType: 5
     targetId: 
-    requiredCount: 0
+    requiredCount: 1
     displayText: "\uBAA8\uB4C8 \uC7A5\uCC29 \uD6C4 \uBB34\uC0AC\uD788 \uD589\uC131
       \uD0C8\uCD9C"
     targetLocation: {x: 0, y: 0, z: 0}

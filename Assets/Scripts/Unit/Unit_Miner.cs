@@ -346,7 +346,7 @@ public class Unit_Miner : UnitBase
     private void FindAndSetTarget()
     {
         if (_currentCarryAmounts.Values.Sum() > 0) {
-            SetMineTypeAllOffAlert(false);
+            SetMineTypeAllOffAlert(!HasMineableTypesEnabled());
             SetMinerNoResourceAlert(false);
             GoToStorage();
             return;
@@ -681,8 +681,7 @@ public class Unit_Miner : UnitBase
     {
         mineableResourceTypes = newTypes;
         bool hasMineableTypes = HasMineableTypesEnabled();
-        bool isSeekingResource = _currentCarryAmounts.Values.Sum() <= 0;
-        SetMineTypeAllOffAlert(isSeekingResource && !hasMineableTypes);
+        SetMineTypeAllOffAlert(!hasMineableTypes);
         if (!hasMineableTypes) {
             SetMinerNoResourceAlert(false);
         }

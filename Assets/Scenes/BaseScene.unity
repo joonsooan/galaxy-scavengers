@@ -16561,6 +16561,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4993965286891211911, guid: 2174fafcdb5da504bb2dcf537c0b99b5, type: 3}
+      propertyPath: clickType
+      value: Quest Clear
+      objectReference: {fileID: 0}
+    - target: {fileID: 4993965286891211911, guid: 2174fafcdb5da504bb2dcf537c0b99b5, type: 3}
       propertyPath: clickSound.Path
       value: event:/SFX_UI/SFX_UIClick
       objectReference: {fileID: 0}
