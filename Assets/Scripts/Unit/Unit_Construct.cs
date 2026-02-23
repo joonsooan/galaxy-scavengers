@@ -211,6 +211,11 @@ public class Unit_Construct : UnitBase
 
     private void UpdateIdle()
     {
+        if (!HasPendingConstructionSite())
+        {
+            SetConstructNoResourceAlert(false);
+        }
+
         if (Time.time < _nextTaskRequestTime) {
             UpdateIdleRoam();
             return;
@@ -531,7 +536,6 @@ public class Unit_Construct : UnitBase
 
     public void SetTask_FetchResource(ConstructionSite.ConstructionRequest request, ConstructionSite site)
     {
-        SetConstructNoResourceAlert(false);
         if (movement == null) {
             if (request != null && request.site != null) {
                 request.site.CancelRequest(request);
@@ -544,6 +548,7 @@ public class Unit_Construct : UnitBase
         _storageRoute = null;
         _storageRouteIndex = 0;
         _remainingRequestAmount = request != null ? request.amount : 0;
+        bool hasSufficientResource = false;
 
         if (ResourceManager.Instance != null && request != null && site != null && _remainingRequestAmount > 0) {
             List<IStorage> storages = ResourceManager.Instance.GetAllStorages();
@@ -558,7 +563,9 @@ public class Unit_Construct : UnitBase
                     candidates.Add(storage);
                 }
 
-                if (candidates.Count > 0 && totalAvailable >= request.amount) {
+                hasSufficientResource = totalAvailable >= request.amount;
+
+                if (candidates.Count > 0 && hasSufficientResource) {
                     candidates.Sort((a, b) => {
                         float distA = Vector3.Distance(site.GetPosition(), a.GetPosition());
                         float distB = Vector3.Distance(site.GetPosition(), b.GetPosition());
@@ -591,6 +598,12 @@ public class Unit_Construct : UnitBase
                                 return;
                             }
                         }
+
+                        _currentRequest?.site?.CancelRequest(_currentRequest);
+                        _nextTaskRequestTime = Time.time + TaskRequestCooldown;
+                        SetConstructNoResourceAlert(false);
+                        SetTask_Idle();
+                        return;
                     }
                 }
             }
@@ -598,7 +611,7 @@ public class Unit_Construct : UnitBase
 
         _currentRequest?.site?.CancelRequest(_currentRequest);
         _nextTaskRequestTime = Time.time + TaskRequestCooldown;
-        SetConstructNoResourceAlert(true);
+        SetConstructNoResourceAlert(!hasSufficientResource);
         SetTask_Idle();
     }
 
@@ -670,6 +683,31 @@ public class Unit_Construct : UnitBase
             alertManager?.UnregisterAlert(GameAlertType.ConstructNoResource, this);
         }
         _noResourceAlertActive = shouldEnable;
+    }
+
+    private bool HasPendingConstructionSite()
+    {
+        if (ConstructionManager.Instance == null)
+        {
+            return false;
+        }
+
+        IReadOnlyList<ConstructionSite> sites = ConstructionManager.Instance.ConstructionSites;
+        if (sites == null || sites.Count == 0)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < sites.Count; i++)
+        {
+            ConstructionSite site = sites[i];
+            if (site != null && !site.IsComplete)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void ReturnCarriedResourcesToStorage()

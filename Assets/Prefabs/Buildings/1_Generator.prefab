@@ -196,7 +196,7 @@ MonoBehaviour:
   flashDuration: 0.3
   currentHealth: 0
   generationInterval: 2
-  resourceAmount: 5
+  resourceAmount: 2
   resourceType: 1
   resourceImageOffset: {x: 0.5, y: 0.75, z: 0}
 --- !u!114 &2831755290380365654

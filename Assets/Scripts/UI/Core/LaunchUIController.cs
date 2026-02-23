@@ -79,6 +79,8 @@ public class LaunchUIController : MonoBehaviour
     private int _pendingBeatStepsForSecond;
     private int _lastDisplayedWholeSeconds = -1;
     private bool _hasAppliedFirstBeatSecondStep;
+    private float _countdownPreviousTimeScale = 1f;
+    private bool _hasCountdownTimeScaleOverride;
 
     private void Awake()
     {
@@ -124,6 +126,7 @@ public class LaunchUIController : MonoBehaviour
         {
             BgmManager.Instance.DisableCountdownBeatSync();
         }
+        RestoreCountdownTimeScaleOverride();
         ResetCountdownVisualState();
     }
 
@@ -285,6 +288,7 @@ public class LaunchUIController : MonoBehaviour
             GameManager.Instance.TogglePause();
         }
         SetLaunchPausePanelLock(false);
+        ApplyCountdownTimeScaleOverride();
 
         GameSceneQuestUIManager questUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
         if (questUIManager != null)
@@ -535,6 +539,29 @@ public class LaunchUIController : MonoBehaviour
         OnLaunchCountdownFinished?.Invoke();
 
         SceneLoader.Instance.LoadBaseScene(SceneLoader.ReturnFromGameState.Success);
+    }
+
+    private void ApplyCountdownTimeScaleOverride()
+    {
+        if (_hasCountdownTimeScaleOverride)
+        {
+            return;
+        }
+
+        _countdownPreviousTimeScale = Mathf.Max(0.01f, Time.timeScale);
+        Time.timeScale = 1f;
+        _hasCountdownTimeScaleOverride = true;
+    }
+
+    private void RestoreCountdownTimeScaleOverride()
+    {
+        if (!_hasCountdownTimeScaleOverride)
+        {
+            return;
+        }
+
+        Time.timeScale = _countdownPreviousTimeScale;
+        _hasCountdownTimeScaleOverride = false;
     }
 
     private IEnumerator FadeToBlack()
