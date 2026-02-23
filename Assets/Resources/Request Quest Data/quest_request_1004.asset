@@ -22,11 +22,11 @@ MonoBehaviour:
     \uC790\uC6D0\uC744 \uD655\uBCF4\uD558\uC138\uC694!"
   requiredResources:
   - resourceType: 8
-    amount: 50
+    amount: 20
   - resourceType: 9
-    amount: 50
+    amount: 20
   - resourceType: 10
-    amount: 50
+    amount: 20
   questCheckRequirements:
   - checkType: 0
     targetId: 

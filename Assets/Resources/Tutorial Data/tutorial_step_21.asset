@@ -45,7 +45,6 @@ MonoBehaviour:
   enableMaterialHighlight: 1
   highlightTargetIDs:
   - processor_AlloyPlate
-  - unit_assign_cell
   showArrowUI: 0
   arrowID: 
   showTargetBracket: 1

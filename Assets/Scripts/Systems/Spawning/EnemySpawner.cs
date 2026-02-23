@@ -142,7 +142,7 @@ public class EnemySpawner : MonoBehaviour
         {
             ActivateExistingEnemiesFromBudget(ConvertPercentToMultiplier(noiseCautionBudgetMultiplierPercent));
         }
-        else if (zone == NoiseManager.NoiseZone.Warning)
+        else if (zone == NoiseManager.NoiseZone.Warning || zone == NoiseManager.NoiseZone.Danger)
         {
             ActivateExistingEnemiesFromBudget(ConvertPercentToMultiplier(noiseWarningBudgetMultiplierPercent));
         }
