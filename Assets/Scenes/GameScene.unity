@@ -5984,7 +5984,7 @@ MonoBehaviour:
   noise100WaveCooldown: 30
   noise100AreaCount: 5
   noise100BudgetMultiplierPercent: 15
-  emergencyWaveMultiplierIncrementPercent: 2
+  emergencyWaveMultiplierIncrementPercent: 3
   noiseCautionBudgetMultiplierPercent: 8
   noiseWarningBudgetMultiplierPercent: 15
   percentValueMigrationDone: 1

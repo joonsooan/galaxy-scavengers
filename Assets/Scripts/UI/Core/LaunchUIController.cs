@@ -538,6 +538,9 @@ public class LaunchUIController : MonoBehaviour
         _countdownCoroutine = null;
         OnLaunchCountdownFinished?.Invoke();
 
+        Time.timeScale = 1f;
+        _hasCountdownTimeScaleOverride = false;
+
         SceneLoader.Instance.LoadBaseScene(SceneLoader.ReturnFromGameState.Success);
     }
 
