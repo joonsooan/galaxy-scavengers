@@ -10,24 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 898dc1efeda45414a8149ac16673e46f, type: 3}
-  m_Name: quest_request_1003
+  m_Name: quest_request_1004
   m_EditorClassIdentifier: 
-  questId: 1003
+  questId: 1004
   questType: 1
   questProvider: 0
-  previousQuestIds: ea030000
-  questName: "\uC218\uB9AC \uBD80\uD488 \uD655\uBCF4"
-  questInfo: "\uD604\uC7AC \uD568\uC120\uC758 \uCF54\uC5B4 \uACA9\uB0A9\uACE0\uC5D0
-    \uACE0\uC7A5\uC774 \uC0DD\uACA8 \uC218\uB9AC\uAC00 \uD544\uC694\uD55C \uC0C1\uD669\uC785\uB2C8\uB2E4.\n\uC218\uB9AC\uC5D0
-    \uD544\uC694\uD55C \uBA87 \uAC00\uC9C0 \uBD80\uD488\uB4E4\uC744 \uD655\uBCF4\uD574\uC8FC\uC138\uC694.\n\uC870\uB9BD\uC18C\uB97C
-    \uAC74\uC124\uD574 \uC790\uC6D0\uC744 \uAC00\uACF5\uD558\uBA74 \uB429\uB2C8\uB2E4."
+  previousQuestIds: 
+  questName: "\uC5D0\uB108\uC9C0 \uD655\uBCF4"
+  questInfo: "\uC5EC\uBD84\uC758 \uC5D0\uB108\uC9C0\uB294 \uC5B8\uC81C\uB4E0\uC9C0
+    \uD658\uC601\uC774\uC8E0."
   requiredResources:
-  - resourceType: 6
+  - resourceType: 8
     amount: 50
-  - resourceType: 7
-    amount: 50
-  - resourceType: 12
-    amount: 50
+  - resourceType: 11
+    amount: 30
   questCheckRequirements:
   - checkType: 0
     targetId: 
