@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="AudioFile" id="{5d4292f0-6a3f-417f-ac08-6186fe5608ad}">
+		<property name="assetPath">
+			<value>ethereal-landscape-space-music.mp3</value>
+		</property>
+		<property name="isStreaming">
+			<value>true</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>44.0999985</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>159.84326530612245</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{a7a75309-85f1-4e1f-8f6d-60f7d7d8a7a3}</destination>
+		</relationship>
+	</object>
+</objects>

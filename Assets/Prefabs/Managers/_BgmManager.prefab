@@ -79,6 +79,18 @@ MonoBehaviour:
       Data3: -1013242689
       Data4: 927224795
     Path: event:/BGM_InGame/BGM_InGame_3
+  - Guid:
+      Data1: 768131495
+      Data2: 1197306255
+      Data3: -1753623630
+      Data4: 1590867011
+    Path: event:/BGM_InGame/BGM_InGame_4
+  - Guid:
+      Data1: -1267811933
+      Data2: 1228745763
+      Data3: -1280670053
+      Data4: -2139291702
+    Path: event:/BGM_InGame/BGM_InGame_5
   tutorialBgm:
     Guid:
       Data1: 603399768
