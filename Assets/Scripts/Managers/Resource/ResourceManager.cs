@@ -48,6 +48,12 @@ public class ResourceManager : MonoBehaviour
     [SerializeField] private int aetherInitialAmount;
     [SerializeField] private int biomassInitialAmount;
     [SerializeField] private int cryoCrystalInitialAmount;
+    
+    [Header("Tutorial Base Resource Start Values")]
+    [SerializeField] private int tutorialFerriteInitialAmount;
+    [SerializeField] private int tutorialAetherInitialAmount;
+    [SerializeField] private int tutorialBiomassInitialAmount;
+    [SerializeField] private int tutorialCryoCrystalInitialAmount;
 
     [Header("1 Crafted Resource Start Values")]
     [SerializeField] private int alloyPlateInitialAmount;
@@ -231,6 +237,20 @@ public class ResourceManager : MonoBehaviour
         mainStructure.InitializeStorage(ResourceType.NexusData, nexusDataInitialAmount);
         mainStructure.InitializeStorage(ResourceType.NeuralMatrix, neuralMatrixInitialAmount);
 
+        mainStructure.UpdateStorageUI();
+    }
+
+    public void ApplyTutorialStartResources()
+    {
+        if (ResourceDataManager.Instance == null) return;
+        MainStructure mainStructure = ResourceDataManager.Instance.GetMainStructure();
+        if (mainStructure == null) return;
+
+        // Tutorial start should ignore default base start values.
+        mainStructure.InitializeStorage(ResourceType.Ferrite, tutorialFerriteInitialAmount);
+        mainStructure.InitializeStorage(ResourceType.Aether, tutorialAetherInitialAmount);
+        mainStructure.InitializeStorage(ResourceType.Biomass, tutorialBiomassInitialAmount);
+        mainStructure.InitializeStorage(ResourceType.CryoCrystal, tutorialCryoCrystalInitialAmount);
         mainStructure.UpdateStorageUI();
     }
 
