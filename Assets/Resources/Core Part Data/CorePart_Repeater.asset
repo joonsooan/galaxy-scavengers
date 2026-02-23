@@ -18,6 +18,7 @@ MonoBehaviour:
     \uC99D\uD3ED\uD574 \uC804\uC1A1\uD558\uB294 \uD1B5\uC2E0 \uC7A5\uCE58\uC785\uB2C8\uB2E4.\n\uD30C\uC190\uB41C
     \uACBD\uC6B0 \uAC74\uBB3C\uC758 \uC0DD\uC0B0 \uC18D\uB3C4, \uC720\uB2DB\uC758
     \uC791\uC5C5 \uC18D\uB3C4\uAC00 \uAC10\uC18C\uD569\uB2C8\uB2E4."
+  questTitleColor: {r: 0.3019608, g: 0.60784316, b: 0.9019608, a: 1}
   requiredResources:
   - resourceType: 0
     amount: 2000

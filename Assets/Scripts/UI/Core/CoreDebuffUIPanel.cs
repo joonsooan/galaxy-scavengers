@@ -6,6 +6,14 @@ using UnityEngine.UI;
 
 public class CoreDebuffUIPanel : MonoBehaviour
 {
+    private static readonly CorePart[] CorePartDisplayOrder = {
+        CorePart.Engine,
+        CorePart.Barrier,
+        CorePart.Controller,
+        CorePart.Repeater,
+        CorePart.Storage,
+    };
+
     [Header("UI References")]
     [SerializeField] private GameObject debuffContainer;
     [SerializeField] private GameObject debuffImagePrefab;
@@ -48,7 +56,7 @@ public class CoreDebuffUIPanel : MonoBehaviour
 
         if (debuffImagePrefab == null) return;
 
-        foreach (CorePart part in System.Enum.GetValues(typeof(CorePart)))
+        foreach (CorePart part in CorePartDisplayOrder)
         {
             if (!CoreRepairManager.Instance.IsPartRepaired(part))
             {

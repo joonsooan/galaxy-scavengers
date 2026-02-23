@@ -17,6 +17,7 @@ public class CorePartData : ScriptableObject
     public string partName;
     [TextArea(2, 4)]
     public string partDescription;
+    public Color questTitleColor = Color.cyan;
 
     [Header("Repair Requirements")]
     public ResourceCost[] requiredResources;
