@@ -31,7 +31,6 @@ public class Unit_Drone : UnitBase
     private Tween _hoverTween;
     private Coroutine _loadingCoroutine;
     private float _nextRepathTime;
-    private bool _notAssignedAlertActive;
     private bool _noResourceAlertActive;
 
     private UnitSpriteController _spriteController;
@@ -85,8 +84,10 @@ public class Unit_Drone : UnitBase
 
     protected override void OnDisable()
     {
-        SetDroneIsNotAssignedAlert(false);
-        SetDroneNoResourceAlert(false);
+        if (_noResourceAlertActive) {
+            FindFirstObjectByType<GameAlertUIManager>()?.UnregisterAlert(GameAlertType.DroneNoResource, this);
+            _noResourceAlertActive = false;
+        }
         StopHover();
         base.OnDisable();
         UnitManager.Instance?.RemoveUnit(this);
@@ -98,10 +99,15 @@ public class Unit_Drone : UnitBase
         switch (_currentState) {
         case DroneState.Idle:
             UpdateIdle();
-            bool shouldShowNotAssignedAlert = !IsAssigned;
-            SetDroneIsNotAssignedAlert(shouldShowNotAssignedAlert);
-            if (shouldShowNotAssignedAlert) {
-                SetDroneNoResourceAlert(false);
+            bool shouldShowAlert = !IsAssigned;
+            var alertManager = FindFirstObjectByType<GameAlertUIManager>();
+            if (shouldShowAlert && !_noResourceAlertActive) {
+                alertManager?.RegisterAlert(GameAlertType.DroneNoResource, this);
+                _noResourceAlertActive = true;
+            }
+            else if (!shouldShowAlert && _noResourceAlertActive) {
+                alertManager?.UnregisterAlert(GameAlertType.DroneNoResource, this);
+                _noResourceAlertActive = false;
             }
             break;
 
@@ -655,8 +661,6 @@ public class Unit_Drone : UnitBase
 
     public void SetTask_FetchResource(Processor.ResourceRequest request, Processor processor)
     {
-        SetDroneIsNotAssignedAlert(false);
-        SetDroneNoResourceAlert(false);
         _currentRequest = request;
         _targetStorage = null;
         _storageRoute = null;
@@ -704,7 +708,6 @@ public class Unit_Drone : UnitBase
                                 _storageRouteIndex = i;
                                 _targetStorage = storage;
                                 _currentState = DroneState.FetchingResource;
-                                SetDroneNoResourceAlert(false);
                                 return;
                             }
                         }
@@ -713,12 +716,11 @@ public class Unit_Drone : UnitBase
             }
         }
 
-        SetTask_ReturnHome(true, true);
+        SetTask_ReturnHome(true);
     }
 
     public void SetTask_Process(Processor processor, ActiveRecipe recipeTask)
     {
-        SetDroneNoResourceAlert(false);
         if (recipeTask == null) {
             SetTask_Idle();
             return;
@@ -744,10 +746,9 @@ public class Unit_Drone : UnitBase
         ReleaseFromRecipeTask();
         HideProgressBar();
         _currentState = DroneState.Idle;
-        SetDroneNoResourceAlert(false);
     }
 
-    private void SetTask_ReturnHome(bool stopMovement = false, bool dueToNoResource = false)
+    private void SetTask_ReturnHome(bool stopMovement = false)
     {
         ReleaseFromRecipeTask();
         HideProgressBar();
@@ -762,34 +763,6 @@ public class Unit_Drone : UnitBase
         if (stopMovement) {
             movement.StopMovement();
         }
-
-        SetDroneNoResourceAlert(dueToNoResource && IsAssigned);
-    }
-
-    private void SetDroneIsNotAssignedAlert(bool shouldEnable)
-    {
-        if (shouldEnable == _notAssignedAlertActive) return;
-        GameAlertUIManager alertManager = FindFirstObjectByType<GameAlertUIManager>();
-        if (shouldEnable) {
-            alertManager?.RegisterAlert(GameAlertType.DroneIsNotAssigned, this);
-        }
-        else {
-            alertManager?.UnregisterAlert(GameAlertType.DroneIsNotAssigned, this);
-        }
-        _notAssignedAlertActive = shouldEnable;
-    }
-
-    private void SetDroneNoResourceAlert(bool shouldEnable)
-    {
-        if (shouldEnable == _noResourceAlertActive) return;
-        GameAlertUIManager alertManager = FindFirstObjectByType<GameAlertUIManager>();
-        if (shouldEnable) {
-            alertManager?.RegisterAlert(GameAlertType.DroneNoResource, this);
-        }
-        else {
-            alertManager?.UnregisterAlert(GameAlertType.DroneNoResource, this);
-        }
-        _noResourceAlertActive = shouldEnable;
     }
 
     private void UpdateHoverAnimation()
