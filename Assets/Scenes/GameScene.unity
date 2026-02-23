@@ -2370,7 +2370,7 @@ MonoBehaviour:
   gameStartTime: 6
   autoAdvanceTime: 1
   dayStartPercent: 20
-  nightStartPercent: 75
+  nightStartPercent: 82.5
   globalLight2D: {fileID: 619394801}
   ambientLightGradient:
     serializedVersion: 2

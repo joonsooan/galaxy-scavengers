@@ -14,27 +14,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   questId: 1
   questType: 0
-  questProvider: 1
+  questProvider: 0
   previousQuestIds: 00000000
   questName: "\uC704\uB300\uD55C \uCCAB \uAC78\uC74C"
-  questInfo: "\uD604\uC7AC \uAE30\uC220 \uC218\uC900\uC73C\uB85C\uB294 \uAE30\uBCF8\uC801\uC778
-    \uBAA8\uB4C8 \uBA87 \uAC1C\uB9CC \uC0DD\uC0B0\uD560 \uC218 \uC788\uC73C\uB098,
-    \uAE30\uBCF8\uC801\uC778 \uBAA8\uB4C8\uB3C4 \uC790\uC6D0 \uCC44\uAD74\uACFC \uAC00\uACF5
-    \uACFC\uC815\uC5D0 \uD06C\uB098\uD070 \uB3C4\uC6C0\uC744 \uC90D\uB2C8\uB2E4.\n\uBA3C\uC800
-    \uAE30\uBCF8 \uBAA8\uB4C8\uC744 \uD558\uB098 \uB9CC\uB4E4\uACE0, \uCF54\uC5B4
-    \uACA9\uB0A9\uACE0\uC5D0\uC11C \uC7A5\uCC29\uD574\uBCF4\uC8E0."
+  questInfo: "\uD29C\uD1A0\uB9AC\uC5BC\uC744 \uBB34\uC0AC\uD788 \uB9C8\uCE58\uC168\uAD70\uC694!\n\uC774\uC81C
+    \uD568\uC120\uC758 \uBAA8\uB4C8 \uC81C\uC791\uC18C\uB97C \uC0AC\uC6A9\uD560 \uC218
+    \uC788\uAC8C \uB418\uC5C8\uC2B5\uB2C8\uB2E4.\n\uBAA8\uB4C8\uC740 \uC2DC\uB4DC
+    \uCF54\uC5B4\uC5D0 \uC7A5\uCC29\uD560 \uC218 \uC788\uB294 \uBD80\uD488\uC73C\uB85C,
+    \uAC74\uBB3C\uC758 \uC0DD\uC0B0 \uC18D\uB3C4\uB098 \uC720\uB2DB\uC758 \uC791\uC5C5
+    \uC18D\uB3C4\uB97C \uBC84\uD504\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.\n\uBAA8\uB4C8
+    \uC81C\uC791\uC18C\uC5D0\uC11C \uBAA8\uB4C8\uC744 \uC0DD\uC0B0\uD574\uBD05\uC2DC\uB2E4!"
   requiredResources: []
   questCheckRequirements:
   - checkType: 5
     targetId: 
-    requiredCount: 1
-    displayText: "\uBAA8\uB4C8 \uC7A5\uCC29 \uD6C4 1 \uC138\uC158 \uC644\uB8CC"
+    requiredCount: 0
+    displayText: "\uBAA8\uB4C8 \uC7A5\uCC29 \uD6C4 \uBB34\uC0AC\uD788 \uD589\uC131
+      \uD0C8\uCD9C"
     targetLocation: {x: 0, y: 0, z: 0}
     locationTolerance: 0
   questFinishReward:
     resourceRewards: []
-    moduleRewards:
-    - {fileID: 11400000, guid: b9acc1162b5703e4ea39b5c969c89d4e, type: 2}
-    creditReward: 50
+    moduleRewards: []
+    creditReward: 100
     unlockedBuildings: []
     newUnits: []
