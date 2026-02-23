@@ -756,28 +756,16 @@ public class QuestDataManager : MonoBehaviour
                 int savedState = PlayerPrefs.GetInt(stateKey);
                 QuestState loadedState = (QuestState)savedState;
 
-                if (loadedState == QuestState.Finished)
-                {
-                    bool hasPrerequisites = HasRealPrerequisites(quest.previousQuestIds);
-                    if (!hasPrerequisites) {
-                        _questStates[quest.questId] = QuestState.Available;
-                    }
-                    else {
-                        _questStates[quest.questId] = QuestState.Locked;
-                    }
+                _questStates[quest.questId] = loadedState;
+
+                if (_questStates[quest.questId] == QuestState.Active ||
+                    _questStates[quest.questId] == QuestState.Completable) {
+                    _activeQuestIds.Add(quest.questId);
                 }
-                else
-                {
-                    _questStates[quest.questId] = loadedState;
 
-                    if (_questStates[quest.questId] == QuestState.Active ||
-                        _questStates[quest.questId] == QuestState.Completable) {
-                        _activeQuestIds.Add(quest.questId);
-                    }
-
-                    if (_questStates[quest.questId] == QuestState.Completed) {
-                        _completedQuestIds.Add(quest.questId);
-                    }
+                if (_questStates[quest.questId] == QuestState.Completed ||
+                    _questStates[quest.questId] == QuestState.Finished) {
+                    _completedQuestIds.Add(quest.questId);
                 }
             }
         }

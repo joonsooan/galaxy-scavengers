@@ -438,7 +438,14 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
 
         QuestState questState = QuestDataManager.Instance.GetQuestState(_tutorialQuestId);
 
-        if (questState == QuestState.Available)
+        bool isTutorialQuestAcceptedOrDone =
+            questState == QuestState.Active ||
+            questState == QuestState.Completable ||
+            questState == QuestState.Completed ||
+            questState == QuestState.Finished ||
+            QuestDataManager.Instance.IsQuestCompleted(_tutorialQuestId);
+
+        if (!isTutorialQuestAcceptedOrDone)
         {
             launchButton.interactable = false;
         }

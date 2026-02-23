@@ -188,8 +188,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
         foreach (QuestData quest in coreRepairQuests)
         {
             QuestState state = QuestDataManager.Instance.GetQuestState(quest.questId);
-            bool isViewed = _viewedQuestIds.Contains(quest.questId);
-            bool shouldShow = (state == QuestState.Active || state == QuestState.Completable) && !isViewed;
+            bool shouldShow = IsCoreRepairNotifierActive(quest.questId, state);
             if (shouldShow)
             {
                 ShowNotifierForNewQuest(quest.questId);
@@ -256,8 +255,7 @@ public class GameSceneQuestUIManager : MonoBehaviour
             if (questData.questType == QuestType.CoreRepairQuest)
             {
                 QuestState state = QuestDataManager.Instance.GetQuestState(questId);
-                bool isViewed = _viewedQuestIds.Contains(questId);
-                bool shouldShow = (state == QuestState.Active || state == QuestState.Completable) && !isViewed;
+                bool shouldShow = IsCoreRepairNotifierActive(questId, state);
                 if (shouldShow)
                 {
                     ShowNotifierForNewQuest(questId, false);
@@ -627,7 +625,8 @@ public class GameSceneQuestUIManager : MonoBehaviour
                     }
                     else if (questData.questType == QuestType.CoreRepairQuest)
                     {
-                        shouldShowNotifier = !_viewedQuestIds.Contains(questData.questId);
+                        QuestState state = QuestDataManager.Instance.GetQuestState(questData.questId);
+                        shouldShowNotifier = IsCoreRepairNotifierActive(questData.questId, state);
                     }
                     else if (questData.questType == QuestType.RequestQuest)
                     {
@@ -781,6 +780,16 @@ public class GameSceneQuestUIManager : MonoBehaviour
     public bool IsQuestViewed(int questId)
     {
         return _viewedQuestIds.Contains(questId);
+    }
+
+    private bool IsCoreRepairNotifierActive(int questId, QuestState state)
+    {
+        if (state == QuestState.Completable)
+        {
+            return true;
+        }
+
+        return state == QuestState.Active && !_viewedQuestIds.Contains(questId);
     }
     
     public void ShowQuestDetailPanel()

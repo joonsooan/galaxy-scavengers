@@ -207,7 +207,7 @@ public class BgmManager : MonoBehaviour
             int posMs;
             if (_currentInstance.getTimelinePosition(out posMs) == RESULT.OK && posMs >= startFadeAtMs)
             {
-                yield return StartCoroutine(FadeOutBgm(gameBgmFadeOutTime));
+                yield return StartCoroutine(FadeOutBgm(gameBgmFadeOutTime, false));
                 _gameBgmEndFadeCoroutine = null;
                 yield break;
             }
@@ -400,7 +400,7 @@ public class BgmManager : MonoBehaviour
         }
     }
 
-    private IEnumerator FadeOutBgm(float duration)
+    private IEnumerator FadeOutBgm(float duration, bool stopGameBgmFlow = true)
     {
         if (!_hasInstance) {
             yield break;
@@ -418,16 +418,19 @@ public class BgmManager : MonoBehaviour
             yield return null;
         }
 
-        StopCurrent(true);
+        StopCurrent(true, stopGameBgmFlow);
     }
 
-    private void StopCurrent(bool immediate)
+    private void StopCurrent(bool immediate, bool stopGameBgmFlow = true)
     {
         if (!_hasInstance) {
             return;
         }
 
-        StopGameBgmCooldown();
+        if (stopGameBgmFlow)
+        {
+            StopGameBgmCooldown();
+        }
 
         try {
             _currentInstance.stop(immediate ? STOP_MODE.IMMEDIATE : STOP_MODE.ALLOWFADEOUT);

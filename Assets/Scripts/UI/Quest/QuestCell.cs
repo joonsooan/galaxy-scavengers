@@ -144,7 +144,9 @@ public class QuestCell : MonoBehaviour
         QuestState questState = QuestDataManager.Instance.GetQuestState(questData.questId);
         bool shouldShow;
         
-        if (questState == QuestState.Available || questState == QuestState.Completable)
+        bool isBaseQuestReadyToComplete = questData.questType == QuestType.BaseQuest && IsQuestReadyToComplete(questData.questId, questState);
+
+        if (questState == QuestState.Available || questState == QuestState.Completable || isBaseQuestReadyToComplete)
         {
             shouldShow = true;
         }
@@ -161,18 +163,19 @@ public class QuestCell : MonoBehaviour
             if (questData.questType == QuestType.BaseQuest)
             {
                 QuestState state = QuestDataManager.Instance.GetQuestState(questData.questId);
-                shouldShowNotifier = state == QuestState.Completable;
+                shouldShowNotifier = IsQuestReadyToComplete(questData.questId, state);
             }
             else if (questData.questType == QuestType.CoreRepairQuest)
             {
+                QuestState state = QuestDataManager.Instance.GetQuestState(questData.questId);
                 if (_gameSceneQuestUIManager != null)
                 {
                     bool isViewed = _gameSceneQuestUIManager.IsQuestViewed(questData.questId);
-                    shouldShowNotifier = !isViewed;
+                    shouldShowNotifier = state == QuestState.Completable || (state == QuestState.Active && !isViewed);
                 }
                 else
                 {
-                    shouldShowNotifier = isNew;
+                    shouldShowNotifier = state == QuestState.Completable || (state == QuestState.Active && isNew);
                 }
             }
             else if (questData.questType == QuestType.RequestQuest)
@@ -197,6 +200,21 @@ public class QuestCell : MonoBehaviour
             }
             notifierIcon.SetActive(shouldShowNotifier);
         }
+    }
+
+    private bool IsQuestReadyToComplete(int questId, QuestState state)
+    {
+        if (state == QuestState.Completable)
+        {
+            return true;
+        }
+
+        if (state != QuestState.Active || QuestDataManager.Instance == null)
+        {
+            return false;
+        }
+
+        return QuestDataManager.Instance.CheckQuestCompletion(questId);
     }
 
     private void MarkAsViewed()
