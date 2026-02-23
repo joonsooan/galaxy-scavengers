@@ -275,6 +275,40 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         drone.SetTask_Idle();
     }
 
+    public bool HasWorkForDrone(int droneCapacity)
+    {
+        if (!IsOperational)
+        {
+            return false;
+        }
+
+        if (FindNextIngredientRequest(droneCapacity) != null)
+        {
+            return true;
+        }
+
+        foreach (ActiveRecipe recipe in _activeRecipes)
+        {
+            if (recipe.assignedDrone == null &&
+                !recipe.isProcessing &&
+                HasIngredientsFor(recipe.recipeData) &&
+                PassesProductionCapCheck(recipe))
+            {
+                return true;
+            }
+        }
+
+        foreach (ActiveRecipe recipe in _activeRecipes)
+        {
+            if (recipe.assignedDrone == null && recipe.isProcessing)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private bool PassesProductionCapCheck(ActiveRecipe recipe)
     {
         if (recipe.maxProductionLimit <= 0) {
@@ -296,37 +330,65 @@ public class Processor : Damageable, IClickable, IAetherConsumer
 
         if (_recipes == null) return null;
 
+        ResourceRequest prioritized = FindIngredientRequestForRecipeGroup(
+            droneCapacity,
+            totalOnTheWay,
+            totalInStorage,
+            recipe => !_pendingRequests.Any(r => r.targetRecipe == recipe));
+        if (prioritized != null) {
+            return prioritized;
+        }
+
+        ResourceRequest fallback = FindIngredientRequestForRecipeGroup(
+            droneCapacity,
+            totalOnTheWay,
+            totalInStorage,
+            recipe => true);
+        if (fallback != null) {
+            return fallback;
+        }
+
+        return null;
+    }
+
+    private ResourceRequest FindIngredientRequestForRecipeGroup(
+        int droneCapacity,
+        int totalOnTheWay,
+        int totalInStorage,
+        Func<ActiveRecipe, bool> recipeFilter)
+    {
         foreach (ActiveRecipe recipe in _activeRecipes) {
             if (!PassesProductionCapCheck(recipe)) {
                 continue;
             }
+            if (!recipeFilter(recipe)) {
+                continue;
+            }
 
-            // 레시피에 필요한 재료 확인
             foreach (ResourceCost ingredient in recipe.recipeData.ingredients) {
-                int needed = ingredient.amount;
-
-                // '이미 진행중인' 레시피는 재료가 필요 없음
-                if (recipe.isProcessing) {
-                    needed = 0;
-                }
-
+                int needed = recipe.isProcessing ? 0 : ingredient.amount;
                 int inStorage = _currentIngredients.ContainsKey(ingredient.resourceType) ? _currentIngredients[ingredient.resourceType] : 0;
-                int onTheWay = _pendingRequests
-                    .Where(r => r.type == ingredient.resourceType)
+                int onTheWayForRecipe = _pendingRequests
+                    .Where(r => r.targetRecipe == recipe && r.type == ingredient.resourceType)
                     .Sum(r => r.amount);
 
-                int stillNeeded = needed - inStorage - onTheWay;
+                int stillNeeded = needed - inStorage - onTheWayForRecipe;
+                if (stillNeeded <= 0) {
+                    continue;
+                }
 
-                if (stillNeeded > 0) {
-                    int spaceAvailable = _maxIngredientStorage - totalInStorage - totalOnTheWay;
-                    int amountToFetch = Mathf.Min(stillNeeded, droneCapacity, spaceAvailable);
-
-                    if (amountToFetch > 0) {
-                        return new ResourceRequest { type = ingredient.resourceType, amount = amountToFetch };
-                    }
+                int spaceAvailable = _maxIngredientStorage - totalInStorage - totalOnTheWay;
+                int amountToFetch = Mathf.Min(stillNeeded, droneCapacity, spaceAvailable);
+                if (amountToFetch > 0) {
+                    return new ResourceRequest {
+                        type = ingredient.resourceType,
+                        amount = amountToFetch,
+                        targetRecipe = recipe
+                    };
                 }
             }
         }
+
         return null;
     }
 
@@ -728,5 +790,6 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         public int amount;
         public Unit_Drone assignedDrone;
         public ResourceType type;
+        public ActiveRecipe targetRecipe;
     }
 }
