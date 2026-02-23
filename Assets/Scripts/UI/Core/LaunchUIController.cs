@@ -549,7 +549,7 @@ public class LaunchUIController : MonoBehaviour
         }
 
         _countdownPreviousTimeScale = Mathf.Max(0.01f, Time.timeScale);
-        Time.timeScale = 1f;
+        Time.timeScale = 2f;
         _hasCountdownTimeScaleOverride = true;
     }
 

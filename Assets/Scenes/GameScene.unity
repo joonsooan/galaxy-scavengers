@@ -2219,7 +2219,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: -10}
-  m_SizeDelta: {x: 100, y: 23.67}
+  m_SizeDelta: {x: 100, y: 0}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &98590584
 MonoBehaviour:
@@ -5983,7 +5983,7 @@ MonoBehaviour:
   timeBeta: 0.1
   noise100WaveCooldown: 30
   noise100AreaCount: 5
-  noise100BudgetMultiplierPercent: 10
+  noise100BudgetMultiplierPercent: 15
   emergencyWaveMultiplierIncrementPercent: 2
   noiseCautionBudgetMultiplierPercent: 8
   noiseWarningBudgetMultiplierPercent: 15
@@ -9477,7 +9477,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: -102}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &450058904
 MonoBehaviour:
@@ -22907,7 +22907,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.627451}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.78431374}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -52381,7 +52381,6 @@ RectTransform:
   - {fileID: 327025570}
   - {fileID: 1539729020}
   - {fileID: 1085667706}
-  - {fileID: 542929658}
   - {fileID: 350766405}
   - {fileID: 1078723810}
   - {fileID: 1922431906}
@@ -52394,6 +52393,7 @@ RectTransform:
   - {fileID: 6747580248328557886}
   - {fileID: 751652415}
   - {fileID: 1271822336}
+  - {fileID: 542929658}
   - {fileID: 293458369}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -52723,7 +52723,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 14, y: 12}
-  m_SizeDelta: {x: 97.35, y: 16}
+  m_SizeDelta: {x: 0, y: 16}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &1505114022
 MonoBehaviour:
@@ -71613,7 +71613,7 @@ RectTransform:
   m_Father: {fileID: 202283192}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -71807,13 +71807,13 @@ MonoBehaviour:
     amountToMine: 200
     timeToMinePerUnit: 0.1
   - resourceType: 1
-    amountToMine: 100
+    amountToMine: 200
     timeToMinePerUnit: 0.2
   - resourceType: 2
-    amountToMine: 50
+    amountToMine: 100
     timeToMinePerUnit: 0.3
   - resourceType: 3
-    amountToMine: 50
+    amountToMine: 100
     timeToMinePerUnit: 0.5
   resourceDisplayNames:
   - "\uD398\uB77C\uC774\uD2B8"
@@ -72810,7 +72810,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2037369538
 RectTransform:
   m_ObjectHideFlags: 0

@@ -6,10 +6,29 @@ public class AlertCellTooltipTrigger : MonoBehaviour, IPointerEnterHandler, IPoi
     [SerializeField] private GameAlertType alertType;
     private GameAlertUIManager _alertManager;
 
+    private GameAlertType GetResolvedAlertType()
+    {
+        string objectName = gameObject.name.ToLowerInvariant();
+
+        if (alertType == GameAlertType.DroneIsNotAssigned && objectName.Contains("noresource"))
+        {
+            return GameAlertType.DroneNoResource;
+        }
+
+        if (alertType == GameAlertType.DroneNoResource &&
+            (objectName.Contains("notassigned") || objectName.Contains("not_assigned")))
+        {
+            return GameAlertType.DroneIsNotAssigned;
+        }
+
+        return alertType;
+    }
+
     public void OnPointerEnter(PointerEventData eventData)
     {
+        GameAlertType resolvedType = GetResolvedAlertType();
         if ((_alertManager ??= FindFirstObjectByType<GameAlertUIManager>()) != null)
-            _alertManager.ShowTooltip(alertType);
+            _alertManager.ShowTooltip(resolvedType);
     }
 
     public void OnPointerExit(PointerEventData eventData)
@@ -20,8 +39,9 @@ public class AlertCellTooltipTrigger : MonoBehaviour, IPointerEnterHandler, IPoi
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        GameAlertType resolvedType = GetResolvedAlertType();
         if ((_alertManager ??= FindFirstObjectByType<GameAlertUIManager>()) == null)
             return;
-        _alertManager.TryFocusAlert(alertType);
+        _alertManager.TryFocusAlert(resolvedType);
     }
 }

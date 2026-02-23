@@ -71,7 +71,7 @@ public class ResourceDataManager : MonoBehaviour
         RecalculateResourceCountsFromStorages();
     }
     
-    private void RecalculateResourceCountsFromStorages()
+    public void RecalculateResourceCountsFromStorages()
     {
         foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
         {

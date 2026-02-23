@@ -160,8 +160,27 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
 
     public int GetCurrentUnitCount(int unitIndex)
     {
-        _producedUnitCounts.TryGetValue(unitIndex, out int count);
-        return count;
+        if (droneHubData != null &&
+            droneHubData.ProducibleUnits != null &&
+            unitIndex >= 0 &&
+            unitIndex < droneHubData.ProducibleUnits.Count &&
+            UnitManager.Instance != null &&
+            UnitManager.Instance.AllyUnits != null)
+        {
+            UnitData targetUnitData = droneHubData.ProducibleUnits[unitIndex];
+            int count = 0;
+            IReadOnlyList<UnitBase> allyUnits = UnitManager.Instance.AllyUnits;
+            for (int i = 0; i < allyUnits.Count; i++)
+            {
+                UnitBase unit = allyUnits[i];
+                if (unit == null) continue;
+                if (unit.unitData == targetUnitData) count++;
+            }
+            return count;
+        }
+
+        _producedUnitCounts.TryGetValue(unitIndex, out int fallbackCount);
+        return fallbackCount;
     }
 
     public int GetTargetUnitCount(int unitIndex)
@@ -374,11 +393,11 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
 
             int unitIndex = FindUnitIndex(unitToProduce);
             if (unitIndex >= 0) {
-                _producedUnitCounts.TryGetValue(unitIndex, out int currentCount);
-                _producedUnitCounts[unitIndex] = currentCount + 1;
-
+                _producedUnitCounts.TryGetValue(unitIndex, out int producedCount);
+                _producedUnitCounts[unitIndex] = producedCount + 1;
+                int currentCount = GetCurrentUnitCount(unitIndex);
                 int targetCount = GetTargetUnitCount(unitIndex);
-                OnUnitTargetChanged?.Invoke(unitIndex, currentCount + 1, targetCount);
+                OnUnitTargetChanged?.Invoke(unitIndex, currentCount, targetCount);
             }
 
             OnUnitProduced?.Invoke(unitToProduce);

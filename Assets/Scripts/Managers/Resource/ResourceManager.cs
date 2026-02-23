@@ -237,6 +237,10 @@ public class ResourceManager : MonoBehaviour
         mainStructure.InitializeStorage(ResourceType.NexusData, nexusDataInitialAmount);
         mainStructure.InitializeStorage(ResourceType.NeuralMatrix, neuralMatrixInitialAmount);
 
+        if (ResourceDataManager.Instance != null)
+        {
+            ResourceDataManager.Instance.RecalculateResourceCountsFromStorages();
+        }
         mainStructure.UpdateStorageUI();
     }
 
@@ -251,6 +255,10 @@ public class ResourceManager : MonoBehaviour
         mainStructure.InitializeStorage(ResourceType.Aether, tutorialAetherInitialAmount);
         mainStructure.InitializeStorage(ResourceType.Biomass, tutorialBiomassInitialAmount);
         mainStructure.InitializeStorage(ResourceType.CryoCrystal, tutorialCryoCrystalInitialAmount);
+        if (ResourceDataManager.Instance != null)
+        {
+            ResourceDataManager.Instance.RecalculateResourceCountsFromStorages();
+        }
         mainStructure.UpdateStorageUI();
     }
 
