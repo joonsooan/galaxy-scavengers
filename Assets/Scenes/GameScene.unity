@@ -2365,12 +2365,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c90e03b4b8f687648b584f96455ef6ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RealSecondsPerInGameHour: 5
+  RealSecondsPerInGameHour: 8
   currentTime: 6
   gameStartTime: 6
   autoAdvanceTime: 1
-  dayStartPercent: 15
-  nightStartPercent: 85
+  dayStartPercent: 10
+  nightStartPercent: 80
   globalLight2D: {fileID: 619394801}
   ambientLightGradient:
     serializedVersion: 2
@@ -3419,7 +3419,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3864970575395246013, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: alertType
-      value: 3
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 6622626863705287713, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_Colors.m_NormalColor.a
@@ -5361,7 +5361,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3864970575395246013, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: alertType
-      value: 4
+      value: 13
       objectReference: {fileID: 0}
     - target: {fileID: 6622626863705287713, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_Colors.m_NormalColor.a
@@ -54787,7 +54787,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3864970575395246013, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: alertType
-      value: 4
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 6622626863705287713, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_Colors.m_NormalColor.a
@@ -68834,7 +68834,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3864970575395246013, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: alertType
-      value: 4
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 6622626863705287713, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_Colors.m_NormalColor.a
@@ -70098,7 +70098,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3864970575395246013, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: alertType
-      value: 4
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 6622626863705287713, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_Colors.m_NormalColor.a
@@ -71752,6 +71752,10 @@ MonoBehaviour:
   aetherInitialAmount: 200
   biomassInitialAmount: 0
   cryoCrystalInitialAmount: 0
+  tutorialFerriteInitialAmount: 0
+  tutorialAetherInitialAmount: 0
+  tutorialBiomassInitialAmount: 0
+  tutorialCryoCrystalInitialAmount: 0
   alloyPlateInitialAmount: 0
   compositeFrameInitialAmount: 0
   eChipInitialAmount: 0
