@@ -22873,7 +22873,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &542929658
 RectTransform:
   m_ObjectHideFlags: 0
@@ -22891,8 +22891,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -10}
-  m_SizeDelta: {x: 60, y: 20}
+  m_AnchoredPosition: {x: 0, y: -20}
+  m_SizeDelta: {x: 80, y: 20}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &542929659
 MonoBehaviour:
@@ -43046,7 +43046,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '99 : 99'
+  m_text: 99.999 s
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1f55a221e169b4b41adc70f72323c1d6, type: 2}
   m_sharedMaterial: {fileID: -731586743875455862, guid: 1f55a221e169b4b41adc70f72323c1d6, type: 2}
@@ -43073,8 +43073,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 9
-  m_fontSizeBase: 9
+  m_fontSize: 12
+  m_fontSizeBase: 12
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -53400,7 +53400,7 @@ MonoBehaviour:
   neededAetherText: {fileID: 403905148}
   launchButton: {fileID: 1085667707}
   launchCompleteUI: {fileID: 0}
-  countdownDurationSeconds: 100
+  countdownDurationSeconds: 104
   countdownStartDelaySeconds: 1
   launchCompleteDisplayDuration: 0
   fadeToBlackDuration: 1
@@ -53421,6 +53421,17 @@ MonoBehaviour:
       Data4: 1658255786
     Path: event:/BGM_InGame/BGM_CountDown
   bgmFadeOutTime: 1
+  countdownDangerThresholdSeconds: 10
+  countdownDefaultColor: {r: 1, g: 1, b: 1, a: 1}
+  countdownDangerColor: {r: 1, g: 0, b: 0, a: 1}
+  normalBounceScale: 0.18
+  normalBounceDuration: 0.18
+  normalBounceVibrato: 4
+  normalBounceElasticity: 0.85
+  dangerBounceScale: 0.3
+  dangerBounceDuration: 0.24
+  dangerBounceVibrato: 5
+  dangerBounceElasticity: 0.95
   speedUI: {fileID: 1029636134}
   questPanel: {fileID: 53596316}
   menuButton: {fileID: 6465018715673569242}

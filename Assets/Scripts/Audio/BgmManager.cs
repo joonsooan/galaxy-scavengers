@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading;
 using FMOD;
 using FMOD.Studio;
 using FMODUnity;
@@ -38,6 +41,10 @@ public class BgmManager : MonoBehaviour
     private Coroutine _gameBgmEndFadeCoroutine;
     private bool _isGameBgmCooldownActive;
     private WaitForSecondsRealtime _gameBgmCooldownWait;
+    private static readonly EVENT_CALLBACK CountdownBeatCallback = OnCountdownBeatCallback;
+    private int _pendingCountdownBeatTicks;
+    private int _countdownBeatSyncActive;
+    private int _latestCountdownTempoMilliBpm;
     public static BgmManager Instance { get; private set; }
 
     private void Awake()
@@ -143,7 +150,7 @@ public class BgmManager : MonoBehaviour
             return;
         }
 
-        EventReference selectedBgm = availableBgms[Random.Range(0, availableBgms.Count)];
+        EventReference selectedBgm = availableBgms[UnityEngine.Random.Range(0, availableBgms.Count)];
         _lastGameBgm = selectedBgm;
 
         if (_playGameBgmCoroutine != null)
@@ -274,6 +281,56 @@ public class BgmManager : MonoBehaviour
     public void PlayBgm(EventReference bgm, float fadeOutTime = -1f)
     {
         PlayBgm(bgm, true, fadeOutTime);
+    }
+
+    public bool EnableCountdownBeatSync()
+    {
+        if (!_hasInstance)
+        {
+            return false;
+        }
+
+        DisableCountdownBeatSync();
+
+        RESULT callbackResult = _currentInstance.setCallback(CountdownBeatCallback, EVENT_CALLBACK_TYPE.TIMELINE_BEAT | EVENT_CALLBACK_TYPE.STOPPED);
+
+        if (callbackResult != RESULT.OK)
+        {
+            DisableCountdownBeatSync();
+            return false;
+        }
+
+        Interlocked.Exchange(ref _pendingCountdownBeatTicks, 0);
+        Interlocked.Exchange(ref _countdownBeatSyncActive, 1);
+        Interlocked.Exchange(ref _latestCountdownTempoMilliBpm, 0);
+        return true;
+    }
+
+    public void DisableCountdownBeatSync()
+    {
+        ResetCountdownBeatSyncState(true);
+    }
+
+    public int ConsumeCountdownBeatTicks()
+    {
+        if (Interlocked.CompareExchange(ref _countdownBeatSyncActive, 0, 0) == 0)
+        {
+            return 0;
+        }
+
+        int consumed = Interlocked.Exchange(ref _pendingCountdownBeatTicks, 0);
+        return Mathf.Max(0, consumed);
+    }
+
+    public float GetCountdownTempoBpm()
+    {
+        int milliBpm = Interlocked.CompareExchange(ref _latestCountdownTempoMilliBpm, 0, 0);
+        if (milliBpm <= 0)
+        {
+            return 0f;
+        }
+
+        return milliBpm / 1000f;
     }
 
     public void PlayBgm(EventReference bgm, bool stopCurrent, float fadeOutTime = -1f)
@@ -424,8 +481,11 @@ public class BgmManager : MonoBehaviour
     private void StopCurrent(bool immediate, bool stopGameBgmFlow = true)
     {
         if (!_hasInstance) {
+            ResetCountdownBeatSyncState(false);
             return;
         }
+
+        ResetCountdownBeatSyncState(true);
 
         if (stopGameBgmFlow)
         {
@@ -445,8 +505,11 @@ public class BgmManager : MonoBehaviour
     private void StopCurrentInstanceOnly()
     {
         if (!_hasInstance) {
+            ResetCountdownBeatSyncState(false);
             return;
         }
+
+        ResetCountdownBeatSyncState(true);
 
         try {
             _currentInstance.stop(STOP_MODE.IMMEDIATE);
@@ -476,6 +539,61 @@ public class BgmManager : MonoBehaviour
             _gameBgmEndFadeCoroutine = null;
         }
         _isGameBgmCooldownActive = false;
+    }
+
+    private void ResetCountdownBeatSyncState(bool detachFromCurrentInstance)
+    {
+        if (detachFromCurrentInstance && _hasInstance)
+        {
+            _currentInstance.setCallback(null);
+        }
+
+        Interlocked.Exchange(ref _pendingCountdownBeatTicks, 0);
+        Interlocked.Exchange(ref _countdownBeatSyncActive, 0);
+        Interlocked.Exchange(ref _latestCountdownTempoMilliBpm, 0);
+    }
+
+    [AOT.MonoPInvokeCallback(typeof(EVENT_CALLBACK))]
+    private static RESULT OnCountdownBeatCallback(EVENT_CALLBACK_TYPE type, IntPtr eventInstancePtr, IntPtr parameterPtr)
+    {
+        if (type != EVENT_CALLBACK_TYPE.TIMELINE_BEAT && type != EVENT_CALLBACK_TYPE.STOPPED)
+        {
+            return RESULT.OK;
+        }
+
+        BgmManager manager = Instance;
+        if (manager == null)
+        {
+            return RESULT.OK;
+        }
+
+        if (Interlocked.CompareExchange(ref manager._countdownBeatSyncActive, 0, 0) == 0)
+        {
+            return RESULT.OK;
+        }
+
+        if (manager._currentInstance.handle != eventInstancePtr)
+        {
+            return RESULT.OK;
+        }
+
+        if (type == EVENT_CALLBACK_TYPE.TIMELINE_BEAT)
+        {
+            if (parameterPtr != IntPtr.Zero)
+            {
+                TIMELINE_BEAT_PROPERTIES beat = Marshal.PtrToStructure<TIMELINE_BEAT_PROPERTIES>(parameterPtr);
+                int milliTempo = Mathf.Max(0, Mathf.RoundToInt(beat.tempo * 1000f));
+                Interlocked.Exchange(ref manager._latestCountdownTempoMilliBpm, milliTempo);
+            }
+
+            Interlocked.Increment(ref manager._pendingCountdownBeatTicks);
+        }
+        else if (type == EVENT_CALLBACK_TYPE.STOPPED)
+        {
+            Interlocked.Exchange(ref manager._countdownBeatSyncActive, 0);
+        }
+
+        return RESULT.OK;
     }
 
     public void PlaySuccessLoadingBgm(float fadeInTime = -1f)
