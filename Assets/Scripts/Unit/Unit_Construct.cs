@@ -44,6 +44,7 @@ public class Unit_Construct : UnitBase
 
     private Rigidbody2D _rb;
     private int _remainingRequestAmount;
+    private bool _noResourceAlertActive;
     private UnitSpriteController _spriteController;
     private Transform _spriteTransform;
     private List<IStorage> _storageRoute;
@@ -100,6 +101,7 @@ public class Unit_Construct : UnitBase
 
     protected override void OnDisable()
     {
+        SetConstructNoResourceAlert(false);
         base.OnDisable();
         UnitManager.Instance?.RemoveUnit(this);
         ConstructionManager.Instance?.UnregisterConstructDrone(this);
@@ -529,6 +531,7 @@ public class Unit_Construct : UnitBase
 
     public void SetTask_FetchResource(ConstructionSite.ConstructionRequest request, ConstructionSite site)
     {
+        SetConstructNoResourceAlert(false);
         if (movement == null) {
             if (request != null && request.site != null) {
                 request.site.CancelRequest(request);
@@ -584,6 +587,7 @@ public class Unit_Construct : UnitBase
                                 _targetStorage = storage;
                                 _currentState = ConstructState.FetchingResource;
                                 ResetIdleRoam();
+                                SetConstructNoResourceAlert(false);
                                 return;
                             }
                         }
@@ -594,6 +598,7 @@ public class Unit_Construct : UnitBase
 
         _currentRequest?.site?.CancelRequest(_currentRequest);
         _nextTaskRequestTime = Time.time + TaskRequestCooldown;
+        SetConstructNoResourceAlert(true);
         SetTask_Idle();
     }
 
@@ -652,6 +657,19 @@ public class Unit_Construct : UnitBase
         StopAllCoroutines();
         _loadingCoroutine = null;
         _unloadingCoroutine = null;
+    }
+
+    private void SetConstructNoResourceAlert(bool shouldEnable)
+    {
+        if (shouldEnable == _noResourceAlertActive) return;
+        GameAlertUIManager alertManager = FindFirstObjectByType<GameAlertUIManager>();
+        if (shouldEnable) {
+            alertManager?.RegisterAlert(GameAlertType.ConstructNoResource, this);
+        }
+        else {
+            alertManager?.UnregisterAlert(GameAlertType.ConstructNoResource, this);
+        }
+        _noResourceAlertActive = shouldEnable;
     }
 
     private void ReturnCarriedResourcesToStorage()

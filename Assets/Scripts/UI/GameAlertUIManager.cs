@@ -16,15 +16,23 @@ public enum GameAlertType
     NoiseCaution = 6,
     NoiseWarning = 7,
     NoiseDanger = 8,
-    MainEngineRepair = 9
+    MainEngineRepair = 9,
+    MineTypeAllOff = 10,
+    MinerIsFull = 11,
+    DroneIsNotAssigned = 12,
+    ConstructNoResource = 13
 }
 
 public class GameAlertUIManager : MonoBehaviour
 {
+    [SerializeField] private GameObject minetypeallOffCell;
     [SerializeField] private GameObject minerNoResourceCell;
+    [SerializeField] private GameObject minerIsFullCell;
     [SerializeField] private GameObject unitUnderAttackCell;
     [SerializeField] private GameObject buildingUnderAttackCell;
+    [SerializeField] private GameObject droneIsNotAssignedCell;
     [SerializeField] private GameObject droneNoResourceCell;
+    [SerializeField] private GameObject constructNoResourceCell;
     [SerializeField] private GameObject storageFullCell;
     [SerializeField] private GameObject aetherStorageFullCell;
     [SerializeField] private GameObject mainEngineRepairCell;
@@ -34,9 +42,12 @@ public class GameAlertUIManager : MonoBehaviour
 
     [Header("Alert Sounds")]
     [SerializeField] private EventReference minerNoResourceSound;
+    [SerializeField] private EventReference minerIsFullSound;
     [SerializeField] private EventReference unitUnderAttackSound;
     [SerializeField] private EventReference buildingUnderAttackSound;
+    [SerializeField] private EventReference droneIsNotAssignedSound;
     [SerializeField] private EventReference droneNoResourceSound;
+    [SerializeField] private EventReference constructNoResourceSound;
     [SerializeField] private EventReference storageFullSound;
     [SerializeField] private EventReference aetherStorageFullSound;
     [SerializeField] private EventReference mainEngineRepairSound;
@@ -47,27 +58,34 @@ public class GameAlertUIManager : MonoBehaviour
     [Header("Tooltip")]
     [SerializeField] private GameObject tooltipPanel;
     [SerializeField] private TMP_Text tooltipText;
-
-    private const string TooltipMinerNoResource = "채굴 유닛이 캘 자원이 없습니다.";
-    private const string TooltipUnitUnderAttack = "유닛이 공격당하고 있습니다!";
-    private const string TooltipBuildingUnderAttack = "건물이 공격당하고 있습니다!";
-    private const string TooltipDroneNoResource = "가공 유닛이 가공할 자원이 없습니다.";
-    private const string TooltipStorageFull = "모든 저장 공간이 가득 찼습니다!\n저장고를 더 건설해주세요.";
-    private const string TooltipAetherStorageFull = "모든 에테르 저장고가 가득 찼습니다!\n저장고나 배터리를 더 건설해주세요.";
-    private const string TooltipMainEngineRepair = "메인 엔진이 고장나\n시드 코어를 발사할 수 없습니다.\n퀘스트를 확인하세요.";
-    private const string ToolTipNoiseCaution = "소음 정도 : 주의\n적의 습격에 대비하세요!";
-    private const string ToolTipNoiseWarning = "소음 정도 : 경고\n적의 습격에 대비하세요!";
-    private const string ToolTipNoiseDanger = "소음 정도 : 위험\n적의 습격에 대비하세요!";
-
-    private const string ToolTipExtraTextUnit = "(클릭해서 유닛으로 이동)";
-    private const string ToolTipExtraTextBuilding = "(클릭해서 건물로 이동)";
+    [Header("Tooltip Messages")]
+    [SerializeField, TextArea(2, 6)] private string tooltipMineTypeAllOff = "채굴 타입이 모두 비활성화되었습니다.";
+    [SerializeField, TextArea(2, 6)] private string tooltipMinerNoResource = "채굴 유닛이 캘 자원이 없습니다.";
+    [SerializeField, TextArea(2, 6)] private string tooltipMinerIsFull = "채굴 유닛이 자원을 저장할 공간이 없습니다.";
+    [SerializeField, TextArea(2, 6)] private string tooltipUnitUnderAttack = "유닛이 공격당하고 있습니다!";
+    [SerializeField, TextArea(2, 6)] private string tooltipBuildingUnderAttack = "건물이 공격당하고 있습니다!";
+    [SerializeField, TextArea(2, 6)] private string tooltipDroneIsNotAssigned = "가공 유닛이 프로세서에 배정되지 않았습니다.";
+    [SerializeField, TextArea(2, 6)] private string tooltipDroneNoResource = "가공 유닛이 가공할 자원이 없습니다.";
+    [SerializeField, TextArea(2, 6)] private string tooltipConstructNoResource = "건설 유닛이 건설할 자원이 없습니다.";
+    [SerializeField, TextArea(2, 6)] private string tooltipStorageFull = "모든 저장 공간이 가득 찼습니다!\n저장고를 더 건설해주세요.";
+    [SerializeField, TextArea(2, 6)] private string tooltipAetherStorageFull = "모든 에테르 저장고가 가득 찼습니다!\n저장고나 배터리를 더 건설해주세요.";
+    [SerializeField, TextArea(2, 6)] private string tooltipMainEngineRepair = "메인 엔진이 고장나\n시드 코어를 발사할 수 없습니다.\n퀘스트를 확인하세요.";
+    [SerializeField, TextArea(2, 6)] private string tooltipNoiseCaution = "소음 정도 : 주의\n적의 습격에 대비하세요!";
+    [SerializeField, TextArea(2, 6)] private string tooltipNoiseWarning = "소음 정도 : 경고\n적의 습격에 대비하세요!";
+    [SerializeField, TextArea(2, 6)] private string tooltipNoiseDanger = "소음 정도 : 위험\n적의 습격에 대비하세요!";
+    [SerializeField, TextArea(1, 3)] private string toolTipExtraTextUnit = "(클릭해서 유닛으로 이동)";
+    [SerializeField, TextArea(1, 3)] private string toolTipExtraTextBuilding = "(클릭해서 건물로 이동)";
 
     private GameAlertType? _currentTooltipType;
 
+    private readonly List<Damageable> _mineTypeAllOffSources = new List<Damageable>();
     private readonly List<Damageable> _minerNoResourceSources = new List<Damageable>();
+    private readonly List<Damageable> _minerIsFullSources = new List<Damageable>();
     private readonly List<Damageable> _unitUnderAttackSources = new List<Damageable>();
     private readonly List<Damageable> _buildingUnderAttackSources = new List<Damageable>();
+    private readonly List<Damageable> _droneIsNotAssignedSources = new List<Damageable>();
     private readonly List<Damageable> _droneNoResourceSources = new List<Damageable>();
+    private readonly List<Damageable> _constructNoResourceSources = new List<Damageable>();
     private readonly List<Damageable> _storageFullSources = new List<Damageable>();
     private readonly List<Damageable> _aetherStorageFullSources = new List<Damageable>();
     private readonly List<Damageable> _mainEngineRepairSources = new List<Damageable>();
@@ -78,10 +96,14 @@ public class GameAlertUIManager : MonoBehaviour
     private bool _isStorageFullByTracker;
     private bool _isAetherFullByTracker;
 
+    private int _mineTypeAllOffCount;
     private int _minerNoResourceCount;
+    private int _minerIsFullCount;
     private int _unitUnderAttackCount;
     private int _buildingUnderAttackCount;
+    private int _droneIsNotAssignedCount;
     private int _droneNoResourceCount;
+    private int _constructNoResourceCount;
     private int _storageFullCount;
     private int _aetherStorageFullCount;
     private int _mainEngineRepairCount;
@@ -232,9 +254,17 @@ public class GameAlertUIManager : MonoBehaviour
     {
         switch (type)
         {
+            case GameAlertType.MineTypeAllOff:
+                _mineTypeAllOffCount++;
+                AddSource(_mineTypeAllOffSources, source);
+                break;
             case GameAlertType.MinerNoResource:
                 _minerNoResourceCount++;
                 AddSource(_minerNoResourceSources, source);
+                break;
+            case GameAlertType.MinerIsFull:
+                _minerIsFullCount++;
+                AddSource(_minerIsFullSources, source);
                 break;
             case GameAlertType.UnitUnderAttack:
                 _unitUnderAttackCount++;
@@ -244,9 +274,17 @@ public class GameAlertUIManager : MonoBehaviour
                 _buildingUnderAttackCount++;
                 AddSource(_buildingUnderAttackSources, source);
                 break;
+            case GameAlertType.DroneIsNotAssigned:
+                _droneIsNotAssignedCount++;
+                AddSource(_droneIsNotAssignedSources, source);
+                break;
             case GameAlertType.DroneNoResource:
                 _droneNoResourceCount++;
                 AddSource(_droneNoResourceSources, source);
+                break;
+            case GameAlertType.ConstructNoResource:
+                _constructNoResourceCount++;
+                AddSource(_constructNoResourceSources, source);
                 break;
             case GameAlertType.StorageFull:
                 _storageFullCount++;
@@ -284,9 +322,17 @@ public class GameAlertUIManager : MonoBehaviour
     {
         switch (type)
         {
+            case GameAlertType.MineTypeAllOff:
+                _mineTypeAllOffCount = Mathf.Max(0, _mineTypeAllOffCount - 1);
+                RemoveSource(_mineTypeAllOffSources, source);
+                break;
             case GameAlertType.MinerNoResource:
                 _minerNoResourceCount = Mathf.Max(0, _minerNoResourceCount - 1);
                 RemoveSource(_minerNoResourceSources, source);
+                break;
+            case GameAlertType.MinerIsFull:
+                _minerIsFullCount = Mathf.Max(0, _minerIsFullCount - 1);
+                RemoveSource(_minerIsFullSources, source);
                 break;
             case GameAlertType.UnitUnderAttack:
                 _unitUnderAttackCount = Mathf.Max(0, _unitUnderAttackCount - 1);
@@ -296,9 +342,17 @@ public class GameAlertUIManager : MonoBehaviour
                 _buildingUnderAttackCount = Mathf.Max(0, _buildingUnderAttackCount - 1);
                 RemoveSource(_buildingUnderAttackSources, source);
                 break;
+            case GameAlertType.DroneIsNotAssigned:
+                _droneIsNotAssignedCount = Mathf.Max(0, _droneIsNotAssignedCount - 1);
+                RemoveSource(_droneIsNotAssignedSources, source);
+                break;
             case GameAlertType.DroneNoResource:
                 _droneNoResourceCount = Mathf.Max(0, _droneNoResourceCount - 1);
                 RemoveSource(_droneNoResourceSources, source);
+                break;
+            case GameAlertType.ConstructNoResource:
+                _constructNoResourceCount = Mathf.Max(0, _constructNoResourceCount - 1);
+                RemoveSource(_constructNoResourceSources, source);
                 break;
             case GameAlertType.StorageFull:
                 _storageFullCount = Mathf.Max(0, _storageFullCount - 1);
@@ -336,8 +390,14 @@ public class GameAlertUIManager : MonoBehaviour
     {
         switch (type)
         {
+            case GameAlertType.MineTypeAllOff:
+                if (minetypeallOffCell != null) minetypeallOffCell.SetActive(active);
+                break;
             case GameAlertType.MinerNoResource:
                 if (minerNoResourceCell != null) minerNoResourceCell.SetActive(active);
+                break;
+            case GameAlertType.MinerIsFull:
+                if (minerIsFullCell != null) minerIsFullCell.SetActive(active);
                 break;
             case GameAlertType.UnitUnderAttack:
                 if (unitUnderAttackCell != null) unitUnderAttackCell.SetActive(active);
@@ -345,8 +405,14 @@ public class GameAlertUIManager : MonoBehaviour
             case GameAlertType.BuildingUnderAttack:
                 if (buildingUnderAttackCell != null) buildingUnderAttackCell.SetActive(active);
                 break;
+            case GameAlertType.DroneIsNotAssigned:
+                if (droneIsNotAssignedCell != null) droneIsNotAssignedCell.SetActive(active);
+                break;
             case GameAlertType.DroneNoResource:
                 if (droneNoResourceCell != null) droneNoResourceCell.SetActive(active);
+                break;
+            case GameAlertType.ConstructNoResource:
+                if (constructNoResourceCell != null) constructNoResourceCell.SetActive(active);
                 break;
             case GameAlertType.StorageFull:
                 if (storageFullCell != null) storageFullCell.SetActive(active);
@@ -367,6 +433,17 @@ public class GameAlertUIManager : MonoBehaviour
     {
         switch (type)
         {
+            case GameAlertType.MineTypeAllOff:
+                if (minetypeallOffCell != null)
+                {
+                    bool active = _mineTypeAllOffCount > 0;
+                    if (active && !minetypeallOffCell.activeSelf && !minerNoResourceSound.IsNull)
+                        RuntimeManager.PlayOneShot(minerNoResourceSound);
+                    minetypeallOffCell.SetActive(active);
+                    if (!active && _currentTooltipType == GameAlertType.MineTypeAllOff)
+                        HideTooltip();
+                }
+                break;
             case GameAlertType.MinerNoResource:
                 if (minerNoResourceCell != null)
                 {
@@ -375,6 +452,18 @@ public class GameAlertUIManager : MonoBehaviour
                         RuntimeManager.PlayOneShot(minerNoResourceSound);
                     minerNoResourceCell.SetActive(active);
                     if (!active && _currentTooltipType == GameAlertType.MinerNoResource)
+                        HideTooltip();
+                }
+                break;
+            case GameAlertType.MinerIsFull:
+                if (minerIsFullCell != null)
+                {
+                    bool active = _minerIsFullCount > 0;
+                    EventReference sound = minerIsFullSound.IsNull ? minerNoResourceSound : minerIsFullSound;
+                    if (active && !minerIsFullCell.activeSelf && !sound.IsNull)
+                        RuntimeManager.PlayOneShot(sound);
+                    minerIsFullCell.SetActive(active);
+                    if (!active && _currentTooltipType == GameAlertType.MinerIsFull)
                         HideTooltip();
                 }
                 break;
@@ -402,6 +491,18 @@ public class GameAlertUIManager : MonoBehaviour
                         HideTooltip();
                 }
                 break;
+            case GameAlertType.DroneIsNotAssigned:
+                if (droneIsNotAssignedCell != null)
+                {
+                    bool active = _droneIsNotAssignedCount > 0;
+                    EventReference sound = droneIsNotAssignedSound.IsNull ? droneNoResourceSound : droneIsNotAssignedSound;
+                    if (active && !droneIsNotAssignedCell.activeSelf && !sound.IsNull)
+                        RuntimeManager.PlayOneShot(sound);
+                    droneIsNotAssignedCell.SetActive(active);
+                    if (!active && _currentTooltipType == GameAlertType.DroneIsNotAssigned)
+                        HideTooltip();
+                }
+                break;
             case GameAlertType.DroneNoResource:
                 if (droneNoResourceCell != null)
                 {
@@ -410,6 +511,18 @@ public class GameAlertUIManager : MonoBehaviour
                         RuntimeManager.PlayOneShot(droneNoResourceSound);
                     droneNoResourceCell.SetActive(active);
                     if (!active && _currentTooltipType == GameAlertType.DroneNoResource)
+                        HideTooltip();
+                }
+                break;
+            case GameAlertType.ConstructNoResource:
+                if (constructNoResourceCell != null)
+                {
+                    bool active = _constructNoResourceCount > 0;
+                    EventReference sound = constructNoResourceSound.IsNull ? droneNoResourceSound : constructNoResourceSound;
+                    if (active && !constructNoResourceCell.activeSelf && !sound.IsNull)
+                        RuntimeManager.PlayOneShot(sound);
+                    constructNoResourceCell.SetActive(active);
+                    if (!active && _currentTooltipType == GameAlertType.ConstructNoResource)
                         HideTooltip();
                 }
                 break;
@@ -451,10 +564,14 @@ public class GameAlertUIManager : MonoBehaviour
 
     private void SetAllInactive()
     {
+        if (minetypeallOffCell != null) minetypeallOffCell.SetActive(false);
         if (minerNoResourceCell != null) minerNoResourceCell.SetActive(false);
+        if (minerIsFullCell != null) minerIsFullCell.SetActive(false);
         if (unitUnderAttackCell != null) unitUnderAttackCell.SetActive(false);
         if (buildingUnderAttackCell != null) buildingUnderAttackCell.SetActive(false);
+        if (droneIsNotAssignedCell != null) droneIsNotAssignedCell.SetActive(false);
         if (droneNoResourceCell != null) droneNoResourceCell.SetActive(false);
+        if (constructNoResourceCell != null) constructNoResourceCell.SetActive(false);
         if (storageFullCell != null) storageFullCell.SetActive(false);
         if (aetherStorageFullCell != null) aetherStorageFullCell.SetActive(false);
         if (mainEngineRepairCell != null) mainEngineRepairCell.SetActive(false);
@@ -510,16 +627,20 @@ public class GameAlertUIManager : MonoBehaviour
     {
         switch (type)
         {
-            case GameAlertType.MinerNoResource: return TooltipMinerNoResource;
-            case GameAlertType.UnitUnderAttack: return TooltipUnitUnderAttack;
-            case GameAlertType.BuildingUnderAttack: return TooltipBuildingUnderAttack;
-            case GameAlertType.DroneNoResource: return TooltipDroneNoResource;
-            case GameAlertType.StorageFull: return TooltipStorageFull;
-            case GameAlertType.AetherStorageFull: return TooltipAetherStorageFull;
-            case GameAlertType.MainEngineRepair: return TooltipMainEngineRepair;
-            case GameAlertType.NoiseCaution: return ToolTipNoiseCaution;
-            case GameAlertType.NoiseWarning: return ToolTipNoiseWarning;
-            case GameAlertType.NoiseDanger: return ToolTipNoiseDanger;
+            case GameAlertType.MineTypeAllOff: return tooltipMineTypeAllOff;
+            case GameAlertType.MinerNoResource: return tooltipMinerNoResource;
+            case GameAlertType.MinerIsFull: return tooltipMinerIsFull;
+            case GameAlertType.UnitUnderAttack: return tooltipUnitUnderAttack;
+            case GameAlertType.BuildingUnderAttack: return tooltipBuildingUnderAttack;
+            case GameAlertType.DroneIsNotAssigned: return tooltipDroneIsNotAssigned;
+            case GameAlertType.DroneNoResource: return tooltipDroneNoResource;
+            case GameAlertType.ConstructNoResource: return tooltipConstructNoResource;
+            case GameAlertType.StorageFull: return tooltipStorageFull;
+            case GameAlertType.AetherStorageFull: return tooltipAetherStorageFull;
+            case GameAlertType.MainEngineRepair: return tooltipMainEngineRepair;
+            case GameAlertType.NoiseCaution: return tooltipNoiseCaution;
+            case GameAlertType.NoiseWarning: return tooltipNoiseWarning;
+            case GameAlertType.NoiseDanger: return tooltipNoiseDanger;
             default: return string.Empty;
         }
     }
@@ -528,10 +649,14 @@ public class GameAlertUIManager : MonoBehaviour
     {
         switch (type)
         {
-            case GameAlertType.MinerNoResource: return ToolTipExtraTextUnit;
-            case GameAlertType.UnitUnderAttack: return ToolTipExtraTextUnit;
-            case GameAlertType.DroneNoResource: return ToolTipExtraTextUnit;
-            case GameAlertType.BuildingUnderAttack: return ToolTipExtraTextBuilding;
+            case GameAlertType.MineTypeAllOff: return toolTipExtraTextUnit;
+            case GameAlertType.MinerNoResource: return toolTipExtraTextUnit;
+            case GameAlertType.MinerIsFull: return toolTipExtraTextUnit;
+            case GameAlertType.UnitUnderAttack: return toolTipExtraTextUnit;
+            case GameAlertType.DroneIsNotAssigned: return toolTipExtraTextUnit;
+            case GameAlertType.DroneNoResource: return toolTipExtraTextUnit;
+            case GameAlertType.ConstructNoResource: return toolTipExtraTextUnit;
+            case GameAlertType.BuildingUnderAttack: return toolTipExtraTextBuilding;
             default: return string.Empty;
         }
     }
@@ -582,10 +707,14 @@ public class GameAlertUIManager : MonoBehaviour
     {
         switch (type)
         {
+            case GameAlertType.MineTypeAllOff: return _mineTypeAllOffSources;
             case GameAlertType.MinerNoResource: return _minerNoResourceSources;
+            case GameAlertType.MinerIsFull: return _minerIsFullSources;
             case GameAlertType.UnitUnderAttack: return _unitUnderAttackSources;
             case GameAlertType.BuildingUnderAttack: return _buildingUnderAttackSources;
+            case GameAlertType.DroneIsNotAssigned: return _droneIsNotAssignedSources;
             case GameAlertType.DroneNoResource: return _droneNoResourceSources;
+            case GameAlertType.ConstructNoResource: return _constructNoResourceSources;
             case GameAlertType.StorageFull: return _storageFullSources;
             case GameAlertType.AetherStorageFull: return _aetherStorageFullSources;
             case GameAlertType.MainEngineRepair: return _mainEngineRepairSources;
@@ -651,10 +780,14 @@ public class GameAlertUIManager : MonoBehaviour
     {
         switch (type)
         {
+            case GameAlertType.MineTypeAllOff:
             case GameAlertType.MinerNoResource:
+            case GameAlertType.MinerIsFull:
             case GameAlertType.UnitUnderAttack:
             case GameAlertType.BuildingUnderAttack:
+            case GameAlertType.DroneIsNotAssigned:
             case GameAlertType.DroneNoResource:
+            case GameAlertType.ConstructNoResource:
                 return true;
             default:
                 return false;
