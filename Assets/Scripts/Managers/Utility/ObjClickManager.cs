@@ -38,6 +38,12 @@ public class ObjClickManager : MonoBehaviour
         if (GameManager.Instance != null && GameManager.Instance.IsDragging()) {
             return;
         }
+
+        LaunchUIController launchUIController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
+        if (launchUIController != null && launchUIController.IsLaunchInputLockActive())
+        {
+            return;
+        }
         
         if (BuildingHoverManager.Instance != null)
         {
