@@ -70,15 +70,9 @@ public class MainStructure : BaseStorage, IClickable
     {
         int totalAmount = GetTotalCurrentAmount();
         bool wasFull = totalAmount >= maxStorageAmount;
-        var alertManager = FindFirstObjectByType<GameAlertUIManager>();
         
         if (wasFull) 
         {
-            if (alertManager != null && !_wasStorageFull)
-            {
-                alertManager.RegisterAlert(GameAlertType.StorageFull, this);
-            }
-            _wasStorageFull = true;
             return;
         }
 
@@ -86,20 +80,6 @@ public class MainStructure : BaseStorage, IClickable
         currentResources[type] += canAddAmount;
         
         InvokeResourceChanged(type);
-        
-        int newTotalAmount = GetTotalCurrentAmount();
-        bool stillFull = newTotalAmount >= maxStorageAmount;
-        
-        if (!wasFull && stillFull && alertManager != null)
-        {
-            alertManager.RegisterAlert(GameAlertType.StorageFull, this);
-        }
-        else if (_wasStorageFull && !stillFull && alertManager != null)
-        {
-            alertManager.UnregisterAlert(GameAlertType.StorageFull, this);
-        }
-        
-        _wasStorageFull = stillFull;
     }
     
     public void InitializeStorage(ResourceType type, int amount)
@@ -117,11 +97,11 @@ public class MainStructure : BaseStorage, IClickable
     
     protected override void OnDestroy()
     {
-        base.OnDestroy();
-        
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.GameOver();
+            GameManager.Instance.GameOver(transform);
         }
+
+        base.OnDestroy();
     }
 }

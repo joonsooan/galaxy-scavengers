@@ -21,6 +21,7 @@ public class VisibilityController : MonoBehaviour
     private Vector3Int _lastCheckedCell = new (int.MaxValue, int.MaxValue, int.MaxValue);
     private const float UpdateInterval = 0.1f;
     private float _nextUpdateTime;
+    public bool IsCurrentlyVisible => _wasVisible;
     
     private void Awake()
     {

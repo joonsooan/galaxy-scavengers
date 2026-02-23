@@ -135,7 +135,8 @@ public class TutorialManager : MonoBehaviour
         else
         {
             BuildUIPanelDictionary();
-            ShowAllUIPanels();
+            ShowAllUIPanels(false);
+            StartCoroutine(EnableAlertPanelWhenGameplayReady());
         }
     }
 
@@ -279,14 +280,6 @@ public class TutorialManager : MonoBehaviour
 
         ProcessStepStartActions(currentStep);
         EnableUIPanelsForStep(currentStep);
-        if (currentStep.stepType == TutorialStepType.MineableTypesChanged && mainControlPanel != null)
-        {
-            MainControlPanel mainControl = mainControlPanel.GetComponent<MainControlPanel>();
-            if (mainControl != null)
-            {
-                mainControl.ShowResourceStatPanelForTutorial();
-            }
-        }
         EnableMaterialHighlights(currentStep);
         ShowArrowUI(currentStep);
         ShowTargetBracket(currentStep);
@@ -779,7 +772,7 @@ public class TutorialManager : MonoBehaviour
         }
 
         EnableAllEnemyUnits();
-        ShowAllUIPanels();
+        ShowAllUIPanels(true);
         HideArrowUI();
         HideTargetBracket();
 
@@ -805,7 +798,7 @@ public class TutorialManager : MonoBehaviour
         }
 
         EnableAllEnemyUnits();
-        ShowAllUIPanels();
+        ShowAllUIPanels(true);
         HideArrowUI();
         HideTargetBracket();
 
@@ -828,7 +821,7 @@ public class TutorialManager : MonoBehaviour
             }
 
             EnableAllEnemyUnits();
-            ShowAllUIPanels();
+            ShowAllUIPanels(true);
             HideArrowUI();
             HideTargetBracket();
 
@@ -901,10 +894,13 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
-    private void ShowAllUIPanels()
+    private void ShowAllUIPanels(bool includeAlertPanel)
     {
         foreach (KeyValuePair<TutorialUIPanel, GameObject> entry in _uiPanels) {
             if (entry.Key == TutorialUIPanel.ResourceInfoPanel) {
+                continue;
+            }
+            if (entry.Key == TutorialUIPanel.AlertPanel && !includeAlertPanel) {
                 continue;
             }
 
@@ -914,7 +910,7 @@ public class TutorialManager : MonoBehaviour
             }
         }
 
-        if (alertPanel != null) {
+        if (includeAlertPanel && alertPanel != null) {
             alertPanel.SetActive(true);
         }
     }
@@ -926,9 +922,30 @@ public class TutorialManager : MonoBehaviour
         }
 
         foreach (TutorialUIPanel panelType in step.enableUIPanels) {
+            if (_isTutorialActive && panelType == TutorialUIPanel.AlertPanel) {
+                continue;
+            }
             if (_uiPanels.TryGetValue(panelType, out GameObject panel) && panel != null) {
                 panel.SetActive(true);
             }
+        }
+    }
+
+    private IEnumerator EnableAlertPanelWhenGameplayReady()
+    {
+        while (!GameManager.IsGameplayReady)
+        {
+            yield return null;
+        }
+
+        if (_isTutorialActive)
+        {
+            yield break;
+        }
+
+        if (alertPanel != null)
+        {
+            alertPanel.SetActive(true);
         }
     }
 

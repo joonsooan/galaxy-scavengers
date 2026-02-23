@@ -1,0 +1,546 @@
+fileFormatVersion: 2
+guid: a38c8cd3d45f89945b88aabf8853401b
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 2566248089090174754
+    second: enemy-scuttler-attack-left-normal_0
+  - first:
+      213: 3731805241363822725
+    second: enemy-scuttler-attack-left-normal_1
+  - first:
+      213: 9010404996142177523
+    second: enemy-scuttler-attack-left-normal_2
+  - first:
+      213: 6323608060500733052
+    second: enemy-scuttler-attack-left-normal_3
+  - first:
+      213: 768734525339236789
+    second: enemy-scuttler-attack-left-normal_4
+  - first:
+      213: 6532002311410145027
+    second: enemy-scuttler-attack-left-normal_5
+  - first:
+      213: 8981521317005370659
+    second: enemy-scuttler-attack-left-normal_6
+  - first:
+      213: 1418878182833152379
+    second: enemy-scuttler-attack-left-normal_7
+  - first:
+      213: -4625716563538282859
+    second: enemy-scuttler-attack-left-normal_8
+  - first:
+      213: 3750697623675203344
+    second: enemy-scuttler-attack-left-normal_9
+  - first:
+      213: 4914844463481112260
+    second: enemy-scuttler-attack-left-normal_10
+  - first:
+      213: 1417477884548798880
+    second: enemy-scuttler-attack-left-normal_11
+  - first:
+      213: -3606929287125909289
+    second: enemy-scuttler-attack-left-normal_12
+  - first:
+      213: -6775333091256279787
+    second: enemy-scuttler-attack-left-normal_13
+  - first:
+      213: 189711970546774752
+    second: enemy-scuttler-attack-left-normal_14
+  - first:
+      213: -3826272608285444224
+    second: enemy-scuttler-attack-left-normal_15
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    sRGBTexture: 0
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 0
+  spriteTessellationDetail: -1
+  textureType: 1
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: enemy-scuttler-attack-left-normal_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 26
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 22faebb5a052d9320800000000000000
+      internalID: 2566248089090174754
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-attack-left-normal_1
+      rect:
+        serializedVersion: 2
+        x: 25
+        y: 0
+        width: 27
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5887e6658190ac330800000000000000
+      internalID: 3731805241363822725
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-attack-left-normal_2
+      rect:
+        serializedVersion: 2
+        x: 51
+        y: 0
+        width: 27
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3fc9575da936b0d70800000000000000
+      internalID: 9010404996142177523
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-attack-left-normal_3
+      rect:
+        serializedVersion: 2
+        x: 78
+        y: 1
+        width: 26
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7c61f0f608f1c750800000000000000
+      internalID: 6323608060500733052
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-attack-left-normal_4
+      rect:
+        serializedVersion: 2
+        x: 104
+        y: 1
+        width: 25
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b97c655af71baa00800000000000000
+      internalID: 768734525339236789
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-attack-left-normal_5
+      rect:
+        serializedVersion: 2
+        x: 130
+        y: 1
+        width: 25
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 307d1a38e7556aa50800000000000000
+      internalID: 6532002311410145027
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-attack-left-normal_6
+      rect:
+        serializedVersion: 2
+        x: 156
+        y: 1
+        width: 25
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 32524ba3d06c4ac70800000000000000
+      internalID: 8981521317005370659
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-attack-left-normal_7
+      rect:
+        serializedVersion: 2
+        x: 183
+        y: 2
+        width: 23
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b716253903ed0b310800000000000000
+      internalID: 1418878182833152379
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-attack-left-normal_8
+      rect:
+        serializedVersion: 2
+        x: 211
+        y: 1
+        width: 22
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 596f8a62b472ecfb0800000000000000
+      internalID: -4625716563538282859
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-attack-left-normal_9
+      rect:
+        serializedVersion: 2
+        x: 238
+        y: 0
+        width: 22
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 01fef0fdd972d0430800000000000000
+      internalID: 3750697623675203344
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-attack-left-normal_10
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 0
+        width: 22
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4c64614eff8053440800000000000000
+      internalID: 4914844463481112260
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-attack-left-normal_11
+      rect:
+        serializedVersion: 2
+        x: 290
+        y: 0
+        width: 22
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a9d08930a4eba310800000000000000
+      internalID: 1417477884548798880
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-attack-left-normal_12
+      rect:
+        serializedVersion: 2
+        x: 314
+        y: 0
+        width: 24
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7d048e67cec91fdc0800000000000000
+      internalID: -3606929287125909289
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-attack-left-normal_13
+      rect:
+        serializedVersion: 2
+        x: 338
+        y: 0
+        width: 26
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 51d58b4637e29f1a0800000000000000
+      internalID: -6775333091256279787
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-attack-left-normal_14
+      rect:
+        serializedVersion: 2
+        x: 364
+        y: 1
+        width: 26
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e27416380ef1a200800000000000000
+      internalID: 189711970546774752
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: enemy-scuttler-attack-left-normal_15
+      rect:
+        serializedVersion: 2
+        x: 390
+        y: 0
+        width: 25
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 087b651d55956eac0800000000000000
+      internalID: -3826272608285444224
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      enemy-scuttler-attack-left-normal_0: 2566248089090174754
+      enemy-scuttler-attack-left-normal_1: 3731805241363822725
+      enemy-scuttler-attack-left-normal_10: 4914844463481112260
+      enemy-scuttler-attack-left-normal_11: 1417477884548798880
+      enemy-scuttler-attack-left-normal_12: -3606929287125909289
+      enemy-scuttler-attack-left-normal_13: -6775333091256279787
+      enemy-scuttler-attack-left-normal_14: 189711970546774752
+      enemy-scuttler-attack-left-normal_15: -3826272608285444224
+      enemy-scuttler-attack-left-normal_2: 9010404996142177523
+      enemy-scuttler-attack-left-normal_3: 6323608060500733052
+      enemy-scuttler-attack-left-normal_4: 768734525339236789
+      enemy-scuttler-attack-left-normal_5: 6532002311410145027
+      enemy-scuttler-attack-left-normal_6: 8981521317005370659
+      enemy-scuttler-attack-left-normal_7: 1418878182833152379
+      enemy-scuttler-attack-left-normal_8: -4625716563538282859
+      enemy-scuttler-attack-left-normal_9: 3750697623675203344
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

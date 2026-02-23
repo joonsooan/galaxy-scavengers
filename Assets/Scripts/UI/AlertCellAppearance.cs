@@ -1,4 +1,3 @@
-using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,7 +7,6 @@ public class AlertCellAppearance : MonoBehaviour
     private Vector2 _restPosition;
     private Image _panelImage;
     private float _defaultAlpha = 1f;
-    private Sequence _sequence;
 
     private void Awake()
     {
@@ -17,7 +15,9 @@ public class AlertCellAppearance : MonoBehaviour
             _restPosition = _rectTransform.anchoredPosition;
         _panelImage = GetComponent<Image>();
         if (_panelImage != null)
+        {
             _defaultAlpha = _panelImage.color.a;
+        }
     }
 
     private void OnEnable()
@@ -30,14 +30,10 @@ public class AlertCellAppearance : MonoBehaviour
             c.a = _defaultAlpha;
             _panelImage.color = c;
         }
-        _sequence?.Kill();
-        _sequence = null;
     }
 
     private void OnDisable()
     {
-        _sequence?.Kill();
-        _sequence = null;
         if (_rectTransform != null)
             _rectTransform.anchoredPosition = _restPosition;
         if (_panelImage != null)
@@ -48,16 +44,9 @@ public class AlertCellAppearance : MonoBehaviour
         }
     }
 
-    private void OnDestroy()
-    {
-        _sequence?.Kill();
-    }
-
     public void SetHovered(bool hovered)
     {
         if (_panelImage == null) return;
-        _sequence?.Kill();
-        _sequence = null;
         Color c = _panelImage.color;
         c.a = hovered ? _defaultAlpha : 0f;
         _panelImage.color = c;

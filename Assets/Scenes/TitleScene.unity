@@ -268,6 +268,7 @@ MonoBehaviour:
       Data3: -73339495
       Data4: 1624008095
     Path: event:/SFX_UI/SFX_UIClick
+  clickType: Default
 --- !u!1001 &34701778
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2796,6 +2797,10 @@ PrefabInstance:
       value: event:/SFX_UI/SFX_GameSpeed_3
       objectReference: {fileID: 0}
     - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
+      propertyPath: gameOverUiHideDelay
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
       propertyPath: speed1Sound.Guid.Data1
       value: 820238353
       objectReference: {fileID: 0}
@@ -3665,6 +3670,7 @@ MonoBehaviour:
       Data3: -73339495
       Data4: 1624008095
     Path: event:/SFX_UI/SFX_UIClick
+  clickType: Default
 --- !u!1001 &1163903897
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4187,6 +4193,7 @@ MonoBehaviour:
       Data3: -73339495
       Data4: 1624008095
     Path: event:/SFX_UI/SFX_UIClick
+  clickType: Default
 --- !u!114 &1396266987
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5359,6 +5366,7 @@ MonoBehaviour:
       Data3: -73339495
       Data4: 1624008095
     Path: event:/SFX_UI/SFX_UIClick
+  clickType: Default
 --- !u!1 &2034979321
 GameObject:
   m_ObjectHideFlags: 0

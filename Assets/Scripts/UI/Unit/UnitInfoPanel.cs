@@ -9,9 +9,16 @@ public class UnitInfoPanel : MonoBehaviour
     [SerializeField] private TMP_Text unitDescText;
     [SerializeField] private TMP_Text unitHealthText;
 
-    private UnitBase _currentUnit;
-
     public static UnitInfoPanel Instance { get; private set; }
+
+    private UnitBase _currentUnit;
+    private UnitData _previewUnitData;
+    private RectTransform _rectTransform;
+    private bool _isLayoutOverridden;
+    private Vector2 _defaultAnchorMin;
+    private Vector2 _defaultAnchorMax;
+    private Vector2 _defaultPivot;
+    private Vector2 _defaultAnchoredPosition;
 
     private void Awake()
     {
@@ -21,6 +28,16 @@ public class UnitInfoPanel : MonoBehaviour
             return;
         }
         Instance = this;
+
+        _rectTransform = GetComponent<RectTransform>();
+        if (_rectTransform != null)
+        {
+            _defaultAnchorMin = _rectTransform.anchorMin;
+            _defaultAnchorMax = _rectTransform.anchorMax;
+            _defaultPivot = _rectTransform.pivot;
+            _defaultAnchoredPosition = _rectTransform.anchoredPosition;
+        }
+
         ClearAllInfo();
     }
 
@@ -32,6 +49,21 @@ public class UnitInfoPanel : MonoBehaviour
             return;
         }
         _currentUnit = unit;
+        _previewUnitData = null;
+        RefreshUI();
+        gameObject.SetActive(true);
+    }
+
+    public void PreviewInfo(UnitData unitData)
+    {
+        if (unitData == null)
+        {
+            CancelPreview();
+            return;
+        }
+
+        _currentUnit = null;
+        _previewUnitData = unitData;
         RefreshUI();
         gameObject.SetActive(true);
     }
@@ -39,6 +71,7 @@ public class UnitInfoPanel : MonoBehaviour
     public void CancelPreview()
     {
         _currentUnit = null;
+        _previewUnitData = null;
         ClearUI();
         gameObject.SetActive(false);
     }
@@ -46,12 +79,53 @@ public class UnitInfoPanel : MonoBehaviour
     public void ClearAllInfo()
     {
         _currentUnit = null;
+        _previewUnitData = null;
         ClearUI();
         gameObject.SetActive(false);
     }
 
+    public void ApplyFixedAnchorLayout(Vector2 anchor, Vector2 anchoredPosition)
+    {
+        if (_rectTransform == null)
+        {
+            return;
+        }
+
+        if (!_isLayoutOverridden)
+        {
+            _defaultAnchorMin = _rectTransform.anchorMin;
+            _defaultAnchorMax = _rectTransform.anchorMax;
+            _defaultPivot = _rectTransform.pivot;
+            _defaultAnchoredPosition = _rectTransform.anchoredPosition;
+            _isLayoutOverridden = true;
+        }
+
+        _rectTransform.anchorMin = anchor;
+        _rectTransform.anchorMax = anchor;
+        _rectTransform.pivot = anchor;
+        _rectTransform.anchoredPosition = anchoredPosition;
+    }
+
+    public void RestoreDefaultLayout()
+    {
+        if (_rectTransform == null || !_isLayoutOverridden)
+        {
+            return;
+        }
+
+        _rectTransform.anchorMin = _defaultAnchorMin;
+        _rectTransform.anchorMax = _defaultAnchorMax;
+        _rectTransform.pivot = _defaultPivot;
+        _rectTransform.anchoredPosition = _defaultAnchoredPosition;
+        _isLayoutOverridden = false;
+    }
+
     private void Update()
     {
+        if (_previewUnitData != null)
+        {
+            return;
+        }
         if (_currentUnit == null)
         {
             return;
@@ -71,6 +145,25 @@ public class UnitInfoPanel : MonoBehaviour
 
     private void RefreshUI()
     {
+        if (_previewUnitData != null)
+        {
+            if (unitNameText != null)
+            {
+                unitNameText.text = _previewUnitData.unitName;
+            }
+            if (unitDescText != null)
+            {
+                unitDescText.text = _previewUnitData.description;
+            }
+            if (unitHealthText != null)
+            {
+                int previewMaxHealth = GetPreviewMaxHealth(_previewUnitData);
+                unitHealthText.text = $"체력 : {previewMaxHealth}";
+            }
+            RebuildLayout();
+            return;
+        }
+
         if (_currentUnit == null)
         {
             ClearUI();
@@ -137,5 +230,29 @@ public class UnitInfoPanel : MonoBehaviour
             LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
         if (panelRect != null && panelRect.parent is RectTransform parentRect)
             LayoutRebuilder.ForceRebuildLayoutImmediate(parentRect);
+    }
+
+    private static int GetPreviewMaxHealth(UnitData unitData)
+    {
+        if (unitData == null || unitData.unitPrefab == null)
+        {
+            return 0;
+        }
+
+        UnitBase unitBase = unitData.unitPrefab.GetComponent<UnitBase>();
+        if (unitBase == null)
+        {
+            unitBase = unitData.unitPrefab.GetComponentInChildren<UnitBase>(true);
+        }
+
+        return unitBase != null ? unitBase.MaxHealth : 0;
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            Instance = null;
+        }
     }
 }

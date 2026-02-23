@@ -10,8 +10,6 @@ public class BaseStorage : Damageable, IStorage
 
     protected readonly Dictionary<ResourceType, int> currentResources = new Dictionary<ResourceType, int>();
 
-    protected bool _wasStorageFull;
-
     protected override void Awake()
     {
         base.Awake();
@@ -40,13 +38,8 @@ public class BaseStorage : Damageable, IStorage
     {
         int totalAmount = GetTotalCurrentAmount();
         bool isFull = totalAmount >= maxStorageAmount;
-        var alertManager = FindFirstObjectByType<GameAlertUIManager>();
 
         if (isFull) {
-            if (!_wasStorageFull && alertManager != null) {
-                alertManager.RegisterAlert(GameAlertType.StorageFull, this);
-            }
-            _wasStorageFull = true;
             return false;
         }
 
@@ -54,15 +47,6 @@ public class BaseStorage : Damageable, IStorage
         currentResources[type] += canAddAmount;
 
         NotifyResourceChange(type, canAddAmount);
-
-        int newTotalAmount = GetTotalCurrentAmount();
-        bool stillFull = newTotalAmount >= maxStorageAmount;
-
-        if (_wasStorageFull && !stillFull && alertManager != null) {
-            alertManager.UnregisterAlert(GameAlertType.StorageFull, this);
-        }
-
-        _wasStorageFull = stillFull;
 
         return canAddAmount > 0;
     }
@@ -82,7 +66,7 @@ public class BaseStorage : Damageable, IStorage
         if (ResourceManager.Instance != null) {
             ResourceManager.Instance.RemoveResource(type, amountWithdrawn);
         }
-
+        
         return true;
     }
 

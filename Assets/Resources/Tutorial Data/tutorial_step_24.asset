@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: tutorial_step_24
   m_EditorClassIdentifier: 
   stepIndex: 24
-  text: "\uCF54\uC5B4 \uC218\uB9AC\uC5D0 \uD544\uC694\uD55C \uC790\uC6D0\uC740 \uD018\uC2A4\uD2B8
-    \uCC3D\uC5D0\uC11C \uD655\uC778\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.\n\uD018\uC2A4\uD2B8
-    \uCC3D\uC5D0\uB294 \uD604\uC7AC \uC9C4\uD589 \uC911\uC778 \uD018\uC2A4\uD2B8\uB97C
+  text: "\uCF54\uC5B4 \uC218\uB9AC\uC5D0 \uD544\uC694\uD55C \uC790\uC6D0\uC740 <color=#FFC107>\uD018\uC2A4\uD2B8
+    \uCC3D</color>\uC5D0\uC11C \uD655\uC778\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.\n<color=#FFC107>\uD018\uC2A4\uD2B8
+    \uCC3D</color>\uC5D0\uB294 \uD604\uC7AC \uC9C4\uD589 \uC911\uC778 \uD018\uC2A4\uD2B8\uB3C4
     \uD655\uC778\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.\n<color=#DBD1C7>(\uD654\uBA74\uC744
     \uD074\uB9AD\uD574\uC11C \uB2E4\uC74C)</color>"
   stepType: 0
@@ -27,6 +27,7 @@ MonoBehaviour:
   itemType: 
   showProgressBar: 0
   enableUIPanels: 0b000000
+  tutorialPanelMoveDownOffset: 110
   spawnUnits: []
   grantResources: []
   completionSound:
@@ -40,3 +41,6 @@ MonoBehaviour:
   highlightTargetIDs: []
   showArrowUI: 1
   arrowID: quest_panel
+  showTargetBracket: 0
+  targetBracketBuildingType: 
+  includeConstructionSiteForTargetBracket: 1

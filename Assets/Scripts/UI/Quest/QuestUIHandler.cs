@@ -74,12 +74,19 @@ public class QuestUIHandler : MonoBehaviour
     
     private IEnumerator SubscribeToQuestDataManagerWhenReady()
     {
-        while (QuestDataManager.Instance == null)
+        while (QuestDataManager.Instance == null || !QuestDataManager.Instance.IsInitialized)
         {
             yield return null;
         }
         
         QuestDataManager.Instance.OnQuestStateChanged += OnQuestStateChanged;
+        QuestDataManager.Instance.OnInitialized -= OnQuestDataManagerInitialized;
+        QuestDataManager.Instance.OnInitialized += OnQuestDataManagerInitialized;
+
+        if (_isQuestMode)
+        {
+            LoadQuestCells();
+        }
     }
     
     private IEnumerator SubscribeToBaseInventoryWhenReady()
@@ -99,6 +106,7 @@ public class QuestUIHandler : MonoBehaviour
         if (QuestDataManager.Instance != null)
         {
             QuestDataManager.Instance.OnQuestStateChanged -= OnQuestStateChanged;
+            QuestDataManager.Instance.OnInitialized -= OnQuestDataManagerInitialized;
         }
         
         BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
@@ -254,7 +262,7 @@ public class QuestUIHandler : MonoBehaviour
     
     private IEnumerator LoadQuestCellsWhenReady()
     {
-        while (QuestDataManager.Instance == null)
+        while (QuestDataManager.Instance == null || !QuestDataManager.Instance.IsInitialized)
         {
             yield return null;
         }
@@ -262,6 +270,15 @@ public class QuestUIHandler : MonoBehaviour
         yield return null;
         
         LoadQuestCells();
+    }
+
+    private void OnQuestDataManagerInitialized()
+    {
+        if (_isQuestMode)
+        {
+            LoadQuestCells();
+        }
+        RequestIndicatorUpdate();
     }
     
     public void ShowShopUI()

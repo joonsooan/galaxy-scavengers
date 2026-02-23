@@ -1,9 +1,10 @@
 using FMODUnity;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class DroneProduceCell : MonoBehaviour
+public class DroneProduceCell : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     private const int MaxProduceAmount = 999;
     private const float ButtonClickCooldown = 0.1f;
@@ -29,18 +30,22 @@ public class DroneProduceCell : MonoBehaviour
     private int _targetCount;
     private string _tutorialID;
     private int _unitIndex;
+    private UnitData _unitData;
+    private DroneProduceUIManager _uiManager;
 
     private void OnDisable()
     {
         DroneHub.OnUnitTargetChanged -= HandleUnitTargetChanged;
     }
 
-    public void Initialize(UnitData unitData, DroneHub droneHub, int unitIndex)
+    public void Initialize(UnitData unitData, DroneHub droneHub, int unitIndex, DroneProduceUIManager uiManager)
     {
         DroneHub.OnUnitTargetChanged -= HandleUnitTargetChanged;
 
         _droneHub = droneHub;
         _unitIndex = unitIndex;
+        _unitData = unitData;
+        _uiManager = uiManager;
 
         if (unitData == null) {
             Debug.LogError("UnitData is null");
@@ -93,6 +98,30 @@ public class DroneProduceCell : MonoBehaviour
         UpdateUI();
 
         DroneHub.OnUnitTargetChanged += HandleUnitTargetChanged;
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        if (_uiManager != null)
+        {
+            _uiManager.OnProduceCellHover(_unitData);
+        }
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (_uiManager != null)
+        {
+            _uiManager.OnProduceCellHoverExit(_unitData);
+        }
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (_uiManager != null)
+        {
+            _uiManager.OnProduceCellClicked(_unitData);
+        }
     }
 
     private void HandleUnitTargetChanged(int unitIndex, int currentCount, int targetCount)

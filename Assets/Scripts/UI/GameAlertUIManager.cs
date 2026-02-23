@@ -7,15 +7,16 @@ using FMODUnity;
 
 public enum GameAlertType
 {
-    MinerNoResource,
-    UnitUnderAttack,
-    BuildingUnderAttack,
-    DroneNoResource,
-    StorageFull,
-    AetherStorageFull,
-    NoiseCaution,
-    NoiseWarning,
-    NoiseDanger
+    MinerNoResource = 0,
+    UnitUnderAttack = 1,
+    BuildingUnderAttack = 2,
+    DroneNoResource = 3,
+    StorageFull = 4,
+    AetherStorageFull = 5,
+    NoiseCaution = 6,
+    NoiseWarning = 7,
+    NoiseDanger = 8,
+    MainEngineRepair = 9
 }
 
 public class GameAlertUIManager : MonoBehaviour
@@ -26,6 +27,7 @@ public class GameAlertUIManager : MonoBehaviour
     [SerializeField] private GameObject droneNoResourceCell;
     [SerializeField] private GameObject storageFullCell;
     [SerializeField] private GameObject aetherStorageFullCell;
+    [SerializeField] private GameObject mainEngineRepairCell;
     [SerializeField] private GameObject noiseCautionCell;
     [SerializeField] private GameObject noiseWarningCell;
     [SerializeField] private GameObject noiseDangerCell;
@@ -37,6 +39,7 @@ public class GameAlertUIManager : MonoBehaviour
     [SerializeField] private EventReference droneNoResourceSound;
     [SerializeField] private EventReference storageFullSound;
     [SerializeField] private EventReference aetherStorageFullSound;
+    [SerializeField] private EventReference mainEngineRepairSound;
     [SerializeField] private EventReference noiseCautionSound;
     [SerializeField] private EventReference noiseWarningSound;
     [SerializeField] private EventReference noiseDangerSound;
@@ -51,6 +54,7 @@ public class GameAlertUIManager : MonoBehaviour
     private const string TooltipDroneNoResource = "가공 유닛이 가공할 자원이 없습니다.";
     private const string TooltipStorageFull = "모든 저장 공간이 가득 찼습니다!\n저장고를 더 건설해주세요.";
     private const string TooltipAetherStorageFull = "모든 에테르 저장고가 가득 찼습니다!\n저장고나 배터리를 더 건설해주세요.";
+    private const string TooltipMainEngineRepair = "메인 엔진이 고장나\n시드 코어를 발사할 수 없습니다.\n퀘스트를 확인하세요.";
     private const string ToolTipNoiseCaution = "소음 정도 : 주의\n적의 습격에 대비하세요!";
     private const string ToolTipNoiseWarning = "소음 정도 : 경고\n적의 습격에 대비하세요!";
     private const string ToolTipNoiseDanger = "소음 정도 : 위험\n적의 습격에 대비하세요!";
@@ -66,8 +70,13 @@ public class GameAlertUIManager : MonoBehaviour
     private readonly List<Damageable> _droneNoResourceSources = new List<Damageable>();
     private readonly List<Damageable> _storageFullSources = new List<Damageable>();
     private readonly List<Damageable> _aetherStorageFullSources = new List<Damageable>();
+    private readonly List<Damageable> _mainEngineRepairSources = new List<Damageable>();
     private const int MaxSourcesPerType = 5;
     private Coroutine _tooltipRebuildCoroutine;
+    private StorageTrackerManager _storageTrackerManager;
+    private Coroutine _bindStorageTrackerCoroutine;
+    private bool _isStorageFullByTracker;
+    private bool _isAetherFullByTracker;
 
     private int _minerNoResourceCount;
     private int _unitUnderAttackCount;
@@ -75,8 +84,11 @@ public class GameAlertUIManager : MonoBehaviour
     private int _droneNoResourceCount;
     private int _storageFullCount;
     private int _aetherStorageFullCount;
+    private int _mainEngineRepairCount;
     [SerializeField] private CameraTargetController cameraTargetController;
     private readonly Dictionary<GameAlertType, int> _alertFocusIndices = new Dictionary<GameAlertType, int>();
+    private bool _unitUnderAttackAlertActive;
+    private bool _buildingUnderAttackAlertActive;
 
     private void Awake()
     {
@@ -85,6 +97,11 @@ public class GameAlertUIManager : MonoBehaviour
 
     private void OnEnable()
     {
+        _isStorageFullByTracker = false;
+        _isAetherFullByTracker = false;
+        if (_bindStorageTrackerCoroutine != null)
+            StopCoroutine(_bindStorageTrackerCoroutine);
+        _bindStorageTrackerCoroutine = StartCoroutine(BindStorageTrackerWhenReady());
         if (NoiseManager.Instance != null)
         {
             NoiseManager.Instance.OnNoiseChanged += OnNoiseChanged;
@@ -94,6 +111,17 @@ public class GameAlertUIManager : MonoBehaviour
 
     private void OnDisable()
     {
+        if (_bindStorageTrackerCoroutine != null)
+        {
+            StopCoroutine(_bindStorageTrackerCoroutine);
+            _bindStorageTrackerCoroutine = null;
+        }
+        if (_storageTrackerManager != null)
+        {
+            _storageTrackerManager.OnStorageChanged -= OnTrackedStorageChanged;
+            _storageTrackerManager.OnAetherChanged -= OnTrackedAetherChanged;
+        }
+        _storageTrackerManager = null;
         if (NoiseManager.Instance != null)
         {
             NoiseManager.Instance.OnNoiseChanged -= OnNoiseChanged;
@@ -129,6 +157,72 @@ public class GameAlertUIManager : MonoBehaviour
         }
     }
 
+    private IEnumerator BindStorageTrackerWhenReady()
+    {
+        while (_storageTrackerManager == null)
+        {
+            _storageTrackerManager = FindFirstObjectByType<StorageTrackerManager>();
+            if (_storageTrackerManager == null)
+                yield return null;
+        }
+
+        _storageTrackerManager.OnStorageChanged -= OnTrackedStorageChanged;
+        _storageTrackerManager.OnStorageChanged += OnTrackedStorageChanged;
+        _storageTrackerManager.OnAetherChanged -= OnTrackedAetherChanged;
+        _storageTrackerManager.OnAetherChanged += OnTrackedAetherChanged;
+        SyncStorageFullAlertWithTracker();
+        SyncAetherFullAlertWithTracker();
+        _bindStorageTrackerCoroutine = null;
+    }
+
+    private void OnTrackedStorageChanged()
+    {
+        SyncStorageFullAlertWithTracker();
+    }
+
+    private void OnTrackedAetherChanged()
+    {
+        SyncAetherFullAlertWithTracker();
+    }
+
+    private void SyncStorageFullAlertWithTracker()
+    {
+        if (_storageTrackerManager == null)
+            return;
+
+        int max = _storageTrackerManager.MaxStorableResourceAmount;
+        int current = _storageTrackerManager.CurrentTotalStoredResourceAmount;
+        bool isStorageFull = max > 0 && current >= max;
+
+        if (isStorageFull == _isStorageFullByTracker)
+            return;
+
+        _isStorageFullByTracker = isStorageFull;
+        if (isStorageFull)
+            RegisterAlert(GameAlertType.StorageFull);
+        else
+            UnregisterAlert(GameAlertType.StorageFull);
+    }
+
+    private void SyncAetherFullAlertWithTracker()
+    {
+        if (_storageTrackerManager == null)
+            return;
+
+        int max = _storageTrackerManager.MaxStorableAetherAmount;
+        int current = _storageTrackerManager.CurrentAetherAmount;
+        bool isAetherFull = max > 0 && current >= max;
+
+        if (isAetherFull == _isAetherFullByTracker)
+            return;
+
+        _isAetherFullByTracker = isAetherFull;
+        if (isAetherFull)
+            RegisterAlert(GameAlertType.AetherStorageFull);
+        else
+            UnregisterAlert(GameAlertType.AetherStorageFull);
+    }
+
     public void RegisterAlert(GameAlertType type)
     {
         RegisterAlert(type, null);
@@ -161,6 +255,10 @@ public class GameAlertUIManager : MonoBehaviour
             case GameAlertType.AetherStorageFull:
                 _aetherStorageFullCount++;
                 AddSource(_aetherStorageFullSources, source);
+                break;
+            case GameAlertType.MainEngineRepair:
+                _mainEngineRepairCount++;
+                AddSource(_mainEngineRepairSources, source);
                 break;
         }
 
@@ -210,6 +308,10 @@ public class GameAlertUIManager : MonoBehaviour
                 _aetherStorageFullCount = Mathf.Max(0, _aetherStorageFullCount - 1);
                 RemoveSource(_aetherStorageFullSources, source);
                 break;
+            case GameAlertType.MainEngineRepair:
+                _mainEngineRepairCount = Mathf.Max(0, _mainEngineRepairCount - 1);
+                RemoveSource(_mainEngineRepairSources, source);
+                break;
         }
 
         UpdateAlertState(type);
@@ -232,7 +334,6 @@ public class GameAlertUIManager : MonoBehaviour
 
     public void SetAlertActive(GameAlertType type, bool active)
     {
-
         switch (type)
         {
             case GameAlertType.MinerNoResource:
@@ -252,6 +353,9 @@ public class GameAlertUIManager : MonoBehaviour
                 break;
             case GameAlertType.AetherStorageFull:
                 if (aetherStorageFullCell != null) aetherStorageFullCell.SetActive(active);
+                break;
+            case GameAlertType.MainEngineRepair:
+                if (mainEngineRepairCell != null) mainEngineRepairCell.SetActive(active);
                 break;
         }
 
@@ -278,9 +382,10 @@ public class GameAlertUIManager : MonoBehaviour
                 if (unitUnderAttackCell != null)
                 {
                     bool active = _unitUnderAttackCount > 0;
-                    if (active && !unitUnderAttackCell.activeSelf && !unitUnderAttackSound.IsNull)
+                    if (active && !_unitUnderAttackAlertActive && !unitUnderAttackSound.IsNull)
                         RuntimeManager.PlayOneShot(unitUnderAttackSound);
                     unitUnderAttackCell.SetActive(active);
+                    _unitUnderAttackAlertActive = active;
                     if (!active && _currentTooltipType == GameAlertType.UnitUnderAttack)
                         HideTooltip();
                 }
@@ -289,9 +394,10 @@ public class GameAlertUIManager : MonoBehaviour
                 if (buildingUnderAttackCell != null)
                 {
                     bool active = _buildingUnderAttackCount > 0;
-                    if (active && !buildingUnderAttackCell.activeSelf && !buildingUnderAttackSound.IsNull)
+                    if (active && !_buildingUnderAttackAlertActive && !buildingUnderAttackSound.IsNull)
                         RuntimeManager.PlayOneShot(buildingUnderAttackSound);
                     buildingUnderAttackCell.SetActive(active);
+                    _buildingUnderAttackAlertActive = active;
                     if (!active && _currentTooltipType == GameAlertType.BuildingUnderAttack)
                         HideTooltip();
                 }
@@ -329,6 +435,17 @@ public class GameAlertUIManager : MonoBehaviour
                         HideTooltip();
                 }
                 break;
+            case GameAlertType.MainEngineRepair:
+                if (mainEngineRepairCell != null)
+                {
+                    bool active = _mainEngineRepairCount > 0;
+                    if (active && !mainEngineRepairCell.activeSelf && !mainEngineRepairSound.IsNull)
+                        RuntimeManager.PlayOneShot(mainEngineRepairSound);
+                    mainEngineRepairCell.SetActive(active);
+                    if (!active && _currentTooltipType == GameAlertType.MainEngineRepair)
+                        HideTooltip();
+                }
+                break;
         }
     }
 
@@ -340,9 +457,12 @@ public class GameAlertUIManager : MonoBehaviour
         if (droneNoResourceCell != null) droneNoResourceCell.SetActive(false);
         if (storageFullCell != null) storageFullCell.SetActive(false);
         if (aetherStorageFullCell != null) aetherStorageFullCell.SetActive(false);
+        if (mainEngineRepairCell != null) mainEngineRepairCell.SetActive(false);
         if (noiseCautionCell != null) noiseCautionCell.SetActive(false);
         if (noiseWarningCell != null) noiseWarningCell.SetActive(false);
         if (noiseDangerCell != null) noiseDangerCell.SetActive(false);
+        _unitUnderAttackAlertActive = false;
+        _buildingUnderAttackAlertActive = false;
     }
 
     public void ShowTooltip(GameAlertType type)
@@ -375,7 +495,7 @@ public class GameAlertUIManager : MonoBehaviour
             if (!string.IsNullOrEmpty(name)) names.Add(name);
         }
         
-        if (type == GameAlertType.StorageFull || type == GameAlertType.AetherStorageFull ||
+        if (type == GameAlertType.StorageFull || type == GameAlertType.AetherStorageFull || type == GameAlertType.MainEngineRepair ||
             type == GameAlertType.NoiseCaution || type == GameAlertType.NoiseWarning || type == GameAlertType.NoiseDanger)
             tooltipText.text = header;
         else if (names.Count > 0)
@@ -396,6 +516,7 @@ public class GameAlertUIManager : MonoBehaviour
             case GameAlertType.DroneNoResource: return TooltipDroneNoResource;
             case GameAlertType.StorageFull: return TooltipStorageFull;
             case GameAlertType.AetherStorageFull: return TooltipAetherStorageFull;
+            case GameAlertType.MainEngineRepair: return TooltipMainEngineRepair;
             case GameAlertType.NoiseCaution: return ToolTipNoiseCaution;
             case GameAlertType.NoiseWarning: return ToolTipNoiseWarning;
             case GameAlertType.NoiseDanger: return ToolTipNoiseDanger;
@@ -467,6 +588,7 @@ public class GameAlertUIManager : MonoBehaviour
             case GameAlertType.DroneNoResource: return _droneNoResourceSources;
             case GameAlertType.StorageFull: return _storageFullSources;
             case GameAlertType.AetherStorageFull: return _aetherStorageFullSources;
+            case GameAlertType.MainEngineRepair: return _mainEngineRepairSources;
             default: return new List<Damageable>();
         }
     }
@@ -538,5 +660,6 @@ public class GameAlertUIManager : MonoBehaviour
                 return false;
         }
     }
+
 }
 

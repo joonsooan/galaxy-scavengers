@@ -117,6 +117,11 @@ public class RequestQuestManager : MonoBehaviour
             yield return new WaitForSeconds(initialQuestDelay);
         }
 
+        if (IsLaunchCountdownActive())
+        {
+            yield break;
+        }
+
         SpawnFirstRequestQuest();
     }
     
@@ -142,6 +147,11 @@ public class RequestQuestManager : MonoBehaviour
         while (_currentQuestIndex < _availableRequestQuests.Count)
         {
             yield return new WaitForSeconds(timeBetweenQuests);
+
+            if (IsLaunchCountdownActive())
+            {
+                yield break;
+            }
             
             if (SceneManager.GetActiveScene().name == "GameScene")
             {
@@ -162,6 +172,11 @@ public class RequestQuestManager : MonoBehaviour
     private void SpawnRequestQuest(QuestData questData)
     {
         if (questData == null || QuestDataManager.Instance == null)
+        {
+            return;
+        }
+
+        if (IsLaunchCountdownActive())
         {
             return;
         }
@@ -195,5 +210,11 @@ public class RequestQuestManager : MonoBehaviour
                 QuestDataManager.Instance.UnregisterRuntimeQuest(questData.questId);
             }
         }
+    }
+
+    private static bool IsLaunchCountdownActive()
+    {
+        LaunchUIController launchUIController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
+        return launchUIController != null && launchUIController.IsCountdownSequenceActive();
     }
 }

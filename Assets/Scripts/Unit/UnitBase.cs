@@ -33,10 +33,9 @@ public abstract class UnitBase : Damageable
 
     public UnitState currentState;
     private bool _isRegisteredToNoiseManager;
-    private Light2D _unitLight2D;
-    private Color _unitLightBaseColor;
-    private float _unitLightCurrentAlpha = 1f;
-    private const float UnitLightAlphaLerpSpeed = 5f;
+    private Light2D[] _unitLights2D;
+    private float[] _unitLightBaseAlphas;
+    private const float UnitLightAlphaLerpSpeed = 2f;
 
     private UnitMovement _idleRoamMovement;
     private UnitSpriteController _idleRoamSpriteController;
@@ -71,17 +70,27 @@ public abstract class UnitBase : Damageable
     {
         if (DayNightCycleManager.Instance == null) return;
 
-        if (_unitLight2D == null) {
-            _unitLight2D = GetComponentInChildren<Light2D>();
-            if (_unitLight2D == null) return;
-            Color c = _unitLight2D.color;
-            _unitLightBaseColor = new Color(c.r, c.g, c.b, 1f);
-            _unitLightCurrentAlpha = c.a;
+        if (_unitLights2D == null) {
+            _unitLights2D = GetComponentsInChildren<Light2D>(true);
+            if (_unitLights2D == null || _unitLights2D.Length == 0) return;
+            _unitLightBaseAlphas = new float[_unitLights2D.Length];
+            for (int i = 0; i < _unitLights2D.Length; i++) {
+                Light2D light2D = _unitLights2D[i];
+                _unitLightBaseAlphas[i] = light2D != null ? light2D.color.a : 0f;
+            }
         }
 
-        float targetAlpha = DayNightCycleManager.Instance.IsDay() ? 0.2f : 1f;
-        _unitLightCurrentAlpha = Mathf.Lerp(_unitLightCurrentAlpha, targetAlpha, UnitLightAlphaLerpSpeed * Time.deltaTime);
-        _unitLight2D.color = new Color(_unitLightBaseColor.r, _unitLightBaseColor.g, _unitLightBaseColor.b, _unitLightCurrentAlpha);
+        float targetMultiplier = DayNightCycleManager.Instance.IsDay() ? 0f : 1f;
+        for (int i = 0; i < _unitLights2D.Length; i++) {
+            Light2D light2D = _unitLights2D[i];
+            if (light2D == null) continue;
+
+            float baseAlpha = _unitLightBaseAlphas[i];
+            float targetAlpha = baseAlpha * targetMultiplier;
+            Color currentColor = light2D.color;
+            float nextAlpha = Mathf.Lerp(currentColor.a, targetAlpha, UnitLightAlphaLerpSpeed * Time.deltaTime);
+            light2D.color = new Color(currentColor.r, currentColor.g, currentColor.b, nextAlpha);
+        }
     }
 
     protected void UpdateIdleRoam()

@@ -326,6 +326,11 @@ public class CameraTargetController : MonoBehaviour
             return;
         }
 
+        if (IsLaunchInputLocked())
+        {
+            return;
+        }
+
         float scroll = Input.GetAxisRaw("Mouse ScrollWheel");
         if (scroll == 0 || _pixelPerfCam == null) return;
 
@@ -372,6 +377,12 @@ public class CameraTargetController : MonoBehaviour
             _currentZoomIndex = newIndex;
             UpdateActiveCamera();
         }
+    }
+
+    private bool IsLaunchInputLocked()
+    {
+        LaunchUIController launchUIController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
+        return launchUIController != null && launchUIController.IsLaunchInputLockActive();
     }
 
     private void WarpCameras(Vector3 deltaPos)

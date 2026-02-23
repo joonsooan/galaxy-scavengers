@@ -3,26 +3,45 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using FMODUnity;
 
-public class FMODUIButton : MonoBehaviour, IPointerEnterHandler, IPointerUpHandler
+public class FMODUIButton : MonoBehaviour, IPointerEnterHandler, IPointerClickHandler, IPointerUpHandler
 {
     [Header("FMOD Events")]
     [SerializeField] private EventReference hoverSound;
     [SerializeField] private EventReference clickSound;
-    private string _currentClickState = "Default";
+    [SerializeField] private string clickType = "Default";
+    private static int _lastClickSoundFrame = -1;
+
+    public static bool HasPlayedClickSoundThisFrame => _lastClickSoundFrame == Time.frameCount;
 
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (!hoverSound.IsNull)
         {
-            PlaySoundWithParameter(hoverSound, "ClickType", _currentClickState);
+            PlaySoundWithParameter(hoverSound, "ClickType", clickType);
         }
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        PlayClickSound();
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        PlayClickSound();
+    }
+
+    private void PlayClickSound()
+    {
+        if (HasPlayedClickSoundThisFrame)
+        {
+            return;
+        }
+
         if (!clickSound.IsNull)
         {
-            PlaySoundWithParameter(clickSound, "ClickType", _currentClickState);
+            PlaySoundWithParameter(clickSound, "ClickType", clickType);
+            _lastClickSoundFrame = Time.frameCount;
         }
     }
 
@@ -37,6 +56,11 @@ public class FMODUIButton : MonoBehaviour, IPointerEnterHandler, IPointerUpHandl
 
     public void SetClickState(string clickState)
     {
-        _currentClickState = clickState;
+        SetClickType(clickState);
+    }
+
+    public void SetClickType(string newClickType)
+    {
+        clickType = newClickType;
     }
 }

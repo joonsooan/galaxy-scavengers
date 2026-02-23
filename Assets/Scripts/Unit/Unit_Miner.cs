@@ -12,6 +12,7 @@ using STOP_MODE = FMOD.Studio.STOP_MODE;
 
 public class Unit_Miner : UnitBase
 {
+    private static readonly Dictionary<Vector3Int, Unit_Miner> ReservedMiningCells = new Dictionary<Vector3Int, Unit_Miner>();
     [Header("References")]
     [SerializeField] private UnitMovement unitMovement;
 
@@ -59,6 +60,8 @@ public class Unit_Miner : UnitBase
     private IStorage _targetStorage;
     private Vector3Int _targetUnloadCell;
     private Sequence _vibrationSequence;
+    private bool _hasReservedMiningCell;
+    private Vector3Int _reservedMiningCell;
 
     protected override void Awake()
     {
@@ -98,6 +101,7 @@ public class Unit_Miner : UnitBase
     {
         base.OnDisable();
         UnsubscribeEvents();
+        ReleaseMiningCellReservation();
         if (_noResourceAlertActive) {
             FindFirstObjectByType<GameAlertUIManager>()?.UnregisterAlert(GameAlertType.MinerNoResource, this);
             _noResourceAlertActive = false;
@@ -106,6 +110,7 @@ public class Unit_Miner : UnitBase
 
     protected override void OnDestroy()
     {
+        ReleaseMiningCellReservation();
         if (_noResourceAlertActive) {
             FindFirstObjectByType<GameAlertUIManager>()?.UnregisterAlert(GameAlertType.MinerNoResource, this);
             _noResourceAlertActive = false;
@@ -359,11 +364,16 @@ public class Unit_Miner : UnitBase
             if (_targetResourceNode != null && _targetResourceNode != bestTarget.resourceNode) {
                 _targetResourceNode.Unreserve();
             }
+            ReleaseMiningCellReservation();
 
             _targetResourceNode = bestTarget.resourceNode;
             _targetMiningCell = bestTarget.miningCell;
 
-            if (_targetResourceNode.Reserve(this)) {
+            if (!TryReserveMiningCell(_targetMiningCell)) {
+                _targetResourceNode = null;
+                currentState = UnitState.Idle;
+            }
+            else if (_targetResourceNode.Reserve(this)) {
                 if (unitMovement.SetNewTarget(BuildingManager.Instance.grid.GetCellCenterWorld(_targetMiningCell))) {
                     currentState = UnitState.Moving;
                     ResetIdleRoam();
@@ -374,17 +384,20 @@ public class Unit_Miner : UnitBase
                 }
                 else {
                     _targetResourceNode.Unreserve();
+                    ReleaseMiningCellReservation();
                     _targetResourceNode = null;
                     currentState = UnitState.Idle;
                 }
             }
             else {
+                ReleaseMiningCellReservation();
                 _targetResourceNode = null;
                 currentState = UnitState.Idle;
             }
         }
         else {
             _targetResourceNode?.Unreserve();
+            ReleaseMiningCellReservation();
             _targetResourceNode = null;
             currentState = UnitState.Idle;
             if (!_noResourceAlertActive) {
@@ -448,7 +461,9 @@ public class Unit_Miner : UnitBase
                     continue;
                 }
 
-                if (BuildingManager.Instance.CanPlaceBuilding(neighborCell) && !UnitMovement.IsCellAssigned(neighborCell)) {
+                if (BuildingManager.Instance.CanPlaceBuilding(neighborCell) &&
+                    !UnitMovement.IsCellAssigned(neighborCell) &&
+                    !IsMiningCellReservedByOther(neighborCell)) {
                     if (distanceToNeighbor < bestTarget.distance) {
                         bestTarget.resourceNode = resourceNode;
                         bestTarget.miningCell = neighborCell;
@@ -587,6 +602,7 @@ public class Unit_Miner : UnitBase
         StopMiningParticles();
         StopMiningSound();
         _targetResourceNode?.Unreserve();
+        ReleaseMiningCellReservation();
         _targetResourceNode = null;
         currentState = UnitState.Idle;
         unitMovement.StopMovement();
@@ -638,6 +654,7 @@ public class Unit_Miner : UnitBase
             StopMiningParticles();
             StopMiningSound();
             _targetResourceNode?.Unreserve();
+            ReleaseMiningCellReservation();
             _targetResourceNode = null;
 
             GoToStorage();
@@ -965,6 +982,41 @@ public class Unit_Miner : UnitBase
             }
             yield return _miningDelay;
         }
+    }
+
+    private bool TryReserveMiningCell(Vector3Int cell)
+    {
+        if (ReservedMiningCells.TryGetValue(cell, out Unit_Miner reservedMiner) && reservedMiner != null && reservedMiner != this) {
+            return false;
+        }
+
+        ReservedMiningCells[cell] = this;
+        _reservedMiningCell = cell;
+        _hasReservedMiningCell = true;
+        return true;
+    }
+
+    private void ReleaseMiningCellReservation()
+    {
+        if (!_hasReservedMiningCell) {
+            return;
+        }
+
+        if (ReservedMiningCells.TryGetValue(_reservedMiningCell, out Unit_Miner reservedMiner) && reservedMiner == this) {
+            ReservedMiningCells.Remove(_reservedMiningCell);
+        }
+
+        _reservedMiningCell = default;
+        _hasReservedMiningCell = false;
+    }
+
+    private bool IsMiningCellReservedByOther(Vector3Int cell)
+    {
+        if (!ReservedMiningCells.TryGetValue(cell, out Unit_Miner reservedMiner)) {
+            return false;
+        }
+
+        return reservedMiner != null && reservedMiner != this;
     }
 
     private struct MiningTarget

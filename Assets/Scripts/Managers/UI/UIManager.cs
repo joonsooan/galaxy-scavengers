@@ -22,6 +22,7 @@ public class UIManager : MonoBehaviour
 
     [Header("Pause Panel")]
     [SerializeField] private GameObject pausePanel;
+    [SerializeField] private InventorySystem inventorySystem;
 
     [Header("Storage Info Panel")]
     [SerializeField] private GameObject storageInfoPanel;
@@ -46,6 +47,7 @@ public class UIManager : MonoBehaviour
     private ProcessorData _pinnedProcessorData;
     private Action<ResourceType, int, int> _storageResourceChangedHandler;
     private IStorage _trackedStorage;
+    private bool _pausePanelLock;
 
     public Canvas GetObjectUICanvas()
     {
@@ -68,6 +70,10 @@ public class UIManager : MonoBehaviour
         if (storageInfoPanel != null) storageInfoPanel.SetActive(false);
 
         _areaBuildingDestroyer = FindFirstObjectByType<AreaBuildingDestroyer>();
+        if (inventorySystem == null)
+        {
+            inventorySystem = GetComponent<InventorySystem>();
+        }
     }
 
     private void Update()
@@ -159,10 +165,7 @@ public class UIManager : MonoBehaviour
 
     private void HideMainStructureInventory()
     {
-        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
-        if (mainStructure == null) return;
-
-        InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
+        InventorySystem inventorySystem = GetInventorySystem();
         if (inventorySystem == null) return;
 
         GameObject inventoryPanel = inventorySystem.GetInventoryPanel();
@@ -183,10 +186,7 @@ public class UIManager : MonoBehaviour
 
         HideCurrentIClickableUI();
 
-        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
-        if (mainStructure == null) return;
-
-        InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
+        InventorySystem inventorySystem = GetInventorySystem();
         if (inventorySystem == null) return;
 
         GameObject inventoryPanel = inventorySystem.GetInventoryPanel();
@@ -393,9 +393,40 @@ public class UIManager : MonoBehaviour
 
     public void SetPausePanelActive(bool active)
     {
+        if (_pausePanelLock && !active)
+        {
+            return;
+        }
+
         if (pausePanel != null) {
             pausePanel.SetActive(active);
         }
+    }
+
+    public void SetPausePanelLock(bool locked)
+    {
+        _pausePanelLock = locked;
+        if (_pausePanelLock && pausePanel != null)
+        {
+            pausePanel.SetActive(true);
+        }
+    }
+
+    public InventorySystem GetInventorySystem()
+    {
+        if (inventorySystem != null)
+        {
+            return inventorySystem;
+        }
+
+        inventorySystem = GetComponent<InventorySystem>();
+        if (inventorySystem != null)
+        {
+            return inventorySystem;
+        }
+
+        inventorySystem = FindFirstObjectByType<InventorySystem>(FindObjectsInactive.Include);
+        return inventorySystem;
     }
 
     public void DisplayStorageInfo(IStorage storage)

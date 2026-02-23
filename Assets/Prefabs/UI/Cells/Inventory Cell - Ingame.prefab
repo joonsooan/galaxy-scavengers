@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 829497281735151168}
   - component: {fileID: 4405612620870698826}
   - component: {fileID: 2944262688703406021}
+  - component: {fileID: 8722137733151726402}
   m_Layer: 5
   m_Name: Inventory Cell - Ingame
   m_TagString: Untagged
@@ -137,6 +138,33 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   iconImage: {fileID: 3580741479228333915}
   amountText: {fileID: 393204787057471041}
+--- !u!114 &8722137733151726402
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3842191235755297668}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f773253efb55a164ba538a657419fd8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverSound:
+    Guid:
+      Data1: 199913248
+      Data2: 1202326804
+      Data3: -537020530
+      Data4: 1684792045
+    Path: event:/SFX_UI/SFX_UIHover
+  clickSound:
+    Guid:
+      Data1: -345895807
+      Data2: 1210214295
+      Data3: -73339495
+      Data4: 1624008095
+    Path: event:/SFX_UI/SFX_UIClick
+  clickType: Default
 --- !u!1 &5156968405867722590
 GameObject:
   m_ObjectHideFlags: 0

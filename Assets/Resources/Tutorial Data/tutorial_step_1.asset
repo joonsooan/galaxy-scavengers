@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: tutorial_step_1
   m_EditorClassIdentifier: 
   stepIndex: 1
-  text: "Galaxy Scavengers\uC758 \uC138\uACC4\uC5D0 \uC624\uC2E0 \uAC83\uC744 \uD658\uC601\uD569\uB2C8\uB2E4!\n\uD654\uBA74\uC744
+  text: "Galaxy Scavengers\uC758 \uC138\uACC4\uC5D0 \uC624\uC2E0 \uAC83\uC744 \uD658\uC601\uD569\uB2C8\uB2E4.\n\uD654\uBA74\uC744
     \uD074\uB9AD\uD574\uBCF4\uC138\uC694!"
   stepType: 0
   duration: 0
@@ -24,6 +24,7 @@ MonoBehaviour:
   itemType: 
   showProgressBar: 0
   enableUIPanels: 0000000004000000
+  tutorialPanelMoveDownOffset: 0
   spawnUnits: []
   grantResources: []
   completionSound:

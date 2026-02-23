@@ -11,6 +11,7 @@ public class BuildingHoverManager : MonoBehaviour
     private IStorage _currentHoveredStorage;
     private ResourceNode _currentHoveredResource;
     private UnitBase _currentHoveredUnit;
+    private UnitInfoPanel _unitInfoPanel;
     private bool _keepPanelVisible = false;
     private bool _panelsJustClosed = false;
     private float _panelsClosedTime = 0f;
@@ -32,6 +33,7 @@ public class BuildingHoverManager : MonoBehaviour
     private void Start()
     {
         _mainCamera = Camera.main;
+        _unitInfoPanel = UnitInfoPanel.Instance;
         CreateMouseHoverDetector();
     }
 
@@ -225,10 +227,11 @@ public class BuildingHoverManager : MonoBehaviour
         }
         if (_currentHoveredUnit != null)
         {
-            if (UnitInfoPanel.Instance != null)
+            UnitInfoPanel unitInfoPanel = GetUnitInfoPanel();
+            if (unitInfoPanel != null)
             {
-                UnitInfoPanel.Instance.CancelPreview();
-                UnitInfoPanel.Instance.gameObject.SetActive(false);
+                unitInfoPanel.CancelPreview();
+                unitInfoPanel.gameObject.SetActive(false);
             }
             _currentHoveredUnit = null;
         }
@@ -422,7 +425,8 @@ public class BuildingHoverManager : MonoBehaviour
 
     private void ShowUnitInfo(UnitBase unit)
     {
-        if (UnitInfoPanel.Instance == null)
+        UnitInfoPanel unitInfoPanel = GetUnitInfoPanel();
+        if (unitInfoPanel == null)
         {
             return;
         }
@@ -438,25 +442,39 @@ public class BuildingHoverManager : MonoBehaviour
         {
             return;
         }
-        if (IsProcessorOrDroneHubPanelActive() || _panelsJustClosed)
+        if (_panelsJustClosed)
         {
             return;
         }
-        UnitInfoPanel.Instance.gameObject.SetActive(true);
-        UnitInfoPanel.Instance.PreviewInfo(unit);
+        if (GameManager.Instance != null && GameManager.Instance.uiManager != null && GameManager.Instance.uiManager.IsProcessorPanelActive())
+        {
+            return;
+        }
+        unitInfoPanel.gameObject.SetActive(true);
+        unitInfoPanel.PreviewInfo(unit);
     }
 
     private void ClearUnitHover()
     {
         if (_currentHoveredUnit != null)
         {
-            if (UnitInfoPanel.Instance != null)
+            UnitInfoPanel unitInfoPanel = GetUnitInfoPanel();
+            if (unitInfoPanel != null)
             {
-                UnitInfoPanel.Instance.CancelPreview();
-                UnitInfoPanel.Instance.gameObject.SetActive(false);
+                unitInfoPanel.CancelPreview();
+                unitInfoPanel.gameObject.SetActive(false);
             }
             _currentHoveredUnit = null;
         }
+    }
+
+    private UnitInfoPanel GetUnitInfoPanel()
+    {
+        if (_unitInfoPanel == null)
+            _unitInfoPanel = UnitInfoPanel.Instance;
+        if (_unitInfoPanel == null)
+            _unitInfoPanel = FindFirstObjectByType<UnitInfoPanel>();
+        return _unitInfoPanel;
     }
 
     public void ClearHoverOnClick()

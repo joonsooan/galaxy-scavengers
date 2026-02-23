@@ -5238,8 +5238,9 @@ MonoBehaviour:
   gameOverImage: {fileID: 2274156340482688565}
   gameOverParticles: {fileID: 2518815341981756597}
   continueButton: {fileID: 5251780253177049048}
-  gameOverTextString: "\uAC8C\uC784 \uC624\uBC84"
+  gameOverTextString: "\uAC8C\uC784 \uC624\uBC84..."
   backgroundColor: {r: 0, g: 0, b: 0, a: 1}
+  fadeInStartDelay: 1
   fadeInDuration: 1
   fadeOutDuration: 1
   particleStartDelay: 0
@@ -5318,6 +5319,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6940393628182051328}
     m_Modifications:
+    - target: {fileID: 3104050489292751736, guid: 3d476f46c636e7541b4cc4767340c364, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -2050269315440685635, guid: 84180e42ab5b5fe44a97a14bdb3666d9, type: 3}
     - target: {fileID: 3410462841285133477, guid: 3d476f46c636e7541b4cc4767340c364, type: 3}
       propertyPath: m_text
       value: "\uACC4\uC18D"
@@ -5406,6 +5411,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: Continue Btn
       objectReference: {fileID: 0}
+    - target: {fileID: 7817928405752371267, guid: 3d476f46c636e7541b4cc4767340c364, type: 3}
+      propertyPath: m_SpriteState.m_PressedSprite
+      value: 
+      objectReference: {fileID: 3108826956411037258, guid: c1d21adf50b6eb44a8adea1ab30473de, type: 3}
+    - target: {fileID: 7817928405752371267, guid: 3d476f46c636e7541b4cc4767340c364, type: 3}
+      propertyPath: m_SpriteState.m_DisabledSprite
+      value: 
+      objectReference: {fileID: -2050269315440685635, guid: 84180e42ab5b5fe44a97a14bdb3666d9, type: 3}
+    - target: {fileID: 7817928405752371267, guid: 3d476f46c636e7541b4cc4767340c364, type: 3}
+      propertyPath: m_SpriteState.m_HighlightedSprite
+      value: 
+      objectReference: {fileID: -2050269315440685635, guid: 84180e42ab5b5fe44a97a14bdb3666d9, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

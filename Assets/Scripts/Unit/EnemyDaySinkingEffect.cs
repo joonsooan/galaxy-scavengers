@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyDaySinkingEffect : MonoBehaviour
@@ -9,11 +8,6 @@ public class EnemyDaySinkingEffect : MonoBehaviour
     [SerializeField] private Renderer targetRenderer;
     [SerializeField] private Transform spriteRoot;
     [SerializeField] private ParticleSystem sinkParticle;
-
-    [Header("Clip")]
-    [SerializeField] private float clipStart = -1f;
-    [SerializeField] private float clipEnd = 1f;
-    [SerializeField] private float idleClipHeight = -1f;
 
     [Header("Sinking")]
     [SerializeField] private float sinkDuration = 0.6f;
@@ -32,16 +26,15 @@ public class EnemyDaySinkingEffect : MonoBehaviour
     [SerializeField] private bool waitForParticleFadeOut = true;
     [SerializeField] private float particleFadeOutMaxWait = 0.35f;
 
-    private static readonly int ClipHeightId = Shader.PropertyToID("_ClipHeight");
-
-    private MaterialPropertyBlock _propertyBlock;
-    private readonly List<Renderer> _clipRenderers = new List<Renderer>();
     private Coroutine _sinkingCoroutine;
     private Coroutine _risingCoroutine;
     private Action _onComplete;
     private UnitMovement _unitMovement;
     private Rigidbody2D _rigidbody2D;
     private EnemyUnitBase _enemyUnitBase;
+    private SpriteRenderer[] _spriteRenderers;
+    private Color[] _spriteColorsBeforeHide;
+    private bool _isSpriteAlphaHidden;
     private Vector3 _startLocalPosition;
 
     public bool IsSinking { get; private set; }
@@ -49,29 +42,37 @@ public class EnemyDaySinkingEffect : MonoBehaviour
 
     private void Awake()
     {
-        _propertyBlock = new MaterialPropertyBlock();
         _unitMovement = GetComponent<UnitMovement>();
         _rigidbody2D = GetComponent<Rigidbody2D>();
         _enemyUnitBase = GetComponent<EnemyUnitBase>();
-        RefreshClipRenderers();
+        _spriteRenderers = GetComponentsInChildren<SpriteRenderer>(true);
+        _spriteColorsBeforeHide = new Color[_spriteRenderers.Length];
+
+        if (spriteRoot == null && targetRenderer != null)
+        {
+            spriteRoot = targetRenderer.transform;
+        }
 
         if (spriteRoot != null)
         {
             _startLocalPosition = spriteRoot.localPosition;
         }
-        else if (targetRenderer != null)
-        {
-            _startLocalPosition = targetRenderer.transform.localPosition;
-        }
     }
 
     private void OnEnable()
     {
-        RefreshClipRenderers();
+        StopAllRunningRoutines();
+        StopParticleImmediate();
+        RestoreSpriteAlpha();
+
+        if (spriteRoot != null)
+        {
+            spriteRoot.localPosition = _startLocalPosition;
+        }
 
         if (playRiseOnEnable)
         {
-            PreSetupRisingState(); 
+            PreSetupRisingState();
             _risingCoroutine = StartCoroutine(RisingRoutine());
         }
         else
@@ -98,7 +99,6 @@ public class EnemyDaySinkingEffect : MonoBehaviour
         {
             spriteRoot.localPosition = new Vector3(_startLocalPosition.x, _startLocalPosition.y - riseDistance, _startLocalPosition.z);
         }
-        SetClipHeight(clipEnd);
     }
 
     public void StartSinking(Action onComplete = null)
@@ -123,7 +123,11 @@ public class EnemyDaySinkingEffect : MonoBehaviour
             _rigidbody2D.linearVelocity = Vector2.zero;
         }
 
-        SetClipHeight(clipStart);
+        if (spriteRoot != null)
+        {
+            spriteRoot.localPosition = _startLocalPosition;
+        }
+
         _onComplete = onComplete;
         _sinkingCoroutine = StartCoroutine(SinkingRoutine());
     }
@@ -139,6 +143,7 @@ public class EnemyDaySinkingEffect : MonoBehaviour
 
         PlayParticle();
         yield return AnimateSinking();
+        HideSpriteAlphaForParticleOnly();
         yield return StopParticleWithFadeOut();
 
         IsSinking = false;
@@ -162,18 +167,19 @@ public class EnemyDaySinkingEffect : MonoBehaviour
         _enemyUnitBase?.SetBehaviorPaused(true);
         _unitMovement?.ForceStopAllMovement();
 
-        if (_rigidbody2D != null) _rigidbody2D.linearVelocity = Vector2.zero;
+        if (_rigidbody2D != null)
+        {
+            _rigidbody2D.linearVelocity = Vector2.zero;
+        }
+
         if (spriteRoot != null)
         {
             spriteRoot.localPosition = new Vector3(_startLocalPosition.x, _startLocalPosition.y - riseDistance, _startLocalPosition.z);
         }
 
         PlayParticle();
-        SetClipHeight(clipEnd);
-        
         yield return AnimateRising();
 
-        SetClipHeight(idleClipHeight);
         if (spriteRoot != null)
         {
             spriteRoot.localPosition = _startLocalPosition;
@@ -210,7 +216,7 @@ public class EnemyDaySinkingEffect : MonoBehaviour
     {
         if (riseDuration <= 0f)
         {
-            ApplyRisingFrame(1f);
+            ApplyRisingFrame(1f, 0f);
             yield break;
         }
 
@@ -219,15 +225,17 @@ public class EnemyDaySinkingEffect : MonoBehaviour
         {
             elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / riseDuration);
-            ApplyRisingFrame(t);
+            ApplyRisingFrame(t, elapsed);
             yield return null;
         }
     }
 
     private void ApplySinkingFrame(float t, float elapsed)
     {
-        SetClipHeight(Mathf.Lerp(clipStart, clipEnd, t));
-        if (spriteRoot == null) return;
+        if (spriteRoot == null)
+        {
+            return;
+        }
 
         float shakeOffsetX = Mathf.Sin(elapsed * shakeFrequency) * shakeAmplitude * (1f - t);
         Vector3 pos = _startLocalPosition;
@@ -236,45 +244,88 @@ public class EnemyDaySinkingEffect : MonoBehaviour
         spriteRoot.localPosition = pos;
     }
 
-    private void ApplyRisingFrame(float t)
+    private void ApplyRisingFrame(float t, float elapsed)
     {
-        SetClipHeight(Mathf.Lerp(clipEnd, clipStart, t));
-        if (spriteRoot == null) return;
+        if (spriteRoot == null)
+        {
+            return;
+        }
 
+        float shakeOffsetX = Mathf.Sin(elapsed * shakeFrequency) * shakeAmplitude * (1f - t);
         Vector3 pos = _startLocalPosition;
+        pos.x += shakeOffsetX;
         pos.y -= riseDistance * (1f - t);
         spriteRoot.localPosition = pos;
     }
 
     private void ResetVisualState()
     {
-        SetClipHeight(idleClipHeight);
+        RestoreSpriteAlpha();
+
         if (spriteRoot != null)
         {
             spriteRoot.localPosition = _startLocalPosition;
         }
 
-        if (sinkParticle != null)
+        StopParticleImmediate();
+    }
+
+    private void EnsureSpriteRendererCache()
+    {
+        if (_spriteRenderers == null || _spriteRenderers.Length == 0)
         {
-            sinkParticle.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            _spriteRenderers = GetComponentsInChildren<SpriteRenderer>(true);
+        }
+
+        if (_spriteColorsBeforeHide == null || _spriteColorsBeforeHide.Length != _spriteRenderers.Length)
+        {
+            _spriteColorsBeforeHide = new Color[_spriteRenderers.Length];
         }
     }
 
-    private void SetClipHeight(float value)
+    private void HideSpriteAlphaForParticleOnly()
     {
-        if (_propertyBlock == null) _propertyBlock = new MaterialPropertyBlock();
-
-        if (_clipRenderers.Count == 0) RefreshClipRenderers();
-
-        for (int i = 0; i < _clipRenderers.Count; i++)
+        if (_isSpriteAlphaHidden)
         {
-            Renderer r = _clipRenderers[i];
-            if (r == null) continue;
-
-            r.GetPropertyBlock(_propertyBlock);
-            _propertyBlock.SetFloat(ClipHeightId, value);
-            r.SetPropertyBlock(_propertyBlock);
+            return;
         }
+
+        EnsureSpriteRendererCache();
+
+        for (int i = 0; i < _spriteRenderers.Length; i++)
+        {
+            SpriteRenderer sr = _spriteRenderers[i];
+            if (sr != null)
+            {
+                _spriteColorsBeforeHide[i] = sr.color;
+                Color c = sr.color;
+                c.a = 0f;
+                sr.color = c;
+            }
+        }
+
+        _isSpriteAlphaHidden = true;
+    }
+
+    private void RestoreSpriteAlpha()
+    {
+        if (!_isSpriteAlphaHidden)
+        {
+            return;
+        }
+
+        EnsureSpriteRendererCache();
+
+        for (int i = 0; i < _spriteRenderers.Length; i++)
+        {
+            SpriteRenderer sr = _spriteRenderers[i];
+            if (sr != null)
+            {
+                sr.color = _spriteColorsBeforeHide[i];
+            }
+        }
+
+        _isSpriteAlphaHidden = false;
     }
 
     private IEnumerator StopParticleWithFadeOut()
@@ -306,6 +357,16 @@ public class EnemyDaySinkingEffect : MonoBehaviour
         }
     }
 
+    private void StopParticleImmediate()
+    {
+        if (sinkParticle == null)
+        {
+            return;
+        }
+
+        sinkParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+    }
+
     private void StopAllRunningRoutines()
     {
         if (_sinkingCoroutine != null)
@@ -323,50 +384,5 @@ public class EnemyDaySinkingEffect : MonoBehaviour
         IsSinking = false;
         IsRising = false;
         _onComplete = null;
-    }
-
-    private void RefreshClipRenderers()
-    {
-        _clipRenderers.Clear();
-
-        if (HasClipHeightProperty(targetRenderer))
-        {
-            _clipRenderers.Add(targetRenderer);
-        }
-
-        SpriteRenderer[] sprites = GetComponentsInChildren<SpriteRenderer>(true);
-        for (int i = 0; i < sprites.Length; i++)
-        {
-            SpriteRenderer sprite = sprites[i];
-            if (HasClipHeightProperty(sprite) && !_clipRenderers.Contains(sprite))
-            {
-                _clipRenderers.Add(sprite);
-            }
-        }
-
-        if (_clipRenderers.Count == 0)
-        {
-            Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
-            for (int i = 0; i < renderers.Length; i++)
-            {
-                Renderer renderer = renderers[i];
-                if (HasClipHeightProperty(renderer) && !_clipRenderers.Contains(renderer))
-                {
-                    _clipRenderers.Add(renderer);
-                }
-            }
-        }
-
-        if (spriteRoot == null && _clipRenderers.Count > 0)
-        {
-            spriteRoot = _clipRenderers[0].transform;
-        }
-
-        targetRenderer = _clipRenderers.Count > 0 ? _clipRenderers[0] : null;
-    }
-
-    private bool HasClipHeightProperty(Renderer renderer)
-    {
-        return renderer != null && renderer.sharedMaterial != null && renderer.sharedMaterial.HasProperty(ClipHeightId);
     }
 }

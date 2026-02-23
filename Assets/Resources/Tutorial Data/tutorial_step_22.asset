@@ -17,8 +17,9 @@ MonoBehaviour:
     \uC774\uC81C \uAC70\uC758 \uB2E4 \uC654\uC2B5\uB2C8\uB2E4.\n\uAC00\uACF5\uD55C
     \uC790\uC6D0\uC740 \uBB34\uC0AC\uD788 \uB4E4\uACE0 \uD0C8\uCD9C\uD574\uC57C\uC9C0
     \uC4F8\uBAA8\uAC00 \uC788\uC5B4\uC9D1\uB2C8\uB2E4.\n\uD589\uC131\uC744 \uD0C8\uCD9C\uD558\uAE30
-    \uC704\uD574\uC11C \uCF54\uC5B4\uB97C \uC218\uB9AC\uD574\uC57C \uD569\uB2C8\uB2E4.\n<color=#DBD1C7>(\uD654\uBA74\uC744
-    \uD074\uB9AD\uD574\uC11C \uB2E4\uC74C)</color>"
+    \uC704\uD574\uC11C <color=#FFC107>\uC2DC\uB4DC \uCF54\uC5B4\uB97C \uC218\uB9AC</color>\uD574\uC57C
+    \uD569\uB2C8\uB2E4.\n<color=#DBD1C7>(\uD654\uBA74\uC744 \uD074\uB9AD\uD574\uC11C
+    \uB2E4\uC74C)</color>"
   stepType: 0
   duration: 0
   count: 1
@@ -28,6 +29,7 @@ MonoBehaviour:
   itemType: 
   showProgressBar: 0
   enableUIPanels: 0a000000
+  tutorialPanelMoveDownOffset: 0
   spawnUnits: []
   grantResources: []
   completionSound:
@@ -41,3 +43,6 @@ MonoBehaviour:
   highlightTargetIDs: []
   showArrowUI: 1
   arrowID: launch_btn
+  showTargetBracket: 0
+  targetBracketBuildingType: 
+  includeConstructionSiteForTargetBracket: 1

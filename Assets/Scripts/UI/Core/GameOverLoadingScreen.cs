@@ -19,6 +19,7 @@ public class GameOverLoadingScreen : MonoBehaviour
     [SerializeField] private Color backgroundColor = new (0f, 0f, 0f, 0.95f);
 
     [Header("Timing")]
+    [SerializeField] private float fadeInStartDelay = 0f;
     [SerializeField] private float fadeInDuration = 1.0f;
     [SerializeField] private float fadeOutDuration = 1.0f;
     [SerializeField] private float particleStartDelay = 0.5f;
@@ -30,12 +31,16 @@ public class GameOverLoadingScreen : MonoBehaviour
     [SerializeField] private float loadingBgmFadeOutTime = 1.0f;
     
     private Coroutine _particleStartCoroutine;
+    private WaitForSecondsRealtime _fadeInStartDelayWait;
     private WaitForSecondsRealtime _particleStartDelayWait;
+    private CanvasGroup _continueButtonCanvasGroup;
     private bool _isExiting;
+    public bool IsEntryAnimationComplete { get; private set; }
     
     private void Awake()
     {
         InitializeUI();
+        _fadeInStartDelayWait = CoroutineCache.GetWaitForSecondsRealtime(fadeInStartDelay);
         _particleStartDelayWait = CoroutineCache.GetWaitForSecondsRealtime(particleStartDelay);
         
         if (continueButton != null)
@@ -47,6 +52,7 @@ public class GameOverLoadingScreen : MonoBehaviour
     private void OnEnable()
     {
         _isExiting = false;
+        IsEntryAnimationComplete = false;
         StartCoroutine(StartAnimation());
     }
 
@@ -85,11 +91,27 @@ public class GameOverLoadingScreen : MonoBehaviour
             main.useUnscaledTime = true;
             gameOverParticles.Stop();
         }
+        if (continueButton != null)
+        {
+            _continueButtonCanvasGroup = continueButton.GetComponent<CanvasGroup>();
+            if (_continueButtonCanvasGroup == null)
+            {
+                _continueButtonCanvasGroup = continueButton.gameObject.AddComponent<CanvasGroup>();
+            }
+            _continueButtonCanvasGroup.alpha = 0f;
+            _continueButtonCanvasGroup.interactable = false;
+            continueButton.interactable = false;
+        }
     }
 
     private IEnumerator StartAnimation()
     {
         Time.timeScale = 0f;
+
+        if (fadeInStartDelay > 0f)
+        {
+            yield return _fadeInStartDelayWait;
+        }
 
         if (!gameOverEnterSound.IsNull)
         {
@@ -118,6 +140,10 @@ public class GameOverLoadingScreen : MonoBehaviour
                 imageGroup.DOFade(1f, fadeInDuration).SetUpdate(true);
             }
         }
+        if (_continueButtonCanvasGroup != null)
+        {
+            _continueButtonCanvasGroup.DOFade(1f, fadeInDuration).SetUpdate(true);
+        }
 
         if (gameOverParticles != null)
         {
@@ -131,6 +157,11 @@ public class GameOverLoadingScreen : MonoBehaviour
         {
             continueButton.interactable = true;
         }
+        if (_continueButtonCanvasGroup != null)
+        {
+            _continueButtonCanvasGroup.interactable = true;
+        }
+        IsEntryAnimationComplete = true;
     }
 
     private IEnumerator StartParticlesDelayed()
@@ -167,6 +198,10 @@ public class GameOverLoadingScreen : MonoBehaviour
         {
             continueButton.interactable = false;
         }
+        if (_continueButtonCanvasGroup != null)
+        {
+            _continueButtonCanvasGroup.interactable = false;
+        }
         
         StartCoroutine(ExitSequence());
     }
@@ -191,10 +226,14 @@ public class GameOverLoadingScreen : MonoBehaviour
                 imageGroup.DOFade(0f, fadeOutDuration).SetUpdate(true);
             }
         }
+        if (_continueButtonCanvasGroup != null)
+        {
+            _continueButtonCanvasGroup.DOFade(0f, fadeOutDuration).SetUpdate(true);
+        }
 
         if (backgroundImage != null)
         {
-            yield return backgroundImage.DOFade(0f, fadeOutDuration).SetUpdate(true).WaitForCompletion();
+            yield return backgroundImage.DOFade(1f, fadeOutDuration).SetUpdate(true).WaitForCompletion();
         }
 
         Time.timeScale = 1f;

@@ -101,6 +101,11 @@ public class LoadingUIManager : MonoBehaviour
         return null;
     }
 
+    public bool IsAnyLoadingScreenActive()
+    {
+        return _currentLoadingScreen != null && _currentLoadingScreen.activeInHierarchy;
+    }
+
     private void Awake()
     {
         if (Instance == null)

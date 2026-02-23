@@ -49,6 +49,17 @@ public class DayNightCycleManager : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            Instance = null;
+        }
+
+        OnNightStarted = null;
+        OnDayStarted = null;
+    }
+
     private void Start()
     {
         autoAdvanceTime = false;

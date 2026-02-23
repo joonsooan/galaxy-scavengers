@@ -100,8 +100,12 @@ public class ResourceManager : MonoBehaviour
 
     private void Update()
     {
+        if (IsLoadingScreenActive()) {
+            return;
+        }
+
 #if UNITY_EDITOR
-        if (Input.GetKeyDown(KeyCode.C)) {
+        if (Input.GetKeyDown(KeyCode.F1)) {
             AddCheatResources();
         }
 #endif
@@ -128,6 +132,20 @@ public class ResourceManager : MonoBehaviour
         ResourceDataManager.OnResourceAmountChanged -= ForwardOnResourceAmountChanged;
         ResourceDataManager.OnResourceNodeAdded -= ForwardOnResourceNodeAdded;
         ResourceDataManager.OnResourceNodeRemoved -= ForwardOnResourceNodeRemoved;
+    }
+
+    private bool IsLoadingScreenActive()
+    {
+        if (LoadingUIManager.Instance == null) {
+            return false;
+        }
+
+        LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
+        if (loadingScreen == null) {
+            return false;
+        }
+
+        return loadingScreen.gameObject.activeSelf;
     }
 
     // Forward events from ResourceDataManager for backward compatibility
@@ -220,6 +238,51 @@ public class ResourceManager : MonoBehaviour
     public void AddResource(ResourceType type, int amount)
     {
         ResourceDataManager.Instance?.AddResource(type, amount);
+    }
+
+    public int AddGeneratedResource(ResourceType type, int amount, Vector3 sourcePosition)
+    {
+        if (amount <= 0) return 0;
+        if (ResourceDataManager.Instance == null) return 0;
+
+        if (type != ResourceType.Aether)
+        {
+            AddResource(type, amount);
+            return amount;
+        }
+
+        int remaining = amount;
+        List<IStorage> storages = GetAllStorages();
+        if (storages == null || storages.Count == 0)
+        {
+            return 0;
+        }
+
+        List<IStorage> batteryPriority = new List<IStorage>();
+        List<IStorage> storageAndMainPriority = new List<IStorage>();
+
+        for (int i = 0; i < storages.Count; i++)
+        {
+            IStorage storage = storages[i];
+            if (storage == null) continue;
+
+            Component component = storage as Component;
+            if (component == null || component.gameObject == null || !component.gameObject.activeInHierarchy) continue;
+
+            if (storage is Battery)
+            {
+                batteryPriority.Add(storage);
+            }
+            else if (storage is Storage || storage is MainStructure)
+            {
+                storageAndMainPriority.Add(storage);
+            }
+        }
+
+        StoreResourceInPriority(type, sourcePosition, batteryPriority, ref remaining);
+        StoreResourceInPriority(type, sourcePosition, storageAndMainPriority, ref remaining);
+
+        return amount - remaining;
     }
 
     public bool RemoveResource(ResourceType type, int amount)
@@ -328,5 +391,43 @@ public class ResourceManager : MonoBehaviour
     public IStorage FindClosestStorageWithResource(Vector3 position, ResourceType type, int minAmount)
     {
         return ResourceDataManager.Instance?.FindClosestStorageWithResource(position, type, minAmount);
+    }
+
+    private static void StoreResourceInPriority(ResourceType type, Vector3 sourcePosition, List<IStorage> targets, ref int remaining)
+    {
+        if (targets == null || targets.Count == 0 || remaining <= 0) return;
+
+        while (remaining > 0 && targets.Count > 0)
+        {
+            int nearestIndex = -1;
+            float nearestDistance = float.MaxValue;
+            for (int i = 0; i < targets.Count; i++)
+            {
+                IStorage storage = targets[i];
+                if (storage == null) continue;
+                float distance = Vector3.Distance(sourcePosition, storage.GetPosition());
+                if (distance < nearestDistance)
+                {
+                    nearestDistance = distance;
+                    nearestIndex = i;
+                }
+            }
+
+            if (nearestIndex < 0) break;
+
+            IStorage selected = targets[nearestIndex];
+            targets.RemoveAt(nearestIndex);
+            if (selected == null) continue;
+
+            int before = selected.GetCurrentResourceAmount(type);
+            bool added = selected.TryAddResource(type, remaining);
+            if (!added) continue;
+
+            int after = selected.GetCurrentResourceAmount(type);
+            int consumed = Mathf.Max(0, after - before);
+            if (consumed <= 0) continue;
+
+            remaining -= consumed;
+        }
     }
 }

@@ -21,6 +21,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private EventReference speed2Sound;
     [SerializeField] private EventReference speed3Sound;
 
+
     [HideInInspector] public UnityEvent<DisplayableData> onStartDrag;
     [HideInInspector] public UnityEvent onEndDrag;
 
@@ -38,6 +39,7 @@ public class GameManager : MonoBehaviour
     public bool IsGameSceneInitialized { get; private set; }
 
     public static bool IsGameplayReady { get; set; } = true;
+    private bool _isGameOverProcessing;
 
     private void Awake()
     {
@@ -112,29 +114,34 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.Q)) {
+        LaunchUIController launchUIController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
+        bool isPauseInputLocked = launchUIController != null && launchUIController.IsPauseInputLocked();
+        bool isLaunchMenuInputBlocked = launchUIController != null && launchUIController.IsMenuInputBlocked();
+        bool isCountdownSequenceActive = launchUIController != null && launchUIController.IsCountdownSequenceActive();
+
+        if (!isLaunchMenuInputBlocked && Input.GetKeyDown(KeyCode.Q)) {
             GameSceneQuestUIManager questUI = FindFirstObjectByType<GameSceneQuestUIManager>();
-            if (questUI != null) questUI.ToggleQuestPanel();
+            if (questUI != null) questUI.ToggleQuestPanelWithShortcut();
         }
 
-        if (Input.GetKeyDown(KeyCode.Space)) {
+        if (!isPauseInputLocked && !isCountdownSequenceActive && Input.GetKeyDown(KeyCode.Space)) {
             TogglePause();
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha1)) {
+        if (!isLaunchMenuInputBlocked && Input.GetKeyDown(KeyCode.Alpha1)) {
             SetGameSpeed(1f);
         }
-        else if (Input.GetKeyDown(KeyCode.Alpha2)) {
+        else if (!isLaunchMenuInputBlocked && Input.GetKeyDown(KeyCode.Alpha2)) {
             SetGameSpeed(2f);
         }
-        else if (Input.GetKeyDown(KeyCode.Alpha3)) {
+        else if (!isLaunchMenuInputBlocked && Input.GetKeyDown(KeyCode.Alpha3)) {
             SetGameSpeed(3f);
         }
 
         if (IsPaused) return;
 
 #if UNITY_EDITOR
-        if (Input.GetKeyDown(KeyCode.F)) {
+        if (Input.GetKeyDown(KeyCode.F2)) {
             if (FogOfWarManager.Instance != null) {
                 FogOfWarManager.Instance.ToggleFogVisibility();
             }
@@ -217,11 +224,78 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void GameOver()
+    public void GameOver(Transform gameOverFocusTarget = null)
     {
-        Time.timeScale = 1;
-        if (SceneLoader.Instance != null) {
+        if (_isGameOverProcessing) return;
+        _isGameOverProcessing = true;
+        FocusCameraOnGameOverTarget(gameOverFocusTarget);
+        IsGameplayReady = false;
+        HideAllGameplayUiForGameOver();
+
+        if (SceneLoader.Instance != null)
+        {
             SceneLoader.Instance.LoadBaseScene(SceneLoader.ReturnFromGameState.Failure);
+        }
+    }
+
+    public void OnGameOverScreenFullyShown()
+    {
+        Time.timeScale = 1f;
+    }
+
+    private void FocusCameraOnGameOverTarget(Transform explicitTarget)
+    {
+        CameraTargetController cameraTargetController = FindFirstObjectByType<CameraTargetController>(FindObjectsInactive.Include);
+        if (cameraTargetController == null) return;
+
+        Transform target = explicitTarget;
+        if (target == null)
+        {
+            MainStructure mainStructure = FindFirstObjectByType<MainStructure>(FindObjectsInactive.Include);
+            if (mainStructure != null)
+            {
+                target = mainStructure.transform;
+            }
+        }
+
+        if (target != null)
+        {
+            cameraTargetController.SetFollowTarget(target);
+        }
+    }
+
+    private void HideAllGameplayUiForGameOver()
+    {
+        if (uiManager != null)
+        {
+            uiManager.UnpinAndHideAllPanels();
+            uiManager.SetPausePanelLock(false);
+            uiManager.SetPausePanelActive(false);
+        }
+
+        MainControlPanel mainControlPanel = FindFirstObjectByType<MainControlPanel>(FindObjectsInactive.Include);
+        if (mainControlPanel != null)
+        {
+            mainControlPanel.HideAllPanels();
+        }
+
+        GameSceneQuestUIManager questUi = FindFirstObjectByType<GameSceneQuestUIManager>(FindObjectsInactive.Include);
+        if (questUi != null)
+        {
+            questUi.HideQuestPanel();
+        }
+
+        Scene activeScene = SceneManager.GetActiveScene();
+        Canvas[] sceneCanvases = FindObjectsByType<Canvas>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (Canvas canvas in sceneCanvases)
+        {
+            if (canvas == null || canvas.gameObject == null) continue;
+            if (canvas.gameObject.scene != activeScene) continue;
+            if (canvas.gameObject.name == "Main Canvas")
+            {
+                canvas.gameObject.SetActive(false);
+                break;
+            }
         }
     }
 
@@ -266,6 +340,7 @@ public class GameManager : MonoBehaviour
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         if (scene.name == "GameScene") {
+            _isGameOverProcessing = false;
             IsPaused = false;
             _savedTimeScale = 1f;
             Time.timeScale = 1f;
@@ -523,12 +598,7 @@ public class GameManager : MonoBehaviour
         if (LoadingUIManager.Instance == null) {
             return false;
         }
-
-        LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
-        if (loadingScreen == null) {
-            return false;
-        }
-
-        return loadingScreen.gameObject.activeSelf;
+        
+        return LoadingUIManager.Instance.IsAnyLoadingScreenActive();
     }
 }

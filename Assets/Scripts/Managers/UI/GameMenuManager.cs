@@ -43,6 +43,7 @@ public class GameMenuManager : MonoBehaviour
     private FMODVolumeController _volumeController;
     private Button _currentMenuOpenButton;
     private bool _isMenuOpen;
+    private MainControlPanel _mainControlPanel;
 
     public static GameMenuManager Instance { get; private set; }
 
@@ -80,6 +81,8 @@ public class GameMenuManager : MonoBehaviour
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         FindAndSetupMenuUI();
+        _mainControlPanel = null;
+        TryCacheMainControlPanel();
     }
 
     private void InitializeUIReferences()
@@ -269,11 +272,28 @@ public class GameMenuManager : MonoBehaviour
 
     private void Update()
     {
+        if (IsLoadingScreenActive())
+        {
+            return;
+        }
+
+        if (IsLaunchMenuInputBlocked())
+        {
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (HelpUIManager.Instance != null && HelpUIManager.Instance.IsHelpOpen())
             {
                 HelpUIManager.Instance.CloseHelp();
+                return;
+            }
+
+            MainControlPanel mainControlPanel = TryCacheMainControlPanel();
+            if (mainControlPanel != null && mainControlPanel.IsResourceStatPanelActive())
+            {
+                mainControlPanel.CloseResourceStatPanel();
                 return;
             }
 
@@ -291,6 +311,7 @@ public class GameMenuManager : MonoBehaviour
     public void OpenMenu()
     {
         if (_isMenuOpen) return;
+        if (IsLaunchMenuInputBlocked()) return;
 
         if (_currentMainPanel == null)
         {
@@ -431,6 +452,11 @@ public class GameMenuManager : MonoBehaviour
 
     private void PlayButtonSound()
     {
+        if (FMODUIButton.HasPlayedClickSoundThisFrame)
+        {
+            return;
+        }
+
         if (!buttonClickSound.IsNull)
         {
             RuntimeManager.PlayOneShot(buttonClickSound);
@@ -440,6 +466,32 @@ public class GameMenuManager : MonoBehaviour
     public bool IsMenuOpen()
     {
         return _isMenuOpen;
+    }
+
+    private MainControlPanel TryCacheMainControlPanel()
+    {
+        if (_mainControlPanel == null)
+        {
+            _mainControlPanel = FindFirstObjectByType<MainControlPanel>();
+        }
+
+        return _mainControlPanel;
+    }
+
+    private bool IsLoadingScreenActive()
+    {
+        if (LoadingUIManager.Instance == null)
+        {
+            return false;
+        }
+        
+        return LoadingUIManager.Instance.IsAnyLoadingScreenActive();
+    }
+
+    private bool IsLaunchMenuInputBlocked()
+    {
+        LaunchUIController launchUIController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
+        return launchUIController != null && launchUIController.IsMenuInputBlocked();
     }
 
     private void OnDestroy()

@@ -5,6 +5,7 @@ using FMODUnity;
 
 public class CardDragger : MonoBehaviour
 {
+    private const string DraggingSortingLayerName = "Dragging";
     public bool IsDragging => _isDragging;
 
     [Header("References")]
@@ -112,6 +113,7 @@ public class CardDragger : MonoBehaviour
         if (_activeBuildingData == null || _activeBuildingData.buildingPrefab == null) return;
         
         _ghostBuildingInstance = Instantiate(_activeBuildingData.buildingPrefab, Vector3.zero, Quaternion.identity);
+        SetGhostSortingLayer();
         _ghostBuildingRenderer = _ghostBuildingInstance.GetComponent<SpriteRenderer>();
 
         if (_ghostBuildingRenderer != null)
@@ -140,6 +142,40 @@ public class CardDragger : MonoBehaviour
                 {
                     FogOfWarManager.Instance.UnregisterVisionProvider(visionProvider);
                 }
+            }
+        }
+    }
+
+    private void SetGhostSortingLayer()
+    {
+        if (_ghostBuildingInstance == null)
+        {
+            return;
+        }
+
+        bool hasDraggingLayer = false;
+        SortingLayer[] sortingLayers = SortingLayer.layers;
+        for (int i = 0; i < sortingLayers.Length; i++)
+        {
+            if (sortingLayers[i].name == DraggingSortingLayerName)
+            {
+                hasDraggingLayer = true;
+                break;
+            }
+        }
+
+        if (!hasDraggingLayer)
+        {
+            return;
+        }
+
+        SpriteRenderer[] renderers = _ghostBuildingInstance.GetComponentsInChildren<SpriteRenderer>(true);
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            SpriteRenderer renderer = renderers[i];
+            if (renderer != null)
+            {
+                renderer.sortingLayerName = DraggingSortingLayerName;
             }
         }
     }

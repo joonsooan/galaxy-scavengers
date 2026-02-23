@@ -10,10 +10,15 @@ public class Unit_Enemy_1 : EnemyUnitBase
 
     protected override bool CanPerformAttack()
     {
-        return HasLineOfSightToTarget(_targetDamageable, _targetUnit);
+        return EvaluateLineOfSight(_targetDamageable, _targetUnit, true);
     }
 
     protected override bool HasLineOfSightToTarget(Damageable building, UnitBase unit)
+    {
+        return EvaluateLineOfSight(building, unit, true);
+    }
+
+    private bool EvaluateLineOfSight(Damageable building, UnitBase unit, bool allowRetarget)
     {
         Transform targetT = building != null ? building.transform : (unit != null ? unit.transform : null);
         if (targetT == null || BuildingManager.Instance?.grid == null) return false;
@@ -36,6 +41,53 @@ public class Unit_Enemy_1 : EnemyUnitBase
             if (BuildingManager.Instance.IsTerrainCell(cell)) return false;
             if (BuildingManager.Instance.IsResourceTile(cell)) return false;
         }
+
+        Damageable retargetCandidate = null;
+        float retargetCandidateDistSq = float.MaxValue;
+        RaycastHit2D[] hits = Physics2D.LinecastAll(from, to);
+        for (int i = 0; i < hits.Length; i++)
+        {
+            Collider2D hitCollider = hits[i].collider;
+            if (hitCollider == null) continue;
+            if (hitCollider.isTrigger) continue;
+            Transform hitTransform = hitCollider.transform;
+            if (hitTransform == transform || hitTransform.IsChildOf(transform)) continue;
+            if (hitTransform == targetT || hitTransform.IsChildOf(targetT)) continue;
+
+            if (hitCollider.GetComponentInParent<ResourceNode>() != null) return false;
+
+            Damageable blockingDamageable = hitCollider.GetComponentInParent<Damageable>();
+            if (blockingDamageable != null &&
+                blockingDamageable != building &&
+                blockingDamageable != this &&
+                blockingDamageable.GetComponent<UnitBase>() == null &&
+                blockingDamageable.CurrentHealth > 0)
+            {
+                if (!allowRetarget)
+                {
+                    return false;
+                }
+
+                float blockerDistSq = (blockingDamageable.transform.position - from).sqrMagnitude;
+                if (blockerDistSq < retargetCandidateDistSq)
+                {
+                    retargetCandidateDistSq = blockerDistSq;
+                    retargetCandidate = blockingDamageable;
+                }
+                continue;
+            }
+
+            if (hitCollider.GetComponentInParent<BuildingPiece>() != null) return false;
+            if (hitCollider.GetComponentInParent<MainStructure>() != null) return false;
+        }
+
+        if (retargetCandidate != null)
+        {
+            _targetDamageable = retargetCandidate;
+            _targetUnit = null;
+            return EvaluateLineOfSight(retargetCandidate, null, false);
+        }
+
         return true;
     }
 

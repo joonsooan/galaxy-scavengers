@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using DG.Tweening;
 using TMPro;
@@ -7,6 +8,9 @@ using FMODUnity;
 
 public class LaunchUIController : MonoBehaviour
 {
+    public static event Action OnLaunchCountdownStarted;
+    public static event Action OnLaunchCountdownFinished;
+
     [Header("UI References")]
     [SerializeField] private GameObject launchPanel;
     [SerializeField] private GameObject requiredAetherPanel;
@@ -18,8 +22,7 @@ public class LaunchUIController : MonoBehaviour
 
     [Header("Launch Settings")]
     [SerializeField] private float countdownDurationSeconds = 10f;
-    [SerializeField] private int neededAetherPerCell = 10;
-    [SerializeField] private int freeLaunchCells = 0;
+    [SerializeField] private float countdownStartDelaySeconds = 0.6f;
     [SerializeField] private float launchCompleteDisplayDuration = 2f;
     [SerializeField] private float fadeToBlackDuration = 1f;
     [SerializeField] private float blackScreenWaitDuration = 1f;
@@ -27,7 +30,14 @@ public class LaunchUIController : MonoBehaviour
 
     [Header("Audio")]
     [SerializeField] private EventReference buttonClickSound;
+    [SerializeField] private EventReference countdownBgm;
     [SerializeField] private float bgmFadeOutTime = 0.5f;
+    
+    [Header("Countdown Hidden UI")]
+    [SerializeField] private GameObject speedUI;
+    [SerializeField] private GameObject questPanel;
+    [SerializeField] private GameObject menuButton;
+    [SerializeField] private GameObject launchButtonObject;
 
     private bool _isCountingDown;
     private Coroutine _countdownCoroutine;
@@ -35,9 +45,14 @@ public class LaunchUIController : MonoBehaviour
     private WaitForSecondsRealtime _blackScreenWaitWait;
     private WaitForSecondsRealtime _tutorialPanelHideDelayWait;
     private WaitForSecondsRealtime _fadeToBlackDurationWait;
+    private WaitForSecondsRealtime _countdownStartDelayWait;
     private float _cachedTutorialPanelHideDelay;
     private float _cachedFadeToBlackDuration;
+    private float _cachedCountdownStartDelay;
     private GameObject _fadeOverlay;
+    private bool _isMainEngineRepairAlertActive;
+    private bool _isLaunchPausePanelLockActive;
+    private bool _isPreparingCountdown;
 
     private void Awake()
     {
@@ -62,6 +77,12 @@ public class LaunchUIController : MonoBehaviour
         {
             CoreRepairManager.Instance.OnRepairStatusChanged += UpdateLaunchAvailability;
         }
+        TutorialManager.OnTutorialEnded += UpdateLaunchAvailability;
+    }
+
+    private void Start()
+    {
+        StartCoroutine(SyncLaunchAvailabilityWhenGameplayReady());
     }
 
     private void OnDisable()
@@ -70,6 +91,9 @@ public class LaunchUIController : MonoBehaviour
         {
             CoreRepairManager.Instance.OnRepairStatusChanged -= UpdateLaunchAvailability;
         }
+        TutorialManager.OnTutorialEnded -= UpdateLaunchAvailability;
+        _isPreparingCountdown = false;
+        SetLaunchPausePanelLock(false);
     }
 
     private void UpdateCachedWaits()
@@ -87,6 +111,12 @@ public class LaunchUIController : MonoBehaviour
         {
             _cachedFadeToBlackDuration = fadeToBlackDuration;
             _fadeToBlackDurationWait = CoroutineCache.GetWaitForSecondsRealtime(fadeToBlackDuration);
+        }
+
+        if (_countdownStartDelayWait == null || Mathf.Abs(_cachedCountdownStartDelay - countdownStartDelaySeconds) > 0.001f)
+        {
+            _cachedCountdownStartDelay = countdownStartDelaySeconds;
+            _countdownStartDelayWait = CoroutineCache.GetWaitForSecondsRealtime(countdownStartDelaySeconds);
         }
     }
 
@@ -147,6 +177,12 @@ public class LaunchUIController : MonoBehaviour
             launchPanel.SetActive(true);
         }
 
+        if (GameManager.Instance != null && !GameManager.Instance.IsPaused)
+        {
+            GameManager.Instance.TogglePause();
+        }
+        SetLaunchPausePanelLock(true);
+
         if (countdownPanel != null)
         {
             countdownPanel.SetActive(false);
@@ -158,7 +194,7 @@ public class LaunchUIController : MonoBehaviour
 
     public void OnCancelLaunch()
     {
-        if (!buttonClickSound.IsNull)
+        if (!FMODUIButton.HasPlayedClickSoundThisFrame && !buttonClickSound.IsNull)
         {
             RuntimeManager.PlayOneShot(buttonClickSound);
         }
@@ -167,6 +203,12 @@ public class LaunchUIController : MonoBehaviour
         {
             launchPanel.SetActive(false);
         }
+        
+        if (GameManager.Instance != null && GameManager.Instance.IsPaused)
+        {
+            GameManager.Instance.TogglePause();
+        }
+        SetLaunchPausePanelLock(false);
     }
 
     public void OnConfirmLaunch()
@@ -176,18 +218,12 @@ public class LaunchUIController : MonoBehaviour
             return;
         }
 
-        if (!buttonClickSound.IsNull)
+        if (!FMODUIButton.HasPlayedClickSoundThisFrame && !buttonClickSound.IsNull)
         {
             RuntimeManager.PlayOneShot(buttonClickSound);
         }
 
-        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
-        if (mainStructure == null)
-        {
-            return;
-        }
-
-        InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
+        InventorySystem inventorySystem = GetLaunchInventorySystem();
         if (inventorySystem == null)
         {
             return;
@@ -197,16 +233,27 @@ public class LaunchUIController : MonoBehaviour
         {
             launchPanel.SetActive(false);
         }
-
+        
+        if (GameManager.Instance != null && !GameManager.Instance.IsPaused)
+        {
+            GameManager.Instance.TogglePause();
+        }
+        SetLaunchPausePanelLock(true);
         inventorySystem.ToggleInventory();
     }
 
     public void StartLaunchCountdown()
     {
-        if (_isCountingDown)
+        if (_isCountingDown || _isPreparingCountdown)
         {
             return;
         }
+
+        if (GameManager.Instance != null && GameManager.Instance.IsPaused)
+        {
+            GameManager.Instance.TogglePause();
+        }
+        SetLaunchPausePanelLock(false);
 
         GameSceneQuestUIManager questUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
         if (questUIManager != null)
@@ -214,45 +261,17 @@ public class LaunchUIController : MonoBehaviour
             questUIManager.HideQuestPanel();
         }
 
-        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
-        if (mainStructure == null)
-        {
-            return;
-        }
-
-        InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
+        InventorySystem inventorySystem = GetLaunchInventorySystem();
         if (inventorySystem == null)
         {
             return;
         }
 
-        int occupiedCells = inventorySystem.GetOccupiedCellCount();
-        int cellsRequiringAether = Mathf.Max(0, occupiedCells - freeLaunchCells);
-        int neededAether = neededAetherPerCell * cellsRequiringAether;
-
-        if (ResourceManager.Instance != null)
-        {
-            int currentAether = ResourceManager.Instance.GetResourceAmount(ResourceType.Aether);
-            if (currentAether < neededAether)
-            {
-                Debug.LogWarning($"LaunchUIController: Not enough aether! Need {neededAether}, have {currentAether}");
-                return;
-            }
-
-            if (neededAether > 0)
-            {
-                ResourceManager.Instance.RemoveResource(ResourceType.Aether, neededAether);
-            }
-        }
-
         inventorySystem.SetTransferEnabled(false);
-
-        if (countdownPanel != null)
-        {
-            countdownPanel.SetActive(true);
-        }
+        HideUiForLaunchCountdown();
 
         _isCountingDown = true;
+        OnLaunchCountdownStarted?.Invoke();
 
         if (_countdownCoroutine != null)
         {
@@ -261,8 +280,100 @@ public class LaunchUIController : MonoBehaviour
         _countdownCoroutine = StartCoroutine(CountdownCoroutine());
     }
 
+    private InventorySystem GetLaunchInventorySystem()
+    {
+        UIManager uiManager = null;
+        if (GameManager.Instance != null)
+        {
+            uiManager = GameManager.Instance.uiManager;
+        }
+        if (uiManager == null)
+        {
+            uiManager = FindFirstObjectByType<UIManager>(FindObjectsInactive.Include);
+        }
+        if (uiManager != null)
+        {
+            return uiManager.GetInventorySystem();
+        }
+
+        return FindFirstObjectByType<InventorySystem>(FindObjectsInactive.Include);
+    }
+
+    private void SetLaunchPausePanelLock(bool active)
+    {
+        _isLaunchPausePanelLockActive = active;
+
+        if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
+        {
+            GameManager.Instance.uiManager.SetPausePanelLock(active);
+            GameManager.Instance.uiManager.SetPausePanelActive(active);
+        }
+    }
+
+    public bool IsLaunchInputLockActive()
+    {
+        return _isLaunchPausePanelLockActive || (launchPanel != null && launchPanel.activeSelf);
+    }
+
+    public bool IsPauseInputLocked()
+    {
+        return _isLaunchPausePanelLockActive;
+    }
+
+    public bool IsMenuInputBlocked()
+    {
+        if (_isLaunchPausePanelLockActive)
+        {
+            return true;
+        }
+
+        return _isPreparingCountdown || _isCountingDown;
+    }
+
+    public bool IsCountdownSequenceActive()
+    {
+        return _isPreparingCountdown || _isCountingDown;
+    }
+
     private IEnumerator CountdownCoroutine()
     {
+        _isPreparingCountdown = true;
+        UpdateCachedWaits();
+
+        if (BgmManager.Instance != null)
+        {
+            BgmManager.Instance.StopBgm(bgmFadeOutTime);
+        }
+
+        if (countdownPanel != null)
+        {
+            countdownPanel.SetActive(false);
+        }
+
+        if (countdownStartDelaySeconds > 0f)
+        {
+            yield return _countdownStartDelayWait;
+        }
+
+        if (countdownPanel != null)
+        {
+            countdownPanel.SetActive(true);
+        }
+
+        if (BgmManager.Instance != null)
+        {
+            if (!countdownBgm.IsNull)
+            {
+                BgmManager.Instance.PlayBgm(countdownBgm, true, 0f);
+            }
+            else
+            {
+                BgmManager.Instance.StopBgm(0f);
+            }
+        }
+
+        _isPreparingCountdown = false;
+
         float remaining = Mathf.Max(0f, countdownDurationSeconds);
 
         while (remaining > 0f)
@@ -282,14 +393,10 @@ public class LaunchUIController : MonoBehaviour
             countdownPanel.SetActive(false);
         }
 
-        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
-        if (mainStructure != null)
+        InventorySystem inventorySystem = GetLaunchInventorySystem();
+        if (inventorySystem != null)
         {
-            InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
-            if (inventorySystem != null)
-            {
-                inventorySystem.TransferAllToBaseInventory();
-            }
+            inventorySystem.TransferAllToBaseInventory();
         }
 
         if (launchCompleteUI != null)
@@ -316,7 +423,9 @@ public class LaunchUIController : MonoBehaviour
         yield return _blackScreenWaitWait;
 
         _isCountingDown = false;
+        _isPreparingCountdown = false;
         _countdownCoroutine = null;
+        OnLaunchCountdownFinished?.Invoke();
 
         SceneLoader.Instance.LoadBaseScene(SceneLoader.ReturnFromGameState.Success);
     }
@@ -345,33 +454,38 @@ public class LaunchUIController : MonoBehaviour
         yield return _fadeToBlackDurationWait;
     }
 
+    private void HideUiForLaunchCountdown()
+    {
+        HideTargetUi(speedUI);
+        HideTargetUi(questPanel);
+        HideTargetUi(menuButton);
+        HideTargetUi(launchButtonObject);
+    }
+
+    private static void HideTargetUi(GameObject target)
+    {
+        if (target != null && target.activeSelf)
+        {
+            target.SetActive(false);
+        }
+    }
+
     private void UpdateNeededAetherText()
     {
         if (neededAetherText == null)
         {
             return;
         }
-
-        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
-        if (mainStructure == null)
+        
+        neededAetherText.text = "0";
+        if (requiredAetherPanel != null)
         {
-            neededAetherText.text = "0";
-            return;
+            RectTransform panelRect = requiredAetherPanel.GetComponent<RectTransform>();
+            if (panelRect != null)
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
+            }
         }
-
-        InventorySystem inventorySystem = mainStructure.GetComponent<InventorySystem>();
-        if (inventorySystem == null)
-        {
-            neededAetherText.text = "0";
-            return;
-        }
-
-        int occupiedCells = inventorySystem.GetOccupiedCellCount();
-        int cellsRequiringAether = Mathf.Max(0, occupiedCells - freeLaunchCells);
-        int neededAether = neededAetherPerCell * cellsRequiringAether;
-
-        neededAetherText.text = neededAether.ToString();
-        LayoutRebuilder.ForceRebuildLayoutImmediate(requiredAetherPanel.GetComponent<RectTransform>());
     }
 
     private void UpdateCountdownText(float remainingSeconds)
@@ -391,6 +505,26 @@ public class LaunchUIController : MonoBehaviour
     private void UpdateLaunchAvailability()
     {
         bool isEngineRepaired = CoreRepairManager.Instance != null && CoreRepairManager.Instance.IsPartRepaired(CorePart.Engine);
+        bool isTutorialActive = TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive();
+        GameAlertUIManager alertManager = FindFirstObjectByType<GameAlertUIManager>();
+        bool shouldShowEngineRepairAlert = !isEngineRepaired && GameManager.IsGameplayReady && !isTutorialActive && IsReadyToShowMainEngineAlert();
+        if (alertManager != null)
+        {
+            if (shouldShowEngineRepairAlert && !_isMainEngineRepairAlertActive)
+            {
+                alertManager.RegisterAlert(GameAlertType.MainEngineRepair);
+                _isMainEngineRepairAlertActive = true;
+            }
+            else if (!shouldShowEngineRepairAlert && _isMainEngineRepairAlertActive)
+            {
+                alertManager.UnregisterAlert(GameAlertType.MainEngineRepair);
+                _isMainEngineRepairAlertActive = false;
+            }
+        }
+        else
+        {
+            _isMainEngineRepairAlertActive = false;
+        }
         
         if (launchButton != null)
         {
@@ -409,6 +543,37 @@ public class LaunchUIController : MonoBehaviour
                 }
             }
         }
+    }
+
+    private IEnumerator SyncLaunchAvailabilityWhenGameplayReady()
+    {
+        while (!GameManager.IsGameplayReady)
+        {
+            yield return null;
+        }
+
+        while (!IsReadyToShowMainEngineAlert())
+        {
+            yield return null;
+        }
+
+        UpdateLaunchAvailability();
+    }
+
+    private bool IsReadyToShowMainEngineAlert()
+    {
+        if (LoadingUIManager.Instance != null && LoadingUIManager.Instance.IsAnyLoadingScreenActive())
+        {
+            return false;
+        }
+
+        CameraTargetController cameraTargetController = FindFirstObjectByType<CameraTargetController>();
+        if (cameraTargetController == null || cameraTargetController.followTarget == null)
+        {
+            return false;
+        }
+
+        return cameraTargetController.followTarget.GetComponent<Unit_Player>() != null;
     }
 }
 

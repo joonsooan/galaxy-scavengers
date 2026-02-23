@@ -1,7 +1,9 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 [Serializable]
@@ -34,102 +36,138 @@ public class EnemySpawner : MonoBehaviour
     [Header("Wave Budget Settings")]
     [SerializeField] private float noise100WaveCooldown = 30f;
     [SerializeField] private int noise100AreaCount = 3;
-    [SerializeField] [Range(0f, 1f)] private float noise100BudgetMultiplier = 1.5f;
-    [SerializeField] [Range(0f, 1f)] private float noiseCautionBudgetMultiplier = 0.5f;
-    [SerializeField] [Range(0f, 1f)] private float noiseWarningBudgetMultiplier = 1f;
+    [FormerlySerializedAs("noise100BudgetMultiplier")]
+    [SerializeField] [Range(0f, 100f)] private float noise100BudgetMultiplierPercent = 10f;
+    [FormerlySerializedAs("emergencyWaveMultiplierIncrement")]
+    [SerializeField] [Range(0f, 100f)] private float emergencyWaveMultiplierIncrementPercent = 10f;
+    [FormerlySerializedAs("noiseCautionBudgetMultiplier")]
+    [SerializeField] [Range(0f, 100f)] private float noiseCautionBudgetMultiplierPercent = 10f;
+    [FormerlySerializedAs("noiseWarningBudgetMultiplier")]
+    [SerializeField] [Range(0f, 100f)] private float noiseWarningBudgetMultiplierPercent = 10f;
+    [SerializeField] [HideInInspector] private bool percentValueMigrationDone;
 
-    private float _lastNoise100WaveTime = -1f;
-    private bool _isWaveFromNoise100 = false;
+    private bool _isEmergencyWaveSpawn;
     private bool _wasNoise100 = false;
+    private bool _noiseEmergencyActive;
+    private bool _countdownEmergencyActive;
+    private float _noiseEmergencyMultiplierBonus;
+    private float _countdownEmergencyMultiplierBonus;
+    private Coroutine _emergencyWaveCoroutine;
+    private readonly HashSet<int> _persistentEnemyInstanceIds = new HashSet<int>();
+    private string _currentEmergencyTriggerSource = string.Empty;
+    private bool _isSubscribedToEvents;
 
-    private void Start()
+    private void OnValidate()
     {
-        if (DayNightCycleManager.Instance != null)
+        if (percentValueMigrationDone) return;
+
+        bool migrated = false;
+        if (ShouldMigrateLegacyDecimal(noise100BudgetMultiplierPercent))
         {
-            DayNightCycleManager.OnNightStarted += OnNightStarted;
-            DayNightCycleManager.OnDayStarted += OnDayStarted;
+            noise100BudgetMultiplierPercent *= 100f;
+            migrated = true;
+        }
+        if (ShouldMigrateLegacyDecimal(emergencyWaveMultiplierIncrementPercent))
+        {
+            emergencyWaveMultiplierIncrementPercent *= 100f;
+            migrated = true;
+        }
+        if (ShouldMigrateLegacyDecimal(noiseCautionBudgetMultiplierPercent))
+        {
+            noiseCautionBudgetMultiplierPercent *= 100f;
+            migrated = true;
+        }
+        if (ShouldMigrateLegacyDecimal(noiseWarningBudgetMultiplierPercent))
+        {
+            noiseWarningBudgetMultiplierPercent *= 100f;
+            migrated = true;
         }
 
-        if (NoiseManager.Instance != null)
+        if (migrated || noise100BudgetMultiplierPercent > 5f || emergencyWaveMultiplierIncrementPercent > 5f ||
+            noiseCautionBudgetMultiplierPercent > 5f || noiseWarningBudgetMultiplierPercent > 5f)
         {
-            NoiseManager.Instance.OnNoiseChanged += OnNoiseChanged;
+            percentValueMigrationDone = true;
         }
     }
 
-    private void OnDestroy()
+    private void OnEnable()
     {
-        if (DayNightCycleManager.Instance != null)
+        if (_isSubscribedToEvents)
         {
-            DayNightCycleManager.OnNightStarted -= OnNightStarted;
-            DayNightCycleManager.OnDayStarted -= OnDayStarted;
+            return;
         }
 
-        if (NoiseManager.Instance != null)
+        DayNightCycleManager.OnNightStarted += OnNightStarted;
+        DayNightCycleManager.OnDayStarted += OnDayStarted;
+        LaunchUIController.OnLaunchCountdownStarted += OnLaunchCountdownStarted;
+        LaunchUIController.OnLaunchCountdownFinished += OnLaunchCountdownFinished;
+
+        if (NoiseManager.Instance != null) NoiseManager.Instance.OnNoiseChanged += OnNoiseChanged;
+        _isSubscribedToEvents = true;
+    }
+
+    private void OnDisable()
+    {
+        if (!_isSubscribedToEvents)
         {
-            NoiseManager.Instance.OnNoiseChanged -= OnNoiseChanged;
+            return;
         }
+
+        DayNightCycleManager.OnNightStarted -= OnNightStarted;
+        DayNightCycleManager.OnDayStarted -= OnDayStarted;
+        LaunchUIController.OnLaunchCountdownStarted -= OnLaunchCountdownStarted;
+        LaunchUIController.OnLaunchCountdownFinished -= OnLaunchCountdownFinished;
+
+        if (NoiseManager.Instance != null) NoiseManager.Instance.OnNoiseChanged -= OnNoiseChanged;
+        _isSubscribedToEvents = false;
+        ResetEmergencyState();
     }
 
     private void OnNightStarted()
     {
         if (NoiseManager.Instance == null) return;
+        if (IsAnyEmergencyActive()) return;
 
         float noisePercentage = NoiseManager.Instance.NoisePercentage;
         if (noisePercentage < 100f)
         {
             SpawnWaveFromBudget();
-            _lastNoise100WaveTime = Time.time;
         }
 
         NoiseManager.NoiseZone zone = NoiseManager.Instance.GetCurrentNoiseZone();
         if (zone == NoiseManager.NoiseZone.Caution)
         {
-            ActivateExistingEnemiesFromBudget(noiseCautionBudgetMultiplier);
+            ActivateExistingEnemiesFromBudget(ConvertPercentToMultiplier(noiseCautionBudgetMultiplierPercent));
         }
         else if (zone == NoiseManager.NoiseZone.Warning)
         {
-            ActivateExistingEnemiesFromBudget(noiseWarningBudgetMultiplier);
+            ActivateExistingEnemiesFromBudget(ConvertPercentToMultiplier(noiseWarningBudgetMultiplierPercent));
         }
     }
-
-    private static bool _noise100SpawnEnabled = false;
 
     private void OnNoiseChanged(float noisePercentage)
     {
         if (noisePercentage >= 100f)
         {
-            if (!_noise100SpawnEnabled) return;
             if (!_wasNoise100)
             {
                 _wasNoise100 = true;
-                float timeSinceLastWave = _lastNoise100WaveTime < 0f ? float.MaxValue : Time.time - _lastNoise100WaveTime;
-                bool bypassCooldown = false;
-#if UNITY_EDITOR
-                bypassCooldown = NoiseManager.Instance != null && NoiseManager.Instance.IsCheatNoise100Active;
-#endif
-                if (timeSinceLastWave >= noise100WaveCooldown || bypassCooldown)
-                {
-                    bool isNight = DayNightCycleManager.Instance != null && !DayNightCycleManager.Instance.IsDay();
-                    if (isNight && UnitManager.Instance != null && UnitManager.Instance.EnemyUnits.Count > 0)
-                    {
-                        ActivateExistingEnemiesFromBudget();
-                    }
-                    else
-                    {
-                        _isWaveFromNoise100 = true;
-                        SpawnWaveFromBudget();
-                    }
-                    _lastNoise100WaveTime = Time.time;
-                }
+                Debug.Log($"[EnemySpawner] Emergency trigger: Noise reached {noisePercentage:0.##}%. Starting emergency spawn.");
+                StartNoiseEmergency();
             }
         }
         else
         {
             _wasNoise100 = false;
+            if (_noiseEmergencyActive)
+            {
+                Debug.Log($"[EnemySpawner] Emergency trigger ended: Noise dropped below 100% ({noisePercentage:0.##}%). Stopping noise emergency spawn and resetting noise multiplier bonus.");
+            }
+            StopNoiseEmergency();
         }
     }
 
-    private void ActivateExistingEnemiesFromBudget(float multiplier)
+    private void ActivateExistingEnemiesFromBudget(float multiplier, bool markAsPersistent = false)
     {
         if (UnitManager.Instance == null) return;
 
@@ -155,6 +193,10 @@ public class EnemySpawner : MonoBehaviour
             int idx = Random.Range(0, candidates.Count);
             EnemyUnitBase selected = candidates[idx];
             candidates.RemoveAt(idx);
+            if (markAsPersistent)
+            {
+                MarkPersistentEnemy(selected);
+            }
             selected.ActivateInfiniteAttackState();
         }
         LogEnemyStats();
@@ -162,7 +204,7 @@ public class EnemySpawner : MonoBehaviour
 
     private void ActivateExistingEnemiesFromBudget()
     {
-        ActivateExistingEnemiesFromBudget(noise100BudgetMultiplier);
+        ActivateExistingEnemiesFromBudget(ConvertPercentToMultiplier(noise100BudgetMultiplierPercent), false);
     }
 
     private void OnDayStarted()
@@ -173,6 +215,8 @@ public class EnemySpawner : MonoBehaviour
         foreach (UnitBase unit in enemies)
         {
             if (unit == null) continue;
+            EnemyUnitBase enemyUnit = unit as EnemyUnitBase;
+            if (enemyUnit != null && IsPersistentEnemy(enemyUnit)) continue;
             if (unit is Damageable damageable)
             {
                 damageable.RestoreToFullHealth();
@@ -211,8 +255,19 @@ public class EnemySpawner : MonoBehaviour
 
     private void SpawnWaveFromBudget()
     {
-        float multiplier = _isWaveFromNoise100 ? noise100BudgetMultiplier : 1f;
+        float multiplier = _isEmergencyWaveSpawn ? GetCurrentEmergencyMultiplier() : 1f;
         float totalBudget = CalculateWaveBudget(multiplier);
+        int spawnedEnemyCount = 0;
+        int emergencyRemainingSlots = int.MaxValue;
+        if (_isEmergencyWaveSpawn)
+        {
+            emergencyRemainingSlots = Mathf.Max(0, maxSpawnCountPerWave - GetActiveEnemyCount());
+            if (emergencyRemainingSlots <= 0)
+            {
+                Debug.Log($"[EnemySpawner] Emergency wave skipped. Active enemies already at cap ({maxSpawnCountPerWave}).");
+                return;
+            }
+        }
 
         List<EnemySpawnData> validEnemies = enemyPrefabs
             .Where(e => e != null && e.enemyPrefab != null && e.cost > 0)
@@ -228,7 +283,7 @@ public class EnemySpawner : MonoBehaviour
 
         List<Vector2Int> uniqueHoles = holes.Distinct().ToList();
         List<Vector2Int> selectedHoles;
-        if (_isWaveFromNoise100)
+        if (_isEmergencyWaveSpawn)
         {
             List<Vector2Int> availableHoles = new List<Vector2Int>(uniqueHoles);
             selectedHoles = new List<Vector2Int>();
@@ -246,6 +301,19 @@ public class EnemySpawner : MonoBehaviour
         }
 
         float budgetPerHole = selectedHoles.Count > 0 ? totalBudget / selectedHoles.Count : 0f;
+        if (_isEmergencyWaveSpawn)
+        {
+            float noise = NoiseManager.Instance != null ? NoiseManager.Instance.NoisePercentage : 0f;
+            float totalElapsedHours = DayNightCycleManager.Instance != null ? DayNightCycleManager.Instance.GetTotalElapsedInGameHours() : 0f;
+            float rawBudget = (basePoints + (noise * noiseAlpha)) * (1f + (totalElapsedHours * timeBeta));
+            Debug.Log(
+                $"[EnemySpawner] Emergency budget calc | Trigger={_currentEmergencyTriggerSource}, " +
+                $"basePoints={basePoints:0.##}, noise={noise:0.##}, noiseAlpha={noiseAlpha:0.###}, " +
+                $"hours={totalElapsedHours:0.##}, timeBeta={timeBeta:0.###}, rawBudget={rawBudget:0.##}, " +
+                $"multiplier={multiplier:0.###}, finalBudget={totalBudget:0.##}, " +
+                $"areaCount={selectedHoles.Count}, budgetPerArea={budgetPerHole:0.##}, " +
+                $"countdownBonus={_countdownEmergencyMultiplierBonus:0.###}, noiseBonus={_noiseEmergencyMultiplierBonus:0.###}");
+        }
 
         if (BuildingManager.Instance == null) return;
         Grid grid = BuildingManager.Instance.grid;
@@ -255,11 +323,19 @@ public class EnemySpawner : MonoBehaviour
 
         for (int holeIdx = 0; holeIdx < selectedHoles.Count; holeIdx++)
         {
+            if (_isEmergencyWaveSpawn && allSpawnsUncapped.Count >= emergencyRemainingSlots)
+            {
+                break;
+            }
             Vector2Int holePos = selectedHoles[holeIdx];
             float remainingBudget = budgetPerHole;
 
             while (remainingBudget > 0f)
             {
+                if (_isEmergencyWaveSpawn && allSpawnsUncapped.Count >= emergencyRemainingSlots)
+                {
+                    break;
+                }
                 List<EnemySpawnData> affordable = validEnemies.Where(e => e.cost <= remainingBudget).ToList();
                 if (affordable.Count == 0) break;
 
@@ -296,6 +372,11 @@ public class EnemySpawner : MonoBehaviour
         else
         {
             finalSpawns = new List<(EnemySpawnData, Vector2Int)>(allSpawnsUncapped);
+        }
+
+        if (_isEmergencyWaveSpawn && finalSpawns.Count > emergencyRemainingSlots)
+        {
+            finalSpawns = finalSpawns.Take(emergencyRemainingSlots).ToList();
         }
 
         for (int i = finalSpawns.Count - 1; i > 0; i--)
@@ -339,6 +420,7 @@ public class EnemySpawner : MonoBehaviour
                 GameObject enemy = ObjectPooler.Instance.SpawnFromPool(poolTag, spawnPos, Quaternion.identity);
                 if (enemy != null)
                 {
+                    spawnedEnemyCount++;
                     EnemyUnitBase enemyScript = enemy.GetComponent<EnemyUnitBase>();
                     if (enemyScript != null)
                     {
@@ -352,9 +434,14 @@ public class EnemySpawner : MonoBehaviour
                             float healthMult = 1f + spawn.data.healthBonusPercent / 100f;
                             enemyScript.ApplyEnhancement(spawn.data.enhancedSpriteColor, moveMult, attackMult, healthMult);
                         }
-                        if (_isWaveFromNoise100)
+                        if (_isEmergencyWaveSpawn)
                         {
+                            MarkPersistentEnemy(enemyScript);
                             enemyScript.ActivateInfiniteAttackState();
+                        }
+                        else
+                        {
+                            UnmarkPersistentEnemy(enemyScript);
                         }
                         if (TutorialManager.Instance != null)
                         {
@@ -372,9 +459,208 @@ public class EnemySpawner : MonoBehaviour
                 }
             }
         }
-
-        _isWaveFromNoise100 = false;
+        if (_isEmergencyWaveSpawn)
+        {
+            Debug.Log($"[EnemySpawner] Emergency wave spawned. Trigger={_currentEmergencyTriggerSource}, Spawned={spawnedEnemyCount}, Multiplier={multiplier:0.##}, AreaCount={selectedHoles.Count}, NoiseEmergency={_noiseEmergencyActive}, CountdownEmergency={_countdownEmergencyActive}");
+        }
         LogEnemyStats();
+    }
+
+    private int GetActiveEnemyCount()
+    {
+        if (UnitManager.Instance == null || UnitManager.Instance.EnemyUnits == null) return 0;
+
+        int activeCount = 0;
+        foreach (UnitBase unit in UnitManager.Instance.EnemyUnits)
+        {
+            if (unit == null || unit.gameObject == null) continue;
+            if (!unit.gameObject.activeInHierarchy) continue;
+            activeCount++;
+        }
+
+        return activeCount;
+    }
+
+    private void OnLaunchCountdownStarted()
+    {
+        Debug.Log("[EnemySpawner] Emergency trigger: Launch countdown started. Starting emergency spawn.");
+        StartCountdownEmergency();
+    }
+
+    private void OnLaunchCountdownFinished()
+    {
+        if (_countdownEmergencyActive)
+        {
+            Debug.Log("[EnemySpawner] Emergency trigger ended: Launch countdown finished. Stopping countdown emergency spawn and resetting countdown multiplier bonus.");
+        }
+        StopCountdownEmergency();
+    }
+
+    private void StartNoiseEmergency()
+    {
+        if (_noiseEmergencyActive) return;
+
+        _noiseEmergencyActive = true;
+        _currentEmergencyTriggerSource = "Noise100";
+        ActivateExistingEnemiesFromBudget(ConvertPercentToMultiplier(noise100BudgetMultiplierPercent), true);
+        SpawnEmergencyWave();
+        EnsureEmergencyWaveLoopRunning();
+    }
+
+    private void StopNoiseEmergency()
+    {
+        if (!_noiseEmergencyActive) return;
+
+        _noiseEmergencyActive = false;
+        _noiseEmergencyMultiplierBonus = 0f;
+        TryStopEmergencyWaveLoop();
+    }
+
+    private void StartCountdownEmergency()
+    {
+        if (_countdownEmergencyActive) return;
+
+        _countdownEmergencyActive = true;
+        _currentEmergencyTriggerSource = "LaunchCountdown";
+        ActivateExistingEnemiesFromBudget(ConvertPercentToMultiplier(noise100BudgetMultiplierPercent), true);
+        SpawnEmergencyWave();
+        EnsureEmergencyWaveLoopRunning();
+    }
+
+    private void StopCountdownEmergency()
+    {
+        if (!_countdownEmergencyActive) return;
+
+        _countdownEmergencyActive = false;
+        _countdownEmergencyMultiplierBonus = 0f;
+        TryStopEmergencyWaveLoop();
+    }
+
+    private void EnsureEmergencyWaveLoopRunning()
+    {
+        if (!IsAnyEmergencyActive()) return;
+        if (_emergencyWaveCoroutine != null) return;
+        _emergencyWaveCoroutine = StartCoroutine(EmergencyWaveLoop());
+    }
+
+    private void TryStopEmergencyWaveLoop()
+    {
+        if (IsAnyEmergencyActive()) return;
+        if (_emergencyWaveCoroutine == null) return;
+        StopCoroutine(_emergencyWaveCoroutine);
+        _emergencyWaveCoroutine = null;
+    }
+
+    private IEnumerator EmergencyWaveLoop()
+    {
+        while (IsAnyEmergencyActive())
+        {
+            yield return CoroutineCache.GetWaitForSeconds(noise100WaveCooldown);
+            if (!IsAnyEmergencyActive()) break;
+            SpawnEmergencyWave();
+        }
+
+        _emergencyWaveCoroutine = null;
+    }
+
+    private void SpawnEmergencyWave()
+    {
+        if (_countdownEmergencyActive && _noiseEmergencyActive)
+        {
+            _currentEmergencyTriggerSource = "Noise100+LaunchCountdown";
+        }
+        else if (_countdownEmergencyActive)
+        {
+            _currentEmergencyTriggerSource = "LaunchCountdown";
+        }
+        else if (_noiseEmergencyActive)
+        {
+            _currentEmergencyTriggerSource = "Noise100";
+        }
+
+        _isEmergencyWaveSpawn = true;
+        SpawnWaveFromBudget();
+        _isEmergencyWaveSpawn = false;
+
+        if (_countdownEmergencyActive)
+        {
+            _countdownEmergencyMultiplierBonus += ConvertPercentToIncrement(emergencyWaveMultiplierIncrementPercent);
+        }
+        if (_noiseEmergencyActive)
+        {
+            _noiseEmergencyMultiplierBonus += ConvertPercentToIncrement(emergencyWaveMultiplierIncrementPercent);
+        }
+    }
+
+    private float GetCurrentEmergencyMultiplier()
+    {
+        float multiplier = ConvertPercentToMultiplier(noise100BudgetMultiplierPercent);
+        if (_countdownEmergencyActive)
+        {
+            multiplier += _countdownEmergencyMultiplierBonus;
+        }
+        if (_noiseEmergencyActive)
+        {
+            multiplier += _noiseEmergencyMultiplierBonus;
+        }
+
+        return Mathf.Max(0f, multiplier);
+    }
+
+    private static float ConvertPercentToMultiplier(float value)
+    {
+        return value * 0.01f;
+    }
+
+    private static float ConvertPercentToIncrement(float value)
+    {
+        return value * 0.01f;
+    }
+
+    private static bool ShouldMigrateLegacyDecimal(float value)
+    {
+        return value > 0f && value <= 5f;
+    }
+
+    private bool IsAnyEmergencyActive()
+    {
+        return _countdownEmergencyActive || _noiseEmergencyActive;
+    }
+
+    private void MarkPersistentEnemy(EnemyUnitBase enemy)
+    {
+        if (enemy == null) return;
+        _persistentEnemyInstanceIds.Add(enemy.GetInstanceID());
+    }
+
+    private void UnmarkPersistentEnemy(EnemyUnitBase enemy)
+    {
+        if (enemy == null) return;
+        _persistentEnemyInstanceIds.Remove(enemy.GetInstanceID());
+    }
+
+    private bool IsPersistentEnemy(EnemyUnitBase enemy)
+    {
+        if (enemy == null) return false;
+        return _persistentEnemyInstanceIds.Contains(enemy.GetInstanceID());
+    }
+
+    private void ResetEmergencyState()
+    {
+        _wasNoise100 = false;
+        _noiseEmergencyActive = false;
+        _countdownEmergencyActive = false;
+        _noiseEmergencyMultiplierBonus = 0f;
+        _countdownEmergencyMultiplierBonus = 0f;
+        _isEmergencyWaveSpawn = false;
+
+        if (_emergencyWaveCoroutine != null)
+        {
+            StopCoroutine(_emergencyWaveCoroutine);
+            _emergencyWaveCoroutine = null;
+        }
+
+        _persistentEnemyInstanceIds.Clear();
     }
 
     private static void LogEnemyStats()

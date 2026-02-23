@@ -47,6 +47,7 @@ public class TutorialStepData : ScriptableObject
     [Header("UI Settings")]
     public bool showProgressBar;
     public List<TutorialUIPanel> enableUIPanels = new List<TutorialUIPanel>();
+    public float tutorialPanelMoveDownOffset;
 
     [Header("Step Start Actions")]
     public UnitData[] spawnUnits;
