@@ -112,6 +112,8 @@ public class GameAlertUIManager : MonoBehaviour
     private bool _unitUnderAttackAlertActive;
     private bool _buildingUnderAttackAlertActive;
 
+    private bool _isCountdownIgnoringAlerts;
+
     private void Awake()
     {
         SetAllInactive();
@@ -119,6 +121,8 @@ public class GameAlertUIManager : MonoBehaviour
 
     private void OnEnable()
     {
+        LaunchUIController.OnLaunchCountdownStarted += OnLaunchCountdownStarted;
+        LaunchUIController.OnLaunchCountdownFinished += OnLaunchCountdownFinished;
         _isStorageFullByTracker = false;
         _isAetherFullByTracker = false;
         if (_bindStorageTrackerCoroutine != null)
@@ -252,6 +256,10 @@ public class GameAlertUIManager : MonoBehaviour
 
     public void RegisterAlert(GameAlertType type, Damageable source)
     {
+        if (_isCountdownIgnoringAlerts && IsCountdownIgnoredAlert(type))
+        {
+            return;
+        }
         switch (type)
         {
             case GameAlertType.MineTypeAllOff:
@@ -303,6 +311,32 @@ public class GameAlertUIManager : MonoBehaviour
         UpdateAlertState(type);
         if (_currentTooltipType == type)
             RefreshTooltipText(type);
+    }
+
+    private static bool IsCountdownIgnoredAlert(GameAlertType type)
+    {
+        return type == GameAlertType.MinerNoResource ||
+               type == GameAlertType.DroneNoResource ||
+               type == GameAlertType.DroneIsNotAssigned;
+    }
+
+    private void OnLaunchCountdownStarted()
+    {
+        _isCountdownIgnoringAlerts = true;
+        _minerNoResourceCount = 0;
+        _minerNoResourceSources.Clear();
+        _droneNoResourceCount = 0;
+        _droneNoResourceSources.Clear();
+        _droneIsNotAssignedCount = 0;
+        _droneIsNotAssignedSources.Clear();
+        SetAlertActive(GameAlertType.MinerNoResource, false);
+        SetAlertActive(GameAlertType.DroneNoResource, false);
+        SetAlertActive(GameAlertType.DroneIsNotAssigned, false);
+    }
+
+    private void OnLaunchCountdownFinished()
+    {
+        _isCountdownIgnoringAlerts = false;
     }
 
     private static void AddSource(List<Damageable> list, Damageable source)

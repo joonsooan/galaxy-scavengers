@@ -916,7 +916,8 @@ public class BuildingManager : MonoBehaviour
 
     private void ResetAllProcessors()
     {
-        foreach (Processor processor in _processors) {
+        Processor[] allProcessors = FindObjectsByType<Processor>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (Processor processor in allProcessors) {
             if (processor != null) {
                 processor.ResetAllWork();
             }

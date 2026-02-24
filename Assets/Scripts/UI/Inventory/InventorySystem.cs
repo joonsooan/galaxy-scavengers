@@ -263,7 +263,7 @@ public class InventorySystem : MonoBehaviour
 
     public InventoryCell FindFirstEmptyCell()
     {
-        return _inventoryCells.FirstOrDefault(cell => cell.IsEmpty());
+        return _inventoryCells.FirstOrDefault(cell => cell != null && cell.gameObject != null && cell.gameObject.activeSelf && cell.IsEmpty());
     }
 
     public List<InventoryCell> GetAllEmptyCells()
