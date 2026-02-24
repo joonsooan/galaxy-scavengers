@@ -189,6 +189,7 @@ public class Unit_Drone : UnitBase
         HasCheckedIn = false;
 
         if (_currentProcessor != null) {
+            movement?.ForceStopAllMovement();
             _currentProcessor.AssignDrone(this);
             _currentState = DroneState.Idle;
 
@@ -328,7 +329,9 @@ public class Unit_Drone : UnitBase
                 return;
             }
 
-            bool isAtProcessorForCheckIn = movement.HasReachedTarget(movement.waypointTolerance);
+            Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
+            bool isAtProcessorByDistance = Vector3.Distance(transform.position, interactionPos) <= movement.waypointTolerance;
+            bool isAtProcessorForCheckIn = movement.HasReachedTarget(movement.waypointTolerance) || isAtProcessorByDistance;
 
             if (isAtProcessorForCheckIn) {
                 if (_assignmentCoroutine == null) {
@@ -338,7 +341,6 @@ public class Unit_Drone : UnitBase
             }
 
             if (!movement.IsMoving) {
-                Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
                 bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
                 if (!hasPath) {
                     if (_assignmentCoroutine == null) {

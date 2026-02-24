@@ -2365,7 +2365,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c90e03b4b8f687648b584f96455ef6ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RealSecondsPerInGameHour: 8
+  RealSecondsPerInGameHour: 5
   currentTime: 6
   gameStartTime: 6
   autoAdvanceTime: 1
@@ -3419,7 +3419,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3864970575395246013, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: alertType
-      value: 12
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 6622626863705287713, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_Colors.m_NormalColor.a
@@ -5979,9 +5979,9 @@ MonoBehaviour:
   maxSpawnCountPerWave: 120
   spawnRadiusOffset: 5
   basePoints: 30
-  noiseAlpha: 0.2
+  noiseAlpha: 0.3
   timeBeta: 0.1
-  noise100WaveCooldown: 30
+  noise100WaveCooldown: 20
   noise100AreaCount: 5
   noise100BudgetMultiplierPercent: 15
   emergencyWaveMultiplierIncrementPercent: 3

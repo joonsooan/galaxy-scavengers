@@ -124,6 +124,7 @@ public class ResourceManager : MonoBehaviour
         // Forward events from ResourceDataManager for backward compatibility
         ResourceDataManager.OnNewStorageAdded += ForwardOnNewStorageAdded;
         ResourceDataManager.OnStorageRemoved += ForwardOnStorageRemoved;
+        ResourceDataManager.OnStorageSpaceFreed += ForwardOnStorageSpaceFreed;
         ResourceDataManager.OnResourceAmountChanged += ForwardOnResourceAmountChanged;
         ResourceDataManager.OnResourceNodeAdded += ForwardOnResourceNodeAdded;
         ResourceDataManager.OnResourceNodeRemoved += ForwardOnResourceNodeRemoved;
@@ -132,9 +133,10 @@ public class ResourceManager : MonoBehaviour
     private void OnDisable()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
-        
+
         ResourceDataManager.OnNewStorageAdded -= ForwardOnNewStorageAdded;
         ResourceDataManager.OnStorageRemoved -= ForwardOnStorageRemoved;
+        ResourceDataManager.OnStorageSpaceFreed -= ForwardOnStorageSpaceFreed;
         ResourceDataManager.OnResourceAmountChanged -= ForwardOnResourceAmountChanged;
         ResourceDataManager.OnResourceNodeAdded -= ForwardOnResourceNodeAdded;
         ResourceDataManager.OnResourceNodeRemoved -= ForwardOnResourceNodeRemoved;
@@ -157,12 +159,14 @@ public class ResourceManager : MonoBehaviour
     // Forward events from ResourceDataManager for backward compatibility
     public static event Action OnNewStorageAdded;
     public static event Action<IStorage> OnStorageRemoved;
+    public static event Action<IStorage, int> OnStorageSpaceFreed;
     public static event Action<ResourceType, int> OnResourceAmountChanged;
     public static event Action<ResourceNode> OnResourceNodeAdded;
     public static event Action<ResourceNode> OnResourceNodeRemoved;
 
     private void ForwardOnNewStorageAdded() => OnNewStorageAdded?.Invoke();
     private void ForwardOnStorageRemoved(IStorage storage) => OnStorageRemoved?.Invoke(storage);
+    private void ForwardOnStorageSpaceFreed(IStorage storage, int availableCapacity) => OnStorageSpaceFreed?.Invoke(storage, availableCapacity);
     private void ForwardOnResourceAmountChanged(ResourceType type, int amount) => OnResourceAmountChanged?.Invoke(type, amount);
     private void ForwardOnResourceNodeAdded(ResourceNode node) => OnResourceNodeAdded?.Invoke(node);
     private void ForwardOnResourceNodeRemoved(ResourceNode node) => OnResourceNodeRemoved?.Invoke(node);
@@ -346,6 +350,26 @@ public class ResourceManager : MonoBehaviour
     public void RemoveStorage(IStorage storage)
     {
         ResourceDataManager.Instance?.RemoveStorage(storage);
+    }
+
+    public void ReserveStorageCapacity(IStorage storage, int amount)
+    {
+        ResourceDataManager.Instance?.ReserveCapacity(storage, amount);
+    }
+
+    public void ReleaseStorageCapacity(IStorage storage, int amount)
+    {
+        ResourceDataManager.Instance?.ReleaseCapacity(storage, amount);
+    }
+
+    public int GetAvailableStorageCapacity(IStorage storage)
+    {
+        return ResourceDataManager.Instance != null ? ResourceDataManager.Instance.GetAvailableCapacity(storage) : 0;
+    }
+
+    public void NotifyStorageSpaceFreed(IStorage storage, int availableCapacity)
+    {
+        ResourceDataManager.Instance?.NotifyStorageSpaceFreed(storage, availableCapacity);
     }
 
     public List<IStorage> GetAllStorages()

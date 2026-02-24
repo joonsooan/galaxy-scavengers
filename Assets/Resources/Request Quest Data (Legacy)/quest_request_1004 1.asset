@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 898dc1efeda45414a8149ac16673e46f, type: 3}
-  m_Name: quest_request_1004
+  m_Name: quest_request_1004 1
   m_EditorClassIdentifier: 
   questId: 1004
   questType: 1

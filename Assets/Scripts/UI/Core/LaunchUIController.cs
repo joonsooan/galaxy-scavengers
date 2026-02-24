@@ -431,6 +431,13 @@ public class LaunchUIController : MonoBehaviour
         {
             if (useBeatSync)
             {
+                float timeSinceLastBeat = Time.unscaledTime - _lastBeatTimestamp;
+                if (_hasPreviousBeatTimestamp && timeSinceLastBeat > 2f)
+                {
+                    useBeatSync = false;
+                    realtimeFallbackRemaining = _displayRemainingSeconds;
+                }
+
                 int beatTicks = BgmManager.Instance != null ? BgmManager.Instance.ConsumeCountdownBeatTicks() : 0;
                 if (beatTicks > 0)
                 {

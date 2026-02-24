@@ -8,6 +8,7 @@ public class ResourceDataManager : MonoBehaviour
 {
     private readonly HashSet<ResourceNode> _allResources = new ();
     private readonly List<IStorage> _allStorages = new ();
+    private readonly Dictionary<IStorage, int> _reservedCapacity = new Dictionary<IStorage, int>();
     private readonly Dictionary<ResourceType, int> _resourceCounts = new ();
     private readonly Dictionary<ResourceType, ResourceStats> _resourceStats = new ();
     private MainStructure _mainStructure;
@@ -37,9 +38,45 @@ public class ResourceDataManager : MonoBehaviour
 
     public static event Action OnNewStorageAdded;
     public static event Action<IStorage> OnStorageRemoved;
+    public static event Action<IStorage, int> OnStorageSpaceFreed;
     public static event Action<ResourceType, int> OnResourceAmountChanged;
     public static event Action<ResourceNode> OnResourceNodeAdded;
     public static event Action<ResourceNode> OnResourceNodeRemoved;
+
+    public void ReserveCapacity(IStorage storage, int amount)
+    {
+        if (storage == null || amount <= 0) return;
+        _reservedCapacity.TryGetValue(storage, out int current);
+        _reservedCapacity[storage] = current + amount;
+    }
+
+    public void ReleaseCapacity(IStorage storage, int amount)
+    {
+        if (storage == null || amount <= 0) return;
+        if (_reservedCapacity.TryGetValue(storage, out int current)) {
+            int remaining = Mathf.Max(0, current - amount);
+            if (remaining <= 0) {
+                _reservedCapacity.Remove(storage);
+            }
+            else {
+                _reservedCapacity[storage] = remaining;
+            }
+        }
+    }
+
+    public int GetAvailableCapacity(IStorage storage)
+    {
+        if (storage == null) return 0;
+        int reserved = _reservedCapacity.TryGetValue(storage, out int r) ? r : 0;
+        return Mathf.Max(0, storage.GetMaxCapacity() - storage.GetTotalCurrentAmount() - reserved);
+    }
+
+    public void NotifyStorageSpaceFreed(IStorage storage, int availableCapacity)
+    {
+        if (storage != null && availableCapacity > 0) {
+            OnStorageSpaceFreed?.Invoke(storage, availableCapacity);
+        }
+    }
 
     public void InitializeResourceStats(List<ResourceStats> resourceStatsList)
     {
@@ -55,7 +92,8 @@ public class ResourceDataManager : MonoBehaviour
             _mainStructure = null;
             _allStorages.Clear();
             _allResources.Clear();
-            
+            _reservedCapacity.Clear();
+
             StartCoroutine(DelayedSceneInitialization());
         }
     }
@@ -203,6 +241,7 @@ public class ResourceDataManager : MonoBehaviour
     public void RemoveStorage(IStorage storage)
     {
         if (_allStorages.Remove(storage)) {
+            _reservedCapacity.Remove(storage);
             OnStorageRemoved?.Invoke(storage);
         }
     }

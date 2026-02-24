@@ -62,6 +62,16 @@ public class BuildingManager : MonoBehaviour
         CacheMapGenerator();
     }
 
+    private void OnEnable()
+    {
+        LaunchUIController.OnLaunchCountdownStarted += ResetAllProcessors;
+    }
+
+    private void OnDisable()
+    {
+        LaunchUIController.OnLaunchCountdownStarted -= ResetAllProcessors;
+    }
+
     private void Start()
     {
         InitializeResourceCache();
@@ -904,6 +914,14 @@ public class BuildingManager : MonoBehaviour
         _processors.Remove(processor);
     }
 
+    private void ResetAllProcessors()
+    {
+        foreach (Processor processor in _processors) {
+            if (processor != null) {
+                processor.ResetAllWork();
+            }
+        }
+    }
 
     public void RegisterPrePlacedBuilding(BuildingPiece buildingPiece)
     {

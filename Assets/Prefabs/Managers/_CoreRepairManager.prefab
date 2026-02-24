@@ -51,4 +51,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ec94958cb24bb8e4ea5b5fafe7c618c1, type: 2}
   - {fileID: 11400000, guid: 343e9567e6ed9c542a125712440b2730, type: 2}
   alwaysDamageEngine: 1
-  randomDamagedPartsCount: 2
+  randomDamagedPartsCount: 1
+  debuffEffectColor: {r: 1, g: 0.4392157, b: 0.2627451, a: 1}

@@ -20,7 +20,7 @@ MonoBehaviour:
   questTitleColor: {r: 0.65882355, g: 0.5176471, b: 0.9529412, a: 1}
   requiredResources:
   - resourceType: 0
-    amount: 3000
+    amount: 1500
   repairReward:
     resourceRewards: []
     moduleRewards: []

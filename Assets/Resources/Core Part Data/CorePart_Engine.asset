@@ -20,10 +20,10 @@ MonoBehaviour:
     \uCF54\uC5B4\uB97C \uC2DC\uB3D9\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4."
   questTitleColor: {r: 0.5686275, g: 0.85882354, b: 0.4117647, a: 1}
   requiredResources:
+  - resourceType: 0
+    amount: 1000
   - resourceType: 1
-    amount: 2000
-  - resourceType: 4
-    amount: 50
+    amount: 1000
   repairReward:
     resourceRewards: []
     moduleRewards: []

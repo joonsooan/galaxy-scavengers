@@ -64,6 +64,7 @@ public class Unit_Miner : UnitBase
     private Sequence _vibrationSequence;
     private bool _hasReservedMiningCell;
     private Vector3Int _reservedMiningCell;
+    private int _reservedStorageAmount;
 
     protected override void Awake()
     {
@@ -104,6 +105,7 @@ public class Unit_Miner : UnitBase
         base.OnDisable();
         UnsubscribeEvents();
         ReleaseMiningCellReservation();
+        ReleaseStorageReservation();
         ClearMinerAlerts();
     }
 
@@ -280,7 +282,7 @@ public class Unit_Miner : UnitBase
             if (hasAether) {
                 AetherConsumptionManager aetherManager = FindFirstObjectByType<AetherConsumptionManager>();
                 if (aetherManager != null && aetherManager.IsAetherCapacityFull) {
-                    // Don't unload aether if capacity is full
+                    ReleaseStorageReservation();
                     InitializeCarryAmounts();
                     _targetResourceNode = null;
                     _targetStorage = null;
@@ -330,10 +332,13 @@ public class Unit_Miner : UnitBase
             }
 
             if (remainingResources.Count > 0 && remainingResources.Values.Sum() > 0) {
+                ReleaseStorageReservation();
                 _targetStorage = null;
                 GoToStorage();
                 yield break;
             }
+
+            ReleaseStorageReservation();
         }
 
         InitializeCarryAmounts();
@@ -484,9 +489,15 @@ public class Unit_Miner : UnitBase
 
     private void GoToStorage()
     {
+        ReleaseStorageReservation();
+
         UnloadTarget bestTarget = FindClosestUnloadPosition();
 
         if (bestTarget.storage != null) {
+            int carryAmount = _currentCarryAmounts.Values.Sum();
+            ResourceManager.Instance.ReserveStorageCapacity(bestTarget.storage, carryAmount);
+            _reservedStorageAmount = carryAmount;
+
             _targetStorage = bestTarget.storage;
             _targetUnloadCell = bestTarget.unloadCell;
             SetMinerIsFullAlert(false);
@@ -517,8 +528,9 @@ public class Unit_Miner : UnitBase
             }
         }
 
+        int carryAmount = _currentCarryAmounts.Values.Sum();
         IEnumerable<IStorage> allStorages = ResourceManager.Instance.GetAllStorages()
-            .Where(s => s != null && s.GetTotalCurrentAmount() < s.GetMaxCapacity());
+            .Where(s => s != null && ResourceManager.Instance.GetAvailableStorageCapacity(s) >= carryAmount);
 
         if (!hasAether) {
             allStorages = allStorages.Where(s => !(s is Battery));
@@ -606,8 +618,17 @@ public class Unit_Miner : UnitBase
         unitMovement.StopMovement();
     }
 
+    private void ReleaseStorageReservation()
+    {
+        if (_targetStorage != null && _reservedStorageAmount > 0 && ResourceManager.Instance != null) {
+            ResourceManager.Instance.ReleaseStorageCapacity(_targetStorage, _reservedStorageAmount);
+            _reservedStorageAmount = 0;
+        }
+    }
+
     private void HandleStorageLoss()
     {
+        ReleaseStorageReservation();
         FindAndSetStorage();
         GoToStorage();
     }
@@ -616,6 +637,7 @@ public class Unit_Miner : UnitBase
     {
         OnResourceMined += HandleResourceMined;
         ResourceManager.OnNewStorageAdded += HandleNewStorageAdded;
+        ResourceManager.OnStorageSpaceFreed += HandleStorageSpaceFreed;
         ResourceManager.OnStorageRemoved += HandleStorageRemoved;
         UnitManager.OnMineableTypesChanged += HandleMineableTypesChanged;
         SceneManager.sceneUnloaded += OnSceneUnloaded;
@@ -626,6 +648,7 @@ public class Unit_Miner : UnitBase
     {
         OnResourceMined -= HandleResourceMined;
         ResourceManager.OnNewStorageAdded -= HandleNewStorageAdded;
+        ResourceManager.OnStorageSpaceFreed -= HandleStorageSpaceFreed;
         ResourceManager.OnStorageRemoved -= HandleStorageRemoved;
         UnitManager.OnMineableTypesChanged -= HandleMineableTypesChanged;
         SceneManager.sceneUnloaded -= OnSceneUnloaded;
@@ -667,9 +690,18 @@ public class Unit_Miner : UnitBase
         }
     }
 
+    private void HandleStorageSpaceFreed(IStorage storage, int availableCapacity)
+    {
+        SetMinerIsFullAlert(false);
+        if (_currentCarryAmounts.Values.Sum() > 0 && currentState is UnitState.Idle or UnitState.ReturningToStorage) {
+            GoToStorage();
+        }
+    }
+
     private void HandleStorageRemoved(IStorage storage)
     {
         if (_targetStorage == storage) {
+            ReleaseStorageReservation();
             _targetStorage = null;
             if (currentState is UnitState.ReturningToStorage or UnitState.Unloading) {
                 GoToStorage();

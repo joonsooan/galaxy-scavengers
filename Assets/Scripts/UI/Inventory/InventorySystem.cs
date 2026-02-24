@@ -302,10 +302,11 @@ public class InventorySystem : MonoBehaviour
             }
 
             int amountForThisCell = Mathf.Min(remainingToMove, maxStack);
-            if (ResourceManager.Instance.RemoveResource(type, amountForThisCell))
+            int withdrawn = WithdrawResourceFromStorages(type, amountForThisCell);
+            if (withdrawn > 0)
             {
-                emptyCell.SetResource(type, amountForThisCell);
-                remainingToMove -= amountForThisCell;
+                emptyCell.SetResource(type, withdrawn);
+                remainingToMove -= withdrawn;
             }
             else
             {
@@ -326,6 +327,49 @@ public class InventorySystem : MonoBehaviour
         }
 
         return addedAnyResource;
+    }
+
+    private int WithdrawResourceFromStorages(ResourceType type, int amount)
+    {
+        if (ResourceManager.Instance == null || amount <= 0)
+        {
+            return 0;
+        }
+
+        List<IStorage> storages = ResourceManager.Instance.GetAllStorages();
+        if (storages == null || storages.Count == 0)
+        {
+            return 0;
+        }
+
+        MainStructure mainStructure = ResourceDataManager.Instance?.GetMainStructure();
+        List<IStorage> orderedStorages = new List<IStorage>();
+        if (mainStructure != null)
+        {
+            orderedStorages.Add(mainStructure);
+        }
+        foreach (IStorage s in storages)
+        {
+            if (s != null && s != mainStructure)
+            {
+                orderedStorages.Add(s);
+            }
+        }
+
+        int remaining = amount;
+        foreach (IStorage storage in orderedStorages)
+        {
+            if (remaining <= 0)
+            {
+                break;
+            }
+            if (storage.TryWithdrawResource(type, remaining, out int withdrawn) && withdrawn > 0)
+            {
+                remaining -= withdrawn;
+            }
+        }
+
+        return amount - remaining;
     }
 
     public void ReturnResourceToManager(ResourceType type, int amount)

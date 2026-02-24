@@ -54,6 +54,26 @@ public class Unit_Construct : UnitBase
     private Coroutine _unloadingCoroutine;
     private GameObject _currentSiteAnimation;
     private Animator _currentSiteAnimator;
+    private bool _isInvulnerable;
+
+    public bool IsInvulnerable => _isInvulnerable;
+
+    public void SetInvulnerable(bool value)
+    {
+        _isInvulnerable = value;
+    }
+
+    public override void TakeDamage(int damage)
+    {
+        if (_isInvulnerable) return;
+        base.TakeDamage(damage);
+    }
+
+    public override void TakeDamage(int damage, DamageContext context)
+    {
+        if (_isInvulnerable) return;
+        base.TakeDamage(damage, context);
+    }
 
     protected override void Awake()
     {

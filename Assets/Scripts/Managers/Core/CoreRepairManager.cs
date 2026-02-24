@@ -12,7 +12,7 @@ public class CoreRepairManager : MonoBehaviour
 
     [Header("Landing Settings")]
     [SerializeField] private bool alwaysDamageEngine = true;
-    [SerializeField] private int randomDamagedPartsCount = 2;
+    [SerializeField] private int randomDamagedPartsCount = 1;
 
     [Header("Debuff UI")]
     [SerializeField] private Color debuffEffectColor = new Color(1f, 0.4f, 0.4f);

@@ -59,6 +59,9 @@ public class BaseStorage : Damageable, IStorage
             return false;
         }
 
+        int totalBefore = GetTotalCurrentAmount();
+        bool wasFull = totalBefore >= maxStorageAmount;
+
         amountWithdrawn = Mathf.Min(availableAmount, amountToWithdraw);
         currentResources[type] -= amountWithdrawn;
 
@@ -66,7 +69,12 @@ public class BaseStorage : Damageable, IStorage
         if (ResourceManager.Instance != null) {
             ResourceManager.Instance.RemoveResource(type, amountWithdrawn);
         }
-        
+
+        if (wasFull && GetTotalCurrentAmount() < maxStorageAmount) {
+            int availableCapacity = maxStorageAmount - GetTotalCurrentAmount();
+            ResourceManager.Instance?.NotifyStorageSpaceFreed(this, availableCapacity);
+        }
+
         return true;
     }
 

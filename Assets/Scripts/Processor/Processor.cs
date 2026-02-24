@@ -580,6 +580,31 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         }
     }
 
+    public void ResetAllWork()
+    {
+        HashSet<Unit_Drone> dronesToRelease = new HashSet<Unit_Drone>();
+
+        foreach (ActiveRecipe recipe in _activeRecipes) {
+            recipe.processingProgress = 0f;
+            recipe.isProcessing = false;
+            if (recipe.assignedDrone != null) {
+                dronesToRelease.Add(recipe.assignedDrone);
+                recipe.assignedDrone = null;
+            }
+        }
+
+        foreach (ResourceRequest request in _pendingRequests) {
+            if (request.assignedDrone != null) {
+                dronesToRelease.Add(request.assignedDrone);
+            }
+        }
+        _pendingRequests.Clear();
+
+        foreach (Unit_Drone drone in dronesToRelease) {
+            drone.SetTask_Idle();
+        }
+    }
+
     private void AssignIdleDroneToFreedWork()
     {
         foreach (Unit_Drone idleDrone in _assignedDrones) {
