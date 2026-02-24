@@ -5979,13 +5979,13 @@ MonoBehaviour:
   maxSpawnCountPerWave: 120
   spawnRadiusOffset: 5
   basePoints: 30
-  noiseAlpha: 0.3
+  noiseAlpha: 0.25
   timeBeta: 0.06
   noise100WaveCooldown: 20
   noise100AreaCount: 5
-  noise100BudgetMultiplierPercent: 15
+  noise100BudgetMultiplierPercent: 10
   emergencyWaveMultiplierIncrementPercent: 0.5
-  noiseCautionBudgetMultiplierPercent: 9
+  noiseCautionBudgetMultiplierPercent: 10
   noiseWarningBudgetMultiplierPercent: 15
   percentValueMigrationDone: 1
 --- !u!114 &313771330
