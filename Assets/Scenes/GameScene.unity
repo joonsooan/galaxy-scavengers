@@ -2365,7 +2365,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c90e03b4b8f687648b584f96455ef6ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RealSecondsPerInGameHour: 5
+  RealSecondsPerInGameHour: 4
   currentTime: 6
   gameStartTime: 6
   autoAdvanceTime: 1
