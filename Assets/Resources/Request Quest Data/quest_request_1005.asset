@@ -23,9 +23,9 @@ MonoBehaviour:
     \uD544\uC694\uD55C \uC790\uC6D0\uB4E4\uC744 \uAC00\uACF5\uD558\uBA74 \uB429\uB2C8\uB2E4."
   requiredResources:
   - resourceType: 6
-    amount: 100
+    amount: 50
   - resourceType: 7
-    amount: 100
+    amount: 50
   questCheckRequirements:
   - checkType: 0
     targetId: 
