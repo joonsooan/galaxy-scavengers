@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 public class RequestQuestManager : MonoBehaviour
 {
     public static RequestQuestManager Instance { get; private set; }
+    private const float QuestSpawnCheckInterval = 0.5f;
     
     [Header("Request Quest Settings")]
     [Tooltip("튜토리얼 종료 후 첫 퀘스트가 생성되기까지의 실제 시간(초)")]
@@ -17,9 +18,11 @@ public class RequestQuestManager : MonoBehaviour
     
     private List<QuestData> _availableRequestQuests = new List<QuestData>();
     private List<QuestData> _spawnedRequestQuests = new List<QuestData>();
-    private int _currentQuestIndex = 0;
+    private readonly HashSet<int> _processedRequestQuestIds = new ();
+    private readonly Dictionary<int, float> _prerequisiteSatisfiedAt = new ();
     private Coroutine _questSpawnCoroutine;
     private bool _isInitialized = false;
+    private bool _eventsSubscribed;
     
     public static event Action<QuestData> OnRequestQuestSpawned;
     
@@ -37,26 +40,40 @@ public class RequestQuestManager : MonoBehaviour
     private void Start()
     {
         LoadRequestQuestsFromResources();
-        TutorialManager.OnTutorialEnded += OnTutorialEnded;
-        SceneManager.sceneLoaded += OnSceneLoaded;
     }
     
     private void OnEnable()
     {
+        if (_eventsSubscribed)
+        {
+            return;
+        }
+
         TutorialManager.OnTutorialEnded += OnTutorialEnded;
         SceneManager.sceneLoaded += OnSceneLoaded;
+        _eventsSubscribed = true;
     }
     
     private void OnDisable()
     {
+        if (!_eventsSubscribed)
+        {
+            return;
+        }
+
         TutorialManager.OnTutorialEnded -= OnTutorialEnded;
         SceneManager.sceneLoaded -= OnSceneLoaded;
+        _eventsSubscribed = false;
     }
     
     private void OnDestroy()
     {
-        TutorialManager.OnTutorialEnded -= OnTutorialEnded;
-        SceneManager.sceneLoaded -= OnSceneLoaded;
+        if (_eventsSubscribed)
+        {
+            TutorialManager.OnTutorialEnded -= OnTutorialEnded;
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+            _eventsSubscribed = false;
+        }
     }
     
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -82,7 +99,7 @@ public class RequestQuestManager : MonoBehaviour
         if (!isTutorialActive && !shouldStartTutorial && !_isInitialized)
         {
             _isInitialized = true;
-            StartCoroutine(SpawnFirstRequestQuestWithDelay());
+            StartQuestSpawnLoop();
         }
     }
     
@@ -107,65 +124,72 @@ public class RequestQuestManager : MonoBehaviour
         }
         
         _isInitialized = true;
-        StartCoroutine(SpawnFirstRequestQuestWithDelay());
+        StartQuestSpawnLoop();
     }
 
-    private IEnumerator SpawnFirstRequestQuestWithDelay()
+    private void StartQuestSpawnLoop()
     {
-        if (initialQuestDelay > 0f)
+        if (_questSpawnCoroutine != null)
         {
-            yield return new WaitForSeconds(initialQuestDelay);
+            StopCoroutine(_questSpawnCoroutine);
         }
-
-        if (IsLaunchCountdownActive())
-        {
-            yield break;
-        }
-
-        SpawnFirstRequestQuest();
+        _questSpawnCoroutine = StartCoroutine(SpawnRequestQuestCoroutine());
     }
-    
-    private void SpawnFirstRequestQuest()
+
+    private IEnumerator SpawnRequestQuestCoroutine()
     {
-        if (_availableRequestQuests.Count == 0)
+        while (true)
         {
-            return;
-        }
-        
-        QuestData firstQuest = _availableRequestQuests[0];
-        SpawnRequestQuest(firstQuest);
-        _currentQuestIndex = 1;
-        
-        if (_currentQuestIndex < _availableRequestQuests.Count)
-        {
-            _questSpawnCoroutine = StartCoroutine(SpawnNextRequestQuestCoroutine());
-        }
-    }
-    
-    private IEnumerator SpawnNextRequestQuestCoroutine()
-    {
-        while (_currentQuestIndex < _availableRequestQuests.Count)
-        {
-            yield return new WaitForSeconds(timeBetweenQuests);
+            if (SceneManager.GetActiveScene().name != "GameScene")
+            {
+                yield return CoroutineCache.GetWaitForSeconds(QuestSpawnCheckInterval);
+                continue;
+            }
 
             if (IsLaunchCountdownActive())
             {
+                yield return CoroutineCache.GetWaitForSeconds(QuestSpawnCheckInterval);
+                continue;
+            }
+
+            bool isTutorialActive = TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive();
+            if (isTutorialActive)
+            {
+                yield return CoroutineCache.GetWaitForSeconds(QuestSpawnCheckInterval);
+                continue;
+            }
+
+            QuestData nextQuest = GetNextQuestToSpawn();
+            if (nextQuest == null)
+            {
+                _questSpawnCoroutine = null;
                 yield break;
             }
-            
-            if (SceneManager.GetActiveScene().name == "GameScene")
+
+            if (!ArePrerequisitesSatisfied(nextQuest))
             {
-                bool isTutorialActive = TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive();
-                
-                if (isTutorialActive)
-                {
-                    continue;
-                }
-                
-                QuestData nextQuest = _availableRequestQuests[_currentQuestIndex];
-                SpawnRequestQuest(nextQuest);
-                _currentQuestIndex++;
+                _prerequisiteSatisfiedAt.Remove(nextQuest.questId);
+                yield return CoroutineCache.GetWaitForSeconds(QuestSpawnCheckInterval);
+                continue;
             }
+
+            if (!_prerequisiteSatisfiedAt.TryGetValue(nextQuest.questId, out float satisfiedAt))
+            {
+                _prerequisiteSatisfiedAt[nextQuest.questId] = Time.time;
+                yield return CoroutineCache.GetWaitForSeconds(QuestSpawnCheckInterval);
+                continue;
+            }
+
+            float requiredDelay = GetSpawnDelay(nextQuest);
+            if (Time.time - satisfiedAt < requiredDelay)
+            {
+                yield return CoroutineCache.GetWaitForSeconds(QuestSpawnCheckInterval);
+                continue;
+            }
+
+            SpawnRequestQuest(nextQuest);
+            _prerequisiteSatisfiedAt.Remove(nextQuest.questId);
+            yield return CoroutineCache.GetWaitForSeconds(QuestSpawnCheckInterval);
         }
     }
     
@@ -189,13 +213,15 @@ public class RequestQuestManager : MonoBehaviour
         
         QuestDataManager.Instance.RegisterRuntimeQuest(questData);
         _spawnedRequestQuests.Add(questData);
+        _processedRequestQuestIds.Add(questData.questId);
         OnRequestQuestSpawned?.Invoke(questData);
     }
     
     public List<QuestData> GetAvailableRequestQuests()
     {
         return _availableRequestQuests.Where(quest => 
-            !_spawnedRequestQuests.Contains(quest)
+            !_spawnedRequestQuests.Contains(quest) &&
+            !_processedRequestQuestIds.Contains(quest.questId)
         ).ToList();
     }
     
@@ -210,6 +236,65 @@ public class RequestQuestManager : MonoBehaviour
                 QuestDataManager.Instance.UnregisterRuntimeQuest(questData.questId);
             }
         }
+    }
+
+    private QuestData GetNextQuestToSpawn()
+    {
+        if (_availableRequestQuests == null || _availableRequestQuests.Count == 0)
+        {
+            return null;
+        }
+
+        QuestDataManager questDataManager = QuestDataManager.Instance;
+        foreach (QuestData quest in _availableRequestQuests)
+        {
+            if (quest == null) continue;
+            if (_processedRequestQuestIds.Contains(quest.questId)) continue;
+            if (questDataManager != null && questDataManager.IsQuestCompleted(quest.questId))
+            {
+                _processedRequestQuestIds.Add(quest.questId);
+                continue;
+            }
+            return quest;
+        }
+        return null;
+    }
+
+    private float GetSpawnDelay(QuestData quest)
+    {
+        return HasRealPrerequisites(quest) ? timeBetweenQuests : initialQuestDelay;
+    }
+
+    private static bool HasRealPrerequisites(QuestData quest)
+    {
+        if (quest == null || quest.previousQuestIds == null || quest.previousQuestIds.Length == 0)
+        {
+            return false;
+        }
+        return !quest.previousQuestIds.Contains(-1);
+    }
+
+    private static bool ArePrerequisitesSatisfied(QuestData quest)
+    {
+        if (!HasRealPrerequisites(quest))
+        {
+            return true;
+        }
+
+        if (QuestDataManager.Instance == null)
+        {
+            return false;
+        }
+
+        foreach (int prerequisiteId in quest.previousQuestIds)
+        {
+            if (prerequisiteId < 0) continue;
+            if (!QuestDataManager.Instance.IsQuestCompleted(prerequisiteId))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static bool IsLaunchCountdownActive()

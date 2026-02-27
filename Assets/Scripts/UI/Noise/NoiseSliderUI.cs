@@ -69,11 +69,11 @@ public class NoiseSliderUI : MonoBehaviour
         {
             noiseZoneText.text = zone switch
             {
-                NoiseManager.NoiseZone.Safe => "안전",
-                NoiseManager.NoiseZone.Caution => "주의",
-                NoiseManager.NoiseZone.Warning => "경고",
-                NoiseManager.NoiseZone.Danger => "위험",
-                _ => "안전"
+                NoiseManager.NoiseZone.Safe => "소음 : 안전",
+                NoiseManager.NoiseZone.Caution => "소음 : 주의",
+                NoiseManager.NoiseZone.Warning => "소음 : 경고",
+                NoiseManager.NoiseZone.Danger => "소음 : 위험",
+                _ => "소음 : 안전"
             };
             noiseZoneText.color = targetColor;
         }

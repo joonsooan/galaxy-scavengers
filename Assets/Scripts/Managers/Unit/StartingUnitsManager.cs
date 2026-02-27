@@ -164,6 +164,9 @@ public class StartingUnitsManager : MonoBehaviour
             if (config == null || config.unitData == null || config.count <= 0) {
                 continue;
             }
+            if (IsTutorialMode() && config.unitData.unitPrefab != null && config.unitData.unitPrefab.GetComponent<Unit_Construct>() != null) {
+                continue;
+            }
 
             for (int i = 0; i < config.count; i++) {
                 Vector3 spawnPosition = GetSpawnPositionAroundMainStructure(centerPosition, config.spawnRadius);
@@ -211,6 +214,33 @@ public class StartingUnitsManager : MonoBehaviour
                 }
             }
         }
+
+        if (!IsTutorialMode()) {
+            bool hasConstruct = false;
+            foreach (StartingUnitConfig c in _allStartingUnits) {
+                if (c?.unitData?.unitPrefab != null && c.unitData.unitPrefab.GetComponent<Unit_Construct>() != null) {
+                    hasConstruct = true;
+                    break;
+                }
+            }
+            if (!hasConstruct) {
+                UnitData constructData = Resources.Load<UnitData>("Unit Data/Unit_Construct");
+                if (constructData != null) {
+                    _allStartingUnits.Add(new StartingUnitConfig {
+                        unitData = constructData,
+                        count = 1,
+                        spawnRadius = 3f,
+                        spawnInterval = 0.5f
+                    });
+                }
+            }
+        }
+    }
+
+    private static bool IsTutorialMode()
+    {
+        return TutorialManager.Instance != null &&
+            (TutorialManager.Instance.IsTutorialActive() || TutorialManager.Instance.ShouldStartTutorial());
     }
 
     private Vector3 GetSpawnPositionAroundMainStructure(Vector3 center, float radius)

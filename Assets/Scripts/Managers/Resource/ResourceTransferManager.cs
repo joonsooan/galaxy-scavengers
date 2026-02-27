@@ -60,6 +60,62 @@ public class ResourceTransferManager : MonoBehaviour
         }
     }
 
+    private void WithdrawInventoryResourcesFromMainStructure(Dictionary<ResourceType, int> resources)
+    {
+        if (resources == null || resources.Count == 0)
+        {
+            return;
+        }
+
+        if (ResourceDataManager.Instance == null)
+        {
+            return;
+        }
+
+        MainStructure mainStructure = ResourceDataManager.Instance.GetMainStructure();
+        List<IStorage> storages = ResourceDataManager.Instance.GetAllStorages();
+        if (storages == null || storages.Count == 0)
+        {
+            return;
+        }
+
+        List<IStorage> orderedStorages = new List<IStorage>();
+        if (mainStructure != null)
+        {
+            orderedStorages.Add(mainStructure);
+        }
+        foreach (IStorage s in storages)
+        {
+            if (s != null && s != mainStructure)
+            {
+                orderedStorages.Add(s);
+            }
+        }
+
+        foreach (var kvp in resources)
+        {
+            if (kvp.Value <= 0)
+            {
+                continue;
+            }
+
+            int remaining = kvp.Value;
+            foreach (IStorage storage in orderedStorages)
+            {
+                if (remaining <= 0)
+                {
+                    break;
+                }
+                if (storage.TryWithdrawResource(kvp.Key, remaining, out int withdrawn) && withdrawn > 0)
+                {
+                    remaining -= withdrawn;
+                }
+            }
+        }
+
+        ResourceDataManager.Instance.RecalculateResourceCountsFromStorages();
+    }
+
     public void StoreGameInventoryForTransfer(InventorySystem gameInventory)
     {
         Dictionary<ResourceType, int> resourcesToTransfer = gameInventory.GetAllResourcesFromInventory();
@@ -69,6 +125,8 @@ public class ResourceTransferManager : MonoBehaviour
             Debug.Log("ResourceTransferManager: No resources to transfer");
             return;
         }
+
+        WithdrawInventoryResourcesFromMainStructure(resourcesToTransfer);
 
         _pendingResources = resourcesToTransfer;
         gameInventory.ClearAllInventoryCells();

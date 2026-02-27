@@ -260,10 +260,11 @@ MonoBehaviour:
   healthBarYOffset: 0.75
   currentState: 0
   carryCapacity: 1000
-  processingSpeed: 2
-  loadingTime: 1
-  unloadingTime: 1
+  processingSpeed: 3
+  loadingTime: 0.5
+  unloadingTime: 0.5
   assignmentTime: 1
+  notAssignedAlertDelay: 1
   movement: {fileID: 4483249089817793867}
   hoverHeight: 0.1
   hoverDuration: 1
@@ -382,7 +383,7 @@ MonoBehaviour:
   m_BlendStyleIndex: 0
   m_FalloffIntensity: 0.5
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 0.1
+  m_Intensity: 0.3
   m_LightVolumeIntensity: 1
   m_LightVolumeEnabled: 0
   m_ApplyToSortingLayers: 0000000051af41f095106c118f7ac7c255feb1e9

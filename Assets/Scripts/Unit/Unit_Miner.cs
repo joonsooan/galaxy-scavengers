@@ -51,6 +51,8 @@ public class Unit_Miner : UnitBase
     private EventInstance _miningSoundInstance;
     private Tween _miningVibrationTween;
     private bool _noResourceAlertActive;
+    private bool _mineTypeAllOffAlertActive;
+    private bool _isFullAlertActive;
     private WaitForSeconds _searchWait;
     private WaitForSeconds _resourceImageSpawnWait;
     private Vector3 _spriteBaseLocalPosition;
@@ -62,6 +64,7 @@ public class Unit_Miner : UnitBase
     private Sequence _vibrationSequence;
     private bool _hasReservedMiningCell;
     private Vector3Int _reservedMiningCell;
+    private int _reservedStorageAmount;
 
     protected override void Awake()
     {
@@ -102,19 +105,14 @@ public class Unit_Miner : UnitBase
         base.OnDisable();
         UnsubscribeEvents();
         ReleaseMiningCellReservation();
-        if (_noResourceAlertActive) {
-            FindFirstObjectByType<GameAlertUIManager>()?.UnregisterAlert(GameAlertType.MinerNoResource, this);
-            _noResourceAlertActive = false;
-        }
+        ReleaseStorageReservation();
+        ClearMinerAlerts();
     }
 
     protected override void OnDestroy()
     {
         ReleaseMiningCellReservation();
-        if (_noResourceAlertActive) {
-            FindFirstObjectByType<GameAlertUIManager>()?.UnregisterAlert(GameAlertType.MinerNoResource, this);
-            _noResourceAlertActive = false;
-        }
+        ClearMinerAlerts();
         StopMiningVibration();
         StopMiningParticles();
         StopMiningSound();
@@ -284,7 +282,7 @@ public class Unit_Miner : UnitBase
             if (hasAether) {
                 AetherConsumptionManager aetherManager = FindFirstObjectByType<AetherConsumptionManager>();
                 if (aetherManager != null && aetherManager.IsAetherCapacityFull) {
-                    // Don't unload aether if capacity is full
+                    ReleaseStorageReservation();
                     InitializeCarryAmounts();
                     _targetResourceNode = null;
                     _targetStorage = null;
@@ -334,10 +332,13 @@ public class Unit_Miner : UnitBase
             }
 
             if (remainingResources.Count > 0 && remainingResources.Values.Sum() > 0) {
+                ReleaseStorageReservation();
                 _targetStorage = null;
                 GoToStorage();
                 yield break;
             }
+
+            ReleaseStorageReservation();
         }
 
         InitializeCarryAmounts();
@@ -350,10 +351,8 @@ public class Unit_Miner : UnitBase
     private void FindAndSetTarget()
     {
         if (_currentCarryAmounts.Values.Sum() > 0) {
-            if (_noResourceAlertActive) {
-                FindFirstObjectByType<GameAlertUIManager>()?.UnregisterAlert(GameAlertType.MinerNoResource, this);
-                _noResourceAlertActive = false;
-            }
+            SetMineTypeAllOffAlert(!HasMineableTypesEnabled());
+            SetMinerNoResourceAlert(false);
             GoToStorage();
             return;
         }
@@ -377,10 +376,8 @@ public class Unit_Miner : UnitBase
                 if (unitMovement.SetNewTarget(BuildingManager.Instance.grid.GetCellCenterWorld(_targetMiningCell))) {
                     currentState = UnitState.Moving;
                     ResetIdleRoam();
-                    if (_noResourceAlertActive) {
-                        FindFirstObjectByType<GameAlertUIManager>()?.UnregisterAlert(GameAlertType.MinerNoResource, this);
-                        _noResourceAlertActive = false;
-                    }
+                    SetMineTypeAllOffAlert(false);
+                    SetMinerNoResourceAlert(false);
                 }
                 else {
                     _targetResourceNode.Unreserve();
@@ -400,9 +397,13 @@ public class Unit_Miner : UnitBase
             ReleaseMiningCellReservation();
             _targetResourceNode = null;
             currentState = UnitState.Idle;
-            if (!_noResourceAlertActive) {
-                FindFirstObjectByType<GameAlertUIManager>()?.RegisterAlert(GameAlertType.MinerNoResource, this);
-                _noResourceAlertActive = true;
+            if (!HasMineableTypesEnabled()) {
+                SetMineTypeAllOffAlert(true);
+                SetMinerNoResourceAlert(false);
+            }
+            else {
+                SetMineTypeAllOffAlert(false);
+                SetMinerNoResourceAlert(true);
             }
         }
     }
@@ -488,17 +489,25 @@ public class Unit_Miner : UnitBase
 
     private void GoToStorage()
     {
+        ReleaseStorageReservation();
+
         UnloadTarget bestTarget = FindClosestUnloadPosition();
 
         if (bestTarget.storage != null) {
+            int carryAmount = _currentCarryAmounts.Values.Sum();
+            ResourceManager.Instance.ReserveStorageCapacity(bestTarget.storage, carryAmount);
+            _reservedStorageAmount = carryAmount;
+
             _targetStorage = bestTarget.storage;
             _targetUnloadCell = bestTarget.unloadCell;
+            SetMinerIsFullAlert(false);
 
             currentState = UnitState.ReturningToStorage;
             unitMovement.SetNewTarget(BuildingManager.Instance.grid.GetCellCenterWorld(_targetUnloadCell));
         }
         else {
             currentState = UnitState.Idle;
+            SetMinerIsFullAlert(_currentCarryAmounts.Values.Sum() > 0);
             Debug.Log("모든 저장소가 가득 찼거나 접근할 수 없습니다. 대기합니다.");
         }
     }
@@ -519,8 +528,9 @@ public class Unit_Miner : UnitBase
             }
         }
 
+        int carryAmount = _currentCarryAmounts.Values.Sum();
         IEnumerable<IStorage> allStorages = ResourceManager.Instance.GetAllStorages()
-            .Where(s => s != null && s.GetTotalCurrentAmount() < s.GetMaxCapacity());
+            .Where(s => s != null && ResourceManager.Instance.GetAvailableStorageCapacity(s) >= carryAmount);
 
         if (!hasAether) {
             allStorages = allStorages.Where(s => !(s is Battery));
@@ -608,8 +618,17 @@ public class Unit_Miner : UnitBase
         unitMovement.StopMovement();
     }
 
+    private void ReleaseStorageReservation()
+    {
+        if (_targetStorage != null && _reservedStorageAmount > 0 && ResourceManager.Instance != null) {
+            ResourceManager.Instance.ReleaseStorageCapacity(_targetStorage, _reservedStorageAmount);
+            _reservedStorageAmount = 0;
+        }
+    }
+
     private void HandleStorageLoss()
     {
+        ReleaseStorageReservation();
         FindAndSetStorage();
         GoToStorage();
     }
@@ -618,6 +637,7 @@ public class Unit_Miner : UnitBase
     {
         OnResourceMined += HandleResourceMined;
         ResourceManager.OnNewStorageAdded += HandleNewStorageAdded;
+        ResourceManager.OnStorageSpaceFreed += HandleStorageSpaceFreed;
         ResourceManager.OnStorageRemoved += HandleStorageRemoved;
         UnitManager.OnMineableTypesChanged += HandleMineableTypesChanged;
         SceneManager.sceneUnloaded += OnSceneUnloaded;
@@ -628,6 +648,7 @@ public class Unit_Miner : UnitBase
     {
         OnResourceMined -= HandleResourceMined;
         ResourceManager.OnNewStorageAdded -= HandleNewStorageAdded;
+        ResourceManager.OnStorageSpaceFreed -= HandleStorageSpaceFreed;
         ResourceManager.OnStorageRemoved -= HandleStorageRemoved;
         UnitManager.OnMineableTypesChanged -= HandleMineableTypesChanged;
         SceneManager.sceneUnloaded -= OnSceneUnloaded;
@@ -663,6 +684,15 @@ public class Unit_Miner : UnitBase
 
     private void HandleNewStorageAdded()
     {
+        SetMinerIsFullAlert(false);
+        if (_currentCarryAmounts.Values.Sum() > 0 && currentState is UnitState.Idle or UnitState.ReturningToStorage) {
+            GoToStorage();
+        }
+    }
+
+    private void HandleStorageSpaceFreed(IStorage storage, int availableCapacity)
+    {
+        SetMinerIsFullAlert(false);
         if (_currentCarryAmounts.Values.Sum() > 0 && currentState is UnitState.Idle or UnitState.ReturningToStorage) {
             GoToStorage();
         }
@@ -671,6 +701,7 @@ public class Unit_Miner : UnitBase
     private void HandleStorageRemoved(IStorage storage)
     {
         if (_targetStorage == storage) {
+            ReleaseStorageReservation();
             _targetStorage = null;
             if (currentState is UnitState.ReturningToStorage or UnitState.Unloading) {
                 GoToStorage();
@@ -681,6 +712,11 @@ public class Unit_Miner : UnitBase
     private void HandleMineableTypesChanged(ResourceType[] newTypes)
     {
         mineableResourceTypes = newTypes;
+        bool hasMineableTypes = HasMineableTypesEnabled();
+        SetMineTypeAllOffAlert(!hasMineableTypes);
+        if (!hasMineableTypes) {
+            SetMinerNoResourceAlert(false);
+        }
 
         if ((currentState == UnitState.Mining || currentState == UnitState.Moving) &&
             _targetResourceNode != null && !mineableResourceTypes.Contains(_targetResourceNode.resourceType)) {
@@ -702,6 +738,57 @@ public class Unit_Miner : UnitBase
                 TryStartActions();
             }
         }
+    }
+
+    private void ClearMinerAlerts()
+    {
+        SetMinerNoResourceAlert(false);
+        SetMineTypeAllOffAlert(false);
+        SetMinerIsFullAlert(false);
+    }
+
+    private bool HasMineableTypesEnabled()
+    {
+        return mineableResourceTypes != null && mineableResourceTypes.Length > 0;
+    }
+
+    private void SetMinerNoResourceAlert(bool shouldEnable)
+    {
+        if (shouldEnable == _noResourceAlertActive) return;
+        GameAlertUIManager alertManager = FindFirstObjectByType<GameAlertUIManager>();
+        if (shouldEnable) {
+            alertManager?.RegisterAlert(GameAlertType.MinerNoResource, this);
+        }
+        else {
+            alertManager?.UnregisterAlert(GameAlertType.MinerNoResource, this);
+        }
+        _noResourceAlertActive = shouldEnable;
+    }
+
+    private void SetMineTypeAllOffAlert(bool shouldEnable)
+    {
+        if (shouldEnable == _mineTypeAllOffAlertActive) return;
+        GameAlertUIManager alertManager = FindFirstObjectByType<GameAlertUIManager>();
+        if (shouldEnable) {
+            alertManager?.RegisterAlert(GameAlertType.MineTypeAllOff, this);
+        }
+        else {
+            alertManager?.UnregisterAlert(GameAlertType.MineTypeAllOff, this);
+        }
+        _mineTypeAllOffAlertActive = shouldEnable;
+    }
+
+    private void SetMinerIsFullAlert(bool shouldEnable)
+    {
+        if (shouldEnable == _isFullAlertActive) return;
+        GameAlertUIManager alertManager = FindFirstObjectByType<GameAlertUIManager>();
+        if (shouldEnable) {
+            alertManager?.RegisterAlert(GameAlertType.MinerIsFull, this);
+        }
+        else {
+            alertManager?.UnregisterAlert(GameAlertType.MinerIsFull, this);
+        }
+        _isFullAlertActive = shouldEnable;
     }
 
     private void OnSceneUnloaded(Scene scene)

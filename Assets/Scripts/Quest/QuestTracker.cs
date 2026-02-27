@@ -303,6 +303,26 @@ public class QuestTracker : MonoBehaviour
         
         Debug.Log("QuestTracker: All quest tracking progress has been reset.");
     }
+
+    public void ResetQuestProgressForQuest(int questId)
+    {
+        _questProgress.Remove(questId);
+
+        if (QuestDataManager.Instance != null)
+        {
+            QuestData quest = QuestDataManager.Instance.GetQuestData(questId);
+            if (quest != null && quest.questCheckRequirements != null)
+            {
+                foreach (QuestCheckData checkData in quest.questCheckRequirements)
+                {
+                    if (checkData == null) continue;
+                    checkData.ResetProgress();
+                }
+            }
+        }
+
+        ClearSavedQuestCheckProgressForQuest(questId);
+    }
     
     private void SaveQuestCheckProgress()
     {
@@ -402,6 +422,32 @@ public class QuestTracker : MonoBehaviour
             }
         }
         
+        PlayerPrefs.Save();
+    }
+
+    private void ClearSavedQuestCheckProgressForQuest(int questId)
+    {
+        if (QuestDataManager.Instance == null) return;
+
+        QuestData quest = QuestDataManager.Instance.GetQuestData(questId);
+        if (quest == null || quest.questCheckRequirements == null) return;
+
+        for (int i = 0; i < quest.questCheckRequirements.Length; i++)
+        {
+            string progressKey = $"QuestCheckProgress_{questId}_{i}";
+            string completedKey = $"QuestCheckCompleted_{questId}_{i}";
+
+            if (PlayerPrefs.HasKey(progressKey))
+            {
+                PlayerPrefs.DeleteKey(progressKey);
+            }
+
+            if (PlayerPrefs.HasKey(completedKey))
+            {
+                PlayerPrefs.DeleteKey(completedKey);
+            }
+        }
+
         PlayerPrefs.Save();
     }
 }

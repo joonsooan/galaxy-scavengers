@@ -252,6 +252,7 @@ public class TutorialManager : MonoBehaviour
 
         _isTutorialActive = true;
         _currentStepIndex = 0;
+        ResourceManager.Instance?.ApplyTutorialStartResources();
 
         if (DayNightCycleManager.Instance != null) {
             DayNightCycleManager.Instance.SetAutoAdvanceTime(false);

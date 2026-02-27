@@ -9,6 +9,7 @@ public class ModuleStationUIManager : MonoBehaviour, IQuestUIProvider
     [SerializeField] private GameObject moduleStationPanel;
     [SerializeField] private TMP_Text stationNameText;
     [SerializeField] private TMP_Text stationInfoText;
+    [SerializeField] private TMP_Text moduleCraftingModeText;
     [SerializeField] private GameObject recipeGridContainer;
     [SerializeField] private GameObject moduleGridCellPrefab;
     [SerializeField] private ModuleDetailPanel moduleDetailPanel;
@@ -156,6 +157,10 @@ public class ModuleStationUIManager : MonoBehaviour, IQuestUIProvider
     {
         recipeGridContainer.SetActive(true);
         moduleDetailPanel.ShowPanel();
+        if (moduleCraftingModeText != null)
+        {
+            moduleCraftingModeText.gameObject.SetActive(true);
+        }
         LoadAllRecipes();
     }
     
@@ -163,6 +168,10 @@ public class ModuleStationUIManager : MonoBehaviour, IQuestUIProvider
     {
         recipeGridContainer.SetActive(false);
         moduleDetailPanel.HidePanel();
+        if (moduleCraftingModeText != null)
+        {
+            moduleCraftingModeText.gameObject.SetActive(false);
+        }
     }
     
     public void ClearDetailPanel()

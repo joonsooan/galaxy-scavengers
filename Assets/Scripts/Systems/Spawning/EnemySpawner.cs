@@ -53,6 +53,7 @@ public class EnemySpawner : MonoBehaviour
     private float _noiseEmergencyMultiplierBonus;
     private float _countdownEmergencyMultiplierBonus;
     private Coroutine _emergencyWaveCoroutine;
+    private int _countdownEmergencyElapsedSeconds;
     private readonly HashSet<int> _persistentEnemyInstanceIds = new HashSet<int>();
     private string _currentEmergencyTriggerSource = string.Empty;
     private bool _isSubscribedToEvents;
@@ -101,6 +102,7 @@ public class EnemySpawner : MonoBehaviour
         DayNightCycleManager.OnDayStarted += OnDayStarted;
         LaunchUIController.OnLaunchCountdownStarted += OnLaunchCountdownStarted;
         LaunchUIController.OnLaunchCountdownFinished += OnLaunchCountdownFinished;
+        LaunchUIController.OnLaunchCountdownSecondChanged += OnLaunchCountdownSecondChanged;
 
         if (NoiseManager.Instance != null) NoiseManager.Instance.OnNoiseChanged += OnNoiseChanged;
         _isSubscribedToEvents = true;
@@ -117,6 +119,7 @@ public class EnemySpawner : MonoBehaviour
         DayNightCycleManager.OnDayStarted -= OnDayStarted;
         LaunchUIController.OnLaunchCountdownStarted -= OnLaunchCountdownStarted;
         LaunchUIController.OnLaunchCountdownFinished -= OnLaunchCountdownFinished;
+        LaunchUIController.OnLaunchCountdownSecondChanged -= OnLaunchCountdownSecondChanged;
 
         if (NoiseManager.Instance != null) NoiseManager.Instance.OnNoiseChanged -= OnNoiseChanged;
         _isSubscribedToEvents = false;
@@ -139,7 +142,7 @@ public class EnemySpawner : MonoBehaviour
         {
             ActivateExistingEnemiesFromBudget(ConvertPercentToMultiplier(noiseCautionBudgetMultiplierPercent));
         }
-        else if (zone == NoiseManager.NoiseZone.Warning)
+        else if (zone == NoiseManager.NoiseZone.Warning || zone == NoiseManager.NoiseZone.Danger)
         {
             ActivateExistingEnemiesFromBudget(ConvertPercentToMultiplier(noiseWarningBudgetMultiplierPercent));
         }
@@ -504,7 +507,10 @@ public class EnemySpawner : MonoBehaviour
         _currentEmergencyTriggerSource = "Noise100";
         ActivateExistingEnemiesFromBudget(ConvertPercentToMultiplier(noise100BudgetMultiplierPercent), true);
         SpawnEmergencyWave();
-        EnsureEmergencyWaveLoopRunning();
+        if (!_countdownEmergencyActive)
+        {
+            EnsureEmergencyWaveLoopRunning();
+        }
     }
 
     private void StopNoiseEmergency()
@@ -521,10 +527,11 @@ public class EnemySpawner : MonoBehaviour
         if (_countdownEmergencyActive) return;
 
         _countdownEmergencyActive = true;
+        _countdownEmergencyElapsedSeconds = 0;
         _currentEmergencyTriggerSource = "LaunchCountdown";
         ActivateExistingEnemiesFromBudget(ConvertPercentToMultiplier(noise100BudgetMultiplierPercent), true);
         SpawnEmergencyWave();
-        EnsureEmergencyWaveLoopRunning();
+        TryStopEmergencyWaveLoop();
     }
 
     private void StopCountdownEmergency()
@@ -532,8 +539,16 @@ public class EnemySpawner : MonoBehaviour
         if (!_countdownEmergencyActive) return;
 
         _countdownEmergencyActive = false;
+        _countdownEmergencyElapsedSeconds = 0;
         _countdownEmergencyMultiplierBonus = 0f;
-        TryStopEmergencyWaveLoop();
+        if (_noiseEmergencyActive)
+        {
+            EnsureEmergencyWaveLoopRunning();
+        }
+        else
+        {
+            TryStopEmergencyWaveLoop();
+        }
     }
 
     private void EnsureEmergencyWaveLoopRunning()
@@ -553,10 +568,10 @@ public class EnemySpawner : MonoBehaviour
 
     private IEnumerator EmergencyWaveLoop()
     {
-        while (IsAnyEmergencyActive())
+        while (_noiseEmergencyActive && !_countdownEmergencyActive)
         {
             yield return CoroutineCache.GetWaitForSeconds(noise100WaveCooldown);
-            if (!IsAnyEmergencyActive()) break;
+            if (!_noiseEmergencyActive || _countdownEmergencyActive) break;
             SpawnEmergencyWave();
         }
 
@@ -589,6 +604,22 @@ public class EnemySpawner : MonoBehaviour
         if (_noiseEmergencyActive)
         {
             _noiseEmergencyMultiplierBonus += ConvertPercentToIncrement(emergencyWaveMultiplierIncrementPercent);
+        }
+    }
+
+    private void OnLaunchCountdownSecondChanged(int remainingSeconds)
+    {
+        if (!_countdownEmergencyActive)
+        {
+            return;
+        }
+
+        _countdownEmergencyElapsedSeconds++;
+        int spawnIntervalSeconds = Mathf.Max(1, Mathf.RoundToInt(noise100WaveCooldown));
+        if (_countdownEmergencyElapsedSeconds >= spawnIntervalSeconds)
+        {
+            _countdownEmergencyElapsedSeconds = 0;
+            SpawnEmergencyWave();
         }
     }
 
@@ -652,6 +683,7 @@ public class EnemySpawner : MonoBehaviour
         _countdownEmergencyActive = false;
         _noiseEmergencyMultiplierBonus = 0f;
         _countdownEmergencyMultiplierBonus = 0f;
+        _countdownEmergencyElapsedSeconds = 0;
         _isEmergencyWaveSpawn = false;
 
         if (_emergencyWaveCoroutine != null)

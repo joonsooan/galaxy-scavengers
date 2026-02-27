@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8181208960080871813}
   - component: {fileID: 5254277940681920834}
   - component: {fileID: 7245013787098741407}
+  - component: {fileID: 8574172107661188701}
   m_Layer: 0
   m_Name: _BgmManager
   m_TagString: Untagged
@@ -78,6 +79,18 @@ MonoBehaviour:
       Data3: -1013242689
       Data4: 927224795
     Path: event:/BGM_InGame/BGM_InGame_3
+  - Guid:
+      Data1: 768131495
+      Data2: 1197306255
+      Data3: -1753623630
+      Data4: 1590867011
+    Path: event:/BGM_InGame/BGM_InGame_4
+  - Guid:
+      Data1: -1267811933
+      Data2: 1228745763
+      Data3: -1280670053
+      Data4: -2139291702
+    Path: event:/BGM_InGame/BGM_InGame_5
   tutorialBgm:
     Guid:
       Data1: 603399768
@@ -129,3 +142,25 @@ MonoBehaviour:
   defaultMasterVolume: 1
   defaultMusicVolume: 1
   defaultSFXVolume: 1
+--- !u!114 &8574172107661188701
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4922650622587349759}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfbff72b56c5219419b3a395d45bd5da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hitEvent:
+    Guid:
+      Data1: -503132671
+      Data2: 1224608739
+      Data3: 1160129210
+      Data4: 1511118941
+    Path: event:/SFX_InGame/SFX_Hit
+  targetTypeParameter: TargetType
+  attackTypeParameter: AttackType
+  attackerFactionParameter: AttackerFaction

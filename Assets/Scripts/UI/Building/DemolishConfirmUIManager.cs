@@ -14,6 +14,7 @@ public class DemolishTarget
     public bool isConstructionSite;
     public ConstructionSite constructionSite;
     public Dictionary<ResourceType, int> preCalculatedRefund;
+    public bool isUnit;
 }
 
 public class DemolishConfirmUIManager : MonoBehaviour
@@ -155,7 +156,8 @@ public class DemolishConfirmUIManager : MonoBehaviour
             Dictionary<ResourceType, int> cost = t.preCalculatedRefund != null ? t.preCalculatedRefund : GetConstructionCost(t);
             bool isBuildingPiece = t.buildingData == null && t.buildingPieceType != BuildingPieceType.None;
             bool isConstructionSitePiece = t.isConstructionSite;
-            float ratio = (isBuildingPiece || isConstructionSitePiece) ? 1f : refundRatio;
+            bool isUnit = t.isUnit;
+            float ratio = (isBuildingPiece || isConstructionSitePiece) ? 1f : (isUnit ? 0.5f : refundRatio);
 
             foreach (var kvp in cost)
             {

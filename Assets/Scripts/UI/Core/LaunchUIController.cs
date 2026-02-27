@@ -10,6 +10,7 @@ public class LaunchUIController : MonoBehaviour
 {
     public static event Action OnLaunchCountdownStarted;
     public static event Action OnLaunchCountdownFinished;
+    public static event Action<int> OnLaunchCountdownSecondChanged;
 
     [Header("UI References")]
     [SerializeField] private GameObject launchPanel;
@@ -32,6 +33,19 @@ public class LaunchUIController : MonoBehaviour
     [SerializeField] private EventReference buttonClickSound;
     [SerializeField] private EventReference countdownBgm;
     [SerializeField] private float bgmFadeOutTime = 0.5f;
+
+    [Header("Countdown Visual Settings")]
+    [SerializeField] private int countdownDangerThresholdSeconds = 10;
+    [SerializeField] private Color countdownDefaultColor = Color.white;
+    [SerializeField] private Color countdownDangerColor = Color.red;
+    [SerializeField] private float normalBounceScale = 0.18f;
+    [SerializeField] private float normalBounceDuration = 0.18f;
+    [SerializeField] private int normalBounceVibrato = 8;
+    [SerializeField] private float normalBounceElasticity = 0.85f;
+    [SerializeField] private float dangerBounceScale = 0.3f;
+    [SerializeField] private float dangerBounceDuration = 0.24f;
+    [SerializeField] private int dangerBounceVibrato = 10;
+    [SerializeField] private float dangerBounceElasticity = 0.95f;
     
     [Header("Countdown Hidden UI")]
     [SerializeField] private GameObject speedUI;
@@ -53,6 +67,20 @@ public class LaunchUIController : MonoBehaviour
     private bool _isMainEngineRepairAlertActive;
     private bool _isLaunchPausePanelLockActive;
     private bool _isPreparingCountdown;
+    private Tween _countdownBounceTween;
+    private Vector3 _countdownBaseScale;
+    private bool _hasCountdownBaseScale;
+    private int _remainingWholeSeconds;
+    private float _displayRemainingSeconds;
+    private float _lastBeatTimestamp;
+    private float _estimatedBeatInterval = 1f;
+    private bool _hasPreviousBeatTimestamp;
+    private bool _isDangerCountdown;
+    private int _pendingBeatStepsForSecond;
+    private int _lastDisplayedWholeSeconds = -1;
+    private bool _hasAppliedFirstBeatSecondStep;
+    private float _countdownPreviousTimeScale = 1f;
+    private bool _hasCountdownTimeScaleOverride;
 
     private void Awake()
     {
@@ -94,6 +122,12 @@ public class LaunchUIController : MonoBehaviour
         TutorialManager.OnTutorialEnded -= UpdateLaunchAvailability;
         _isPreparingCountdown = false;
         SetLaunchPausePanelLock(false);
+        if (BgmManager.Instance != null)
+        {
+            BgmManager.Instance.DisableCountdownBeatSync();
+        }
+        RestoreCountdownTimeScaleOverride();
+        ResetCountdownVisualState();
     }
 
     private void UpdateCachedWaits()
@@ -254,6 +288,7 @@ public class LaunchUIController : MonoBehaviour
             GameManager.Instance.TogglePause();
         }
         SetLaunchPausePanelLock(false);
+        ApplyCountdownTimeScaleOverride();
 
         GameSceneQuestUIManager questUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
         if (questUIManager != null)
@@ -373,17 +408,100 @@ public class LaunchUIController : MonoBehaviour
         }
 
         _isPreparingCountdown = false;
-
-        float remaining = Mathf.Max(0f, countdownDurationSeconds);
-
-        while (remaining > 0f)
+        bool useBeatSync = false;
+        if (BgmManager.Instance != null && !countdownBgm.IsNull)
         {
-            UpdateCountdownText(remaining);
-            yield return null;
-            remaining -= Time.deltaTime;
+            useBeatSync = BgmManager.Instance.EnableCountdownBeatSync();
         }
 
-        remaining = 0f;
+        _remainingWholeSeconds = Mathf.Max(0, Mathf.CeilToInt(countdownDurationSeconds));
+        _displayRemainingSeconds = _remainingWholeSeconds;
+        _estimatedBeatInterval = 1f;
+        _lastBeatTimestamp = Time.unscaledTime;
+        _hasPreviousBeatTimestamp = true;
+        _pendingBeatStepsForSecond = 0;
+        _lastDisplayedWholeSeconds = _remainingWholeSeconds;
+        _hasAppliedFirstBeatSecondStep = false;
+        ResetCountdownVisualState();
+        HandleSecondChanged(-1, _lastDisplayedWholeSeconds);
+
+        float realtimeFallbackRemaining = Mathf.Max(0f, countdownDurationSeconds);
+
+        while (_remainingWholeSeconds > 0)
+        {
+            if (useBeatSync)
+            {
+                float timeSinceLastBeat = Time.unscaledTime - _lastBeatTimestamp;
+                if (_hasPreviousBeatTimestamp && timeSinceLastBeat > 2f)
+                {
+                    useBeatSync = false;
+                    realtimeFallbackRemaining = _displayRemainingSeconds;
+                }
+
+                int beatTicks = BgmManager.Instance != null ? BgmManager.Instance.ConsumeCountdownBeatTicks() : 0;
+                if (beatTicks > 0)
+                {
+                    float tempoBpm = BgmManager.Instance != null ? BgmManager.Instance.GetCountdownTempoBpm() : 0f;
+                    int beatsPerCountdownSecond = GetBeatsPerCountdownSecond(tempoBpm);
+
+                    for (int i = 0; i < beatTicks; i++)
+                    {
+                        if (_remainingWholeSeconds <= 0)
+                        {
+                            break;
+                        }
+
+                        float now = Time.unscaledTime;
+                        if (_hasPreviousBeatTimestamp)
+                        {
+                            float interval = now - _lastBeatTimestamp;
+                            if (interval > 0.02f && interval < 5f)
+                            {
+                                _estimatedBeatInterval = interval;
+                            }
+                        }
+
+                        _lastBeatTimestamp = now;
+                        _hasPreviousBeatTimestamp = true;
+
+                        if (!_hasAppliedFirstBeatSecondStep)
+                        {
+                            _hasAppliedFirstBeatSecondStep = true;
+                            _pendingBeatStepsForSecond = 0;
+                            _remainingWholeSeconds = Mathf.Max(0, _remainingWholeSeconds - 1);
+                            continue;
+                        }
+
+                        _pendingBeatStepsForSecond++;
+                        if (_pendingBeatStepsForSecond >= beatsPerCountdownSecond)
+                        {
+                            _pendingBeatStepsForSecond = 0;
+                            _remainingWholeSeconds = Mathf.Max(0, _remainingWholeSeconds - 1);
+                        }
+                    }
+                }
+
+                UpdateBeatSyncedDisplaySeconds();
+            }
+            else
+            {
+                realtimeFallbackRemaining = Mathf.Max(0f, realtimeFallbackRemaining - Time.deltaTime);
+                _displayRemainingSeconds = realtimeFallbackRemaining;
+
+                int currentSeconds = Mathf.Max(0, Mathf.CeilToInt(realtimeFallbackRemaining));
+                _remainingWholeSeconds = currentSeconds;
+            }
+
+            UpdateCountdownVisualByDisplayedSeconds();
+            UpdateCountdownText(_displayRemainingSeconds);
+            yield return null;
+        }
+
+        if (BgmManager.Instance != null)
+        {
+            BgmManager.Instance.DisableCountdownBeatSync();
+        }
+
         UpdateCountdownText(0f);
 
         yield return null;
@@ -427,7 +545,33 @@ public class LaunchUIController : MonoBehaviour
         _countdownCoroutine = null;
         OnLaunchCountdownFinished?.Invoke();
 
+        Time.timeScale = 1f;
+        _hasCountdownTimeScaleOverride = false;
+
         SceneLoader.Instance.LoadBaseScene(SceneLoader.ReturnFromGameState.Success);
+    }
+
+    private void ApplyCountdownTimeScaleOverride()
+    {
+        if (_hasCountdownTimeScaleOverride)
+        {
+            return;
+        }
+
+        _countdownPreviousTimeScale = Mathf.Max(0.01f, Time.timeScale);
+        Time.timeScale = 2f;
+        _hasCountdownTimeScaleOverride = true;
+    }
+
+    private void RestoreCountdownTimeScaleOverride()
+    {
+        if (!_hasCountdownTimeScaleOverride)
+        {
+            return;
+        }
+
+        Time.timeScale = _countdownPreviousTimeScale;
+        _hasCountdownTimeScaleOverride = false;
     }
 
     private IEnumerator FadeToBlack()
@@ -495,11 +639,115 @@ public class LaunchUIController : MonoBehaviour
             return;
         }
 
-        int totalSeconds = Mathf.Max(0, Mathf.CeilToInt(remainingSeconds));
-        int minutes = totalSeconds / 60;
-        int seconds = totalSeconds % 60;
+        float clampedSeconds = Mathf.Max(0f, remainingSeconds);
+        countdownText.text = $"{clampedSeconds:00.000} s";
+    }
 
-        countdownText.text = $"{minutes:00} : {seconds:00}";
+    private void UpdateBeatSyncedDisplaySeconds()
+    {
+        if (_remainingWholeSeconds <= 0)
+        {
+            _displayRemainingSeconds = 0f;
+            return;
+        }
+
+        if (!_hasPreviousBeatTimestamp)
+        {
+            _displayRemainingSeconds = _remainingWholeSeconds;
+            return;
+        }
+
+        float elapsedSinceBeat = Time.unscaledTime - _lastBeatTimestamp;
+        float normalized = Mathf.Clamp01(elapsedSinceBeat / Mathf.Max(0.01f, _estimatedBeatInterval));
+        float beatProgress = _pendingBeatStepsForSecond + normalized;
+        float beatsPerCountdownSecond = Mathf.Max(1f, GetBeatsPerCountdownSecond(BgmManager.Instance != null ? BgmManager.Instance.GetCountdownTempoBpm() : 0f));
+        float secondProgress = beatProgress / beatsPerCountdownSecond;
+        _displayRemainingSeconds = Mathf.Max(0f, _remainingWholeSeconds - secondProgress);
+    }
+
+    private static int GetBeatsPerCountdownSecond(float tempoBpm)
+    {
+        if (tempoBpm <= 0f)
+        {
+            return 1;
+        }
+
+        return Mathf.Max(1, Mathf.RoundToInt(tempoBpm / 60f));
+    }
+
+    private void HandleSecondChanged(int previousSeconds, int currentSeconds)
+    {
+        bool isDanger = currentSeconds <= countdownDangerThresholdSeconds;
+        if (isDanger != _isDangerCountdown && countdownText != null)
+        {
+            countdownText.color = isDanger ? countdownDangerColor : countdownDefaultColor;
+            _isDangerCountdown = isDanger;
+        }
+
+        if (previousSeconds >= 0 && currentSeconds != previousSeconds)
+        {
+            PlayCountdownBounce(_isDangerCountdown);
+        }
+    }
+
+    private void UpdateCountdownVisualByDisplayedSeconds()
+    {
+        int displayedWholeSeconds = Mathf.Max(0, Mathf.CeilToInt(_displayRemainingSeconds));
+        if (_lastDisplayedWholeSeconds == displayedWholeSeconds)
+        {
+            return;
+        }
+
+        HandleSecondChanged(_lastDisplayedWholeSeconds, displayedWholeSeconds);
+        _lastDisplayedWholeSeconds = displayedWholeSeconds;
+        OnLaunchCountdownSecondChanged?.Invoke(displayedWholeSeconds);
+    }
+
+    private void ResetCountdownVisualState()
+    {
+        if (countdownText == null)
+        {
+            return;
+        }
+
+        if (!_hasCountdownBaseScale)
+        {
+            _countdownBaseScale = countdownText.rectTransform.localScale;
+            _hasCountdownBaseScale = true;
+        }
+
+        if (_countdownBounceTween != null && _countdownBounceTween.IsActive())
+        {
+            _countdownBounceTween.Kill();
+        }
+
+        countdownText.rectTransform.localScale = _countdownBaseScale;
+        countdownText.color = countdownDefaultColor;
+        _isDangerCountdown = false;
+    }
+
+    private void PlayCountdownBounce(bool danger)
+    {
+        if (countdownText == null)
+        {
+            return;
+        }
+
+        if (_countdownBounceTween != null && _countdownBounceTween.IsActive())
+        {
+            _countdownBounceTween.Kill();
+        }
+
+        countdownText.rectTransform.localScale = _countdownBaseScale;
+
+        float scale = danger ? dangerBounceScale : normalBounceScale;
+        float duration = danger ? dangerBounceDuration : normalBounceDuration;
+        int vibrato = danger ? dangerBounceVibrato : normalBounceVibrato;
+        float elasticity = danger ? dangerBounceElasticity : normalBounceElasticity;
+
+        _countdownBounceTween = countdownText.rectTransform
+            .DOPunchScale(new Vector3(scale, scale, scale), duration, vibrato, elasticity)
+            .SetUpdate(true);
     }
 
     private void UpdateLaunchAvailability()

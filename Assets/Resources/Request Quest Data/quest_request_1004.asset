@@ -15,25 +15,23 @@ MonoBehaviour:
   questId: 1004
   questType: 1
   questProvider: 0
-  previousQuestIds: 
-  questName: "\uC5D0\uB108\uC9C0 \uD655\uBCF4"
-  questInfo: "\uC5EC\uBD84\uC758 \uC5D0\uB108\uC9C0\uB294 \uC5B8\uC81C\uB4E0\uC9C0
-    \uD658\uC601\uC774\uC8E0."
-  requiredResources:
-  - resourceType: 8
-    amount: 50
-  - resourceType: 11
-    amount: 30
+  previousQuestIds: ea030000
+  questName: "\uB354\uC6B1\uB354 \uB9CE\uC740 \uC790\uC6D0"
+  questInfo: "\uC0DD\uC0B0 \uAC74\uBB3C\uC744 \uBCD1\uB82C\uB85C \uAC74\uC124\uD558\uBA74
+    \uC790\uC6D0 \uAC00\uACF5 \uD6A8\uC728\uC774 \uD6E8\uC52C \uC88B\uC544\uC9D1\uB2C8\uB2E4.\n\uC0C8\uB85C\uC6B4
+    \uC0DD\uC0B0 \uAC74\uBB3C\uC778 \uC870\uB9BD\uC18C\uB97C \uC5EC\uB7EC \uAC1C
+    \uC124\uCE58\uD574\uBCF4\uC8E0!"
+  requiredResources: []
   questCheckRequirements:
-  - checkType: 0
-    targetId: 
-    requiredCount: 0
-    displayText: 
+  - checkType: 1
+    targetId: "\uC870\uB9BD\uC18C"
+    requiredCount: 5
+    displayText: "\uC870\uB9BD\uC18C 5\uAC1C \uAC74\uC124"
     targetLocation: {x: 0, y: 0, z: 0}
     locationTolerance: 0
   questFinishReward:
     resourceRewards: []
     moduleRewards: []
-    creditReward: 200
+    creditReward: 100
     unlockedBuildings: []
     newUnits: []

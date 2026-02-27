@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading;
 using FMOD;
 using FMOD.Studio;
 using FMODUnity;
@@ -36,8 +39,20 @@ public class BgmManager : MonoBehaviour
     private Coroutine _gameBgmCooldownCoroutine;
     private Coroutine _playGameBgmCoroutine;
     private Coroutine _gameBgmEndFadeCoroutine;
+    private Coroutine _loadingFadeInCoroutine;
+    private Coroutine _loadingFadeOutCoroutine;
+    private Coroutine _successFadeInCoroutine;
+    private Coroutine _successFadeOutCoroutine;
+    private Coroutine _failureFadeInCoroutine;
+    private Coroutine _failureFadeOutCoroutine;
+    private Coroutine _playSuccessTransitionCoroutine;
+    private Coroutine _playFailureTransitionCoroutine;
     private bool _isGameBgmCooldownActive;
     private WaitForSecondsRealtime _gameBgmCooldownWait;
+    private static readonly EVENT_CALLBACK CountdownBeatCallback = OnCountdownBeatCallback;
+    private int _pendingCountdownBeatTicks;
+    private int _countdownBeatSyncActive;
+    private int _latestCountdownTempoMilliBpm;
     public static BgmManager Instance { get; private set; }
 
     private void Awake()
@@ -59,7 +74,11 @@ public class BgmManager : MonoBehaviour
     private void OnDestroy()
     {
         if (Instance == this) {
+            StopTransitionCoroutines();
             StopCurrent(true);
+            StopLoadingBgmImmediate();
+            StopSuccessLoadingBgmImmediate();
+            StopFailureLoadingBgmImmediate();
             Instance = null;
         }
     }
@@ -143,7 +162,7 @@ public class BgmManager : MonoBehaviour
             return;
         }
 
-        EventReference selectedBgm = availableBgms[Random.Range(0, availableBgms.Count)];
+        EventReference selectedBgm = availableBgms[UnityEngine.Random.Range(0, availableBgms.Count)];
         _lastGameBgm = selectedBgm;
 
         if (_playGameBgmCoroutine != null)
@@ -276,6 +295,56 @@ public class BgmManager : MonoBehaviour
         PlayBgm(bgm, true, fadeOutTime);
     }
 
+    public bool EnableCountdownBeatSync()
+    {
+        if (!_hasInstance)
+        {
+            return false;
+        }
+
+        DisableCountdownBeatSync();
+
+        RESULT callbackResult = _currentInstance.setCallback(CountdownBeatCallback, EVENT_CALLBACK_TYPE.TIMELINE_BEAT | EVENT_CALLBACK_TYPE.STOPPED);
+
+        if (callbackResult != RESULT.OK)
+        {
+            DisableCountdownBeatSync();
+            return false;
+        }
+
+        Interlocked.Exchange(ref _pendingCountdownBeatTicks, 0);
+        Interlocked.Exchange(ref _countdownBeatSyncActive, 1);
+        Interlocked.Exchange(ref _latestCountdownTempoMilliBpm, 0);
+        return true;
+    }
+
+    public void DisableCountdownBeatSync()
+    {
+        ResetCountdownBeatSyncState(true);
+    }
+
+    public int ConsumeCountdownBeatTicks()
+    {
+        if (Interlocked.CompareExchange(ref _countdownBeatSyncActive, 0, 0) == 0)
+        {
+            return 0;
+        }
+
+        int consumed = Interlocked.Exchange(ref _pendingCountdownBeatTicks, 0);
+        return Mathf.Max(0, consumed);
+    }
+
+    public float GetCountdownTempoBpm()
+    {
+        int milliBpm = Interlocked.CompareExchange(ref _latestCountdownTempoMilliBpm, 0, 0);
+        if (milliBpm <= 0)
+        {
+            return 0f;
+        }
+
+        return milliBpm / 1000f;
+    }
+
     public void PlayBgm(EventReference bgm, bool stopCurrent, float fadeOutTime = -1f)
     {
         if (bgm.IsNull) {
@@ -290,8 +359,16 @@ public class BgmManager : MonoBehaviour
         StopGameBgmCooldown();
 
         float fadeTime = fadeOutTime >= 0f ? fadeOutTime : defaultFadeOutTime;
-        if (stopCurrent) {
-            StopCurrent(fadeTime <= 0f);
+        if (_hasInstance)
+        {
+            if (stopCurrent)
+            {
+                StopCurrent(fadeTime <= 0f);
+            }
+            else
+            {
+                StopCurrent(true, false);
+            }
         }
 
         _currentBgm = bgm;
@@ -307,14 +384,18 @@ public class BgmManager : MonoBehaviour
         }
 
         float fadeTime = fadeInTime >= 0f ? fadeInTime : defaultFadeInTime;
-        StopLoadingBgm(fadeTime);
+        StopLoadingBgmImmediate();
 
         _loadingInstance = RuntimeManager.CreateInstance(loadingBgm);
         _hasLoadingInstance = true;
         _loadingInstance.setVolume(0f);
         _loadingInstance.start();
-        
-        StartCoroutine(FadeInLoadingBgm(fadeTime));
+
+        if (_loadingFadeInCoroutine != null)
+        {
+            StopCoroutine(_loadingFadeInCoroutine);
+        }
+        _loadingFadeInCoroutine = StartCoroutine(FadeInLoadingBgm(_loadingInstance, fadeTime));
     }
 
     public void StopLoadingBgm(float fadeOutTime = -1f)
@@ -324,58 +405,94 @@ public class BgmManager : MonoBehaviour
         }
 
         float fadeTime = fadeOutTime >= 0f ? fadeOutTime : defaultFadeOutTime;
-        StartCoroutine(FadeOutLoadingBgm(fadeTime));
+        EventInstance targetInstance = _loadingInstance;
+        if (_loadingFadeInCoroutine != null)
+        {
+            StopCoroutine(_loadingFadeInCoroutine);
+            _loadingFadeInCoroutine = null;
+        }
+        if (_loadingFadeOutCoroutine != null)
+        {
+            StopCoroutine(_loadingFadeOutCoroutine);
+        }
+        _loadingFadeOutCoroutine = StartCoroutine(FadeOutLoadingBgm(targetInstance, fadeTime));
     }
 
-    private IEnumerator FadeInLoadingBgm(float duration)
+    private IEnumerator FadeInLoadingBgm(EventInstance targetInstance, float duration)
     {
         float elapsed = 0f;
-        while (elapsed < duration && _hasLoadingInstance)
+        while (elapsed < duration && _hasLoadingInstance && _loadingInstance.handle == targetInstance.handle)
         {
             elapsed += Time.unscaledDeltaTime;
             float volume = Mathf.Clamp01(elapsed / duration);
-            _loadingInstance.setVolume(volume);
+            targetInstance.setVolume(volume);
             yield return null;
         }
         
-        if (_hasLoadingInstance) {
-            _loadingInstance.setVolume(1f);
+        if (_hasLoadingInstance && _loadingInstance.handle == targetInstance.handle) {
+            targetInstance.setVolume(1f);
+        }
+
+        if (_loadingFadeInCoroutine != null)
+        {
+            _loadingFadeInCoroutine = null;
         }
     }
 
-    private IEnumerator FadeOutLoadingBgm(float duration)
+    private IEnumerator FadeOutLoadingBgm(EventInstance targetInstance, float duration)
     {
-        if (!_hasLoadingInstance) {
+        if (!_hasLoadingInstance || _loadingInstance.handle != targetInstance.handle) {
             yield break;
         }
 
         float startVolume = 1f;
-        _loadingInstance.getVolume(out startVolume);
+        targetInstance.getVolume(out startVolume);
 
         float elapsed = 0f;
-        while (elapsed < duration && _hasLoadingInstance)
+        while (elapsed < duration && _hasLoadingInstance && _loadingInstance.handle == targetInstance.handle)
         {
             elapsed += Time.unscaledDeltaTime;
             float volume = Mathf.Lerp(startVolume, 0f, elapsed / duration);
-            _loadingInstance.setVolume(volume);
+            targetInstance.setVolume(volume);
             yield return null;
         }
 
-        StopLoadingBgmImmediate();
+        StopLoadingInstance(targetInstance);
+        _loadingFadeOutCoroutine = null;
     }
 
     private void StopLoadingBgmImmediate()
     {
+        if (_loadingFadeInCoroutine != null)
+        {
+            StopCoroutine(_loadingFadeInCoroutine);
+            _loadingFadeInCoroutine = null;
+        }
+        if (_loadingFadeOutCoroutine != null)
+        {
+            StopCoroutine(_loadingFadeOutCoroutine);
+            _loadingFadeOutCoroutine = null;
+        }
+
         if (!_hasLoadingInstance) {
             return;
         }
 
+        StopLoadingInstance(_loadingInstance);
+    }
+
+    private void StopLoadingInstance(EventInstance targetInstance)
+    {
         try {
-            _loadingInstance.stop(STOP_MODE.IMMEDIATE);
-            _loadingInstance.release();
+            targetInstance.stop(STOP_MODE.IMMEDIATE);
+            targetInstance.release();
         }
         finally {
-            _hasLoadingInstance = false;
+            if (_hasLoadingInstance && _loadingInstance.handle == targetInstance.handle)
+            {
+                _hasLoadingInstance = false;
+                _loadingInstance.clearHandle();
+            }
         }
     }
 
@@ -424,8 +541,11 @@ public class BgmManager : MonoBehaviour
     private void StopCurrent(bool immediate, bool stopGameBgmFlow = true)
     {
         if (!_hasInstance) {
+            ResetCountdownBeatSyncState(false);
             return;
         }
+
+        ResetCountdownBeatSyncState(true);
 
         if (stopGameBgmFlow)
         {
@@ -445,8 +565,11 @@ public class BgmManager : MonoBehaviour
     private void StopCurrentInstanceOnly()
     {
         if (!_hasInstance) {
+            ResetCountdownBeatSyncState(false);
             return;
         }
+
+        ResetCountdownBeatSyncState(true);
 
         try {
             _currentInstance.stop(STOP_MODE.IMMEDIATE);
@@ -478,6 +601,61 @@ public class BgmManager : MonoBehaviour
         _isGameBgmCooldownActive = false;
     }
 
+    private void ResetCountdownBeatSyncState(bool detachFromCurrentInstance)
+    {
+        if (detachFromCurrentInstance && _hasInstance)
+        {
+            _currentInstance.setCallback(null);
+        }
+
+        Interlocked.Exchange(ref _pendingCountdownBeatTicks, 0);
+        Interlocked.Exchange(ref _countdownBeatSyncActive, 0);
+        Interlocked.Exchange(ref _latestCountdownTempoMilliBpm, 0);
+    }
+
+    [AOT.MonoPInvokeCallback(typeof(EVENT_CALLBACK))]
+    private static RESULT OnCountdownBeatCallback(EVENT_CALLBACK_TYPE type, IntPtr eventInstancePtr, IntPtr parameterPtr)
+    {
+        if (type != EVENT_CALLBACK_TYPE.TIMELINE_BEAT && type != EVENT_CALLBACK_TYPE.STOPPED)
+        {
+            return RESULT.OK;
+        }
+
+        BgmManager manager = Instance;
+        if (manager == null)
+        {
+            return RESULT.OK;
+        }
+
+        if (Interlocked.CompareExchange(ref manager._countdownBeatSyncActive, 0, 0) == 0)
+        {
+            return RESULT.OK;
+        }
+
+        if (manager._currentInstance.handle != eventInstancePtr)
+        {
+            return RESULT.OK;
+        }
+
+        if (type == EVENT_CALLBACK_TYPE.TIMELINE_BEAT)
+        {
+            if (parameterPtr != IntPtr.Zero)
+            {
+                TIMELINE_BEAT_PROPERTIES beat = Marshal.PtrToStructure<TIMELINE_BEAT_PROPERTIES>(parameterPtr);
+                int milliTempo = Mathf.Max(0, Mathf.RoundToInt(beat.tempo * 1000f));
+                Interlocked.Exchange(ref manager._latestCountdownTempoMilliBpm, milliTempo);
+            }
+
+            Interlocked.Increment(ref manager._pendingCountdownBeatTicks);
+        }
+        else if (type == EVENT_CALLBACK_TYPE.STOPPED)
+        {
+            Interlocked.Exchange(ref manager._countdownBeatSyncActive, 0);
+        }
+
+        return RESULT.OK;
+    }
+
     public void PlaySuccessLoadingBgm(float fadeInTime = -1f)
     {
         if (successLoadingBgm.IsNull) {
@@ -485,11 +663,12 @@ public class BgmManager : MonoBehaviour
         }
 
         float fadeTime = fadeInTime >= 0f ? fadeInTime : defaultFadeInTime;
-        StopSuccessLoadingBgm(fadeTime);
+        StopTransitionCoroutines();
+        StopSuccessLoadingBgmImmediate();
 
         if (_hasInstance)
         {
-            StartCoroutine(FadeOutGameBgmAndPlaySuccess(fadeTime));
+            _playSuccessTransitionCoroutine = StartCoroutine(FadeOutGameBgmAndPlaySuccess(fadeTime));
         }
         else
         {
@@ -497,8 +676,12 @@ public class BgmManager : MonoBehaviour
             _hasSuccessLoadingInstance = true;
             _successLoadingInstance.setVolume(0f);
             _successLoadingInstance.start();
-            
-            StartCoroutine(FadeInSuccessLoadingBgm(fadeTime));
+
+            if (_successFadeInCoroutine != null)
+            {
+                StopCoroutine(_successFadeInCoroutine);
+            }
+            _successFadeInCoroutine = StartCoroutine(FadeInSuccessLoadingBgm(_successLoadingInstance, fadeTime));
         }
     }
 
@@ -510,8 +693,14 @@ public class BgmManager : MonoBehaviour
         _hasSuccessLoadingInstance = true;
         _successLoadingInstance.setVolume(0f);
         _successLoadingInstance.start();
-        
-        yield return StartCoroutine(FadeInSuccessLoadingBgm(fadeInTime));
+
+        if (_successFadeInCoroutine != null)
+        {
+            StopCoroutine(_successFadeInCoroutine);
+        }
+        _successFadeInCoroutine = StartCoroutine(FadeInSuccessLoadingBgm(_successLoadingInstance, fadeInTime));
+        yield return _successFadeInCoroutine;
+        _playSuccessTransitionCoroutine = null;
     }
 
     public void StopSuccessLoadingBgm(float fadeOutTime = -1f)
@@ -521,58 +710,100 @@ public class BgmManager : MonoBehaviour
         }
 
         float fadeTime = fadeOutTime >= 0f ? fadeOutTime : defaultFadeOutTime;
-        StartCoroutine(FadeOutSuccessLoadingBgm(fadeTime));
+        EventInstance targetInstance = _successLoadingInstance;
+        if (_successFadeInCoroutine != null)
+        {
+            StopCoroutine(_successFadeInCoroutine);
+            _successFadeInCoroutine = null;
+        }
+        if (_successFadeOutCoroutine != null)
+        {
+            StopCoroutine(_successFadeOutCoroutine);
+        }
+        _successFadeOutCoroutine = StartCoroutine(FadeOutSuccessLoadingBgm(targetInstance, fadeTime));
     }
 
-    private IEnumerator FadeInSuccessLoadingBgm(float duration)
+    private IEnumerator FadeInSuccessLoadingBgm(EventInstance targetInstance, float duration)
     {
         float elapsed = 0f;
-        while (elapsed < duration && _hasSuccessLoadingInstance)
+        while (elapsed < duration && _hasSuccessLoadingInstance && _successLoadingInstance.handle == targetInstance.handle)
         {
             elapsed += Time.unscaledDeltaTime;
             float volume = Mathf.Clamp01(elapsed / duration);
-            _successLoadingInstance.setVolume(volume);
+            targetInstance.setVolume(volume);
             yield return null;
         }
         
-        if (_hasSuccessLoadingInstance) {
-            _successLoadingInstance.setVolume(1f);
+        if (_hasSuccessLoadingInstance && _successLoadingInstance.handle == targetInstance.handle) {
+            targetInstance.setVolume(1f);
+        }
+
+        if (_successFadeInCoroutine != null)
+        {
+            _successFadeInCoroutine = null;
         }
     }
 
-    private IEnumerator FadeOutSuccessLoadingBgm(float duration)
+    private IEnumerator FadeOutSuccessLoadingBgm(EventInstance targetInstance, float duration)
     {
-        if (!_hasSuccessLoadingInstance) {
+        if (!_hasSuccessLoadingInstance || _successLoadingInstance.handle != targetInstance.handle) {
             yield break;
         }
 
         float startVolume = 1f;
-        _successLoadingInstance.getVolume(out startVolume);
+        targetInstance.getVolume(out startVolume);
 
         float elapsed = 0f;
-        while (elapsed < duration && _hasSuccessLoadingInstance)
+        while (elapsed < duration && _hasSuccessLoadingInstance && _successLoadingInstance.handle == targetInstance.handle)
         {
             elapsed += Time.unscaledDeltaTime;
             float volume = Mathf.Lerp(startVolume, 0f, elapsed / duration);
-            _successLoadingInstance.setVolume(volume);
+            targetInstance.setVolume(volume);
             yield return null;
         }
 
-        StopSuccessLoadingBgmImmediate();
+        StopSuccessLoadingInstance(targetInstance);
+        _successFadeOutCoroutine = null;
     }
 
     private void StopSuccessLoadingBgmImmediate()
     {
+        if (_playSuccessTransitionCoroutine != null)
+        {
+            StopCoroutine(_playSuccessTransitionCoroutine);
+            _playSuccessTransitionCoroutine = null;
+        }
+
+        if (_successFadeInCoroutine != null)
+        {
+            StopCoroutine(_successFadeInCoroutine);
+            _successFadeInCoroutine = null;
+        }
+        if (_successFadeOutCoroutine != null)
+        {
+            StopCoroutine(_successFadeOutCoroutine);
+            _successFadeOutCoroutine = null;
+        }
+
         if (!_hasSuccessLoadingInstance) {
             return;
         }
 
+        StopSuccessLoadingInstance(_successLoadingInstance);
+    }
+
+    private void StopSuccessLoadingInstance(EventInstance targetInstance)
+    {
         try {
-            _successLoadingInstance.stop(STOP_MODE.IMMEDIATE);
-            _successLoadingInstance.release();
+            targetInstance.stop(STOP_MODE.IMMEDIATE);
+            targetInstance.release();
         }
         finally {
-            _hasSuccessLoadingInstance = false;
+            if (_hasSuccessLoadingInstance && _successLoadingInstance.handle == targetInstance.handle)
+            {
+                _hasSuccessLoadingInstance = false;
+                _successLoadingInstance.clearHandle();
+            }
         }
     }
 
@@ -583,11 +814,12 @@ public class BgmManager : MonoBehaviour
         }
 
         float fadeTime = fadeInTime >= 0f ? fadeInTime : defaultFadeInTime;
-        StopFailureLoadingBgm(fadeTime);
+        StopTransitionCoroutines();
+        StopFailureLoadingBgmImmediate();
 
         if (_hasInstance)
         {
-            StartCoroutine(FadeOutGameBgmAndPlayFailure(fadeTime));
+            _playFailureTransitionCoroutine = StartCoroutine(FadeOutGameBgmAndPlayFailure(fadeTime));
         }
         else
         {
@@ -595,8 +827,12 @@ public class BgmManager : MonoBehaviour
             _hasFailureLoadingInstance = true;
             _failureLoadingInstance.setVolume(0f);
             _failureLoadingInstance.start();
-            
-            StartCoroutine(FadeInFailureLoadingBgm(fadeTime));
+
+            if (_failureFadeInCoroutine != null)
+            {
+                StopCoroutine(_failureFadeInCoroutine);
+            }
+            _failureFadeInCoroutine = StartCoroutine(FadeInFailureLoadingBgm(_failureLoadingInstance, fadeTime));
         }
     }
 
@@ -608,8 +844,14 @@ public class BgmManager : MonoBehaviour
         _hasFailureLoadingInstance = true;
         _failureLoadingInstance.setVolume(0f);
         _failureLoadingInstance.start();
-        
-        yield return StartCoroutine(FadeInFailureLoadingBgm(fadeInTime));
+
+        if (_failureFadeInCoroutine != null)
+        {
+            StopCoroutine(_failureFadeInCoroutine);
+        }
+        _failureFadeInCoroutine = StartCoroutine(FadeInFailureLoadingBgm(_failureLoadingInstance, fadeInTime));
+        yield return _failureFadeInCoroutine;
+        _playFailureTransitionCoroutine = null;
     }
 
     public void StopFailureLoadingBgm(float fadeOutTime = -1f)
@@ -619,58 +861,115 @@ public class BgmManager : MonoBehaviour
         }
 
         float fadeTime = fadeOutTime >= 0f ? fadeOutTime : defaultFadeOutTime;
-        StartCoroutine(FadeOutFailureLoadingBgm(fadeTime));
+        EventInstance targetInstance = _failureLoadingInstance;
+        if (_failureFadeInCoroutine != null)
+        {
+            StopCoroutine(_failureFadeInCoroutine);
+            _failureFadeInCoroutine = null;
+        }
+        if (_failureFadeOutCoroutine != null)
+        {
+            StopCoroutine(_failureFadeOutCoroutine);
+        }
+        _failureFadeOutCoroutine = StartCoroutine(FadeOutFailureLoadingBgm(targetInstance, fadeTime));
     }
 
-    private IEnumerator FadeInFailureLoadingBgm(float duration)
+    private IEnumerator FadeInFailureLoadingBgm(EventInstance targetInstance, float duration)
     {
         float elapsed = 0f;
-        while (elapsed < duration && _hasFailureLoadingInstance)
+        while (elapsed < duration && _hasFailureLoadingInstance && _failureLoadingInstance.handle == targetInstance.handle)
         {
             elapsed += Time.unscaledDeltaTime;
             float volume = Mathf.Clamp01(elapsed / duration);
-            _failureLoadingInstance.setVolume(volume);
+            targetInstance.setVolume(volume);
             yield return null;
         }
         
-        if (_hasFailureLoadingInstance) {
-            _failureLoadingInstance.setVolume(1f);
+        if (_hasFailureLoadingInstance && _failureLoadingInstance.handle == targetInstance.handle) {
+            targetInstance.setVolume(1f);
+        }
+
+        if (_failureFadeInCoroutine != null)
+        {
+            _failureFadeInCoroutine = null;
         }
     }
 
-    private IEnumerator FadeOutFailureLoadingBgm(float duration)
+    private IEnumerator FadeOutFailureLoadingBgm(EventInstance targetInstance, float duration)
     {
-        if (!_hasFailureLoadingInstance) {
+        if (!_hasFailureLoadingInstance || _failureLoadingInstance.handle != targetInstance.handle) {
             yield break;
         }
 
         float startVolume = 1f;
-        _failureLoadingInstance.getVolume(out startVolume);
+        targetInstance.getVolume(out startVolume);
 
         float elapsed = 0f;
-        while (elapsed < duration && _hasFailureLoadingInstance)
+        while (elapsed < duration && _hasFailureLoadingInstance && _failureLoadingInstance.handle == targetInstance.handle)
         {
             elapsed += Time.unscaledDeltaTime;
             float volume = Mathf.Lerp(startVolume, 0f, elapsed / duration);
-            _failureLoadingInstance.setVolume(volume);
+            targetInstance.setVolume(volume);
             yield return null;
         }
 
-        StopFailureLoadingBgmImmediate();
+        StopFailureLoadingInstance(targetInstance);
+        _failureFadeOutCoroutine = null;
     }
 
     private void StopFailureLoadingBgmImmediate()
     {
+        if (_playFailureTransitionCoroutine != null)
+        {
+            StopCoroutine(_playFailureTransitionCoroutine);
+            _playFailureTransitionCoroutine = null;
+        }
+
+        if (_failureFadeInCoroutine != null)
+        {
+            StopCoroutine(_failureFadeInCoroutine);
+            _failureFadeInCoroutine = null;
+        }
+        if (_failureFadeOutCoroutine != null)
+        {
+            StopCoroutine(_failureFadeOutCoroutine);
+            _failureFadeOutCoroutine = null;
+        }
+
         if (!_hasFailureLoadingInstance) {
             return;
         }
 
+        StopFailureLoadingInstance(_failureLoadingInstance);
+    }
+
+    private void StopFailureLoadingInstance(EventInstance targetInstance)
+    {
         try {
-            _failureLoadingInstance.stop(STOP_MODE.IMMEDIATE);
-            _failureLoadingInstance.release();
+            targetInstance.stop(STOP_MODE.IMMEDIATE);
+            targetInstance.release();
         }
         finally {
-            _hasFailureLoadingInstance = false;
+            if (_hasFailureLoadingInstance && _failureLoadingInstance.handle == targetInstance.handle)
+            {
+                _hasFailureLoadingInstance = false;
+                _failureLoadingInstance.clearHandle();
+            }
+        }
+    }
+
+    private void StopTransitionCoroutines()
+    {
+        if (_playSuccessTransitionCoroutine != null)
+        {
+            StopCoroutine(_playSuccessTransitionCoroutine);
+            _playSuccessTransitionCoroutine = null;
+        }
+
+        if (_playFailureTransitionCoroutine != null)
+        {
+            StopCoroutine(_playFailureTransitionCoroutine);
+            _playFailureTransitionCoroutine = null;
         }
     }
 }

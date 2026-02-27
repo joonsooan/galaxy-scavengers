@@ -15,28 +15,25 @@ MonoBehaviour:
   questId: 1003
   questType: 1
   questProvider: 0
-  previousQuestIds: 
-  questName: "\uC218\uB9AC\uC6A9 \uBD80\uD488 \uD655\uBCF4"
-  questInfo: "\uCF54\uC5B4 \uACA9\uB0A9\uACE0\uC5D0 \uACE0\uC7A5\uC774 \uC0DD\uACA8
-    \uC218\uB9AC\uAC00 \uD544\uC694\uD55C \uC0C1\uD669\uC785\uB2C8\uB2E4.\n\uC218\uB9AC\uC5D0
-    \uD544\uC694\uD55C \uBA87 \uAC00\uC9C0 \uBD80\uD488\uB4E4\uC744 \uD655\uBCF4\uD574\uC8FC\uC138\uC694."
-  requiredResources:
-  - resourceType: 4
-    amount: 20
-  - resourceType: 5
-    amount: 20
-  - resourceType: 9
-    amount: 20
+  previousQuestIds: ea030000
+  questName: "\uD589\uC131 \uD0C8\uCD9C"
+  questInfo: "\uC2AC\uC2AC \uD589\uC131\uC744 \uD0C8\uCD9C\uD560 \uB54C\uAC00 \uC628
+    \uAC83 \uAC19\uAD70\uC694.\n\uBA54\uC778 \uC5D4\uC9C4\uC744 \uC218\uB9AC\uD55C
+    \uB2E4\uC74C \uD0C8\uCD9C \uBC84\uD2BC\uC744 \uB20C\uB7EC \uD568\uC120\uC73C\uB85C
+    \uBCF5\uADC0\uD569\uC2DC\uB2E4.\n\uC544\uC9C1 \uD0C8\uCD9C\uD558\uACE0 \uC2F6\uC9C0
+    \uC54A\uB2E4\uBA74 \uD574\uB2F9 \uD018\uC2A4\uD2B8\uB97C \uAC70\uC808\uD558\uACE0
+    \uC774\uC5B4\uC11C \uD50C\uB808\uC774\uD574\uB3C4 \uC88B\uC2B5\uB2C8\uB2E4!"
+  requiredResources: []
   questCheckRequirements:
-  - checkType: 0
+  - checkType: 6
     targetId: 
-    requiredCount: 0
-    displayText: 
+    requiredCount: 1
+    displayText: "\uD589\uC131 \uD0C8\uCD9C"
     targetLocation: {x: 0, y: 0, z: 0}
     locationTolerance: 0
   questFinishReward:
     resourceRewards: []
     moduleRewards: []
-    creditReward: 100
+    creditReward: 0
     unlockedBuildings: []
     newUnits: []

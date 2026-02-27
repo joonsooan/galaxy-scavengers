@@ -10,6 +10,8 @@ public class QuestCell : MonoBehaviour
     [SerializeField] private Button cellButton;
     [SerializeField] private GameObject configureIcon;
     [SerializeField] private GameObject notifierIcon;
+    [Header("Title Color")]
+    [SerializeField] private Color coreRepairQuestTitleColor = Color.cyan;
 
     private QuestData _questData;
     private QuestDetailPanel _questDetailPanel;
@@ -17,9 +19,15 @@ public class QuestCell : MonoBehaviour
     private QuestUIHandler _questUIHandler;
     private GameSceneQuestUIManager _gameSceneQuestUIManager;
     private bool _isNew;
+    private Color _defaultQuestTitleColor = Color.white;
 
     private void Awake()
     {
+        if (questNameText != null)
+        {
+            _defaultQuestTitleColor = questNameText.color;
+        }
+
         if (cellButton != null)
         {
             cellButton.onClick.AddListener(OnCellClicked);
@@ -95,6 +103,7 @@ public class QuestCell : MonoBehaviour
         {
             questNameText.text = questData.questName;
         }
+        ApplyQuestTitleColor(questData);
 
         if (questIdText != null && questData != null)
         {
@@ -120,6 +129,7 @@ public class QuestCell : MonoBehaviour
         {
             questNameText.text = questData.questName;
         }
+        ApplyQuestTitleColor(questData);
         
         if (questIdText != null && questData != null)
         {
@@ -346,6 +356,45 @@ public class QuestCell : MonoBehaviour
     private void RefreshIcon()
     {
         CheckAndUpdateCompletability();
+    }
+
+    private void ApplyQuestTitleColor(QuestData questData)
+    {
+        if (questNameText == null)
+        {
+            return;
+        }
+
+        if (questData != null && questData.questType == QuestType.CoreRepairQuest)
+        {
+            questNameText.color = GetCoreRepairQuestTitleColor(questData);
+        }
+        else
+        {
+            questNameText.color = _defaultQuestTitleColor;
+        }
+    }
+
+    private Color GetCoreRepairQuestTitleColor(QuestData questData)
+    {
+        if (questData == null)
+        {
+            return coreRepairQuestTitleColor;
+        }
+
+        if (CoreRepairManager.Instance == null)
+        {
+            return coreRepairQuestTitleColor;
+        }
+
+        CorePart part = CoreRepairManager.Instance.GetCorePartFromQuestId(questData.questId);
+        CorePartData partData = CoreRepairManager.Instance.GetPartData(part);
+        if (partData != null)
+        {
+            return partData.questTitleColor;
+        }
+
+        return coreRepairQuestTitleColor;
     }
 }
 

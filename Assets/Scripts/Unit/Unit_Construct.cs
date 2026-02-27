@@ -44,6 +44,7 @@ public class Unit_Construct : UnitBase
 
     private Rigidbody2D _rb;
     private int _remainingRequestAmount;
+    private bool _noResourceAlertActive;
     private UnitSpriteController _spriteController;
     private Transform _spriteTransform;
     private List<IStorage> _storageRoute;
@@ -53,6 +54,26 @@ public class Unit_Construct : UnitBase
     private Coroutine _unloadingCoroutine;
     private GameObject _currentSiteAnimation;
     private Animator _currentSiteAnimator;
+    private bool _isInvulnerable;
+
+    public bool IsInvulnerable => _isInvulnerable;
+
+    public void SetInvulnerable(bool value)
+    {
+        _isInvulnerable = value;
+    }
+
+    public override void TakeDamage(int damage)
+    {
+        if (_isInvulnerable) return;
+        base.TakeDamage(damage);
+    }
+
+    public override void TakeDamage(int damage, DamageContext context)
+    {
+        if (_isInvulnerable) return;
+        base.TakeDamage(damage, context);
+    }
 
     protected override void Awake()
     {
@@ -100,6 +121,7 @@ public class Unit_Construct : UnitBase
 
     protected override void OnDisable()
     {
+        SetConstructNoResourceAlert(false);
         base.OnDisable();
         UnitManager.Instance?.RemoveUnit(this);
         ConstructionManager.Instance?.UnregisterConstructDrone(this);
@@ -209,6 +231,11 @@ public class Unit_Construct : UnitBase
 
     private void UpdateIdle()
     {
+        if (!HasPendingConstructionSite())
+        {
+            SetConstructNoResourceAlert(false);
+        }
+
         if (Time.time < _nextTaskRequestTime) {
             UpdateIdleRoam();
             return;
@@ -541,6 +568,7 @@ public class Unit_Construct : UnitBase
         _storageRoute = null;
         _storageRouteIndex = 0;
         _remainingRequestAmount = request != null ? request.amount : 0;
+        bool hasSufficientResource = false;
 
         if (ResourceManager.Instance != null && request != null && site != null && _remainingRequestAmount > 0) {
             List<IStorage> storages = ResourceManager.Instance.GetAllStorages();
@@ -555,7 +583,9 @@ public class Unit_Construct : UnitBase
                     candidates.Add(storage);
                 }
 
-                if (candidates.Count > 0 && totalAvailable >= request.amount) {
+                hasSufficientResource = totalAvailable >= request.amount;
+
+                if (candidates.Count > 0 && hasSufficientResource) {
                     candidates.Sort((a, b) => {
                         float distA = Vector3.Distance(site.GetPosition(), a.GetPosition());
                         float distB = Vector3.Distance(site.GetPosition(), b.GetPosition());
@@ -584,9 +614,16 @@ public class Unit_Construct : UnitBase
                                 _targetStorage = storage;
                                 _currentState = ConstructState.FetchingResource;
                                 ResetIdleRoam();
+                                SetConstructNoResourceAlert(false);
                                 return;
                             }
                         }
+
+                        _currentRequest?.site?.CancelRequest(_currentRequest);
+                        _nextTaskRequestTime = Time.time + TaskRequestCooldown;
+                        SetConstructNoResourceAlert(false);
+                        SetTask_Idle();
+                        return;
                     }
                 }
             }
@@ -594,6 +631,7 @@ public class Unit_Construct : UnitBase
 
         _currentRequest?.site?.CancelRequest(_currentRequest);
         _nextTaskRequestTime = Time.time + TaskRequestCooldown;
+        SetConstructNoResourceAlert(!hasSufficientResource);
         SetTask_Idle();
     }
 
@@ -652,6 +690,44 @@ public class Unit_Construct : UnitBase
         StopAllCoroutines();
         _loadingCoroutine = null;
         _unloadingCoroutine = null;
+    }
+
+    private void SetConstructNoResourceAlert(bool shouldEnable)
+    {
+        if (shouldEnable == _noResourceAlertActive) return;
+        GameAlertUIManager alertManager = FindFirstObjectByType<GameAlertUIManager>();
+        if (shouldEnable) {
+            alertManager?.RegisterAlert(GameAlertType.ConstructNoResource, this);
+        }
+        else {
+            alertManager?.UnregisterAlert(GameAlertType.ConstructNoResource, this);
+        }
+        _noResourceAlertActive = shouldEnable;
+    }
+
+    private bool HasPendingConstructionSite()
+    {
+        if (ConstructionManager.Instance == null)
+        {
+            return false;
+        }
+
+        IReadOnlyList<ConstructionSite> sites = ConstructionManager.Instance.ConstructionSites;
+        if (sites == null || sites.Count == 0)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < sites.Count; i++)
+        {
+            ConstructionSite site = sites[i];
+            if (site != null && !site.IsComplete)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void ReturnCarriedResourcesToStorage()

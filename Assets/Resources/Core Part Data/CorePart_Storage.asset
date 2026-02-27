@@ -17,9 +17,10 @@ MonoBehaviour:
   partDescription: "\uC2DC\uB4DC \uCF54\uC5B4\uC5D0 \uC790\uC6D0\uC744 \uC800\uC7A5\uD558\uAE30
     \uC704\uD55C \uACF5\uAC04\uC785\uB2C8\uB2E4.\n\uD30C\uC190\uB41C \uACBD\uC6B0
     \uC800\uC7A5 \uACF5\uAC04\uC774 \uD06C\uAC8C \uAC10\uC18C\uD569\uB2C8\uB2E4."
+  questTitleColor: {r: 0.65882355, g: 0.5176471, b: 0.9529412, a: 1}
   requiredResources:
   - resourceType: 0
-    amount: 3000
+    amount: 1500
   repairReward:
     resourceRewards: []
     moduleRewards: []

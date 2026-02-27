@@ -409,7 +409,78 @@ public class AreaBuildingDestroyer : MonoBehaviour
             }
         }
 
+        CollectUnitTargets(selectedCells, targets);
+
         return targets;
+    }
+
+    private void CollectUnitTargets(HashSet<Vector3Int> selectedCells, List<DemolishTarget> targets)
+    {
+        if (_grid == null || UnitManager.Instance == null)
+        {
+            return;
+        }
+
+        void AddUnit(UnitBase unit)
+        {
+            if (unit == null || unit is Unit_Player)
+            {
+                return;
+            }
+            if (unit is Unit_Construct construct && construct.IsInvulnerable)
+            {
+                return;
+            }
+            Vector3Int unitCell = _grid.WorldToCell(unit.transform.position);
+            if (!selectedCells.Contains(unitCell))
+            {
+                return;
+            }
+            string displayName = unit.unitData != null && !string.IsNullOrEmpty(unit.unitData.unitName) ? unit.unitData.unitName : (unit.unitData != null ? unit.unitData.name : unit.GetType().Name);
+            Dictionary<ResourceType, int> cost = GetUnitProductionCost(unit.unitData);
+
+            targets.Add(new DemolishTarget
+            {
+                displayName = displayName,
+                anchorCell = default,
+                buildingData = null,
+                buildingPieceType = BuildingPieceType.None,
+                isConstructionSite = false,
+                constructionSite = null,
+                preCalculatedRefund = cost,
+                isUnit = true
+            });
+        }
+
+        foreach (UnitBase unit in UnitManager.Instance.AllyUnits)
+        {
+            AddUnit(unit);
+        }
+        foreach (UnitBase unit in UnitManager.Instance.EnemyUnits)
+        {
+            AddUnit(unit);
+        }
+    }
+
+    private static Dictionary<ResourceType, int> GetUnitProductionCost(UnitData unitData)
+    {
+        Dictionary<ResourceType, int> result = new Dictionary<ResourceType, int>();
+        if (unitData == null || unitData.productionCosts == null)
+        {
+            return result;
+        }
+        foreach (ResourceCost cost in unitData.productionCosts)
+        {
+            if (result.ContainsKey(cost.resourceType))
+            {
+                result[cost.resourceType] += cost.amount;
+            }
+            else
+            {
+                result[cost.resourceType] = cost.amount;
+            }
+        }
+        return result;
     }
 
     private HashSet<Vector3Int> CollectConstructionSiteCells(HashSet<Vector3Int> selectedCells)
@@ -531,6 +602,56 @@ public class AreaBuildingDestroyer : MonoBehaviour
         }
         
         DestroyBeaconsInArea(selectedCells);
+        DestroyUnitsInArea(selectedCells);
+    }
+
+    private void DestroyUnitsInArea(HashSet<Vector3Int> cells)
+    {
+        if (_grid == null || UnitManager.Instance == null)
+        {
+            return;
+        }
+
+        List<UnitBase> unitsToDestroy = new List<UnitBase>();
+
+        foreach (UnitBase unit in UnitManager.Instance.AllyUnits)
+        {
+            if (unit == null || unit is Unit_Player)
+            {
+                continue;
+            }
+            if (unit is Unit_Construct construct && construct.IsInvulnerable)
+            {
+                continue;
+            }
+            Vector3Int unitCell = _grid.WorldToCell(unit.transform.position);
+            if (cells.Contains(unitCell))
+            {
+                unitsToDestroy.Add(unit);
+            }
+        }
+
+        foreach (UnitBase unit in UnitManager.Instance.EnemyUnits)
+        {
+            if (unit == null)
+            {
+                continue;
+            }
+            Vector3Int unitCell = _grid.WorldToCell(unit.transform.position);
+            if (cells.Contains(unitCell))
+            {
+                unitsToDestroy.Add(unit);
+            }
+        }
+
+        foreach (UnitBase unit in unitsToDestroy)
+        {
+            if (unit != null && unit.gameObject != null)
+            {
+                UnitManager.Instance.RemoveUnit(unit);
+                Destroy(unit.gameObject);
+            }
+        }
     }
     
     private void DestroyConstructionSitesInArea(HashSet<Vector3Int> cells)

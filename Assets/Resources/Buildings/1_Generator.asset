@@ -27,4 +27,4 @@ MonoBehaviour:
     relativePosition: {x: 1, y: 0, z: 0}
   - buildingPieceType: 2
     relativePosition: {x: 1, y: 1, z: 0}
-  noiseCoefficient: 1
+  noiseCoefficient: 0.5

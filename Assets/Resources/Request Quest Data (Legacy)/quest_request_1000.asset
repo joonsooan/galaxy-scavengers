@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 898dc1efeda45414a8149ac16673e46f, type: 3}
+  m_Name: quest_request_1000
+  m_EditorClassIdentifier: 
+  questId: 1000
+  questType: 1
+  questProvider: 0
+  previousQuestIds: 
+  questName: "\uBC29\uC5B4 \uC900\uBE44"
+  questInfo: "\uD589\uC131\uC5D0\uC11C\uC758 \uD558\uB8E8\uB294 \uC798 \uC2DC\uC791\uD558\uACE0
+    \uACC4\uC2E0\uAC00\uC694?\n\uBC24\uC774 \uB418\uBA74 \uC2DC\uB044\uB7EC\uC6B4
+    \uC18C\uC74C\uC744 \uB208\uCE58\uCC48 \uBD88\uCCAD\uAC1D\uB4E4\uC774 \uCC3E\uC544\uC62C
+    \uC218\uB3C4 \uC788\uC73C\uB2C8 \uB300\uBE44\uB97C \uD574\uC57C \uD569\uB2C8\uB2E4.\n\uC18C\uC911\uD55C
+    \uC790\uC6D0\uC744 \uC9C0\uD0AC \uC218 \uC788\uB294 \uBC29\uC5B4 \uC2DC\uC124\uC744
+    \uC124\uCE58\uD574\uC8FC\uC138\uC694."
+  requiredResources: []
+  questCheckRequirements:
+  - checkType: 1
+    targetId: "\uD3EC\uD0D1"
+    requiredCount: 3
+    displayText: "\uD3EC\uD0D1 3\uAC1C \uAC74\uC124"
+    targetLocation: {x: 0, y: 0, z: 0}
+    locationTolerance: 0
+  questFinishReward:
+    resourceRewards: []
+    moduleRewards: []
+    creditReward: 100
+    unlockedBuildings: []
+    newUnits: []

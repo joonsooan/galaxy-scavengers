@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using DG.Tweening;
 using UnityEngine;
 
@@ -13,12 +14,14 @@ public class Unit_Drone : UnitBase
     [SerializeField] private float loadingTime = 1f;
     [SerializeField] private float unloadingTime = 1f;
     [SerializeField] private float assignmentTime = 1f;
+    [SerializeField] private float notAssignedAlertDelay = 3f;
     [SerializeField] private UnitMovement movement;
 
     [Header("Hover Animation")]
     [SerializeField] private float hoverHeight = 0.2f;
     [SerializeField] private float hoverDuration = 1.5f;
     private Coroutine _assignmentCoroutine;
+    private Coroutine _autoAssignCoroutine;
     private Vector3 _baseHoverLocalPosition;
     private WaitForSeconds _assignmentWait;
 
@@ -31,7 +34,9 @@ public class Unit_Drone : UnitBase
     private Tween _hoverTween;
     private Coroutine _loadingCoroutine;
     private float _nextRepathTime;
+    private bool _notAssignedAlertActive;
     private bool _noResourceAlertActive;
+    private float _notAssignedAlertEnableTime;
 
     private UnitSpriteController _spriteController;
     private Transform _spriteTransform;
@@ -65,6 +70,9 @@ public class Unit_Drone : UnitBase
             _baseHoverLocalPosition = _spriteTransform.localPosition;
         }
         _assignmentWait = CoroutineCache.GetWaitForSeconds(assignmentTime);
+        if (!IsAssigned) {
+            _autoAssignCoroutine = StartCoroutine(AutoAssignNearestProcessorCoroutine());
+        }
     }
 
     private void Update()
@@ -79,15 +87,18 @@ public class Unit_Drone : UnitBase
     protected override void OnEnable()
     {
         base.OnEnable();
+        _notAssignedAlertEnableTime = Time.time + Mathf.Max(0f, notAssignedAlertDelay);
         UnitManager.Instance?.AddUnit(this);
     }
 
     protected override void OnDisable()
     {
-        if (_noResourceAlertActive) {
-            FindFirstObjectByType<GameAlertUIManager>()?.UnregisterAlert(GameAlertType.DroneNoResource, this);
-            _noResourceAlertActive = false;
+        if (_autoAssignCoroutine != null) {
+            StopCoroutine(_autoAssignCoroutine);
+            _autoAssignCoroutine = null;
         }
+        SetDroneIsNotAssignedAlert(false);
+        SetDroneNoResourceAlert(false);
         StopHover();
         base.OnDisable();
         UnitManager.Instance?.RemoveUnit(this);
@@ -99,15 +110,11 @@ public class Unit_Drone : UnitBase
         switch (_currentState) {
         case DroneState.Idle:
             UpdateIdle();
-            bool shouldShowAlert = !IsAssigned;
-            var alertManager = FindFirstObjectByType<GameAlertUIManager>();
-            if (shouldShowAlert && !_noResourceAlertActive) {
-                alertManager?.RegisterAlert(GameAlertType.DroneNoResource, this);
-                _noResourceAlertActive = true;
-            }
-            else if (!shouldShowAlert && _noResourceAlertActive) {
-                alertManager?.UnregisterAlert(GameAlertType.DroneNoResource, this);
-                _noResourceAlertActive = false;
+            bool delayElapsed = Time.time >= _notAssignedAlertEnableTime;
+            bool shouldShowNotAssignedAlert = !IsAssigned && delayElapsed;
+            SetDroneIsNotAssignedAlert(shouldShowNotAssignedAlert);
+            if (shouldShowNotAssignedAlert) {
+                SetDroneNoResourceAlert(false);
             }
             break;
 
@@ -182,6 +189,7 @@ public class Unit_Drone : UnitBase
         HasCheckedIn = false;
 
         if (_currentProcessor != null) {
+            movement?.ForceStopAllMovement();
             _currentProcessor.AssignDrone(this);
             _currentState = DroneState.Idle;
 
@@ -321,7 +329,9 @@ public class Unit_Drone : UnitBase
                 return;
             }
 
-            bool isAtProcessorForCheckIn = movement.HasReachedTarget(movement.waypointTolerance);
+            Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
+            bool isAtProcessorByDistance = Vector3.Distance(transform.position, interactionPos) <= movement.waypointTolerance;
+            bool isAtProcessorForCheckIn = movement.HasReachedTarget(movement.waypointTolerance) || isAtProcessorByDistance;
 
             if (isAtProcessorForCheckIn) {
                 if (_assignmentCoroutine == null) {
@@ -331,7 +341,6 @@ public class Unit_Drone : UnitBase
             }
 
             if (!movement.IsMoving) {
-                Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
                 bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
                 if (!hasPath) {
                     if (_assignmentCoroutine == null) {
@@ -661,6 +670,8 @@ public class Unit_Drone : UnitBase
 
     public void SetTask_FetchResource(Processor.ResourceRequest request, Processor processor)
     {
+        SetDroneIsNotAssignedAlert(false);
+        SetDroneNoResourceAlert(false);
         _currentRequest = request;
         _targetStorage = null;
         _storageRoute = null;
@@ -708,6 +719,7 @@ public class Unit_Drone : UnitBase
                                 _storageRouteIndex = i;
                                 _targetStorage = storage;
                                 _currentState = DroneState.FetchingResource;
+                                SetDroneNoResourceAlert(false);
                                 return;
                             }
                         }
@@ -716,11 +728,12 @@ public class Unit_Drone : UnitBase
             }
         }
 
-        SetTask_ReturnHome(true);
+        SetTask_ReturnHome(true, true);
     }
 
     public void SetTask_Process(Processor processor, ActiveRecipe recipeTask)
     {
+        SetDroneNoResourceAlert(false);
         if (recipeTask == null) {
             SetTask_Idle();
             return;
@@ -746,9 +759,10 @@ public class Unit_Drone : UnitBase
         ReleaseFromRecipeTask();
         HideProgressBar();
         _currentState = DroneState.Idle;
+        SetDroneNoResourceAlert(false);
     }
 
-    private void SetTask_ReturnHome(bool stopMovement = false)
+    private void SetTask_ReturnHome(bool stopMovement = false, bool dueToNoResource = false)
     {
         ReleaseFromRecipeTask();
         HideProgressBar();
@@ -763,6 +777,95 @@ public class Unit_Drone : UnitBase
         if (stopMovement) {
             movement.StopMovement();
         }
+
+        SetDroneNoResourceAlert(dueToNoResource && IsAssigned);
+    }
+
+    private void SetDroneIsNotAssignedAlert(bool shouldEnable)
+    {
+        if (shouldEnable == _notAssignedAlertActive) return;
+        GameAlertUIManager alertManager = FindFirstObjectByType<GameAlertUIManager>();
+        if (shouldEnable) {
+            alertManager?.RegisterAlert(GameAlertType.DroneIsNotAssigned, this);
+        }
+        else {
+            alertManager?.UnregisterAlert(GameAlertType.DroneIsNotAssigned, this);
+        }
+        _notAssignedAlertActive = shouldEnable;
+    }
+
+    private void SetDroneNoResourceAlert(bool shouldEnable)
+    {
+        if (shouldEnable == _noResourceAlertActive) return;
+        GameAlertUIManager alertManager = FindFirstObjectByType<GameAlertUIManager>();
+        if (shouldEnable) {
+            alertManager?.RegisterAlert(GameAlertType.DroneNoResource, this);
+        }
+        else {
+            alertManager?.UnregisterAlert(GameAlertType.DroneNoResource, this);
+        }
+        _noResourceAlertActive = shouldEnable;
+    }
+
+    private IEnumerator AutoAssignNearestProcessorCoroutine()
+    {
+        yield return null;
+
+        const int maxAttempts = 10;
+        WaitForSeconds retryWait = CoroutineCache.GetWaitForSeconds(0.5f);
+
+        for (int attempt = 0; attempt < maxAttempts; attempt++) {
+            if (!isActiveAndEnabled || IsAssigned) {
+                _autoAssignCoroutine = null;
+                yield break;
+            }
+
+            Processor processor = FindBestAutoAssignProcessor();
+            if (processor != null) {
+                AssignProcessor(processor);
+                _autoAssignCoroutine = null;
+                yield break;
+            }
+
+            yield return retryWait;
+        }
+
+        _autoAssignCoroutine = null;
+    }
+
+    private Processor FindBestAutoAssignProcessor()
+    {
+        Processor[] processors = FindObjectsByType<Processor>(FindObjectsSortMode.None);
+        if (processors == null || processors.Length == 0) {
+            return null;
+        }
+
+        List<Processor> assignable = processors
+            .Where(p => p != null && p.gameObject.activeInHierarchy && !p.IsFull)
+            .ToList();
+
+        if (assignable.Count == 0) {
+            return null;
+        }
+
+        Vector3 dronePos = transform.position;
+        List<Processor> withWork = assignable
+            .Where(p => p.HasWorkForDrone(carryCapacity))
+            .ToList();
+
+        List<Processor> candidates = withWork.Count > 0 ? withWork : assignable;
+        Processor best = null;
+        float bestDistance = float.MaxValue;
+
+        foreach (Processor processor in candidates) {
+            float distance = Vector3.Distance(dronePos, processor.transform.position);
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                best = processor;
+            }
+        }
+
+        return best;
     }
 
     private void UpdateHoverAnimation()

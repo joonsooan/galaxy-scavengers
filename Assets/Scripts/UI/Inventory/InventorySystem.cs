@@ -263,7 +263,7 @@ public class InventorySystem : MonoBehaviour
 
     public InventoryCell FindFirstEmptyCell()
     {
-        return _inventoryCells.FirstOrDefault(cell => cell.IsEmpty());
+        return _inventoryCells.FirstOrDefault(cell => cell != null && cell.gameObject != null && cell.gameObject.activeSelf && cell.IsEmpty());
     }
 
     public List<InventoryCell> GetAllEmptyCells()
@@ -302,10 +302,11 @@ public class InventorySystem : MonoBehaviour
             }
 
             int amountForThisCell = Mathf.Min(remainingToMove, maxStack);
-            if (ResourceManager.Instance.RemoveResource(type, amountForThisCell))
+            int withdrawn = WithdrawResourceFromStorages(type, amountForThisCell);
+            if (withdrawn > 0)
             {
-                emptyCell.SetResource(type, amountForThisCell);
-                remainingToMove -= amountForThisCell;
+                emptyCell.SetResource(type, withdrawn);
+                remainingToMove -= withdrawn;
             }
             else
             {
@@ -328,12 +329,52 @@ public class InventorySystem : MonoBehaviour
         return addedAnyResource;
     }
 
+    private int WithdrawResourceFromStorages(ResourceType type, int amount)
+    {
+        if (ResourceManager.Instance == null || amount <= 0)
+        {
+            return 0;
+        }
+
+        List<IStorage> storages = ResourceManager.Instance.GetAllStorages();
+        if (storages == null || storages.Count == 0)
+        {
+            return 0;
+        }
+
+        MainStructure mainStructure = ResourceDataManager.Instance?.GetMainStructure();
+        List<IStorage> orderedStorages = new List<IStorage>();
+        if (mainStructure != null)
+        {
+            orderedStorages.Add(mainStructure);
+        }
+        foreach (IStorage s in storages)
+        {
+            if (s != null && s != mainStructure)
+            {
+                orderedStorages.Add(s);
+            }
+        }
+
+        int remaining = amount;
+        foreach (IStorage storage in orderedStorages)
+        {
+            if (remaining <= 0)
+            {
+                break;
+            }
+            if (storage.TryWithdrawResource(type, remaining, out int withdrawn) && withdrawn > 0)
+            {
+                remaining -= withdrawn;
+            }
+        }
+
+        return amount - remaining;
+    }
+
     public void ReturnResourceToManager(ResourceType type, int amount)
     {
-        if (ResourceManager.Instance != null)
-        {
-            ResourceManager.Instance.AddResource(type, amount);
-        }
+        ReturnResourceToStorages(type, amount);
     }
 
     public void ReturnAllResourcesOfType(ResourceType type)
@@ -357,13 +398,61 @@ public class InventorySystem : MonoBehaviour
 
         if (totalAmount > 0)
         {
-            ResourceManager.Instance.AddResource(type, totalAmount);
+            ReturnResourceToStorages(type, totalAmount);
             
             foreach (InventoryCell cell in cellsToClear)
             {
                 cell.Clear();
             }
         }
+    }
+
+    private void ReturnResourceToStorages(ResourceType type, int amount)
+    {
+        if (amount <= 0 || ResourceManager.Instance == null)
+        {
+            return;
+        }
+
+        int remaining = amount;
+        List<IStorage> storages = ResourceManager.Instance.GetAllStorages();
+        if (storages != null)
+        {
+            for (int i = 0; i < storages.Count; i++)
+            {
+                if (remaining <= 0)
+                {
+                    break;
+                }
+
+                IStorage storage = storages[i];
+                if (storage == null)
+                {
+                    continue;
+                }
+
+                int beforeAmount = storage.GetCurrentResourceAmount(type);
+                bool added = storage.TryAddResource(type, remaining);
+                if (!added)
+                {
+                    continue;
+                }
+
+                int afterAmount = storage.GetCurrentResourceAmount(type);
+                int movedAmount = Mathf.Max(0, afterAmount - beforeAmount);
+                if (movedAmount > 0)
+                {
+                    remaining -= movedAmount;
+                }
+            }
+        }
+
+        if (remaining > 0)
+        {
+            ResourceManager.Instance.AddResource(type, remaining);
+        }
+
+        RefreshAllResourceCells();
     }
 
     private void UpdateResourceInfoCells(ResourceType type, int amount)
