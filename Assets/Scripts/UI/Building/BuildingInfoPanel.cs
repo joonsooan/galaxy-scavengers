@@ -19,7 +19,7 @@ public class BuildingInfoPanel : MonoBehaviour
 
     [Header("Aether & Noise")]
     [SerializeField] private GameObject aetherSpendPanel;
-    [SerializeField] private TMP_Text aetherConsumptionText;
+    [SerializeField] private TMP_Text electricityConsumptionText;
     [SerializeField] private GameObject noisePanel;
     [SerializeField] private TMP_Text noiseText;
 
@@ -154,9 +154,9 @@ public class BuildingInfoPanel : MonoBehaviour
             aetherSpendPanel.SetActive(electricityConsumption > 0);
         }
 
-        if (aetherConsumptionText != null && electricityConsumption > 0)
+        if (electricityConsumptionText != null && electricityConsumption > 0)
         {
-            aetherConsumptionText.text = $"소모량 : {electricityConsumption:F1}";
+            electricityConsumptionText.text = $"소모량 : {electricityConsumption:F1}";
         }
 
         if (data == null || data.buildingType != BuildingType.MainStructure)
@@ -306,7 +306,7 @@ public class BuildingInfoPanel : MonoBehaviour
     {
         if (aetherSpendPanel != null) aetherSpendPanel.SetActive(false);
         if (noisePanel != null) noisePanel.SetActive(false);
-        if (aetherConsumptionText != null) aetherConsumptionText.text = string.Empty;
+        if (electricityConsumptionText != null) electricityConsumptionText.text = string.Empty;
         if (noiseText != null) noiseText.text = string.Empty;
     }
 

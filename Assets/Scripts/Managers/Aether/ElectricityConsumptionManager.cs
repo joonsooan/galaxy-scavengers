@@ -13,7 +13,6 @@ public class ElectricityConsumptionManager : MonoBehaviour
     private readonly List<PowerReceiver> _powerReceivers = new List<PowerReceiver>();
     private readonly Dictionary<IElectricityConsumer, bool> _consumerStates = new Dictionary<IElectricityConsumer, bool>();
     private readonly List<MainStructure> _mainStructures = new List<MainStructure>();
-    private readonly List<Storage> _storages = new List<Storage>();
 
     private AetherTimerManager _timerManager;
 
@@ -35,12 +34,6 @@ public class ElectricityConsumptionManager : MonoBehaviour
             foreach (MainStructure mainStructure in _mainStructures) {
                 if (mainStructure != null) {
                     total += mainStructure.BaseAetherCapacity;
-                }
-            }
-
-            foreach (Storage storage in _storages) {
-                if (storage != null) {
-                    total += storage.AetherCapacity;
                 }
             }
 
@@ -225,20 +218,6 @@ public class ElectricityConsumptionManager : MonoBehaviour
     {
         if (mainStructure != null) {
             _mainStructures.Remove(mainStructure);
-        }
-    }
-
-    public void RegisterStorage(Storage storage)
-    {
-        if (storage != null && !_storages.Contains(storage)) {
-            _storages.Add(storage);
-        }
-    }
-
-    public void UnregisterStorage(Storage storage)
-    {
-        if (storage != null) {
-            _storages.Remove(storage);
         }
     }
 

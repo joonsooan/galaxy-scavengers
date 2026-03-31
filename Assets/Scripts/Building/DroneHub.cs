@@ -7,7 +7,7 @@ public class DroneHub : Damageable, IClickable, IElectricityConsumer
 {
     [SerializeField] private DroneHubData droneHubData;
     [Header("Electricity consumption")]
-    [SerializeField] private int aetherConsumptionPerSecond = 1;
+    [SerializeField] private int electricityConsumptionPerSecond = 1;
     [Header("Production Progress UI")]
     [SerializeField] private ProductionProgressSlider productionSlider;
 
@@ -71,7 +71,7 @@ public class DroneHub : Damageable, IClickable, IElectricityConsumer
         base.OnDisable();
     }
 
-    public int ElectricityConsumptionPerSecond => aetherConsumptionPerSecond;
+    public int ElectricityConsumptionPerSecond => electricityConsumptionPerSecond;
 
     public bool IsOperational { get; private set; } = true;
 

@@ -9,7 +9,7 @@ public class Turret : Damageable, IElectricityConsumer
     [SerializeField] private int attackDamage = 10;
     [SerializeField] private GameObject bulletPrefab;
     [Header("Electricity consumption")]
-    [SerializeField] private int aetherConsumptionPerSecond = 1;
+    [SerializeField] private int electricityConsumptionPerSecond = 1;
 
     private Transform _target;
     private Coroutine _attackCoroutine;
@@ -20,7 +20,7 @@ public class Turret : Damageable, IElectricityConsumer
     private bool _isOperational = true;
     private ElectricityConsumptionManager _electricityConsumptionManager;
     
-    public int ElectricityConsumptionPerSecond => aetherConsumptionPerSecond;
+    public int ElectricityConsumptionPerSecond => electricityConsumptionPerSecond;
     public bool IsOperational => _isOperational;
     
     private void OnDrawGizmosSelected()

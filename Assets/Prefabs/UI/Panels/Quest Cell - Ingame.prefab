@@ -103,6 +103,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -389,6 +390,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -534,7 +536,7 @@ MonoBehaviour:
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
-    m_HighlightedSprite: {fileID: -1899253260378458392, guid: 1fd5403476e2e2e41b3bcb15ae427786, type: 3}
+    m_HighlightedSprite: {fileID: -4239486290848219248, guid: 92b7981e41463a94ab348ae08507a7ec, type: 3}
     m_PressedSprite: {fileID: 8508079644404475916, guid: f243b32f5f223af468ab44a596d5592a, type: 3}
     m_SelectedSprite: {fileID: 9098191060468450725, guid: 034f1e0c4607c8748bd83c531ad32898, type: 3}
     m_DisabledSprite: {fileID: -1899253260378458392, guid: 1fd5403476e2e2e41b3bcb15ae427786, type: 3}
@@ -566,6 +568,7 @@ MonoBehaviour:
   cellButton: {fileID: 4407997240673077720}
   configureIcon: {fileID: 2613250169957899930}
   notifierIcon: {fileID: 2613250169957899930}
+  coreRepairQuestTitleColor: {r: 0, g: 1, b: 1, a: 1}
 --- !u!114 &-3059361073330713778
 MonoBehaviour:
   m_ObjectHideFlags: 0

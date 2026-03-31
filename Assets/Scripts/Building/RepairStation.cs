@@ -9,14 +9,14 @@ public class RepairStation : Damageable, IElectricityConsumer
     [SerializeField] private float healRadius = 5f;
     [SerializeField] private int healAmount = 10;
     [Header("Electricity consumption")]
-    [SerializeField] private int aetherConsumptionPerSecond = 1;
+    [SerializeField] private int electricityConsumptionPerSecond = 1;
     
     private Coroutine _healCoroutine;
     private WaitForSeconds _healWait;
     private bool _isOperational = true;
     private ElectricityConsumptionManager _electricityConsumptionManager;
     
-    public int ElectricityConsumptionPerSecond => aetherConsumptionPerSecond;
+    public int ElectricityConsumptionPerSecond => electricityConsumptionPerSecond;
     public bool IsOperational => _isOperational;
     
     private void OnDrawGizmosSelected()

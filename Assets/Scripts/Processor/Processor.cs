@@ -8,7 +8,7 @@ public class Processor : Damageable, IClickable, IElectricityConsumer
     private const float TaskCheckInterval = 1f;
     [SerializeField] private ProcessorData processorData;
     [Header("Electricity consumption")]
-    [SerializeField] private int aetherConsumptionPerSecond = 1;
+    [SerializeField] private int electricityConsumptionPerSecond = 1;
 
     private readonly List<ActiveRecipe> _activeRecipes = new List<ActiveRecipe>();
 
@@ -120,7 +120,7 @@ public class Processor : Damageable, IClickable, IElectricityConsumer
         }
     }
 
-    public int ElectricityConsumptionPerSecond => aetherConsumptionPerSecond;
+    public int ElectricityConsumptionPerSecond => electricityConsumptionPerSecond;
 
     public bool IsOperational { get; private set; } = true;
 

@@ -143,6 +143,11 @@ public class MapGenerator : MonoBehaviour
         return new BoundsInt(mapOrigin, new Vector3Int(width, height, 1));
     }
 
+    public void PrepareStaticSceneMapMetadata()
+    {
+        CalculateMapDimensions();
+    }
+
     public Tilemap GroundTilemap {
         get {
             return groundTilemap;

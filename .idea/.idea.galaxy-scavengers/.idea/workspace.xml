@@ -5,15 +5,74 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2e9922bb-ccc6-4c6e-93bd-15fa8a8d7f34" name="변경" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.galaxy-scavengers/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.galaxy-scavengers/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Materials/Shader Materials/ShinyPanel_size_16.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Shader Materials/ShinyPanel_size_16.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/0_Trash/10_Orbital Launcher.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/0_Trash/10_Orbital Launcher.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Buildings/0_Storage.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Buildings/0_Storage.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Buildings/10_Receiver.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Buildings/10_Receiver.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Buildings/2_Drone Hub.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Buildings/2_Drone Hub.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Buildings/3_Smelter.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Buildings/3_Smelter.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Buildings/4_Assembler.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Buildings/4_Assembler.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Buildings/5_Reactor.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Buildings/5_Reactor.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Buildings/6_Battery.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Buildings/6_Battery.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Buildings/7_Repair Station.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Buildings/7_Repair Station.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Buildings/8_AutoTurret.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Buildings/8_AutoTurret.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy).meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0000.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0000.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0001.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0001.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0002.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0002.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0003.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0003.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0004.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0004.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0005.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0005.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0006.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0006.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0007.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0007.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0008.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0008.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0009.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0009.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0010.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0010.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0011.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0011.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0012.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0012.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0013.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0013.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0014.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0014.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0015.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Quest Data (Legacy)/quest_0015.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Request Quest Data (Legacy).meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Request Quest Data (Legacy)/quest_request_1000.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Request Quest Data (Legacy)/quest_request_1000.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Request Quest Data (Legacy)/quest_request_1001.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Request Quest Data (Legacy)/quest_request_1001.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Request Quest Data (Legacy)/quest_request_1002.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Request Quest Data (Legacy)/quest_request_1002.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Request Quest Data (Legacy)/quest_request_1003.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Request Quest Data (Legacy)/quest_request_1003.asset.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Request Quest Data (Legacy)/quest_request_1004.asset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Request Quest Data (Legacy)/quest_request_1004.asset.meta" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Building/Battery.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Building/Battery.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Building/PowerReceiver.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Building/PowerReceiver.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Building/ResourceGenerator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Building/ResourceGenerator.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Data/BuildingPieceData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Data/BuildingPieceData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Building/BuildingManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Building/BuildingManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Power/PowerGridGeometry.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Power/PowerGridGeometry.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Audio/FMODUIButton.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Audio/FMODUIButton.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Building/DroneHub.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Building/DroneHub.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Building/RepairStation.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Building/RepairStation.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Building/Storage.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Building/Storage.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Building/Turret.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Building/Turret.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Aether/ElectricityConsumptionManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Aether/ElectricityConsumptionManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Game/GameManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Game/GameManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Game/MapGenerator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Game/MapGenerator.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Processor/Processor.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Processor/Processor.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Building/BuildingInfoPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Building/BuildingInfoPanel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Status/IngameStatusUI.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Status/IngameStatusUI.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Unit/Unit_Miner.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Unit/Unit_Miner.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -194,7 +253,7 @@
       <workItem from="1771657136468" duration="3000" />
       <workItem from="1771660851912" duration="674000" />
       <workItem from="1774923477764" duration="263000" />
-      <workItem from="1774923868757" duration="2835000" />
+      <workItem from="1774923868757" duration="3424000" />
     </task>
     <servers />
   </component>

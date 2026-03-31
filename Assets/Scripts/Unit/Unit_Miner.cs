@@ -275,7 +275,6 @@ public class Unit_Miner : UnitBase
         HideProgressBar();
 
         if (_targetStorage != null) {
-            // Check if trying to unload aether and capacity is full
             bool hasAether = _currentCarryAmounts.ContainsKey(ResourceType.Aether) &&
                 _currentCarryAmounts[ResourceType.Aether] > 0;
 
@@ -520,7 +519,6 @@ public class Unit_Miner : UnitBase
             _currentCarryAmounts[ResourceType.Aether] > 0;
         bool hasNonAether = _currentCarryAmounts.Any(p => p.Key != ResourceType.Aether && p.Value > 0);
 
-        // If trying to unload aether and capacity is full, don't find storage
         if (hasAether && !hasNonAether) {
             ElectricityConsumptionManager powerManager = ElectricityConsumptionManager.Instance;
             if (powerManager != null && powerManager.IsAetherOreStorageFull) {
