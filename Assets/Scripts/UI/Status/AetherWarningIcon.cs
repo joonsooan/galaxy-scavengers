@@ -7,11 +7,11 @@ public class AetherWarningIcon : MonoBehaviour
     [SerializeField] private GameObject iconObject;
     [SerializeField] private Image iconImage;
     
-    private IAetherConsumer _aetherConsumer;
+    private IElectricityConsumer _electricityConsumer;
     
     private void Awake()
     {
-        _aetherConsumer = GetComponentInParent<IAetherConsumer>();
+        _electricityConsumer = GetComponentInParent<IElectricityConsumer>();
         
         if (iconObject != null)
         {
@@ -21,9 +21,9 @@ public class AetherWarningIcon : MonoBehaviour
     
     private void Update()
     {
-        if (_aetherConsumer != null && iconObject != null)
+        if (_electricityConsumer != null && iconObject != null)
         {
-            iconObject.SetActive(!_aetherConsumer.IsOperational);
+            iconObject.SetActive(!_electricityConsumer.IsOperational);
         }
     }
 }

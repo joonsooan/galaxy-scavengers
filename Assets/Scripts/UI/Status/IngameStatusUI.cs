@@ -13,7 +13,7 @@ public class IngameStatusUI : MonoBehaviour
     [SerializeField] private Image creditIconImage;
     [SerializeField] private TMP_Text creditAmountText;
 
-    private AetherConsumptionManager _aetherConsumptionManager;
+    private ElectricityConsumptionManager _electricityConsumptionManager;
     private Color _originalColor;
     private StorageTrackerManager _storageTrackerManager;
     private bool _isCreditSubscribed;
@@ -21,12 +21,12 @@ public class IngameStatusUI : MonoBehaviour
 
     private void Start()
     {
-        _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
+        _electricityConsumptionManager = FindFirstObjectByType<ElectricityConsumptionManager>();
         _storageTrackerManager = FindFirstObjectByType<StorageTrackerManager>();
 
         if (_storageTrackerManager != null) {
             _storageTrackerManager.OnStorageChanged += UpdateStorageText;
-            _storageTrackerManager.OnAetherChanged += UpdateAetherText;
+            _storageTrackerManager.OnElectricityChanged += UpdateAetherText;
         }
 
         _originalColor = aetherStatusText.color;
@@ -38,21 +38,21 @@ public class IngameStatusUI : MonoBehaviour
 
     private void Update()
     {
-        if (_aetherConsumptionManager == null || aetherStatusText == null) return;
+        if (_electricityConsumptionManager == null || aetherStatusText == null) return;
 
-        float netAether = _aetherConsumptionManager.NetAetherPerSecond;
-        if (netAether > 0) {
+        float netElectricity = _electricityConsumptionManager.NetElectricityPerSecond;
+        if (netElectricity > 0) {
             aetherStatusText.color = Color.green;
-            aetherStatusText.text = $"변화량 : + {netAether:F1}/s";
+            aetherStatusText.text = $"전기 : + {netElectricity:F1}/s";
         }
-        else if (netAether < 0) {
-            netAether = Mathf.Abs(netAether);
+        else if (netElectricity < 0) {
+            netElectricity = Mathf.Abs(netElectricity);
             aetherStatusText.color = Color.red;
-            aetherStatusText.text = $"변화량 : - {netAether:F1}/s";
+            aetherStatusText.text = $"전기 : - {netElectricity:F1}/s";
         }
         else {
             aetherStatusText.color = _originalColor;
-            aetherStatusText.text = $"변화량 : {netAether:F1}/s";
+            aetherStatusText.text = $"전기 : {netElectricity:F1}/s";
         }
     }
 
@@ -60,7 +60,7 @@ public class IngameStatusUI : MonoBehaviour
     {
         if (_storageTrackerManager != null) {
             _storageTrackerManager.OnStorageChanged -= UpdateStorageText;
-            _storageTrackerManager.OnAetherChanged -= UpdateAetherText;
+            _storageTrackerManager.OnElectricityChanged -= UpdateAetherText;
         }
 
         if (_isCreditSubscribed && CreditManager.Instance != null)
@@ -84,16 +84,16 @@ public class IngameStatusUI : MonoBehaviour
     {
         if (aetherText == null || _storageTrackerManager == null) return;
 
-        int current = _storageTrackerManager.CurrentAetherAmount;
-        int max = _storageTrackerManager.MaxStorableAetherAmount;
+        int current = _storageTrackerManager.CurrentElectricityAmount;
+        int max = _storageTrackerManager.MaxStorableElectricityAmount;
 
-        if (current >= max) {
+        if (current >= max && max > 0) {
             aetherText.color = Color.red;
         }
         else {
             aetherText.color = _originalColor;
         }
-        aetherText.text = $"저장량 : {current} / {max}";
+        aetherText.text = $"전기 저장 : {current} / {max}";
     }
 
     private IEnumerator BindCreditManagerWhenReady()

@@ -3,10 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DroneHub : Damageable, IClickable, IAetherConsumer
+public class DroneHub : Damageable, IClickable, IElectricityConsumer
 {
     [SerializeField] private DroneHubData droneHubData;
-    [Header("Aether Consumption")]
+    [Header("Electricity consumption")]
     [SerializeField] private int aetherConsumptionPerSecond = 1;
     [Header("Production Progress UI")]
     [SerializeField] private ProductionProgressSlider productionSlider;
@@ -15,7 +15,7 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
     private readonly Queue<UnitData> _productionQueue = new ();
     private readonly Dictionary<int, int> _targetUnitCounts = new ();
     
-    private AetherConsumptionManager _aetherConsumptionManager;
+    private ElectricityConsumptionManager _electricityConsumptionManager;
     private UnitData _currentProducingUnit;
     
     private float _currentProductionTime;
@@ -50,9 +50,9 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
             return;
         }
 
-        FindAndCacheAetherManager();
-        if (_aetherConsumptionManager != null) {
-            _aetherConsumptionManager.RegisterConsumer(this);
+        FindAndCacheElectricityManager();
+        if (_electricityConsumptionManager != null) {
+            _electricityConsumptionManager.RegisterConsumer(this);
         }
 
         ResourceManager.OnResourceAmountChanged += OnResourceAmountChanged;
@@ -60,8 +60,8 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
 
     protected override void OnDisable()
     {
-        if (_aetherConsumptionManager != null) {
-            _aetherConsumptionManager.UnregisterConsumer(this);
+        if (_electricityConsumptionManager != null) {
+            _electricityConsumptionManager.UnregisterConsumer(this);
         }
         ResourceManager.OnResourceAmountChanged -= OnResourceAmountChanged;
 
@@ -71,15 +71,11 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
         base.OnDisable();
     }
 
-    public int AetherConsumptionPerSecond {
-        get {
-            return aetherConsumptionPerSecond;
-        }
-    }
+    public int ElectricityConsumptionPerSecond => aetherConsumptionPerSecond;
 
     public bool IsOperational { get; private set; } = true;
 
-    public void OnAetherUnavailable()
+    public void OnElectricityUnavailable()
     {
         if (IsOperational) {
             IsOperational = false;
@@ -87,7 +83,7 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
         }
     }
 
-    public void OnAetherAvailable()
+    public void OnElectricityAvailable()
     {
         if (!IsOperational) {
             IsOperational = true;
@@ -146,10 +142,10 @@ public class DroneHub : Damageable, IClickable, IAetherConsumer
         }
     }
 
-    private void FindAndCacheAetherManager()
+    private void FindAndCacheElectricityManager()
     {
-        if (_aetherConsumptionManager == null) {
-            _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
+        if (_electricityConsumptionManager == null) {
+            _electricityConsumptionManager = FindFirstObjectByType<ElectricityConsumptionManager>();
         }
     }
 

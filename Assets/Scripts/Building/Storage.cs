@@ -5,7 +5,7 @@ public class Storage : BaseStorage
     [Header("Aether Capacity")]
     [SerializeField] private int aetherCapacity = 50;
     
-    private AetherConsumptionManager _aetherConsumptionManager;
+    private ElectricityConsumptionManager _electricityConsumptionManager;
     
     public int AetherCapacity => aetherCapacity;
     
@@ -31,28 +31,28 @@ public class Storage : BaseStorage
             return;
         }
         
-        FindAndCacheAetherManager();
-        if (_aetherConsumptionManager != null)
+        FindAndCacheElectricityManager();
+        if (_electricityConsumptionManager != null)
         {
-            _aetherConsumptionManager.RegisterStorage(this);
+            _electricityConsumptionManager.RegisterStorage(this);
         }
     }
     
     protected override void OnDisable()
     {
-        if (_aetherConsumptionManager != null)
+        if (_electricityConsumptionManager != null)
         {
-            _aetherConsumptionManager.UnregisterStorage(this);
+            _electricityConsumptionManager.UnregisterStorage(this);
         }
         
         base.OnDisable();
     }
     
-    private void FindAndCacheAetherManager()
+    private void FindAndCacheElectricityManager()
     {
-        if (_aetherConsumptionManager == null)
+        if (_electricityConsumptionManager == null)
         {
-            _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
+            _electricityConsumptionManager = FindFirstObjectByType<ElectricityConsumptionManager>();
         }
     }
     

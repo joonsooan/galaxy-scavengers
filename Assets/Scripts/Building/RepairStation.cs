@@ -2,21 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RepairStation : Damageable, IAetherConsumer
+public class RepairStation : Damageable, IElectricityConsumer
 {
     [Header("Heal Settings")]
     [SerializeField] private float healInterval = 1f;
     [SerializeField] private float healRadius = 5f;
     [SerializeField] private int healAmount = 10;
-    [Header("Aether Consumption")]
+    [Header("Electricity consumption")]
     [SerializeField] private int aetherConsumptionPerSecond = 1;
     
     private Coroutine _healCoroutine;
     private WaitForSeconds _healWait;
     private bool _isOperational = true;
-    private AetherConsumptionManager _aetherConsumptionManager;
+    private ElectricityConsumptionManager _electricityConsumptionManager;
     
-    public int AetherConsumptionPerSecond => aetherConsumptionPerSecond;
+    public int ElectricityConsumptionPerSecond => aetherConsumptionPerSecond;
     public bool IsOperational => _isOperational;
     
     private void OnDrawGizmosSelected()
@@ -34,10 +34,10 @@ public class RepairStation : Damageable, IAetherConsumer
             return;
         }
         
-        FindAndCacheAetherManager();
-        if (_aetherConsumptionManager != null)
+        FindAndCacheElectricityManager();
+        if (_electricityConsumptionManager != null)
         {
-            _aetherConsumptionManager.RegisterConsumer(this);
+            _electricityConsumptionManager.RegisterConsumer(this);
         }
         
         _healWait = new WaitForSeconds(healInterval);
@@ -46,9 +46,9 @@ public class RepairStation : Damageable, IAetherConsumer
     
     protected override void OnDisable()
     {
-        if (_aetherConsumptionManager != null)
+        if (_electricityConsumptionManager != null)
         {
-            _aetherConsumptionManager.UnregisterConsumer(this);
+            _electricityConsumptionManager.UnregisterConsumer(this);
         }
         
         base.OnDisable();
@@ -56,15 +56,15 @@ public class RepairStation : Damageable, IAetherConsumer
         StopHealing();
     }
     
-    private void FindAndCacheAetherManager()
+    private void FindAndCacheElectricityManager()
     {
-        if (_aetherConsumptionManager == null)
+        if (_electricityConsumptionManager == null)
         {
-            _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
+            _electricityConsumptionManager = FindFirstObjectByType<ElectricityConsumptionManager>();
         }
     }
     
-    public void OnAetherUnavailable()
+    public void OnElectricityUnavailable()
     {
         if (_isOperational)
         {
@@ -73,7 +73,7 @@ public class RepairStation : Damageable, IAetherConsumer
         }
     }
     
-    public void OnAetherAvailable()
+    public void OnElectricityAvailable()
     {
         if (!_isOperational)
         {

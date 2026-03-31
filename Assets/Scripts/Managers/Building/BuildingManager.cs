@@ -722,6 +722,7 @@ public class BuildingManager : MonoBehaviour
             break;
         case BuildingType.Turret:
         case BuildingType.Radar:
+        case BuildingType.PowerReceiver:
             break;
         }
     }
@@ -825,6 +826,24 @@ public class BuildingManager : MonoBehaviour
         }
 
         occupiedCells = null;
+        return false;
+    }
+
+    public bool TryGetBuildingAnchorCells(Transform buildingTransform, out Vector3Int anchor, out List<Vector3Int> occupiedCells)
+    {
+        anchor = default;
+        occupiedCells = null;
+        if (grid == null || buildingTransform == null) {
+            return false;
+        }
+
+        Vector3Int cell = grid.WorldToCell(buildingTransform.position);
+        if (_cellToStructureMap.TryGetValue(cell, out BuildingStructure structure)) {
+            anchor = structure.anchor;
+            occupiedCells = structure.occupiedCells;
+            return true;
+        }
+
         return false;
     }
 

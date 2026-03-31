@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class StorageTrackerManager : MonoBehaviour
 {
-    private AetherConsumptionManager _aetherConsumptionManager;
+    private ElectricityConsumptionManager _electricityConsumptionManager;
 
     private ResourceManager _resourceManager;
 
@@ -12,11 +12,13 @@ public class StorageTrackerManager : MonoBehaviour
     public int MaxStorableResourceAmount { get; private set; }
     public int CurrentAetherAmount { get; private set; }
     public int MaxStorableAetherAmount { get; private set; }
+    public int CurrentElectricityAmount { get; private set; }
+    public int MaxStorableElectricityAmount { get; private set; }
 
     private void Start()
     {
         _resourceManager = FindFirstObjectByType<ResourceManager>();
-        _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
+        _electricityConsumptionManager = FindFirstObjectByType<ElectricityConsumptionManager>();
 
         if (_resourceManager != null) {
             ResourceManager.OnNewStorageAdded += OnStorageAdded;
@@ -33,6 +35,7 @@ public class StorageTrackerManager : MonoBehaviour
 
         UpdateStorageValues();
         UpdateAetherValues();
+        UpdateElectricityValues();
     }
 
     private void OnDestroy()
@@ -53,6 +56,7 @@ public class StorageTrackerManager : MonoBehaviour
 
     public event Action OnStorageChanged;
     public event Action OnAetherChanged;
+    public event Action OnElectricityChanged;
 
     private void OnStorageAdded()
     {
@@ -66,6 +70,7 @@ public class StorageTrackerManager : MonoBehaviour
 
         UpdateStorageValues();
         UpdateAetherValues();
+        UpdateElectricityValues();
     }
 
     private void OnStorageRemoved(IStorage storage)
@@ -76,6 +81,7 @@ public class StorageTrackerManager : MonoBehaviour
 
         UpdateStorageValues();
         UpdateAetherValues();
+        UpdateElectricityValues();
     }
 
     private void OnStorageResourceChanged(ResourceType type, int current, int max)
@@ -84,12 +90,18 @@ public class StorageTrackerManager : MonoBehaviour
         if (type == ResourceType.Aether) {
             UpdateAetherValues();
         }
+        if (type == ResourceType.Electricity) {
+            UpdateElectricityValues();
+        }
     }
 
     private void OnResourceAmountChanged(ResourceType type, int amount)
     {
         if (type == ResourceType.Aether) {
             UpdateAetherValues();
+        }
+        if (type == ResourceType.Electricity) {
+            UpdateElectricityValues();
         }
         UpdateStorageValues();
     }
@@ -123,10 +135,10 @@ public class StorageTrackerManager : MonoBehaviour
 
     private void UpdateAetherValues()
     {
-        if (_resourceManager == null || _aetherConsumptionManager == null) return;
+        if (_resourceManager == null || _electricityConsumptionManager == null) return;
 
         int currentAether = _resourceManager.GetResourceAmount(ResourceType.Aether);
-        int maxAether = _aetherConsumptionManager.MaxAetherCapacity;
+        int maxAether = _electricityConsumptionManager.MaxAetherOreStorageCapacity;
 
         bool changed = CurrentAetherAmount != currentAether ||
             MaxStorableAetherAmount != maxAether;
@@ -136,6 +148,24 @@ public class StorageTrackerManager : MonoBehaviour
 
         if (changed) {
             OnAetherChanged?.Invoke();
+        }
+    }
+
+    private void UpdateElectricityValues()
+    {
+        if (_electricityConsumptionManager == null) return;
+
+        int current = _electricityConsumptionManager.GetTotalElectricityAmount();
+        int max = _electricityConsumptionManager.MaxElectricityStorageCapacity;
+
+        bool changed = CurrentElectricityAmount != current ||
+            MaxStorableElectricityAmount != max;
+
+        CurrentElectricityAmount = current;
+        MaxStorableElectricityAmount = max;
+
+        if (changed) {
+            OnElectricityChanged?.Invoke();
         }
     }
 }

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Processor : Damageable, IClickable, IAetherConsumer
+public class Processor : Damageable, IClickable, IElectricityConsumer
 {
     private const float TaskCheckInterval = 1f;
     [SerializeField] private ProcessorData processorData;
-    [Header("Aether Consumption")]
+    [Header("Electricity consumption")]
     [SerializeField] private int aetherConsumptionPerSecond = 1;
 
     private readonly List<ActiveRecipe> _activeRecipes = new List<ActiveRecipe>();
@@ -16,7 +16,7 @@ public class Processor : Damageable, IClickable, IAetherConsumer
     private readonly Dictionary<ResourceType, int> _currentIngredients = new Dictionary<ResourceType, int>();
     private readonly Dictionary<Unit_Drone, Vector3Int> _droneInteractionCells = new Dictionary<Unit_Drone, Vector3Int>();
     private readonly List<ResourceRequest> _pendingRequests = new List<ResourceRequest>();
-    private AetherConsumptionManager _aetherConsumptionManager;
+    private ElectricityConsumptionManager _electricityConsumptionManager;
     private bool _isInitialized;
     private float _lastTaskCheckTime;
 
@@ -93,9 +93,9 @@ public class Processor : Damageable, IClickable, IAetherConsumer
             return;
         }
 
-        FindAndCacheAetherManager();
-        if (_aetherConsumptionManager != null) {
-            _aetherConsumptionManager.RegisterConsumer(this);
+        FindAndCacheElectricityManager();
+        if (_electricityConsumptionManager != null) {
+            _electricityConsumptionManager.RegisterConsumer(this);
         }
 
         ResourceManager.OnResourceAmountChanged += OnResourceAmountChanged;
@@ -107,8 +107,8 @@ public class Processor : Damageable, IClickable, IAetherConsumer
     {
         ResourceManager.OnResourceAmountChanged -= OnResourceAmountChanged;
 
-        if (_aetherConsumptionManager != null) {
-            _aetherConsumptionManager.UnregisterConsumer(this);
+        if (_electricityConsumptionManager != null) {
+            _electricityConsumptionManager.UnregisterConsumer(this);
         }
 
         base.OnDisable();
@@ -120,16 +120,11 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         }
     }
 
-    // IAetherConsumer implementation
-    public int AetherConsumptionPerSecond {
-        get {
-            return aetherConsumptionPerSecond;
-        }
-    }
+    public int ElectricityConsumptionPerSecond => aetherConsumptionPerSecond;
 
     public bool IsOperational { get; private set; } = true;
 
-    public void OnAetherUnavailable()
+    public void OnElectricityUnavailable()
     {
         if (IsOperational) {
             IsOperational = false;
@@ -146,7 +141,7 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         }
     }
 
-    public void OnAetherAvailable()
+    public void OnElectricityAvailable()
     {
         if (!IsOperational) {
             IsOperational = true;
@@ -183,10 +178,10 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         }
     }
 
-    private void FindAndCacheAetherManager()
+    private void FindAndCacheElectricityManager()
     {
-        if (_aetherConsumptionManager == null) {
-            _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
+        if (_electricityConsumptionManager == null) {
+            _electricityConsumptionManager = FindFirstObjectByType<ElectricityConsumptionManager>();
         }
     }
 

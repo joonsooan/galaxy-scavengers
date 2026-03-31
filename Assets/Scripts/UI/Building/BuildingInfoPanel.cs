@@ -142,21 +142,21 @@ public class BuildingInfoPanel : MonoBehaviour
 
     private void UpdateAetherAndNoiseDisplay(BuildingData data)
     {
-        int aetherConsumption = 0;
-        IAetherConsumer aetherConsumer = data != null && data.buildingPrefab != null ? data.buildingPrefab.GetComponent<IAetherConsumer>() : null;
-        if (aetherConsumer != null)
+        int electricityConsumption = 0;
+        IElectricityConsumer electricityConsumer = data != null && data.buildingPrefab != null ? data.buildingPrefab.GetComponent<IElectricityConsumer>() : null;
+        if (electricityConsumer != null)
         {
-            aetherConsumption = aetherConsumer.AetherConsumptionPerSecond;
+            electricityConsumption = electricityConsumer.ElectricityConsumptionPerSecond;
         }
 
         if (aetherSpendPanel != null)
         {
-            aetherSpendPanel.SetActive(aetherConsumption > 0);
+            aetherSpendPanel.SetActive(electricityConsumption > 0);
         }
 
-        if (aetherConsumptionText != null && aetherConsumption > 0)
+        if (aetherConsumptionText != null && electricityConsumption > 0)
         {
-            aetherConsumptionText.text = $"소모량 : {aetherConsumption:F1}";
+            aetherConsumptionText.text = $"소모량 : {electricityConsumption:F1}";
         }
 
         if (data == null || data.buildingType != BuildingType.MainStructure)

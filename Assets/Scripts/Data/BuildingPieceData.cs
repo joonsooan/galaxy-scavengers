@@ -12,7 +12,8 @@ public enum BuildingPieceType
     ElectroMagnet,
     BioCultivator,
     CrystalLink,
-    AetherCondenser
+    AetherCondenser,
+    PowerReceiver
 }
 
 [System.Serializable]

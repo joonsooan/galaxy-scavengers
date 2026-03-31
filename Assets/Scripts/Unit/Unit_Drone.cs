@@ -591,7 +591,7 @@ public class Unit_Drone : UnitBase
             return;
         }
 
-        if (_currentProcessor != null && _currentProcessor is IAetherConsumer consumer && !consumer.IsOperational) {
+        if (_currentProcessor != null && _currentProcessor is IElectricityConsumer consumer && !consumer.IsOperational) {
             SetTask_Idle();
             return;
         }

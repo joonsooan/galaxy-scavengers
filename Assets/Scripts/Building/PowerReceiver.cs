@@ -1,8 +1,7 @@
 using UnityEngine;
 
-public class Battery : BaseStorage, IPowerGridNode
+public class PowerReceiver : Damageable, IPowerGridNode
 {
-    [Header("Power grid")]
     [SerializeField] private int supplyRangeN = 5;
 
     private ElectricityConsumptionManager _electricityConsumptionManager;
@@ -19,7 +18,7 @@ public class Battery : BaseStorage, IPowerGridNode
         FindAndCacheElectricityManager();
         if (_electricityConsumptionManager != null)
         {
-            _electricityConsumptionManager.RegisterBattery(this);
+            _electricityConsumptionManager.RegisterPowerReceiver(this);
         }
     }
 
@@ -27,7 +26,7 @@ public class Battery : BaseStorage, IPowerGridNode
     {
         if (_electricityConsumptionManager != null)
         {
-            _electricityConsumptionManager.UnregisterBattery(this);
+            _electricityConsumptionManager.UnregisterPowerReceiver(this);
         }
 
         base.OnDisable();
@@ -39,31 +38,6 @@ public class Battery : BaseStorage, IPowerGridNode
         {
             _electricityConsumptionManager = FindFirstObjectByType<ElectricityConsumptionManager>();
         }
-    }
-
-    public override bool TryAddResource(ResourceType type, int amount)
-    {
-        if (type != ResourceType.Electricity) return false;
-        return base.TryAddResource(type, amount);
-    }
-
-    public override bool TryWithdrawResource(ResourceType type, int amountToWithdraw, out int amountWithdrawn)
-    {
-        if (type != ResourceType.Electricity)
-        {
-            amountWithdrawn = 0;
-            return false;
-        }
-        return base.TryWithdrawResource(type, amountToWithdraw, out amountWithdrawn);
-    }
-
-    public override bool HasEnoughResources(ResourceCost[] costs)
-    {
-        foreach (ResourceCost cost in costs)
-        {
-            if (cost.resourceType != ResourceType.Electricity) return false;
-        }
-        return base.HasEnoughResources(costs);
     }
 
     public BoundsInt GetPowerCoverageBounds()
@@ -79,6 +53,6 @@ public class Battery : BaseStorage, IPowerGridNode
 
     public bool IsActivePowerSource()
     {
-        return GetCurrentResourceAmount(ResourceType.Electricity) > 0;
+        return false;
     }
 }

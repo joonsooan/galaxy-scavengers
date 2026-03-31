@@ -9,7 +9,7 @@ public class MainStructure : BaseStorage, IClickable
     [SerializeField] private int baseAetherCapacity = 100;
     
     private bool _isProducing;
-    private AetherConsumptionManager _aetherConsumptionManager;
+    private ElectricityConsumptionManager _electricityConsumptionManager;
     
     public int BaseAetherCapacity => baseAetherCapacity;
 
@@ -20,10 +20,10 @@ public class MainStructure : BaseStorage, IClickable
         // Don't register ghost/preview buildings
         if (IsProperlyPlacedBuilding())
         {
-            FindAndCacheAetherManager();
-            if (_aetherConsumptionManager != null)
+            FindAndCacheElectricityManager();
+            if (_electricityConsumptionManager != null)
             {
-                _aetherConsumptionManager.RegisterMainStructure(this);
+                _electricityConsumptionManager.RegisterMainStructure(this);
             }
 
             if (TargetManager.Instance != null)
@@ -46,19 +46,19 @@ public class MainStructure : BaseStorage, IClickable
     
     protected override void OnDisable()
     {
-        if (_aetherConsumptionManager != null)
+        if (_electricityConsumptionManager != null)
         {
-            _aetherConsumptionManager.UnregisterMainStructure(this);
+            _electricityConsumptionManager.UnregisterMainStructure(this);
         }
         
         base.OnDisable();
     }
     
-    private void FindAndCacheAetherManager()
+    private void FindAndCacheElectricityManager()
     {
-        if (_aetherConsumptionManager == null)
+        if (_electricityConsumptionManager == null)
         {
-            _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
+            _electricityConsumptionManager = FindFirstObjectByType<ElectricityConsumptionManager>();
         }
     }
     
