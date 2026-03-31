@@ -52,7 +52,7 @@ public class Storage : BaseStorage
     {
         if (_electricityConsumptionManager == null)
         {
-            _electricityConsumptionManager = FindFirstObjectByType<ElectricityConsumptionManager>();
+            _electricityConsumptionManager = ElectricityConsumptionManager.Instance;
         }
     }
     

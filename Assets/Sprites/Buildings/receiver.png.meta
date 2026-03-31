@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 2b5ff78d38d215e4181e38b9a8fb09bc
+guid: 606016b21173b94478a0f243d265ce77
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5822311547626613287
-    second: dron_hub_0
+      213: -8490457115195810129
+    second: reciever_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -96,40 +96,27 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 4
-    buildTarget: WebGL
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: drone_hub_0
+      name: receiver_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 48
-        height: 32
-      alignment: 9
-      pivot: {x: 0.5, y: 0.25}
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 9d59f00de7ef23fa0800000000000000
-      internalID: -5822311547626613287
+      spriteID: faed014fc36db2a80800000000000000
+      internalID: -8490457115195810129
       vertices: []
       indices: 
       edges: []
@@ -138,19 +125,17 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 9a0d42532e4b83d4a88603b5230a78e3
+    spriteID: 314385a76cc22d6489a03228bb1d4a96
     internalID: 0
     vertices: []
     indices: 
     edges: []
     weights: []
-    secondaryTextures:
-    - texture: {fileID: 2800000, guid: dc7b78c811224424284f44c28a3de346, type: 3}
-      name: _NormalMap
+    secondaryTextures: []
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      drone_hub_0: -5822311547626613287
+      receiver_0: -8490457115195810129
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

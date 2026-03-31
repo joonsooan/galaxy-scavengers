@@ -2,8 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[DefaultExecutionOrder(-100)]
 public class ElectricityConsumptionManager : MonoBehaviour
 {
+    public static ElectricityConsumptionManager Instance { get; private set; }
+
     private readonly List<IElectricityConsumer> _electricityConsumers = new List<IElectricityConsumer>();
     private readonly List<ResourceGenerator> _resourceGenerators = new List<ResourceGenerator>();
     private readonly List<Battery> _batteries = new List<Battery>();
@@ -112,6 +115,23 @@ public class ElectricityConsumptionManager : MonoBehaviour
     public float NetElectricityPerSecond {
         get {
             return ElectricityProductionPerSecond - TotalElectricityConsumptionPerSecond;
+        }
+    }
+
+    private void Awake()
+    {
+        if (Instance == null) {
+            Instance = this;
+        }
+        else {
+            Destroy(gameObject);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this) {
+            Instance = null;
         }
     }
 
@@ -275,7 +295,6 @@ public class ElectricityConsumptionManager : MonoBehaviour
 
     private HashSet<Vector3Int> BuildPoweredCellSet()
     {
-        HashSet<Vector3Int> powered = new HashSet<Vector3Int>();
         List<IPowerGridNode> nodes = new List<IPowerGridNode>();
 
         foreach (ResourceGenerator generator in _resourceGenerators) {
@@ -305,70 +324,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
             }
         }
 
-        if (nodes.Count == 0) {
-            return powered;
-        }
-
-        List<BoundsInt> boundsList = new List<BoundsInt>(nodes.Count);
-        List<bool> isSourceFlags = new List<bool>(nodes.Count);
-        for (int i = 0; i < nodes.Count; i++) {
-            IPowerGridNode node = nodes[i];
-            boundsList.Add(node.GetPowerCoverageBounds());
-            isSourceFlags.Add(node.IsActivePowerSource());
-        }
-
-        int n = nodes.Count;
-        List<int>[] adj = new List<int>[n];
-        for (int i = 0; i < n; i++) {
-            adj[i] = new List<int>();
-        }
-
-        for (int i = 0; i < n; i++) {
-            for (int j = i + 1; j < n; j++) {
-                if (PowerGridGeometry.CoverageRangesTouchOrOverlap(boundsList[i], boundsList[j])) {
-                    adj[i].Add(j);
-                    adj[j].Add(i);
-                }
-            }
-        }
-
-        bool[] visited = new bool[n];
-        for (int start = 0; start < n; start++) {
-            if (visited[start]) continue;
-
-            bool componentHasSource = false;
-            Queue<int> queue = new Queue<int>();
-            queue.Enqueue(start);
-            visited[start] = true;
-            List<int> component = new List<int>();
-
-            while (queue.Count > 0) {
-                int u = queue.Dequeue();
-                component.Add(u);
-                if (isSourceFlags[u]) {
-                    componentHasSource = true;
-                }
-
-                foreach (int v in adj[u]) {
-                    if (!visited[v]) {
-                        visited[v] = true;
-                        queue.Enqueue(v);
-                    }
-                }
-            }
-
-            if (!componentHasSource) {
-                continue;
-            }
-
-            foreach (int idx in component) {
-                foreach (Vector3Int cell in boundsList[idx].allPositionsWithin) {
-                    powered.Add(cell);
-                }
-            }
-        }
-
-        return powered;
+        return PowerGridConnectivity.ComputePoweredCells(nodes);
     }
 
     private static bool IsConsumerFullyPowered(IElectricityConsumer consumer, HashSet<Vector3Int> poweredCells)

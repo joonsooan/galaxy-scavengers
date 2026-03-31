@@ -1,7 +1,37 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public static class PowerGridGeometry
-{
+{    /// <summary>Draws the coverage square in world space using the grid's cell basis (supports rotation).</summary>
+    public static void DrawCoverageOutline(BoundsInt coverage, Grid grid, Color color, float vertexLift = 0.02f)
+    {
+        if (grid == null || coverage.size.x <= 0 || coverage.size.y <= 0) {
+            return;
+        }
+
+        Vector3 origin = grid.CellToWorld(new Vector3Int(coverage.xMin, coverage.yMin, coverage.zMin));
+        Vector3 dx = grid.CellToWorld(new Vector3Int(coverage.xMin + 1, coverage.yMin, coverage.zMin)) - origin;
+        Vector3 dy = grid.CellToWorld(new Vector3Int(coverage.xMin, coverage.yMin + 1, coverage.zMin)) - origin;
+        if (dx.sqrMagnitude < 1e-8f || dy.sqrMagnitude < 1e-8f) {
+            return;
+        }
+
+        Vector3 lift = grid.transform.forward * vertexLift;
+        Vector3 p0 = origin + lift;
+        Vector3 p1 = origin + dx * coverage.size.x + lift;
+        Vector3 p2 = origin + dy * coverage.size.y + lift;
+        Vector3 p3 = origin + dx * coverage.size.x + dy * coverage.size.y + lift;
+
+        Color prev = Gizmos.color;
+        Gizmos.color = color;
+        Gizmos.DrawLine(p0, p1);
+        Gizmos.DrawLine(p1, p3);
+        Gizmos.DrawLine(p3, p2);
+        Gizmos.DrawLine(p2, p0);
+        Gizmos.color = prev;
+    }
+
+    /// <summary>nxn square with <paramref name="anchorMin"/> as the minimum corner cell (legacy / tile-aligned).</summary>
     public static BoundsInt ComputeSquareCoverage(Vector3Int anchorMin, int n)
     {
         if (n <= 0) {
@@ -9,6 +39,43 @@ public static class PowerGridGeometry
         }
 
         return new BoundsInt(anchorMin.x, anchorMin.y, anchorMin.z, n, n, 1);
+    }
+
+    /// <summary>nxn square on the grid centered on <paramref name="centerCell"/> (odd n: exact center; even n: slight left/bottom bias).</summary>
+    public static BoundsInt ComputeSquareCoverageCentered(Vector3Int centerCell, int n)
+    {
+        if (n <= 0) {
+            return new BoundsInt(centerCell.x, centerCell.y, centerCell.z, 0, 0, 1);
+        }
+
+        int offset = (n - 1) / 2;
+        return new BoundsInt(centerCell.x - offset, centerCell.y - offset, centerCell.z, n, n, 1);
+    }
+
+    /// <summary>nxn square centered on the AABB of <paramref name="occupiedCells"/> (building footprint center).</summary>
+    public static BoundsInt ComputeSquareCoverageCenteredOnFootprint(List<Vector3Int> occupiedCells, int n)
+    {
+        if (occupiedCells == null || occupiedCells.Count == 0 || n <= 0) {
+            return default;
+        }
+
+        int minX = int.MaxValue;
+        int minY = int.MaxValue;
+        int maxX = int.MinValue;
+        int maxY = int.MinValue;
+        int z = occupiedCells[0].z;
+
+        for (int i = 0; i < occupiedCells.Count; i++) {
+            Vector3Int c = occupiedCells[i];
+            if (c.x < minX) minX = c.x;
+            if (c.y < minY) minY = c.y;
+            if (c.x > maxX) maxX = c.x;
+            if (c.y > maxY) maxY = c.y;
+        }
+
+        int centerX = (minX + maxX) / 2;
+        int centerY = (minY + maxY) / 2;
+        return ComputeSquareCoverageCentered(new Vector3Int(centerX, centerY, z), n);
     }
 
     public static bool CoverageRangesTouchOrOverlap(BoundsInt a, BoundsInt b)

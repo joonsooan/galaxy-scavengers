@@ -113,7 +113,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: SIDCORE_4_0
+      name: seed_core_0
       rect:
         serializedVersion: 2
         x: 0
@@ -150,7 +150,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      SIDCORE_4_0: 978782236917189718
+      seed_core_0: 978782236917189718
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -68,7 +68,7 @@ public class Turret : Damageable, IElectricityConsumer
     {
         if (_electricityConsumptionManager == null)
         {
-            _electricityConsumptionManager = FindFirstObjectByType<ElectricityConsumptionManager>();
+            _electricityConsumptionManager = ElectricityConsumptionManager.Instance;
         }
     }
     

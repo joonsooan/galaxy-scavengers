@@ -18,7 +18,7 @@ public class StorageTrackerManager : MonoBehaviour
     private void Start()
     {
         _resourceManager = FindFirstObjectByType<ResourceManager>();
-        _electricityConsumptionManager = FindFirstObjectByType<ElectricityConsumptionManager>();
+        _electricityConsumptionManager = ElectricityConsumptionManager.Instance;
 
         if (_resourceManager != null) {
             ResourceManager.OnNewStorageAdded += OnStorageAdded;

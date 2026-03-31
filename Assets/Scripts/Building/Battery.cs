@@ -1,9 +1,14 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Battery : BaseStorage, IPowerGridNode
 {
     [Header("Power grid")]
     [SerializeField] private int supplyRangeN = 5;
+
+    [Header("Gizmos")]
+    [SerializeField] private bool showPowerCoverageGizmo = true;
+    [SerializeField] private Color powerCoverageGizmoColor = new(0.2f, 0.85f, 1f, 1f);
 
     private ElectricityConsumptionManager _electricityConsumptionManager;
 
@@ -37,7 +42,7 @@ public class Battery : BaseStorage, IPowerGridNode
     {
         if (_electricityConsumptionManager == null)
         {
-            _electricityConsumptionManager = FindFirstObjectByType<ElectricityConsumptionManager>();
+            _electricityConsumptionManager = ElectricityConsumptionManager.Instance;
         }
     }
 
@@ -69,16 +74,36 @@ public class Battery : BaseStorage, IPowerGridNode
     public BoundsInt GetPowerCoverageBounds()
     {
         BuildingManager bm = BuildingManager.Instance;
-        if (bm == null || !bm.TryGetBuildingAnchorCells(transform, out Vector3Int anchor, out _))
+        if (bm == null || !bm.TryGetBuildingAnchorCells(transform, out _, out List<Vector3Int> occupied) ||
+            occupied == null || occupied.Count == 0)
         {
             return default;
         }
 
-        return PowerGridGeometry.ComputeSquareCoverage(anchor, supplyRangeN);
+        return PowerGridGeometry.ComputeSquareCoverageCenteredOnFootprint(occupied, supplyRangeN);
     }
 
     public bool IsActivePowerSource()
     {
         return GetCurrentResourceAmount(ResourceType.Electricity) > 0;
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (!showPowerCoverageGizmo) {
+            return;
+        }
+
+        Grid grid = BuildingManager.Instance != null ? BuildingManager.Instance.grid : null;
+        if (grid == null) {
+            return;
+        }
+
+        BoundsInt b = GetPowerCoverageBounds();
+        if (b.size.x <= 0 || b.size.y <= 0) {
+            return;
+        }
+
+        PowerGridGeometry.DrawCoverageOutline(b, grid, powerCoverageGizmoColor);
     }
 }

@@ -280,7 +280,7 @@ public class Unit_Miner : UnitBase
                 _currentCarryAmounts[ResourceType.Aether] > 0;
 
             if (hasAether) {
-                ElectricityConsumptionManager powerManager = FindFirstObjectByType<ElectricityConsumptionManager>();
+                ElectricityConsumptionManager powerManager = ElectricityConsumptionManager.Instance;
                 if (powerManager != null && powerManager.IsAetherOreStorageFull) {
                     ReleaseStorageReservation();
                     InitializeCarryAmounts();
@@ -522,7 +522,7 @@ public class Unit_Miner : UnitBase
 
         // If trying to unload aether and capacity is full, don't find storage
         if (hasAether && !hasNonAether) {
-            ElectricityConsumptionManager powerManager = FindFirstObjectByType<ElectricityConsumptionManager>();
+            ElectricityConsumptionManager powerManager = ElectricityConsumptionManager.Instance;
             if (powerManager != null && powerManager.IsAetherOreStorageFull) {
                 return new UnloadTarget { distance = float.MaxValue };
             }

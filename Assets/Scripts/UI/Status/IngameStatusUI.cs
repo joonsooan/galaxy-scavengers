@@ -21,7 +21,7 @@ public class IngameStatusUI : MonoBehaviour
 
     private void Start()
     {
-        _electricityConsumptionManager = FindFirstObjectByType<ElectricityConsumptionManager>();
+        _electricityConsumptionManager = ElectricityConsumptionManager.Instance;
         _storageTrackerManager = FindFirstObjectByType<StorageTrackerManager>();
 
         if (_storageTrackerManager != null) {

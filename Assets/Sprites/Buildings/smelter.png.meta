@@ -113,7 +113,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: smelter_modified_0
+      name: smelter_0
       rect:
         serializedVersion: 2
         x: 0
@@ -150,7 +150,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      smelter_modified_0: 1688704480188365344
+      smelter_0: 1688704480188365344
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

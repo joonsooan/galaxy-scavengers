@@ -553,15 +553,23 @@ public class BuildingManager : MonoBehaviour
         Vector3 worldPos = grid.GetCellCenterWorld(originPos);
         GameObject newPieceObject = Instantiate(data.buildingPrefab, worldPos, Quaternion.identity, buildingParentTransform);
 
-        BuildingPiece mainPiece = newPieceObject.GetComponent<BuildingPiece>();
-        if (mainPiece == null) {
-            mainPiece = newPieceObject.AddComponent<BuildingPiece>();
+        if (data.buildingType == BuildingType.PowerReceiver) {
+            BuildingPiece strayPiece = newPieceObject.GetComponent<BuildingPiece>();
+            if (strayPiece != null) {
+                Destroy(strayPiece);
+            }
         }
+        else {
+            BuildingPiece mainPiece = newPieceObject.GetComponent<BuildingPiece>();
+            if (mainPiece == null) {
+                mainPiece = newPieceObject.AddComponent<BuildingPiece>();
+            }
 
-        mainPiece.cellPosition = originPos;
+            mainPiece.cellPosition = originPos;
 
-        foreach (Vector3Int targetPos in recipePositions) {
-            _placedPieces[targetPos] = mainPiece;
+            foreach (Vector3Int targetPos in recipePositions) {
+                _placedPieces[targetPos] = mainPiece;
+            }
         }
 
         HandleBuildingLogic(newPieceObject, data);
@@ -650,16 +658,26 @@ public class BuildingManager : MonoBehaviour
         Vector3 worldPos = grid.GetCellCenterWorld(originPos);
         GameObject pieceObject = Instantiate(data.buildingPrefab, worldPos, Quaternion.identity, buildingParentTransform);
 
-        BuildingPiece mainPiece = pieceObject.GetComponent<BuildingPiece>();
-        if (mainPiece == null) {
-            mainPiece = pieceObject.AddComponent<BuildingPiece>();
+        if (data.buildingType == BuildingType.PowerReceiver) {
+            BuildingPiece strayPiece = pieceObject.GetComponent<BuildingPiece>();
+            if (strayPiece != null) {
+                Destroy(strayPiece);
+            }
+        }
+        else {
+            BuildingPiece mainPiece = pieceObject.GetComponent<BuildingPiece>();
+            if (mainPiece == null) {
+                mainPiece = pieceObject.AddComponent<BuildingPiece>();
+            }
+
+            mainPiece.cellPosition = originPos;
+
+            foreach (Vector3Int targetPos in recipePositions) {
+                _placedPieces[targetPos] = mainPiece;
+            }
         }
 
-        mainPiece.cellPosition = originPos;
-
         foreach (Vector3Int targetPos in recipePositions) {
-            _placedPieces[targetPos] = mainPiece;
-
             if (data.buildingTile != null) {
                 buildingTilemap.SetTile(targetPos, data.buildingTile);
             }
@@ -722,7 +740,13 @@ public class BuildingManager : MonoBehaviour
             break;
         case BuildingType.Turret:
         case BuildingType.Radar:
+            break;
         case BuildingType.PowerReceiver:
+            PowerReceiver powerReceiver = obj.GetComponent<PowerReceiver>();
+            if (powerReceiver == null) {
+                powerReceiver = obj.GetComponentInChildren<PowerReceiver>(true);
+            }
+            powerReceiver?.SetConstructed();
             break;
         }
     }

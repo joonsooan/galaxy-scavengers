@@ -181,7 +181,7 @@ public class Processor : Damageable, IClickable, IElectricityConsumer
     private void FindAndCacheElectricityManager()
     {
         if (_electricityConsumptionManager == null) {
-            _electricityConsumptionManager = FindFirstObjectByType<ElectricityConsumptionManager>();
+            _electricityConsumptionManager = ElectricityConsumptionManager.Instance;
         }
     }
 

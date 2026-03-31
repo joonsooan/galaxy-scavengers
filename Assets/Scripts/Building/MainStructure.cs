@@ -58,7 +58,7 @@ public class MainStructure : BaseStorage, IClickable
     {
         if (_electricityConsumptionManager == null)
         {
-            _electricityConsumptionManager = FindFirstObjectByType<ElectricityConsumptionManager>();
+            _electricityConsumptionManager = ElectricityConsumptionManager.Instance;
         }
     }
     

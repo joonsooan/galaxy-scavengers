@@ -8,13 +8,25 @@ public class StatModifierReceiver_BuildingHP : MonoBehaviour
 
     private void Awake()
     {
-        _damageable = GetComponent<Damageable>();
+        ResolveDamageable();
     }
 
     private void Start()
     {
-        _originalMaxHealth = _damageable.MaxHealth;
+        ResolveDamageable();
         ApplyModifiers();
+    }
+
+    private void ResolveDamageable()
+    {
+        if (_damageable != null) {
+            return;
+        }
+
+        _damageable = GetComponent<Damageable>();
+        if (_damageable == null) {
+            _damageable = GetComponentInParent<Damageable>();
+        }
     }
 
     private void OnDestroy()
@@ -26,7 +38,14 @@ public class StatModifierReceiver_BuildingHP : MonoBehaviour
 
     public void ApplyModifiers()
     {
-        if (_damageable == null || ModuleEffectManager.Instance == null) return;
+        ResolveDamageable();
+        if (_damageable == null || ModuleEffectManager.Instance == null) {
+            return;
+        }
+
+        if (!_modifiersApplied) {
+            _originalMaxHealth = _damageable.MaxHealth;
+        }
 
         float modifier = ModuleEffectManager.Instance.GetStatModifier(ModuleStatType.BuildingHP);
         int newMaxHealth = Mathf.RoundToInt(_originalMaxHealth * (1f + modifier));

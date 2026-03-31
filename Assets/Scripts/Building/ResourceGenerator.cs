@@ -15,6 +15,10 @@ public class ResourceGenerator : Damageable, IPowerGridNode
     [SerializeField] private int electricityBufferCurrent;
     [SerializeField] private ResourceCost[] fuelCostsPerProduction = { new ResourceCost { resourceType = ResourceType.Ferrite, amount = 1 } };
 
+    [Header("Gizmos")]
+    [SerializeField] private bool showPowerCoverageGizmo = true;
+    [SerializeField] private Color powerCoverageGizmoColor = new(1f, 0.92f, 0.2f, 1f);
+
     [Header("VFX")]
     [SerializeField] private Vector3 resourceImageOffset = new(0f, 0.5f, 0f);
 
@@ -69,7 +73,7 @@ public class ResourceGenerator : Damageable, IPowerGridNode
     {
         if (_electricityConsumptionManager == null)
         {
-            _electricityConsumptionManager = FindFirstObjectByType<ElectricityConsumptionManager>();
+            _electricityConsumptionManager = ElectricityConsumptionManager.Instance;
         }
     }
 
@@ -237,12 +241,13 @@ public class ResourceGenerator : Damageable, IPowerGridNode
     {
         HashSet<Storage> set = new HashSet<Storage>();
         BuildingManager bm = BuildingManager.Instance;
-        if (bm == null || !bm.TryGetBuildingAnchorCells(transform, out Vector3Int anchor, out _))
+        if (bm == null || !bm.TryGetBuildingAnchorCells(transform, out _, out List<Vector3Int> occupied) ||
+            occupied == null || occupied.Count == 0)
         {
             return new List<Storage>();
         }
 
-        BoundsInt coverage = PowerGridGeometry.ComputeSquareCoverage(anchor, supplyRangeN);
+        BoundsInt coverage = PowerGridGeometry.ComputeSquareCoverageCenteredOnFootprint(occupied, supplyRangeN);
         foreach (Vector3Int cell in coverage.allPositionsWithin)
         {
             BuildingPiece piece = bm.GetPieceAt(cell);
@@ -260,12 +265,13 @@ public class ResourceGenerator : Damageable, IPowerGridNode
     public BoundsInt GetPowerCoverageBounds()
     {
         BuildingManager bm = BuildingManager.Instance;
-        if (bm == null || !bm.TryGetBuildingAnchorCells(transform, out Vector3Int anchor, out _))
+        if (bm == null || !bm.TryGetBuildingAnchorCells(transform, out _, out List<Vector3Int> occupied) ||
+            occupied == null || occupied.Count == 0)
         {
             return default;
         }
 
-        return PowerGridGeometry.ComputeSquareCoverage(anchor, supplyRangeN);
+        return PowerGridGeometry.ComputeSquareCoverageCenteredOnFootprint(occupied, supplyRangeN);
     }
 
     public bool IsActivePowerSource()
@@ -289,6 +295,25 @@ public class ResourceGenerator : Damageable, IPowerGridNode
         int spill = electricityBufferCurrent;
         int added = ResourceManager.Instance.AddGeneratedResource(ResourceType.Electricity, spill, transform.position);
         electricityBufferCurrent -= added;
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (!showPowerCoverageGizmo) {
+            return;
+        }
+
+        Grid grid = BuildingManager.Instance != null ? BuildingManager.Instance.grid : null;
+        if (grid == null) {
+            return;
+        }
+
+        BoundsInt b = GetPowerCoverageBounds();
+        if (b.size.x <= 0 || b.size.y <= 0) {
+            return;
+        }
+
+        PowerGridGeometry.DrawCoverageOutline(b, grid, powerCoverageGizmoColor);
     }
 
     private void ShowResourceImage()
