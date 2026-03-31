@@ -34,8 +34,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 15, y: 0}
-  m_SizeDelta: {x: -30, y: 0}
+  m_AnchoredPosition: {x: 5, y: 0}
+  m_SizeDelta: {x: -10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4819157347697287468
 CanvasRenderer:
@@ -92,8 +92,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 8
+  m_fontSizeBase: 8
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -103,6 +103,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -320,8 +321,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -15, y: 0}
-  m_SizeDelta: {x: -30, y: 0}
+  m_AnchoredPosition: {x: -5, y: 0}
+  m_SizeDelta: {x: -10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7446341352716338174
 CanvasRenderer:
@@ -378,8 +379,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 8
+  m_fontSizeBase: 8
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -389,6 +390,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -433,8 +435,8 @@ GameObject:
   - component: {fileID: 4563304568767730507}
   - component: {fileID: 350293946916344055}
   - component: {fileID: 4560509508935542933}
-  - component: {fileID: 4407997240673077720}
   - component: {fileID: 3127025967943948341}
+  - component: {fileID: 5424618582015701494}
   - component: {fileID: -8653178207744038335}
   m_Layer: 5
   m_Name: Quest Cell
@@ -465,7 +467,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 608, y: 100}
+  m_SizeDelta: {x: 208, y: 30}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &350293946916344055
 CanvasRenderer:
@@ -495,7 +497,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1899253260378458392, guid: 68b7b6858ef64184ea7caa5afc831746, type: 3}
+  m_Sprite: {fileID: -1899253260378458392, guid: 1fd5403476e2e2e41b3bcb15ae427786, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -505,7 +507,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &4407997240673077720
+--- !u!114 &3127025967943948341
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -514,11 +516,29 @@ MonoBehaviour:
   m_GameObject: {fileID: 8886172208372129132}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Script: {fileID: 11500000, guid: 25849507120579e48920c34181b396ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  questNameText: {fileID: 760081875994038050}
+  questIdText: {fileID: 3884863510617793911}
+  cellButton: {fileID: 5424618582015701494}
+  configureIcon: {fileID: 2613250169957899930}
+  notifierIcon: {fileID: 2613250169957899930}
+  coreRepairQuestTitleColor: {r: 0, g: 1, b: 1, a: 1}
+--- !u!114 &5424618582015701494
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8886172208372129132}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7c3e9d2f1b8405e8a6c4d3e2f1098ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonReliableHighlight
   m_Navigation:
-    m_Mode: 0
+    m_Mode: 3
     m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
@@ -534,10 +554,10 @@ MonoBehaviour:
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
-    m_HighlightedSprite: {fileID: -1899253260378458392, guid: 68b7b6858ef64184ea7caa5afc831746, type: 3}
-    m_PressedSprite: {fileID: 8508079644404475916, guid: cd0f06509dc602d479cbc0c2ff53e1dd, type: 3}
-    m_SelectedSprite: {fileID: 9098191060468450725, guid: ab9f38b9d8456064a828f69654a96f74, type: 3}
-    m_DisabledSprite: {fileID: -1899253260378458392, guid: 68b7b6858ef64184ea7caa5afc831746, type: 3}
+    m_HighlightedSprite: {fileID: -4239486290848219248, guid: 92b7981e41463a94ab348ae08507a7ec, type: 3}
+    m_PressedSprite: {fileID: 8508079644404475916, guid: f243b32f5f223af468ab44a596d5592a, type: 3}
+    m_SelectedSprite: {fileID: -1899253260378458392, guid: 1fd5403476e2e2e41b3bcb15ae427786, type: 3}
+    m_DisabledSprite: {fileID: -1899253260378458392, guid: 1fd5403476e2e2e41b3bcb15ae427786, type: 3}
   m_AnimationTriggers:
     m_NormalTrigger: Normal
     m_HighlightedTrigger: Highlighted
@@ -549,23 +569,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &3127025967943948341
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8886172208372129132}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25849507120579e48920c34181b396ca, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  questNameText: {fileID: 760081875994038050}
-  questIdText: {fileID: 3884863510617793911}
-  cellButton: {fileID: 4407997240673077720}
-  configureIcon: {fileID: 2613250169957899930}
-  notifierIcon: {fileID: 0}
 --- !u!114 &-8653178207744038335
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -592,6 +595,7 @@ MonoBehaviour:
       Data3: -73339495
       Data4: 1624008095
     Path: event:/SFX_UI/SFX_UIClick
+  clickType: Default
 --- !u!1001 &5577011000162117715
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -626,11 +630,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3527890300224991109, guid: 3f5fb3fcc71bad543b835e59a31eb2b4, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 16
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 3527890300224991109, guid: 3f5fb3fcc71bad543b835e59a31eb2b4, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 16
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 3527890300224991109, guid: 3f5fb3fcc71bad543b835e59a31eb2b4, type: 3}
       propertyPath: m_LocalPosition.x
@@ -662,11 +666,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3527890300224991109, guid: 3f5fb3fcc71bad543b835e59a31eb2b4, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -12
+      value: -4
       objectReference: {fileID: 0}
     - target: {fileID: 3527890300224991109, guid: 3f5fb3fcc71bad543b835e59a31eb2b4, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -12
+      value: -4
       objectReference: {fileID: 0}
     - target: {fileID: 3527890300224991109, guid: 3f5fb3fcc71bad543b835e59a31eb2b4, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -680,6 +684,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3671361251437154951, guid: 3f5fb3fcc71bad543b835e59a31eb2b4, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -721159605879738764, guid: 9cf9873f68e48424fb68d23f9d8909cf, type: 3}
     - target: {fileID: 7575517312150288073, guid: 3f5fb3fcc71bad543b835e59a31eb2b4, type: 3}
       propertyPath: m_Name
       value: Notifier
