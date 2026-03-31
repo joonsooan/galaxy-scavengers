@@ -1163,7 +1163,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &136940243
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1182,8 +1182,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 680, y: 0}
-  m_SizeDelta: {x: 660, y: 0}
+  m_AnchoredPosition: {x: 210, y: 0}
+  m_SizeDelta: {x: 220, y: 0}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &136940245
 MonoBehaviour:
@@ -7139,9 +7139,9 @@ MonoBehaviour:
   recipeGridContainer: {fileID: 1250932339}
   moduleGridCellPrefab: {fileID: 3842191235755297668, guid: 212cc6356ff0c2a40b4fb2779b9c11d8, type: 3}
   moduleDetailPanel: {fileID: 1391150705}
-  closeButton: {fileID: 0}
-  questButton: {fileID: 0}
-  shopButton: {fileID: 0}
+  closeButton: {fileID: 2065198581}
+  questButton: {fileID: 2713242275129634197}
+  shopButton: {fileID: 4132953019903380461}
   questGridPanel: {fileID: 122338890}
   questGridParent: {fileID: 441203460}
   questCellPrefab: {fileID: 8886172208372129132, guid: c5b8f6229c1aa904b88ac940426139a7, type: 3}
@@ -8311,8 +8311,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -62}
-  m_SizeDelta: {x: 0, y: -284}
+  m_AnchoredPosition: {x: 0, y: -20}
+  m_SizeDelta: {x: 0, y: -80}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &1250932341
 MonoBehaviour:
@@ -8327,14 +8327,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Padding:
-    m_Left: 26
-    m_Right: 26
+    m_Left: 16
+    m_Right: 6
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 0
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 200, y: 120}
+  m_CellSize: {x: 60, y: 40}
   m_Spacing: {x: 4, y: 4}
   m_Constraint: 0
   m_ConstraintCount: 2
@@ -9107,8 +9107,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: -114}
-  m_SizeDelta: {x: 660, y: 60}
+  m_AnchoredPosition: {x: 0, y: -20}
+  m_SizeDelta: {x: 220, y: 20}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1483693127
 MonoBehaviour:
@@ -9157,8 +9157,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 8
+  m_fontSizeBase: 8
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -13155,6 +13155,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 585683324274000616, guid: 82f20152d91a2174f99e632a73289a3a, type: 3}
   m_PrefabInstance: {fileID: 2065198579}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2065198581 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7353138626552658510, guid: 82f20152d91a2174f99e632a73289a3a, type: 3}
+  m_PrefabInstance: {fileID: 2065198579}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7c3e9d2f1b8405e8a6c4d3e2f1098ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonReliableHighlight
 --- !u!1 &2075185169
 GameObject:
   m_ObjectHideFlags: 0
@@ -13753,6 +13764,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b5c66150bb7d1d84cb74e0330ab41af9, type: 3}
+--- !u!114 &2713242275129634197 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7226140226612595950, guid: b5c66150bb7d1d84cb74e0330ab41af9, type: 3}
+  m_PrefabInstance: {fileID: 2713242275129634196}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7c3e9d2f1b8405e8a6c4d3e2f1098ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonReliableHighlight
 --- !u!1001 &2738191910387057110
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13979,6 +14001,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8314b73511beb8741a19a2fbc95dffe0, type: 3}
+--- !u!114 &4132953019903380461 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6912782456145333248, guid: 8314b73511beb8741a19a2fbc95dffe0, type: 3}
+  m_PrefabInstance: {fileID: 4132953019903380460}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7c3e9d2f1b8405e8a6c4d3e2f1098ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonReliableHighlight
 --- !u!1001 &4307967270014339608
 PrefabInstance:
   m_ObjectHideFlags: 0
