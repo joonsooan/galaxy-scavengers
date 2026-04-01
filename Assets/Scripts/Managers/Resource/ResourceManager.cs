@@ -365,6 +365,33 @@ public class ResourceManager : MonoBehaviour
         return ResourceDataManager.Instance != null && ResourceDataManager.Instance.RemoveResource(type, amount);
     }
 
+    public int TryWithdrawElectricityFromStoragesInOrder(int amount, List<IStorage> storagesOrdered)
+    {
+        if (amount <= 0 || storagesOrdered == null || storagesOrdered.Count == 0) {
+            return 0;
+        }
+
+        int remaining = amount;
+        int totalWithdrawn = 0;
+        for (int i = 0; i < storagesOrdered.Count; i++) {
+            if (remaining <= 0) {
+                break;
+            }
+
+            IStorage storage = storagesOrdered[i];
+            if (storage == null) {
+                continue;
+            }
+
+            if (storage.TryWithdrawResource(ResourceType.Electricity, remaining, out int withdrawn) && withdrawn > 0) {
+                totalWithdrawn += withdrawn;
+                remaining -= withdrawn;
+            }
+        }
+
+        return totalWithdrawn;
+    }
+
     public bool SpendResources(ResourceCost[] costs)
     {
         return ResourceDataManager.Instance != null && ResourceDataManager.Instance.SpendResources(costs);

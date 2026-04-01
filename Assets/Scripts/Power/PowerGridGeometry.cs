@@ -52,30 +52,19 @@ public static class PowerGridGeometry
         return new BoundsInt(centerCell.x - offset, centerCell.y - offset, centerCell.z, n, n, 1);
     }
 
-    /// <summary>nxn square centered on the AABB of <paramref name="occupiedCells"/> (building footprint center).</summary>
-    public static BoundsInt ComputeSquareCoverageCenteredOnFootprint(List<Vector3Int> occupiedCells, int n)
+    public static BoundsInt ComputeSquareCoverageCenteredOnFootprint(Grid grid, List<Vector3Int> occupiedCells, int n)
     {
-        if (occupiedCells == null || occupiedCells.Count == 0 || n <= 0) {
+        if (grid == null || occupiedCells == null || occupiedCells.Count == 0 || n <= 0) {
             return default;
         }
 
-        int minX = int.MaxValue;
-        int minY = int.MaxValue;
-        int maxX = int.MinValue;
-        int maxY = int.MinValue;
-        int z = occupiedCells[0].z;
-
-        for (int i = 0; i < occupiedCells.Count; i++) {
-            Vector3Int c = occupiedCells[i];
-            if (c.x < minX) minX = c.x;
-            if (c.y < minY) minY = c.y;
-            if (c.x > maxX) maxX = c.x;
-            if (c.y > maxY) maxY = c.y;
+        Vector3 sumWorld = Vector3.zero;
+        int count = occupiedCells.Count;
+        for (int i = 0; i < count; i++) {
+            sumWorld += grid.GetCellCenterWorld(occupiedCells[i]);
         }
-
-        int centerX = (minX + maxX) / 2;
-        int centerY = (minY + maxY) / 2;
-        return ComputeSquareCoverageCentered(new Vector3Int(centerX, centerY, z), n);
+        Vector3Int centerCell = grid.WorldToCell(sumWorld / count);
+        return ComputeSquareCoverageCentered(centerCell, n);
     }
 
     public static bool CoverageRangesTouchOrOverlap(BoundsInt a, BoundsInt b)

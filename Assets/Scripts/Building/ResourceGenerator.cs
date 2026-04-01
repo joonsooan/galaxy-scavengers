@@ -10,7 +10,8 @@ public class ResourceGenerator : Damageable, IPowerGridNode
     [SerializeField] private int resourceAmount = 1;
 
     [Header("Power grid")]
-    [SerializeField] private int supplyRangeN = 5;
+    [Tooltip("NxN cells centered on building footprint (world-space centroid).")]
+    [SerializeField] [Range(1, 50)] private int supplyRangeN = 5;
     [SerializeField] private int electricityBufferMax = 20;
     [SerializeField] private int electricityBufferCurrent;
     [SerializeField] private ResourceCost[] fuelCostsPerProduction = { new ResourceCost { resourceType = ResourceType.Ferrite, amount = 1 } };
@@ -247,7 +248,7 @@ public class ResourceGenerator : Damageable, IPowerGridNode
             return new List<Storage>();
         }
 
-        BoundsInt coverage = PowerGridGeometry.ComputeSquareCoverageCenteredOnFootprint(occupied, supplyRangeN);
+        BoundsInt coverage = PowerGridGeometry.ComputeSquareCoverageCenteredOnFootprint(bm.grid, occupied, supplyRangeN);
         foreach (Vector3Int cell in coverage.allPositionsWithin)
         {
             BuildingPiece piece = bm.GetPieceAt(cell);
@@ -271,7 +272,7 @@ public class ResourceGenerator : Damageable, IPowerGridNode
             return default;
         }
 
-        return PowerGridGeometry.ComputeSquareCoverageCenteredOnFootprint(occupied, supplyRangeN);
+        return PowerGridGeometry.ComputeSquareCoverageCenteredOnFootprint(bm.grid, occupied, supplyRangeN);
     }
 
     public bool IsActivePowerSource()

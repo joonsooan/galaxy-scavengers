@@ -109,12 +109,14 @@ public class BuildingHoverManager : MonoBehaviour
         _currentHoveredBuilding = buildingDataHolder;
         _keepPanelVisible = false;
         ShowBuildingInfo(buildingDataHolder);
+        TryShowPowerCoveragePreview(buildingDataHolder);
     }
 
     public void OnBuildingExit(BuildingDataHolder buildingDataHolder)
     {
         if (buildingDataHolder == _currentHoveredBuilding)
         {
+            ClearPowerCoveragePreview();
             if (_keepPanelVisible)
             {
                 ClearBuildingInfoButKeepPanel();
@@ -210,6 +212,7 @@ public class BuildingHoverManager : MonoBehaviour
 
     private void ClearHoverStateOnly()
     {
+        ClearPowerCoveragePreview();
         _currentHoveredBuilding = null;
         _currentHoveredStorage = null;
         if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
@@ -234,6 +237,30 @@ public class BuildingHoverManager : MonoBehaviour
                 unitInfoPanel.gameObject.SetActive(false);
             }
             _currentHoveredUnit = null;
+        }
+    }
+
+
+    private static void ClearPowerCoveragePreview()
+    {
+        PowerCoveragePreviewOverlay overlay = PowerCoveragePreviewOverlay.Instance;
+        if (overlay != null) {
+            overlay.Clear();
+        }
+    }
+
+    private static void TryShowPowerCoveragePreview(BuildingDataHolder buildingDataHolder)
+    {
+        if (buildingDataHolder == null || buildingDataHolder.buildingData == null) {
+            return;
+        }
+        BuildingType t = buildingDataHolder.buildingData.buildingType;
+        if (t != BuildingType.Generator && t != BuildingType.Battery && t != BuildingType.PowerReceiver) {
+            return;
+        }
+        PowerCoveragePreviewOverlay overlay = PowerCoveragePreviewOverlay.Instance;
+        if (overlay != null) {
+            overlay.Show();
         }
     }
 
@@ -340,6 +367,7 @@ public class BuildingHoverManager : MonoBehaviour
 
     private void ClearHover()
     {
+        ClearPowerCoveragePreview();
         if (_currentHoveredBuilding != null)
         {
             if (BuildingInfoPanel.Instance != null)
@@ -353,6 +381,7 @@ public class BuildingHoverManager : MonoBehaviour
 
     private void ClearBuildingInfoButKeepPanel()
     {
+        ClearPowerCoveragePreview();
         if (_currentHoveredBuilding != null)
         {
             if (BuildingInfoPanel.Instance != null)

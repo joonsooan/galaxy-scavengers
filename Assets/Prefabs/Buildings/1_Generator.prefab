@@ -201,7 +201,7 @@ MonoBehaviour:
   currentHealth: 0
   generationInterval: 1
   resourceAmount: 10
-  supplyRangeN: 5
+  supplyRangeN: 6
   electricityBufferMax: 20
   electricityBufferCurrent: 0
   fuelCostsPerProduction:
@@ -213,6 +213,8 @@ MonoBehaviour:
     amount: 5
   - resourceType: 3
     amount: 5
+  showPowerCoverageGizmo: 1
+  powerCoverageGizmoColor: {r: 1, g: 0.92, b: 0.2, a: 1}
   resourceImageOffset: {x: 0.5, y: 0.75, z: 0}
 --- !u!114 &2831755290380365654
 MonoBehaviour:

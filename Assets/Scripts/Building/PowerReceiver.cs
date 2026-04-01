@@ -5,7 +5,8 @@ using UnityEngine;
 public class PowerReceiver : Damageable, IPowerGridNode
 {
     [Header("Power grid")]
-    [SerializeField] private int supplyRangeN = 5;
+    [Tooltip("NxN cells centered on building footprint (world-space centroid).")]
+    [SerializeField] [Range(1, 50)] private int supplyRangeN = 5;
 
     [Header("Gizmos")]
     [SerializeField] private bool showPowerCoverageGizmo = true;
@@ -27,6 +28,7 @@ public class PowerReceiver : Damageable, IPowerGridNode
         {
             _electricityConsumptionManager.RegisterPowerReceiver(this);
         }
+        EnsurePowerGridNodeBillboard();
     }
 
     protected override void OnDisable()
@@ -60,6 +62,15 @@ public class PowerReceiver : Damageable, IPowerGridNode
         {
             _electricityConsumptionManager.RegisterPowerReceiver(this);
         }
+        EnsurePowerGridNodeBillboard();
+    }
+
+    private void EnsurePowerGridNodeBillboard()
+    {
+        if (GetComponent<PowerGridNodeStatusBillboard>() == null)
+        {
+            gameObject.AddComponent<PowerGridNodeStatusBillboard>();
+        }
     }
 
     public BoundsInt GetPowerCoverageBounds()
@@ -71,7 +82,7 @@ public class PowerReceiver : Damageable, IPowerGridNode
             return default;
         }
 
-        return PowerGridGeometry.ComputeSquareCoverageCenteredOnFootprint(occupied, supplyRangeN);
+        return PowerGridGeometry.ComputeSquareCoverageCenteredOnFootprint(bm.grid, occupied, supplyRangeN);
     }
 
     public bool IsActivePowerSource()

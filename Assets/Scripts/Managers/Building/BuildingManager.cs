@@ -861,8 +861,18 @@ public class BuildingManager : MonoBehaviour
             return false;
         }
 
-        Vector3Int cell = grid.WorldToCell(buildingTransform.position);
-        if (_cellToStructureMap.TryGetValue(cell, out BuildingStructure structure)) {
+        Vector3Int lookupCell;
+        BuildingPiece piece = buildingTransform.GetComponent<BuildingPiece>();
+        if (piece == null) {
+            piece = buildingTransform.GetComponentInParent<BuildingPiece>();
+        }
+        if (piece != null) {
+            lookupCell = piece.cellPosition;
+        }
+        else {
+            lookupCell = grid.WorldToCell(buildingTransform.position);
+        }
+        if (_cellToStructureMap.TryGetValue(lookupCell, out BuildingStructure structure)) {
             anchor = structure.anchor;
             occupiedCells = structure.occupiedCells;
             return true;

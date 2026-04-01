@@ -4,7 +4,8 @@ using UnityEngine;
 public class Battery : BaseStorage, IPowerGridNode
 {
     [Header("Power grid")]
-    [SerializeField] private int supplyRangeN = 5;
+    [Tooltip("NxN cells centered on building footprint (world-space centroid).")]
+    [SerializeField] [Range(1, 50)] private int supplyRangeN = 5;
 
     [Header("Gizmos")]
     [SerializeField] private bool showPowerCoverageGizmo = true;
@@ -25,6 +26,10 @@ public class Battery : BaseStorage, IPowerGridNode
         if (_electricityConsumptionManager != null)
         {
             _electricityConsumptionManager.RegisterBattery(this);
+        }
+        if (GetComponent<PowerGridNodeStatusBillboard>() == null)
+        {
+            gameObject.AddComponent<PowerGridNodeStatusBillboard>();
         }
     }
 
@@ -80,7 +85,7 @@ public class Battery : BaseStorage, IPowerGridNode
             return default;
         }
 
-        return PowerGridGeometry.ComputeSquareCoverageCenteredOnFootprint(occupied, supplyRangeN);
+        return PowerGridGeometry.ComputeSquareCoverageCenteredOnFootprint(bm.grid, occupied, supplyRangeN);
     }
 
     public bool IsActivePowerSource()
