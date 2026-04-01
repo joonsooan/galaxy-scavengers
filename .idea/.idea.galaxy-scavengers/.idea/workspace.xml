@@ -5,9 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2e9922bb-ccc6-4c6e-93bd-15fa8a8d7f34" name="변경" comment="">
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/BaseScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/BaseScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/TitleScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/TitleScene.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/Game Scene UI (16)/button-launch-1-clicked.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Sprites/UI/Game Scene UI (16)/button-launch-1-clicked.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Common/ButtonReliableHighlight.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Common/CustomButton.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Common/ButtonReliableHighlight.cs.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Common/CustomButton.cs.meta" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -190,6 +189,7 @@
       <workItem from="1774923477764" duration="263000" />
       <workItem from="1774923868757" duration="3424000" />
       <workItem from="1774950243184" duration="6000" />
+      <workItem from="1775010034484" duration="681000" />
     </task>
     <servers />
   </component>

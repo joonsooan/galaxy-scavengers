@@ -1,7 +1,7 @@
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ButtonReliableHighlight : Button
+public class CustomButton : Button
 {
     public override void OnPointerEnter(PointerEventData eventData)
     {
