@@ -241,7 +241,6 @@ public class RequestQuestAcceptPanel : MonoBehaviour
             QuestCheckType.ResourceRequirement => "자원 요구사항",
             QuestCheckType.BuildingConstructed => "건설 요구사항",
             QuestCheckType.UnitProduced => "생산 요구사항",
-            QuestCheckType.BeaconPlacedForScout => "탐사 요구사항",
             QuestCheckType.ScoutEnteredLocation => "탐사 요구사항",
             QuestCheckType.ModulePlacedOnCore => "모듈 요구사항",
             QuestCheckType.ReturnFromGameSceneSuccess => "요구사항",
@@ -268,7 +267,6 @@ public class RequestQuestAcceptPanel : MonoBehaviour
             {
                 if (checkData.checkType == QuestCheckType.BuildingConstructed ||
                     checkData.checkType == QuestCheckType.UnitProduced ||
-                    checkData.checkType == QuestCheckType.BeaconPlacedForScout ||
                     checkData.checkType == QuestCheckType.ScoutEnteredLocation ||
                     checkData.checkType == QuestCheckType.ModulePlacedOnCore ||
                     checkData.checkType == QuestCheckType.ReturnFromGameSceneSuccess ||

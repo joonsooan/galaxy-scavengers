@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 3169003736456806877}
   - component: {fileID: 952973934286858722}
   - component: {fileID: 8054321829144718534}
-  - component: {fileID: 9104813460774295461}
   - component: {fileID: 3132766170232860239}
   - component: {fileID: 9023288875373990353}
   - component: {fileID: -4051372442946673797}
@@ -40,6 +39,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &3169003736456806877
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -58,6 +58,8 @@ SpriteRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -79,9 +81,11 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 580065311
-  m_SortingLayer: 5
+  m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_Sprite: {fileID: -8377893650794245212, guid: 2e9dd00a9d898794d9325559858bad30, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -90,8 +94,7 @@ SpriteRenderer:
   m_Size: {x: 0.17, y: 0.16}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
+  m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
 --- !u!50 &952973934286858722
 Rigidbody2D:
@@ -166,29 +169,6 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!114 &9104813460774295461
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7944764008120523387}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8160fdd2ef278954989ab8169f597e2f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHealth: 100
-  currentHealth: 0
-  unitType: 1
-  flashColor: {r: 1, g: 0, b: 0, a: 1}
-  flashDuration: 0.1
-  currentState: 0
-  attackDamage: 10
-  attackRange: 1.2
-  attackSpeed: 1
-  targetSearchInterval: 1
-  unitMovement: {fileID: 3132766170232860239}
 --- !u!114 &3132766170232860239
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -203,7 +183,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 4
   waypointTolerance: 0.1
-  alignmentSpeed: 3
 --- !u!114 &9023288875373990353
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -216,9 +195,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6d119d16415c69741bcfa340b580f4c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spriteUp: {fileID: -3124680713139702455, guid: 2e9dd00a9d898794d9325559858bad30, type: 3}
-  spriteDown: {fileID: 6298481942164089023, guid: 2e9dd00a9d898794d9325559858bad30, type: 3}
-  spriteRight: {fileID: -8377893650794245212, guid: 2e9dd00a9d898794d9325559858bad30, type: 3}
 --- !u!114 &-4051372442946673797
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -53,7 +53,6 @@ public class QuestTracker : MonoBehaviour
     {
         BuildingManager.OnBuildingConstructed += OnBuildingConstructed;
         DroneHub.OnUnitProduced += OnUnitProduced;
-        BeaconManager.OnBeaconPlacedForScout += OnBeaconPlacedForScout;
         Unit_Scout.OnScoutEnteredLocation += OnScoutEnteredLocation;
         CoreCustomizationManager.OnModulePlacedOnCore += OnModulePlacedOnCore;
         ResourceTransferManager.OnResourceTransferCompleted += OnResourceTransferCompleted;
@@ -68,7 +67,6 @@ public class QuestTracker : MonoBehaviour
     {
         BuildingManager.OnBuildingConstructed -= OnBuildingConstructed;
         DroneHub.OnUnitProduced -= OnUnitProduced;
-        BeaconManager.OnBeaconPlacedForScout -= OnBeaconPlacedForScout;
         Unit_Scout.OnScoutEnteredLocation -= OnScoutEnteredLocation;
         CoreCustomizationManager.OnModulePlacedOnCore -= OnModulePlacedOnCore;
         ResourceTransferManager.OnResourceTransferCompleted -= OnResourceTransferCompleted;
@@ -158,16 +156,6 @@ public class QuestTracker : MonoBehaviour
                 }
             }
             return false;
-        });
-    }
-    
-    private void OnBeaconPlacedForScout(Beacon beacon)
-    {
-        if (beacon == null) return;
-        
-        CheckAllActiveQuests(checkData =>
-        {
-            return checkData.checkType == QuestCheckType.BeaconPlacedForScout;
         });
     }
     

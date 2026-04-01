@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7084515157832651942}
   - component: {fileID: 2278735596937047090}
   - component: {fileID: 2938999515541066919}
-  - component: {fileID: 300880970514830573}
+  - component: {fileID: 8549182032827952867}
   - component: {fileID: 7277591578428090671}
   - component: {fileID: 1681751252677961889}
   m_Layer: 5
@@ -79,7 +79,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &300880970514830573
+--- !u!114 &8549182032827952867
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -88,11 +88,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 637084433338222292}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Script: {fileID: 11500000, guid: a7c3e9d2f1b8405e8a6c4d3e2f1098ab, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonReliableHighlight
   m_Navigation:
-    m_Mode: 0
+    m_Mode: 3
     m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
@@ -108,9 +108,9 @@ MonoBehaviour:
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
-    m_HighlightedSprite: {fileID: -1899253260378458392, guid: 1fd5403476e2e2e41b3bcb15ae427786, type: 3}
+    m_HighlightedSprite: {fileID: -4239486290848219248, guid: 92b7981e41463a94ab348ae08507a7ec, type: 3}
     m_PressedSprite: {fileID: 8508079644404475916, guid: f243b32f5f223af468ab44a596d5592a, type: 3}
-    m_SelectedSprite: {fileID: 9098191060468450725, guid: 034f1e0c4607c8748bd83c531ad32898, type: 3}
+    m_SelectedSprite: {fileID: -1899253260378458392, guid: 1fd5403476e2e2e41b3bcb15ae427786, type: 3}
     m_DisabledSprite: {fileID: -1899253260378458392, guid: 1fd5403476e2e2e41b3bcb15ae427786, type: 3}
   m_AnimationTriggers:
     m_NormalTrigger: Normal
@@ -149,6 +149,7 @@ MonoBehaviour:
       Data3: -73339495
       Data4: 1624008095
     Path: event:/SFX_UI/SFX_UIClick
+  clickType: Default
 --- !u!114 &1681751252677961889
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -161,7 +162,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a11aec6f8fe466c4ca5f08d0666359d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cellButton: {fileID: 300880970514830573}
+  cellButton: {fileID: 8549182032827952867}
   cellNameText: {fileID: 1586873529893604535}
 --- !u!1 &4433159135437633008
 GameObject:
@@ -266,6 +267,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0

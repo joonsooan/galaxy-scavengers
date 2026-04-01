@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2419866219278600048}
   - component: {fileID: 3175802879121171361}
-  - component: {fileID: -7242546676535085412}
   m_Layer: 0
   m_Name: Beacon
   m_TagString: Untagged
@@ -35,6 +34,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &3175802879121171361
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -53,6 +53,8 @@ SpriteRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -74,9 +76,11 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -1027114353
-  m_SortingLayer: 2
+  m_SortingLayer: 3
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_Sprite: {fileID: 1591790270097169076, guid: f0681f52ad6654f4db331a33403a0ee0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -86,21 +90,4 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &-7242546676535085412
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5453999205571622832}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 03d7316432f2d044db6aae7fc0e92c62, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  stayInterval: 1
-  spriteRenderer: {fileID: 3175802879121171361}
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
-  activeColor: {r: 0.6754716, g: 0.6754716, b: 0.6754716, a: 1}

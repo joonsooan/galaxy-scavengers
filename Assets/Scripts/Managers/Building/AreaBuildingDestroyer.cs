@@ -601,7 +601,6 @@ public class AreaBuildingDestroyer : MonoBehaviour
             _buildingManager.ClearBuildingDataAt(cell);
         }
         
-        DestroyBeaconsInArea(selectedCells);
         DestroyUnitsInArea(selectedCells);
     }
 
@@ -746,35 +745,6 @@ public class AreaBuildingDestroyer : MonoBehaviour
         }
     }
     
-    private void DestroyBeaconsInArea(HashSet<Vector3Int> cells)
-    {
-        if (_grid == null) return;
-        List<Beacon> beaconsToDestroy = new List<Beacon>();
-        IReadOnlyList<Beacon> allBeacons = BeaconManager.Instance != null
-            ? BeaconManager.Instance.Beacons
-            : System.Array.Empty<Beacon>();
-        
-        foreach (Beacon beacon in allBeacons)
-        {
-            if (beacon == null) continue;
-            
-            Vector3Int beaconCell = _grid.WorldToCell(beacon.transform.position);
-            
-            if (cells.Contains(beaconCell))
-            {
-                beaconsToDestroy.Add(beacon);
-            }
-        }
-        
-        foreach (Beacon beacon in beaconsToDestroy)
-        {
-            if (beacon != null)
-            {
-                beacon.DestroyBeacon();
-            }
-        }
-    }
-
     private bool IsLoadingScreenActive()
     {
         if (LoadingUIManager.Instance == null)

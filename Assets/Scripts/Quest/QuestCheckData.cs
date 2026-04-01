@@ -48,7 +48,6 @@ public class QuestCheckData
                 
             case QuestCheckType.BuildingConstructed:
             case QuestCheckType.UnitProduced:
-            case QuestCheckType.BeaconPlacedForScout:
                 return currentCount >= requiredCount;
                 
             case QuestCheckType.ScoutEnteredLocation:

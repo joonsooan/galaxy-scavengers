@@ -1,11 +1,10 @@
 public enum QuestCheckType
 {
-    ResourceRequirement,      // Existing resource checking (keep current behavior)
-    BuildingConstructed,      // Check if specific building(s) are constructed
-    UnitProduced,             // Check if specific unit(s) are produced
-    BeaconPlacedForScout,     // Check if beacon is placed to send unit_scout
-    ScoutEnteredLocation,     // Check if unit_scout enters specific map location
-    ModulePlacedOnCore,       // Check if module is placed on core during resource transfer
-    ReturnFromGameSceneSuccess,  // Auto-completable when successfully returning to BaseScene from GameScene
-    ReturnFromGameSceneFailure   // Auto-completable when failing and returning to BaseScene from GameScene
+    ResourceRequirement = 0,
+    BuildingConstructed = 1,
+    UnitProduced = 2,
+    ScoutEnteredLocation = 4,
+    ModulePlacedOnCore = 5,
+    ReturnFromGameSceneSuccess = 6,
+    ReturnFromGameSceneFailure = 7
 }
