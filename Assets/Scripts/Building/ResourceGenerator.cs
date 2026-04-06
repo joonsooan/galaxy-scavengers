@@ -331,9 +331,7 @@ public class ResourceGenerator : Damageable, IPowerGridNode
                     set.Add(storage);
                 }
             }
-            else if (bm.TryGetMainStructureAtCell(cell, out MainStructure mainAtCell) &&
-                     BuildingManager.IsBuildingProperlyPlaced(mainAtCell.transform))
-            {
+            else if (bm.TryGetMainStructureAtCell(cell, out MainStructure mainAtCell)) {
                 set.Add(mainAtCell);
             }
         }

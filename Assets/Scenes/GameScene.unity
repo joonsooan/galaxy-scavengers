@@ -71966,16 +71966,16 @@ MonoBehaviour:
   - {fileID: 7242802088552420798, guid: 5b644de4e058ce64a8684b1f4614a66c, type: 3}
   resourceStatsList:
   - resourceType: 0
-    amountToMine: 200
+    amountToMine: 1000
     timeToMinePerUnit: 0.1
   - resourceType: 1
-    amountToMine: 200
+    amountToMine: 1000
     timeToMinePerUnit: 0.2
   - resourceType: 2
-    amountToMine: 100
+    amountToMine: 500
     timeToMinePerUnit: 0.3
   - resourceType: 3
-    amountToMine: 100
+    amountToMine: 500
     timeToMinePerUnit: 0.5
   resourceDisplayNames:
   - "\uD398\uB77C\uC774\uD2B8"

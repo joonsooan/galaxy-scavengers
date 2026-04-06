@@ -199,7 +199,7 @@ MonoBehaviour:
   flashDuration: 0.3
   currentHealth: 0
   maxStorageAmount: 10000
-  supplyRangeN: 6
+  supplyRangeN: 5
   showPowerCoverageGizmo: 1
   powerCoverageGizmoColor: {r: 0.2, g: 0.85, b: 1, a: 1}
 --- !u!114 &3827199288077238633

@@ -199,7 +199,7 @@ MonoBehaviour:
   flashDuration: 0.3
   currentHealth: 0
   processorData: {fileID: 11400000, guid: 7043b48c7c07b8944a9b18aa0f5e3cc6, type: 2}
-  electricityConsumptionPerSecond: 1
+  electricityConsumptionPerSecond: 5
 --- !u!114 &-987125448019468143
 MonoBehaviour:
   m_ObjectHideFlags: 0

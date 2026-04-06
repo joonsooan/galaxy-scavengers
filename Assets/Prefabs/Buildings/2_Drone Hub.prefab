@@ -368,7 +368,7 @@ MonoBehaviour:
   flashDuration: 0.3
   currentHealth: 0
   droneHubData: {fileID: 11400000, guid: 5d08ea5a0927c3a4c96a5b782a641802, type: 2}
-  electricityConsumptionPerSecond: 1
+  electricityConsumptionPerSecond: 5
   productionSlider: {fileID: 8664545961476982809}
 --- !u!114 &-1230124184689666094
 MonoBehaviour:

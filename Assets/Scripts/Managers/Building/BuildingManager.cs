@@ -553,6 +553,7 @@ public class BuildingManager : MonoBehaviour
 
         Vector3 worldPos = grid.GetCellCenterWorld(originPos);
         GameObject newPieceObject = Instantiate(data.buildingPrefab, worldPos, Quaternion.identity, buildingParentTransform);
+        newPieceObject.SetActive(false);
 
         BuildingPiece builtMainPiece = newPieceObject.GetComponent<BuildingPiece>();
         if (builtMainPiece == null) {
@@ -564,6 +565,8 @@ public class BuildingManager : MonoBehaviour
         foreach (Vector3Int targetPos in recipePositions) {
             _placedPieces[targetPos] = builtMainPiece;
         }
+
+        newPieceObject.SetActive(true);
 
         HandleBuildingLogic(newPieceObject, data);
 
@@ -650,6 +653,7 @@ public class BuildingManager : MonoBehaviour
 
         Vector3 worldPos = grid.GetCellCenterWorld(originPos);
         GameObject pieceObject = Instantiate(data.buildingPrefab, worldPos, Quaternion.identity, buildingParentTransform);
+        pieceObject.SetActive(false);
 
         BuildingPiece mainPiece = pieceObject.GetComponent<BuildingPiece>();
         if (mainPiece == null) {
@@ -667,6 +671,8 @@ public class BuildingManager : MonoBehaviour
                 buildingTilemap.SetTile(targetPos, data.buildingTile);
             }
         }
+
+        pieceObject.SetActive(true);
 
         HandleBuildingLogic(pieceObject, data);
 
@@ -863,30 +869,73 @@ public class BuildingManager : MonoBehaviour
             return false;
         }
 
-        Vector3Int lookupCell;
+        MainStructure mainStructure = buildingTransform.GetComponent<MainStructure>() ??
+                                      buildingTransform.GetComponentInParent<MainStructure>(true);
+        if (mainStructure != null && TryGetFootprintForRegisteredMainStructure(mainStructure, out anchor, out occupiedCells)) {
+            return true;
+        }
+
         BuildingPiece piece = buildingTransform.GetComponent<BuildingPiece>();
         if (piece == null) {
             piece = buildingTransform.GetComponentInParent<BuildingPiece>(true);
         }
+
+        Vector3Int lookupCell;
         if (piece != null) {
             lookupCell = piece.cellPosition;
+            if (_cellToStructureMap.TryGetValue(lookupCell, out BuildingStructure structure)) {
+                anchor = structure.anchor;
+                occupiedCells = structure.occupiedCells;
+                return true;
+            }
+            foreach (KeyValuePair<Vector3Int, BuildingPiece> kvp in _placedPieces) {
+                if (kvp.Value != piece) {
+                    continue;
+                }
+                if (_cellToStructureMap.TryGetValue(kvp.Key, out structure)) {
+                    anchor = structure.anchor;
+                    occupiedCells = structure.occupiedCells;
+                    return true;
+                }
+            }
         }
         else {
             lookupCell = grid.WorldToCell(buildingTransform.position);
-        }
-        if (_cellToStructureMap.TryGetValue(lookupCell, out BuildingStructure structure)) {
-            anchor = structure.anchor;
-            occupiedCells = structure.occupiedCells;
-            return true;
+            if (_cellToStructureMap.TryGetValue(lookupCell, out BuildingStructure structure)) {
+                anchor = structure.anchor;
+                occupiedCells = structure.occupiedCells;
+                return true;
+            }
         }
 
         Vector3Int worldCell = grid.WorldToCell(buildingTransform.position);
-        if (worldCell != lookupCell && _cellToStructureMap.TryGetValue(worldCell, out structure)) {
-            anchor = structure.anchor;
-            occupiedCells = structure.occupiedCells;
+        if (worldCell != lookupCell && _cellToStructureMap.TryGetValue(worldCell, out BuildingStructure structureWorld)) {
+            anchor = structureWorld.anchor;
+            occupiedCells = structureWorld.occupiedCells;
             return true;
         }
 
+        return false;
+    }
+
+    private bool TryGetFootprintForRegisteredMainStructure(MainStructure mainStructure, out Vector3Int anchor,
+        out List<Vector3Int> occupiedCells)
+    {
+        anchor = default;
+        occupiedCells = null;
+        if (mainStructure == null) {
+            return false;
+        }
+        foreach (KeyValuePair<Vector3Int, MainStructure> kvp in _mainStructureInstanceByAnchor) {
+            if (kvp.Value != mainStructure) {
+                continue;
+            }
+            anchor = kvp.Key;
+            if (_buildingStructuresByAnchor.TryGetValue(anchor, out BuildingStructure structure)) {
+                occupiedCells = structure.occupiedCells;
+                return true;
+            }
+        }
         return false;
     }
 

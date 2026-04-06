@@ -199,7 +199,7 @@ MonoBehaviour:
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
   currentHealth: 0
-  generationInterval: 5
+  generationInterval: 2
   resourceAmount: 10
   supplyRangeN: 8
   powerCoverageCellOffset: {x: -1, y: -1}

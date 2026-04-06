@@ -75,8 +75,7 @@ public static class PowerGridGeometry
     {
         int sepX = AxisSeparationExclusive(a.xMin, a.xMax, b.xMin, b.xMax);
         int sepY = AxisSeparationExclusive(a.yMin, a.yMax, b.yMin, b.yMax);
-        int cheb = sepX > sepY ? sepX : sepY;
-        return cheb <= 1;
+        return sepX <= 0 && sepY <= 0;
     }
 
     private static int AxisSeparationExclusive(int aMin, int aMaxEx, int bMin, int bMaxEx)

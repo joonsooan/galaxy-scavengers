@@ -529,21 +529,17 @@ public class GameManager : MonoBehaviour
                 if (!alreadyRegistered) {
                     ResourceManager.Instance.RegisterMainStructure(mainStructure);
                     ResourceManager.Instance.AddStorage(mainStructure);
-
-                    if (BuildingManager.Instance != null && mainStructure.transform != null) {
-                        Vector3 worldPos = mainStructure.transform.position;
-                        if (BuildingManager.Instance.grid != null) {
-                            Vector3Int cellPos = BuildingManager.Instance.grid.WorldToCell(worldPos);
-                            Vector3Int anchorCell = cellPos - new Vector3Int(1, 1, 0);
-                            BuildingManager.Instance.RegisterMainStructure(anchorCell, new Vector2Int(3, 3), mainStructure);
-                        }
-                    }
-
-                    // Ensure MainStructure is always registered as a valid enemy target
-                    if (TargetManager.Instance != null) {
-                        TargetManager.Instance.RegisterTarget(mainStructure);
-                    }
                 }
+            }
+
+            if (BuildingManager.Instance != null && mainStructure.transform != null && BuildingManager.Instance.grid != null) {
+                Vector3Int cellPos = BuildingManager.Instance.grid.WorldToCell(mainStructure.transform.position);
+                Vector3Int anchorCell = cellPos - new Vector3Int(1, 1, 0);
+                BuildingManager.Instance.RegisterMainStructure(anchorCell, new Vector2Int(3, 3), mainStructure);
+            }
+
+            if (TargetManager.Instance != null) {
+                TargetManager.Instance.RegisterTarget(mainStructure);
             }
         }
     }
