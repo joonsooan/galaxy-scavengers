@@ -5689,9 +5689,9 @@ MonoBehaviour:
   grid: {fileID: 2115591665}
   groundTile: {fileID: 11400000, guid: 7d463f590028a4e46a4251ccd769d5d4, type: 2}
   lowGroundTile: {fileID: 11400000, guid: bb80e475df194d84b99fa520de1399a7, type: 2}
-  lowWallTile: {fileID: 11400000, guid: 93afd56ec3515e544b883d2ff9a577f2, type: 2}
-  highWallTile: {fileID: 11400000, guid: b7ddf0a4ab22ed248857521fe858e07d, type: 2}
-  wallTile: {fileID: 11400000, guid: 93afd56ec3515e544b883d2ff9a577f2, type: 2}
+  lowWallTile: {fileID: 11400000, guid: 45ac393d882c3784a95c4c965fdebacb, type: 2}
+  highWallTile: {fileID: 11400000, guid: 672b18c1a181dbb4c8932439ca58c1ad, type: 2}
+  wallTile: {fileID: 11400000, guid: 45ac393d882c3784a95c4c965fdebacb, type: 2}
   enemyHomeTile: {fileID: 11400000, guid: 348f5bc6f36c8024883e0096b9432311, type: 2}
   enemyTerritoryTile: {fileID: 11400000, guid: b12fd5aa50a0e98408c4617860e0ba38, type: 2}
   width: 192
@@ -5803,7 +5803,7 @@ MonoBehaviour:
   resourceTilemap: {fileID: 2116328957}
   resourceSettings:
   - resourceType: 0
-    resourceRuleTile: {fileID: 11400000, guid: 7d01455128c2e81459aa804408a8a254, type: 2}
+    resourceRuleTile: {fileID: 11400000, guid: d543be48c51a93b4b93bd82b7895f211, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: 9e542c61b3b4f0745ab05a9dadeccb8f, type: 3}
     spawnFrequencyPercent: 50
     baseRichness: 10
@@ -21948,7 +21948,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 662.501
+  orthographic size: 11.25
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -21973,7 +21973,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0.5, z: -20}
+  m_LocalPosition: {x: 0.5, y: 0.5, z: -40}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
