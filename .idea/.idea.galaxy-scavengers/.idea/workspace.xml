@@ -20,6 +20,7 @@
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Building/BuildingManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Building/BuildingManager.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Resource/ResourceManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Resource/ResourceManager.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Resource/ResourceTransferManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Resource/ResourceTransferManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Utility/ObjectPooler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Utility/ObjectPooler.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Power/PowerGridConnectivity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Power/PowerGridConnectivity.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/Power/PowerGridGeometry.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Power/PowerGridGeometry.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Inventory/InventorySystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Inventory/InventorySystem.cs" afterDir="false" />
@@ -305,7 +306,7 @@
       <workItem from="1774923477764" duration="263000" />
       <workItem from="1774923868757" duration="3424000" />
       <workItem from="1774950243184" duration="6000" />
-      <workItem from="1775010034484" duration="2517000" />
+      <workItem from="1775010034484" duration="3025000" />
     </task>
     <servers />
   </component>
