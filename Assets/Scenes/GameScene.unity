@@ -5808,7 +5808,7 @@ MonoBehaviour:
     spawnFrequencyPercent: 50
     baseRichness: 10
   - resourceType: 1
-    resourceRuleTile: {fileID: 11400000, guid: 9a1e64488072b374899978330f64d230, type: 2}
+    resourceRuleTile: {fileID: 11400000, guid: 4a204e4ef2ebd554c8714d2be2ec1a62, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: a3a2b3c4676bb844e898ce2cf3dd397b, type: 3}
     spawnFrequencyPercent: 25
     baseRichness: 10
