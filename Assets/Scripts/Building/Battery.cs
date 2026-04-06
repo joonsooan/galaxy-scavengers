@@ -6,6 +6,7 @@ public class Battery : BaseStorage, IPowerGridNode
     [Header("Power grid")]
     [Tooltip("NxN cells centered on building footprint (world-space centroid).")]
     [SerializeField] [Range(1, 50)] private int supplyRangeN = 5;
+    public int PowerSupplyRangeN => supplyRangeN;
 
     [Header("Gizmos")]
     [SerializeField] private bool showPowerCoverageGizmo = true;

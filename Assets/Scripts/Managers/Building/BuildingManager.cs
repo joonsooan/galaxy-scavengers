@@ -20,6 +20,7 @@ public class BuildingManager : MonoBehaviour
     private readonly Dictionary<Vector3Int, BuildingStructure> _buildingStructuresByAnchor = new Dictionary<Vector3Int, BuildingStructure>();
     private readonly Dictionary<Vector3Int, BuildingStructure> _cellToStructureMap = new Dictionary<Vector3Int, BuildingStructure>();
     private readonly HashSet<Vector3Int> _mainStructureCells = new HashSet<Vector3Int>();
+    private readonly Dictionary<Vector3Int, MainStructure> _mainStructureInstanceByAnchor = new Dictionary<Vector3Int, MainStructure>();
     private readonly Dictionary<Vector3Int, BuildingPiece> _placedPieces = new Dictionary<Vector3Int, BuildingPiece>();
     private readonly List<Processor> _processors = new List<Processor>();
     private readonly HashSet<Vector3Int> _resourceCellCache = new HashSet<Vector3Int>();
@@ -229,7 +230,7 @@ public class BuildingManager : MonoBehaviour
             Vector3Int centerCell = grid.WorldToCell(mainStructure.transform.position);
             Vector3Int anchorCell = centerCell - new Vector3Int(1, 1, 0);
 
-            RegisterMainStructure(anchorCell, new Vector2Int(3, 3));
+            RegisterMainStructure(anchorCell, new Vector2Int(3, 3), mainStructure);
         }
     }
 
@@ -931,7 +932,7 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
-    public void RegisterMainStructure(Vector3Int anchorCell, Vector2Int size)
+    public void RegisterMainStructure(Vector3Int anchorCell, Vector2Int size, MainStructure mainStructureInstance = null)
     {
         BuildingStructure structure = new BuildingStructure {
             anchor = anchorCell,
@@ -948,16 +949,31 @@ public class BuildingManager : MonoBehaviour
 
         RegisterBuildingStructure(structure);
 
+        if (mainStructureInstance != null) {
+            _mainStructureInstanceByAnchor[anchorCell] = mainStructureInstance;
+        }
+
         foreach (Vector3Int cell in structure.occupiedCells) {
             OnTilemapChanged?.Invoke(cell);
         }
     }
 
+    public bool TryGetMainStructureAtCell(Vector3Int cell, out MainStructure mainStructure)
+    {
+        mainStructure = null;
+        if (!_cellToStructureMap.TryGetValue(cell, out BuildingStructure structure)) {
+            return false;
+        }
+        return _mainStructureInstanceByAnchor.TryGetValue(structure.anchor, out mainStructure);
+    }
+
     private void UnregisterBuildingStructure(Vector3Int anchor)
     {
+        _mainStructureInstanceByAnchor.Remove(anchor);
         if (_buildingStructuresByAnchor.Remove(anchor, out BuildingStructure structure)) {
             foreach (Vector3Int cell in structure.occupiedCells) {
                 _cellToStructureMap.Remove(cell);
+                _mainStructureCells.Remove(cell);
                 TryAddCellToWalkable(cell);
             }
         }

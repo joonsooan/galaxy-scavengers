@@ -535,7 +535,7 @@ public class GameManager : MonoBehaviour
                         if (BuildingManager.Instance.grid != null) {
                             Vector3Int cellPos = BuildingManager.Instance.grid.WorldToCell(worldPos);
                             Vector3Int anchorCell = cellPos - new Vector3Int(1, 1, 0);
-                            BuildingManager.Instance.RegisterMainStructure(anchorCell, new Vector2Int(3, 3));
+                            BuildingManager.Instance.RegisterMainStructure(anchorCell, new Vector2Int(3, 3), mainStructure);
                         }
                     }
 

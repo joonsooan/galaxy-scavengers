@@ -74,11 +74,14 @@ public class BuildingHoverManager : MonoBehaviour
 
         if (GameManager.Instance != null && GameManager.Instance.IsDragging())
         {
-            ClearHoverStateOnly();
+            CardDragger dragger = GameManager.Instance.cardDragger;
+            bool keepPowerPreview = dragger != null && dragger.IsDraggingBuildingCard;
+            ClearHoverStateOnly(keepPowerPreview);
             return;
         }
 
-        if (UIUtils.IsPointerOverUI() && !IsPointerOverFloatingNumText() && !IsPointerOverProgressSlider())
+        if (UIUtils.IsPointerOverUI() && !IsPointerOverFloatingNumText() && !IsPointerOverProgressSlider() &&
+            !IsPointerOverPowerStatusWorldFollower())
         {
             ClearAllHovers();
             return;
@@ -210,9 +213,11 @@ public class BuildingHoverManager : MonoBehaviour
         ClearUnitHover();
     }
 
-    private void ClearHoverStateOnly()
+    private void ClearHoverStateOnly(bool keepPowerCoveragePreview = false)
     {
-        ClearPowerCoveragePreview();
+        if (!keepPowerCoveragePreview) {
+            ClearPowerCoveragePreview();
+        }
         _currentHoveredBuilding = null;
         _currentHoveredStorage = null;
         if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
@@ -252,10 +257,6 @@ public class BuildingHoverManager : MonoBehaviour
     private static void TryShowPowerCoveragePreview(BuildingDataHolder buildingDataHolder)
     {
         if (buildingDataHolder == null || buildingDataHolder.buildingData == null) {
-            return;
-        }
-        BuildingType t = buildingDataHolder.buildingData.buildingType;
-        if (t != BuildingType.Generator && t != BuildingType.Battery && t != BuildingType.PowerReceiver) {
             return;
         }
         PowerCoveragePreviewOverlay overlay = PowerCoveragePreviewOverlay.Instance;
@@ -315,6 +316,30 @@ public class BuildingHoverManager : MonoBehaviour
         {
             if (result.gameObject != null && result.gameObject.GetComponent<FloatingNumText>() != null)
             {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsPointerOverPowerStatusWorldFollower()
+    {
+        if (EventSystem.current == null) {
+            return false;
+        }
+
+        PointerEventData pointerEventData = new PointerEventData(EventSystem.current);
+        pointerEventData.position = Input.mousePosition;
+
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerEventData, results);
+
+        foreach (RaycastResult result in results) {
+            if (result.gameObject == null) {
+                continue;
+            }
+            if (result.gameObject.GetComponentInParent<PowerStatusWorldFollower>() != null) {
                 return true;
             }
         }

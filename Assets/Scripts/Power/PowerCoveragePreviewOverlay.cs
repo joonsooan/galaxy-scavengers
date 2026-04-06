@@ -40,10 +40,6 @@ public class PowerCoveragePreviewOverlay : MonoBehaviour
         if (!IsShowing || data == null) {
             return;
         }
-        if (data.buildingType != BuildingType.Generator && data.buildingType != BuildingType.Battery &&
-            data.buildingType != BuildingType.PowerReceiver) {
-            return;
-        }
         Show();
     }
 
@@ -121,6 +117,11 @@ public class PowerCoveragePreviewOverlay : MonoBehaviour
 
     public void Show()
     {
+        ShowIncludingPlacementPreview(null, default, null);
+    }
+
+    public void ShowIncludingPlacementPreview(BuildingData dragBuilding, Vector3Int anchorCell, Grid grid)
+    {
         EnsurePreviewTilemap();
         IsShowing = true;
         ClearInternal();
@@ -146,17 +147,78 @@ public class PowerCoveragePreviewOverlay : MonoBehaviour
                 continue;
             }
             BoundsInt bounds = node.GetPowerCoverageBounds();
-            foreach (Vector3Int cell in bounds.allPositionsWithin) {
-                if (ground == null || !ground.HasTile(cell) || bm.IsTerrainCell(cell)) {
-                    continue;
-                }
-                if (_paintedCells.Add(cell)) {
-                    previewTilemap.SetTile(cell, tile);
-                }
-            }
+            PaintBounds(bounds, ground, bm, tile);
+        }
+
+        if (dragBuilding != null && grid != null &&
+            TryGetDragPreviewPowerBounds(dragBuilding, grid, anchorCell, out BoundsInt dragBounds)) {
+            PaintBounds(dragBounds, ground, bm, tile);
         }
 
         previewTilemap.RefreshAllTiles();
+    }
+
+    private void PaintBounds(BoundsInt bounds, Tilemap ground, BuildingManager bm, TileBase tile)
+    {
+        if (previewTilemap == null || bounds.size.x <= 0 || bounds.size.y <= 0) {
+            return;
+        }
+        foreach (Vector3Int cell in bounds.allPositionsWithin) {
+            if (ground == null || !ground.HasTile(cell) || bm.IsTerrainCell(cell)) {
+                continue;
+            }
+            if (_paintedCells.Add(cell)) {
+                previewTilemap.SetTile(cell, tile);
+            }
+        }
+    }
+
+    private static bool TryGetDragPreviewPowerBounds(BuildingData data, Grid grid, Vector3Int anchorCell, out BoundsInt bounds)
+    {
+        bounds = default;
+        if (data == null || data.recipe == null || data.buildingPrefab == null || grid == null) {
+            return false;
+        }
+
+        List<Vector3Int> occupied = new List<Vector3Int>(data.recipe.Count);
+        foreach (BuildingData.BuildingPiece piece in data.recipe) {
+            occupied.Add(anchorCell + piece.relativePosition);
+        }
+
+        int n = 5;
+        Vector2Int cellOffset = default;
+        switch (data.buildingType) {
+        case BuildingType.Generator:
+            ResourceGenerator rg = data.buildingPrefab.GetComponent<ResourceGenerator>() ??
+                                   data.buildingPrefab.GetComponentInChildren<ResourceGenerator>(true);
+            if (rg == null) {
+                return false;
+            }
+            n = rg.SupplyRangeN;
+            cellOffset = rg.PowerCoverageCellOffset;
+            break;
+        case BuildingType.Battery:
+            Battery bat = data.buildingPrefab.GetComponent<Battery>() ??
+                          data.buildingPrefab.GetComponentInChildren<Battery>(true);
+            if (bat == null) {
+                return false;
+            }
+            n = bat.PowerSupplyRangeN;
+            break;
+        case BuildingType.PowerReceiver:
+            PowerReceiver pr = data.buildingPrefab.GetComponent<PowerReceiver>() ??
+                             data.buildingPrefab.GetComponentInChildren<PowerReceiver>(true);
+            if (pr == null) {
+                return false;
+            }
+            n = pr.PowerSupplyRangeN;
+            break;
+        default:
+            return false;
+        }
+
+        bounds = PowerGridGeometry.ComputeSquareCoverageCenteredOnFootprint(grid, occupied, n, cellOffset);
+        return bounds.size.x > 0 && bounds.size.y > 0;
     }
 
     public void Clear()

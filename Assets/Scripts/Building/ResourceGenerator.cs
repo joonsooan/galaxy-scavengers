@@ -41,6 +41,7 @@ public class ResourceGenerator : Damageable, IPowerGridNode
     public int ResourceAmount => resourceAmount;
     public bool IsConstructed => _isConstructed;
     public int SupplyRangeN => supplyRangeN;
+    public Vector2Int PowerCoverageCellOffset => powerCoverageCellOffset;
     public int ElectricityBufferMax => electricityBufferMax;
     public int ElectricityBufferCurrent => electricityBufferCurrent;
 
@@ -318,16 +319,22 @@ public class ResourceGenerator : Damageable, IPowerGridNode
         foreach (Vector3Int cell in coverage.allPositionsWithin)
         {
             BuildingPiece piece = bm.GetPieceAt(cell);
-            if (piece == null) continue;
-            MainStructure mainStructure = piece.GetComponentInParent<MainStructure>();
-            if (mainStructure != null && BuildingManager.IsBuildingProperlyPlaced(mainStructure.transform))
-            {
-                set.Add(mainStructure);
+            if (piece != null) {
+                MainStructure mainStructure = piece.GetComponentInParent<MainStructure>();
+                if (mainStructure != null && BuildingManager.IsBuildingProperlyPlaced(mainStructure.transform))
+                {
+                    set.Add(mainStructure);
+                }
+                Storage storage = piece.GetComponentInParent<Storage>();
+                if (storage != null && BuildingManager.IsBuildingProperlyPlaced(storage.transform))
+                {
+                    set.Add(storage);
+                }
             }
-            Storage storage = piece.GetComponentInParent<Storage>();
-            if (storage != null && BuildingManager.IsBuildingProperlyPlaced(storage.transform))
+            else if (bm.TryGetMainStructureAtCell(cell, out MainStructure mainAtCell) &&
+                     BuildingManager.IsBuildingProperlyPlaced(mainAtCell.transform))
             {
-                set.Add(storage);
+                set.Add(mainAtCell);
             }
         }
 
