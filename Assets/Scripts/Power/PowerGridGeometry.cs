@@ -2,7 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public static class PowerGridGeometry
-{    /// <summary>Draws the coverage square in world space using the grid's cell basis (supports rotation).</summary>
+{
+    /// <summary>Draws the coverage square in world space using the grid's cell basis (supports rotation).</summary>
     public static void DrawCoverageOutline(BoundsInt coverage, Grid grid, Color color, float vertexLift = 0.02f)
     {
         if (grid == null || coverage.size.x <= 0 || coverage.size.y <= 0) {
@@ -52,7 +53,8 @@ public static class PowerGridGeometry
         return new BoundsInt(centerCell.x - offset, centerCell.y - offset, centerCell.z, n, n, 1);
     }
 
-    public static BoundsInt ComputeSquareCoverageCenteredOnFootprint(Grid grid, List<Vector3Int> occupiedCells, int n)
+    public static BoundsInt ComputeSquareCoverageCenteredOnFootprint(Grid grid, List<Vector3Int> occupiedCells, int n,
+        Vector2Int centerCellOffset = default)
     {
         if (grid == null || occupiedCells == null || occupiedCells.Count == 0 || n <= 0) {
             return default;
@@ -64,6 +66,8 @@ public static class PowerGridGeometry
             sumWorld += grid.GetCellCenterWorld(occupiedCells[i]);
         }
         Vector3Int centerCell = grid.WorldToCell(sumWorld / count);
+        centerCell.x += centerCellOffset.x;
+        centerCell.y += centerCellOffset.y;
         return ComputeSquareCoverageCentered(centerCell, n);
     }
 

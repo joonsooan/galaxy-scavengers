@@ -198,7 +198,7 @@ MonoBehaviour:
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
   currentHealth: 0
-  maxStorageAmount: 2000
+  maxStorageAmount: 10000
   supplyRangeN: 6
   showPowerCoverageGizmo: 1
   powerCoverageGizmoColor: {r: 0.2, g: 0.85, b: 1, a: 1}

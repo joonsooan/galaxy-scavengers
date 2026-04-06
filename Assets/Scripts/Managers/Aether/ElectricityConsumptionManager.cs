@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -100,16 +101,33 @@ public class ElectricityConsumptionManager : MonoBehaviour
     public int MaxElectricityStorageCapacity {
         get {
             int total = 0;
-            foreach (Battery battery in _batteries) {
-                if (battery != null) {
-                    total += battery.GetMaxCapacity();
-                }
-            }
-
             foreach (ResourceGenerator generator in _resourceGenerators) {
                 if (generator != null) {
                     total += generator.ElectricityBufferMax;
                 }
+            }
+
+            if (ResourceManager.Instance == null) {
+                return total;
+            }
+
+            foreach (IStorage storage in ResourceManager.Instance.GetAllStorages()) {
+                if (storage is not Battery) {
+                    continue;
+                }
+
+                if (storage == null) {
+                    continue;
+                }
+
+                Component c = storage as Component;
+                if (c == null || c.gameObject == null || !c.gameObject.activeInHierarchy) {
+                    continue;
+                }
+
+                int elec = storage.GetCurrentResourceAmount(ResourceType.Electricity);
+                int room = Mathf.Max(0, storage.GetMaxCapacity() - storage.GetTotalCurrentAmount());
+                total += elec + room;
             }
 
             return total;
@@ -148,7 +166,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
         if (_consumerVisualStates.TryGetValue(consumer, out PowerFeedVisualState s)) {
             return s;
         }
-        return PowerFeedVisualState.Ok;
+        return PowerFeedVisualState.Disconnected;
     }
 
     public PowerFeedVisualState GetBatteryVisualState(Battery battery)
@@ -292,6 +310,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
     {
         if (receiver != null && !_powerReceivers.Contains(receiver)) {
             _powerReceivers.Add(receiver);
+            _powerReceiverVisualStates[receiver] = PowerFeedVisualState.Disconnected;
         }
     }
 
@@ -329,6 +348,8 @@ public class ElectricityConsumptionManager : MonoBehaviour
         PowerGridConnectivity.AnalyzePowerGrid(_powerNodesBuffer, out HashSet<Vector3Int> poweredCells,
             out bool[] nodeConnected, out int[] nodeSourcedComponentId, out List<BoundsInt> nodeBounds);
 
+        HashSet<long> poweredCellsXY = BuildPoweredCellsXYKeys(poweredCells);
+
         _poweredConsumerSortBuffer.Clear();
         for (int i = _electricityConsumers.Count - 1; i >= 0; i--) {
             IElectricityConsumer consumer = _electricityConsumers[i];
@@ -343,7 +364,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
                 continue;
             }
 
-            bool powered = IsConsumerFullyPowered(consumer, poweredCells);
+            bool powered = IsConsumerFullyPowered(consumer, poweredCellsXY);
             bool wasOperational = _consumerStates.ContainsKey(consumer) && _consumerStates[consumer];
 
             if (!powered) {
@@ -355,7 +376,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
                 continue;
             }
 
-            if (!TryFindConsumerPowerComponentId(consumer, _powerNodesBuffer, nodeBounds, nodeSourcedComponentId, out int compId)) {
+            if (!TryFindConsumerPowerComponentId(consumer, _powerNodesBuffer, nodeBounds, nodeSourcedComponentId, poweredCellsXY, out int compId)) {
                 _consumerVisualStates[consumer] = PowerFeedVisualState.Disconnected;
                 if (wasOperational) {
                     consumer.OnElectricityUnavailable();
@@ -381,6 +402,9 @@ public class ElectricityConsumptionManager : MonoBehaviour
             Vector3 refPos = GetReferenceSourceWorldPositionForComponent(w.ComponentId, _powerNodesBuffer, nodeSourcedComponentId);
             BuildElectricityWithdrawOrderForConsumer(w.ComponentId, refPos, nodeSourcedComponentId);
             int got = ResourceManager.Instance.TryWithdrawElectricityFromStoragesInOrder(w.Consumption, _electricityWithdrawOrderBuffer);
+            if (got < w.Consumption) {
+                got += TryConsumeElectricityFromGeneratorsInComponent(w.ComponentId, w.Consumption - got, nodeSourcedComponentId, _powerNodesBuffer, _resourceGenerators);
+            }
             bool ok = got >= w.Consumption;
             bool wasOperational = _consumerStates.ContainsKey(w.Consumer) && _consumerStates[w.Consumer];
             if (ok) {
@@ -435,7 +459,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
             if (idx < 0 || !nodeConnected[idx]) {
                 vs = PowerFeedVisualState.Disconnected;
             }
-            else if (ResourceManager.Instance.GetResourceAmount(ResourceType.Electricity) <= 0) {
+            else if (GetTotalElectricityAmount() <= 0) {
                 vs = PowerFeedVisualState.InsufficientPool;
             }
             else {
@@ -443,6 +467,72 @@ public class ElectricityConsumptionManager : MonoBehaviour
             }
             _powerReceiverVisualStates[receiver] = vs;
         }
+
+        LogPowerGridBuildingStates();
+    }
+
+    private void LogPowerGridBuildingStates()
+    {
+        StringBuilder sb = new StringBuilder(256);
+        sb.Append("[PowerGrid] ");
+
+        for (int i = 0; i < _electricityConsumers.Count; i++) {
+            IElectricityConsumer c = _electricityConsumers[i];
+            if (c == null) continue;
+            Component comp = c as Component;
+            string name = comp != null ? comp.gameObject.name : c.GetType().Name;
+            int draw = c.ElectricityConsumptionPerSecond;
+            if (draw <= 0) {
+                sb.Append($"Consumer {name}: no_draw; ");
+                continue;
+            }
+            _consumerVisualStates.TryGetValue(c, out PowerFeedVisualState vs);
+            sb.Append($"Consumer {name} ({draw}/s): {vs}; ");
+        }
+
+        foreach (ResourceGenerator gen in _resourceGenerators) {
+            if (gen == null || !gen.isActiveAndEnabled) continue;
+            _resourceGeneratorVisualStates.TryGetValue(gen, out PowerFeedVisualState gvs);
+            sb.Append($"Generator {gen.gameObject.name}: {gvs}; ");
+        }
+
+        foreach (Battery bat in _batteries) {
+            if (bat == null || !bat.isActiveAndEnabled) continue;
+            _batteryVisualStates.TryGetValue(bat, out PowerFeedVisualState bvs);
+            sb.Append($"Battery {bat.gameObject.name}: {bvs}; ");
+        }
+
+        foreach (PowerReceiver recv in _powerReceivers) {
+            if (recv == null || !recv.isActiveAndEnabled) continue;
+            _powerReceiverVisualStates.TryGetValue(recv, out PowerFeedVisualState rvs);
+            sb.Append($"PowerReceiver {recv.gameObject.name}: {rvs}; ");
+        }
+
+        Debug.Log(sb.ToString());
+    }
+
+    private static HashSet<long> BuildPoweredCellsXYKeys(HashSet<Vector3Int> poweredCells)
+    {
+        HashSet<long> keys = new HashSet<long>();
+        if (poweredCells == null || poweredCells.Count == 0) {
+            return keys;
+        }
+        foreach (Vector3Int p in poweredCells) {
+            keys.Add(PackCellXY(p.x, p.y));
+        }
+        return keys;
+    }
+
+    private static long PackCellXY(int x, int y)
+    {
+        unchecked {
+            return ((long)(uint)x << 32) | (uint)y;
+        }
+    }
+
+    private static bool BoundsContainsCellXY(BoundsInt b, Vector3Int cell)
+    {
+        return cell.x >= b.xMin && cell.x < b.xMax && cell.y >= b.yMin && cell.y < b.yMax;
     }
 
     private void BuildPowerNodeList(List<IPowerGridNode> buffer)
@@ -477,9 +567,9 @@ public class ElectricityConsumptionManager : MonoBehaviour
         }
     }
 
-    private static bool IsConsumerFullyPowered(IElectricityConsumer consumer, HashSet<Vector3Int> poweredCells)
+    private static bool IsConsumerFullyPowered(IElectricityConsumer consumer, HashSet<long> poweredCellsXY)
     {
-        if (poweredCells == null || poweredCells.Count == 0) return false;
+        if (poweredCellsXY == null || poweredCellsXY.Count == 0) return false;
         Component component = consumer as Component;
         if (component == null || BuildingManager.Instance == null) return false;
 
@@ -490,18 +580,18 @@ public class ElectricityConsumptionManager : MonoBehaviour
         if (occupied == null || occupied.Count == 0) return false;
 
         foreach (Vector3Int cell in occupied) {
-            if (!poweredCells.Contains(cell)) {
-                return false;
+            if (poweredCellsXY.Contains(PackCellXY(cell.x, cell.y))) {
+                return true;
             }
         }
 
-        return true;
+        return false;
     }
 
-    private static bool TryFindConsumerPowerComponentId(IElectricityConsumer consumer, List<IPowerGridNode> nodes, List<BoundsInt> nodeBounds, int[] nodeSourcedComponentId, out int componentId)
+    private static bool TryFindConsumerPowerComponentId(IElectricityConsumer consumer, List<IPowerGridNode> nodes, List<BoundsInt> nodeBounds, int[] nodeSourcedComponentId, HashSet<long> poweredCellsXY, out int componentId)
     {
         componentId = -1;
-        if (nodes == null || nodeBounds == null || nodeSourcedComponentId == null) {
+        if (nodes == null || nodeBounds == null || nodeSourcedComponentId == null || poweredCellsXY == null || poweredCellsXY.Count == 0) {
             return false;
         }
 
@@ -519,6 +609,9 @@ public class ElectricityConsumptionManager : MonoBehaviour
         }
 
         foreach (Vector3Int cell in occupied) {
+            if (!poweredCellsXY.Contains(PackCellXY(cell.x, cell.y))) {
+                continue;
+            }
             for (int i = 0; i < nodes.Count; i++) {
                 if (nodeSourcedComponentId[i] < 0) {
                     continue;
@@ -529,7 +622,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
                     continue;
                 }
 
-                if (!b.Contains(cell)) {
+                if (!BoundsContainsCellXY(b, cell)) {
                     continue;
                 }
 
@@ -622,6 +715,35 @@ public class ElectricityConsumptionManager : MonoBehaviour
         }
 
         return Vector3.zero;
+    }
+
+    private static int TryConsumeElectricityFromGeneratorsInComponent(int componentId, int need, int[] nodeSourcedComponentId, List<IPowerGridNode> nodes, List<ResourceGenerator> generators)
+    {
+        if (need <= 0 || nodeSourcedComponentId == null || nodes == null || generators == null) {
+            return 0;
+        }
+        int total = 0;
+        for (int gi = 0; gi < generators.Count; gi++) {
+            ResourceGenerator gen = generators[gi];
+            if (gen == null || !gen.isActiveAndEnabled) {
+                continue;
+            }
+            int nodeIndex = -1;
+            for (int j = 0; j < nodes.Count; j++) {
+                if (ReferenceEquals(nodes[j], gen)) {
+                    nodeIndex = j;
+                    break;
+                }
+            }
+            if (nodeIndex < 0 || nodeSourcedComponentId[nodeIndex] != componentId) {
+                continue;
+            }
+            total += gen.TryConsumeBufferForPowerDelivery(need - total);
+            if (total >= need) {
+                break;
+            }
+        }
+        return total;
     }
 
     private void BuildElectricityWithdrawOrderForConsumer(int componentId, Vector3 refWorldPos, int[] nodeSourcedComponentId)

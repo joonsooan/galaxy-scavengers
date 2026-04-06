@@ -18,7 +18,7 @@ GameObject:
   - component: {fileID: 1624190025622244497}
   - component: {fileID: -4359105832664595340}
   m_Layer: 0
-  m_Name: 1_Generator
+  m_Name: 1_Generator_Basic 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -199,20 +199,16 @@ MonoBehaviour:
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
   currentHealth: 0
-  generationInterval: 1
+  generationInterval: 5
   resourceAmount: 10
-  supplyRangeN: 6
-  electricityBufferMax: 20
+  supplyRangeN: 8
+  powerCoverageCellOffset: {x: -1, y: -1}
+  electricityBufferMax: 1000
   electricityBufferCurrent: 0
   fuelCostsPerProduction:
-  - resourceType: 0
-    amount: 5
   - resourceType: 1
     amount: 5
-  - resourceType: 2
-    amount: 5
-  - resourceType: 3
-    amount: 5
+  fuelRequirementMode: 1
   showPowerCoverageGizmo: 1
   powerCoverageGizmoColor: {r: 1, g: 0.92, b: 0.2, a: 1}
   resourceImageOffset: {x: 0.5, y: 0.75, z: 0}

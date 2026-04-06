@@ -3,6 +3,12 @@ using System.Linq;
 using UnityEngine;
 using System.Collections;
 
+public enum ResourceGeneratorFuelRequirementMode
+{
+    AllListedCosts,
+    AnySingleListedCost,
+}
+
 public class ResourceGenerator : Damageable, IPowerGridNode
 {
     [Header("Values")]
@@ -12,9 +18,12 @@ public class ResourceGenerator : Damageable, IPowerGridNode
     [Header("Power grid")]
     [Tooltip("NxN cells centered on building footprint (world-space centroid).")]
     [SerializeField] [Range(1, 50)] private int supplyRangeN = 5;
+    [Tooltip("Shifts power grid coverage center on the tile grid (X/Y cells). Does not affect fuel pickup range.")]
+    [SerializeField] private Vector2Int powerCoverageCellOffset;
     [SerializeField] private int electricityBufferMax = 20;
     [SerializeField] private int electricityBufferCurrent;
     [SerializeField] private ResourceCost[] fuelCostsPerProduction = { new ResourceCost { resourceType = ResourceType.Ferrite, amount = 1 } };
+    [SerializeField] private ResourceGeneratorFuelRequirementMode fuelRequirementMode = ResourceGeneratorFuelRequirementMode.AllListedCosts;
 
     [Header("Gizmos")]
     [SerializeField] private bool showPowerCoverageGizmo = true;
@@ -163,23 +172,46 @@ public class ResourceGenerator : Damageable, IPowerGridNode
             return true;
         }
 
-        List<Storage> storages = CollectStoragesInSupplyRange();
-        if (storages.Count == 0)
+        if (!HasPositiveFuelCostEntry())
         {
+            return true;
+        }
+
+        List<IStorage> fuelTargets = CollectFuelStoragesInSupplyRange();
+        if (fuelTargets.Count == 0)
+        {
+            return false;
+        }
+
+        if (fuelRequirementMode == ResourceGeneratorFuelRequirementMode.AnySingleListedCost)
+        {
+            foreach (ResourceCost cost in fuelCostsPerProduction)
+            {
+                if (cost.amount <= 0) continue;
+                int sum = GetTotalAmountInFuelTargets(fuelTargets, cost.resourceType);
+                if (sum < cost.amount) continue;
+                int need = cost.amount;
+                foreach (IStorage storage in fuelTargets)
+                {
+                    if (storage == null || need <= 0) continue;
+                    if (storage.TryWithdrawResource(cost.resourceType, need, out int withdrawn))
+                    {
+                        need -= withdrawn;
+                    }
+                }
+                if (need <= 0)
+                {
+                    return true;
+                }
+            }
+
             return false;
         }
 
         foreach (ResourceCost cost in fuelCostsPerProduction)
         {
             if (cost.amount <= 0) continue;
-            int sum = 0;
-            foreach (Storage storage in storages)
-            {
-                if (storage != null)
-                {
-                    sum += storage.GetCurrentResourceAmount(cost.resourceType);
-                }
-            }
+            int sum = GetTotalAmountInFuelTargets(fuelTargets, cost.resourceType);
 
             if (sum < cost.amount)
             {
@@ -191,7 +223,7 @@ public class ResourceGenerator : Damageable, IPowerGridNode
         {
             if (cost.amount <= 0) continue;
             int need = cost.amount;
-            foreach (Storage storage in storages)
+            foreach (IStorage storage in fuelTargets)
             {
                 if (storage == null || need <= 0) continue;
                 if (storage.TryWithdrawResource(cost.resourceType, need, out int withdrawn))
@@ -204,6 +236,31 @@ public class ResourceGenerator : Damageable, IPowerGridNode
         return true;
     }
 
+    private static int GetTotalAmountInFuelTargets(List<IStorage> targets, ResourceType resourceType)
+    {
+        int sum = 0;
+        foreach (IStorage storage in targets)
+        {
+            if (storage != null)
+            {
+                sum += storage.GetCurrentResourceAmount(resourceType);
+            }
+        }
+        return sum;
+    }
+
+    private bool HasPositiveFuelCostEntry()
+    {
+        foreach (ResourceCost c in fuelCostsPerProduction)
+        {
+            if (c.amount > 0)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public bool HasFuelAvailableInRange()
     {
         if (fuelCostsPerProduction == null || fuelCostsPerProduction.Length == 0)
@@ -211,25 +268,34 @@ public class ResourceGenerator : Damageable, IPowerGridNode
             return true;
         }
 
-        List<Storage> storages = CollectStoragesInSupplyRange();
-        if (storages.Count == 0)
+        if (!HasPositiveFuelCostEntry())
         {
+            return true;
+        }
+
+        List<IStorage> fuelTargets = CollectFuelStoragesInSupplyRange();
+        if (fuelTargets.Count == 0)
+        {
+            return false;
+        }
+
+        if (fuelRequirementMode == ResourceGeneratorFuelRequirementMode.AnySingleListedCost)
+        {
+            foreach (ResourceCost cost in fuelCostsPerProduction)
+            {
+                if (cost.amount <= 0) continue;
+                if (GetTotalAmountInFuelTargets(fuelTargets, cost.resourceType) >= cost.amount)
+                {
+                    return true;
+                }
+            }
             return false;
         }
 
         foreach (ResourceCost cost in fuelCostsPerProduction)
         {
             if (cost.amount <= 0) continue;
-            int sum = 0;
-            foreach (Storage storage in storages)
-            {
-                if (storage != null)
-                {
-                    sum += storage.GetCurrentResourceAmount(cost.resourceType);
-                }
-            }
-
-            if (sum < cost.amount)
+            if (GetTotalAmountInFuelTargets(fuelTargets, cost.resourceType) < cost.amount)
             {
                 return false;
             }
@@ -238,14 +304,14 @@ public class ResourceGenerator : Damageable, IPowerGridNode
         return true;
     }
 
-    private List<Storage> CollectStoragesInSupplyRange()
+    private List<IStorage> CollectFuelStoragesInSupplyRange()
     {
-        HashSet<Storage> set = new HashSet<Storage>();
+        HashSet<IStorage> set = new HashSet<IStorage>();
         BuildingManager bm = BuildingManager.Instance;
         if (bm == null || !bm.TryGetBuildingAnchorCells(transform, out _, out List<Vector3Int> occupied) ||
             occupied == null || occupied.Count == 0)
         {
-            return new List<Storage>();
+            return new List<IStorage>();
         }
 
         BoundsInt coverage = PowerGridGeometry.ComputeSquareCoverageCenteredOnFootprint(bm.grid, occupied, supplyRangeN);
@@ -253,6 +319,11 @@ public class ResourceGenerator : Damageable, IPowerGridNode
         {
             BuildingPiece piece = bm.GetPieceAt(cell);
             if (piece == null) continue;
+            MainStructure mainStructure = piece.GetComponentInParent<MainStructure>();
+            if (mainStructure != null && BuildingManager.IsBuildingProperlyPlaced(mainStructure.transform))
+            {
+                set.Add(mainStructure);
+            }
             Storage storage = piece.GetComponentInParent<Storage>();
             if (storage != null && BuildingManager.IsBuildingProperlyPlaced(storage.transform))
             {
@@ -272,7 +343,7 @@ public class ResourceGenerator : Damageable, IPowerGridNode
             return default;
         }
 
-        return PowerGridGeometry.ComputeSquareCoverageCenteredOnFootprint(bm.grid, occupied, supplyRangeN);
+        return PowerGridGeometry.ComputeSquareCoverageCenteredOnFootprint(bm.grid, occupied, supplyRangeN, powerCoverageCellOffset);
     }
 
     public bool IsActivePowerSource()
@@ -296,6 +367,17 @@ public class ResourceGenerator : Damageable, IPowerGridNode
         int spill = electricityBufferCurrent;
         int added = ResourceManager.Instance.AddGeneratedResource(ResourceType.Electricity, spill, transform.position);
         electricityBufferCurrent -= added;
+    }
+
+    public int TryConsumeBufferForPowerDelivery(int amountRequested)
+    {
+        if (amountRequested <= 0)
+        {
+            return 0;
+        }
+        int take = Mathf.Min(amountRequested, electricityBufferCurrent);
+        electricityBufferCurrent -= take;
+        return take;
     }
 
     private void OnDrawGizmos()

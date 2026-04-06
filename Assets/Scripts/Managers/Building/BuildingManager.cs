@@ -738,6 +738,13 @@ public class BuildingManager : MonoBehaviour
                 generator.SetConstructed();
             }
             break;
+        case BuildingType.DroneHub:
+            DroneHub droneHub = obj.GetComponent<DroneHub>();
+            if (droneHub == null) {
+                droneHub = obj.GetComponentInChildren<DroneHub>(true);
+            }
+            droneHub?.SetConstructed();
+            break;
         case BuildingType.Turret:
         case BuildingType.Radar:
             break;
@@ -864,7 +871,7 @@ public class BuildingManager : MonoBehaviour
         Vector3Int lookupCell;
         BuildingPiece piece = buildingTransform.GetComponent<BuildingPiece>();
         if (piece == null) {
-            piece = buildingTransform.GetComponentInParent<BuildingPiece>();
+            piece = buildingTransform.GetComponentInParent<BuildingPiece>(true);
         }
         if (piece != null) {
             lookupCell = piece.cellPosition;

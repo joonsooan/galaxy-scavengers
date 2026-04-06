@@ -65,6 +65,14 @@ public class MainStructure : BaseStorage, IClickable
     public void OnClicked()
     {
     }
+
+    public override bool TryAddResource(ResourceType type, int amount)
+    {
+        if (type == ResourceType.Electricity) {
+            return false;
+        }
+        return base.TryAddResource(type, amount);
+    }
     
     public void AddResourceToStorageOnly(ResourceType type, int amount)
     {
@@ -84,6 +92,9 @@ public class MainStructure : BaseStorage, IClickable
     
     public void InitializeStorage(ResourceType type, int amount)
     {
+        if (type == ResourceType.Electricity) {
+            return;
+        }
         if (currentResources.ContainsKey(type))
         {
             currentResources[type] = Mathf.Min(amount, maxStorageAmount);

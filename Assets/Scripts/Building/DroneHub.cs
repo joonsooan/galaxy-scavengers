@@ -40,6 +40,24 @@ public class DroneHub : Damageable, IClickable, IElectricityConsumer
         if (productionSlider != null) {
             productionSlider.Initialize(transform);
         }
+
+        if (IsProperlyPlacedBuilding()) {
+            FindAndCacheElectricityManager();
+            if (_electricityConsumptionManager != null) {
+                _electricityConsumptionManager.RegisterConsumer(this);
+            }
+        }
+    }
+
+    public void SetConstructed()
+    {
+        if (!IsProperlyPlacedBuilding()) {
+            return;
+        }
+        FindAndCacheElectricityManager();
+        if (_electricityConsumptionManager != null) {
+            _electricityConsumptionManager.RegisterConsumer(this);
+        }
     }
 
     protected override void OnEnable()

@@ -36,31 +36,16 @@ public static class PowerStatusBillboardAlign
             insuff.sortingLayerID = hostSr.sortingLayerID;
             disc.sortingOrder = hostSr.sortingOrder + 20;
             insuff.sortingOrder = hostSr.sortingOrder + 21;
-            float hostH = hostSr.bounds.size.y;
-            float iconH = Mathf.Max(disc.bounds.size.y, 0.001f);
-            float scale = Mathf.Clamp(hostH * heightFractionOfHost / iconH, 0.2f, 4f);
-            disc.transform.localScale = Vector3.one * scale;
-            insuff.transform.localScale = Vector3.one * scale;
+            disc.transform.localScale = Vector3.one;
+            insuff.transform.localScale = Vector3.one;
         }
     }
 
     public static void ApplyCanvasIconWorldHeight(Transform hostRoot, RectTransform iconRt, float heightFractionOfHost)
     {
-        if (iconRt == null || heightFractionOfHost <= 0f) {
+        if (iconRt == null) {
             return;
         }
-        SpriteRenderer hostSr = FindHostSpriteExcludingIcons(hostRoot);
-        if (hostSr == null || hostSr.sprite == null) {
-            return;
-        }
-        float desiredWorldH = hostSr.bounds.size.y * heightFractionOfHost;
-        Vector3[] corners = new Vector3[4];
-        iconRt.GetWorldCorners(corners);
-        float h = Mathf.Abs(corners[1].y - corners[0].y);
-        if (h < 1e-5f) {
-            return;
-        }
-        float k = desiredWorldH / h;
-        iconRt.localScale = iconRt.localScale * k;
+        iconRt.localScale = Vector3.one;
     }
 }
