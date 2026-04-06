@@ -1194,7 +1194,7 @@ GameObject:
   - component: {fileID: 53596317}
   - component: {fileID: 53596320}
   - component: {fileID: 53596319}
-  - component: {fileID: 53596321}
+  - component: {fileID: 53596323}
   - component: {fileID: 53596322}
   m_Layer: 5
   m_Name: Quest Panel
@@ -1263,7 +1263,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 53596316}
   m_CullTransparentMesh: 1
---- !u!114 &53596321
+--- !u!114 &53596322
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1272,9 +1272,36 @@ MonoBehaviour:
   m_GameObject: {fileID: 53596316}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Script: {fileID: 11500000, guid: f773253efb55a164ba538a657419fd8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hoverSound:
+    Guid:
+      Data1: 199913248
+      Data2: 1202326804
+      Data3: -537020530
+      Data4: 1684792045
+    Path: event:/SFX_UI/SFX_UIHover
+  clickSound:
+    Guid:
+      Data1: -345895807
+      Data2: 1210214295
+      Data3: -73339495
+      Data4: 1624008095
+    Path: event:/SFX_UI/SFX_UIClick
+  clickType: Default
+--- !u!114 &53596323
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 53596316}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7c3e9d2f1b8405e8a6c4d3e2f1098ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CustomButton
   m_Navigation:
     m_Mode: 3
     m_WrapAround: 0
@@ -1307,33 +1334,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &53596322
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 53596316}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f773253efb55a164ba538a657419fd8b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hoverSound:
-    Guid:
-      Data1: 199913248
-      Data2: 1202326804
-      Data3: -537020530
-      Data4: 1684792045
-    Path: event:/SFX_UI/SFX_UIHover
-  clickSound:
-    Guid:
-      Data1: -345895807
-      Data2: 1210214295
-      Data3: -73339495
-      Data4: 1624008095
-    Path: event:/SFX_UI/SFX_UIClick
-  clickType: Default
 --- !u!1 &59790003
 GameObject:
   m_ObjectHideFlags: 0
@@ -4986,7 +4986,7 @@ MonoBehaviour:
   questCellGridParent: {fileID: 1396283560}
   questDetailPanelObject: {fileID: 6394633008629927887}
   requestQuestAcceptPanelObject: {fileID: 6394633008225565772}
-  toggleQuestPanelButton: {fileID: 53596321}
+  toggleQuestPanelButton: {fileID: 0}
   notifierIcon: {fileID: 990474923}
   newQuestSound:
     Guid:
@@ -42786,7 +42786,7 @@ MonoBehaviour:
   pausePlayImage: {fileID: 870608168}
   speedText: {fileID: 704023448}
   pausePlayButton: {fileID: 870608170}
-  speedCycleButton: {fileID: 0}
+  speedCycleButton: {fileID: 806546447}
   pauseSprite: {fileID: -2098902124, guid: 824af561a984cff48876157824d84459, type: 3}
   playSprite: {fileID: -2113796617615807303, guid: 824af561a984cff48876157824d84459, type: 3}
 --- !u!114 &1029636137
