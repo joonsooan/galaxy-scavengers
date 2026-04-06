@@ -428,8 +428,19 @@ public class ElectricityConsumptionManager : MonoBehaviour
                 continue;
             }
 
-            bool producing = gen.IsConstructed && gen.HasFuelAvailableInRange() && !IsElectricityStorageFull;
-            _resourceGeneratorVisualStates[gen] = producing ? PowerFeedVisualState.Ok : PowerFeedVisualState.Disconnected;
+            bool canProduce = gen.IsConstructed && gen.HasFuelAvailableInRange() && !IsElectricityStorageFull;
+            int buffer = gen.ElectricityBufferCurrent;
+            PowerFeedVisualState gvs;
+            if (canProduce) {
+                gvs = PowerFeedVisualState.Ok;
+            }
+            else if (buffer > 0) {
+                gvs = PowerFeedVisualState.InsufficientPool;
+            }
+            else {
+                gvs = PowerFeedVisualState.Disconnected;
+            }
+            _resourceGeneratorVisualStates[gen] = gvs;
         }
 
         foreach (Battery battery in _batteries) {

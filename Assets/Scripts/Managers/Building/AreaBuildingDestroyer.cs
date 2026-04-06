@@ -524,11 +524,15 @@ public class AreaBuildingDestroyer : MonoBehaviour
 
     private Vector3Int GetAnchorForCell(Vector3Int cell)
     {
-        if (_buildingManager.GetBuildingAt(cell, out List<Vector3Int> _))
-        {
-            BuildingPiece piece = _buildingManager.GetPieceAt(cell);
-            if (piece != null)
-                return piece.cellPosition;
+        if (!_buildingManager.GetBuildingAt(cell, out List<Vector3Int> _)) {
+            return default;
+        }
+        BuildingPiece piece = _buildingManager.GetPieceAt(cell);
+        if (piece != null) {
+            return piece.cellPosition;
+        }
+        if (_buildingManager.TryGetBuildingAnchor(cell, out Vector3Int anchor)) {
+            return anchor;
         }
         return default;
     }

@@ -553,23 +553,15 @@ public class BuildingManager : MonoBehaviour
         Vector3 worldPos = grid.GetCellCenterWorld(originPos);
         GameObject newPieceObject = Instantiate(data.buildingPrefab, worldPos, Quaternion.identity, buildingParentTransform);
 
-        if (data.buildingType == BuildingType.PowerReceiver) {
-            BuildingPiece strayPiece = newPieceObject.GetComponent<BuildingPiece>();
-            if (strayPiece != null) {
-                Destroy(strayPiece);
-            }
+        BuildingPiece builtMainPiece = newPieceObject.GetComponent<BuildingPiece>();
+        if (builtMainPiece == null) {
+            builtMainPiece = newPieceObject.AddComponent<BuildingPiece>();
         }
-        else {
-            BuildingPiece mainPiece = newPieceObject.GetComponent<BuildingPiece>();
-            if (mainPiece == null) {
-                mainPiece = newPieceObject.AddComponent<BuildingPiece>();
-            }
 
-            mainPiece.cellPosition = originPos;
+        builtMainPiece.cellPosition = originPos;
 
-            foreach (Vector3Int targetPos in recipePositions) {
-                _placedPieces[targetPos] = mainPiece;
-            }
+        foreach (Vector3Int targetPos in recipePositions) {
+            _placedPieces[targetPos] = builtMainPiece;
         }
 
         HandleBuildingLogic(newPieceObject, data);
@@ -658,23 +650,15 @@ public class BuildingManager : MonoBehaviour
         Vector3 worldPos = grid.GetCellCenterWorld(originPos);
         GameObject pieceObject = Instantiate(data.buildingPrefab, worldPos, Quaternion.identity, buildingParentTransform);
 
-        if (data.buildingType == BuildingType.PowerReceiver) {
-            BuildingPiece strayPiece = pieceObject.GetComponent<BuildingPiece>();
-            if (strayPiece != null) {
-                Destroy(strayPiece);
-            }
+        BuildingPiece mainPiece = pieceObject.GetComponent<BuildingPiece>();
+        if (mainPiece == null) {
+            mainPiece = pieceObject.AddComponent<BuildingPiece>();
         }
-        else {
-            BuildingPiece mainPiece = pieceObject.GetComponent<BuildingPiece>();
-            if (mainPiece == null) {
-                mainPiece = pieceObject.AddComponent<BuildingPiece>();
-            }
 
-            mainPiece.cellPosition = originPos;
+        mainPiece.cellPosition = originPos;
 
-            foreach (Vector3Int targetPos in recipePositions) {
-                _placedPieces[targetPos] = mainPiece;
-            }
+        foreach (Vector3Int targetPos in recipePositions) {
+            _placedPieces[targetPos] = mainPiece;
         }
 
         foreach (Vector3Int targetPos in recipePositions) {
@@ -860,6 +844,16 @@ public class BuildingManager : MonoBehaviour
         return false;
     }
 
+    public bool TryGetBuildingAnchor(Vector3Int cellInBuildingFootprint, out Vector3Int anchor)
+    {
+        anchor = default;
+        if (_cellToStructureMap.TryGetValue(cellInBuildingFootprint, out BuildingStructure structure)) {
+            anchor = structure.anchor;
+            return true;
+        }
+        return false;
+    }
+
     public bool TryGetBuildingAnchorCells(Transform buildingTransform, out Vector3Int anchor, out List<Vector3Int> occupiedCells)
     {
         anchor = default;
@@ -880,6 +874,13 @@ public class BuildingManager : MonoBehaviour
             lookupCell = grid.WorldToCell(buildingTransform.position);
         }
         if (_cellToStructureMap.TryGetValue(lookupCell, out BuildingStructure structure)) {
+            anchor = structure.anchor;
+            occupiedCells = structure.occupiedCells;
+            return true;
+        }
+
+        Vector3Int worldCell = grid.WorldToCell(buildingTransform.position);
+        if (worldCell != lookupCell && _cellToStructureMap.TryGetValue(worldCell, out structure)) {
             anchor = structure.anchor;
             occupiedCells = structure.occupiedCells;
             return true;

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>Full-building power pole: use <see cref="BuildingData"/> with <see cref="BuildingType.PowerReceiver"/>, not a building piece.</summary>
+/// <summary>Full-building power pole: <see cref="BuildingData"/> with <see cref="BuildingType.PowerReceiver"/>.</summary>
 public class PowerReceiver : Damageable, IPowerGridNode
 {
     [Header("Power grid")]
