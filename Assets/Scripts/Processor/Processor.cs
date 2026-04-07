@@ -25,6 +25,8 @@ public class Processor : Damageable, IClickable, IElectricityConsumer
 
     private List<ProcessorRecipe> _recipes;
 
+    private ResourceType? _selectedOutputResource;
+
     public ProcessorData ProcessorData {
         get {
             return processorData;
@@ -42,6 +44,8 @@ public class Processor : Damageable, IClickable, IElectricityConsumer
             return _assignedDrones;
         }
     }
+
+    public ResourceType? SelectedOutputResource => _selectedOutputResource;
 
     public bool IsFull {
         get {
@@ -163,6 +167,83 @@ public class Processor : Damageable, IClickable, IElectricityConsumer
         OnProcessorClicked?.Invoke(this);
     }
 
+    public void SetSelectedOutputResource(ResourceType? type)
+    {
+        if (Nullable.Equals(_selectedOutputResource, type)) {
+            return;
+        }
+
+        _selectedOutputResource = type;
+        CleanupIneligibleRecipeWork();
+
+        if (!_isInitialized || !IsOperational) {
+            return;
+        }
+
+        foreach (Unit_Drone drone in _assignedDrones) {
+            if (drone != null && drone.HasCheckedIn && drone.CurrentRecipeTask == null) {
+                bool hasPendingRequest = _pendingRequests.Any(r => r.assignedDrone == drone);
+                if (!hasPendingRequest) {
+                    RequestTask(drone);
+                }
+            }
+        }
+    }
+
+    public ActiveRecipe GetActiveRecipeForResource(ResourceType type)
+    {
+        return _activeRecipes.FirstOrDefault(r => r.recipeData != null && r.recipeData.resourceType == type);
+    }
+
+    private bool IsEligibleForCurrentOutput(ActiveRecipe recipe)
+    {
+        if (recipe?.recipeData == null) {
+            return false;
+        }
+
+        if (!_selectedOutputResource.HasValue) {
+            return false;
+        }
+
+        return recipe.recipeData.resourceType == _selectedOutputResource.Value;
+    }
+
+    private void CleanupIneligibleRecipeWork()
+    {
+        HashSet<Unit_Drone> dronesToIdle = new HashSet<Unit_Drone>();
+
+        foreach (ActiveRecipe recipe in _activeRecipes) {
+            if (IsEligibleForCurrentOutput(recipe)) {
+                continue;
+            }
+
+            if (recipe.assignedDrone != null) {
+                dronesToIdle.Add(recipe.assignedDrone);
+                recipe.assignedDrone = null;
+            }
+
+            recipe.isProcessing = false;
+            recipe.processingProgress = 0f;
+        }
+
+        for (int i = _pendingRequests.Count - 1; i >= 0; i--) {
+            ResourceRequest req = _pendingRequests[i];
+            if (req.targetRecipe != null && !IsEligibleForCurrentOutput(req.targetRecipe)) {
+                if (req.assignedDrone != null) {
+                    dronesToIdle.Add(req.assignedDrone);
+                }
+
+                _pendingRequests.RemoveAt(i);
+            }
+        }
+
+        foreach (Unit_Drone drone in dronesToIdle) {
+            if (drone != null) {
+                drone.SetTask_Idle();
+            }
+        }
+    }
+
     private void CheckIdleDronesForTasks()
     {
         if (!IsOperational) return;
@@ -228,6 +309,12 @@ public class Processor : Damageable, IClickable, IElectricityConsumer
             ActiveRecipe assignedRecipe = _activeRecipes.FirstOrDefault(r => r.assignedDrone == drone && r == drone.CurrentRecipeTask);
 
             if (assignedRecipe != null && assignedRecipe.assignedDrone == drone) {
+                if (!IsEligibleForCurrentOutput(assignedRecipe)) {
+                    ReleaseDroneFromRecipe(drone);
+                    drone.SetTask_Idle();
+                    return;
+                }
+
                 drone.SetTask_Process(this, assignedRecipe);
                 return;
             }
@@ -263,6 +350,10 @@ public class Processor : Damageable, IClickable, IElectricityConsumer
         }
 
         foreach (ActiveRecipe recipe in _activeRecipes) {
+            if (!IsEligibleForCurrentOutput(recipe)) {
+                continue;
+            }
+
             if (recipe.assignedDrone == null &&
                 recipe.isProcessing &&
                 !IsRecipeLockedByOtherDrone(recipe, drone)) {
@@ -301,6 +392,10 @@ public class Processor : Damageable, IClickable, IElectricityConsumer
 
         foreach (ActiveRecipe recipe in _activeRecipes)
         {
+            if (!IsEligibleForCurrentOutput(recipe)) {
+                continue;
+            }
+
             if (recipe.assignedDrone == null &&
                 recipe.isProcessing &&
                 !IsRecipeLockedByOtherDrone(recipe))
@@ -314,6 +409,10 @@ public class Processor : Damageable, IClickable, IElectricityConsumer
 
     private bool PassesProductionCapCheck(ActiveRecipe recipe)
     {
+        if (!IsEligibleForCurrentOutput(recipe)) {
+            return false;
+        }
+
         if (recipe.maxProductionLimit <= 0) {
             return false;
         }
@@ -515,6 +614,16 @@ public class Processor : Damageable, IClickable, IElectricityConsumer
             if (recipe.assignedDrone != null) {
                 recipe.assignedDrone.SetTask_Idle();
             }
+            recipe.assignedDrone = null;
+            recipe.isProcessing = false;
+            return;
+        }
+
+        if (!IsEligibleForCurrentOutput(recipe)) {
+            if (recipe.assignedDrone != null) {
+                recipe.assignedDrone.SetTask_Idle();
+            }
+
             recipe.assignedDrone = null;
             recipe.isProcessing = false;
             return;
@@ -840,6 +949,16 @@ public class Processor : Damageable, IClickable, IElectricityConsumer
 
     public void CheckProductionLimits(ActiveRecipe recipe)
     {
+        if (!IsEligibleForCurrentOutput(recipe)) {
+            if (recipe.assignedDrone != null) {
+                Unit_Drone drone = recipe.assignedDrone;
+                ReleaseDroneFromRecipe(drone);
+                drone.SetTask_Idle();
+            }
+
+            return;
+        }
+
         if (recipe.maxProductionLimit <= 0) {
             if (recipe.assignedDrone != null) {
                 Unit_Drone drone = recipe.assignedDrone;

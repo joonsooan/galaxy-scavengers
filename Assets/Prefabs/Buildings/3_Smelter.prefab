@@ -282,7 +282,7 @@ MonoBehaviour:
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
   currentHealth: 0
-  processorData: {fileID: 11400000, guid: 364a690d8e5d9e54f87d00f2d469f386, type: 2}
+  processorData: {fileID: 11400000, guid: ca6e212f4217b484aaf071ad8738644c, type: 2}
   electricityConsumptionPerSecond: 5
 --- !u!114 &-5155737904070828582
 MonoBehaviour:

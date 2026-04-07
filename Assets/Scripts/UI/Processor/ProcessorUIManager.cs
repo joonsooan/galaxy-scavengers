@@ -1,12 +1,18 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ProcessorUIManager : MonoBehaviour
 {
     [Header("UI References")]
     public GameObject recipeCellPrefab;
     public Transform contentParent;
+
+    [Header("Resource picker")]
+    [SerializeField] private Transform recipePickerParent;
+    [SerializeField] private GameObject recipePickerIconPrefab;
+    [SerializeField] private Button changeResourceButton;
 
     [Header("Display UI")]
     [SerializeField] private TMP_Text processorName;
@@ -18,6 +24,7 @@ public class ProcessorUIManager : MonoBehaviour
 
     private ProcessorData _currentData;
     private Processor _currentProcessor;
+    private bool _showResourcePicker;
 
     public static ProcessorUIManager Instance { get; private set; }
 
@@ -29,52 +36,217 @@ public class ProcessorUIManager : MonoBehaviour
         else {
             Instance = this;
         }
+
+        if (changeResourceButton != null) {
+            changeResourceButton.onClick.AddListener(OnChangeResourceButtonClicked);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (changeResourceButton != null) {
+            changeResourceButton.onClick.RemoveListener(OnChangeResourceButtonClicked);
+        }
+    }
+
+    private void OnChangeResourceButtonClicked()
+    {
+        _showResourcePicker = true;
+        RefreshRecipeDisplay();
     }
 
     public void ShowProcessorUI(Processor processor)
     {
         _currentProcessor = processor;
-        _currentData = processor.ProcessorData;
+        _currentData = processor != null ? processor.ProcessorData : null;
+        _showResourcePicker = false;
 
         SetProcessorInfo(_currentData);
-        LoadAllRecipes(_currentData);
-
+        RefreshRecipeDisplay();
         InstantiateUnitAssignCells();
     }
 
     private void SetProcessorInfo(ProcessorData data)
     {
-        processorName.text = data.ProcessorName;
-        processorInfo.text = data.ProcessorInfo;
-    }
+        if (processorName != null) {
+            processorName.text = data != null ? data.ProcessorName : string.Empty;
+        }
 
-    private void LoadAllRecipes(ProcessorData data)
-    {
-        ClearAllRecipes();
-        InstantiateRecipeCells();
-    }
-
-    private void ClearAllRecipes()
-    {
-        foreach (Transform child in contentParent) {
-            Destroy(child.gameObject);
+        if (processorInfo != null) {
+            processorInfo.text = data != null ? data.ProcessorInfo : string.Empty;
         }
     }
 
-    private void InstantiateRecipeCells()
+    private void RefreshRecipeDisplay()
     {
-        if (recipeCellPrefab == null || contentParent == null) {
+        Transform pickerRoot = recipePickerParent != null ? recipePickerParent : contentParent;
+        Transform recipeRoot = contentParent;
+
+        if (pickerRoot != recipeRoot) {
+            ClearChildren(pickerRoot);
+            ClearChildren(recipeRoot);
+        }
+        else {
+            ClearChildren(recipeRoot);
+        }
+
+        if (changeResourceButton != null) {
+            changeResourceButton.gameObject.SetActive(false);
+        }
+
+        if (_currentProcessor == null || _currentData == null) {
+            return;
+        }
+
+        bool showGrid = !_currentProcessor.SelectedOutputResource.HasValue || _showResourcePicker;
+
+        if (showGrid) {
+            if (recipePickerParent != null) {
+                EnsurePickerLayout(recipePickerParent);
+            }
+
+            BuildResourcePickerGrid(pickerRoot);
+        }
+        else {
+            if (changeResourceButton != null) {
+                changeResourceButton.gameObject.SetActive(true);
+            }
+
+            if (pickerRoot != recipeRoot) {
+                ClearChildren(pickerRoot);
+            }
+
+            InstantiateSingleRecipeCell(recipeRoot);
+        }
+    }
+
+    private static void EnsurePickerLayout(Transform pickerRoot)
+    {
+        if (pickerRoot == null) {
+            return;
+        }
+
+        var rect = pickerRoot as RectTransform;
+        if (rect == null) {
+            return;
+        }
+
+        if (rect.GetComponent<GridLayoutGroup>() != null) {
+            return;
+        }
+
+        var grid = rect.gameObject.AddComponent<GridLayoutGroup>();
+        grid.cellSize = new Vector2(64f, 64f);
+        grid.spacing = new Vector2(8f, 8f);
+        grid.constraint = GridLayoutGroup.Constraint.Flexible;
+    }
+
+    private void BuildResourcePickerGrid(Transform parent)
+    {
+        if (parent == null) {
+            return;
+        }
+
+        if (recipePickerIconPrefab == null) {
+            Debug.LogError("Recipe picker icon prefab not set");
+            return;
+        }
+
+        List<ProcessorRecipe> recipes = _currentData.Recipes;
+        if (recipes == null || recipes.Count == 0) {
+            return;
+        }
+
+        HashSet<ResourceType> seen = new HashSet<ResourceType>();
+
+        foreach (ProcessorRecipe recipe in recipes) {
+            if (recipe == null) {
+                continue;
+            }
+
+            if (!seen.Add(recipe.resourceType)) {
+                continue;
+            }
+
+            ResourceType type = recipe.resourceType;
+            GameObject iconObj = Instantiate(recipePickerIconPrefab, parent);
+            Button btn = iconObj.GetComponentInChildren<Button>(true);
+
+            if (btn == null) {
+                Debug.LogError("Recipe picker icon prefab must include a Button (on root or child).");
+                continue;
+            }
+
+            Image img = iconObj.GetComponentInChildren<Image>(true);
+            if (img == null) {
+                continue;
+            }
+
+            if (ResourceManager.Instance != null) {
+                Sprite spr = ResourceManager.Instance.GetResourceIcon(type);
+                if (spr != null) {
+                    img.sprite = spr;
+                }
+            }
+
+            btn.onClick.RemoveAllListeners();
+            ResourceType typeCopy = type;
+            btn.onClick.AddListener(() => OnResourceTypePicked(typeCopy));
+        }
+    }
+
+    private void OnResourceTypePicked(ResourceType type)
+    {
+        if (_currentProcessor == null) {
+            return;
+        }
+
+        bool pickerMode = !_currentProcessor.SelectedOutputResource.HasValue || _showResourcePicker;
+
+        if (pickerMode && _currentProcessor.SelectedOutputResource.HasValue &&
+            _currentProcessor.SelectedOutputResource.Value == type) {
+            _currentProcessor.SetSelectedOutputResource(null);
+        }
+        else {
+            _currentProcessor.SetSelectedOutputResource(type);
+            _showResourcePicker = false;
+        }
+
+        RefreshRecipeDisplay();
+    }
+
+    private void InstantiateSingleRecipeCell(Transform parent)
+    {
+        if (recipeCellPrefab == null || parent == null) {
             Debug.LogError("Recipe Cell Prefab and Content Parent not set");
             return;
         }
 
-        foreach (var activeRecipe in _currentProcessor.ActiveRecipes) {
-            GameObject newCellObject = Instantiate(recipeCellPrefab, contentParent);
-            ProcessorRecipeCell newCell = newCellObject.GetComponent<ProcessorRecipeCell>();
+        if (!_currentProcessor.SelectedOutputResource.HasValue) {
+            return;
+        }
 
-            if (newCell != null) {
-                newCell.Initialize(activeRecipe);
-            }
+        ActiveRecipe activeRecipe = _currentProcessor.GetActiveRecipeForResource(_currentProcessor.SelectedOutputResource.Value);
+        if (activeRecipe == null) {
+            return;
+        }
+
+        GameObject newCellObject = Instantiate(recipeCellPrefab, parent);
+        ProcessorRecipeCell newCell = newCellObject.GetComponent<ProcessorRecipeCell>();
+
+        if (newCell != null) {
+            newCell.Initialize(activeRecipe);
+        }
+    }
+
+    private static void ClearChildren(Transform parent)
+    {
+        if (parent == null) {
+            return;
+        }
+
+        for (int i = parent.childCount - 1; i >= 0; i--) {
+            Destroy(parent.GetChild(i).gameObject);
         }
     }
 

@@ -10,68 +10,76 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 49527cd14b8bc244c8968cf06ce143ca, type: 3}
-  m_Name: Basic_Data
+  m_Name: Smelter_1_Data
   m_EditorClassIdentifier: 
-  processorName: Smelter
-  processorInfo: 'A basic processing facility.
-
-    Melts raw ore at high temperatures,
-    refining it into standard ingots or plates.'
+  processorName: "\uC81C\uB828\uC18C"
+  processorInfo: "\uAE30\uCD08 \uC790\uC6D0\uC744 \uB179\uC5EC\uC11C \uC0C1\uC704
+    \uC790\uC6D0\uC73C\uB85C \uAC00\uACF5\uD558\uB294 \uC2DC\uC124\uC785\uB2C8\uB2E4."
   maxIngredientStorage: 100
-  maxAssignedDrones: 2
+  maxAssignedDrones: 1
   recipes:
   - resourceType: 4
     recipeIcon: {fileID: -6291453560396589059, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
     ingredients:
     - resourceType: 0
       amount: 10
-    processingTime: 10
+    processingTime: 3
     produceAmount: 1
     priority: 0
   - resourceType: 5
     recipeIcon: {fileID: 359855223478723041, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
     ingredients:
     - resourceType: 0
-      amount: 5
-    - resourceType: 2
       amount: 10
-    processingTime: 10
+    - resourceType: 1
+      amount: 10
+    - resourceType: 2
+      amount: 5
+    processingTime: 3
     produceAmount: 1
     priority: 0
   - resourceType: 6
     recipeIcon: {fileID: 9116947346429250140, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
     ingredients:
     - resourceType: 0
-      amount: 5
+      amount: 10
     - resourceType: 1
-      amount: 5
-    processingTime: 10
+      amount: 20
+    processingTime: 3
     produceAmount: 1
     priority: 0
   - resourceType: 7
     recipeIcon: {fileID: -6843591316079228388, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
     ingredients:
     - resourceType: 0
-      amount: 5
+      amount: 10
+    - resourceType: 1
+      amount: 10
     - resourceType: 2
       amount: 5
-    processingTime: 10
+    processingTime: 3
     produceAmount: 1
     priority: 0
   - resourceType: 8
     recipeIcon: {fileID: -4396813597575786351, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
     ingredients:
+    - resourceType: 0
+      amount: 10
     - resourceType: 1
-      amount: 15
-    processingTime: 10
+      amount: 20
+    - resourceType: 3
+      amount: 5
+    processingTime: 5
     produceAmount: 1
     priority: 0
   - resourceType: 9
     recipeIcon: {fileID: -4905985573008516872, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
     ingredients:
-    - resourceType: 2
+    - resourceType: 1
       amount: 10
-    processingTime: 10
+    - resourceType: 2
+      amount: 5
+    processingTime: 5
     produceAmount: 1
     priority: 0
   - resourceType: 10
@@ -81,17 +89,19 @@ MonoBehaviour:
       amount: 10
     - resourceType: 3
       amount: 5
-    processingTime: 10
+    processingTime: 5
     produceAmount: 1
     priority: 0
   - resourceType: 11
     recipeIcon: {fileID: -3423204301100993705, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
     ingredients:
+    - resourceType: 1
+      amount: 20
     - resourceType: 2
-      amount: 15
+      amount: 5
     - resourceType: 3
       amount: 5
-    processingTime: 10
+    processingTime: 5
     produceAmount: 1
     priority: 0
   - resourceType: 12
@@ -100,15 +110,19 @@ MonoBehaviour:
     - resourceType: 0
       amount: 10
     - resourceType: 1
+      amount: 10
+    - resourceType: 3
       amount: 5
-    processingTime: 10
+    processingTime: 3
     produceAmount: 1
     priority: 0
   - resourceType: 13
     recipeIcon: {fileID: -5146700307962209370, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
     ingredients:
     - resourceType: 0
-      amount: 5
-    processingTime: 10
+      amount: 20
+    - resourceType: 1
+      amount: 10
+    processingTime: 3
     produceAmount: 1
     priority: 0

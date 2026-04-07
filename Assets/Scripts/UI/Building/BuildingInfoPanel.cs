@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class BuildingInfoPanel : MonoBehaviour
 {
@@ -12,10 +11,6 @@ public class BuildingInfoPanel : MonoBehaviour
     [SerializeField] private TMP_Text buildingDesc;
     [SerializeField] private TMP_Text healthText;
     [SerializeField] private GameObject resourceInfoCellPrefab;
-    [SerializeField] private Transform processorResourceIconParent;
-    [SerializeField] private GameObject processorResourceIconPrefab;
-    [SerializeField] private TMP_Text producibleResourceLabel;
-    [SerializeField] private GameObject processorResourceGroup;
 
     [Header("Aether & Noise")]
     [SerializeField] private GameObject aetherSpendPanel;
@@ -119,22 +114,11 @@ public class BuildingInfoPanel : MonoBehaviour
             if (data.buildingType == BuildingType.MainStructure)
             {
                 if (noisePanel != null) noisePanel.SetActive(false);
-                if (processorResourceGroup != null) processorResourceGroup.SetActive(false);
             }
             else
             {
                 UpdateResourceDisplay(data);
             }
-        }
-
-        if (IsProcessorBuilding(data))
-        {
-            ProcessorData processorData = GetProcessorData(data);
-            UpdateProcessorResourceDisplay(processorData);
-        }
-        else
-        {
-            ClearProcessorResourceDisplay();
         }
 
         UpdateAetherAndNoiseDisplay(data);
@@ -206,7 +190,6 @@ public class BuildingInfoPanel : MonoBehaviour
             }
             resourcePanel.SetActive(false);
         }
-        ClearProcessorResourceDisplay();
         HideAetherAndNoiseDisplay();
     }
     
@@ -298,7 +281,6 @@ public class BuildingInfoPanel : MonoBehaviour
         {
             resourcePanel.SetActive(false);
         }
-        ClearProcessorResourceDisplay();
         HideAetherAndNoiseDisplay();
     }
 
@@ -310,143 +292,4 @@ public class BuildingInfoPanel : MonoBehaviour
         if (noiseText != null) noiseText.text = string.Empty;
     }
 
-    private bool IsProcessorBuilding(BuildingData data)
-    {
-        if (data == null)
-        {
-            return false;
-        }
-        return data.buildingType == BuildingType.Smelter ||
-               data.buildingType == BuildingType.Assembler ||
-               data.buildingType == BuildingType.Reactor;
-    }
-
-    private ProcessorData GetProcessorData(BuildingData data)
-    {
-        if (data == null)
-        {
-            return null;
-        }
-        if (data.buildingPrefab == null)
-        {
-            return null;
-        }
-        Processor processor = data.buildingPrefab.GetComponent<Processor>();
-        if (processor == null)
-        {
-            return null;
-        }
-        return processor.ProcessorData;
-    }
-
-    private void UpdateProcessorResourceDisplay(ProcessorData processorData)
-    {
-        if (processorResourceGroup != null)
-        {
-            processorResourceGroup.SetActive(false);
-        }
-
-        if (processorResourceIconParent == null)
-        {
-            return;
-        }
-
-        foreach (Transform child in processorResourceIconParent)
-        {
-            Destroy(child.gameObject);
-        }
-
-        if (producibleResourceLabel != null)
-        {
-            producibleResourceLabel.gameObject.SetActive(false);
-        }
-
-        if (processorData == null)
-        {
-            processorResourceIconParent.gameObject.SetActive(false);
-            return;
-        }
-
-        List<ProcessorRecipe> recipes = processorData.Recipes;
-        if (recipes == null || recipes.Count == 0)
-        {
-            processorResourceIconParent.gameObject.SetActive(false);
-            return;
-        }
-
-        HashSet<ResourceType> resourceTypes = new HashSet<ResourceType>();
-        for (int i = 0; i < recipes.Count; i++)
-        {
-            ProcessorRecipe recipe = recipes[i];
-            if (recipe != null)
-            {
-                resourceTypes.Add(recipe.resourceType);
-            }
-        }
-
-        if (resourceTypes.Count == 0)
-        {
-            processorResourceIconParent.gameObject.SetActive(false);
-            return;
-        }
-
-        foreach (ResourceType type in resourceTypes)
-        {
-            if (processorResourceIconPrefab == null)
-            {
-                continue;
-            }
-
-            GameObject iconObj = Instantiate(processorResourceIconPrefab, processorResourceIconParent);
-            Image image = iconObj.GetComponentInChildren<Image>();
-
-            if (image != null)
-            {
-                Sprite icon = null;
-                if (ResourceManager.Instance != null)
-                {
-                    icon = ResourceManager.Instance.GetResourceIcon(type);
-                }
-
-                if (icon != null)
-                {
-                    image.sprite = icon;
-                }
-            }
-        }
-
-        processorResourceIconParent.gameObject.SetActive(true);
-
-        if (producibleResourceLabel != null)
-        {
-            producibleResourceLabel.gameObject.SetActive(true);
-        }
-
-        if (processorResourceGroup != null)
-        {
-            processorResourceGroup.SetActive(true);
-        }
-    }
-
-    private void ClearProcessorResourceDisplay()
-    {
-        if (processorResourceIconParent != null)
-        {
-            foreach (Transform child in processorResourceIconParent)
-            {
-                Destroy(child.gameObject);
-            }
-            processorResourceIconParent.gameObject.SetActive(false);
-        }
-
-        if (producibleResourceLabel != null)
-        {
-            producibleResourceLabel.gameObject.SetActive(false);
-        }
-
-        if (processorResourceGroup != null)
-        {
-            processorResourceGroup.SetActive(false);
-        }
-    }
 }
