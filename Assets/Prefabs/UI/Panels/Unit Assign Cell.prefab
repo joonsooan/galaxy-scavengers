@@ -86,7 +86,7 @@ GameObject:
   - component: {fileID: 55158914406625734}
   - component: {fileID: 7855377308571804850}
   - component: {fileID: 8754805069060548411}
-  - component: {fileID: 4113288312921380297}
+  - component: {fileID: 3102615283414105237}
   - component: {fileID: -8629858683669164493}
   - component: {fileID: 5940882722103498637}
   m_Layer: 5
@@ -155,7 +155,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &4113288312921380297
+--- !u!114 &3102615283414105237
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -164,9 +164,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 5644447303132800839}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Script: {fileID: 11500000, guid: a7c3e9d2f1b8405e8a6c4d3e2f1098ab, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Assembly-CSharp::CustomButton
   m_Navigation:
     m_Mode: 3
     m_WrapAround: 0
@@ -184,7 +184,7 @@ MonoBehaviour:
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
-    m_HighlightedSprite: {fileID: -1899253260378458392, guid: 1fd5403476e2e2e41b3bcb15ae427786, type: 3}
+    m_HighlightedSprite: {fileID: -4239486290848219248, guid: 92b7981e41463a94ab348ae08507a7ec, type: 3}
     m_PressedSprite: {fileID: 8508079644404475916, guid: f243b32f5f223af468ab44a596d5592a, type: 3}
     m_SelectedSprite: {fileID: -1899253260378458392, guid: 1fd5403476e2e2e41b3bcb15ae427786, type: 3}
     m_DisabledSprite: {fileID: -1899253260378458392, guid: 1fd5403476e2e2e41b3bcb15ae427786, type: 3}
@@ -213,7 +213,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   droneIcon: {fileID: 2149455835236925970}
   emptySlotIcon: {fileID: 3270293437597525463}
-  cellButton: {fileID: 4113288312921380297}
+  cellButton: {fileID: 3102615283414105237}
   glowMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
 --- !u!114 &5940882722103498637
 MonoBehaviour:
@@ -241,6 +241,7 @@ MonoBehaviour:
       Data3: -73339495
       Data4: 1624008095
     Path: event:/SFX_UI/SFX_UIClick
+  clickType: Default
 --- !u!1 &7893659078431901417
 GameObject:
   m_ObjectHideFlags: 0
