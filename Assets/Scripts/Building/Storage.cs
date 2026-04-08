@@ -2,17 +2,18 @@ using UnityEngine;
 
 public class Storage : BaseStorage
 {
-    [Header("Aether Capacity")]
-    [SerializeField] private int aetherCapacity = 50;
-    
-    private AetherConsumptionManager _aetherConsumptionManager;
-    
-    public int AetherCapacity => aetherCapacity;
-    
+    public override bool TryAddResource(ResourceType type, int amount)
+    {
+        if (type == ResourceType.Electricity) {
+            return false;
+        }
+        return base.TryAddResource(type, amount);
+    }
+
     protected override void Start()
     {
         base.Start();
-        
+
         if (IsProperlyPlacedBuilding())
         {
             if (GetComponent<BuildingHoverTrigger>() == null)
@@ -21,41 +22,7 @@ public class Storage : BaseStorage
             }
         }
     }
-    
-    protected override void OnEnable()
-    {
-        base.OnEnable();
-        
-        if (!IsProperlyPlacedBuilding())
-        {
-            return;
-        }
-        
-        FindAndCacheAetherManager();
-        if (_aetherConsumptionManager != null)
-        {
-            _aetherConsumptionManager.RegisterStorage(this);
-        }
-    }
-    
-    protected override void OnDisable()
-    {
-        if (_aetherConsumptionManager != null)
-        {
-            _aetherConsumptionManager.UnregisterStorage(this);
-        }
-        
-        base.OnDisable();
-    }
-    
-    private void FindAndCacheAetherManager()
-    {
-        if (_aetherConsumptionManager == null)
-        {
-            _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
-        }
-    }
-    
+
     private bool IsProperlyPlacedBuilding()
     {
         return BuildingManager.IsBuildingProperlyPlaced(transform);

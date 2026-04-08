@@ -13,6 +13,9 @@ public class GameManager : MonoBehaviour
     public CardDragger cardDragger;
 
 
+    [Header("Debug")]
+    [SerializeField] private bool skipProceduralGenerationWhenLoadingGameScene;
+
     [Header("Audio")]
     [SerializeField] private EventReference pauseSound;
     [SerializeField] private EventReference resumeSound;
@@ -376,7 +379,10 @@ public class GameManager : MonoBehaviour
         yield return null;
 
         if (mapGenerator != null) {
-            yield return StartCoroutine(mapGenerator.GenerateMapAsync(progress));
+            mapGenerator.PrepareStaticSceneMapMetadata();
+            if (!skipProceduralGenerationWhenLoadingGameScene) {
+                yield return StartCoroutine(mapGenerator.GenerateMapAsync(progress));
+            }
         }
 
         if (BuildingManager.Instance != null && mapGenerator != null) {
@@ -388,7 +394,7 @@ public class GameManager : MonoBehaviour
             cameraController.RefreshMapBounds();
         }
 
-        yield return StartCoroutine(InitializeSpawnersAndUnitsAsync(progress));
+        yield return StartCoroutine(InitializeSpawnersAndUnitsAsync(progress, skipProceduralGenerationWhenLoadingGameScene));
         yield return StartCoroutine(WaitForFogOfWarInitializationAsync(progress));
 
         if (progress != null) {
@@ -452,7 +458,7 @@ public class GameManager : MonoBehaviour
         yield return null;
     }
 
-    private IEnumerator InitializeSpawnersAndUnitsAsync(IInitializationProgress progress = null)
+    private IEnumerator InitializeSpawnersAndUnitsAsync(IInitializationProgress progress = null, bool skipProceduralResourceSpawn = false)
     {
         foreach (BuildingSpawner spawner in FindObjectsByType<BuildingSpawner>(FindObjectsSortMode.None)) {
             spawner.SpawnBuildings();
@@ -463,7 +469,7 @@ public class GameManager : MonoBehaviour
         RegisterPrePlacedBuildings();
 
         MapObjectSpawner proceduralSpawner = FindFirstObjectByType<MapObjectSpawner>();
-        if (proceduralSpawner != null) {
+        if (proceduralSpawner != null && !skipProceduralResourceSpawn) {
             yield return StartCoroutine(proceduralSpawner.SpawnResourcesAsync(progress));
         }
 
@@ -523,21 +529,17 @@ public class GameManager : MonoBehaviour
                 if (!alreadyRegistered) {
                     ResourceManager.Instance.RegisterMainStructure(mainStructure);
                     ResourceManager.Instance.AddStorage(mainStructure);
-
-                    if (BuildingManager.Instance != null && mainStructure.transform != null) {
-                        Vector3 worldPos = mainStructure.transform.position;
-                        if (BuildingManager.Instance.grid != null) {
-                            Vector3Int cellPos = BuildingManager.Instance.grid.WorldToCell(worldPos);
-                            Vector3Int anchorCell = cellPos - new Vector3Int(1, 1, 0);
-                            BuildingManager.Instance.RegisterMainStructure(anchorCell, new Vector2Int(3, 3));
-                        }
-                    }
-
-                    // Ensure MainStructure is always registered as a valid enemy target
-                    if (TargetManager.Instance != null) {
-                        TargetManager.Instance.RegisterTarget(mainStructure);
-                    }
                 }
+            }
+
+            if (BuildingManager.Instance != null && mainStructure.transform != null && BuildingManager.Instance.grid != null) {
+                Vector3Int cellPos = BuildingManager.Instance.grid.WorldToCell(mainStructure.transform.position);
+                Vector3Int anchorCell = cellPos - new Vector3Int(1, 1, 0);
+                BuildingManager.Instance.RegisterMainStructure(anchorCell, new Vector2Int(3, 3), mainStructure);
+            }
+
+            if (TargetManager.Instance != null) {
+                TargetManager.Instance.RegisterTarget(mainStructure);
             }
         }
     }

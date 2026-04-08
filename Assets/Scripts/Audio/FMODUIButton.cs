@@ -51,7 +51,7 @@ public class FMODUIButton : MonoBehaviour, IPointerEnterHandler, IPointerClickHa
 
         instance.setParameterByNameWithLabel(paramName, paramValue);
         instance.start();
-        instance.release(); 
+        instance.release();
     }
 
     public void SetClickState(string clickState)

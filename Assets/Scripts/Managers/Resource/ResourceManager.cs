@@ -30,7 +30,8 @@ public enum ResourceType
     CryoConduit,
     SeekerMissile,
     NexusData,
-    NeuralMatrix
+    NeuralMatrix,
+    Electricity
 }
 
 [Serializable]
@@ -78,6 +79,10 @@ public class ResourceManager : MonoBehaviour
     [SerializeField] private int seekerMissileInitialAmount;
     [SerializeField] private int nexusDataInitialAmount;
     [SerializeField] private int neuralMatrixInitialAmount;
+
+    [Header("Electricity (power grid)")]
+    [SerializeField] private int electricityInitialAmount;
+    [SerializeField] private int tutorialElectricityInitialAmount;
 
     [Header("Resource Icons")]
     [SerializeField] private List<Sprite> resourceIcons;
@@ -240,6 +245,7 @@ public class ResourceManager : MonoBehaviour
         mainStructure.InitializeStorage(ResourceType.SeekerMissile, seekerMissileInitialAmount);
         mainStructure.InitializeStorage(ResourceType.NexusData, nexusDataInitialAmount);
         mainStructure.InitializeStorage(ResourceType.NeuralMatrix, neuralMatrixInitialAmount);
+        mainStructure.InitializeStorage(ResourceType.Electricity, electricityInitialAmount);
 
         if (ResourceDataManager.Instance != null)
         {
@@ -259,6 +265,7 @@ public class ResourceManager : MonoBehaviour
         mainStructure.InitializeStorage(ResourceType.Aether, tutorialAetherInitialAmount);
         mainStructure.InitializeStorage(ResourceType.Biomass, tutorialBiomassInitialAmount);
         mainStructure.InitializeStorage(ResourceType.CryoCrystal, tutorialCryoCrystalInitialAmount);
+        mainStructure.InitializeStorage(ResourceType.Electricity, tutorialElectricityInitialAmount);
         if (ResourceDataManager.Instance != null)
         {
             ResourceDataManager.Instance.RecalculateResourceCountsFromStorages();
@@ -277,12 +284,48 @@ public class ResourceManager : MonoBehaviour
         if (amount <= 0) return 0;
         if (ResourceDataManager.Instance == null) return 0;
 
+        if (type == ResourceType.Electricity)
+        {
+            return DistributeElectricityToBatteriesOnly(amount, sourcePosition);
+        }
+
         if (type != ResourceType.Aether)
         {
             AddResource(type, amount);
             return amount;
         }
 
+        return DistributeToBatteryThenMainStorage(type, amount, sourcePosition);
+    }
+
+    private int DistributeElectricityToBatteriesOnly(int amount, Vector3 sourcePosition)
+    {
+        int remaining = amount;
+        List<IStorage> storages = GetAllStorages();
+        if (storages == null || storages.Count == 0)
+        {
+            return 0;
+        }
+
+        List<IStorage> batteriesOnly = new List<IStorage>();
+        for (int i = 0; i < storages.Count; i++)
+        {
+            IStorage storage = storages[i];
+            if (storage == null) continue;
+            Component component = storage as Component;
+            if (component == null || component.gameObject == null || !component.gameObject.activeInHierarchy) continue;
+            if (storage is Battery)
+            {
+                batteriesOnly.Add(storage);
+            }
+        }
+
+        StoreResourceInPriority(ResourceType.Electricity, sourcePosition, batteriesOnly, ref remaining);
+        return amount - remaining;
+    }
+
+    private int DistributeToBatteryThenMainStorage(ResourceType type, int amount, Vector3 sourcePosition)
+    {
         int remaining = amount;
         List<IStorage> storages = GetAllStorages();
         if (storages == null || storages.Count == 0)
@@ -320,6 +363,33 @@ public class ResourceManager : MonoBehaviour
     public bool RemoveResource(ResourceType type, int amount)
     {
         return ResourceDataManager.Instance != null && ResourceDataManager.Instance.RemoveResource(type, amount);
+    }
+
+    public int TryWithdrawElectricityFromStoragesInOrder(int amount, List<IStorage> storagesOrdered)
+    {
+        if (amount <= 0 || storagesOrdered == null || storagesOrdered.Count == 0) {
+            return 0;
+        }
+
+        int remaining = amount;
+        int totalWithdrawn = 0;
+        for (int i = 0; i < storagesOrdered.Count; i++) {
+            if (remaining <= 0) {
+                break;
+            }
+
+            IStorage storage = storagesOrdered[i];
+            if (storage == null) {
+                continue;
+            }
+
+            if (storage.TryWithdrawResource(ResourceType.Electricity, remaining, out int withdrawn) && withdrawn > 0) {
+                totalWithdrawn += withdrawn;
+                remaining -= withdrawn;
+            }
+        }
+
+        return totalWithdrawn;
     }
 
     public bool SpendResources(ResourceCost[] costs)

@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Processor : Damageable, IClickable, IAetherConsumer
+public class Processor : Damageable, IClickable, IElectricityConsumer
 {
     private const float TaskCheckInterval = 1f;
     [SerializeField] private ProcessorData processorData;
-    [Header("Aether Consumption")]
-    [SerializeField] private int aetherConsumptionPerSecond = 1;
+    [Header("Electricity consumption")]
+    [SerializeField] private int electricityConsumptionPerSecond = 1;
 
     private readonly List<ActiveRecipe> _activeRecipes = new List<ActiveRecipe>();
 
@@ -16,7 +16,7 @@ public class Processor : Damageable, IClickable, IAetherConsumer
     private readonly Dictionary<ResourceType, int> _currentIngredients = new Dictionary<ResourceType, int>();
     private readonly Dictionary<Unit_Drone, Vector3Int> _droneInteractionCells = new Dictionary<Unit_Drone, Vector3Int>();
     private readonly List<ResourceRequest> _pendingRequests = new List<ResourceRequest>();
-    private AetherConsumptionManager _aetherConsumptionManager;
+    private ElectricityConsumptionManager _electricityConsumptionManager;
     private bool _isInitialized;
     private float _lastTaskCheckTime;
 
@@ -24,6 +24,8 @@ public class Processor : Damageable, IClickable, IAetherConsumer
     private int _maxIngredientStorage;
 
     private List<ProcessorRecipe> _recipes;
+
+    private ResourceType? _selectedOutputResource;
 
     public ProcessorData ProcessorData {
         get {
@@ -42,6 +44,8 @@ public class Processor : Damageable, IClickable, IAetherConsumer
             return _assignedDrones;
         }
     }
+
+    public ResourceType? SelectedOutputResource => _selectedOutputResource;
 
     public bool IsFull {
         get {
@@ -93,9 +97,9 @@ public class Processor : Damageable, IClickable, IAetherConsumer
             return;
         }
 
-        FindAndCacheAetherManager();
-        if (_aetherConsumptionManager != null) {
-            _aetherConsumptionManager.RegisterConsumer(this);
+        FindAndCacheElectricityManager();
+        if (_electricityConsumptionManager != null) {
+            _electricityConsumptionManager.RegisterConsumer(this);
         }
 
         ResourceManager.OnResourceAmountChanged += OnResourceAmountChanged;
@@ -107,8 +111,8 @@ public class Processor : Damageable, IClickable, IAetherConsumer
     {
         ResourceManager.OnResourceAmountChanged -= OnResourceAmountChanged;
 
-        if (_aetherConsumptionManager != null) {
-            _aetherConsumptionManager.UnregisterConsumer(this);
+        if (_electricityConsumptionManager != null) {
+            _electricityConsumptionManager.UnregisterConsumer(this);
         }
 
         base.OnDisable();
@@ -120,16 +124,11 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         }
     }
 
-    // IAetherConsumer implementation
-    public int AetherConsumptionPerSecond {
-        get {
-            return aetherConsumptionPerSecond;
-        }
-    }
+    public int ElectricityConsumptionPerSecond => electricityConsumptionPerSecond;
 
     public bool IsOperational { get; private set; } = true;
 
-    public void OnAetherUnavailable()
+    public void OnElectricityUnavailable()
     {
         if (IsOperational) {
             IsOperational = false;
@@ -146,7 +145,7 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         }
     }
 
-    public void OnAetherAvailable()
+    public void OnElectricityAvailable()
     {
         if (!IsOperational) {
             IsOperational = true;
@@ -168,6 +167,83 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         OnProcessorClicked?.Invoke(this);
     }
 
+    public void SetSelectedOutputResource(ResourceType? type)
+    {
+        if (Nullable.Equals(_selectedOutputResource, type)) {
+            return;
+        }
+
+        _selectedOutputResource = type;
+        CleanupIneligibleRecipeWork();
+
+        if (!_isInitialized || !IsOperational) {
+            return;
+        }
+
+        foreach (Unit_Drone drone in _assignedDrones) {
+            if (drone != null && drone.HasCheckedIn && drone.CurrentRecipeTask == null) {
+                bool hasPendingRequest = _pendingRequests.Any(r => r.assignedDrone == drone);
+                if (!hasPendingRequest) {
+                    RequestTask(drone);
+                }
+            }
+        }
+    }
+
+    public ActiveRecipe GetActiveRecipeForResource(ResourceType type)
+    {
+        return _activeRecipes.FirstOrDefault(r => r.recipeData != null && r.recipeData.resourceType == type);
+    }
+
+    private bool IsEligibleForCurrentOutput(ActiveRecipe recipe)
+    {
+        if (recipe?.recipeData == null) {
+            return false;
+        }
+
+        if (!_selectedOutputResource.HasValue) {
+            return false;
+        }
+
+        return recipe.recipeData.resourceType == _selectedOutputResource.Value;
+    }
+
+    private void CleanupIneligibleRecipeWork()
+    {
+        HashSet<Unit_Drone> dronesToIdle = new HashSet<Unit_Drone>();
+
+        foreach (ActiveRecipe recipe in _activeRecipes) {
+            if (IsEligibleForCurrentOutput(recipe)) {
+                continue;
+            }
+
+            if (recipe.assignedDrone != null) {
+                dronesToIdle.Add(recipe.assignedDrone);
+                recipe.assignedDrone = null;
+            }
+
+            recipe.isProcessing = false;
+            recipe.processingProgress = 0f;
+        }
+
+        for (int i = _pendingRequests.Count - 1; i >= 0; i--) {
+            ResourceRequest req = _pendingRequests[i];
+            if (req.targetRecipe != null && !IsEligibleForCurrentOutput(req.targetRecipe)) {
+                if (req.assignedDrone != null) {
+                    dronesToIdle.Add(req.assignedDrone);
+                }
+
+                _pendingRequests.RemoveAt(i);
+            }
+        }
+
+        foreach (Unit_Drone drone in dronesToIdle) {
+            if (drone != null) {
+                drone.SetTask_Idle();
+            }
+        }
+    }
+
     private void CheckIdleDronesForTasks()
     {
         if (!IsOperational) return;
@@ -183,10 +259,10 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         }
     }
 
-    private void FindAndCacheAetherManager()
+    private void FindAndCacheElectricityManager()
     {
-        if (_aetherConsumptionManager == null) {
-            _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
+        if (_electricityConsumptionManager == null) {
+            _electricityConsumptionManager = ElectricityConsumptionManager.Instance;
         }
     }
 
@@ -233,6 +309,12 @@ public class Processor : Damageable, IClickable, IAetherConsumer
             ActiveRecipe assignedRecipe = _activeRecipes.FirstOrDefault(r => r.assignedDrone == drone && r == drone.CurrentRecipeTask);
 
             if (assignedRecipe != null && assignedRecipe.assignedDrone == drone) {
+                if (!IsEligibleForCurrentOutput(assignedRecipe)) {
+                    ReleaseDroneFromRecipe(drone);
+                    drone.SetTask_Idle();
+                    return;
+                }
+
                 drone.SetTask_Process(this, assignedRecipe);
                 return;
             }
@@ -268,6 +350,10 @@ public class Processor : Damageable, IClickable, IAetherConsumer
         }
 
         foreach (ActiveRecipe recipe in _activeRecipes) {
+            if (!IsEligibleForCurrentOutput(recipe)) {
+                continue;
+            }
+
             if (recipe.assignedDrone == null &&
                 recipe.isProcessing &&
                 !IsRecipeLockedByOtherDrone(recipe, drone)) {
@@ -306,6 +392,10 @@ public class Processor : Damageable, IClickable, IAetherConsumer
 
         foreach (ActiveRecipe recipe in _activeRecipes)
         {
+            if (!IsEligibleForCurrentOutput(recipe)) {
+                continue;
+            }
+
             if (recipe.assignedDrone == null &&
                 recipe.isProcessing &&
                 !IsRecipeLockedByOtherDrone(recipe))
@@ -319,6 +409,10 @@ public class Processor : Damageable, IClickable, IAetherConsumer
 
     private bool PassesProductionCapCheck(ActiveRecipe recipe)
     {
+        if (!IsEligibleForCurrentOutput(recipe)) {
+            return false;
+        }
+
         if (recipe.maxProductionLimit <= 0) {
             return false;
         }
@@ -520,6 +614,16 @@ public class Processor : Damageable, IClickable, IAetherConsumer
             if (recipe.assignedDrone != null) {
                 recipe.assignedDrone.SetTask_Idle();
             }
+            recipe.assignedDrone = null;
+            recipe.isProcessing = false;
+            return;
+        }
+
+        if (!IsEligibleForCurrentOutput(recipe)) {
+            if (recipe.assignedDrone != null) {
+                recipe.assignedDrone.SetTask_Idle();
+            }
+
             recipe.assignedDrone = null;
             recipe.isProcessing = false;
             return;
@@ -845,6 +949,16 @@ public class Processor : Damageable, IClickable, IAetherConsumer
 
     public void CheckProductionLimits(ActiveRecipe recipe)
     {
+        if (!IsEligibleForCurrentOutput(recipe)) {
+            if (recipe.assignedDrone != null) {
+                Unit_Drone drone = recipe.assignedDrone;
+                ReleaseDroneFromRecipe(drone);
+                drone.SetTask_Idle();
+            }
+
+            return;
+        }
+
         if (recipe.maxProductionLimit <= 0) {
             if (recipe.assignedDrone != null) {
                 Unit_Drone drone = recipe.assignedDrone;

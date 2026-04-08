@@ -68,7 +68,7 @@ public class GameAlertUIManager : MonoBehaviour
     [SerializeField, TextArea(2, 6)] private string tooltipDroneNoResource = "가공 유닛이 가공할 자원이 없습니다.";
     [SerializeField, TextArea(2, 6)] private string tooltipConstructNoResource = "건설 유닛이 건설할 자원이 없습니다.";
     [SerializeField, TextArea(2, 6)] private string tooltipStorageFull = "모든 저장 공간이 가득 찼습니다!\n저장고를 더 건설해주세요.";
-    [SerializeField, TextArea(2, 6)] private string tooltipAetherStorageFull = "모든 에테르 저장고가 가득 찼습니다!\n저장고나 배터리를 더 건설해주세요.";
+    [SerializeField, TextArea(2, 6)] private string tooltipAetherStorageFull = "에테르 광석 저장 한도에 도달했거나 전기 저장이 가득 찼습니다!\n저장고·배터리·발전기를 확인해주세요.";
     [SerializeField, TextArea(2, 6)] private string tooltipMainEngineRepair = "메인 엔진이 고장나\n시드 코어를 발사할 수 없습니다.\n퀘스트를 확인하세요.";
     [SerializeField, TextArea(2, 6)] private string tooltipNoiseCaution = "소음 정도 : 주의\n적의 습격에 대비하세요!";
     [SerializeField, TextArea(2, 6)] private string tooltipNoiseWarning = "소음 정도 : 경고\n적의 습격에 대비하세요!";
@@ -146,6 +146,7 @@ public class GameAlertUIManager : MonoBehaviour
         {
             _storageTrackerManager.OnStorageChanged -= OnTrackedStorageChanged;
             _storageTrackerManager.OnAetherChanged -= OnTrackedAetherChanged;
+            _storageTrackerManager.OnElectricityChanged -= OnTrackedElectricityChanged;
         }
         _storageTrackerManager = null;
         if (NoiseManager.Instance != null)
@@ -196,6 +197,8 @@ public class GameAlertUIManager : MonoBehaviour
         _storageTrackerManager.OnStorageChanged += OnTrackedStorageChanged;
         _storageTrackerManager.OnAetherChanged -= OnTrackedAetherChanged;
         _storageTrackerManager.OnAetherChanged += OnTrackedAetherChanged;
+        _storageTrackerManager.OnElectricityChanged -= OnTrackedElectricityChanged;
+        _storageTrackerManager.OnElectricityChanged += OnTrackedElectricityChanged;
         SyncStorageFullAlertWithTracker();
         SyncAetherFullAlertWithTracker();
         _bindStorageTrackerCoroutine = null;
@@ -207,6 +210,11 @@ public class GameAlertUIManager : MonoBehaviour
     }
 
     private void OnTrackedAetherChanged()
+    {
+        SyncAetherFullAlertWithTracker();
+    }
+
+    private void OnTrackedElectricityChanged()
     {
         SyncAetherFullAlertWithTracker();
     }
@@ -235,15 +243,21 @@ public class GameAlertUIManager : MonoBehaviour
         if (_storageTrackerManager == null)
             return;
 
-        int max = _storageTrackerManager.MaxStorableAetherAmount;
-        int current = _storageTrackerManager.CurrentAetherAmount;
-        bool isAetherFull = max > 0 && current >= max;
+        int maxAetherOre = _storageTrackerManager.MaxStorableAetherAmount;
+        int currentAetherOre = _storageTrackerManager.CurrentAetherAmount;
+        bool aetherOreFull = maxAetherOre > 0 && currentAetherOre >= maxAetherOre;
 
-        if (isAetherFull == _isAetherFullByTracker)
+        int maxElec = _storageTrackerManager.MaxStorableElectricityAmount;
+        int currentElec = _storageTrackerManager.CurrentElectricityAmount;
+        bool electricityFull = maxElec > 0 && currentElec >= maxElec;
+
+        bool shouldAlert = aetherOreFull || electricityFull;
+
+        if (shouldAlert == _isAetherFullByTracker)
             return;
 
-        _isAetherFullByTracker = isAetherFull;
-        if (isAetherFull)
+        _isAetherFullByTracker = shouldAlert;
+        if (shouldAlert)
             RegisterAlert(GameAlertType.AetherStorageFull);
         else
             UnregisterAlert(GameAlertType.AetherStorageFull);

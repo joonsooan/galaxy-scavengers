@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class AetherTimerManager : MonoBehaviour
 {
-    public static event Action OnAetherTick;
+    public static event Action OnPowerTick;
     
     private static readonly WaitForSeconds _tickWait = CoroutineCache.GetWaitForSeconds(1f);
     private Coroutine _tickCoroutine;
     
     private void Start()
     {
-        _tickCoroutine = StartCoroutine(AetherTickCoroutine());
+        _tickCoroutine = StartCoroutine(PowerTickCoroutine());
     }
 
     private void OnDisable()
@@ -23,12 +23,12 @@ public class AetherTimerManager : MonoBehaviour
         }
     }
     
-    private IEnumerator AetherTickCoroutine()
+    private IEnumerator PowerTickCoroutine()
     {
         while (true)
         {
             yield return _tickWait;
-            OnAetherTick?.Invoke();
+            OnPowerTick?.Invoke();
         }
     }
 }

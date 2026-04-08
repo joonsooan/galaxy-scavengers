@@ -74,11 +74,14 @@ public class BuildingHoverManager : MonoBehaviour
 
         if (GameManager.Instance != null && GameManager.Instance.IsDragging())
         {
-            ClearHoverStateOnly();
+            CardDragger dragger = GameManager.Instance.cardDragger;
+            bool keepPowerPreview = dragger != null && dragger.IsDraggingBuildingCard;
+            ClearHoverStateOnly(keepPowerPreview);
             return;
         }
 
-        if (UIUtils.IsPointerOverUI() && !IsPointerOverFloatingNumText() && !IsPointerOverProgressSlider())
+        if (UIUtils.IsPointerOverUI() && !IsPointerOverFloatingNumText() && !IsPointerOverProgressSlider() &&
+            !IsPointerOverPowerStatusWorldFollower())
         {
             ClearAllHovers();
             return;
@@ -109,12 +112,14 @@ public class BuildingHoverManager : MonoBehaviour
         _currentHoveredBuilding = buildingDataHolder;
         _keepPanelVisible = false;
         ShowBuildingInfo(buildingDataHolder);
+        TryShowPowerCoveragePreview(buildingDataHolder);
     }
 
     public void OnBuildingExit(BuildingDataHolder buildingDataHolder)
     {
         if (buildingDataHolder == _currentHoveredBuilding)
         {
+            ClearPowerCoveragePreview();
             if (_keepPanelVisible)
             {
                 ClearBuildingInfoButKeepPanel();
@@ -208,8 +213,11 @@ public class BuildingHoverManager : MonoBehaviour
         ClearUnitHover();
     }
 
-    private void ClearHoverStateOnly()
+    private void ClearHoverStateOnly(bool keepPowerCoveragePreview = false)
     {
+        if (!keepPowerCoveragePreview) {
+            ClearPowerCoveragePreview();
+        }
         _currentHoveredBuilding = null;
         _currentHoveredStorage = null;
         if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
@@ -234,6 +242,26 @@ public class BuildingHoverManager : MonoBehaviour
                 unitInfoPanel.gameObject.SetActive(false);
             }
             _currentHoveredUnit = null;
+        }
+    }
+
+
+    private static void ClearPowerCoveragePreview()
+    {
+        PowerCoveragePreviewOverlay overlay = PowerCoveragePreviewOverlay.Instance;
+        if (overlay != null) {
+            overlay.Clear();
+        }
+    }
+
+    private static void TryShowPowerCoveragePreview(BuildingDataHolder buildingDataHolder)
+    {
+        if (buildingDataHolder == null || buildingDataHolder.buildingData == null) {
+            return;
+        }
+        PowerCoveragePreviewOverlay overlay = PowerCoveragePreviewOverlay.Instance;
+        if (overlay != null) {
+            overlay.Show();
         }
     }
 
@@ -295,6 +323,30 @@ public class BuildingHoverManager : MonoBehaviour
         return false;
     }
 
+    private static bool IsPointerOverPowerStatusWorldFollower()
+    {
+        if (EventSystem.current == null) {
+            return false;
+        }
+
+        PointerEventData pointerEventData = new PointerEventData(EventSystem.current);
+        pointerEventData.position = Input.mousePosition;
+
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerEventData, results);
+
+        foreach (RaycastResult result in results) {
+            if (result.gameObject == null) {
+                continue;
+            }
+            if (result.gameObject.GetComponentInParent<PowerStatusWorldFollower>() != null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private bool IsPointerOverProgressSlider()
     {
         if (EventSystem.current == null) return false;
@@ -340,6 +392,7 @@ public class BuildingHoverManager : MonoBehaviour
 
     private void ClearHover()
     {
+        ClearPowerCoveragePreview();
         if (_currentHoveredBuilding != null)
         {
             if (BuildingInfoPanel.Instance != null)
@@ -353,6 +406,7 @@ public class BuildingHoverManager : MonoBehaviour
 
     private void ClearBuildingInfoButKeepPanel()
     {
+        ClearPowerCoveragePreview();
         if (_currentHoveredBuilding != null)
         {
             if (BuildingInfoPanel.Instance != null)

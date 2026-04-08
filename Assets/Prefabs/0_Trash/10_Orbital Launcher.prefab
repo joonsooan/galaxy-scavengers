@@ -110,7 +110,7 @@ MonoBehaviour:
   fireInterval: 1
   attackDamage: 4
   bulletPrefab: {fileID: 3852804536807886205, guid: c773192e621cee54cb0e65277df6f731, type: 3}
-  aetherConsumptionPerSecond: 0
+  electricityConsumptionPerSecond: 0
 --- !u!114 &7205248449290787444
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -243,4 +243,103 @@ public class ObjectPooler : MonoBehaviour
 
         return objectToSpawn;
     }
+
+    public bool HasUIPool(string tag)
+    {
+        return _poolDictionary != null && !string.IsNullOrEmpty(tag) && _poolDictionary.ContainsKey(tag);
+    }
+
+    public void EnsureUIPool(string tag, GameObject prefab, int count)
+    {
+        if (prefab == null || string.IsNullOrEmpty(tag) || count <= 0) {
+            return;
+        }
+
+        if (_poolDictionary == null) {
+            _poolDictionary = new Dictionary<string, Queue<GameObject>>();
+        }
+
+        if (_prefabMap == null) {
+            _prefabMap = new Dictionary<string, GameObject>();
+        }
+
+        if (_poolParentCache == null) {
+            _poolParentCache = new Dictionary<string, Transform>();
+        }
+
+        if (_poolDictionary.ContainsKey(tag)) {
+            return;
+        }
+
+        string parentName = "UIPool_" + tag;
+        Transform poolParent = GetOrCreatePoolParent(parentName);
+        Queue<GameObject> q = new Queue<GameObject>();
+        for (int i = 0; i < count; i++) {
+            GameObject obj = Instantiate(prefab, poolParent);
+            obj.SetActive(false);
+            q.Enqueue(obj);
+        }
+
+        _poolDictionary[tag] = q;
+        _prefabMap[tag] = prefab;
+    }
+
+    public GameObject SpawnUIPooled(string tag, Transform parent)
+    {
+        if (_poolDictionary == null || string.IsNullOrEmpty(tag) || !_poolDictionary.ContainsKey(tag) || parent == null) {
+            return null;
+        }
+
+        Queue<GameObject> pool = _poolDictionary[tag];
+        GameObject objectToSpawn = null;
+        int n = pool.Count;
+        for (int i = 0; i < n; i++) {
+            GameObject candidate = pool.Dequeue();
+            pool.Enqueue(candidate);
+            if (!candidate.activeSelf) {
+                objectToSpawn = candidate;
+                break;
+            }
+        }
+
+        if (objectToSpawn == null) {
+            GameObject prefab = null;
+            if (_prefabMap != null && _prefabMap.TryGetValue(tag, out prefab) && prefab != null) {
+                Transform poolParent = GetOrCreatePoolParent("UIPool_" + tag);
+                objectToSpawn = Instantiate(prefab, poolParent);
+                pool.Enqueue(objectToSpawn);
+            }
+        }
+
+        if (objectToSpawn == null) {
+            return null;
+        }
+
+        objectToSpawn.transform.SetParent(parent, false);
+        RectTransform rt = objectToSpawn.GetComponent<RectTransform>();
+        if (rt != null) {
+            rt.localPosition = Vector3.zero;
+            rt.localRotation = Quaternion.identity;
+            rt.localScale = Vector3.one;
+        }
+
+        objectToSpawn.SetActive(true);
+
+        if (ModuleEffectManager.Instance != null) {
+            ModuleEffectManager.Instance.OnObjectCreated(objectToSpawn);
+        }
+
+        return objectToSpawn;
+    }
+
+    public void ReturnUIPooled(string tag, GameObject obj)
+    {
+        if (obj == null || _poolDictionary == null || string.IsNullOrEmpty(tag) || !_poolDictionary.ContainsKey(tag)) {
+            return;
+        }
+
+        obj.SetActive(false);
+        Transform poolParent = GetOrCreatePoolParent("UIPool_" + tag);
+        obj.transform.SetParent(poolParent, false);
+    }
 }

@@ -8,6 +8,14 @@ public class CardDragger : MonoBehaviour
     private const string DraggingSortingLayerName = "Dragging";
     public bool IsDragging => _isDragging;
 
+    public bool IsDraggingBuildingCard => _isDragging && _activeBuildingData != null;
+
+    public bool IsDraggingPowerGridPreviewBuilding =>
+        IsDraggingBuildingCard &&
+        (_activeBuildingData.buildingType == BuildingType.Generator ||
+         _activeBuildingData.buildingType == BuildingType.Battery ||
+         _activeBuildingData.buildingType == BuildingType.PowerReceiver);
+
     [Header("References")]
     [SerializeField] private Grid grid;
 
@@ -47,6 +55,10 @@ public class CardDragger : MonoBehaviour
             _cachedComboCosts = CalculateComboCosts(buildingData);
 
             CreateGhostBuilding();
+
+            if (PowerCoveragePreviewOverlay.Instance != null) {
+                PowerCoveragePreviewOverlay.Instance.Show();
+            }
         }
     }
     
@@ -97,6 +109,8 @@ public class CardDragger : MonoBehaviour
 
     public void EndDrag()
     {
+        bool wasDraggingBuildingCard = IsDraggingBuildingCard;
+
         if (_ghostBuildingInstance != null)
         {
             Destroy(_ghostBuildingInstance);
@@ -106,6 +120,10 @@ public class CardDragger : MonoBehaviour
         _activeBuildingData = null;
         _cachedComboCosts = null;
         _ghostBuildingRenderer = null;
+
+        if (wasDraggingBuildingCard && PowerCoveragePreviewOverlay.Instance != null) {
+            PowerCoveragePreviewOverlay.Instance.Clear();
+        }
     }
     
     private void CreateGhostBuilding()
@@ -191,6 +209,10 @@ public class CardDragger : MonoBehaviour
         if (_ghostBuildingInstance != null)
         {
             _ghostBuildingInstance.transform.position = cellCenterWorld;
+        }
+
+        if (IsDraggingPowerGridPreviewBuilding && PowerCoveragePreviewOverlay.Instance != null) {
+            PowerCoveragePreviewOverlay.Instance.ShowIncludingPlacementPreview(_activeBuildingData, cellPosition, grid);
         }
 
         bool canPlacePattern = CanPlaceComboPattern(cellPosition);

@@ -113,7 +113,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: dron_hub_0
+      name: drone_hub_0
       rect:
         serializedVersion: 2
         x: 0
@@ -150,7 +150,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      dron_hub_0: -5822311547626613287
+      drone_hub_0: -5822311547626613287
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

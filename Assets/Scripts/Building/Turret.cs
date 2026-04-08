@@ -1,15 +1,15 @@
 using UnityEngine;
 using System.Collections;
 
-public class Turret : Damageable, IAetherConsumer
+public class Turret : Damageable, IElectricityConsumer
 {
     [Header("Turret Stats")]
     [SerializeField] private float attackRange = 10f;
     [SerializeField] private float fireInterval = 1f;
     [SerializeField] private int attackDamage = 10;
     [SerializeField] private GameObject bulletPrefab;
-    [Header("Aether Consumption")]
-    [SerializeField] private int aetherConsumptionPerSecond = 1;
+    [Header("Electricity consumption")]
+    [SerializeField] private int electricityConsumptionPerSecond = 1;
 
     private Transform _target;
     private Coroutine _attackCoroutine;
@@ -18,9 +18,9 @@ public class Turret : Damageable, IAetherConsumer
     private WaitForSeconds _fireIntervalWait;
     private Vector3 _bulletSpawnPosition;
     private bool _isOperational = true;
-    private AetherConsumptionManager _aetherConsumptionManager;
+    private ElectricityConsumptionManager _electricityConsumptionManager;
     
-    public int AetherConsumptionPerSecond => aetherConsumptionPerSecond;
+    public int ElectricityConsumptionPerSecond => electricityConsumptionPerSecond;
     public bool IsOperational => _isOperational;
     
     private void OnDrawGizmosSelected()
@@ -38,10 +38,10 @@ public class Turret : Damageable, IAetherConsumer
             return;
         }
         
-        FindAndCacheAetherManager();
-        if (_aetherConsumptionManager != null)
+        FindAndCacheElectricityManager();
+        if (_electricityConsumptionManager != null)
         {
-            _aetherConsumptionManager.RegisterConsumer(this);
+            _electricityConsumptionManager.RegisterConsumer(this);
         }
         
         _bulletSpawnPosition = transform.position + new Vector3(0.5f, 0.5f, 0f);
@@ -52,9 +52,9 @@ public class Turret : Damageable, IAetherConsumer
 
     protected override void OnDisable()
     {
-        if (_aetherConsumptionManager != null)
+        if (_electricityConsumptionManager != null)
         {
-            _aetherConsumptionManager.UnregisterConsumer(this);
+            _electricityConsumptionManager.UnregisterConsumer(this);
         }
         
         base.OnDisable();
@@ -64,15 +64,15 @@ public class Turret : Damageable, IAetherConsumer
         _updateTargetCoroutine = null;
     }
     
-    private void FindAndCacheAetherManager()
+    private void FindAndCacheElectricityManager()
     {
-        if (_aetherConsumptionManager == null)
+        if (_electricityConsumptionManager == null)
         {
-            _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
+            _electricityConsumptionManager = ElectricityConsumptionManager.Instance;
         }
     }
     
-    public void OnAetherUnavailable()
+    public void OnElectricityUnavailable()
     {
         if (_isOperational)
         {
@@ -81,7 +81,7 @@ public class Turret : Damageable, IAetherConsumer
         }
     }
     
-    public void OnAetherAvailable()
+    public void OnElectricityAvailable()
     {
         if (!_isOperational)
         {

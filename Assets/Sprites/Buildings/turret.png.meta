@@ -113,7 +113,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: AutoTurret_0
+      name: turret_0
       rect:
         serializedVersion: 2
         x: 0
@@ -150,7 +150,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      AutoTurret_0: -2077689376795794299
+      turret_0: -2077689376795794299
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

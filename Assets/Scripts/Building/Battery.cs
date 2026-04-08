@@ -1,57 +1,66 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-public class Battery : BaseStorage
+public class Battery : BaseStorage, IPowerGridNode
 {
-    [Header("Aether Capacity")]
-    [SerializeField] private int aetherCapacity = 100;
-    
-    private AetherConsumptionManager _aetherConsumptionManager;
-    
-    public int AetherCapacity => aetherCapacity;
-    
+    [Header("Power grid")]
+    [Tooltip("NxN cells centered on building footprint (world-space centroid).")]
+    [SerializeField] [Range(1, 50)] private int supplyRangeN = 5;
+    public int PowerSupplyRangeN => supplyRangeN;
+
+    [Header("Gizmos")]
+    [SerializeField] private bool showPowerCoverageGizmo = true;
+    [SerializeField] private Color powerCoverageGizmoColor = new(0.2f, 0.85f, 1f, 1f);
+
+    private ElectricityConsumptionManager _electricityConsumptionManager;
+
     protected override void OnEnable()
     {
         base.OnEnable();
-        
+
         if (!BuildingManager.IsBuildingProperlyPlaced(transform))
         {
             return;
         }
-        
-        FindAndCacheAetherManager();
-        if (_aetherConsumptionManager != null)
+
+        FindAndCacheElectricityManager();
+        if (_electricityConsumptionManager != null)
         {
-            _aetherConsumptionManager.RegisterBattery(this);
+            _electricityConsumptionManager.RegisterBattery(this);
+        }
+        if (GetComponent<PowerGridNodeStatusBillboard>() == null)
+        {
+            gameObject.AddComponent<PowerGridNodeStatusBillboard>();
         }
     }
-    
+
     protected override void OnDisable()
     {
-        if (_aetherConsumptionManager != null)
+        if (_electricityConsumptionManager != null)
         {
-            _aetherConsumptionManager.UnregisterBattery(this);
+            _electricityConsumptionManager.UnregisterBattery(this);
         }
-        
+
         base.OnDisable();
     }
-    
-    private void FindAndCacheAetherManager()
+
+    private void FindAndCacheElectricityManager()
     {
-        if (_aetherConsumptionManager == null)
+        if (_electricityConsumptionManager == null)
         {
-            _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
+            _electricityConsumptionManager = ElectricityConsumptionManager.Instance;
         }
     }
-    
+
     public override bool TryAddResource(ResourceType type, int amount)
     {
-        if (type != ResourceType.Aether) return false;
+        if (type != ResourceType.Electricity) return false;
         return base.TryAddResource(type, amount);
     }
 
     public override bool TryWithdrawResource(ResourceType type, int amountToWithdraw, out int amountWithdrawn)
     {
-        if (type != ResourceType.Aether)
+        if (type != ResourceType.Electricity)
         {
             amountWithdrawn = 0;
             return false;
@@ -61,10 +70,46 @@ public class Battery : BaseStorage
 
     public override bool HasEnoughResources(ResourceCost[] costs)
     {
-        foreach (var cost in costs)
+        foreach (ResourceCost cost in costs)
         {
-            if (cost.resourceType != ResourceType.Aether) return false;
+            if (cost.resourceType != ResourceType.Electricity) return false;
         }
         return base.HasEnoughResources(costs);
+    }
+
+    public BoundsInt GetPowerCoverageBounds()
+    {
+        BuildingManager bm = BuildingManager.Instance;
+        if (bm == null || !bm.TryGetBuildingAnchorCells(transform, out _, out List<Vector3Int> occupied) ||
+            occupied == null || occupied.Count == 0)
+        {
+            return default;
+        }
+
+        return PowerGridGeometry.ComputeSquareCoverageCenteredOnFootprint(bm.grid, occupied, supplyRangeN);
+    }
+
+    public bool IsActivePowerSource()
+    {
+        return GetCurrentResourceAmount(ResourceType.Electricity) > 0;
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (!showPowerCoverageGizmo) {
+            return;
+        }
+
+        Grid grid = BuildingManager.Instance != null ? BuildingManager.Instance.grid : null;
+        if (grid == null) {
+            return;
+        }
+
+        BoundsInt b = GetPowerCoverageBounds();
+        if (b.size.x <= 0 || b.size.y <= 0) {
+            return;
+        }
+
+        PowerGridGeometry.DrawCoverageOutline(b, grid, powerCoverageGizmoColor);
     }
 }

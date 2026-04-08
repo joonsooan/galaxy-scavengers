@@ -4,7 +4,127 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2e9922bb-ccc6-4c6e-93bd-15fa8a8d7f34" name="변경" comment="" />
+    <list default="true" id="2e9922bb-ccc6-4c6e-93bd-15fa8a8d7f34" name="변경" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.galaxy-scavengers/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.galaxy-scavengers/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Materials/Shader Materials/Flash.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Shader Materials/Flash.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Materials/Shader Materials/ShinyPanel_size_16.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Materials/Shader Materials/ShinyPanel_size_16.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Buildings/1_Generator.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Buildings/1_Generator.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Buildings/6_Battery.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Buildings/6_Battery.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/GameScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/TitleScene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/TitleScene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Building/Battery.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Building/Battery.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Building/PowerReceiver.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Building/PowerReceiver.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Building/ResourceGenerator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Building/ResourceGenerator.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Aether/ElectricityConsumptionManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Aether/ElectricityConsumptionManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Building/BuildingHoverManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Building/BuildingHoverManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Building/BuildingManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Building/BuildingManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Resource/ResourceManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Resource/ResourceManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Resource/ResourceTransferManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Resource/ResourceTransferManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Managers/Utility/ObjectPooler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Managers/Utility/ObjectPooler.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Power/PowerGridConnectivity.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Power/PowerGridConnectivity.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/Power/PowerGridGeometry.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/Power/PowerGridGeometry.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Inventory/InventorySystem.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Inventory/InventorySystem.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/UI/Status/AetherWarningIcon.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/UI/Status/AetherWarningIcon.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-launch-1-clicked.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-launch-1-clicked.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-launch-1-hovered.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-launch-1-hovered.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-launch-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-launch-1.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-produce-1-clicked.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-produce-1-clicked.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-produce-1-hovered.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-produce-1-hovered.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-produce-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-produce-1.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-ui-1-clicked.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-ui-1-clicked.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-ui-1-hovered.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-ui-1-hovered.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-ui-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-ui-1.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-ui-2-clicked.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-ui-2-clicked.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-ui-2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-ui-2.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-ui-white-clicked.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-ui-white-clicked.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-ui-white.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/button-ui-white.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/cell-ui-7.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/cell-ui-7.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/cell-ui-8-clicked.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/cell-ui-8-clicked.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/cell-ui-8-hovered.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/cell-ui-8-hovered.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/cell-ui-8.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/cell-ui-8.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/core-repair.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Button &amp; Cells/core-repair.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/Circle.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/Circle.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/arrow.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/arrow.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/arrow_left.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/arrow_left.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/background-black.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/background-black.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/background-white.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/background-white.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/basescene-background.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/basescene-background.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/circles.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/circles.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/core-launcher-background.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/core-launcher-background.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/core-launcher-core.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/core-launcher-core.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/cursor.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/cursor.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/farm-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/farm-1.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/gear.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/gear.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/lock.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/lock.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/map-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/map-1.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/module-station-1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/module-station-1.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/pixel-circle.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/pixel-circle.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/play-stop.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/play-stop.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/progress-slider-grad.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/progress-slider-grad.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/progress-slider.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/progress-slider.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/question-mark.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/question-mark.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/seed_core_white.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/seed_core_white.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/skill-tree.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/skill-tree.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/star.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/star.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/star_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/star_1.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/star_2.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/star_2.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/star_3.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/star_3.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/star_4.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/star_4.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/sun-moon.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/sun-moon.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/target-bracket.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/target-bracket.png.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/unit-plus.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Sprites/UI/UI/Images/unit-plus.png.meta" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -47,7 +167,7 @@
     &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
     &quot;Unity 에디터에 연결.Attach to Unity Editor.executor&quot;: &quot;Debug&quot;,
     &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feature-game-ux-improvement-2&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature-electricity-system&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
@@ -61,7 +181,7 @@
 }</component>
   <component name="RunManager" selected="Unity 에디터에 연결.Attach to Unity Editor">
     <configuration name="유닛 테스트(배치 모드)" type="RunUnityExe" factoryName="Unity Executable">
-      <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.0.59f2\Editor\Unity.exe" />
+      <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.3.10f1\Editor\Unity.exe" />
       <option name="PROGRAM_PARAMETERS" value="-runTests -batchmode -projectPath &quot;C:\Unity Projects\galaxy-scavengers&quot; -testResults Logs/results.xml -logFile Logs/Editor.log -testPlatform EditMode -debugCodeOptimization" />
       <option name="WORKING_DIRECTORY" value="C:\Unity Projects\galaxy-scavengers" />
       <option name="PASS_PARENT_ENVS" value="1" />
@@ -71,7 +191,7 @@
       <method v="2" />
     </configuration>
     <configuration name="독립실행형 플레이어" type="RunUnityExe" factoryName="Unity Executable">
-      <option name="EXE_PATH" value="$PROJECT_DIR$/../Builds/galaxy-scavengers/galaxy-scavengers_26.02.20\Galaxy Scavengers.exe" />
+      <option name="EXE_PATH" value="$PROJECT_DIR$/../Builds/galaxy-scavengers/galaxy-scavengers_26.02.23\Galaxy Scavengers.exe" />
       <option name="PROGRAM_PARAMETERS" value="" />
       <option name="WORKING_DIRECTORY" value="C:\Unity Projects\Builds\galaxy-scavengers\galaxy-scavengers_26.02.05" />
       <option name="PASS_PARENT_ENVS" value="1" />
@@ -111,7 +231,7 @@
       <method v="2" />
     </configuration>
     <configuration name="Unity 시작" type="RunUnityExe" factoryName="Unity Executable">
-      <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.0.59f2\Editor\Unity.exe" />
+      <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.3.10f1\Editor\Unity.exe" />
       <option name="PROGRAM_PARAMETERS" value="-projectPath &quot;C:\Unity Projects\galaxy-scavengers&quot; -debugCodeOptimization" />
       <option name="WORKING_DIRECTORY" value="C:\Unity Projects\galaxy-scavengers" />
       <option name="PASS_PARENT_ENVS" value="1" />
@@ -183,6 +303,11 @@
       <workItem from="1771569623132" duration="1197000" />
       <workItem from="1771657136468" duration="3000" />
       <workItem from="1771660851912" duration="674000" />
+      <workItem from="1774923477764" duration="263000" />
+      <workItem from="1774923868757" duration="3424000" />
+      <workItem from="1774950243184" duration="6000" />
+      <workItem from="1775010034484" duration="3025000" />
+      <workItem from="1775458765426" duration="7000" />
     </task>
     <servers />
   </component>

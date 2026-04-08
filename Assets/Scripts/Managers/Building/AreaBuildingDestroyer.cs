@@ -524,11 +524,15 @@ public class AreaBuildingDestroyer : MonoBehaviour
 
     private Vector3Int GetAnchorForCell(Vector3Int cell)
     {
-        if (_buildingManager.GetBuildingAt(cell, out List<Vector3Int> _))
-        {
-            BuildingPiece piece = _buildingManager.GetPieceAt(cell);
-            if (piece != null)
-                return piece.cellPosition;
+        if (!_buildingManager.GetBuildingAt(cell, out List<Vector3Int> _)) {
+            return default;
+        }
+        BuildingPiece piece = _buildingManager.GetPieceAt(cell);
+        if (piece != null) {
+            return piece.cellPosition;
+        }
+        if (_buildingManager.TryGetBuildingAnchor(cell, out Vector3Int anchor)) {
+            return anchor;
         }
         return default;
     }
@@ -601,7 +605,6 @@ public class AreaBuildingDestroyer : MonoBehaviour
             _buildingManager.ClearBuildingDataAt(cell);
         }
         
-        DestroyBeaconsInArea(selectedCells);
         DestroyUnitsInArea(selectedCells);
     }
 
@@ -746,35 +749,6 @@ public class AreaBuildingDestroyer : MonoBehaviour
         }
     }
     
-    private void DestroyBeaconsInArea(HashSet<Vector3Int> cells)
-    {
-        if (_grid == null) return;
-        List<Beacon> beaconsToDestroy = new List<Beacon>();
-        IReadOnlyList<Beacon> allBeacons = BeaconManager.Instance != null
-            ? BeaconManager.Instance.Beacons
-            : System.Array.Empty<Beacon>();
-        
-        foreach (Beacon beacon in allBeacons)
-        {
-            if (beacon == null) continue;
-            
-            Vector3Int beaconCell = _grid.WorldToCell(beacon.transform.position);
-            
-            if (cells.Contains(beaconCell))
-            {
-                beaconsToDestroy.Add(beacon);
-            }
-        }
-        
-        foreach (Beacon beacon in beaconsToDestroy)
-        {
-            if (beacon != null)
-            {
-                beacon.DestroyBeacon();
-            }
-        }
-    }
-
     private bool IsLoadingScreenActive()
     {
         if (LoadingUIManager.Instance == null)

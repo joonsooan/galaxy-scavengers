@@ -8,22 +8,22 @@ public class AetherStatusUI : MonoBehaviour
     [SerializeField] private TMP_Text storageText;
     [SerializeField] private TMP_Text aetherText;
     
-    private AetherConsumptionManager _aetherConsumptionManager;
+    private ElectricityConsumptionManager _electricityConsumptionManager;
     private StorageTrackerManager _storageTrackerManager;
     
     private void Start()
     {
-        _aetherConsumptionManager = FindFirstObjectByType<AetherConsumptionManager>();
+        _electricityConsumptionManager = ElectricityConsumptionManager.Instance;
         _storageTrackerManager = FindFirstObjectByType<StorageTrackerManager>();
         
         if (_storageTrackerManager != null)
         {
             _storageTrackerManager.OnStorageChanged += UpdateStorageText;
-            _storageTrackerManager.OnAetherChanged += UpdateAetherText;
+            _storageTrackerManager.OnElectricityChanged += UpdateElectricityStorageText;
         }
         
         UpdateStorageText();
-        UpdateAetherText();
+        UpdateElectricityStorageText();
     }
     
     private void OnDestroy()
@@ -31,18 +31,18 @@ public class AetherStatusUI : MonoBehaviour
         if (_storageTrackerManager != null)
         {
             _storageTrackerManager.OnStorageChanged -= UpdateStorageText;
-            _storageTrackerManager.OnAetherChanged -= UpdateAetherText;
+            _storageTrackerManager.OnElectricityChanged -= UpdateElectricityStorageText;
         }
     }
     
     private void Update()
     {
-        if (_aetherConsumptionManager == null || aetherStatusText == null) return;
+        if (_electricityConsumptionManager == null || aetherStatusText == null) return;
         
-        float netAether = _aetherConsumptionManager.NetAetherPerSecond;
-        int maxCapacity = _aetherConsumptionManager.MaxAetherCapacity;
+        float netElectricity = _electricityConsumptionManager.NetElectricityPerSecond;
+        int maxCapacity = _electricityConsumptionManager.MaxElectricityStorageCapacity;
         
-        aetherStatusText.text = $" 초당 에테르 변화량 : {netAether:F1} / {maxCapacity}";
+        aetherStatusText.text = $" 초당 전기 변화량 : {netElectricity:F1} / {maxCapacity}";
     }
     
     private void UpdateStorageText()
@@ -55,12 +55,12 @@ public class AetherStatusUI : MonoBehaviour
         storageText.text = $"{current} / {max}";
     }
     
-    private void UpdateAetherText()
+    private void UpdateElectricityStorageText()
     {
         if (aetherText == null || _storageTrackerManager == null) return;
         
-        int current = _storageTrackerManager.CurrentAetherAmount;
-        int max = _storageTrackerManager.MaxStorableAetherAmount;
+        int current = _storageTrackerManager.CurrentElectricityAmount;
+        int max = _storageTrackerManager.MaxStorableElectricityAmount;
         
         aetherText.text = $"{current} / {max}";
     }
