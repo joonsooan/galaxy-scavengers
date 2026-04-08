@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
@@ -24,12 +24,14 @@ public class MainControlPanel : MonoBehaviour
     {
         DroneHub.OnDroneHubClicked += HideBuildingInfoPanel;
         Processor.OnProcessorClicked += HideBuildingInfoPanel;
+        DataExtractor.OnDataExtractorClicked += HideBuildingInfoPanelExtractor;
     }
 
     private void OnDisable()
     {
         DroneHub.OnDroneHubClicked -= HideBuildingInfoPanel;
         Processor.OnProcessorClicked -= HideBuildingInfoPanel;
+        DataExtractor.OnDataExtractorClicked -= HideBuildingInfoPanelExtractor;
     }
     
     
@@ -171,6 +173,14 @@ public class MainControlPanel : MonoBehaviour
         ShowPanel(resourceStatPanel);
     }
 
+
+    private void HideBuildingInfoPanelExtractor(DataExtractor _)
+    {
+        if (buildingInfoPanel != null)
+        {
+            buildingInfoPanel.SetActive(false);
+        }
+    }
     private void HideBuildingInfoPanel(Damageable _)
     {
         buildingInfoPanel.SetActive(false);
@@ -180,14 +190,14 @@ public class MainControlPanel : MonoBehaviour
     {
         if (panel == null) return;
         
-        // 현재 보여주고 있는 판넬과 다른 버튼 클릭 시 보여주던 판넬 비활성화
+        // ?꾩옱 蹂댁뿬二쇨퀬 ?덈뒗 ?먮꽟怨??ㅻⅨ 踰꾪듉 ?대┃ ??蹂댁뿬二쇰뜕 ?먮꽟 鍮꾪솢?깊솕
         if (_currentlyActivePanel != null && _currentlyActivePanel != panel)
         {
             _buildingInfoPanelComponent.ClearInfo();
             _currentlyActivePanel.SetActive(false);
         }
         
-        // 같은 버튼 클릭 시 판넬 숨김
+        // 媛숈? 踰꾪듉 ?대┃ ???먮꽟 ?④?
         if (_currentlyActivePanel == panel)
         {
             panel.SetActive(false);
@@ -195,7 +205,7 @@ public class MainControlPanel : MonoBehaviour
             buildingInfoPanel.SetActive(false);
             _currentlyActivePanel = null;
         }
-        // _currentlyActivePanel = null 일 때 버튼 클릭 시 보여줌
+        // _currentlyActivePanel = null ????踰꾪듉 ?대┃ ??蹂댁뿬以?
         else
         {
             panel.SetActive(true);
@@ -321,3 +331,4 @@ public class MainControlPanel : MonoBehaviour
         }
     }
 }
+

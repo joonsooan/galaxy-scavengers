@@ -352,6 +352,32 @@ public class ElectricityConsumptionManager : MonoBehaviour
         }
     }
 
+    private void SanitizeDeadResourceGenerators()
+    {
+        for (int i = _resourceGenerators.Count - 1; i >= 0; i--)
+        {
+            ResourceGenerator g = _resourceGenerators[i];
+            if (g == null)
+            {
+                _resourceGenerators.RemoveAt(i);
+            }
+        }
+
+        List<ResourceGenerator> staleVisualKeys = new List<ResourceGenerator>();
+        foreach (ResourceGenerator key in _resourceGeneratorVisualStates.Keys)
+        {
+            if (key == null)
+            {
+                staleVisualKeys.Add(key);
+            }
+        }
+
+        foreach (ResourceGenerator key in staleVisualKeys)
+        {
+            _resourceGeneratorVisualStates.Remove(key);
+        }
+    }
+
     public void RegisterPowerReceiver(PowerReceiver receiver)
     {
         if (receiver != null && !_powerReceivers.Contains(receiver))
@@ -390,9 +416,16 @@ public class ElectricityConsumptionManager : MonoBehaviour
     {
         if (ResourceManager.Instance == null) return;
 
+        SanitizeDeadResourceGenerators();
+
         foreach (ResourceGenerator generator in _resourceGenerators)
         {
-            generator?.SpillElectricityBufferToNetwork();
+            if (generator == null)
+            {
+                continue;
+            }
+
+            generator.SpillElectricityBufferToNetwork();
         }
 
         BuildPowerNodeList(_powerNodesBuffer);
@@ -490,8 +523,14 @@ public class ElectricityConsumptionManager : MonoBehaviour
 
         foreach (ResourceGenerator gen in _resourceGenerators)
         {
-            if (gen == null || !gen.isActiveAndEnabled)
+            if (gen == null)
             {
+                continue;
+            }
+
+            if (!gen.isActiveAndEnabled)
+            {
+                _resourceGeneratorVisualStates[gen] = PowerFeedVisualState.Ok;
                 continue;
             }
 

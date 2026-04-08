@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -19,6 +19,9 @@ public class UIManager : MonoBehaviour
 
     [Header("Drone Hub Info Panel")]
     [SerializeField] private GameObject droneHubInfoPanel;
+
+    [Header("Extractor Info Panel")]
+    [SerializeField] private GameObject extractorInfoPanel;
 
     [Header("Pause Panel")]
     [SerializeField] private GameObject pausePanel;
@@ -45,6 +48,7 @@ public class UIManager : MonoBehaviour
     private BuildingPieceData _pinnedBuildingPieceData;
     private DroneHubData _pinnedDroneHubData;
     private ProcessorData _pinnedProcessorData;
+    private ExtractorData _pinnedExtractorData;
     private Action<ResourceType, int, int> _storageResourceChangedHandler;
     private IStorage _trackedStorage;
     private bool _pausePanelLock;
@@ -67,6 +71,7 @@ public class UIManager : MonoBehaviour
         if (buildingInfoPanel != null) buildingInfoPanel.SetActive(false);
         if (processorInfoPanel != null) processorInfoPanel.SetActive(false);
         if (droneHubInfoPanel != null) droneHubInfoPanel.SetActive(false);
+        if (extractorInfoPanel != null) extractorInfoPanel.SetActive(false);
         if (storageInfoPanel != null) storageInfoPanel.SetActive(false);
 
         _areaBuildingDestroyer = FindFirstObjectByType<AreaBuildingDestroyer>();
@@ -102,12 +107,14 @@ public class UIManager : MonoBehaviour
     {
         Processor.OnProcessorClicked += HandleProcessorClicked;
         DroneHub.OnDroneHubClicked += HandleDroneHubClicked;
+        DataExtractor.OnDataExtractorClicked += HandleDataExtractorClicked;
     }
 
     private void OnDisable()
     {
         Processor.OnProcessorClicked -= HandleProcessorClicked;
         DroneHub.OnDroneHubClicked -= HandleDroneHubClicked;
+        DataExtractor.OnDataExtractorClicked -= HandleDataExtractorClicked;
     }
 
     private void HandleProcessorClicked(Processor processor)
@@ -140,6 +147,21 @@ public class UIManager : MonoBehaviour
         DisplayDroneHubInfo(droneHub);
     }
 
+
+    private void HandleDataExtractorClicked(DataExtractor extractor)
+    {
+        if (extractor == null) return;
+
+        HideCurrentIClickableUI();
+
+        if (buildingInfoPanel != null)
+        {
+            buildingInfoPanel.SetActive(false);
+        }
+
+        _activeUIPanel = ActiveUIPanel.DataExtractor;
+        DisplayExtractorInfo(extractor);
+    }
     private void HideCurrentIClickableUI()
     {
         switch (_activeUIPanel) {
@@ -152,6 +174,14 @@ public class UIManager : MonoBehaviour
         case ActiveUIPanel.DroneHub:
             if (droneHubInfoPanel != null) {
                 droneHubInfoPanel.gameObject.SetActive(false);
+            }
+            break;
+
+        case ActiveUIPanel.DataExtractor:
+            if (ExtractorUIManager.Instance != null) {
+                ExtractorUIManager.Instance.HideExtractorUI();
+            } else if (extractorInfoPanel != null) {
+                extractorInfoPanel.SetActive(false);
             }
             break;
 
@@ -226,6 +256,14 @@ public class UIManager : MonoBehaviour
             droneHubInfoPanel.SetActive(false);
         }
 
+        _pinnedExtractorData = null;
+        if (extractorInfoPanel != null) {
+            extractorInfoPanel.SetActive(false);
+        }
+        if (ExtractorUIManager.Instance != null) {
+            ExtractorUIManager.Instance.HideExtractorUI();
+        }
+
         if (storageInfoPanel != null) {
             if (_trackedStorage != null && _storageResourceChangedHandler != null) {
                 _trackedStorage.OnResourceChanged -= _storageResourceChangedHandler;
@@ -251,7 +289,8 @@ public class UIManager : MonoBehaviour
         if (droneHubInfoPanel != null) {
             droneHubInfoPanel.SetActive(false);
         }
-        if (_activeUIPanel == ActiveUIPanel.Processor || _activeUIPanel == ActiveUIPanel.DroneHub) {
+        if (_activeUIPanel == ActiveUIPanel.Processor || _activeUIPanel == ActiveUIPanel.DroneHub ||
+            _activeUIPanel == ActiveUIPanel.DataExtractor) {
             _activeUIPanel = ActiveUIPanel.None;
         }
     }
@@ -384,6 +423,58 @@ public class UIManager : MonoBehaviour
     public bool IsProcessorPanelActive()
     {
         return processorInfoPanel != null && processorInfoPanel.activeSelf;
+    }
+
+    private void DisplayExtractorInfo(DataExtractor extractor)
+    {
+        if (extractor == null || extractorInfoPanel == null) return;
+
+        if (!buildingUIClickSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(buildingUIClickSound);
+        }
+
+        extractorInfoPanel.SetActive(true);
+        if (ExtractorUIManager.Instance != null) {
+            ExtractorUIManager.Instance.ShowExtractorUI(extractor);
+        }
+    }
+
+    public void HideExtractorInfo()
+    {
+        if (extractorInfoPanel == null) return;
+
+        if (_pinnedExtractorData == null) {
+            if (ExtractorUIManager.Instance != null) {
+                ExtractorUIManager.Instance.HideExtractorUI();
+            } else {
+                extractorInfoPanel.SetActive(false);
+            }
+            if (_activeUIPanel == ActiveUIPanel.DataExtractor) {
+                _activeUIPanel = ActiveUIPanel.None;
+            }
+        }
+    }
+
+    public void PinExtractorInfo(DataExtractor extractor)
+    {
+        if (extractor == null) return;
+
+        ExtractorData data = extractor.ExtractorDataAsset;
+
+        if (_pinnedExtractorData == data) {
+            UnpinAndHideAllPanels();
+        }
+        else {
+            UnpinAndHideAllPanels();
+            _pinnedExtractorData = data;
+            DisplayExtractorInfo(extractor);
+        }
+    }
+
+    public bool IsExtractorPanelActive()
+    {
+        return extractorInfoPanel != null && extractorInfoPanel.activeSelf;
     }
 
     public bool IsDroneHubPanelActive()
@@ -524,6 +615,10 @@ public class UIManager : MonoBehaviour
         None,
         Processor,
         DroneHub,
+        DataExtractor,
         MainStructure
     }
 }
+
+
+

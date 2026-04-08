@@ -73,6 +73,17 @@ public class ObjClickManager : MonoBehaviour
                     processor.OnClicked();
                     return;
                 }
+
+                DataExtractor dataExtractor = hit.collider.gameObject.GetComponent<DataExtractor>();
+                if (dataExtractor != null)
+                {
+                    if (BuildingInfoPanel.Instance != null)
+                    {
+                        BuildingInfoPanel.Instance.gameObject.SetActive(false);
+                    }
+                    dataExtractor.OnClicked();
+                    return;
+                }
                 
                 DroneHub droneHub = hit.collider.gameObject.GetComponent<DroneHub>();
                 if (droneHub != null)
@@ -119,3 +130,5 @@ public class ObjClickManager : MonoBehaviour
         return loadingScreen.gameObject.activeSelf;
     }
 }
+
+

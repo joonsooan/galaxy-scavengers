@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -74,6 +74,11 @@ public class InventorySystem : MonoBehaviour
         _isInitialized = true;
     }
 
+
+    private void HideInventoryPanelFromExtractor(DataExtractor _)
+    {
+        HideInventoryPanel();
+    }
     private void HideInventoryPanel()
     {
         inventoryPanel.SetActive(false);
@@ -94,6 +99,7 @@ public class InventorySystem : MonoBehaviour
         SubscribeToResourceEvents();
         DroneHub.OnDroneHubClicked += HideInventoryPanel;
         Processor.OnProcessorClicked += HideInventoryPanel;
+        DataExtractor.OnDataExtractorClicked += HideInventoryPanelFromExtractor;
     }
 
     private void SubscribeToResourceEvents()
@@ -109,6 +115,7 @@ public class InventorySystem : MonoBehaviour
         ResourceManager.OnResourceAmountChanged -= UpdateResourceInfoCells;
         DroneHub.OnDroneHubClicked -= HideInventoryPanel;
         Processor.OnProcessorClicked -= HideInventoryPanel;
+        DataExtractor.OnDataExtractorClicked -= HideInventoryPanelFromExtractor;
     }
 
     private void InitializeMaxStackAmounts()
@@ -582,4 +589,5 @@ public class InventorySystem : MonoBehaviour
         }
     }
 }
+
 

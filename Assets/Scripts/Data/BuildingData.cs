@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -16,7 +16,8 @@ public enum BuildingType
     Radar,
     OrbitalLauncher,
     MainStructure,
-    PowerReceiver
+    PowerReceiver,
+    DataExtractor
 }
 
 [CreateAssetMenu(fileName = "New Building Data", menuName = "Building/Building Data")]

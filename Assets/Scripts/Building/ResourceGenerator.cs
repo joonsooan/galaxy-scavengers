@@ -364,6 +364,11 @@ public class ResourceGenerator : Damageable, IPowerGridNode
 
     public void SpillElectricityBufferToNetwork()
     {
+        if (!this)
+        {
+            return;
+        }
+
         if (electricityBufferCurrent <= 0 || ResourceManager.Instance == null)
         {
             return;
