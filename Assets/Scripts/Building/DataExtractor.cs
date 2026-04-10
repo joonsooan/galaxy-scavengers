@@ -26,6 +26,12 @@ public class DataExtractor : Damageable, IClickable, IElectricityConsumer
 
     public bool IsOperational => _isOperational;
 
+    public bool IsAtMaxExtraction =>
+        extractorData != null &&
+        _currentExtractedPercent >= extractorData.maxExtractablePercent - 0.0001f;
+
+    public bool HasConsumableResourcesForSelectedTiers() => GetConsumableSelectedTierIndices().Count > 0;
+
     public static event Action<DataExtractor> OnDataExtractorClicked;
 
     public event Action OnExtractorStateChanged;
@@ -75,7 +81,6 @@ public class DataExtractor : Damageable, IClickable, IElectricityConsumer
             _selectedTierIndices.Add(index);
         }
 
-        EnsureAtLeastOneTierSelected();
         _cycleProgress01 = 0f;
         OnExtractorStateChanged?.Invoke();
     }

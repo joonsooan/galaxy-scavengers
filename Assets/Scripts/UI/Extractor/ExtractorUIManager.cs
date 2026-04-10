@@ -14,6 +14,14 @@ public class ExtractorUIManager : MonoBehaviour
     [SerializeField] private Slider overallDataSlider;
     [SerializeField] private TMP_Text dataPercentageText;
 
+    [Header("Extractor status")]
+    [SerializeField] private TMP_Text extractorStatusText;
+    [SerializeField] private GameObject extractorStatusProblemIcon;
+    [SerializeField] private GameObject extractorStatusOkIcon;
+    [SerializeField] private string statusTextPowerShortage = "\uC804\uB825 \uBD80\uC871";
+    [SerializeField] private string statusTextResourceShortage = "\uC790\uC6D0 \uBD80\uC871";
+    [SerializeField] private string statusTextExtracting = "\uCD94\uCD9C \uC911";
+
     [Header("Extractor Stats Storage")]
     [SerializeField] private TMP_Text connectedStorageTitleText;
     [SerializeField] private Transform connectedStorageContent;
@@ -138,6 +146,23 @@ public class ExtractorUIManager : MonoBehaviour
         }
 
         _outputDataCell = null;
+
+        ClearExtractorStatusDisplay();
+    }
+
+    private void ClearExtractorStatusDisplay()
+    {
+        if (extractorStatusText != null) {
+            extractorStatusText.text = string.Empty;
+        }
+
+        if (extractorStatusProblemIcon != null) {
+            extractorStatusProblemIcon.SetActive(false);
+        }
+
+        if (extractorStatusOkIcon != null) {
+            extractorStatusOkIcon.SetActive(false);
+        }
     }
 
     private void OnExtractorStateChanged()
@@ -396,6 +421,52 @@ public class ExtractorUIManager : MonoBehaviour
 
         if (dataPercentageText != null) {
             dataPercentageText.text = string.Format("{0:F1}% / {1:F1}%", cur, max);
+        }
+
+        RefreshExtractorStatusUi();
+    }
+
+    private void RefreshExtractorStatusUi()
+    {
+        if (_currentExtractor == null) {
+            return;
+        }
+
+        bool powerShortage = _currentExtractor.ElectricityConsumptionPerSecond > 0f &&
+                             !_currentExtractor.IsOperational;
+        bool atMax = _currentExtractor.IsAtMaxExtraction;
+        bool hasConsumable = _currentExtractor.HasConsumableResourcesForSelectedTiers();
+
+        string text = string.Empty;
+        bool showProblem = false;
+        bool showOk = false;
+
+        if (powerShortage) {
+            text = statusTextPowerShortage;
+            showProblem = true;
+        }
+        else if (atMax) {
+            text = string.Empty;
+        }
+        else if (!hasConsumable) {
+            text = statusTextResourceShortage;
+            showProblem = true;
+        }
+        else {
+            text = statusTextExtracting;
+            showOk = true;
+        }
+
+        if (extractorStatusText != null) {
+            extractorStatusText.text = text;
+        }
+
+        if (extractorStatusProblemIcon != null) {
+            extractorStatusProblemIcon.SetActive(showProblem);
+        }
+
+        if (extractorStatusOkIcon != null) {
+            extractorStatusOkIcon.SetActive(showOk);
         }
     }
 
