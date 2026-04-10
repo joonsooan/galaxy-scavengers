@@ -13,14 +13,13 @@ public class DroneProduceUIManager : MonoBehaviour
     [SerializeField] private TMP_Text droneHubInfo;
     [SerializeField] private TMP_Text unitCountText;
     [SerializeField] private UnitInfoPanel unitInfoPanel;
-    
+
     [Header("Unit Info Panel Layout")]
     [SerializeField] private Vector2 unitInfoPanelAnchor = new Vector2(0.5f, 0.5f);
     [SerializeField] private Vector2 unitInfoPanelAnchoredPosition;
 
     private List<UnitData> _allProducibleUnits;
-    private DroneHubData _currentData;
-    private DroneHub _currentDroneHub;
+    private MainStructure _currentMainStructure;
 
     public static DroneProduceUIManager Instance { get; private set; }
 
@@ -34,48 +33,48 @@ public class DroneProduceUIManager : MonoBehaviour
         }
     }
 
-    public void ShowDroneHubUI(DroneHub droneHub)
+    public void ShowDroneProduceUI(MainStructure mainStructure)
     {
-        _currentDroneHub = droneHub;
-        _currentData = droneHub.DroneHubData;
-        if (unitInfoPanel != null)
-        {
+        _currentMainStructure = mainStructure;
+        if (unitInfoPanel != null) {
             unitInfoPanel.ApplyFixedAnchorLayout(unitInfoPanelAnchor, unitInfoPanelAnchoredPosition);
         }
 
-        SetDroneHubInfo(_currentData);
-        LoadAllProducibleUnits(_currentData);
+        SetPanelTexts(mainStructure);
+        LoadAllProducibleUnits(mainStructure);
         UpdateUnitCountText();
     }
 
-    private void SetDroneHubInfo(DroneHubData data)
+    private void SetPanelTexts(MainStructure mainStructure)
     {
-        if (data == null) return;
+        if (mainStructure == null) {
+            return;
+        }
 
         if (droneHubName != null) {
-            droneHubName.text = data.DroneHubName;
+            droneHubName.text = mainStructure.DroneProduceDisplayName;
         }
 
         if (droneHubInfo != null) {
-            droneHubInfo.text = data.DroneHubInfo;
+            droneHubInfo.text = mainStructure.DroneProduceDescription;
         }
     }
 
     private void UpdateUnitCountText()
     {
-        if (unitCountText == null || UnitManager.Instance == null) return;
+        if (unitCountText == null || UnitManager.Instance == null) {
+            return;
+        }
 
         int current = UnitManager.Instance.AllyUnits.Count;
         int max = UnitManager.Instance.GetMaxPopulation();
 
         unitCountText.text = $"{current} / {max}";
 
-        if (current >= max)
-        {
+        if (current >= max) {
             unitCountText.color = Color.red;
         }
-        else
-        {
+        else {
             unitCountText.color = Color.white;
         }
     }
@@ -89,28 +88,26 @@ public class DroneProduceUIManager : MonoBehaviour
     {
         UnitManager.OnUnitCountChanged -= OnUnitCountChanged;
         ClearUnitInfo();
-        if (unitInfoPanel != null)
-        {
+        if (unitInfoPanel != null) {
             unitInfoPanel.RestoreDefaultLayout();
         }
     }
 
     private void OnUnitCountChanged(UnitBase unit)
     {
-        if (_currentDroneHub != null)
-        {
+        if (_currentMainStructure != null) {
             UpdateUnitCountText();
         }
     }
 
-    private void LoadAllProducibleUnits(DroneHubData data)
+    private void LoadAllProducibleUnits(MainStructure mainStructure)
     {
         ClearAllUnits();
-        if (data == null || data.ProducibleUnits == null) {
+        if (mainStructure == null || mainStructure.ProducibleUnits == null) {
             return;
         }
 
-        _allProducibleUnits = data.ProducibleUnits;
+        _allProducibleUnits = mainStructure.ProducibleUnits;
         InstantiateUnitCells();
     }
 
@@ -128,19 +125,21 @@ public class DroneProduceUIManager : MonoBehaviour
             return;
         }
 
-        if (_currentDroneHub == null || _allProducibleUnits == null) {
+        if (_currentMainStructure == null || _allProducibleUnits == null) {
             return;
         }
 
         for (int i = 0; i < _allProducibleUnits.Count; i++) {
             UnitData unitData = _allProducibleUnits[i];
-            if (unitData == null) continue;
+            if (unitData == null) {
+                continue;
+            }
 
             GameObject newCellObject = Instantiate(droneProduceCellPrefab, contentParent);
             DroneProduceCell newCell = newCellObject.GetComponent<DroneProduceCell>();
 
             if (newCell != null) {
-                newCell.Initialize(unitData, _currentDroneHub, i, this);
+                newCell.Initialize(unitData, _currentMainStructure, i, this);
             }
         }
     }
@@ -162,23 +161,22 @@ public class DroneProduceUIManager : MonoBehaviour
 
     public void ClearUnitInfo()
     {
-        if (unitInfoPanel != null)
-        {
+        if (unitInfoPanel != null) {
             unitInfoPanel.ClearAllInfo();
         }
     }
 
     private void ShowUnitInfo(UnitData unitData)
     {
-        if (unitInfoPanel == null)
-        {
+        if (unitInfoPanel == null) {
             return;
         }
-        if (unitData == null)
-        {
+
+        if (unitData == null) {
             unitInfoPanel.ClearAllInfo();
             return;
         }
+
         unitInfoPanel.PreviewInfo(unitData);
     }
 }

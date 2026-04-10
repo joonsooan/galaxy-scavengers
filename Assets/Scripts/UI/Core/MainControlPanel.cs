@@ -22,14 +22,14 @@ public class MainControlPanel : MonoBehaviour
     
     private void OnEnable()
     {
-        DroneHub.OnDroneHubClicked += HideBuildingInfoPanel;
+        MainStructure.OnDroneProducePanelClicked += HideBuildingInfoPanelMainStructure;
         Processor.OnProcessorClicked += HideBuildingInfoPanel;
         DataExtractor.OnDataExtractorClicked += HideBuildingInfoPanelExtractor;
     }
 
     private void OnDisable()
     {
-        DroneHub.OnDroneHubClicked -= HideBuildingInfoPanel;
+        MainStructure.OnDroneProducePanelClicked -= HideBuildingInfoPanelMainStructure;
         Processor.OnProcessorClicked -= HideBuildingInfoPanel;
         DataExtractor.OnDataExtractorClicked -= HideBuildingInfoPanelExtractor;
     }
@@ -184,6 +184,13 @@ public class MainControlPanel : MonoBehaviour
     private void HideBuildingInfoPanel(Damageable _)
     {
         buildingInfoPanel.SetActive(false);
+    }
+
+    private void HideBuildingInfoPanelMainStructure(MainStructure _)
+    {
+        if (buildingInfoPanel != null) {
+            buildingInfoPanel.SetActive(false);
+        }
     }
     
     private void ShowPanel(GameObject panel)

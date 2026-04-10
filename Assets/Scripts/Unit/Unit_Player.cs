@@ -287,8 +287,7 @@ public class Unit_Player : UnitBase
 
             if (hit.collider is BoxCollider2D) {
                 if (hit.collider.GetComponent<MainStructure>() != null ||
-                    hit.collider.GetComponent<Processor>() != null ||
-                    hit.collider.GetComponent<DroneHub>() != null) {
+                    hit.collider.GetComponent<Processor>() != null) {
                     return true;
                 }
             }

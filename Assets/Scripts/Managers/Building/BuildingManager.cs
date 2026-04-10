@@ -463,8 +463,8 @@ public class BuildingManager : MonoBehaviour
             if (buildingTypeName == "Storage") {
                 TutorialManager.Instance.OnBuildingPlaced("Storage");
             }
-            else if (buildingTypeName == "DroneHub") {
-                TutorialManager.Instance.OnBuildingPlaced("DroneHub");
+            else if (buildingTypeName == "MainStructure") {
+                TutorialManager.Instance.OnBuildingPlaced("MainStructure");
             }
             else if (buildingTypeName == "Smelter") {
                 TutorialManager.Instance.OnBuildingPlaced("Smelter");
@@ -728,13 +728,6 @@ public class BuildingManager : MonoBehaviour
             if (generator != null) {
                 generator.SetConstructed();
             }
-            break;
-        case BuildingType.DroneHub:
-            DroneHub droneHub = obj.GetComponent<DroneHub>();
-            if (droneHub == null) {
-                droneHub = obj.GetComponentInChildren<DroneHub>(true);
-            }
-            droneHub?.SetConstructed();
             break;
         case BuildingType.Turret:
         case BuildingType.Radar:

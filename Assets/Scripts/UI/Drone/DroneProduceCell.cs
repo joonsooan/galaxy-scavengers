@@ -24,7 +24,7 @@ public class DroneProduceCell : MonoBehaviour, IPointerEnterHandler, IPointerExi
     [SerializeField] private Material glowMaterial;
     private int _currentProducedCount;
 
-    private DroneHub _droneHub;
+    private MainStructure _mainStructure;
 
     private float _lastButtonClickTime;
     private int _targetCount;
@@ -35,14 +35,14 @@ public class DroneProduceCell : MonoBehaviour, IPointerEnterHandler, IPointerExi
 
     private void OnDisable()
     {
-        DroneHub.OnUnitTargetChanged -= HandleUnitTargetChanged;
+        MainStructure.OnUnitTargetChanged -= HandleUnitTargetChanged;
     }
 
-    public void Initialize(UnitData unitData, DroneHub droneHub, int unitIndex, DroneProduceUIManager uiManager)
+    public void Initialize(UnitData unitData, MainStructure mainStructure, int unitIndex, DroneProduceUIManager uiManager)
     {
-        DroneHub.OnUnitTargetChanged -= HandleUnitTargetChanged;
+        MainStructure.OnUnitTargetChanged -= HandleUnitTargetChanged;
 
-        _droneHub = droneHub;
+        _mainStructure = mainStructure;
         _unitIndex = unitIndex;
         _unitData = unitData;
         _uiManager = uiManager;
@@ -93,11 +93,11 @@ public class DroneProduceCell : MonoBehaviour, IPointerEnterHandler, IPointerExi
             TutorialManager.Instance.RegisterRuntimeUI(_tutorialID, gameObject, glowMaterial);
         }
 
-        _currentProducedCount = _droneHub.GetCurrentUnitCount(_unitIndex);
-        _targetCount = _droneHub.GetTargetUnitCount(_unitIndex);
+        _currentProducedCount = _mainStructure.GetCurrentUnitCount(_unitIndex);
+        _targetCount = _mainStructure.GetTargetUnitCount(_unitIndex);
         UpdateUI();
 
-        DroneHub.OnUnitTargetChanged += HandleUnitTargetChanged;
+        MainStructure.OnUnitTargetChanged += HandleUnitTargetChanged;
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -153,7 +153,10 @@ public class DroneProduceCell : MonoBehaviour, IPointerEnterHandler, IPointerExi
 
     public void OnPlusBtnClick()
     {
-        if (_droneHub == null) return;
+        if (_mainStructure == null) {
+            return;
+        }
+
 
         float currentTime = Time.unscaledTime;
         if (currentTime - _lastButtonClickTime < ButtonClickCooldown) {
@@ -164,7 +167,7 @@ public class DroneProduceCell : MonoBehaviour, IPointerEnterHandler, IPointerExi
         int amountToAdd = GetAmountChange();
         int newTarget = Mathf.Min(_targetCount + amountToAdd, MaxProduceAmount);
 
-        _droneHub.SetTargetUnitCount(_unitIndex, newTarget);
+        _mainStructure.SetTargetUnitCount(_unitIndex, newTarget);
 
         if (TutorialManager.Instance != null) {
             Transform panelParent = transform.parent;
@@ -187,7 +190,10 @@ public class DroneProduceCell : MonoBehaviour, IPointerEnterHandler, IPointerExi
 
     public void OnMinusBtnClick()
     {
-        if (_droneHub == null) return;
+        if (_mainStructure == null) {
+            return;
+        }
+
 
         float currentTime = Time.unscaledTime;
         if (currentTime - _lastButtonClickTime < ButtonClickCooldown) {
@@ -198,7 +204,7 @@ public class DroneProduceCell : MonoBehaviour, IPointerEnterHandler, IPointerExi
         int amountToSubtract = GetAmountChange();
         int newTarget = Mathf.Max(_targetCount - amountToSubtract, 0);
 
-        _droneHub.SetTargetUnitCount(_unitIndex, newTarget);
+        _mainStructure.SetTargetUnitCount(_unitIndex, newTarget);
 
         if (TutorialManager.Instance != null) {
             Transform panelParent = transform.parent;

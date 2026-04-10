@@ -46,7 +46,7 @@ public class UIManager : MonoBehaviour
     private AreaBuildingDestroyer _areaBuildingDestroyer;
 
     private BuildingPieceData _pinnedBuildingPieceData;
-    private DroneHubData _pinnedDroneHubData;
+    private MainStructure _pinnedMainStructureDroneSource;
     private ProcessorData _pinnedProcessorData;
     private ExtractorData _pinnedExtractorData;
     private Action<ResourceType, int, int> _storageResourceChangedHandler;
@@ -106,14 +106,14 @@ public class UIManager : MonoBehaviour
     private void OnEnable()
     {
         Processor.OnProcessorClicked += HandleProcessorClicked;
-        DroneHub.OnDroneHubClicked += HandleDroneHubClicked;
+        MainStructure.OnDroneProducePanelClicked += HandleMainStructureDroneClicked;
         DataExtractor.OnDataExtractorClicked += HandleDataExtractorClicked;
     }
 
     private void OnDisable()
     {
         Processor.OnProcessorClicked -= HandleProcessorClicked;
-        DroneHub.OnDroneHubClicked -= HandleDroneHubClicked;
+        MainStructure.OnDroneProducePanelClicked -= HandleMainStructureDroneClicked;
         DataExtractor.OnDataExtractorClicked -= HandleDataExtractorClicked;
     }
 
@@ -132,19 +132,20 @@ public class UIManager : MonoBehaviour
         DisplayProcessorInfo(processor);
     }
 
-    private void HandleDroneHubClicked(DroneHub droneHub)
+    private void HandleMainStructureDroneClicked(MainStructure mainStructure)
     {
-        if (droneHub == null) return;
+        if (mainStructure == null) {
+            return;
+        }
 
         HideCurrentIClickableUI();
-        
-        if (buildingInfoPanel != null)
-        {
+
+        if (buildingInfoPanel != null) {
             buildingInfoPanel.SetActive(false);
         }
 
         _activeUIPanel = ActiveUIPanel.DroneHub;
-        DisplayDroneHubInfo(droneHub);
+        DisplayMainStructureDroneInfo(mainStructure);
     }
 
 
@@ -251,7 +252,7 @@ public class UIManager : MonoBehaviour
             processorInfoPanel.SetActive(false);
         }
 
-        _pinnedDroneHubData = null;
+        _pinnedMainStructureDroneSource = null;
         if (droneHubInfoPanel != null) {
             droneHubInfoPanel.SetActive(false);
         }
@@ -285,7 +286,7 @@ public class UIManager : MonoBehaviour
         if (processorInfoPanel != null) {
             processorInfoPanel.SetActive(false);
         }
-        _pinnedDroneHubData = null;
+        _pinnedMainStructureDroneSource = null;
         if (droneHubInfoPanel != null) {
             droneHubInfoPanel.SetActive(false);
         }
@@ -379,24 +380,29 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    private void DisplayDroneHubInfo(DroneHub droneHub)
+    private void DisplayMainStructureDroneInfo(MainStructure mainStructure)
     {
-        if (droneHub == null || droneHubInfoPanel == null) return;
-        
-        if (!buildingUIClickSound.IsNull)
-        {
+        if (mainStructure == null || droneHubInfoPanel == null) {
+            return;
+        }
+
+        if (!buildingUIClickSound.IsNull) {
             RuntimeManager.PlayOneShot(buildingUIClickSound);
         }
-        
+
         droneHubInfoPanel.gameObject.SetActive(true);
-        DroneProduceUIManager.Instance.ShowDroneHubUI(droneHub);
+        if (DroneProduceUIManager.Instance != null) {
+            DroneProduceUIManager.Instance.ShowDroneProduceUI(mainStructure);
+        }
     }
 
     public void HideDroneHubInfo()
     {
-        if (droneHubInfoPanel == null) return;
+        if (droneHubInfoPanel == null) {
+            return;
+        }
 
-        if (_pinnedDroneHubData == null) {
+        if (_pinnedMainStructureDroneSource == null) {
             droneHubInfoPanel.gameObject.SetActive(false);
             if (_activeUIPanel == ActiveUIPanel.DroneHub) {
                 _activeUIPanel = ActiveUIPanel.None;
@@ -404,19 +410,19 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void PinDroneHubInfo(DroneHub droneHub)
+    public void PinMainStructureDroneInfo(MainStructure mainStructure)
     {
-        if (droneHub == null) return;
+        if (mainStructure == null) {
+            return;
+        }
 
-        DroneHubData data = droneHub.DroneHubData;
-
-        if (_pinnedDroneHubData == data) {
+        if (_pinnedMainStructureDroneSource == mainStructure) {
             UnpinAndHideAllPanels();
         }
         else {
             UnpinAndHideAllPanels();
-            _pinnedDroneHubData = data;
-            DisplayDroneHubInfo(droneHub);
+            _pinnedMainStructureDroneSource = mainStructure;
+            DisplayMainStructureDroneInfo(mainStructure);
         }
     }
 
@@ -475,6 +481,28 @@ public class UIManager : MonoBehaviour
     public bool IsExtractorPanelActive()
     {
         return extractorInfoPanel != null && extractorInfoPanel.activeSelf;
+    }
+
+    public bool TryCloseExtractorPanelWithEscape()
+    {
+        if (!IsExtractorPanelActive()) {
+            return false;
+        }
+
+        _pinnedExtractorData = null;
+        if (ExtractorUIManager.Instance != null) {
+            ExtractorUIManager.Instance.HideExtractorUI();
+        }
+
+        if (extractorInfoPanel != null) {
+            extractorInfoPanel.SetActive(false);
+        }
+
+        if (_activeUIPanel == ActiveUIPanel.DataExtractor) {
+            _activeUIPanel = ActiveUIPanel.None;
+        }
+
+        return true;
     }
 
     public bool IsDroneHubPanelActive()

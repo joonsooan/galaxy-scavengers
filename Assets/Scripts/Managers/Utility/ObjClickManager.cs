@@ -59,6 +59,11 @@ public class ObjClickManager : MonoBehaviour
                 MainStructure mainStructure = hit.collider.GetComponent<MainStructure>();
                 if (mainStructure != null)
                 {
+                    if (BuildingInfoPanel.Instance != null)
+                    {
+                        BuildingInfoPanel.Instance.gameObject.SetActive(false);
+                    }
+
                     mainStructure.OnClicked();
                     return;
                 }
@@ -85,17 +90,6 @@ public class ObjClickManager : MonoBehaviour
                     return;
                 }
                 
-                DroneHub droneHub = hit.collider.gameObject.GetComponent<DroneHub>();
-                if (droneHub != null)
-                {
-                    if (BuildingInfoPanel.Instance != null)
-                    {
-                        BuildingInfoPanel.Instance.gameObject.SetActive(false);
-                    }
-
-                    droneHub.OnClicked();
-                    return;
-                }
             }
         }
         

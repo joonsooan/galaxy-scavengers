@@ -79,6 +79,11 @@ public class InventorySystem : MonoBehaviour
     {
         HideInventoryPanel();
     }
+
+    private void HideInventoryPanelFromMainStructure(MainStructure _)
+    {
+        HideInventoryPanel();
+    }
     private void HideInventoryPanel()
     {
         inventoryPanel.SetActive(false);
@@ -97,7 +102,7 @@ public class InventorySystem : MonoBehaviour
         }
 
         SubscribeToResourceEvents();
-        DroneHub.OnDroneHubClicked += HideInventoryPanel;
+        MainStructure.OnDroneProducePanelClicked += HideInventoryPanelFromMainStructure;
         Processor.OnProcessorClicked += HideInventoryPanel;
         DataExtractor.OnDataExtractorClicked += HideInventoryPanelFromExtractor;
     }
@@ -113,7 +118,7 @@ public class InventorySystem : MonoBehaviour
     private void OnDisable()
     {
         ResourceManager.OnResourceAmountChanged -= UpdateResourceInfoCells;
-        DroneHub.OnDroneHubClicked -= HideInventoryPanel;
+        MainStructure.OnDroneProducePanelClicked -= HideInventoryPanelFromMainStructure;
         Processor.OnProcessorClicked -= HideInventoryPanel;
         DataExtractor.OnDataExtractorClicked -= HideInventoryPanelFromExtractor;
     }

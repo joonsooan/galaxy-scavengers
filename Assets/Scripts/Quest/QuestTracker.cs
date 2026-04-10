@@ -52,7 +52,7 @@ public class QuestTracker : MonoBehaviour
     private void SubscribeToEvents()
     {
         BuildingManager.OnBuildingConstructed += OnBuildingConstructed;
-        DroneHub.OnUnitProduced += OnUnitProduced;
+        MainStructure.OnUnitProduced += OnUnitProduced;
         Unit_Scout.OnScoutEnteredLocation += OnScoutEnteredLocation;
         CoreCustomizationManager.OnModulePlacedOnCore += OnModulePlacedOnCore;
         ResourceTransferManager.OnResourceTransferCompleted += OnResourceTransferCompleted;
@@ -66,7 +66,7 @@ public class QuestTracker : MonoBehaviour
     private void UnsubscribeFromEvents()
     {
         BuildingManager.OnBuildingConstructed -= OnBuildingConstructed;
-        DroneHub.OnUnitProduced -= OnUnitProduced;
+        MainStructure.OnUnitProduced -= OnUnitProduced;
         Unit_Scout.OnScoutEnteredLocation -= OnScoutEnteredLocation;
         CoreCustomizationManager.OnModulePlacedOnCore -= OnModulePlacedOnCore;
         ResourceTransferManager.OnResourceTransferCompleted -= OnResourceTransferCompleted;
