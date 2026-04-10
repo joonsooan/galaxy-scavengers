@@ -20,4 +20,4 @@ MonoBehaviour:
   buildingPieceTile: {fileID: 11400000, guid: 4324964c49dd69a4789c7460b9814183, type: 2}
   costs:
   - resourceType: 3
-    amount: 10
+    amount: 50
