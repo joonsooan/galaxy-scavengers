@@ -4886,6 +4886,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4542445489244174802, guid: 0af39824d77bc2a488e8d3714734af0e, type: 3}
+      propertyPath: questUnitMappings.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6942864755438468164, guid: 0af39824d77bc2a488e8d3714734af0e, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

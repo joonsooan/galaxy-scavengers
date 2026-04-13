@@ -6363,7 +6363,7 @@ MonoBehaviour:
   falloffExponent: 1.6
   terrainThreshold: 0.3
   lowWallThreshold: 0.4
-  highWallThreshold: 0.5
+  highWallThreshold: 0.6
   enableCenterCircle: 1
   centerCircleRadius: 8
   fillDisconnectedAreas: 1
@@ -72611,8 +72611,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 163725887cf43a3418506d1a895ccbed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ferriteInitialAmount: 300
-  aetherInitialAmount: 300
+  ferriteInitialAmount: 0
+  aetherInitialAmount: 0
   biomassInitialAmount: 0
   cryoCrystalInitialAmount: 0
   tutorialFerriteInitialAmount: 0

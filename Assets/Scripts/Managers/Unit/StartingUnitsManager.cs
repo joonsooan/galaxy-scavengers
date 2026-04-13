@@ -215,26 +215,6 @@ public class StartingUnitsManager : MonoBehaviour
             }
         }
 
-        if (!IsTutorialMode()) {
-            bool hasConstruct = false;
-            foreach (StartingUnitConfig c in _allStartingUnits) {
-                if (c?.unitData?.unitPrefab != null && c.unitData.unitPrefab.GetComponent<Unit_Construct>() != null) {
-                    hasConstruct = true;
-                    break;
-                }
-            }
-            if (!hasConstruct) {
-                UnitData constructData = Resources.Load<UnitData>("Unit Data/Unit_Construct");
-                if (constructData != null) {
-                    _allStartingUnits.Add(new StartingUnitConfig {
-                        unitData = constructData,
-                        count = 1,
-                        spawnRadius = 3f,
-                        spawnInterval = 0.5f
-                    });
-                }
-            }
-        }
     }
 
     private static bool IsTutorialMode()

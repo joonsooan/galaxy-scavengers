@@ -31,11 +31,14 @@ public class DroneProduceUIManager : MonoBehaviour
         else {
             Instance = this;
         }
+
+        ResolveUnitInfoPanel();
     }
 
     public void ShowDroneProduceUI(MainStructure mainStructure)
     {
         _currentMainStructure = mainStructure;
+        ResolveUnitInfoPanel();
         if (unitInfoPanel != null) {
             unitInfoPanel.ApplyFixedAnchorLayout(unitInfoPanelAnchor, unitInfoPanelAnchoredPosition);
         }
@@ -81,6 +84,7 @@ public class DroneProduceUIManager : MonoBehaviour
 
     private void OnEnable()
     {
+        ResolveUnitInfoPanel();
         UnitManager.OnUnitCountChanged += OnUnitCountChanged;
     }
 
@@ -168,6 +172,7 @@ public class DroneProduceUIManager : MonoBehaviour
 
     private void ShowUnitInfo(UnitData unitData)
     {
+        ResolveUnitInfoPanel();
         if (unitInfoPanel == null) {
             return;
         }
@@ -178,5 +183,17 @@ public class DroneProduceUIManager : MonoBehaviour
         }
 
         unitInfoPanel.PreviewInfo(unitData);
+    }
+
+    private void ResolveUnitInfoPanel()
+    {
+        if (unitInfoPanel != null) {
+            return;
+        }
+
+        unitInfoPanel = UnitInfoPanel.Instance;
+        if (unitInfoPanel == null) {
+            unitInfoPanel = FindFirstObjectByType<UnitInfoPanel>(FindObjectsInactive.Include);
+        }
     }
 }

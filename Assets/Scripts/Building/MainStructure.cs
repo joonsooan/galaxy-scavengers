@@ -17,6 +17,7 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
 
     [Header("Production Progress UI")]
     [SerializeField] private ProductionProgressSlider productionSlider;
+    [SerializeField] private Vector3 unitSpawnOffset = new Vector3(0f, -1f, 0f);
 
     [Header("Aether Capacity")]
     [SerializeField] private int baseAetherCapacity = 100;
@@ -100,6 +101,10 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
         }
 
         ResourceManager.OnResourceAmountChanged += OnResourceAmountChanged;
+
+        if (productionSlider != null) {
+            productionSlider.Initialize(transform);
+        }
     }
 
     protected override void OnDisable()
@@ -275,7 +280,11 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
         }
         else if (neededInTotal < currentlyActive) {
             int unitsToRemove = currentlyActive - neededInTotal;
-            RemoveUnitsFromQueue(unitIndex, unitsToRemove);
+            int removedFromQueue = RemoveUnitsFromQueue(unitIndex, unitsToRemove);
+            int remainingToRemove = unitsToRemove - removedFromQueue;
+            if (remainingToRemove > 0) {
+                CancelCurrentProductionIfMatching(producibleUnits[unitIndex]);
+            }
         }
 
         OnUnitTargetChanged?.Invoke(unitIndex, currentProduced, targetCount);
@@ -311,11 +320,11 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
         }
     }
 
-    private void RemoveUnitsFromQueue(int unitIndex, int count)
+    private int RemoveUnitsFromQueue(int unitIndex, int count)
     {
         if (producibleUnits == null ||
             unitIndex < 0 || unitIndex >= producibleUnits.Count) {
-            return;
+            return 0;
         }
 
         UnitData targetUnit = producibleUnits[unitIndex];
@@ -340,6 +349,38 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
         foreach (UnitData unit in queueList) {
             _productionQueue.Enqueue(unit);
         }
+
+        return removed;
+    }
+
+    private bool CancelCurrentProductionIfMatching(UnitData targetUnit)
+    {
+        if (!_isProducing || _currentProducingUnit == null || _currentProducingUnit != targetUnit) {
+            return false;
+        }
+
+        if (_productionCoroutine != null) {
+            StopCoroutine(_productionCoroutine);
+            _productionCoroutine = null;
+        }
+
+        if (targetUnit.productionCosts != null && ResourceManager.Instance != null) {
+            foreach (ResourceCost cost in targetUnit.productionCosts) {
+                ResourceManager.Instance.AddResource(cost.resourceType, cost.amount);
+            }
+        }
+
+        _currentProducingUnit = null;
+        _isProducing = false;
+        if (productionSlider != null) {
+            productionSlider.gameObject.SetActive(false);
+        }
+
+        if (_productionQueue.Count > 0 && IsOperational) {
+            _productionCoroutine = StartCoroutine(ProcessProductionQueue());
+        }
+
+        return true;
     }
 
     private IEnumerator ProcessProductionQueue()
@@ -444,7 +485,8 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
                 continue;
             }
 
-            GameObject unitObj = Instantiate(unitToProduce.unitPrefab, transform.position, Quaternion.identity,
+            Vector3 spawnPosition = transform.TransformPoint(unitSpawnOffset);
+            GameObject unitObj = Instantiate(unitToProduce.unitPrefab, spawnPosition, Quaternion.identity,
                 UnitManager.Instance.unitParent);
             UnitBase unitBase = unitObj.GetComponent<UnitBase>();
             if (unitBase != null) {
