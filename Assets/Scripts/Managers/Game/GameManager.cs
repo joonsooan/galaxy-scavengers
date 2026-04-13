@@ -23,9 +23,6 @@ public class GameManager : MonoBehaviour
     [Header("Audio")]
     [SerializeField] private EventReference pauseSound;
     [SerializeField] private EventReference resumeSound;
-    [SerializeField] private EventReference speed1Sound;
-    [SerializeField] private EventReference speed2Sound;
-    [SerializeField] private EventReference speed3Sound;
 
 
     [HideInInspector] public UnityEvent<DisplayableData> onStartDrag;
@@ -111,16 +108,6 @@ public class GameManager : MonoBehaviour
             TogglePause();
         }
 
-        if (!isLaunchMenuInputBlocked && Input.GetKeyDown(KeyCode.Alpha1)) {
-            SetGameSpeed(1f);
-        }
-        else if (!isLaunchMenuInputBlocked && Input.GetKeyDown(KeyCode.Alpha2)) {
-            SetGameSpeed(2f);
-        }
-        else if (!isLaunchMenuInputBlocked && Input.GetKeyDown(KeyCode.Alpha3)) {
-            SetGameSpeed(3f);
-        }
-
         if (IsPaused) return;
 
 #if UNITY_EDITOR
@@ -166,45 +153,6 @@ public class GameManager : MonoBehaviour
         }
 
         OnPauseStateChanged?.Invoke(IsPaused);
-    }
-
-    public void CycleGameSpeed()
-    {
-        float currentSpeed = _savedTimeScale;
-        float newSpeed;
-
-        if (currentSpeed <= 1f) {
-            newSpeed = 2f;
-        }
-        else if (currentSpeed <= 2f) {
-            newSpeed = 3f;
-        }
-        else {
-            newSpeed = 1f;
-        }
-
-        SetGameSpeed(newSpeed);
-    }
-
-    private void SetGameSpeed(float newSpeed)
-    {
-        if (Mathf.Approximately(_savedTimeScale, newSpeed)) return;
-
-        _savedTimeScale = newSpeed;
-        bool canChangeActualTimeScale = !IsPaused;
-        if (canChangeActualTimeScale) {
-            Time.timeScale = newSpeed;
-        }
-
-        if (Mathf.Approximately(newSpeed, 1f) && !speed1Sound.IsNull) {
-            RuntimeManager.PlayOneShot(speed1Sound);
-        }
-        else if (Mathf.Approximately(newSpeed, 2f) && !speed2Sound.IsNull) {
-            RuntimeManager.PlayOneShot(speed2Sound);
-        }
-        else if (Mathf.Approximately(newSpeed, 3f) && !speed3Sound.IsNull) {
-            RuntimeManager.PlayOneShot(speed3Sound);
-        }
     }
 
     public void GameOver(Transform gameOverFocusTarget = null)

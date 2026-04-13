@@ -1,4 +1,3 @@
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,9 +5,7 @@ public class GameSpeedUI : MonoBehaviour
 {
     [Header("UI References")]
     [SerializeField] private Image pausePlayImage;
-    [SerializeField] private TMP_Text speedText;
     [SerializeField] private Button pausePlayButton;
-    [SerializeField] private Button speedCycleButton;
 
     [Header("Sprites")]
     [SerializeField] private Sprite pauseSprite;
@@ -16,14 +13,12 @@ public class GameSpeedUI : MonoBehaviour
 
     private GameManager _gameManager;
     private bool _lastPausedState;
-    private float _lastTimeScale;
 
     private void Start()
     {
         _gameManager = GameManager.Instance;
         _lastPausedState = _gameManager != null && _gameManager.IsPaused;
-        _lastTimeScale = _gameManager != null ? _gameManager.GetTimeScale() : 1f;
-        
+
         if (pausePlayButton != null)
         {
             pausePlayButton.onClick.AddListener(OnPausePlayButtonClicked);
@@ -33,11 +28,6 @@ public class GameSpeedUI : MonoBehaviour
             }
         }
 
-        if (speedCycleButton != null)
-        {
-            speedCycleButton.onClick.AddListener(OnSpeedCycleButtonClicked);
-        }
-        
         UpdateDisplay();
     }
 
@@ -49,24 +39,11 @@ public class GameSpeedUI : MonoBehaviour
         }
     }
 
-    private void OnSpeedCycleButtonClicked()
-    {
-        if (_gameManager != null)
-        {
-            _gameManager.CycleGameSpeed();
-        }
-    }
-
     private void OnDestroy()
     {
         if (pausePlayButton != null)
         {
             pausePlayButton.onClick.RemoveAllListeners();
-        }
-
-        if (speedCycleButton != null)
-        {
-            speedCycleButton.onClick.RemoveAllListeners();
         }
     }
 
@@ -78,11 +55,9 @@ public class GameSpeedUI : MonoBehaviour
         }
 
         bool currentPaused = _gameManager.IsPaused;
-        float currentTimeScale = _gameManager.GetTimeScale();
 
-        if (currentPaused != _lastPausedState || Mathf.Abs(currentTimeScale - _lastTimeScale) > 0.01f) {
+        if (currentPaused != _lastPausedState) {
             _lastPausedState = currentPaused;
-            _lastTimeScale = currentTimeScale;
             UpdateDisplay();
         }
     }
@@ -102,12 +77,6 @@ public class GameSpeedUI : MonoBehaviour
                     pausePlayImage.sprite = playSprite;
                 }
             }
-        }
-
-        if (speedText != null) {
-            float timeScale = _gameManager.GetTimeScale();
-            int speed = Mathf.RoundToInt(timeScale);
-            speedText.text = $"x{speed}";
         }
     }
 }
