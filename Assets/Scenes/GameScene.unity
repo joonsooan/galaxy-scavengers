@@ -6481,7 +6481,7 @@ MonoBehaviour:
   minCircleRadius: 1
   maxCircleRadius: 3
   circleSpawnPercentage: 80
-  maxCircles: 50
+  maxCircles: 30
   maxResourcesPerCircle: 25
   minSpawnRadius: 8
   startingAreaRadius: 8
@@ -54928,7 +54928,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7137143227214268094, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_Name
-      value: Aether Storage Full Alert
+      value: Elec Insufficient Alert
       objectReference: {fileID: 0}
     - target: {fileID: 8067440897203084835, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_Colors.m_NormalColor.a
@@ -54936,7 +54936,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8884695541414015742, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_text
-      value: "\uC5D0\uD14C\uB974 \uC800\uC7A5\uACE0 \uBD80\uC871"
+      value: "\uC804\uB825 \uBD80\uC871"
       objectReference: {fileID: 0}
     - target: {fileID: 8884695541414015742, guid: 43f343df49d47c148b984b543fbd82df, type: 3}
       propertyPath: m_HorizontalAlignment

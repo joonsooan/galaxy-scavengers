@@ -24,9 +24,9 @@ MonoBehaviour:
   productionTime: 3
   productionCosts:
   - resourceType: 0
-    amount: 2000
+    amount: 200
   - resourceType: 1
-    amount: 2000
+    amount: 200
   - resourceType: 3
-    amount: 500
+    amount: 50
   noiseCoefficient: 0.5
