@@ -162,41 +162,8 @@ public class GameSceneQuestUIManager : MonoBehaviour
     private void OnGameSceneInitialized()
     {
         LoadActiveQuests();
-        RefreshNotifierForCoreRepairQuests();
     }
 
-    private void RefreshNotifierForCoreRepairQuests()
-    {
-        if (IsTutorialActive())
-        {
-            if (notifierIcon != null)
-            {
-                notifierIcon.SetActive(false);
-            }
-            _questPanelShaderSuppressed = true;
-            DisableShaderMaterial();
-            return;
-        }
-
-        if (QuestDataManager.Instance == null)
-        {
-            return;
-        }
-        List<QuestData> coreRepairQuests = QuestDataManager.Instance.GetAllQuests()
-            .Where(q => q != null && q.questType == QuestType.CoreRepairQuest)
-            .ToList();
-        foreach (QuestData quest in coreRepairQuests)
-        {
-            QuestState state = QuestDataManager.Instance.GetQuestState(quest.questId);
-            bool shouldShow = IsCoreRepairNotifierActive(quest.questId, state);
-            if (shouldShow)
-            {
-                ShowNotifierForNewQuest(quest.questId);
-                return;
-            }
-        }
-        UpdateNotifierIcons();
-    }
     
     private void Update()
     {
@@ -224,13 +191,6 @@ public class GameSceneQuestUIManager : MonoBehaviour
         {
             yield return null;
         }
-        List<QuestData> coreRepairQuests = QuestDataManager.Instance.GetAllQuests()
-            .Where(q => q != null && q.questType == QuestType.CoreRepairQuest)
-            .ToList();
-        foreach (QuestData quest in coreRepairQuests)
-        {
-            _viewedQuestIds.Remove(quest.questId);
-        }
         yield return null;
         LoadActiveQuests();
     }
@@ -249,16 +209,6 @@ public class GameSceneQuestUIManager : MonoBehaviour
                     {
                         cell.CheckAndUpdateCompletability();
                     }
-                }
-            }
-            
-            if (questData.questType == QuestType.CoreRepairQuest)
-            {
-                QuestState state = QuestDataManager.Instance.GetQuestState(questId);
-                bool shouldShow = IsCoreRepairNotifierActive(questId, state);
-                if (shouldShow)
-                {
-                    ShowNotifierForNewQuest(questId, false);
                 }
             }
             
@@ -421,10 +371,9 @@ public class GameSceneQuestUIManager : MonoBehaviour
             return shouldInclude;
         }).OrderBy(quest => quest.questType switch
         {
-            QuestType.CoreRepairQuest => 0,
-            QuestType.BaseQuest => 1,
-            QuestType.RequestQuest => 2,
-            _ => 3
+            QuestType.BaseQuest => 0,
+            QuestType.RequestQuest => 1,
+            _ => 2
         }).ToList();
         
         foreach (QuestData quest in activeQuests)
@@ -438,14 +387,6 @@ public class GameSceneQuestUIManager : MonoBehaviour
                 if (quest.questType == QuestType.RequestQuest)
                 {
                     isNew = !_viewedQuestIds.Contains(quest.questId) && !_acceptedRequestQuests.Contains(quest.questId);
-                }
-                else if (quest.questType == QuestType.CoreRepairQuest)
-                {
-                    isNew = !_viewedQuestIds.Contains(quest.questId);
-                    if (isNew)
-                    {
-                        ShowNotifierForNewQuest(quest.questId, false);
-                    }
                 }
                 questCell.Initialize(quest, _questBriefPanel, isNew, null, this);
                 _questCells.Add(questCell);
@@ -623,11 +564,6 @@ public class GameSceneQuestUIManager : MonoBehaviour
                         QuestState state = QuestDataManager.Instance.GetQuestState(questData.questId);
                         shouldShowNotifier = state == QuestState.Completable;
                     }
-                    else if (questData.questType == QuestType.CoreRepairQuest)
-                    {
-                        QuestState state = QuestDataManager.Instance.GetQuestState(questData.questId);
-                        shouldShowNotifier = IsCoreRepairNotifierActive(questData.questId, state);
-                    }
                     else if (questData.questType == QuestType.RequestQuest)
                     {
                         bool isAccepted = _acceptedRequestQuests.Contains(questData.questId);
@@ -782,16 +718,6 @@ public class GameSceneQuestUIManager : MonoBehaviour
         return _viewedQuestIds.Contains(questId);
     }
 
-    private bool IsCoreRepairNotifierActive(int questId, QuestState state)
-    {
-        if (state == QuestState.Completable)
-        {
-            return true;
-        }
-
-        return state == QuestState.Active && !_viewedQuestIds.Contains(questId);
-    }
-    
     public void ShowQuestDetailPanel()
     {
         if (questDetailPanelObject != null)

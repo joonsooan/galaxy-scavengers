@@ -127,7 +127,7 @@ public class QuestBriefPanel : MonoBehaviour
             rewardText.gameObject.SetActive(true);
         }
 
-        bool showRewardPanel = questData.questType != QuestType.CoreRepairQuest;
+        bool showRewardPanel = true;
         if (rewardPanel != null)
         {
             rewardPanel.SetActive(showRewardPanel);
@@ -649,58 +649,6 @@ public class QuestBriefPanel : MonoBehaviour
         }
         else if (questState == QuestState.Completable)
         {
-            QuestData questData = QuestDataManager.Instance.GetQuestData(_currentQuestId);
-
-            if (questData != null && questData.questType == QuestType.CoreRepairQuest)
-            {
-                if (CoreRepairManager.Instance != null && ResourceDataManager.Instance != null)
-                {
-                    CorePart partToRepair = CoreRepairManager.Instance.GetCorePartFromQuestId(_currentQuestId);
-
-                    if (questData.requiredResources != null && questData.requiredResources.Length > 0)
-                    {
-                        bool hasEnoughResources = true;
-                        foreach (ResourceCost cost in questData.requiredResources)
-                        {
-                            if (ResourceDataManager.Instance.GetResourceAmount(cost.resourceType) < cost.amount)
-                            {
-                                hasEnoughResources = false;
-                                break;
-                            }
-                        }
-
-                        if (hasEnoughResources)
-                        {
-                            foreach (ResourceCost cost in questData.requiredResources)
-                            {
-                                ResourceDataManager.Instance.RemoveResource(cost.resourceType, cost.amount);
-                            }
-
-                            if (CoreRepairManager.Instance.TryRepairPart(partToRepair, false))
-                            {
-                                if (QuestManager.Instance != null)
-                                {
-                                    QuestManager.Instance.CompleteQuest(_currentQuestId);
-                                    QuestManager.Instance.FinishQuest(_currentQuestId);
-                                }
-
-                                ClearQuestInfo();
-
-                                GameSceneQuestUIManager questUIManager = FindFirstObjectByType<GameSceneQuestUIManager>();
-                                if (questUIManager != null)
-                                {
-                                    questUIManager.LoadActiveQuests();
-                                    if (_isGameSceneMode)
-                                        questUIManager.HideQuestDetailPanel();
-                                }
-
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-
             if (QuestManager.Instance != null)
             {
                 bool completed = QuestManager.Instance.CompleteQuest(_currentQuestId);

@@ -141,6 +141,22 @@ public class ProcessorUIManager : MonoBehaviour
         grid.constraint = GridLayoutGroup.Constraint.Flexible;
     }
 
+    private static Image GetRecipePickerIconImage(GameObject root)
+    {
+        if (root == null) {
+            return null;
+        }
+
+        foreach (Transform child in root.transform) {
+            Image nested = child.GetComponentInChildren<Image>(true);
+            if (nested != null) {
+                return nested;
+            }
+        }
+
+        return root.GetComponent<Image>();
+    }
+
     private void BuildResourcePickerGrid(Transform parent)
     {
         if (parent == null) {
@@ -177,7 +193,7 @@ public class ProcessorUIManager : MonoBehaviour
                 continue;
             }
 
-            Image img = iconObj.GetComponentInChildren<Image>(true);
+            Image img = GetRecipePickerIconImage(iconObj);
             if (img == null) {
                 continue;
             }

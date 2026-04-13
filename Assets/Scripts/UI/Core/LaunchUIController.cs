@@ -64,7 +64,6 @@ public class LaunchUIController : MonoBehaviour
     private float _cachedFadeToBlackDuration;
     private float _cachedCountdownStartDelay;
     private GameObject _fadeOverlay;
-    private bool _isMainEngineRepairAlertActive;
     private bool _isLaunchPausePanelLockActive;
     private bool _isPreparingCountdown;
     private Tween _countdownBounceTween;
@@ -101,10 +100,6 @@ public class LaunchUIController : MonoBehaviour
 
     private void OnEnable()
     {
-        if (CoreRepairManager.Instance != null)
-        {
-            CoreRepairManager.Instance.OnRepairStatusChanged += UpdateLaunchAvailability;
-        }
         TutorialManager.OnTutorialEnded += UpdateLaunchAvailability;
     }
 
@@ -115,10 +110,6 @@ public class LaunchUIController : MonoBehaviour
 
     private void OnDisable()
     {
-        if (CoreRepairManager.Instance != null)
-        {
-            CoreRepairManager.Instance.OnRepairStatusChanged -= UpdateLaunchAvailability;
-        }
         TutorialManager.OnTutorialEnded -= UpdateLaunchAvailability;
         _isPreparingCountdown = false;
         SetLaunchPausePanelLock(false);
@@ -752,43 +743,14 @@ public class LaunchUIController : MonoBehaviour
 
     private void UpdateLaunchAvailability()
     {
-        bool isEngineRepaired = CoreRepairManager.Instance != null && CoreRepairManager.Instance.IsPartRepaired(CorePart.Engine);
-        bool isTutorialActive = TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive();
-        GameAlertUIManager alertManager = FindFirstObjectByType<GameAlertUIManager>();
-        bool shouldShowEngineRepairAlert = !isEngineRepaired && GameManager.IsGameplayReady && !isTutorialActive && IsReadyToShowMainEngineAlert();
-        if (alertManager != null)
-        {
-            if (shouldShowEngineRepairAlert && !_isMainEngineRepairAlertActive)
-            {
-                alertManager.RegisterAlert(GameAlertType.MainEngineRepair);
-                _isMainEngineRepairAlertActive = true;
-            }
-            else if (!shouldShowEngineRepairAlert && _isMainEngineRepairAlertActive)
-            {
-                alertManager.UnregisterAlert(GameAlertType.MainEngineRepair);
-                _isMainEngineRepairAlertActive = false;
-            }
-        }
-        else
-        {
-            _isMainEngineRepairAlertActive = false;
-        }
-        
         if (launchButton != null)
         {
-            launchButton.interactable = isEngineRepaired;
+            launchButton.interactable = true;
 
             TMP_Text buttonText = launchButton.GetComponentInChildren<TMP_Text>();
             if (buttonText != null)
             {
-                if (isEngineRepaired)
-                {
-                    buttonText.text = "탈출";
-                }
-                else
-                {
-                    buttonText.text = "탈출\n불가";
-                }
+                buttonText.text = "탈출";
             }
         }
     }
@@ -800,28 +762,7 @@ public class LaunchUIController : MonoBehaviour
             yield return null;
         }
 
-        while (!IsReadyToShowMainEngineAlert())
-        {
-            yield return null;
-        }
-
         UpdateLaunchAvailability();
-    }
-
-    private bool IsReadyToShowMainEngineAlert()
-    {
-        if (LoadingUIManager.Instance != null && LoadingUIManager.Instance.IsAnyLoadingScreenActive())
-        {
-            return false;
-        }
-
-        CameraTargetController cameraTargetController = FindFirstObjectByType<CameraTargetController>();
-        if (cameraTargetController == null || cameraTargetController.followTarget == null)
-        {
-            return false;
-        }
-
-        return cameraTargetController.followTarget.GetComponent<Unit_Player>() != null;
     }
 }
 

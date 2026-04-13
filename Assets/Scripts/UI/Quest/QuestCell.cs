@@ -10,9 +10,6 @@ public class QuestCell : MonoBehaviour
     [SerializeField] private Button cellButton;
     [SerializeField] private GameObject configureIcon;
     [SerializeField] private GameObject notifierIcon;
-    [Header("Title Color")]
-    [SerializeField] private Color coreRepairQuestTitleColor = Color.cyan;
-
     private QuestData _questData;
     private QuestDetailPanel _questDetailPanel;
     private QuestBriefPanel _questBriefPanel;
@@ -80,13 +77,7 @@ public class QuestCell : MonoBehaviour
     {
         if (_questData == null || QuestDataManager.Instance == null) return;
         
-        bool isNew = _isNew;
-        if (_gameSceneQuestUIManager != null && _questData.questType == QuestType.CoreRepairQuest)
-        {
-            isNew = !_gameSceneQuestUIManager.IsQuestViewed(_questData.questId);
-        }
-        
-        UpdateConfigureIcon(isNew, _questData);
+        UpdateConfigureIcon(_isNew, _questData);
     }
 
     public void Initialize(QuestData questData, QuestBriefPanel questBriefPanel, bool isNew, QuestUIHandler questUIHandler = null, GameSceneQuestUIManager gameSceneQuestUIManager = null)
@@ -174,19 +165,6 @@ public class QuestCell : MonoBehaviour
             {
                 QuestState state = QuestDataManager.Instance.GetQuestState(questData.questId);
                 shouldShowNotifier = IsQuestReadyToComplete(questData.questId, state);
-            }
-            else if (questData.questType == QuestType.CoreRepairQuest)
-            {
-                QuestState state = QuestDataManager.Instance.GetQuestState(questData.questId);
-                if (_gameSceneQuestUIManager != null)
-                {
-                    bool isViewed = _gameSceneQuestUIManager.IsQuestViewed(questData.questId);
-                    shouldShowNotifier = state == QuestState.Completable || (state == QuestState.Active && !isViewed);
-                }
-                else
-                {
-                    shouldShowNotifier = state == QuestState.Completable || (state == QuestState.Active && isNew);
-                }
             }
             else if (questData.questType == QuestType.RequestQuest)
             {
@@ -365,36 +343,7 @@ public class QuestCell : MonoBehaviour
             return;
         }
 
-        if (questData != null && questData.questType == QuestType.CoreRepairQuest)
-        {
-            questNameText.color = GetCoreRepairQuestTitleColor(questData);
-        }
-        else
-        {
-            questNameText.color = _defaultQuestTitleColor;
-        }
-    }
-
-    private Color GetCoreRepairQuestTitleColor(QuestData questData)
-    {
-        if (questData == null)
-        {
-            return coreRepairQuestTitleColor;
-        }
-
-        if (CoreRepairManager.Instance == null)
-        {
-            return coreRepairQuestTitleColor;
-        }
-
-        CorePart part = CoreRepairManager.Instance.GetCorePartFromQuestId(questData.questId);
-        CorePartData partData = CoreRepairManager.Instance.GetPartData(part);
-        if (partData != null)
-        {
-            return partData.questTitleColor;
-        }
-
-        return coreRepairQuestTitleColor;
+        questNameText.color = _defaultQuestTitleColor;
     }
 }
 

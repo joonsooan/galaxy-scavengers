@@ -17,7 +17,7 @@ public class CameraTargetController : MonoBehaviour
     public Transform followTarget;
     public MapGenerator mapGenerator;
     private readonly float[] _speedMultipliers = { 1f, 1.5f, 2.5f };
-    private readonly int[] _zoomDivisors = { 1, 2, 4 };
+    private readonly float[] _zoomDivisors = { 0.75f, 1.25f, 2f };
 
     private int _currentZoomIndex;
     private float _defaultEdgePanSpeed;
@@ -152,8 +152,8 @@ public class CameraTargetController : MonoBehaviour
 
     private void GetBoundsForZoomLevel(int zoomIndex, out float minX, out float maxX, out float minY, out float maxY)
     {
-        int currentDivisor = _zoomDivisors[zoomIndex];
-        float currentPPU = (float)_defaultPpu / currentDivisor;
+        float currentDivisor = _zoomDivisors[zoomIndex];
+        float currentPPU = _defaultPpu / currentDivisor;
 
         float vertExtent;
         if (_pixelPerfCam != null) {
@@ -406,8 +406,8 @@ public class CameraTargetController : MonoBehaviour
         }
 
         if (_pixelPerfCam != null && _currentZoomIndex < _zoomDivisors.Length) {
-            int divisor = _zoomDivisors[_currentZoomIndex];
-            _pixelPerfCam.assetsPPU = _defaultPpu / divisor;
+            float divisor = _zoomDivisors[_currentZoomIndex];
+            _pixelPerfCam.assetsPPU = Mathf.Max(1, Mathf.RoundToInt(_defaultPpu / divisor));
         }
 
         if (_currentZoomIndex < _speedMultipliers.Length) {

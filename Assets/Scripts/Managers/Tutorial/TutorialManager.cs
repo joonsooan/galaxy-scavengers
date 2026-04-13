@@ -172,6 +172,10 @@ public class TutorialManager : MonoBehaviour
 
     public bool ShouldStartTutorial()
     {
+        if (GameManager.Instance != null && GameManager.Instance.IgnoreTutorial) {
+            return false;
+        }
+
         if (QuestManager.Instance == null) {
             Debug.LogWarning("[TutorialManager] ShouldStartTutorial: QuestManager.Instance is null");
             return false;
@@ -242,10 +246,6 @@ public class TutorialManager : MonoBehaviour
 
     private void StartTutorial()
     {
-        if (CoreRepairManager.Instance != null) {
-            CoreRepairManager.Instance.ApplyDebuffsImmediately();
-        }
-
         if (BgmManager.Instance != null) {
             BgmManager.Instance.PlayTutorialBgm();
         }

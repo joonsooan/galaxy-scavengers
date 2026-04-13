@@ -519,14 +519,10 @@ public class Unit_Player : UnitBase
         }
 
         if (!TutorialManager.Instance.IsTutorialActive()) {
-            return false;
-        }
-
-        if (TutorialManager.Instance.HasReachedStepType(TutorialStepType.BulletFired)) {
             return true;
         }
 
-        return false;
+        return TutorialManager.Instance.HasReachedStepType(TutorialStepType.BulletFired);
     }
 
     private void TryFireBullet(Vector3 targetPosition)

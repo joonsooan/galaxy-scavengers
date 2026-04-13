@@ -26,18 +26,7 @@ public class UnitManager : MonoBehaviour
 
     public int GetMaxPopulation()
     {
-        int maxPop = baseMaxPopulation;
-        
-        if (CoreRepairManager.Instance != null && !CoreRepairManager.Instance.IsPartRepaired(CorePart.Controller))
-        {
-            CorePartData controllerData = CoreRepairManager.Instance.GetPartData(CorePart.Controller);
-            if (controllerData != null)
-            {
-                maxPop = Mathf.Max(1, Mathf.RoundToInt(baseMaxPopulation * (1f - controllerData.debuffValue)));
-            }
-        }
-        
-        return maxPop;
+        return baseMaxPopulation;
     }
 
     public bool CanSpawnUnit()

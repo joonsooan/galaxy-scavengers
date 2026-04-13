@@ -13,7 +13,7 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
     [SerializeField] private List<UnitData> producibleUnits;
 
     [Header("Electricity consumption (drone production)")]
-    [SerializeField] private int electricityConsumptionPerSecond = 1;
+    [SerializeField] private int electricityConsumptionPerSecond = 0;
 
     [Header("Production Progress UI")]
     [SerializeField] private ProductionProgressSlider productionSlider;
@@ -180,13 +180,6 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
 
     private float GetProductionSpeedMultiplier()
     {
-        if (CoreRepairManager.Instance != null && !CoreRepairManager.Instance.IsPartRepaired(CorePart.Repeater)) {
-            CorePartData repeaterData = CoreRepairManager.Instance.GetPartData(CorePart.Repeater);
-            if (repeaterData != null) {
-                return 1f - repeaterData.debuffValue;
-            }
-        }
-
         return 1f;
     }
 

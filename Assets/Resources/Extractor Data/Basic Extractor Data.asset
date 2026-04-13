@@ -29,4 +29,4 @@ MonoBehaviour:
     cycleDurationSeconds: 5
     dataPercentGainedPerCycle: 0.2
     outputDataItemsPerCycle: 2
-  electricityConsumptionPerSecond: 10
+  electricityConsumptionPerSecond: 5

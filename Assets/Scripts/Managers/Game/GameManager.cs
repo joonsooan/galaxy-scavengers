@@ -16,6 +16,10 @@ public class GameManager : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool skipProceduralGenerationWhenLoadingGameScene;
 
+    [Header("Tutorial")]
+    [Tooltip("체크 시 튜토리얼 퀘스트 완료 여부와 관계없이 튜토리얼을 시작하지 않고, 일반 게임 시작 흐름(패널 표시·BGM 등)으로 진행합니다.")]
+    [SerializeField] private bool ignoreTutorial;
+
     [Header("Audio")]
     [SerializeField] private EventReference pauseSound;
     [SerializeField] private EventReference resumeSound;
@@ -33,6 +37,7 @@ public class GameManager : MonoBehaviour
     private float _savedTimeScale = 1f;
     private static readonly WaitForSeconds _wait05 = CoroutineCache.GetWaitForSeconds(0.5f);
     public static GameManager Instance { get; private set; }
+    public bool IgnoreTutorial => ignoreTutorial;
     public bool IsPaused { get; private set; }
 
     public bool IsGameSceneInitialized { get; private set; }
@@ -400,10 +405,6 @@ public class GameManager : MonoBehaviour
         if (progress != null) {
             progress.UpdateProgress(0.0f, "착륙 좌표 고정 중...");
             yield return _wait05;
-        }
-
-        if (CoreRepairManager.Instance != null) {
-            CoreRepairManager.Instance.InitializeLanding();
         }
 
         IsGameSceneInitialized = true;

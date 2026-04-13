@@ -226,7 +226,7 @@ public class QuestDataManager : MonoBehaviour
                 continue;
             }
 
-            if (quest.questType != QuestType.RequestQuest && quest.questType != QuestType.CoreRepairQuest) {
+            if (quest.questType != QuestType.RequestQuest) {
                 continue;
             }
 
@@ -560,7 +560,7 @@ public class QuestDataManager : MonoBehaviour
                 return false;
             }
         }
-        else if (quest.questType == QuestType.RequestQuest || quest.questType == QuestType.CoreRepairQuest) {
+        else if (quest.questType == QuestType.RequestQuest) {
             if (sceneName == "GameScene") {
                 if (ResourceDataManager.Instance == null) {
                     return false;
@@ -955,26 +955,6 @@ public class QuestDataManager : MonoBehaviour
         UnlockDependentQuests(questId);
 
         return true;
-    }
-
-    public void ResetCoreRepairQuestState(int questId)
-    {
-        if (!_questDataDict.ContainsKey(questId)) {
-            return;
-        }
-
-        QuestData quest = _questDataDict[questId];
-        if (quest == null || quest.questType != QuestType.CoreRepairQuest) {
-            return;
-        }
-
-        _completedQuestIds.Remove(questId);
-        _questsReturnedSuccessfully.Remove(questId);
-        _questsReturnedWithFailure.Remove(questId);
-        _questStates[questId] = QuestState.Active;
-        _activeQuestIds.Add(questId);
-        OnQuestStateChanged?.Invoke(questId);
-        SaveQuestProgress();
     }
 
     private void UnlockDependentQuests(int completedQuestId)

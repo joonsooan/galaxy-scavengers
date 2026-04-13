@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -8,6 +9,10 @@ using UnityEngine.UI;
 public class ElectricityConsumptionManager : MonoBehaviour
 {
     public static ElectricityConsumptionManager Instance { get; private set; }
+
+    public bool IsElectricityDemandUnmet { get; private set; }
+
+    public event Action OnAfterElectricityConsumersResolved;
 
     private readonly List<IElectricityConsumer> _electricityConsumers = new List<IElectricityConsumer>();
     private readonly List<ResourceGenerator> _resourceGenerators = new List<ResourceGenerator>();
@@ -597,6 +602,30 @@ public class ElectricityConsumptionManager : MonoBehaviour
             }
             _powerReceiverVisualStates[receiver] = vs;
         }
+
+        bool unmet = false;
+        foreach (IElectricityConsumer consumer in _electricityConsumers)
+        {
+            if (consumer == null)
+            {
+                continue;
+            }
+
+            if (consumer.ElectricityConsumptionPerSecond <= 0)
+            {
+                continue;
+            }
+
+            if (_consumerVisualStates.TryGetValue(consumer, out PowerFeedVisualState vs) &&
+                vs == PowerFeedVisualState.InsufficientPool)
+            {
+                unmet = true;
+                break;
+            }
+        }
+
+        IsElectricityDemandUnmet = unmet;
+        OnAfterElectricityConsumersResolved?.Invoke();
     }
 
     private static HashSet<long> BuildPoweredCellsXYKeys(HashSet<Vector3Int> poweredCells)
