@@ -431,6 +431,10 @@ public class MapObjectSpawner : MonoBehaviour
         {
             return;
         }
+        if (_resourceTilePositions.ContainsKey(cellPos))
+        {
+            return;
+        }
         try
         {
             if (grid == null) return;

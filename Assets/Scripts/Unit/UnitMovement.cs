@@ -25,7 +25,7 @@ public class UnitMovement : MonoBehaviour
     private static int _lastProcessedFrame = -1;
     private const int MaxPathfindingPerFrame = 5;
     private static readonly Queue<(UnitMovement unit, Vector3 targetPos, float stoppingDistance)> _pendingRepathRequests = new Queue<(UnitMovement, Vector3, float)>();
-    private static readonly Queue<(UnitMovement unit, Vector2 targetPos, float stoppingDistance, bool isDirect)> _deferredPathfindingRequests = new Queue<(UnitMovement, Vector2, float, bool)>();
+    private static readonly Queue<(UnitMovement unit, Vector2 targetPos, float stoppingDistance)> _deferredPathfindingRequests = new Queue<(UnitMovement, Vector2, float)>();
 
     private static readonly float D = 1f;
     private static readonly float D2 = 1.41421356f;
@@ -90,10 +90,9 @@ public class UnitMovement : MonoBehaviour
             }
         }
         while (_pathfindingCallsThisFrame < MaxPathfindingPerFrame && _deferredPathfindingRequests.Count > 0) {
-            var (unit, targetPos, stoppingDistance, isDirect) = _deferredPathfindingRequests.Dequeue();
+            var (unit, targetPos, stoppingDistance) = _deferredPathfindingRequests.Dequeue();
             if (unit != null && unit.isActiveAndEnabled) {
-                if (isDirect) unit.SetNewTargetDirect(targetPos, stoppingDistance);
-                else unit.SetNewTarget(targetPos, stoppingDistance);
+                unit.SetNewTarget(targetPos, stoppingDistance);
             }
         }
     }
@@ -207,49 +206,7 @@ public class UnitMovement : MonoBehaviour
 
     public bool SetNewTargetDirect(Vector2 targetPosition, float stoppingDistance)
     {
-        if (_rb == null || _grid == null) {
-            return false;
-        }
-
-        UnregisterInteractionCell();
-
-        _rb.linearVelocity = Vector2.zero;
-        _isForceStopped = false;
-        FinalTargetPosition = targetPosition;
-        _finalStoppingDistance = stoppingDistance;
-        _isAtFinalTarget = false;
-
-        Vector3Int targetCell = _grid.WorldToCell(targetPosition);
-        RegisterInteractionCell(targetCell);
-
-        if (HasClearLineOfSight(transform.position, FinalTargetPosition)) {
-            _path.Clear();
-            _currentWaypoint = FinalTargetPosition;
-            return true;
-        }
-
-        if (!TryConsumePathfindingBudget()) {
-            _deferredPathfindingRequests.Enqueue((this, targetPosition, stoppingDistance, true));
-            return false;
-        }
-
-        _path = FindPath(transform.position, FinalTargetPosition);
-
-        if (_path.Count > 1) {
-            Vector3 firstPoint = _path.Peek();
-            Vector3Int firstCell = _grid.WorldToCell(firstPoint);
-            Vector3Int currentCell = _grid.WorldToCell(transform.position);
-
-            if (firstCell == currentCell) {
-                _path.Dequeue();
-            }
-        }
-
-        if (_path.Count > 0) {
-            _currentWaypoint = _path.Dequeue();
-            return true;
-        }
-        return false;
+        return SetNewTarget(targetPosition, stoppingDistance);
     }
 
     public bool SetNewTarget(Vector2 targetPosition, float stoppingDistance)
@@ -289,14 +246,8 @@ public class UnitMovement : MonoBehaviour
 
         RegisterInteractionCell(targetCellForPathfinding);
 
-        if (HasClearLineOfSight(transform.position, FinalTargetPosition)) {
-            _path.Clear();
-            _currentWaypoint = FinalTargetPosition;
-            return true;
-        }
-
         if (!TryConsumePathfindingBudget()) {
-            _deferredPathfindingRequests.Enqueue((this, (Vector2)FinalTargetPosition, stoppingDistance, false));
+            _deferredPathfindingRequests.Enqueue((this, (Vector2)FinalTargetPosition, stoppingDistance));
             return false;
         }
 
@@ -376,8 +327,6 @@ public class UnitMovement : MonoBehaviour
         Vector3Int endCell = _grid.WorldToCell(endPos);
 
         Node startNode = GetNodeFromPool(startCell, null, 0, GetDistance(startCell, endCell));
-        Node closestNode = startNode;
-        float bestHeuristic = startNode.hCost;
 
         AllNodes.Add(startCell, startNode);
         OpenSet.Push(startNode);
@@ -392,12 +341,6 @@ public class UnitMovement : MonoBehaviour
             Node currentNode = OpenSet.Pop();
             if (ClosedSet.Contains(currentNode.position)) continue;
             ClosedSet.Add(currentNode.position);
-            if (currentNode.hCost < bestHeuristic)
-            {
-                bestHeuristic = currentNode.hCost;
-                closestNode = currentNode;
-            }
-
             if (currentNode.position == endCell) {
                 return ReconstructPath(currentNode);
             }
@@ -428,31 +371,8 @@ public class UnitMovement : MonoBehaviour
         if (iterations >= maxIterations) {
         }
 
-        if (closestNode != null && closestNode.position != startCell)
-        {
-            return ReconstructPath(closestNode);
-        }
-
         Debug.LogWarning($"Path not found. start={startCell}, end={endCell}, iter={iterations}/{maxIterations}");
         return new Queue<Vector3>();
-    }
-
-    private bool HasClearLineOfSight(Vector3 from, Vector3 to)
-    {
-        Vector3Int startCell = _grid.WorldToCell(from);
-        Vector3Int endCell = _grid.WorldToCell(to);
-
-        int dx = Mathf.Abs(endCell.x - startCell.x);
-        int dy = Mathf.Abs(endCell.y - startCell.y);
-        int steps = Mathf.Max(dx, dy, 1);
-
-        for (int i = 0; i <= steps; i++) {
-            float t = (float)i / steps;
-            Vector3 point = Vector3.Lerp(from, to, t);
-            Vector3Int cell = _grid.WorldToCell(point);
-            if (!BuildingManager.Instance.IsCellWalkable(cell, _unitBase is Unit_Construct)) return false;
-        }
-        return true;
     }
 
     private List<Vector3Int> GetInteractionCells(List<Vector3Int> occupiedCells)

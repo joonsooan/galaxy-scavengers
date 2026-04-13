@@ -17,7 +17,7 @@ public class CameraTargetController : MonoBehaviour
     public Transform followTarget;
     public MapGenerator mapGenerator;
     private readonly float[] _speedMultipliers = { 1f, 1.5f, 2.5f };
-    private readonly float[] _zoomDivisors = { 0.75f, 1.5f, 2.5f };
+    private readonly float[] _zoomDivisors = { 0.75f, 1.25f, 2.5f };
 
     private int _currentZoomIndex;
     private float _defaultEdgePanSpeed;

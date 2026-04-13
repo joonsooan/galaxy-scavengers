@@ -103,6 +103,7 @@ public class Unit_Miner : UnitBase
     protected override void OnDisable()
     {
         base.OnDisable();
+        _targetResourceNode?.EndMining(this);
         UnsubscribeEvents();
         ReleaseMiningCellReservation();
         ReleaseStorageReservation();
@@ -111,6 +112,7 @@ public class Unit_Miner : UnitBase
 
     protected override void OnDestroy()
     {
+        _targetResourceNode?.EndMining(this);
         ReleaseMiningCellReservation();
         ClearMinerAlerts();
         StopMiningVibration();
@@ -1010,7 +1012,12 @@ public class Unit_Miner : UnitBase
 
     private void StartMining(ResourceNode target)
     {
+        if (_targetResourceNode != null && _targetResourceNode != target)
+        {
+            _targetResourceNode.EndMining(this);
+        }
         _targetResourceNode = target;
+        _targetResourceNode?.BeginMining(this);
 
         _miningDelay = CoroutineCache.GetWaitForSeconds(target.timeToMinePerUnit);
 
@@ -1021,6 +1028,10 @@ public class Unit_Miner : UnitBase
 
     private void StopMining()
     {
+        if (_targetResourceNode != null)
+        {
+            _targetResourceNode.EndMining(this);
+        }
         if (_mineCoroutine != null) {
             StopCoroutine(_mineCoroutine);
             _mineCoroutine = null;

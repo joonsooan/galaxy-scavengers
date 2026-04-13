@@ -78,6 +78,7 @@ public class Unit_Player : UnitBase
 
     protected override void OnDisable()
     {
+        _targetResourceNode?.EndMining(this);
         GameManager.OnPauseStateChanged -= HandlePauseStateChanged;
         base.OnDisable();
     }
@@ -102,6 +103,7 @@ public class Unit_Player : UnitBase
 
     protected override void OnDestroy()
     {
+        _targetResourceNode?.EndMining(this);
         StopMiningParticles();
         StopMiningSound();
 
@@ -365,6 +367,7 @@ public class Unit_Player : UnitBase
             StopMining();
             return;
         }
+        _targetResourceNode.BeginMining(this);
 
         if (_mineCoroutine == null) {
             _miningDelay = CoroutineCache.GetWaitForSeconds(_targetResourceNode.timeToMinePerUnit);
@@ -378,6 +381,9 @@ public class Unit_Player : UnitBase
 
     private void StopMining()
     {
+        if (_targetResourceNode != null) {
+            _targetResourceNode.EndMining(this);
+        }
         if (_mineCoroutine != null) {
             StopCoroutine(_mineCoroutine);
             _mineCoroutine = null;
