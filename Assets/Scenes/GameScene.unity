@@ -6457,7 +6457,7 @@ MonoBehaviour:
   resourceTilemap: {fileID: 2116328957}
   resourceSettings:
   - resourceType: 0
-    resourceRuleTile: {fileID: 11400000, guid: d543be48c51a93b4b93bd82b7895f211, type: 2}
+    resourceRuleTile: {fileID: 11400000, guid: 67e71fd0640035f48babe81f640aa485, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: 9e542c61b3b4f0745ab05a9dadeccb8f, type: 3}
     spawnFrequencyPercent: 50
     baseRichness: 10
@@ -6483,6 +6483,8 @@ MonoBehaviour:
   circleSpawnPercentage: 80
   maxCircles: 40
   maxResourcesPerCircle: 25
+  edgeBandRatio: 0.4
+  edgeRemovalChance: 0.3
   minSpawnRadius: 6
   startingAreaRadius: 6
   startingAreaCircleCount: 3
@@ -23249,7 +23251,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 662.501
+  orthographic size: 11.25
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -39668,7 +39670,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &850145276
 RectTransform:
   m_ObjectHideFlags: 0
@@ -43521,7 +43523,7 @@ MonoBehaviour:
   fogTile: {fileID: 11400000, guid: 10bd3c981c2104842b1ff71688283ee8, type: 2}
   fullyVisibleColor: {r: 1, g: 1, b: 1, a: 0}
   partlyVisibleColor: {r: 0, g: 0, b: 0, a: 0.6862745}
-  invisibleColor: {r: 0, g: 0, b: 0, a: 0.8235294}
+  invisibleColor: {r: 0, g: 0, b: 0, a: 0.9019608}
 --- !u!4 &1022667848
 Transform:
   m_ObjectHideFlags: 0
@@ -99056,7 +99058,7 @@ RectTransform:
   m_Father: {fileID: 469765483}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0.411, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}

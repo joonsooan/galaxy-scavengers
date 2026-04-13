@@ -490,6 +490,7 @@ public class Unit_Miner : UnitBase
 
     private void GoToStorage()
     {
+        ResetIdleRoam();
         ReleaseStorageReservation();
 
         UnloadTarget bestTarget = FindClosestUnloadPosition();

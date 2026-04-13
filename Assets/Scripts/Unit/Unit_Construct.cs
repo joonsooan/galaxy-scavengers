@@ -556,6 +556,7 @@ public class Unit_Construct : UnitBase
 
     public void SetTask_FetchResource(ConstructionSite.ConstructionRequest request, ConstructionSite site)
     {
+        ResetIdleRoam();
         if (movement == null) {
             if (request != null && request.site != null) {
                 request.site.CancelRequest(request);

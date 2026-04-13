@@ -670,6 +670,7 @@ public class Unit_Drone : UnitBase
 
     public void SetTask_FetchResource(Processor.ResourceRequest request, Processor processor)
     {
+        ResetIdleRoam();
         SetDroneIsNotAssignedAlert(false);
         SetDroneNoResourceAlert(false);
         _currentRequest = request;
@@ -733,6 +734,7 @@ public class Unit_Drone : UnitBase
 
     public void SetTask_Process(Processor processor, ActiveRecipe recipeTask)
     {
+        ResetIdleRoam();
         SetDroneNoResourceAlert(false);
         if (recipeTask == null) {
             SetTask_Idle();
@@ -764,6 +766,7 @@ public class Unit_Drone : UnitBase
 
     private void SetTask_ReturnHome(bool stopMovement = false, bool dueToNoResource = false)
     {
+        ResetIdleRoam();
         ReleaseFromRecipeTask();
         HideProgressBar();
 
