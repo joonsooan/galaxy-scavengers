@@ -122,8 +122,8 @@ public class GameAlertUIManager : MonoBehaviour
 
     private void OnEnable()
     {
-        LaunchUIController.OnLaunchCountdownStarted += OnLaunchCountdownStarted;
-        LaunchUIController.OnLaunchCountdownFinished += OnLaunchCountdownFinished;
+        LaunchUIController.OnLaunchSequenceStarted += OnLaunchSequenceStarted;
+        LaunchUIController.OnLaunchSequenceFinished += OnLaunchSequenceFinished;
         _isStorageFullByTracker = false;
         _isAetherFullByTracker = false;
         if (_bindStorageTrackerCoroutine != null)
@@ -157,6 +157,8 @@ public class GameAlertUIManager : MonoBehaviour
         {
             NoiseManager.Instance.OnNoiseChanged -= OnNoiseChanged;
         }
+        LaunchUIController.OnLaunchSequenceStarted -= OnLaunchSequenceStarted;
+        LaunchUIController.OnLaunchSequenceFinished -= OnLaunchSequenceFinished;
         HideTooltip();
     }
 
@@ -336,7 +338,7 @@ public class GameAlertUIManager : MonoBehaviour
                type == GameAlertType.DroneIsNotAssigned;
     }
 
-    private void OnLaunchCountdownStarted()
+    private void OnLaunchSequenceStarted()
     {
         _isCountdownIgnoringAlerts = true;
         _minerNoResourceCount = 0;
@@ -350,7 +352,7 @@ public class GameAlertUIManager : MonoBehaviour
         SetAlertActive(GameAlertType.DroneIsNotAssigned, false);
     }
 
-    private void OnLaunchCountdownFinished()
+    private void OnLaunchSequenceFinished()
     {
         _isCountdownIgnoringAlerts = false;
     }

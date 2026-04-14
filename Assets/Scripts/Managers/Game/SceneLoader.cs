@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
@@ -155,14 +154,6 @@ public class SceneLoader : MonoBehaviour
 
         if (LoadingUIManager.Instance != null) {
             bool isSuccess = _returnState == ReturnFromGameState.Success;
-            var questIds = (QuestDataManager.Instance != null) 
-                ? QuestDataManager.Instance.GetActiveQuestIds() 
-                : new HashSet<int>();
-
-            foreach (int id in questIds) {
-                if (isSuccess) QuestDataManager.Instance.MarkQuestReturnedSuccessfully(id);
-                else QuestDataManager.Instance.MarkQuestReturnedWithFailure(id);
-            }
 
             if (isSuccess) {
                 LoadingUIManager.Instance.ShowSuccessLoadingScreen();

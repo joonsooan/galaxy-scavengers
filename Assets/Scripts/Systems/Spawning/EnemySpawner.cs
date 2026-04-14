@@ -100,9 +100,9 @@ public class EnemySpawner : MonoBehaviour
 
         DayNightCycleManager.OnNightStarted += OnNightStarted;
         DayNightCycleManager.OnDayStarted += OnDayStarted;
-        LaunchUIController.OnLaunchCountdownStarted += OnLaunchCountdownStarted;
-        LaunchUIController.OnLaunchCountdownFinished += OnLaunchCountdownFinished;
-        LaunchUIController.OnLaunchCountdownSecondChanged += OnLaunchCountdownSecondChanged;
+        LaunchUIController.OnLaunchSequenceStarted += OnLaunchSequenceStarted;
+        LaunchUIController.OnLaunchSequenceFinished += OnLaunchSequenceFinished;
+        LaunchUIController.OnLaunchSequenceSecondTick += OnLaunchSequenceSecondTick;
 
         if (NoiseManager.Instance != null) NoiseManager.Instance.OnNoiseChanged += OnNoiseChanged;
         _isSubscribedToEvents = true;
@@ -117,9 +117,9 @@ public class EnemySpawner : MonoBehaviour
 
         DayNightCycleManager.OnNightStarted -= OnNightStarted;
         DayNightCycleManager.OnDayStarted -= OnDayStarted;
-        LaunchUIController.OnLaunchCountdownStarted -= OnLaunchCountdownStarted;
-        LaunchUIController.OnLaunchCountdownFinished -= OnLaunchCountdownFinished;
-        LaunchUIController.OnLaunchCountdownSecondChanged -= OnLaunchCountdownSecondChanged;
+        LaunchUIController.OnLaunchSequenceStarted -= OnLaunchSequenceStarted;
+        LaunchUIController.OnLaunchSequenceFinished -= OnLaunchSequenceFinished;
+        LaunchUIController.OnLaunchSequenceSecondTick -= OnLaunchSequenceSecondTick;
 
         if (NoiseManager.Instance != null) NoiseManager.Instance.OnNoiseChanged -= OnNoiseChanged;
         _isSubscribedToEvents = false;
@@ -484,17 +484,17 @@ public class EnemySpawner : MonoBehaviour
         return activeCount;
     }
 
-    private void OnLaunchCountdownStarted()
+    private void OnLaunchSequenceStarted()
     {
-        Debug.Log("[EnemySpawner] Emergency trigger: Launch countdown started. Starting emergency spawn.");
+        Debug.Log("[EnemySpawner] Emergency trigger: Launch sequence started. Starting emergency spawn.");
         StartCountdownEmergency();
     }
 
-    private void OnLaunchCountdownFinished()
+    private void OnLaunchSequenceFinished()
     {
         if (_countdownEmergencyActive)
         {
-            Debug.Log("[EnemySpawner] Emergency trigger ended: Launch countdown finished. Stopping countdown emergency spawn and resetting countdown multiplier bonus.");
+            Debug.Log("[EnemySpawner] Emergency trigger ended: Launch sequence finished. Stopping launch emergency spawn and resetting countdown multiplier bonus.");
         }
         StopCountdownEmergency();
     }
@@ -528,7 +528,7 @@ public class EnemySpawner : MonoBehaviour
 
         _countdownEmergencyActive = true;
         _countdownEmergencyElapsedSeconds = 0;
-        _currentEmergencyTriggerSource = "LaunchCountdown";
+        _currentEmergencyTriggerSource = "LaunchSequence";
         ActivateExistingEnemiesFromBudget(ConvertPercentToMultiplier(noise100BudgetMultiplierPercent), true);
         SpawnEmergencyWave();
         TryStopEmergencyWaveLoop();
@@ -582,11 +582,11 @@ public class EnemySpawner : MonoBehaviour
     {
         if (_countdownEmergencyActive && _noiseEmergencyActive)
         {
-            _currentEmergencyTriggerSource = "Noise100+LaunchCountdown";
+            _currentEmergencyTriggerSource = "Noise100+LaunchSequence";
         }
         else if (_countdownEmergencyActive)
         {
-            _currentEmergencyTriggerSource = "LaunchCountdown";
+            _currentEmergencyTriggerSource = "LaunchSequence";
         }
         else if (_noiseEmergencyActive)
         {
@@ -607,7 +607,7 @@ public class EnemySpawner : MonoBehaviour
         }
     }
 
-    private void OnLaunchCountdownSecondChanged(int remainingSeconds)
+    private void OnLaunchSequenceSecondTick(int remainingSeconds)
     {
         if (!_countdownEmergencyActive)
         {

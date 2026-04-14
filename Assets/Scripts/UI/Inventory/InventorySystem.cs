@@ -590,7 +590,7 @@ public class InventorySystem : MonoBehaviour
         LaunchUIController launchController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
         if (launchController != null)
         {
-            launchController.StartLaunchCountdown();
+            launchController.StartLaunchSequence();
         }
     }
 }

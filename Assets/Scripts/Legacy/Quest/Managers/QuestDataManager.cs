@@ -316,7 +316,7 @@ public class QuestDataManager : MonoBehaviour
 
     private void LoadQuestsFromResources()
     {
-        QuestData[] loadedQuests = Resources.LoadAll<QuestData>("Quest Data");
+        QuestData[] loadedQuests = Resources.LoadAll<QuestData>("Legacy/QuestRuntime/Quest Data");
 
         if (loadedQuests != null && loadedQuests.Length > 0) {
             allQuests.Clear();

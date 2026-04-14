@@ -17,7 +17,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private bool skipProceduralGenerationWhenLoadingGameScene;
 
     [Header("Tutorial")]
-    [Tooltip("체크 시 튜토리얼 퀘스트 완료 여부와 관계없이 튜토리얼을 시작하지 않고, 일반 게임 시작 흐름(패널 표시·BGM 등)으로 진행합니다.")]
+    [Tooltip("체크 시 저장된 튜토리얼 완료 여부와 관계없이 튜토리얼을 시작하지 않고, 일반 게임 시작 흐름(패널 표시·BGM 등)으로 진행합니다.")]
     [SerializeField] private bool ignoreTutorial;
 
     [Header("Audio")]
@@ -98,11 +98,6 @@ public class GameManager : MonoBehaviour
         bool isPauseInputLocked = launchUIController != null && launchUIController.IsPauseInputLocked();
         bool isLaunchMenuInputBlocked = launchUIController != null && launchUIController.IsMenuInputBlocked();
         bool isCountdownSequenceActive = launchUIController != null && launchUIController.IsCountdownSequenceActive();
-
-        if (!isLaunchMenuInputBlocked && Input.GetKeyDown(KeyCode.Q)) {
-            GameSceneQuestUIManager questUI = FindFirstObjectByType<GameSceneQuestUIManager>();
-            if (questUI != null) questUI.ToggleQuestPanelWithShortcut();
-        }
 
         if (!isPauseInputLocked && !isCountdownSequenceActive && Input.GetKeyDown(KeyCode.Space)) {
             TogglePause();
@@ -208,12 +203,6 @@ public class GameManager : MonoBehaviour
         if (mainControlPanel != null)
         {
             mainControlPanel.HideAllPanels();
-        }
-
-        GameSceneQuestUIManager questUi = FindFirstObjectByType<GameSceneQuestUIManager>(FindObjectsInactive.Include);
-        if (questUi != null)
-        {
-            questUi.HideQuestPanel();
         }
 
         Scene activeScene = SceneManager.GetActiveScene();

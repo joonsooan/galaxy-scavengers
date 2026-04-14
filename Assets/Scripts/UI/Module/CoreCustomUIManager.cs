@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
+public class CoreCustomUIManager : MonoBehaviour
 {
     [Header("UI References")]
     [SerializeField] private GameObject coreCustomPanel;
@@ -18,17 +18,6 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
 
     [Header("Core Detail Panel")]
     [SerializeField] private CoreDetailPanel coreDetailPanel;
-    
-    [Header("Quest UI")]
-    [SerializeField] private Button questButton;
-    [SerializeField] private Button shopButton;
-    [SerializeField] private GameObject questGridPanel;
-    [SerializeField] private RectTransform questGridParent;
-    [SerializeField] private GameObject questCellPrefab;
-    [SerializeField] private QuestDetailPanel questDetailPanel;
-    [SerializeField] private QuestProvider questProvider = QuestProvider.NPC_2;
-    [SerializeField] private QuestUIHandler questUIHandler;
-    [SerializeField] private GameObject newQuestIndicator;
 
     [SerializeField] private List<ModuleInventoryCell> moduleSelectionCells = new ();
 
@@ -62,12 +51,6 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
             closeButton.onClick.RemoveAllListeners();
             closeButton.onClick.AddListener(OnCloseButtonClicked);
         }
-        
-        if (questUIHandler == null)
-        {
-            questUIHandler = gameObject.AddComponent<QuestUIHandler>();
-        }
-        questUIHandler.Initialize(this);
     }
 
     private void OnEnable()
@@ -140,19 +123,8 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
             coreCustomPanel.SetActive(true);
             StartCoroutine(RefreshOnPanelShown());
         }
-        
-        if (newQuestIndicator != null && newQuestIndicator.activeSelf && questUIHandler != null)
-        {
-            questUIHandler.ShowQuestUI();
-        }
-        else if (questUIHandler != null)
-        {
-            questUIHandler.ShowShopUI();
-        }
-        else
-        {
-            ShowShopUI();
-        }
+
+        ShowShopUI();
     }
 
     private IEnumerator RefreshOnPanelShown()
@@ -324,15 +296,6 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
         }
     }
     
-    public Button GetQuestButton() => questButton;
-    public Button GetShopButton() => shopButton;
-    public GameObject GetQuestGridPanel() => questGridPanel;
-    public RectTransform GetQuestGridParent() => questGridParent;
-    public GameObject GetQuestCellPrefab() => questCellPrefab;
-    public QuestDetailPanel GetQuestDetailPanel() => questDetailPanel;
-    public QuestProvider GetQuestProvider() => questProvider;
-    public GameObject GetShopUIContainer() => moduleSelectionPanel;
-    
     public void ShowShopUI()
     {
         if (moduleSelectionPanel != null)
@@ -386,8 +349,4 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
             coreDetailPanel.ClearInfo();
         }
     }
-    
-    public GameObject GetNewQuestIndicator() => newQuestIndicator;
-    
-    public string GetUIName() => "Core Custom UI";
 }

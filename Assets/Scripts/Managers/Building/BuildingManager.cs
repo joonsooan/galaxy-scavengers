@@ -65,12 +65,12 @@ public class BuildingManager : MonoBehaviour
 
     private void OnEnable()
     {
-        LaunchUIController.OnLaunchCountdownStarted += ResetAllProcessors;
+        LaunchUIController.OnLaunchSequenceStarted += ResetAllProcessors;
     }
 
     private void OnDisable()
     {
-        LaunchUIController.OnLaunchCountdownStarted -= ResetAllProcessors;
+        LaunchUIController.OnLaunchSequenceStarted -= ResetAllProcessors;
     }
 
     private void Start()

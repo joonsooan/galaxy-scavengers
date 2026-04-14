@@ -35,8 +35,9 @@ public struct HighlightableUI
 
 public class TutorialManager : MonoBehaviour
 {
+    private const string TutorialCompletedPrefsKey = "GalaxyScavengers_TutorialCompleted";
+
     [Header("Tutorial Settings")]
-    [SerializeField] private int firstQuestId = 0;
     [SerializeField] private GameObject tutorialUI;
     [SerializeField] private TutorialStepData[] tutorialStepDataList;
 
@@ -175,26 +176,13 @@ public class TutorialManager : MonoBehaviour
             return false;
         }
 
-        if (QuestManager.Instance == null) {
-            Debug.LogWarning("[TutorialManager] ShouldStartTutorial: QuestManager.Instance is null");
-            return false;
-        }
+        return PlayerPrefs.GetInt(TutorialCompletedPrefsKey, 0) == 0;
+    }
 
-        if (firstQuestId < 0) {
-            Debug.LogWarning($"[TutorialManager] ShouldStartTutorial: firstQuestId is invalid ({firstQuestId})");
-            return false;
-        }
-
-        QuestData questData = QuestManager.Instance.GetQuestData(firstQuestId);
-        if (questData == null) {
-            Debug.LogWarning($"[TutorialManager] ShouldStartTutorial: Quest with ID {firstQuestId} not found");
-            return false;
-        }
-
-        bool isCompleted = QuestManager.Instance.IsQuestCompleted(firstQuestId);
-        bool shouldStart = !isCompleted;
-        
-        return shouldStart;
+    private static void MarkTutorialCompletedInPrefs()
+    {
+        PlayerPrefs.SetInt(TutorialCompletedPrefsKey, 1);
+        PlayerPrefs.Save();
     }
 
     private IEnumerator WaitForGameInitialization()
@@ -654,11 +642,6 @@ public class TutorialManager : MonoBehaviour
         return _isTutorialActive;
     }
 
-    public int GetFirstQuestId()
-    {
-        return firstQuestId;
-    }
-
     public TutorialStepData GetCurrentTutorialStep()
     {
         if (_isTutorialActive && _currentStepIndex >= 0 && _currentStepIndex < _tutorialSteps.Count)
@@ -773,7 +756,8 @@ public class TutorialManager : MonoBehaviour
         if (BgmManager.Instance != null) {
             BgmManager.Instance.PlayGameBgm();
         }
-        
+
+        MarkTutorialCompletedInPrefs();
         OnTutorialEnded?.Invoke();
     }
 
@@ -796,6 +780,7 @@ public class TutorialManager : MonoBehaviour
             _tutorialUI.HideTutorial();
         }
 
+        MarkTutorialCompletedInPrefs();
         OnTutorialEnded?.Invoke();
     }
 
@@ -819,6 +804,9 @@ public class TutorialManager : MonoBehaviour
                 _tutorialUI.HideTutorial();
             }
         }
+
+        PlayerPrefs.DeleteKey(TutorialCompletedPrefsKey);
+        PlayerPrefs.Save();
 
         if (ShouldStartTutorial()) {
             InitializeTutorialSteps();

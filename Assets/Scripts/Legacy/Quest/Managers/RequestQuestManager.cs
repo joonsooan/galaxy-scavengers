@@ -105,7 +105,7 @@ public class RequestQuestManager : MonoBehaviour
     
     private void LoadRequestQuestsFromResources()
     {
-        QuestData[] loadedQuests = Resources.LoadAll<QuestData>("Request Quest Data");
+        QuestData[] loadedQuests = Resources.LoadAll<QuestData>("Legacy/QuestRuntime/Request Quest Data");
         
         if (loadedQuests != null && loadedQuests.Length > 0)
         {
