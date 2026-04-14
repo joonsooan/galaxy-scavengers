@@ -9,19 +9,33 @@ public class GameSceneRoundTimer : MonoBehaviour
     [SerializeField] private bool useUnscaledTime;
     [SerializeField] private Slider timerSlider;
     [SerializeField] private TMP_Text timerText;
+    [Tooltip("Assign the Slider Fill Rect's Image, or leave empty to use the slider's fillRect if present.")]
+    [SerializeField] private Image sliderFillImage;
+
+    [Header("Zone colors (same defaults as NoiseSliderUI fill)")]
+    [SerializeField] private Color safeColor = Color.green;
+    [SerializeField] private Color dangerColor = Color.red;
 
     private float _remainingSeconds;
+    private float _durationTotal;
     private bool _gameOverTriggered;
 
     private void Start()
     {
-        _remainingSeconds = Mathf.Max(0f, initialDurationSeconds);
+        _durationTotal = Mathf.Max(0.01f, initialDurationSeconds);
+        _remainingSeconds = _durationTotal;
         if (timerSlider != null)
         {
             timerSlider.minValue = 0f;
             timerSlider.maxValue = _remainingSeconds;
             timerSlider.wholeNumbers = false;
         }
+
+        if (sliderFillImage == null && timerSlider != null && timerSlider.fillRect != null)
+        {
+            sliderFillImage = timerSlider.fillRect.GetComponent<Image>();
+        }
+
         RefreshDisplay();
     }
 
@@ -68,6 +82,19 @@ public class GameSceneRoundTimer : MonoBehaviour
         if (timerText != null)
         {
             timerText.text = FormatMmSs(_remainingSeconds);
+        }
+
+        ApplyUrgencyColors();
+    }
+
+    private void ApplyUrgencyColors()
+    {
+        float t = 1f - Mathf.Clamp01(_remainingSeconds / _durationTotal);
+        Color c = Color.Lerp(safeColor, dangerColor, t);
+
+        if (sliderFillImage != null)
+        {
+            sliderFillImage.color = c;
         }
     }
 

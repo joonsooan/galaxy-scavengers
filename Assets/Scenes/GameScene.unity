@@ -132,7 +132,7 @@ GameObject:
   - component: {fileID: 4402820}
   - component: {fileID: 4402822}
   m_Layer: 5
-  m_Name: Time Panel
+  m_Name: Left Time Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -209,10 +209,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4bd17b1c6c43db64faac269f90a476f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameSceneRoundTimer
-  initialDurationSeconds: 600
-  useUnscaledTime: 1
+  initialDurationSeconds: 1800
+  useUnscaledTime: 0
   timerSlider: {fileID: 173340493}
   timerText: {fileID: 1645516040}
+  sliderFillImage: {fileID: 1468426923}
+  safeColor: {r: 0, g: 1, b: 0, a: 1}
+  dangerColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &7701078
 GameObject:
   m_ObjectHideFlags: 0
@@ -2870,7 +2873,7 @@ MonoBehaviour:
   RealSecondsPerInGameHour: 4
   currentTime: 6
   gameStartTime: 6
-  autoAdvanceTime: 1
+  autoAdvanceTime: 0
   dayStartPercent: 20
   nightStartPercent: 82.5
   globalLight2D: {fileID: 619394801}
@@ -48214,7 +48217,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3013190113639707673, guid: 3c6f3d68d5394d94eaaa1224879a3e09, type: 3}
       propertyPath: m_Name
-      value: Button_Menu Variant
+      value: Menu Btn
       objectReference: {fileID: 0}
     - target: {fileID: 6760456783297824623, guid: 3c6f3d68d5394d94eaaa1224879a3e09, type: 3}
       propertyPath: m_Pivot.x
@@ -48353,7 +48356,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 4, y: -12}
-  m_SizeDelta: {x: 200, y: 8}
+  m_SizeDelta: {x: 100, y: 8}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1219703143
 MonoBehaviour:
@@ -50021,7 +50024,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 50, y: 0}
-  m_SizeDelta: {x: 50, y: 360}
+  m_SizeDelta: {x: 50, y: 100}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1296516929
 MonoBehaviour:
@@ -50276,7 +50279,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 4, y: -4}
-  m_SizeDelta: {x: 200, y: 8}
+  m_SizeDelta: {x: 100, y: 8}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1334646932
 MonoBehaviour:

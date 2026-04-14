@@ -90,6 +90,8 @@ public class GameManager : MonoBehaviour
 
         if (IsLoadingScreenActive()) return;
 
+        HandleDebugTimeScale();
+
         if (GameMenuManager.Instance != null && GameMenuManager.Instance.IsMenuOpen()) {
             return;
         }
@@ -123,6 +125,34 @@ public class GameManager : MonoBehaviour
             }
         }
 #endif
+    }
+
+    private void HandleDebugTimeScale()
+    {
+        float targetScale = -1f;
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            targetScale = 1f;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            targetScale = 2f;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            targetScale = 4f;
+        }
+
+        if (targetScale < 0f)
+        {
+            return;
+        }
+
+        _savedTimeScale = targetScale;
+        if (!IsPaused)
+        {
+            Time.timeScale = targetScale;
+        }
     }
 
     public void TogglePause()

@@ -56,7 +56,7 @@ public class NoiseSliderUI : MonoBehaviour
         if (NoiseManager.Instance == null) return;
 
         NoiseManager.NoiseZone zone = NoiseManager.Instance.GetCurrentNoiseZone();
-        
+
         float t = Mathf.Clamp01(noisePercentage / 100f);
         Color targetColor = Color.Lerp(safeColor, dangerColor, t);
 
@@ -67,14 +67,6 @@ public class NoiseSliderUI : MonoBehaviour
 
         if (noiseZoneText != null)
         {
-            noiseZoneText.text = zone switch
-            {
-                NoiseManager.NoiseZone.Safe => "소음 : 안전",
-                NoiseManager.NoiseZone.Caution => "소음 : 주의",
-                NoiseManager.NoiseZone.Warning => "소음 : 경고",
-                NoiseManager.NoiseZone.Danger => "소음 : 위험",
-                _ => "소음 : 안전"
-            };
             noiseZoneText.color = targetColor;
         }
     }
