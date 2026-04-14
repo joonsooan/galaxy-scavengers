@@ -10,12 +10,14 @@ public class MainControlPanel : MonoBehaviour
     [SerializeField] private Button processorBtn;
     [SerializeField] private Button resourceStatBtn;
     [SerializeField] private Button resourceStatCloseBtn;
+    [SerializeField] private Button unitManagementBtn;
 
     [Header("UI Panels")]
     [SerializeField] private GameObject buildingInfoPanel;
     [SerializeField] private GameObject baseBuildingPanel;
     [SerializeField] private GameObject processorPanel;
     [SerializeField] private GameObject resourceStatPanel;
+    [SerializeField] private GameObject unitManagementPanelRoot;
     
     private GameObject _currentlyActivePanel;
     private BuildingInfoPanel _buildingInfoPanelComponent;
@@ -61,6 +63,11 @@ public class MainControlPanel : MonoBehaviour
         {
             resourceStatCloseBtn.onClick.AddListener(OnResourceStatCloseBtnClicked);
         }
+
+        if (unitManagementBtn != null)
+        {
+            unitManagementBtn.onClick.AddListener(OnUnitManagementBtnClicked);
+        }
         
         HideAllPanels();
     }
@@ -79,8 +86,8 @@ public class MainControlPanel : MonoBehaviour
         }
         else if (Input.GetKeyDown(KeyCode.R))
         {
-            PlayShortcutClickSound(processorBtn);
-            OnProcessorBtnClicked();
+            PlayShortcutClickSound(unitManagementBtn);
+            OnUnitManagementBtnClicked();
         }
         else if (Input.GetKeyDown(KeyCode.F))
         {
@@ -93,6 +100,15 @@ public class MainControlPanel : MonoBehaviour
             if (Input.GetMouseButtonUp(1))
             {
                 CloseResourceStatPanel();
+                return;
+            }
+        }
+
+        if (IsUnitManagementPanelActive())
+        {
+            if (Input.GetMouseButtonUp(1))
+            {
+                CloseUnitManagementPanel();
                 return;
             }
         }
@@ -173,6 +189,33 @@ public class MainControlPanel : MonoBehaviour
         ShowPanel(resourceStatPanel);
     }
 
+    private void OnUnitManagementBtnClicked()
+    {
+        if (TutorialManager.Instance != null && unitManagementBtn != null)
+        {
+            TutorialManager.Instance.DisableHighlightForTarget(unitManagementBtn.gameObject);
+        }
+
+        if (IsUnitManagementPanelActive())
+        {
+            CloseUnitManagementPanel();
+            return;
+        }
+
+        HideAllPanels();
+        if (_buildingInfoPanelComponent != null)
+        {
+            _buildingInfoPanelComponent.ClearAllInfo();
+        }
+
+        if (buildingInfoPanel != null)
+        {
+            buildingInfoPanel.SetActive(false);
+        }
+
+        ShowPanel(unitManagementPanelRoot);
+    }
+
 
     private void HideBuildingInfoPanelExtractor(DataExtractor _)
     {
@@ -236,6 +279,11 @@ public class MainControlPanel : MonoBehaviour
         {
             resourceStatPanel.SetActive(false);
         }
+
+        if (unitManagementPanelRoot != null)
+        {
+            unitManagementPanelRoot.SetActive(false);
+        }
         
         _currentlyActivePanel = null;
     }
@@ -292,11 +340,34 @@ public class MainControlPanel : MonoBehaviour
             resourceStatPanel.SetActive(true);
             _currentlyActivePanel = resourceStatPanel;
         }
+
+        if (unitManagementPanelRoot != null)
+        {
+            unitManagementPanelRoot.SetActive(false);
+        }
     }
 
     public bool IsResourceStatPanelActive()
     {
         return resourceStatPanel != null && resourceStatPanel.activeSelf;
+    }
+
+    public void CloseUnitManagementPanel()
+    {
+        if (unitManagementPanelRoot != null)
+        {
+            unitManagementPanelRoot.SetActive(false);
+        }
+
+        if (_currentlyActivePanel == unitManagementPanelRoot)
+        {
+            _currentlyActivePanel = null;
+        }
+    }
+
+    public bool IsUnitManagementPanelActive()
+    {
+        return unitManagementPanelRoot != null && unitManagementPanelRoot.activeSelf;
     }
 
     private bool IsLoadingScreenActive()
@@ -335,6 +406,11 @@ public class MainControlPanel : MonoBehaviour
         if (resourceStatCloseBtn != null)
         {
             resourceStatCloseBtn.onClick.RemoveListener(OnResourceStatCloseBtnClicked);
+        }
+
+        if (unitManagementBtn != null)
+        {
+            unitManagementBtn.onClick.RemoveListener(OnUnitManagementBtnClicked);
         }
     }
 }

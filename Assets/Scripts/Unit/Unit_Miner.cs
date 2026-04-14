@@ -77,9 +77,13 @@ public class Unit_Miner : UnitBase
 
     protected void Start()
     {
-        mineableResourceTypes = UnitManager.Instance != null
-            ? UnitManager.Instance.CurrentMineableTypes.ToArray()
-            : (ResourceType[])Enum.GetValues(typeof(ResourceType));
+        if (FindFirstObjectByType<MinerAssignmentSystem>(FindObjectsInactive.Include) == null)
+        {
+            mineableResourceTypes = UnitManager.Instance != null
+                ? UnitManager.Instance.CurrentMineableTypes.ToArray()
+                : (ResourceType[])Enum.GetValues(typeof(ResourceType));
+        }
+
         _spriteController = GetComponentInChildren<UnitSpriteController>();
     }
 
@@ -615,7 +619,11 @@ public class Unit_Miner : UnitBase
         ResourceManager.OnNewStorageAdded += HandleNewStorageAdded;
         ResourceManager.OnStorageSpaceFreed += HandleStorageSpaceFreed;
         ResourceManager.OnStorageRemoved += HandleStorageRemoved;
-        UnitManager.OnMineableTypesChanged += HandleMineableTypesChanged;
+        if (FindFirstObjectByType<MinerAssignmentSystem>(FindObjectsInactive.Include) == null)
+        {
+            UnitManager.OnMineableTypesChanged += HandleMineableTypesChanged;
+        }
+
         SceneManager.sceneUnloaded += OnSceneUnloaded;
         GameManager.OnPauseStateChanged += HandlePauseStateChanged;
     }
@@ -629,6 +637,46 @@ public class Unit_Miner : UnitBase
         UnitManager.OnMineableTypesChanged -= HandleMineableTypesChanged;
         SceneManager.sceneUnloaded -= OnSceneUnloaded;
         GameManager.OnPauseStateChanged -= HandlePauseStateChanged;
+    }
+
+    public void ApplyMineableTypes(ResourceType[] newTypes)
+    {
+        mineableResourceTypes = newTypes != null && newTypes.Length > 0
+            ? newTypes
+            : Array.Empty<ResourceType>();
+        bool hasMineableTypes = HasMineableTypesEnabled();
+        SetMineTypeAllOffAlert(!hasMineableTypes);
+        if (!hasMineableTypes)
+        {
+            SetMinerNoResourceAlert(false);
+        }
+
+        if ((currentState == UnitState.Mining || currentState == UnitState.Moving) &&
+            _targetResourceNode != null && !mineableResourceTypes.Contains(_targetResourceNode.resourceType))
+        {
+            if (currentState == UnitState.Moving)
+            {
+                Vector3 targetPosition = BuildingManager.Instance.grid.GetCellCenterWorld(_targetMiningCell);
+                float distanceToTarget = Vector3.Distance(transform.position, targetPosition);
+
+                if (distanceToTarget > 1.0f)
+                {
+                    HandleTargetLoss();
+                }
+            }
+            else if (currentState == UnitState.Mining)
+            {
+                HandleTargetLoss();
+            }
+        }
+
+        if (currentState == UnitState.Idle)
+        {
+            if (_findResourceCoroutine == null)
+            {
+                TryStartActions();
+            }
+        }
     }
 
     private void HandlePauseStateChanged(bool isPaused)
@@ -687,33 +735,7 @@ public class Unit_Miner : UnitBase
 
     private void HandleMineableTypesChanged(ResourceType[] newTypes)
     {
-        mineableResourceTypes = newTypes;
-        bool hasMineableTypes = HasMineableTypesEnabled();
-        SetMineTypeAllOffAlert(!hasMineableTypes);
-        if (!hasMineableTypes) {
-            SetMinerNoResourceAlert(false);
-        }
-
-        if ((currentState == UnitState.Mining || currentState == UnitState.Moving) &&
-            _targetResourceNode != null && !mineableResourceTypes.Contains(_targetResourceNode.resourceType)) {
-            if (currentState == UnitState.Moving) {
-                Vector3 targetPosition = BuildingManager.Instance.grid.GetCellCenterWorld(_targetMiningCell);
-                float distanceToTarget = Vector3.Distance(transform.position, targetPosition);
-
-                if (distanceToTarget > 1.0f) {
-                    HandleTargetLoss();
-                }
-            }
-            else if (currentState == UnitState.Mining) {
-                HandleTargetLoss();
-            }
-        }
-
-        if (currentState == UnitState.Idle) {
-            if (_findResourceCoroutine == null) {
-                TryStartActions();
-            }
-        }
+        ApplyMineableTypes(newTypes);
     }
 
     private void ClearMinerAlerts()

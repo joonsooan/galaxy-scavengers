@@ -29,9 +29,25 @@ public class UnitManager : MonoBehaviour
         return baseMaxPopulation;
     }
 
+    public int GetPopulationCountedAllyCount()
+    {
+        int count = 0;
+        foreach (UnitBase ally in _allyUnits)
+        {
+            if (ally == null || ally is Unit_Player)
+            {
+                continue;
+            }
+
+            count++;
+        }
+
+        return count;
+    }
+
     public bool CanSpawnUnit()
     {
-        return _allyUnits.Count < GetMaxPopulation();
+        return GetPopulationCountedAllyCount() < GetMaxPopulation();
     }
     
     private void Awake()

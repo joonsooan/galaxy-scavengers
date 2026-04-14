@@ -302,6 +302,12 @@ public class GameMenuManager : MonoBehaviour
                 return;
             }
 
+            if (mainControlPanel != null && mainControlPanel.IsUnitManagementPanelActive())
+            {
+                mainControlPanel.CloseUnitManagementPanel();
+                return;
+            }
+
             if (_isMenuOpen)
             {
                 CloseMenu();
