@@ -1,17 +1,35 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public class UnitProcessorActivityUIController : MonoBehaviour
 {
-    [SerializeField] private UnitProcessorActivityCellView[] cells;
+    [Header("Cell Setup")]
+    [SerializeField] private UnitProcessorActivityCellView resourceSliderCellPrefab;
+    [SerializeField] private Transform produceContentParent;
+    [SerializeField] private Transform spendContentParent;
+
+    [Header("Sampling")]
+    [SerializeField] private float movingAverageWindowMinutes = 5f;
     [SerializeField] private float refreshInterval = 0.5f;
 
     private float _nextRefresh;
+    private readonly List<UnitProcessorActivityCellView> _spawnedCells = new List<UnitProcessorActivityCellView>();
+    private readonly List<ResourceType> _produceTypes = new List<ResourceType>();
+    private readonly List<ResourceType> _spendTypes = new List<ResourceType>();
+    private readonly Dictionary<ResourceType, UnitProcessorActivityCellView> _produceCells = new Dictionary<ResourceType, UnitProcessorActivityCellView>();
+    private readonly Dictionary<ResourceType, UnitProcessorActivityCellView> _spendCells = new Dictionary<ResourceType, UnitProcessorActivityCellView>();
 
     private void OnEnable()
     {
         _nextRefresh = 0f;
+        BuildCellListsIfNeeded();
+    }
+
+    private void OnDisable()
+    {
+        ClearSpawnedCells();
     }
 
     private void Update()
@@ -27,81 +45,147 @@ public class UnitProcessorActivityUIController : MonoBehaviour
 
     public void Refresh()
     {
-        if (cells == null || cells.Length == 0)
+        if (resourceSliderCellPrefab == null || produceContentParent == null || spendContentParent == null)
         {
             return;
         }
 
-        Dictionary<ResourceType, float> rateByType = new Dictionary<ResourceType, float>();
-        Processor[] processors = FindObjectsByType<Processor>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-        foreach (Processor processor in processors)
+        if (_produceCells.Count == 0 || _spendCells.Count == 0)
         {
-            if (processor == null)
-            {
-                continue;
-            }
-
-            IReadOnlyList<ActiveRecipe> recipes = processor.ActiveRecipes;
-            if (recipes == null)
-            {
-                continue;
-            }
-
-            foreach (ActiveRecipe recipe in recipes)
-            {
-                if (recipe?.recipeData == null)
-                {
-                    continue;
-                }
-
-                if (!recipe.isProcessing && recipe.assignedDrone == null)
-                {
-                    continue;
-                }
-
-                ProcessorRecipe data = recipe.recipeData;
-                float time = data.processingTime;
-                if (time <= 0f)
-                {
-                    continue;
-                }
-
-                float perMin = data.produceAmount / time * 60f;
-                ResourceType rt = data.resourceType;
-                if (rateByType.TryGetValue(rt, out float existing))
-                {
-                    rateByType[rt] = existing + perMin;
-                }
-                else
-                {
-                    rateByType[rt] = perMin;
-                }
-            }
+            BuildCellListsIfNeeded();
         }
 
-        List<KeyValuePair<ResourceType, float>> sorted = rateByType
-            .OrderBy(kvp => (int)kvp.Key)
+        float safeWindow = Mathf.Max(0.01f, movingAverageWindowMinutes);
+        ResourceManager rm = ResourceManager.Instance;
+        UpdatePanel(
+            _produceTypes,
+            _produceCells,
+            UnitProcessStatKind.Produce,
+            true,
+            safeWindow,
+            rm);
+        UpdatePanel(
+            _spendTypes,
+            _spendCells,
+            UnitProcessStatKind.Spend,
+            true,
+            safeWindow,
+            rm);
+    }
+
+    private void BuildCellListsIfNeeded()
+    {
+        if (resourceSliderCellPrefab == null || produceContentParent == null || spendContentParent == null)
+        {
+            return;
+        }
+
+        ClearSpawnedCells();
+        _produceCells.Clear();
+        _spendCells.Clear();
+        _produceTypes.Clear();
+        _spendTypes.Clear();
+
+        List<ResourceType> allTypes = Enum.GetValues(typeof(ResourceType))
+            .Cast<ResourceType>()
+            .OrderBy(type => (int)type)
             .ToList();
 
-        ResourceManager rm = ResourceManager.Instance;
-        for (int i = 0; i < cells.Length; i++)
+        foreach (ResourceType type in allTypes)
         {
-            UnitProcessorActivityCellView cell = cells[i];
-            if (cell == null)
+            if (type != ResourceType.Electricity)
             {
-                continue;
+                _spendTypes.Add(type);
             }
 
-            if (i >= sorted.Count)
+            if (type != ResourceType.Electricity)
             {
-                cell.SetVisible(false);
-                continue;
+                _produceTypes.Add(type);
             }
-
-            KeyValuePair<ResourceType, float> entry = sorted[i];
-            Sprite icon = rm != null ? rm.GetResourceIcon(entry.Key) : null;
-            cell.SetVisible(true);
-            cell.SetData(icon, entry.Value);
         }
+
+        SpawnCells(_produceTypes, produceContentParent, _produceCells);
+        SpawnCells(_spendTypes, spendContentParent, _spendCells);
+    }
+
+    private void SpawnCells(
+        List<ResourceType> types,
+        Transform parent,
+        Dictionary<ResourceType, UnitProcessorActivityCellView> destination)
+    {
+        foreach (ResourceType type in types)
+        {
+            UnitProcessorActivityCellView cell = Instantiate(resourceSliderCellPrefab, parent);
+            cell.SetVisible(true);
+            destination[type] = cell;
+            _spawnedCells.Add(cell);
+        }
+    }
+
+    private void UpdatePanel(
+        List<ResourceType> types,
+        Dictionary<ResourceType, UnitProcessorActivityCellView> cellsByType,
+        UnitProcessStatKind statKind,
+        bool excludePowerFuelSpend,
+        float windowMinutes,
+        ResourceManager resourceManager)
+    {
+        Dictionary<ResourceType, float> perMinuteByType = new Dictionary<ResourceType, float>(types.Count);
+        float maxPerMinute = 0f;
+
+        foreach (ResourceType type in types)
+        {
+            float perMinute = UnitProcessResourceStatTracker.GetPerMinuteAverage(
+                type,
+                statKind,
+                windowMinutes,
+                excludePowerFuelSpend);
+            perMinuteByType[type] = perMinute;
+            if (perMinute > maxPerMinute)
+            {
+                maxPerMinute = perMinute;
+            }
+        }
+
+        List<ResourceType> sortedTypes = types
+            .OrderByDescending(type => perMinuteByType[type])
+            .ThenBy(type => (int)type)
+            .ToList();
+
+        for (int index = 0; index < sortedTypes.Count; index++)
+        {
+            ResourceType type = sortedTypes[index];
+            if (cellsByType.TryGetValue(type, out UnitProcessorActivityCellView cell) && cell != null)
+            {
+                cell.transform.SetSiblingIndex(index);
+            }
+        }
+
+        foreach (ResourceType type in sortedTypes)
+        {
+            if (!cellsByType.TryGetValue(type, out UnitProcessorActivityCellView cell) || cell == null)
+            {
+                continue;
+            }
+
+            float value = perMinuteByType[type];
+            float normalized = maxPerMinute > 0f ? value / maxPerMinute : 0f;
+            Sprite icon = resourceManager != null ? resourceManager.GetResourceIcon(type) : null;
+            cell.SetData(icon, normalized, value);
+        }
+    }
+
+    private void ClearSpawnedCells()
+    {
+        for (int i = 0; i < _spawnedCells.Count; i++)
+        {
+            UnitProcessorActivityCellView cell = _spawnedCells[i];
+            if (cell != null)
+            {
+                Destroy(cell.gameObject);
+            }
+        }
+
+        _spawnedCells.Clear();
     }
 }

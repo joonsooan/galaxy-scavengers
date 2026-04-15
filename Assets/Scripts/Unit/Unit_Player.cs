@@ -9,6 +9,14 @@ using STOP_MODE = FMOD.Studio.STOP_MODE;
 
 public class Unit_Player : UnitBase
 {
+    private static readonly HashSet<ResourceType> BaseResourceTypes = new HashSet<ResourceType>
+    {
+        ResourceType.Ferrite,
+        ResourceType.Aether,
+        ResourceType.Biomass,
+        ResourceType.CryoCrystal
+    };
+
     [Header("Player Settings")]
     [SerializeField] private float interactionRange = 3f;
     [SerializeField] private int mineAmountPerAction = 1;
@@ -509,6 +517,10 @@ public class Unit_Player : UnitBase
             int actuallyAdded = afterAmount - beforeAmount;
 
             if (added && actuallyAdded > 0) {
+                if (BaseResourceTypes.Contains(type))
+                {
+                    UnitProcessResourceStatTracker.RecordProduce(type, actuallyAdded);
+                }
                 remaining -= actuallyAdded;
             }
         }

@@ -13,6 +13,13 @@ using STOP_MODE = FMOD.Studio.STOP_MODE;
 public class Unit_Miner : UnitBase
 {
     private static readonly Dictionary<Vector3Int, Unit_Miner> ReservedMiningCells = new Dictionary<Vector3Int, Unit_Miner>();
+    private static readonly HashSet<ResourceType> BaseResourceTypes = new HashSet<ResourceType>
+    {
+        ResourceType.Ferrite,
+        ResourceType.Aether,
+        ResourceType.Biomass,
+        ResourceType.CryoCrystal
+    };
     [Header("References")]
     [SerializeField] private UnitMovement unitMovement;
 
@@ -329,6 +336,11 @@ public class Unit_Miner : UnitBase
                 int amountBefore = resourcesBefore[pair.Key];
                 int amountAfter = _targetStorage.GetCurrentResourceAmount(pair.Key);
                 int amountAccepted = amountAfter - amountBefore;
+
+                if (amountAccepted > 0 && BaseResourceTypes.Contains(pair.Key))
+                {
+                    UnitProcessResourceStatTracker.RecordProduce(pair.Key, amountAccepted);
+                }
 
                 _currentCarryAmounts[pair.Key] -= amountAccepted;
                 if (_currentCarryAmounts[pair.Key] < 0) {

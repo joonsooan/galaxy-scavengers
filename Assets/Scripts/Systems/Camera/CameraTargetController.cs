@@ -31,6 +31,7 @@ public class CameraTargetController : MonoBehaviour
     private Camera _mainCamera;
     private Bounds _mapBounds;
     private Grid _grid;
+    private MainControlPanel _mainControlPanel;
 
     private PixelPerfectCamera _pixelPerfCam;
     private bool[] _zoomLevelInitialized;
@@ -41,6 +42,7 @@ public class CameraTargetController : MonoBehaviour
     private void Awake()
     {
         _mainCamera = Camera.main;
+        _mainControlPanel = FindFirstObjectByType<MainControlPanel>(FindObjectsInactive.Include);
     }
 
     private void Start()
@@ -355,6 +357,11 @@ public class CameraTargetController : MonoBehaviour
             return;
         }
 
+        if (IsUnitManagementZoomBlocked())
+        {
+            return;
+        }
+
         float scroll = Input.GetAxisRaw("Mouse ScrollWheel");
         if (scroll == 0 || _pixelPerfCam == null) return;
 
@@ -411,6 +418,20 @@ public class CameraTargetController : MonoBehaviour
     {
         LaunchUIController launchUIController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
         return launchUIController != null && launchUIController.IsLaunchInputLockActive();
+    }
+
+    private bool IsUnitManagementZoomBlocked()
+    {
+        if (_mainControlPanel == null)
+        {
+            _mainControlPanel = FindFirstObjectByType<MainControlPanel>(FindObjectsInactive.Include);
+            if (_mainControlPanel == null)
+            {
+                return false;
+            }
+        }
+
+        return _mainControlPanel.IsUnitManagementPanelActive();
     }
 
     private void WarpCameras(Vector3 deltaPos)

@@ -148,7 +148,7 @@ GameObject:
   - component: {fileID: 3826792658504862437}
   - component: {fileID: 771006021559725915}
   - component: {fileID: 3191247776719235071}
-  - component: {fileID: 8860004477152087251}
+  - component: {fileID: 3807928144824550500}
   m_Layer: 5
   m_Name: Resource Slider Cell
   m_TagString: Untagged
@@ -179,7 +179,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 24}
+  m_SizeDelta: {x: 120, y: 24}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &771006021559725915
 CanvasRenderer:
@@ -219,7 +219,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &8860004477152087251
+--- !u!114 &3807928144824550500
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -228,30 +228,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1610720371853794772}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b146c912783087a48a78c85ad853d214, type: 3}
+  m_Script: {fileID: 11500000, guid: 8d37da569993259409637c6fec7091e0, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
-  recipeIcon: {fileID: 4771197110190838720}
-  recipeName: {fileID: 0}
-  recipeProcessTime: {fileID: 0}
-  produceInfoText: {fileID: 4628887482447627751}
-  recipeCellPrefab: {fileID: 6155155196410172978, guid: 87d776b852749c2428050baaea9b40b1, type: 3}
-  contentParent: {fileID: 0}
-  plusButtonSound:
-    Guid:
-      Data1: -765664001
-      Data2: 1302141166
-      Data3: 995189914
-      Data4: -85904115
-    Path: event:/SFX_UI/SFX_GameStart
-  minusButtonSound:
-    Guid:
-      Data1: -1936566649
-      Data2: 1287107820
-      Data3: 1616156851
-      Data4: 765321994
-    Path: event:/SFX_UI/SFX_GamePause
-  glowMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
+  m_EditorClassIdentifier: Assembly-CSharp::UnitProcessorActivityCellView
+  resourceIcon: {fileID: 4771197110190838720}
+  amountSlider: {fileID: 5265987353307372116}
+  perMinuteText: {fileID: 4628887482447627751}
 --- !u!1 &1899127148712079185
 GameObject:
   m_ObjectHideFlags: 0
@@ -510,7 +492,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8860004477152087251}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: ProcessorRecipeCell, Assembly-CSharp
         m_MethodName: OnMinusBtnClick
         m_Mode: 1
@@ -556,7 +538,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 4, y: 0}
+  m_AnchoredPosition: {x: 5, y: 0}
   m_SizeDelta: {x: 8, y: 8}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!222 &1137183579876504269
@@ -718,7 +700,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8860004477152087251}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: ProcessorRecipeCell, Assembly-CSharp
         m_MethodName: OnPlusBtnClick
         m_Mode: 1
@@ -1098,3 +1080,14 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 6127075699960773356, guid: b1cb34ada5e13d446b2a7fb9d7f84540, type: 3}
   m_PrefabInstance: {fileID: 5685530472381289470}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &5265987353307372116 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 572947054933297578, guid: b1cb34ada5e13d446b2a7fb9d7f84540, type: 3}
+  m_PrefabInstance: {fileID: 5685530472381289470}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

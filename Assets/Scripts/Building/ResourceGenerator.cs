@@ -202,6 +202,7 @@ public class ResourceGenerator : Damageable, IPowerGridNode
                 }
                 if (need <= 0)
                 {
+                    UnitProcessResourceStatTracker.RecordSpend(cost.resourceType, cost.amount, true);
                     return true;
                 }
             }
@@ -231,6 +232,11 @@ public class ResourceGenerator : Damageable, IPowerGridNode
                 {
                     need -= withdrawn;
                 }
+            }
+
+            if (need <= 0)
+            {
+                UnitProcessResourceStatTracker.RecordSpend(cost.resourceType, cost.amount, true);
             }
         }
 

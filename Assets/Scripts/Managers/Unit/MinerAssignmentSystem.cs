@@ -140,30 +140,49 @@ public class MinerAssignmentSystem : MonoBehaviour
             return;
         }
 
-        ResourceType[] flex = BuildFlexibleMineableTypes(slotCounts);
-        foreach (Unit_Miner miner in miners)
+        List<ResourceType> perMinerAssignedTypes = BuildPerMinerAssignedTypes(slotCounts, n);
+        for (int i = 0; i < miners.Count; i++)
         {
-            miner.ApplyMineableTypes(flex);
+            Unit_Miner miner = miners[i];
+            ResourceType assignedType = perMinerAssignedTypes[i];
+            miner.ApplyMineableTypes(new[] { assignedType });
         }
     }
 
-    private ResourceType[] BuildFlexibleMineableTypes(int[] slotCounts)
+    private List<ResourceType> BuildPerMinerAssignedTypes(int[] slotCounts, int minerCount)
     {
-        List<ResourceType> list = new List<ResourceType>();
+        List<ResourceType> assigned = new List<ResourceType>(minerCount);
         for (int i = 0; i < 4; i++)
         {
-            if (slotCounts[i] > 0)
+            int count = Mathf.Max(0, slotCounts[i]);
+            for (int j = 0; j < count; j++)
             {
-                list.Add(BaseResourceOrder[i]);
+                assigned.Add(BaseResourceOrder[i]);
             }
         }
 
-        if (list.Count == 0)
+        if (assigned.Count == 0)
         {
-            return (ResourceType[])BaseResourceOrder.Clone();
+            int idx = 0;
+            while (assigned.Count < minerCount)
+            {
+                assigned.Add(BaseResourceOrder[idx % BaseResourceOrder.Length]);
+                idx++;
+            }
+            return assigned;
         }
 
-        return list.ToArray();
+        while (assigned.Count < minerCount)
+        {
+            assigned.Add(assigned[assigned.Count % Mathf.Min(assigned.Count, 4)]);
+        }
+
+        if (assigned.Count > minerCount)
+        {
+            assigned.RemoveRange(minerCount, assigned.Count - minerCount);
+        }
+
+        return assigned;
     }
 
     private List<ResourceType> BuildUnionMineableTypes(int[] slotCounts)
