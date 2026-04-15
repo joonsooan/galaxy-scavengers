@@ -15,9 +15,9 @@ public class MainControlPanel : MonoBehaviour
     [Header("UI Panels")]
     [SerializeField] private GameObject buildingInfoPanel;
     [SerializeField] private GameObject baseBuildingPanel;
-    [SerializeField] private GameObject processorPanel;
     [SerializeField] private GameObject resourceStatPanel;
     [SerializeField] private GameObject unitManagementPanelRoot;
+    [SerializeField] private ResourceStatsUIController resourceStatsUIController;
     
     private GameObject _currentlyActivePanel;
     private BuildingInfoPanel _buildingInfoPanelComponent;
@@ -67,6 +67,11 @@ public class MainControlPanel : MonoBehaviour
         if (unitManagementBtn != null)
         {
             unitManagementBtn.onClick.AddListener(OnUnitManagementBtnClicked);
+        }
+
+        if (resourceStatsUIController == null && resourceStatPanel != null)
+        {
+            resourceStatsUIController = resourceStatPanel.GetComponentInChildren<ResourceStatsUIController>(true);
         }
         
         HideAllPanels();
@@ -161,7 +166,6 @@ public class MainControlPanel : MonoBehaviour
 
         GameManager.Instance.uiManager.UnpinAndHideAllPanels();
         buildingInfoPanel.SetActive(true);
-        ShowPanel(processorPanel);
     }
 
     private void OnResourceStatBtnClicked()
@@ -187,6 +191,7 @@ public class MainControlPanel : MonoBehaviour
             buildingInfoPanel.SetActive(false);
         }
         ShowPanel(resourceStatPanel);
+        resourceStatsUIController?.Refresh();
     }
 
     private void OnUnitManagementBtnClicked()
@@ -270,11 +275,6 @@ public class MainControlPanel : MonoBehaviour
             baseBuildingPanel.SetActive(false);
         }
         
-        if (processorPanel != null)
-        {
-            processorPanel.SetActive(false);
-        }
-        
         if (resourceStatPanel != null)
         {
             resourceStatPanel.SetActive(false);
@@ -328,7 +328,6 @@ public class MainControlPanel : MonoBehaviour
         if (resourceStatPanel != null)
         {
             if (baseBuildingPanel != null) baseBuildingPanel.SetActive(false);
-            if (processorPanel != null) processorPanel.SetActive(false);
             if (_buildingInfoPanelComponent != null)
             {
                 _buildingInfoPanelComponent.ClearAllInfo();
@@ -339,6 +338,11 @@ public class MainControlPanel : MonoBehaviour
             }
             resourceStatPanel.SetActive(true);
             _currentlyActivePanel = resourceStatPanel;
+            if (resourceStatsUIController == null)
+            {
+                resourceStatsUIController = resourceStatPanel.GetComponentInChildren<ResourceStatsUIController>(true);
+            }
+            resourceStatsUIController?.Refresh();
         }
 
         if (unitManagementPanelRoot != null)

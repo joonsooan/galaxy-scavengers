@@ -357,7 +357,7 @@ public class CameraTargetController : MonoBehaviour
             return;
         }
 
-        if (IsUnitManagementZoomBlocked())
+        if (IsPanelZoomBlocked())
         {
             return;
         }
@@ -420,7 +420,7 @@ public class CameraTargetController : MonoBehaviour
         return launchUIController != null && launchUIController.IsLaunchInputLockActive();
     }
 
-    private bool IsUnitManagementZoomBlocked()
+    private bool IsPanelZoomBlocked()
     {
         if (_mainControlPanel == null)
         {
@@ -431,7 +431,7 @@ public class CameraTargetController : MonoBehaviour
             }
         }
 
-        return _mainControlPanel.IsUnitManagementPanelActive();
+        return _mainControlPanel.IsUnitManagementPanelActive() || _mainControlPanel.IsResourceStatPanelActive();
     }
 
     private void WarpCameras(Vector3 deltaPos)
