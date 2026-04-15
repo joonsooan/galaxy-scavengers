@@ -180,7 +180,6 @@ GameObject:
   - component: {fileID: 6865986198788389803}
   - component: {fileID: 378933705879413650}
   - component: {fileID: 5177927966069864011}
-  - component: {fileID: -1685140727660024593}
   - component: {fileID: -1230124184689666094}
   - component: {fileID: 2731464798948232543}
   - component: {fileID: -560043367191569186}
@@ -351,25 +350,6 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 3, y: 2}
   m_EdgeRadius: 0
---- !u!114 &-1685140727660024593
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1574451153020646121}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8ffc60e2ee4dc34694c07da284f388b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHealth: 1000
-  flashColor: {r: 1, g: 0, b: 0, a: 1}
-  flashDuration: 0.3
-  currentHealth: 0
-  droneHubData: {fileID: 11400000, guid: 5d08ea5a0927c3a4c96a5b782a641802, type: 2}
-  electricityConsumptionPerSecond: 5
-  productionSlider: {fileID: 8664545961476982809}
 --- !u!114 &-1230124184689666094
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -512,17 +492,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 407612af746ee8a46aef9fa702fd0e8f, type: 3}
---- !u!114 &8664545961476982809 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7401606815928815577, guid: 407612af746ee8a46aef9fa702fd0e8f, type: 3}
-  m_PrefabInstance: {fileID: 2200409233637083072}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 09cee83ca0f33514b874885ebbe0f4a0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!224 &8928475944301192480 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7305187256189117152, guid: 407612af746ee8a46aef9fa702fd0e8f, type: 3}

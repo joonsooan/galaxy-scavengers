@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -74,6 +74,16 @@ public class InventorySystem : MonoBehaviour
         _isInitialized = true;
     }
 
+
+    private void HideInventoryPanelFromExtractor(DataExtractor _)
+    {
+        HideInventoryPanel();
+    }
+
+    private void HideInventoryPanelFromMainStructure(MainStructure _)
+    {
+        HideInventoryPanel();
+    }
     private void HideInventoryPanel()
     {
         inventoryPanel.SetActive(false);
@@ -92,8 +102,9 @@ public class InventorySystem : MonoBehaviour
         }
 
         SubscribeToResourceEvents();
-        DroneHub.OnDroneHubClicked += HideInventoryPanel;
+        MainStructure.OnDroneProducePanelClicked += HideInventoryPanelFromMainStructure;
         Processor.OnProcessorClicked += HideInventoryPanel;
+        DataExtractor.OnDataExtractorClicked += HideInventoryPanelFromExtractor;
     }
 
     private void SubscribeToResourceEvents()
@@ -107,8 +118,9 @@ public class InventorySystem : MonoBehaviour
     private void OnDisable()
     {
         ResourceManager.OnResourceAmountChanged -= UpdateResourceInfoCells;
-        DroneHub.OnDroneHubClicked -= HideInventoryPanel;
+        MainStructure.OnDroneProducePanelClicked -= HideInventoryPanelFromMainStructure;
         Processor.OnProcessorClicked -= HideInventoryPanel;
+        DataExtractor.OnDataExtractorClicked -= HideInventoryPanelFromExtractor;
     }
 
     private void InitializeMaxStackAmounts()
@@ -578,8 +590,9 @@ public class InventorySystem : MonoBehaviour
         LaunchUIController launchController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
         if (launchController != null)
         {
-            launchController.StartLaunchCountdown();
+            launchController.StartLaunchSequence();
         }
     }
 }
+
 

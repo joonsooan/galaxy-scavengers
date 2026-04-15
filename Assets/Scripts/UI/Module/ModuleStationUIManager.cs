@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ModuleStationUIManager : MonoBehaviour, IQuestUIProvider
+public class ModuleStationUIManager : MonoBehaviour
 {
     [Header("UI References")]
     [SerializeField] private GameObject moduleStationPanel;
@@ -14,19 +14,6 @@ public class ModuleStationUIManager : MonoBehaviour, IQuestUIProvider
     [SerializeField] private GameObject moduleGridCellPrefab;
     [SerializeField] private ModuleDetailPanel moduleDetailPanel;
     [SerializeField] private Button closeButton;
-    
-    [Header("Quest UI")]
-    [SerializeField] private Button questButton;
-    [SerializeField] private Button shopButton;
-    [SerializeField] private GameObject questGridPanel;
-    [SerializeField] private RectTransform questGridParent;
-    [SerializeField] private GameObject questCellPrefab;
-    [SerializeField] private QuestDetailPanel questDetailPanel;
-    [SerializeField] private QuestProvider questProvider = QuestProvider.NPC_1;
-    [SerializeField] private QuestUIHandler questUIHandler;
-    [SerializeField] private GameObject newQuestIndicator;
-    [SerializeField] private GameObject questBlockPanel;
-    [SerializeField] private int unlockQuestId = -1;
     [SerializeField] private List<ModuleGridCell> recipeCells = new ();
 
     private ModuleData _currentData;
@@ -39,24 +26,16 @@ public class ModuleStationUIManager : MonoBehaviour, IQuestUIProvider
 
         closeButton.onClick.RemoveAllListeners();
         closeButton.onClick.AddListener(OnCloseButtonClicked);
-        
-        if (questUIHandler == null)
-        {
-            questUIHandler = gameObject.AddComponent<QuestUIHandler>();
-        }
-        questUIHandler.Initialize(this);
     }
 
     private void OnEnable()
     {
         ModuleStation.OnModuleStationClicked += ShowModuleStationUI;
-        SubscribeToQuestEvents();
     }
 
     private void OnDisable()
     {
         ModuleStation.OnModuleStationClicked -= ShowModuleStationUI;
-        UnsubscribeFromQuestEvents();
     }
 
     private void ShowModuleStationUI(ModuleStation station)
@@ -69,29 +48,13 @@ public class ModuleStationUIManager : MonoBehaviour, IQuestUIProvider
         moduleDetailPanel.ClearInfo();
 
         UpdateStationInfo();
-        
-        if (newQuestIndicator != null && newQuestIndicator.activeSelf && questUIHandler != null)
-        {
-            questUIHandler.ShowQuestUI();
-        }
-        else if (questUIHandler != null)
-        {
-            questUIHandler.ShowShopUI();
-        }
-        else
-        {
-            ShowShopUI();
-        }
+        ShowShopUI();
     }
 
     private void HidePanel()
     {
         moduleStationPanel.SetActive(false);
         moduleDetailPanel.HidePanel();
-        if (questUIHandler != null)
-        {
-            questUIHandler.HideQuestUI();
-        }
     }
 
     private void OnCloseButtonClicked()
@@ -144,15 +107,6 @@ public class ModuleStationUIManager : MonoBehaviour, IQuestUIProvider
         }
     }
     
-    public Button GetQuestButton() => questButton;
-    public Button GetShopButton() => shopButton;
-    public GameObject GetQuestGridPanel() => questGridPanel;
-    public RectTransform GetQuestGridParent() => questGridParent;
-    public GameObject GetQuestCellPrefab() => questCellPrefab;
-    public QuestDetailPanel GetQuestDetailPanel() => questDetailPanel;
-    public QuestProvider GetQuestProvider() => questProvider;
-    public GameObject GetShopUIContainer() => recipeGridContainer;
-    
     public void ShowShopUI()
     {
         recipeGridContainer.SetActive(true);
@@ -180,56 +134,5 @@ public class ModuleStationUIManager : MonoBehaviour, IQuestUIProvider
         {
             moduleDetailPanel.ClearInfo();
         }
-    }
-    
-    public GameObject GetNewQuestIndicator() => newQuestIndicator;
-    
-    public string GetUIName() => "Module Station UI";
-
-    private void SubscribeToQuestEvents()
-    {
-        if (QuestDataManager.Instance != null && unlockQuestId >= 0)
-        {
-            QuestDataManager.Instance.OnQuestStateChanged -= OnQuestStateChangedForBlocker;
-            QuestDataManager.Instance.OnQuestStateChanged += OnQuestStateChangedForBlocker;
-            UpdateQuestBlockPanel();
-        }
-        else if (questBlockPanel != null && unlockQuestId >= 0)
-        {
-            questBlockPanel.SetActive(true);
-        }
-    }
-
-    private void UnsubscribeFromQuestEvents()
-    {
-        if (QuestDataManager.Instance != null && unlockQuestId >= 0)
-        {
-            QuestDataManager.Instance.OnQuestStateChanged -= OnQuestStateChangedForBlocker;
-        }
-    }
-
-    private void OnQuestStateChangedForBlocker(int questId)
-    {
-        if (questId == unlockQuestId)
-        {
-            UpdateQuestBlockPanel();
-        }
-    }
-
-    private void UpdateQuestBlockPanel()
-    {
-        if (questBlockPanel == null || unlockQuestId < 0)
-        {
-            return;
-        }
-
-        if (QuestDataManager.Instance == null)
-        {
-            questBlockPanel.SetActive(true);
-            return;
-        }
-
-        bool isCompleted = QuestDataManager.Instance.IsQuestCompleted(unlockQuestId);
-        questBlockPanel.SetActive(!isCompleted);
     }
 }

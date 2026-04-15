@@ -20,10 +20,10 @@ MonoBehaviour:
   tutorialKey: unit_miner
   unitIcon: {fileID: -5932265281250941504, guid: b2344e19305fc3140bc7ee8cae2166c3, type: 3}
   unitPrefab: {fileID: 6649466925040614564, guid: 5a38edecd5297e84d9adb4995b37971b, type: 3}
-  productionTime: 2
+  productionTime: 3
   productionCosts:
   - resourceType: 0
-    amount: 100
+    amount: 50
   - resourceType: 1
-    amount: 100
+    amount: 50
   noiseCoefficient: 0.5

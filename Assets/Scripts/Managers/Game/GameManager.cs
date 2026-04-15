@@ -16,12 +16,13 @@ public class GameManager : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool skipProceduralGenerationWhenLoadingGameScene;
 
+    [Header("Tutorial")]
+    [Tooltip("체크 시 저장된 튜토리얼 완료 여부와 관계없이 튜토리얼을 시작하지 않고, 일반 게임 시작 흐름(패널 표시·BGM 등)으로 진행합니다.")]
+    [SerializeField] private bool ignoreTutorial;
+
     [Header("Audio")]
     [SerializeField] private EventReference pauseSound;
     [SerializeField] private EventReference resumeSound;
-    [SerializeField] private EventReference speed1Sound;
-    [SerializeField] private EventReference speed2Sound;
-    [SerializeField] private EventReference speed3Sound;
 
 
     [HideInInspector] public UnityEvent<DisplayableData> onStartDrag;
@@ -33,6 +34,7 @@ public class GameManager : MonoBehaviour
     private float _savedTimeScale = 1f;
     private static readonly WaitForSeconds _wait05 = CoroutineCache.GetWaitForSeconds(0.5f);
     public static GameManager Instance { get; private set; }
+    public bool IgnoreTutorial => ignoreTutorial;
     public bool IsPaused { get; private set; }
 
     public bool IsGameSceneInitialized { get; private set; }
@@ -88,6 +90,8 @@ public class GameManager : MonoBehaviour
 
         if (IsLoadingScreenActive()) return;
 
+        HandleDebugTimeScale();
+
         if (GameMenuManager.Instance != null && GameMenuManager.Instance.IsMenuOpen()) {
             return;
         }
@@ -97,23 +101,8 @@ public class GameManager : MonoBehaviour
         bool isLaunchMenuInputBlocked = launchUIController != null && launchUIController.IsMenuInputBlocked();
         bool isCountdownSequenceActive = launchUIController != null && launchUIController.IsCountdownSequenceActive();
 
-        if (!isLaunchMenuInputBlocked && Input.GetKeyDown(KeyCode.Q)) {
-            GameSceneQuestUIManager questUI = FindFirstObjectByType<GameSceneQuestUIManager>();
-            if (questUI != null) questUI.ToggleQuestPanelWithShortcut();
-        }
-
         if (!isPauseInputLocked && !isCountdownSequenceActive && Input.GetKeyDown(KeyCode.Space)) {
             TogglePause();
-        }
-
-        if (!isLaunchMenuInputBlocked && Input.GetKeyDown(KeyCode.Alpha1)) {
-            SetGameSpeed(1f);
-        }
-        else if (!isLaunchMenuInputBlocked && Input.GetKeyDown(KeyCode.Alpha2)) {
-            SetGameSpeed(2f);
-        }
-        else if (!isLaunchMenuInputBlocked && Input.GetKeyDown(KeyCode.Alpha3)) {
-            SetGameSpeed(3f);
         }
 
         if (IsPaused) return;
@@ -136,6 +125,34 @@ public class GameManager : MonoBehaviour
             }
         }
 #endif
+    }
+
+    private void HandleDebugTimeScale()
+    {
+        float targetScale = -1f;
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            targetScale = 1f;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            targetScale = 2f;
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            targetScale = 4f;
+        }
+
+        if (targetScale < 0f)
+        {
+            return;
+        }
+
+        _savedTimeScale = targetScale;
+        if (!IsPaused)
+        {
+            Time.timeScale = targetScale;
+        }
     }
 
     public void TogglePause()
@@ -161,45 +178,6 @@ public class GameManager : MonoBehaviour
         }
 
         OnPauseStateChanged?.Invoke(IsPaused);
-    }
-
-    public void CycleGameSpeed()
-    {
-        float currentSpeed = _savedTimeScale;
-        float newSpeed;
-
-        if (currentSpeed <= 1f) {
-            newSpeed = 2f;
-        }
-        else if (currentSpeed <= 2f) {
-            newSpeed = 3f;
-        }
-        else {
-            newSpeed = 1f;
-        }
-
-        SetGameSpeed(newSpeed);
-    }
-
-    private void SetGameSpeed(float newSpeed)
-    {
-        if (Mathf.Approximately(_savedTimeScale, newSpeed)) return;
-
-        _savedTimeScale = newSpeed;
-        bool canChangeActualTimeScale = !IsPaused;
-        if (canChangeActualTimeScale) {
-            Time.timeScale = newSpeed;
-        }
-
-        if (Mathf.Approximately(newSpeed, 1f) && !speed1Sound.IsNull) {
-            RuntimeManager.PlayOneShot(speed1Sound);
-        }
-        else if (Mathf.Approximately(newSpeed, 2f) && !speed2Sound.IsNull) {
-            RuntimeManager.PlayOneShot(speed2Sound);
-        }
-        else if (Mathf.Approximately(newSpeed, 3f) && !speed3Sound.IsNull) {
-            RuntimeManager.PlayOneShot(speed3Sound);
-        }
     }
 
     public void GameOver(Transform gameOverFocusTarget = null)
@@ -255,12 +233,6 @@ public class GameManager : MonoBehaviour
         if (mainControlPanel != null)
         {
             mainControlPanel.HideAllPanels();
-        }
-
-        GameSceneQuestUIManager questUi = FindFirstObjectByType<GameSceneQuestUIManager>(FindObjectsInactive.Include);
-        if (questUi != null)
-        {
-            questUi.HideQuestPanel();
         }
 
         Scene activeScene = SceneManager.GetActiveScene();
@@ -400,10 +372,6 @@ public class GameManager : MonoBehaviour
         if (progress != null) {
             progress.UpdateProgress(0.0f, "착륙 좌표 고정 중...");
             yield return _wait05;
-        }
-
-        if (CoreRepairManager.Instance != null) {
-            CoreRepairManager.Instance.InitializeLanding();
         }
 
         IsGameSceneInitialized = true;

@@ -260,6 +260,28 @@ public class AreaBuildingDestroyer : MonoBehaviour
         return false;
     }
 
+    private bool IsCellPartOfMainStructure(Vector3Int cell)
+    {
+        if (_buildingManager == null) {
+            return false;
+        }
+
+        if (_buildingManager.IsMainStructureCell(cell)) {
+            return true;
+        }
+
+        if (_buildingManager.TryGetMainStructureAtCell(cell, out _)) {
+            return true;
+        }
+
+        BuildingPiece piece = _buildingManager.GetPieceAt(cell);
+        if (piece != null && piece.GetComponentInParent<MainStructure>(true) != null) {
+            return true;
+        }
+
+        return false;
+    }
+
     public void ExecuteDemolish(HashSet<Vector3Int> cells)
     {
         DestroyBuildingsInArea(cells);
@@ -281,7 +303,7 @@ public class AreaBuildingDestroyer : MonoBehaviour
 
         foreach (Vector3Int cell in selectedCells)
         {
-            if (_buildingManager.IsMainStructureCell(cell))
+            if (IsCellPartOfMainStructure(cell))
                 continue;
 
             if (constructionSiteCells.Contains(cell))
@@ -303,6 +325,9 @@ public class AreaBuildingDestroyer : MonoBehaviour
                 }
                 if (data == null)
                     data = _buildingManager.GetBuildingDataAt(anchor);
+
+                if (data != null && data.buildingType == BuildingType.MainStructure)
+                    continue;
 
                 bool isSingleCellStructure = occupiedCells != null && occupiedCells.Count == 1;
 
@@ -338,6 +363,8 @@ public class AreaBuildingDestroyer : MonoBehaviour
             else if (HasBuildingAt(cell))
             {
                 BuildingPiece piece = _buildingManager.GetPieceAt(cell);
+                if (piece != null && piece.GetComponentInParent<MainStructure>(true) != null)
+                    continue;
                 if (piece != null && !seenPieceCells.Contains(cell))
                 {
                     seenPieceCells.Add(cell);
@@ -558,7 +585,7 @@ public class AreaBuildingDestroyer : MonoBehaviour
         
         foreach (Vector3Int cell in selectedCells)
         {
-            if (_buildingManager.IsMainStructureCell(cell))
+            if (IsCellPartOfMainStructure(cell))
             {
                 continue;
             }

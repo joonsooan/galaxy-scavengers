@@ -35,8 +35,9 @@ public struct HighlightableUI
 
 public class TutorialManager : MonoBehaviour
 {
+    private const string TutorialCompletedPrefsKey = "GalaxyScavengers_TutorialCompleted";
+
     [Header("Tutorial Settings")]
-    [SerializeField] private int firstQuestId = 0;
     [SerializeField] private GameObject tutorialUI;
     [SerializeField] private TutorialStepData[] tutorialStepDataList;
 
@@ -79,7 +80,6 @@ public class TutorialManager : MonoBehaviour
     private int _mouseWheelScrollCount;
 
     private int _numberKeyPressCount;
-    private float _lastTimeScale;
     private RectTransform _rect;
     private int _resourceBlockRevealCount;
     private int _resourceMinedAmount;
@@ -172,26 +172,17 @@ public class TutorialManager : MonoBehaviour
 
     public bool ShouldStartTutorial()
     {
-        if (QuestManager.Instance == null) {
-            Debug.LogWarning("[TutorialManager] ShouldStartTutorial: QuestManager.Instance is null");
+        if (GameManager.Instance != null && GameManager.Instance.IgnoreTutorial) {
             return false;
         }
 
-        if (firstQuestId < 0) {
-            Debug.LogWarning($"[TutorialManager] ShouldStartTutorial: firstQuestId is invalid ({firstQuestId})");
-            return false;
-        }
+        return PlayerPrefs.GetInt(TutorialCompletedPrefsKey, 0) == 0;
+    }
 
-        QuestData questData = QuestManager.Instance.GetQuestData(firstQuestId);
-        if (questData == null) {
-            Debug.LogWarning($"[TutorialManager] ShouldStartTutorial: Quest with ID {firstQuestId} not found");
-            return false;
-        }
-
-        bool isCompleted = QuestManager.Instance.IsQuestCompleted(firstQuestId);
-        bool shouldStart = !isCompleted;
-        
-        return shouldStart;
+    private static void MarkTutorialCompletedInPrefs()
+    {
+        PlayerPrefs.SetInt(TutorialCompletedPrefsKey, 1);
+        PlayerPrefs.Save();
     }
 
     private IEnumerator WaitForGameInitialization()
@@ -242,10 +233,6 @@ public class TutorialManager : MonoBehaviour
 
     private void StartTutorial()
     {
-        if (CoreRepairManager.Instance != null) {
-            CoreRepairManager.Instance.ApplyDebuffsImmediately();
-        }
-
         if (BgmManager.Instance != null) {
             BgmManager.Instance.PlayTutorialBgm();
         }
@@ -383,7 +370,6 @@ public class TutorialManager : MonoBehaviour
         _lastMouseWheelValue = Input.mouseScrollDelta.y;
         if (GameManager.Instance != null) {
             _lastPausedState = GameManager.Instance.IsPaused;
-            _lastTimeScale = GameManager.Instance.GetTimeScale();
         }
     }
 
@@ -479,17 +465,8 @@ public class TutorialManager : MonoBehaviour
 
             case TutorialStepType.NumberKeyPress:
                 bool numberKeyPressed = Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Alpha3);
-                bool timeScaleChanged = false;
 
-                if (GameManager.Instance != null) {
-                    float currentTimeScale = GameManager.Instance.GetTimeScale();
-                    if (Mathf.Abs(currentTimeScale - _lastTimeScale) > 0.01f) {
-                        timeScaleChanged = true;
-                        _lastTimeScale = currentTimeScale;
-                    }
-                }
-
-                if (numberKeyPressed || timeScaleChanged) {
+                if (numberKeyPressed) {
                     _numberKeyPressCount++;
                     if (_tutorialUI != null && step.showProgressBar) {
                         _tutorialUI.UpdateProgress((float)_numberKeyPressCount / step.count);
@@ -665,11 +642,6 @@ public class TutorialManager : MonoBehaviour
         return _isTutorialActive;
     }
 
-    public int GetFirstQuestId()
-    {
-        return firstQuestId;
-    }
-
     public TutorialStepData GetCurrentTutorialStep()
     {
         if (_isTutorialActive && _currentStepIndex >= 0 && _currentStepIndex < _tutorialSteps.Count)
@@ -784,7 +756,8 @@ public class TutorialManager : MonoBehaviour
         if (BgmManager.Instance != null) {
             BgmManager.Instance.PlayGameBgm();
         }
-        
+
+        MarkTutorialCompletedInPrefs();
         OnTutorialEnded?.Invoke();
     }
 
@@ -807,6 +780,7 @@ public class TutorialManager : MonoBehaviour
             _tutorialUI.HideTutorial();
         }
 
+        MarkTutorialCompletedInPrefs();
         OnTutorialEnded?.Invoke();
     }
 
@@ -830,6 +804,9 @@ public class TutorialManager : MonoBehaviour
                 _tutorialUI.HideTutorial();
             }
         }
+
+        PlayerPrefs.DeleteKey(TutorialCompletedPrefsKey);
+        PlayerPrefs.Save();
 
         if (ShouldStartTutorial()) {
             InitializeTutorialSteps();

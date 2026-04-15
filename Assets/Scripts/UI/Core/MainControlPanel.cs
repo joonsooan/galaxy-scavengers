@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
@@ -10,26 +10,30 @@ public class MainControlPanel : MonoBehaviour
     [SerializeField] private Button processorBtn;
     [SerializeField] private Button resourceStatBtn;
     [SerializeField] private Button resourceStatCloseBtn;
+    [SerializeField] private Button unitManagementBtn;
 
     [Header("UI Panels")]
     [SerializeField] private GameObject buildingInfoPanel;
     [SerializeField] private GameObject baseBuildingPanel;
-    [SerializeField] private GameObject processorPanel;
     [SerializeField] private GameObject resourceStatPanel;
+    [SerializeField] private GameObject unitManagementPanelRoot;
+    [SerializeField] private ResourceStatsUIController resourceStatsUIController;
     
     private GameObject _currentlyActivePanel;
     private BuildingInfoPanel _buildingInfoPanelComponent;
     
     private void OnEnable()
     {
-        DroneHub.OnDroneHubClicked += HideBuildingInfoPanel;
+        MainStructure.OnDroneProducePanelClicked += HideBuildingInfoPanelMainStructure;
         Processor.OnProcessorClicked += HideBuildingInfoPanel;
+        DataExtractor.OnDataExtractorClicked += HideBuildingInfoPanelExtractor;
     }
 
     private void OnDisable()
     {
-        DroneHub.OnDroneHubClicked -= HideBuildingInfoPanel;
+        MainStructure.OnDroneProducePanelClicked -= HideBuildingInfoPanelMainStructure;
         Processor.OnProcessorClicked -= HideBuildingInfoPanel;
+        DataExtractor.OnDataExtractorClicked -= HideBuildingInfoPanelExtractor;
     }
     
     
@@ -59,6 +63,16 @@ public class MainControlPanel : MonoBehaviour
         {
             resourceStatCloseBtn.onClick.AddListener(OnResourceStatCloseBtnClicked);
         }
+
+        if (unitManagementBtn != null)
+        {
+            unitManagementBtn.onClick.AddListener(OnUnitManagementBtnClicked);
+        }
+
+        if (resourceStatsUIController == null && resourceStatPanel != null)
+        {
+            resourceStatsUIController = resourceStatPanel.GetComponentInChildren<ResourceStatsUIController>(true);
+        }
         
         HideAllPanels();
     }
@@ -77,8 +91,8 @@ public class MainControlPanel : MonoBehaviour
         }
         else if (Input.GetKeyDown(KeyCode.R))
         {
-            PlayShortcutClickSound(processorBtn);
-            OnProcessorBtnClicked();
+            PlayShortcutClickSound(unitManagementBtn);
+            OnUnitManagementBtnClicked();
         }
         else if (Input.GetKeyDown(KeyCode.F))
         {
@@ -91,6 +105,15 @@ public class MainControlPanel : MonoBehaviour
             if (Input.GetMouseButtonUp(1))
             {
                 CloseResourceStatPanel();
+                return;
+            }
+        }
+
+        if (IsUnitManagementPanelActive())
+        {
+            if (Input.GetMouseButtonUp(1))
+            {
+                CloseUnitManagementPanel();
                 return;
             }
         }
@@ -143,7 +166,6 @@ public class MainControlPanel : MonoBehaviour
 
         GameManager.Instance.uiManager.UnpinAndHideAllPanels();
         buildingInfoPanel.SetActive(true);
-        ShowPanel(processorPanel);
     }
 
     private void OnResourceStatBtnClicked()
@@ -169,25 +191,68 @@ public class MainControlPanel : MonoBehaviour
             buildingInfoPanel.SetActive(false);
         }
         ShowPanel(resourceStatPanel);
+        resourceStatsUIController?.Refresh();
     }
 
+    private void OnUnitManagementBtnClicked()
+    {
+        if (TutorialManager.Instance != null && unitManagementBtn != null)
+        {
+            TutorialManager.Instance.DisableHighlightForTarget(unitManagementBtn.gameObject);
+        }
+
+        if (IsUnitManagementPanelActive())
+        {
+            CloseUnitManagementPanel();
+            return;
+        }
+
+        HideAllPanels();
+        if (_buildingInfoPanelComponent != null)
+        {
+            _buildingInfoPanelComponent.ClearAllInfo();
+        }
+
+        if (buildingInfoPanel != null)
+        {
+            buildingInfoPanel.SetActive(false);
+        }
+
+        ShowPanel(unitManagementPanelRoot);
+    }
+
+
+    private void HideBuildingInfoPanelExtractor(DataExtractor _)
+    {
+        if (buildingInfoPanel != null)
+        {
+            buildingInfoPanel.SetActive(false);
+        }
+    }
     private void HideBuildingInfoPanel(Damageable _)
     {
         buildingInfoPanel.SetActive(false);
+    }
+
+    private void HideBuildingInfoPanelMainStructure(MainStructure _)
+    {
+        if (buildingInfoPanel != null) {
+            buildingInfoPanel.SetActive(false);
+        }
     }
     
     private void ShowPanel(GameObject panel)
     {
         if (panel == null) return;
         
-        // 현재 보여주고 있는 판넬과 다른 버튼 클릭 시 보여주던 판넬 비활성화
+        // ?꾩옱 蹂댁뿬二쇨퀬 ?덈뒗 ?먮꽟怨??ㅻⅨ 踰꾪듉 ?대┃ ??蹂댁뿬二쇰뜕 ?먮꽟 鍮꾪솢?깊솕
         if (_currentlyActivePanel != null && _currentlyActivePanel != panel)
         {
             _buildingInfoPanelComponent.ClearInfo();
             _currentlyActivePanel.SetActive(false);
         }
         
-        // 같은 버튼 클릭 시 판넬 숨김
+        // 媛숈? 踰꾪듉 ?대┃ ???먮꽟 ?④?
         if (_currentlyActivePanel == panel)
         {
             panel.SetActive(false);
@@ -195,7 +260,7 @@ public class MainControlPanel : MonoBehaviour
             buildingInfoPanel.SetActive(false);
             _currentlyActivePanel = null;
         }
-        // _currentlyActivePanel = null 일 때 버튼 클릭 시 보여줌
+        // _currentlyActivePanel = null ????踰꾪듉 ?대┃ ??蹂댁뿬以?
         else
         {
             panel.SetActive(true);
@@ -210,14 +275,14 @@ public class MainControlPanel : MonoBehaviour
             baseBuildingPanel.SetActive(false);
         }
         
-        if (processorPanel != null)
-        {
-            processorPanel.SetActive(false);
-        }
-        
         if (resourceStatPanel != null)
         {
             resourceStatPanel.SetActive(false);
+        }
+
+        if (unitManagementPanelRoot != null)
+        {
+            unitManagementPanelRoot.SetActive(false);
         }
         
         _currentlyActivePanel = null;
@@ -263,7 +328,6 @@ public class MainControlPanel : MonoBehaviour
         if (resourceStatPanel != null)
         {
             if (baseBuildingPanel != null) baseBuildingPanel.SetActive(false);
-            if (processorPanel != null) processorPanel.SetActive(false);
             if (_buildingInfoPanelComponent != null)
             {
                 _buildingInfoPanelComponent.ClearAllInfo();
@@ -274,12 +338,40 @@ public class MainControlPanel : MonoBehaviour
             }
             resourceStatPanel.SetActive(true);
             _currentlyActivePanel = resourceStatPanel;
+            if (resourceStatsUIController == null)
+            {
+                resourceStatsUIController = resourceStatPanel.GetComponentInChildren<ResourceStatsUIController>(true);
+            }
+            resourceStatsUIController?.Refresh();
+        }
+
+        if (unitManagementPanelRoot != null)
+        {
+            unitManagementPanelRoot.SetActive(false);
         }
     }
 
     public bool IsResourceStatPanelActive()
     {
         return resourceStatPanel != null && resourceStatPanel.activeSelf;
+    }
+
+    public void CloseUnitManagementPanel()
+    {
+        if (unitManagementPanelRoot != null)
+        {
+            unitManagementPanelRoot.SetActive(false);
+        }
+
+        if (_currentlyActivePanel == unitManagementPanelRoot)
+        {
+            _currentlyActivePanel = null;
+        }
+    }
+
+    public bool IsUnitManagementPanelActive()
+    {
+        return unitManagementPanelRoot != null && unitManagementPanelRoot.activeSelf;
     }
 
     private bool IsLoadingScreenActive()
@@ -319,5 +411,11 @@ public class MainControlPanel : MonoBehaviour
         {
             resourceStatCloseBtn.onClick.RemoveListener(OnResourceStatCloseBtnClicked);
         }
+
+        if (unitManagementBtn != null)
+        {
+            unitManagementBtn.onClick.RemoveListener(OnUnitManagementBtnClicked);
+        }
     }
 }
+

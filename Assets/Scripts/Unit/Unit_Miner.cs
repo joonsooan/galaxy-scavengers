@@ -13,6 +13,13 @@ using STOP_MODE = FMOD.Studio.STOP_MODE;
 public class Unit_Miner : UnitBase
 {
     private static readonly Dictionary<Vector3Int, Unit_Miner> ReservedMiningCells = new Dictionary<Vector3Int, Unit_Miner>();
+    private static readonly HashSet<ResourceType> BaseResourceTypes = new HashSet<ResourceType>
+    {
+        ResourceType.Ferrite,
+        ResourceType.Aether,
+        ResourceType.Biomass,
+        ResourceType.CryoCrystal
+    };
     [Header("References")]
     [SerializeField] private UnitMovement unitMovement;
 
@@ -77,9 +84,13 @@ public class Unit_Miner : UnitBase
 
     protected void Start()
     {
-        mineableResourceTypes = UnitManager.Instance != null
-            ? UnitManager.Instance.CurrentMineableTypes.ToArray()
-            : (ResourceType[])Enum.GetValues(typeof(ResourceType));
+        if (FindFirstObjectByType<MinerAssignmentSystem>(FindObjectsInactive.Include) == null)
+        {
+            mineableResourceTypes = UnitManager.Instance != null
+                ? UnitManager.Instance.CurrentMineableTypes.ToArray()
+                : (ResourceType[])Enum.GetValues(typeof(ResourceType));
+        }
+
         _spriteController = GetComponentInChildren<UnitSpriteController>();
     }
 
@@ -103,6 +114,7 @@ public class Unit_Miner : UnitBase
     protected override void OnDisable()
     {
         base.OnDisable();
+        _targetResourceNode?.EndMining(this);
         UnsubscribeEvents();
         ReleaseMiningCellReservation();
         ReleaseStorageReservation();
@@ -111,6 +123,7 @@ public class Unit_Miner : UnitBase
 
     protected override void OnDestroy()
     {
+        _targetResourceNode?.EndMining(this);
         ReleaseMiningCellReservation();
         ClearMinerAlerts();
         StopMiningVibration();
@@ -324,6 +337,11 @@ public class Unit_Miner : UnitBase
                 int amountAfter = _targetStorage.GetCurrentResourceAmount(pair.Key);
                 int amountAccepted = amountAfter - amountBefore;
 
+                if (amountAccepted > 0 && BaseResourceTypes.Contains(pair.Key))
+                {
+                    UnitProcessResourceStatTracker.RecordProduce(pair.Key, amountAccepted);
+                }
+
                 _currentCarryAmounts[pair.Key] -= amountAccepted;
                 if (_currentCarryAmounts[pair.Key] < 0) {
                     _currentCarryAmounts[pair.Key] = 0;
@@ -488,6 +506,7 @@ public class Unit_Miner : UnitBase
 
     private void GoToStorage()
     {
+        ResetIdleRoam();
         ReleaseStorageReservation();
 
         UnloadTarget bestTarget = FindClosestUnloadPosition();
@@ -612,7 +631,11 @@ public class Unit_Miner : UnitBase
         ResourceManager.OnNewStorageAdded += HandleNewStorageAdded;
         ResourceManager.OnStorageSpaceFreed += HandleStorageSpaceFreed;
         ResourceManager.OnStorageRemoved += HandleStorageRemoved;
-        UnitManager.OnMineableTypesChanged += HandleMineableTypesChanged;
+        if (FindFirstObjectByType<MinerAssignmentSystem>(FindObjectsInactive.Include) == null)
+        {
+            UnitManager.OnMineableTypesChanged += HandleMineableTypesChanged;
+        }
+
         SceneManager.sceneUnloaded += OnSceneUnloaded;
         GameManager.OnPauseStateChanged += HandlePauseStateChanged;
     }
@@ -626,6 +649,46 @@ public class Unit_Miner : UnitBase
         UnitManager.OnMineableTypesChanged -= HandleMineableTypesChanged;
         SceneManager.sceneUnloaded -= OnSceneUnloaded;
         GameManager.OnPauseStateChanged -= HandlePauseStateChanged;
+    }
+
+    public void ApplyMineableTypes(ResourceType[] newTypes)
+    {
+        mineableResourceTypes = newTypes != null && newTypes.Length > 0
+            ? newTypes
+            : Array.Empty<ResourceType>();
+        bool hasMineableTypes = HasMineableTypesEnabled();
+        SetMineTypeAllOffAlert(!hasMineableTypes);
+        if (!hasMineableTypes)
+        {
+            SetMinerNoResourceAlert(false);
+        }
+
+        if ((currentState == UnitState.Mining || currentState == UnitState.Moving) &&
+            _targetResourceNode != null && !mineableResourceTypes.Contains(_targetResourceNode.resourceType))
+        {
+            if (currentState == UnitState.Moving)
+            {
+                Vector3 targetPosition = BuildingManager.Instance.grid.GetCellCenterWorld(_targetMiningCell);
+                float distanceToTarget = Vector3.Distance(transform.position, targetPosition);
+
+                if (distanceToTarget > 1.0f)
+                {
+                    HandleTargetLoss();
+                }
+            }
+            else if (currentState == UnitState.Mining)
+            {
+                HandleTargetLoss();
+            }
+        }
+
+        if (currentState == UnitState.Idle)
+        {
+            if (_findResourceCoroutine == null)
+            {
+                TryStartActions();
+            }
+        }
     }
 
     private void HandlePauseStateChanged(bool isPaused)
@@ -684,33 +747,7 @@ public class Unit_Miner : UnitBase
 
     private void HandleMineableTypesChanged(ResourceType[] newTypes)
     {
-        mineableResourceTypes = newTypes;
-        bool hasMineableTypes = HasMineableTypesEnabled();
-        SetMineTypeAllOffAlert(!hasMineableTypes);
-        if (!hasMineableTypes) {
-            SetMinerNoResourceAlert(false);
-        }
-
-        if ((currentState == UnitState.Mining || currentState == UnitState.Moving) &&
-            _targetResourceNode != null && !mineableResourceTypes.Contains(_targetResourceNode.resourceType)) {
-            if (currentState == UnitState.Moving) {
-                Vector3 targetPosition = BuildingManager.Instance.grid.GetCellCenterWorld(_targetMiningCell);
-                float distanceToTarget = Vector3.Distance(transform.position, targetPosition);
-
-                if (distanceToTarget > 1.0f) {
-                    HandleTargetLoss();
-                }
-            }
-            else if (currentState == UnitState.Mining) {
-                HandleTargetLoss();
-            }
-        }
-
-        if (currentState == UnitState.Idle) {
-            if (_findResourceCoroutine == null) {
-                TryStartActions();
-            }
-        }
+        ApplyMineableTypes(newTypes);
     }
 
     private void ClearMinerAlerts()
@@ -1010,7 +1047,12 @@ public class Unit_Miner : UnitBase
 
     private void StartMining(ResourceNode target)
     {
+        if (_targetResourceNode != null && _targetResourceNode != target)
+        {
+            _targetResourceNode.EndMining(this);
+        }
         _targetResourceNode = target;
+        _targetResourceNode?.BeginMining(this);
 
         _miningDelay = CoroutineCache.GetWaitForSeconds(target.timeToMinePerUnit);
 
@@ -1021,6 +1063,10 @@ public class Unit_Miner : UnitBase
 
     private void StopMining()
     {
+        if (_targetResourceNode != null)
+        {
+            _targetResourceNode.EndMining(this);
+        }
         if (_mineCoroutine != null) {
             StopCoroutine(_mineCoroutine);
             _mineCoroutine = null;

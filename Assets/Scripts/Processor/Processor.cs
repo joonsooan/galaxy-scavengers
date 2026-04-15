@@ -550,6 +550,7 @@ public class Processor : Damageable, IClickable, IElectricityConsumer
     {
         foreach (ResourceCost ingredient in recipe.ingredients) {
             _currentIngredients[ingredient.resourceType] -= ingredient.amount;
+            UnitProcessResourceStatTracker.RecordSpend(ingredient.resourceType, ingredient.amount, false);
         }
     }
 
@@ -767,6 +768,7 @@ public class Processor : Damageable, IClickable, IElectricityConsumer
     private void ProduceOutput(ProcessorRecipe recipeData)
     {
         ResourceManager.Instance.AddResource(recipeData.resourceType, recipeData.produceAmount);
+        UnitProcessResourceStatTracker.RecordProduce(recipeData.resourceType, recipeData.produceAmount);
 
         if (TutorialManager.Instance != null) {
             string itemTypeName = recipeData.resourceType.ToString();

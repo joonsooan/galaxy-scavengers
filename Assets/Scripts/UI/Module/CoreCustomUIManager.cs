@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
+public class CoreCustomUIManager : MonoBehaviour
 {
     [Header("UI References")]
     [SerializeField] private GameObject coreCustomPanel;
@@ -18,25 +18,12 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
 
     [Header("Core Detail Panel")]
     [SerializeField] private CoreDetailPanel coreDetailPanel;
-    
-    [Header("Quest UI")]
-    [SerializeField] private Button questButton;
-    [SerializeField] private Button shopButton;
-    [SerializeField] private GameObject questGridPanel;
-    [SerializeField] private RectTransform questGridParent;
-    [SerializeField] private GameObject questCellPrefab;
-    [SerializeField] private QuestDetailPanel questDetailPanel;
-    [SerializeField] private QuestProvider questProvider = QuestProvider.NPC_2;
-    [SerializeField] private QuestUIHandler questUIHandler;
-    [SerializeField] private GameObject newQuestIndicator;
-    [SerializeField] private Button launchButton;
 
     [SerializeField] private List<ModuleInventoryCell> moduleSelectionCells = new ();
 
     private CoreCustomizationManager _customizationManager;
     private BaseInventoryManager _inventoryManager;
     private BaseInventorySystem _baseInventorySystem;
-    private int _tutorialQuestId = 0;
 
     private void Start()
     {
@@ -45,7 +32,6 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
         SubscribeToEvents();
         InitializeSlots();
         StartCoroutine(WaitForModulesAndRefreshSlots());
-        StartCoroutine(InitializeTutorialQuestTracking());
     }
 
     private void FindManagers()
@@ -65,12 +51,6 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
             closeButton.onClick.RemoveAllListeners();
             closeButton.onClick.AddListener(OnCloseButtonClicked);
         }
-        
-        if (questUIHandler == null)
-        {
-            questUIHandler = gameObject.AddComponent<QuestUIHandler>();
-        }
-        questUIHandler.Initialize(this);
     }
 
     private void OnEnable()
@@ -102,11 +82,6 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
         if (_inventoryManager != null) {
             _inventoryManager.OnModuleAdded -= OnModuleInventoryChanged;
             _inventoryManager.OnModuleRemoved -= OnModuleInventoryChanged;
-        }
-
-        if (QuestDataManager.Instance != null)
-        {
-            QuestDataManager.Instance.OnQuestStateChanged -= OnQuestStateChanged;
         }
     }
 
@@ -148,19 +123,8 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
             coreCustomPanel.SetActive(true);
             StartCoroutine(RefreshOnPanelShown());
         }
-        
-        if (newQuestIndicator != null && newQuestIndicator.activeSelf && questUIHandler != null)
-        {
-            questUIHandler.ShowQuestUI();
-        }
-        else if (questUIHandler != null)
-        {
-            questUIHandler.ShowShopUI();
-        }
-        else
-        {
-            ShowShopUI();
-        }
+
+        ShowShopUI();
     }
 
     private IEnumerator RefreshOnPanelShown()
@@ -332,15 +296,6 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
         }
     }
     
-    public Button GetQuestButton() => questButton;
-    public Button GetShopButton() => shopButton;
-    public GameObject GetQuestGridPanel() => questGridPanel;
-    public RectTransform GetQuestGridParent() => questGridParent;
-    public GameObject GetQuestCellPrefab() => questCellPrefab;
-    public QuestDetailPanel GetQuestDetailPanel() => questDetailPanel;
-    public QuestProvider GetQuestProvider() => questProvider;
-    public GameObject GetShopUIContainer() => moduleSelectionPanel;
-    
     public void ShowShopUI()
     {
         if (moduleSelectionPanel != null)
@@ -392,66 +347,6 @@ public class CoreCustomUIManager : MonoBehaviour, IQuestUIProvider
         if (coreDetailPanel != null)
         {
             coreDetailPanel.ClearInfo();
-        }
-    }
-    
-    public GameObject GetNewQuestIndicator() => newQuestIndicator;
-    
-    public string GetUIName() => "Core Custom UI";
-
-    private IEnumerator InitializeTutorialQuestTracking()
-    {
-        while (QuestDataManager.Instance == null)
-        {
-            yield return null;
-        }
-
-        if (QuestDataManager.Instance != null)
-        {
-            QuestDataManager.Instance.OnQuestStateChanged += OnQuestStateChanged;
-        }
-
-        yield return null;
-        UpdateLaunchButtonState();
-    }
-
-    private void OnQuestStateChanged(int questId)
-    {
-        if (questId == _tutorialQuestId)
-        {
-            UpdateLaunchButtonState();
-        }
-    }
-
-    private void UpdateLaunchButtonState()
-    {
-        if (launchButton == null)
-        {
-            return;
-        }
-
-        if (QuestDataManager.Instance == null)
-        {
-            launchButton.interactable = true;
-            return;
-        }
-
-        QuestState questState = QuestDataManager.Instance.GetQuestState(_tutorialQuestId);
-
-        bool isTutorialQuestAcceptedOrDone =
-            questState == QuestState.Active ||
-            questState == QuestState.Completable ||
-            questState == QuestState.Completed ||
-            questState == QuestState.Finished ||
-            QuestDataManager.Instance.IsQuestCompleted(_tutorialQuestId);
-
-        if (!isTutorialQuestAcceptedOrDone)
-        {
-            launchButton.interactable = false;
-        }
-        else
-        {
-            launchButton.interactable = true;
         }
     }
 }

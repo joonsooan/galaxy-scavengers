@@ -9,6 +9,14 @@ using STOP_MODE = FMOD.Studio.STOP_MODE;
 
 public class Unit_Player : UnitBase
 {
+    private static readonly HashSet<ResourceType> BaseResourceTypes = new HashSet<ResourceType>
+    {
+        ResourceType.Ferrite,
+        ResourceType.Aether,
+        ResourceType.Biomass,
+        ResourceType.CryoCrystal
+    };
+
     [Header("Player Settings")]
     [SerializeField] private float interactionRange = 3f;
     [SerializeField] private int mineAmountPerAction = 1;
@@ -78,6 +86,7 @@ public class Unit_Player : UnitBase
 
     protected override void OnDisable()
     {
+        _targetResourceNode?.EndMining(this);
         GameManager.OnPauseStateChanged -= HandlePauseStateChanged;
         base.OnDisable();
     }
@@ -102,6 +111,7 @@ public class Unit_Player : UnitBase
 
     protected override void OnDestroy()
     {
+        _targetResourceNode?.EndMining(this);
         StopMiningParticles();
         StopMiningSound();
 
@@ -287,8 +297,7 @@ public class Unit_Player : UnitBase
 
             if (hit.collider is BoxCollider2D) {
                 if (hit.collider.GetComponent<MainStructure>() != null ||
-                    hit.collider.GetComponent<Processor>() != null ||
-                    hit.collider.GetComponent<DroneHub>() != null) {
+                    hit.collider.GetComponent<Processor>() != null) {
                     return true;
                 }
             }
@@ -366,6 +375,7 @@ public class Unit_Player : UnitBase
             StopMining();
             return;
         }
+        _targetResourceNode.BeginMining(this);
 
         if (_mineCoroutine == null) {
             _miningDelay = CoroutineCache.GetWaitForSeconds(_targetResourceNode.timeToMinePerUnit);
@@ -379,6 +389,9 @@ public class Unit_Player : UnitBase
 
     private void StopMining()
     {
+        if (_targetResourceNode != null) {
+            _targetResourceNode.EndMining(this);
+        }
         if (_mineCoroutine != null) {
             StopCoroutine(_mineCoroutine);
             _mineCoroutine = null;
@@ -504,6 +517,10 @@ public class Unit_Player : UnitBase
             int actuallyAdded = afterAmount - beforeAmount;
 
             if (added && actuallyAdded > 0) {
+                if (BaseResourceTypes.Contains(type))
+                {
+                    UnitProcessResourceStatTracker.RecordProduce(type, actuallyAdded);
+                }
                 remaining -= actuallyAdded;
             }
         }
@@ -520,14 +537,10 @@ public class Unit_Player : UnitBase
         }
 
         if (!TutorialManager.Instance.IsTutorialActive()) {
-            return false;
-        }
-
-        if (TutorialManager.Instance.HasReachedStepType(TutorialStepType.BulletFired)) {
             return true;
         }
 
-        return false;
+        return TutorialManager.Instance.HasReachedStepType(TutorialStepType.BulletFired);
     }
 
     private void TryFireBullet(Vector3 targetPosition)

@@ -556,6 +556,7 @@ public class Unit_Construct : UnitBase
 
     public void SetTask_FetchResource(ConstructionSite.ConstructionRequest request, ConstructionSite site)
     {
+        ResetIdleRoam();
         if (movement == null) {
             if (request != null && request.site != null) {
                 request.site.CancelRequest(request);
@@ -649,12 +650,6 @@ public class Unit_Construct : UnitBase
 
     private float GetConstructionSpeedMultiplier()
     {
-        if (CoreRepairManager.Instance != null && !CoreRepairManager.Instance.IsPartRepaired(CorePart.Repeater)) {
-            CorePartData repeaterData = CoreRepairManager.Instance.GetPartData(CorePart.Repeater);
-            if (repeaterData != null) {
-                return 1f - repeaterData.debuffValue;
-            }
-        }
         return 1f;
     }
 

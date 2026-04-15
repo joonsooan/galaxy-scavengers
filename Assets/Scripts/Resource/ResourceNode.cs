@@ -17,6 +17,7 @@ public class ResourceNode : MonoBehaviour
     private int _initialAmountToMine;
     private ProductionProgressSlider _progressSliderInstance;
     private float _lastMinedTime = -999f;
+    private readonly HashSet<int> _activeMiningUnitIds = new HashSet<int>();
     private const float SliderHideDelay = 1f;
 
     public bool IsReserved { get; private set; }
@@ -141,9 +142,33 @@ public class ResourceNode : MonoBehaviour
         return amountMined;
     }
 
+    public void BeginMining(UnitBase unit)
+    {
+        if (unit == null)
+        {
+            return;
+        }
+        _activeMiningUnitIds.Add(unit.GetInstanceID());
+        EnsureProgressSliderVisible();
+        RefreshProgressSliderValue();
+    }
+
+    public void EndMining(UnitBase unit)
+    {
+        if (unit == null)
+        {
+            return;
+        }
+        _activeMiningUnitIds.Remove(unit.GetInstanceID());
+        if (_activeMiningUnitIds.Count == 0)
+        {
+            _lastMinedTime = Time.time;
+        }
+    }
+
     private void Update()
     {
-        if (_progressSliderInstance != null && (Time.time - _lastMinedTime) >= SliderHideDelay)
+        if (_progressSliderInstance != null && !IsActivelyBeingMined() && (Time.time - _lastMinedTime) >= SliderHideDelay)
         {
             HideProgressSlider();
         }
@@ -168,26 +193,13 @@ public class ResourceNode : MonoBehaviour
             HideProgressSlider();
             return;
         }
+        EnsureProgressSliderVisible();
+        RefreshProgressSliderValue();
+    }
 
-        if ((Time.time - _lastMinedTime) < SliderHideDelay)
-        {
-            if (_progressSliderInstance == null && progressSliderPrefab != null)
-            {
-                _progressSliderInstance = Instantiate(progressSliderPrefab);
-                _progressSliderInstance.Initialize(transform);
-                _progressSliderInstance.gameObject.SetActive(true);
-            }
-
-            if (_progressSliderInstance != null)
-            {
-                float progress = Mathf.Clamp01((float)amountToMine / _initialAmountToMine);
-                _progressSliderInstance.SetProgress(progress);
-            }
-        }
-        else
-        {
-            HideProgressSlider();
-        }
+    private bool IsActivelyBeingMined()
+    {
+        return _activeMiningUnitIds.Count > 0;
     }
 
     private void HideProgressSlider()
@@ -197,5 +209,25 @@ public class ResourceNode : MonoBehaviour
             Destroy(_progressSliderInstance.gameObject);
             _progressSliderInstance = null;
         }
+    }
+
+    private void EnsureProgressSliderVisible()
+    {
+        if (_progressSliderInstance == null && progressSliderPrefab != null)
+        {
+            _progressSliderInstance = Instantiate(progressSliderPrefab);
+            _progressSliderInstance.Initialize(transform);
+            _progressSliderInstance.gameObject.SetActive(true);
+        }
+    }
+
+    private void RefreshProgressSliderValue()
+    {
+        if (_progressSliderInstance == null || _initialAmountToMine <= 0)
+        {
+            return;
+        }
+        float progress = Mathf.Clamp01((float)amountToMine / _initialAmountToMine);
+        _progressSliderInstance.SetProgress(progress);
     }
 }

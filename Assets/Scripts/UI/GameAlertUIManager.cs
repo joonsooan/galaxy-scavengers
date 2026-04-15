@@ -68,7 +68,7 @@ public class GameAlertUIManager : MonoBehaviour
     [SerializeField, TextArea(2, 6)] private string tooltipDroneNoResource = "가공 유닛이 가공할 자원이 없습니다.";
     [SerializeField, TextArea(2, 6)] private string tooltipConstructNoResource = "건설 유닛이 건설할 자원이 없습니다.";
     [SerializeField, TextArea(2, 6)] private string tooltipStorageFull = "모든 저장 공간이 가득 찼습니다!\n저장고를 더 건설해주세요.";
-    [SerializeField, TextArea(2, 6)] private string tooltipAetherStorageFull = "에테르 광석 저장 한도에 도달했거나 전기 저장이 가득 찼습니다!\n저장고·배터리·발전기를 확인해주세요.";
+    [SerializeField, TextArea(2, 6)] private string tooltipAetherStorageFull = "전력이 부족합니다!\n발전기·배터리·전력망을 확인해주세요.";
     [SerializeField, TextArea(2, 6)] private string tooltipMainEngineRepair = "메인 엔진이 고장나\n시드 코어를 발사할 수 없습니다.\n퀘스트를 확인하세요.";
     [SerializeField, TextArea(2, 6)] private string tooltipNoiseCaution = "소음 정도 : 주의\n적의 습격에 대비하세요!";
     [SerializeField, TextArea(2, 6)] private string tooltipNoiseWarning = "소음 정도 : 경고\n적의 습격에 대비하세요!";
@@ -92,6 +92,7 @@ public class GameAlertUIManager : MonoBehaviour
     private const int MaxSourcesPerType = 5;
     private Coroutine _tooltipRebuildCoroutine;
     private StorageTrackerManager _storageTrackerManager;
+    private ElectricityConsumptionManager _electricityConsumptionManager;
     private Coroutine _bindStorageTrackerCoroutine;
     private bool _isStorageFullByTracker;
     private bool _isAetherFullByTracker;
@@ -121,8 +122,8 @@ public class GameAlertUIManager : MonoBehaviour
 
     private void OnEnable()
     {
-        LaunchUIController.OnLaunchCountdownStarted += OnLaunchCountdownStarted;
-        LaunchUIController.OnLaunchCountdownFinished += OnLaunchCountdownFinished;
+        LaunchUIController.OnLaunchSequenceStarted += OnLaunchSequenceStarted;
+        LaunchUIController.OnLaunchSequenceFinished += OnLaunchSequenceFinished;
         _isStorageFullByTracker = false;
         _isAetherFullByTracker = false;
         if (_bindStorageTrackerCoroutine != null)
@@ -145,14 +146,19 @@ public class GameAlertUIManager : MonoBehaviour
         if (_storageTrackerManager != null)
         {
             _storageTrackerManager.OnStorageChanged -= OnTrackedStorageChanged;
-            _storageTrackerManager.OnAetherChanged -= OnTrackedAetherChanged;
-            _storageTrackerManager.OnElectricityChanged -= OnTrackedElectricityChanged;
         }
         _storageTrackerManager = null;
+        if (_electricityConsumptionManager != null)
+        {
+            _electricityConsumptionManager.OnAfterElectricityConsumersResolved -= OnElectricityPowerTickResolved;
+            _electricityConsumptionManager = null;
+        }
         if (NoiseManager.Instance != null)
         {
             NoiseManager.Instance.OnNoiseChanged -= OnNoiseChanged;
         }
+        LaunchUIController.OnLaunchSequenceStarted -= OnLaunchSequenceStarted;
+        LaunchUIController.OnLaunchSequenceFinished -= OnLaunchSequenceFinished;
         HideTooltip();
     }
 
@@ -195,28 +201,31 @@ public class GameAlertUIManager : MonoBehaviour
 
         _storageTrackerManager.OnStorageChanged -= OnTrackedStorageChanged;
         _storageTrackerManager.OnStorageChanged += OnTrackedStorageChanged;
-        _storageTrackerManager.OnAetherChanged -= OnTrackedAetherChanged;
-        _storageTrackerManager.OnAetherChanged += OnTrackedAetherChanged;
-        _storageTrackerManager.OnElectricityChanged -= OnTrackedElectricityChanged;
-        _storageTrackerManager.OnElectricityChanged += OnTrackedElectricityChanged;
         SyncStorageFullAlertWithTracker();
+
+        ElectricityConsumptionManager ecm = null;
+        while (ecm == null)
+        {
+            ecm = ElectricityConsumptionManager.Instance;
+            if (ecm == null)
+                yield return null;
+        }
+
+        _electricityConsumptionManager = ecm;
+        _electricityConsumptionManager.OnAfterElectricityConsumersResolved -= OnElectricityPowerTickResolved;
+        _electricityConsumptionManager.OnAfterElectricityConsumersResolved += OnElectricityPowerTickResolved;
         SyncAetherFullAlertWithTracker();
         _bindStorageTrackerCoroutine = null;
+    }
+
+    private void OnElectricityPowerTickResolved()
+    {
+        SyncAetherFullAlertWithTracker();
     }
 
     private void OnTrackedStorageChanged()
     {
         SyncStorageFullAlertWithTracker();
-    }
-
-    private void OnTrackedAetherChanged()
-    {
-        SyncAetherFullAlertWithTracker();
-    }
-
-    private void OnTrackedElectricityChanged()
-    {
-        SyncAetherFullAlertWithTracker();
     }
 
     private void SyncStorageFullAlertWithTracker()
@@ -240,18 +249,13 @@ public class GameAlertUIManager : MonoBehaviour
 
     private void SyncAetherFullAlertWithTracker()
     {
-        if (_storageTrackerManager == null)
+        ElectricityConsumptionManager ecm = _electricityConsumptionManager != null
+            ? _electricityConsumptionManager
+            : ElectricityConsumptionManager.Instance;
+        if (ecm == null)
             return;
 
-        int maxAetherOre = _storageTrackerManager.MaxStorableAetherAmount;
-        int currentAetherOre = _storageTrackerManager.CurrentAetherAmount;
-        bool aetherOreFull = maxAetherOre > 0 && currentAetherOre >= maxAetherOre;
-
-        int maxElec = _storageTrackerManager.MaxStorableElectricityAmount;
-        int currentElec = _storageTrackerManager.CurrentElectricityAmount;
-        bool electricityFull = maxElec > 0 && currentElec >= maxElec;
-
-        bool shouldAlert = aetherOreFull || electricityFull;
+        bool shouldAlert = ecm.IsElectricityDemandUnmet;
 
         if (shouldAlert == _isAetherFullByTracker)
             return;
@@ -334,7 +338,7 @@ public class GameAlertUIManager : MonoBehaviour
                type == GameAlertType.DroneIsNotAssigned;
     }
 
-    private void OnLaunchCountdownStarted()
+    private void OnLaunchSequenceStarted()
     {
         _isCountdownIgnoringAlerts = true;
         _minerNoResourceCount = 0;
@@ -348,7 +352,7 @@ public class GameAlertUIManager : MonoBehaviour
         SetAlertActive(GameAlertType.DroneIsNotAssigned, false);
     }
 
-    private void OnLaunchCountdownFinished()
+    private void OnLaunchSequenceFinished()
     {
         _isCountdownIgnoringAlerts = false;
     }

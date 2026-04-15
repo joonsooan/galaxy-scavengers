@@ -26,23 +26,28 @@ public class UnitManager : MonoBehaviour
 
     public int GetMaxPopulation()
     {
-        int maxPop = baseMaxPopulation;
-        
-        if (CoreRepairManager.Instance != null && !CoreRepairManager.Instance.IsPartRepaired(CorePart.Controller))
+        return baseMaxPopulation;
+    }
+
+    public int GetPopulationCountedAllyCount()
+    {
+        int count = 0;
+        foreach (UnitBase ally in _allyUnits)
         {
-            CorePartData controllerData = CoreRepairManager.Instance.GetPartData(CorePart.Controller);
-            if (controllerData != null)
+            if (ally == null || ally is Unit_Player)
             {
-                maxPop = Mathf.Max(1, Mathf.RoundToInt(baseMaxPopulation * (1f - controllerData.debuffValue)));
+                continue;
             }
+
+            count++;
         }
-        
-        return maxPop;
+
+        return count;
     }
 
     public bool CanSpawnUnit()
     {
-        return _allyUnits.Count < GetMaxPopulation();
+        return GetPopulationCountedAllyCount() < GetMaxPopulation();
     }
     
     private void Awake()

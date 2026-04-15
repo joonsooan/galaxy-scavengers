@@ -290,10 +290,21 @@ public class GameMenuManager : MonoBehaviour
                 return;
             }
 
+            if (GameManager.Instance != null && GameManager.Instance.uiManager != null &&
+                GameManager.Instance.uiManager.TryCloseExtractorPanelWithEscape()) {
+                return;
+            }
+
             MainControlPanel mainControlPanel = TryCacheMainControlPanel();
             if (mainControlPanel != null && mainControlPanel.IsResourceStatPanelActive())
             {
                 mainControlPanel.CloseResourceStatPanel();
+                return;
+            }
+
+            if (mainControlPanel != null && mainControlPanel.IsUnitManagementPanelActive())
+            {
+                mainControlPanel.CloseUnitManagementPanel();
                 return;
             }
 

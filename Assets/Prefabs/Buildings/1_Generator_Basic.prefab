@@ -199,11 +199,11 @@ MonoBehaviour:
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
   currentHealth: 0
-  generationInterval: 2
-  resourceAmount: 10
+  generationInterval: 0.5
+  resourceAmount: 1
   supplyRangeN: 8
   powerCoverageCellOffset: {x: -1, y: -1}
-  electricityBufferMax: 1000
+  electricityBufferMax: 50
   electricityBufferCurrent: 0
   fuelCostsPerProduction:
   - resourceType: 0

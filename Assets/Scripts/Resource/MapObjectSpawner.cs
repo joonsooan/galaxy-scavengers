@@ -82,6 +82,12 @@ public class MapObjectSpawner : MonoBehaviour
     
     [Range(10, 1000)]
     [SerializeField] private int maxResourcesPerCircle = 200;
+
+    [Header("Edge Irregularity")]
+    [Range(0f, 1f)]
+    [SerializeField] private float edgeBandRatio = 0.2f;
+    [Range(0f, 1f)]
+    [SerializeField] private float edgeRemovalChance = 0.35f;
     
     [Header("Starting Area")]
     [Range(0, 50)]
@@ -278,6 +284,7 @@ public class MapObjectSpawner : MonoBehaviour
                     if (distanceFromCircleCenter > circle.radius) continue;
                     
                     Vector3Int cellPos = new Vector3Int(x, y, 0);
+                    if (ShouldSkipEdgeCell(cellPos, circle, distanceFromCircleCenter)) continue;
                     
                     if (!IsValidSpawnPosition(cellPos)) continue;
                     
@@ -358,6 +365,7 @@ public class MapObjectSpawner : MonoBehaviour
                     if (distanceFromCircleCenter > circle.radius) continue;
                     
                     Vector3Int cellPos = new Vector3Int(x, y, 0);
+                    if (ShouldSkipEdgeCell(cellPos, circle, distanceFromCircleCenter)) continue;
                     
                     if (!IsValidSpawnPosition(cellPos)) continue;
                     
@@ -431,6 +439,10 @@ public class MapObjectSpawner : MonoBehaviour
         {
             return;
         }
+        if (_resourceTilePositions.ContainsKey(cellPos))
+        {
+            return;
+        }
         try
         {
             if (grid == null) return;
@@ -460,6 +472,37 @@ public class MapObjectSpawner : MonoBehaviour
             int j = Random.Range(0, i + 1);
             (list[i], list[j]) = (list[j], list[i]);
         }
+    }
+
+    private bool ShouldSkipEdgeCell(Vector3Int cellPos, ResourceCircle circle, float distanceFromCircleCenter)
+    {
+        if (edgeRemovalChance <= 0f || edgeBandRatio <= 0f || circle.radius <= 0f)
+        {
+            return false;
+        }
+
+        float normalizedDistance = distanceFromCircleCenter / circle.radius;
+        float edgeStart = Mathf.Clamp01(1f - edgeBandRatio);
+        if (normalizedDistance < edgeStart)
+        {
+            return false;
+        }
+
+        float edgeProgress = Mathf.InverseLerp(edgeStart, 1f, normalizedDistance);
+        float localChance = edgeRemovalChance * edgeProgress;
+        float noise = GetDeterministic01(cellPos.x, cellPos.y, circle.center.x, circle.center.y, (int)circle.resourceType);
+        return noise < localChance;
+    }
+
+    private static float GetDeterministic01(int x, int y, int cx, int cy, int resourceType)
+    {
+        uint hash = 2166136261u;
+        hash = (hash ^ (uint)x) * 16777619u;
+        hash = (hash ^ (uint)y) * 16777619u;
+        hash = (hash ^ (uint)cx) * 16777619u;
+        hash = (hash ^ (uint)cy) * 16777619u;
+        hash = (hash ^ (uint)resourceType) * 16777619u;
+        return (hash & 0x00FFFFFF) / 16777215f;
     }
     
     private List<ResourceCircle> GenerateCenterResourceCircles()
