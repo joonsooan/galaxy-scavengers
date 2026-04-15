@@ -55,20 +55,14 @@ public class MinerAssignmentSystem : MonoBehaviour
 
     private void OnEnable()
     {
-        if (UnitManager.Instance != null)
-        {
-            UnitManager.OnUnitCountChanged += OnUnitCountChanged;
-        }
+        UnitManager.OnUnitCountChanged += OnUnitCountChanged;
 
         RefreshAssignments();
     }
 
     private void OnDisable()
     {
-        if (UnitManager.Instance != null)
-        {
-            UnitManager.OnUnitCountChanged -= OnUnitCountChanged;
-        }
+        UnitManager.OnUnitCountChanged -= OnUnitCountChanged;
     }
 
     private void OnUnitCountChanged(UnitBase _)

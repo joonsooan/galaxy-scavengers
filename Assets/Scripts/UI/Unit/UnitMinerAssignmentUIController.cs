@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -16,6 +17,7 @@ public class UnitMinerAssignmentUIController : MonoBehaviour
 
     private bool _suppress;
     private readonly List<TMP_InputField> _tabOrderedInputs = new List<TMP_InputField>();
+    private UnityAction<string>[] _countEndEditHandlers;
 
     private void OnEnable()
     {
@@ -23,6 +25,8 @@ public class UnitMinerAssignmentUIController : MonoBehaviour
         {
             assignmentSystem = FindFirstObjectByType<MinerAssignmentSystem>(FindObjectsInactive.Include);
         }
+
+        UnitManager.OnUnitCountChanged += OnAllyUnitCountChanged;
 
         ConfigureInputFields();
         RebuildTabOrder();
@@ -32,7 +36,14 @@ public class UnitMinerAssignmentUIController : MonoBehaviour
 
     private void OnDisable()
     {
+        UnitManager.OnUnitCountChanged -= OnAllyUnitCountChanged;
+
         WireListeners(false);
+    }
+
+    private void OnAllyUnitCountChanged(UnitBase _)
+    {
+        RefreshUIFromSystem();
     }
 
     private void Update()
@@ -61,10 +72,16 @@ public class UnitMinerAssignmentUIController : MonoBehaviour
                 continue;
             }
 
-            field.contentType = TMP_InputField.ContentType.IntegerNumber;
-            field.characterValidation = TMP_InputField.CharacterValidation.Integer;
+            field.contentType = TMP_InputField.ContentType.Custom;
+            field.characterValidation = TMP_InputField.CharacterValidation.None;
+            field.onValidateInput = ValidateDigitsOnly;
             field.characterLimit = 3;
         }
+    }
+
+    private static char ValidateDigitsOnly(string _, int __, char addedChar)
+    {
+        return char.IsDigit(addedChar) ? addedChar : '\0';
     }
 
     private void RebuildTabOrder()
@@ -130,6 +147,21 @@ public class UnitMinerAssignmentUIController : MonoBehaviour
         nextField.MoveTextEnd(false);
     }
 
+    private void EnsureCountEndHandlers()
+    {
+        if (_countEndEditHandlers != null)
+        {
+            return;
+        }
+
+        _countEndEditHandlers = new UnityAction<string>[4];
+        for (int i = 0; i < 4; i++)
+        {
+            int slotIndex = i;
+            _countEndEditHandlers[i] = text => OnCountEndEditAtIndex(slotIndex, text);
+        }
+    }
+
     private void WireListeners(bool add)
     {
         if (ratioModeToggle != null)
@@ -143,6 +175,7 @@ public class UnitMinerAssignmentUIController : MonoBehaviour
 
         if (countInputs != null)
         {
+            EnsureCountEndHandlers();
             for (int i = 0; i < countInputs.Length && i < 4; i++)
             {
                 TMP_InputField field = countInputs[i];
@@ -151,10 +184,11 @@ public class UnitMinerAssignmentUIController : MonoBehaviour
                     continue;
                 }
 
-                field.onEndEdit.RemoveListener(OnCountEndEdit);
+                UnityAction<string> handler = _countEndEditHandlers[i];
+                field.onEndEdit.RemoveListener(handler);
                 if (add)
                 {
-                    field.onEndEdit.AddListener(OnCountEndEdit);
+                    field.onEndEdit.AddListener(handler);
                 }
             }
         }
@@ -178,16 +212,17 @@ public class UnitMinerAssignmentUIController : MonoBehaviour
         }
     }
 
-    private void OnRatioModeChanged(bool _)
+    private void OnRatioModeChanged(bool isRatioOn)
     {
         if (_suppress || assignmentSystem == null)
         {
             return;
         }
 
-        bool isRatioOn = ratioModeToggle != null && ratioModeToggle.isOn;
         if (isRatioOn)
         {
+            int[] weights = ReadRatioInputsAsIntArray();
+            assignmentSystem.SetRatioWeights(weights);
             assignmentSystem.RatioMode = true;
         }
         else
@@ -195,10 +230,11 @@ public class UnitMinerAssignmentUIController : MonoBehaviour
             assignmentSystem.SetDirectCounts(assignmentSystem.LastSlotCounts.ToArray());
             assignmentSystem.RatioMode = false;
         }
+
         RefreshUIFromSystem();
     }
 
-    private void OnCountEndEdit(string _)
+    private void OnCountEndEditAtIndex(int editIndex, string editedText)
     {
         if (_suppress || assignmentSystem == null)
         {
@@ -211,23 +247,115 @@ public class UnitMinerAssignmentUIController : MonoBehaviour
             return;
         }
 
-        int[] next = new int[4];
-        if (countInputs != null)
+        if (editIndex < 0 || editIndex >= 4)
         {
-            for (int i = 0; i < 4 && i < countInputs.Length; i++)
-            {
-                TMP_InputField f = countInputs[i];
-                if (f == null)
-                {
-                    continue;
-                }
+            return;
+        }
 
-                next[i] = ParseInput(f.text);
+        int minerCount = UnitManager.Instance != null
+            ? UnitManager.Instance.AllyUnits.Count(u => u is Unit_Miner)
+            : 0;
+
+        int[] previous = assignmentSystem.GetDirectCountsCopy();
+        int requested = ParseInput(editedText);
+        int allocated = Mathf.Min(requested, minerCount);
+        int remaining = minerCount - allocated;
+
+        int[] next = new int[4];
+        next[editIndex] = allocated;
+
+        int otherCount = 0;
+        for (int i = 0; i < 4; i++)
+        {
+            if (i != editIndex)
+            {
+                otherCount++;
             }
+        }
+
+        int[] weights = new int[otherCount];
+        int[] otherIndices = new int[otherCount];
+        int w = 0;
+        for (int i = 0; i < 4; i++)
+        {
+            if (i != editIndex)
+            {
+                otherIndices[w] = i;
+                weights[w] = previous[i];
+                w++;
+            }
+        }
+
+        int[] distributed = DistributeIntegersByWeights(remaining, weights);
+        for (int j = 0; j < otherCount; j++)
+        {
+            next[otherIndices[j]] = distributed[j];
         }
 
         assignmentSystem.SetDirectCounts(next);
         RefreshUIFromSystem();
+    }
+
+    private static int[] DistributeIntegersByWeights(int total, int[] weights)
+    {
+        if (weights == null || weights.Length == 0)
+        {
+            return System.Array.Empty<int>();
+        }
+
+        int n = weights.Length;
+        int[] result = new int[n];
+        if (total <= 0)
+        {
+            return result;
+        }
+
+        int sumW = 0;
+        for (int i = 0; i < n; i++)
+        {
+            sumW += weights[i];
+        }
+
+        if (sumW <= 0)
+        {
+            return SplitEqualIntegers(total, n);
+        }
+
+        int assigned = 0;
+        for (int i = 0; i < n; i++)
+        {
+            result[i] = Mathf.FloorToInt(total * (float)weights[i] / sumW);
+            assigned += result[i];
+        }
+
+        int rem = total - assigned;
+        int idx = 0;
+        while (rem > 0)
+        {
+            result[idx % n]++;
+            rem--;
+            idx++;
+        }
+
+        return result;
+    }
+
+    private static int[] SplitEqualIntegers(int total, int count)
+    {
+        int[] result = new int[count];
+        if (count <= 0)
+        {
+            return result;
+        }
+
+        int baseEach = total / count;
+        int rem = total % count;
+        for (int i = 0; i < count; i++)
+        {
+            result[i] = baseEach + (i < rem ? 1 : 0);
+        }
+
+        return result;
     }
 
     private void OnRatioEndEdit(string _)
@@ -237,23 +365,30 @@ public class UnitMinerAssignmentUIController : MonoBehaviour
             return;
         }
 
-        int[] next = new int[4];
-        if (ratioInputs != null)
-        {
-            for (int i = 0; i < 4 && i < ratioInputs.Length; i++)
-            {
-                TMP_InputField f = ratioInputs[i];
-                if (f == null)
-                {
-                    continue;
-                }
+        assignmentSystem.SetRatioWeights(ReadRatioInputsAsIntArray());
+        RefreshUIFromSystem();
+    }
 
-                next[i] = ParseInput(f.text);
-            }
+    private int[] ReadRatioInputsAsIntArray()
+    {
+        int[] next = new int[4];
+        if (ratioInputs == null)
+        {
+            return next;
         }
 
-        assignmentSystem.SetRatioWeights(next);
-        RefreshUIFromSystem();
+        for (int i = 0; i < 4 && i < ratioInputs.Length; i++)
+        {
+            TMP_InputField f = ratioInputs[i];
+            if (f == null)
+            {
+                continue;
+            }
+
+            next[i] = ParseInput(f.text);
+        }
+
+        return next;
     }
 
     public void RefreshUIFromSystem()

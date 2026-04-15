@@ -15,7 +15,7 @@ MonoBehaviour:
   displayName: "\uCD94\uCD9C\uAE30"
   description: "\uACE0\uB300 \uC794\uD574\uB85C\uBD80\uD130 \uB370\uC774\uD130\uB97C
     \uCD94\uCD9C\uD558\uB294 \uAE30\uBCF8 \uAC74\uBB3C\uC785\uB2C8\uB2E4."
-  icon: {fileID: -4963935807285971671, guid: 2925d484ba747a34a9e235bc67a3548a, type: 3}
+  icon: {fileID: -2661058482978203409, guid: 936a67f0754abc441aab52becc4f36c1, type: 3}
   buildingPrefab: {fileID: 1574451153020646121, guid: b3975d38053c9734f983c355880e889c, type: 3}
   buildingTile: {fileID: 11400000, guid: f3f6c86e80fc1114cac1de4ce3be0f40, type: 2}
   buildingType: 13
