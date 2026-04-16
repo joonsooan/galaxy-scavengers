@@ -79,22 +79,22 @@ public class UnitUpgradeProgress : MonoBehaviour
 
     public float GetMoveSpeedMultiplier()
     {
-        return 1f + SumFloatBonuses(catalog != null ? catalog.moveSpeedLine : null, _levelMove);
+        return 1f + SumFloatBonuses(catalog != null ? catalog.GetLine(UnitUpgradeStatType.MoveSpeed) : null, _levelMove);
     }
 
     public float GetWorkSpeedMultiplier()
     {
-        return 1f + SumFloatBonuses(catalog != null ? catalog.workSpeedLine : null, _levelWork);
+        return 1f + SumFloatBonuses(catalog != null ? catalog.GetLine(UnitUpgradeStatType.WorkSpeed) : null, _levelWork);
     }
 
     public int GetStorageCapacityBonus()
     {
-        return SumIntBonuses(catalog != null ? catalog.storageLine : null, _levelStorage);
+        return SumIntBonuses(catalog != null ? catalog.GetLine(UnitUpgradeStatType.Storage) : null, _levelStorage);
     }
 
     public int GetMaxPopulationBonus()
     {
-        return SumIntBonuses(catalog != null ? catalog.maxPopulationLine : null, _levelMaxPopulation);
+        return SumIntBonuses(catalog != null ? catalog.GetLine(UnitUpgradeStatType.MaxPopulation) : null, _levelMaxPopulation);
     }
 
     public bool IsUpgradeInProgress(UnitUpgradeStatType type)

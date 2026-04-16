@@ -1,26 +1,36 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 [CreateAssetMenu(fileName = "Unit Upgrade Catalog", menuName = "Unit/Unit Upgrade Catalog")]
 public class UnitUpgradeCatalog : ScriptableObject
 {
-    public UnitUpgradeLineData moveSpeedLine;
-    public UnitUpgradeLineData workSpeedLine;
-    public UnitUpgradeLineData storageLine;
-    public UnitUpgradeLineData maxPopulationLine;
+    [SerializeField] private List<UnitUpgradeLineData> lines = new List<UnitUpgradeLineData>();
+
+    public IReadOnlyList<UnitUpgradeLineData> Lines => lines;
 
     public UnitUpgradeLineData GetLine(UnitUpgradeStatType type)
     {
-        switch (type) {
-        case UnitUpgradeStatType.MoveSpeed:
-            return moveSpeedLine;
-        case UnitUpgradeStatType.WorkSpeed:
-            return workSpeedLine;
-        case UnitUpgradeStatType.Storage:
-            return storageLine;
-        case UnitUpgradeStatType.MaxPopulation:
-            return maxPopulationLine;
-        default:
-            return null;
+        for (int i = 0; i < lines.Count; i++)
+        {
+            UnitUpgradeLineData line = lines[i];
+            if (line != null && line.statType == type)
+            {
+                return line;
+            }
+        }
+
+        return null;
+    }
+
+    public IEnumerable<UnitUpgradeLineData> GetLinesInDisplayOrder()
+    {
+        for (int i = 0; i < lines.Count; i++)
+        {
+            UnitUpgradeLineData line = lines[i];
+            if (line != null)
+            {
+                yield return line;
+            }
         }
     }
 }

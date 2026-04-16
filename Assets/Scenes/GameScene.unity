@@ -9892,6 +9892,7 @@ GameObject:
   - component: {fileID: 379858824}
   - component: {fileID: 379858827}
   - component: {fileID: 379858828}
+  - component: {fileID: 379858829}
   m_Layer: 0
   m_Name: _IngameStatsManager
   m_TagString: Untagged
@@ -9953,6 +9954,19 @@ MonoBehaviour:
   ratioMode: 0
   directCounts: 00000000000000000000000000000000
   ratioWeights: 01000000010000000100000001000000
+--- !u!114 &379858829
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 379858823}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a3a616d2f3201e43a02a9fd15b6c56a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnitUpgradeProgress
+  catalog: {fileID: 11400000, guid: 49d9c435f414c4844af84a2e33edd7ec, type: 2}
 --- !u!1001 &379973748
 PrefabInstance:
   m_ObjectHideFlags: 0

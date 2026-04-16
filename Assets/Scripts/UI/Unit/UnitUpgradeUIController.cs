@@ -53,10 +53,10 @@ public class UnitUpgradeUIController : MonoBehaviour
             Destroy(cellParent.GetChild(i).gameObject);
         }
 
-        SpawnLine(catalog.moveSpeedLine);
-        SpawnLine(catalog.workSpeedLine);
-        SpawnLine(catalog.storageLine);
-        SpawnLine(catalog.maxPopulationLine);
+        foreach (UnitUpgradeLineData line in catalog.GetLinesInDisplayOrder())
+        {
+            SpawnLine(line);
+        }
     }
 
     private void ResolveProgressReference()
