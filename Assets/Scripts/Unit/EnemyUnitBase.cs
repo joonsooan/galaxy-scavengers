@@ -56,6 +56,16 @@ public abstract class EnemyUnitBase : UnitBase
     private bool _isBehaviorPaused;
     protected AIState aiState;
 
+    private Vector2Int _spawnHoleKey;
+    private bool _hasSpawnHoleKey;
+    private int _spawnBudgetCost = 10;
+
+    public bool HasSpawnHoleKey => _hasSpawnHoleKey;
+
+    public Vector2Int SpawnHoleKey => _spawnHoleKey;
+
+    public int SpawnBudgetCost => _spawnBudgetCost;
+
     public bool IsEnhanced => _isEnhanced;
 
     protected override void Awake()
@@ -215,6 +225,13 @@ public abstract class EnemyUnitBase : UnitBase
         _spawnPosition = territoryCenter;
         _homeRadius = hRadius;
         _territoryRadius = tRadius;
+    }
+
+    public void SetSpawnHoleMetadata(Vector2Int holeKey, int budgetCost)
+    {
+        _spawnHoleKey = holeKey;
+        _hasSpawnHoleKey = true;
+        _spawnBudgetCost = Mathf.Max(1, budgetCost);
     }
 
     public void ApplyEnhancement(Color spriteColor, float moveSpeedMult, float attackMult, float healthMult)

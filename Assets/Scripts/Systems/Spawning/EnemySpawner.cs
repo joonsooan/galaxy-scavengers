@@ -46,6 +46,13 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] [Range(0f, 100f)] private float noiseWarningBudgetMultiplierPercent = 10f;
     [SerializeField] [HideInInspector] private bool percentValueMigrationDone;
 
+    [Header("Continuous and Noise-Delta Spawning")]
+    [SerializeField] private float continuousSpawnIntervalSeconds = 45f;
+    [SerializeField] [Range(0.01f, 1f)] private float continuousSpawnBudgetFraction = 0.12f;
+    [SerializeField] [Min(0f)] private float noisePercentDeltaBudgetMultiplier = 0.15f;
+    [SerializeField] [Min(0.5f)] private float enemyDeathRespawnDelaySeconds = 12f;
+    [SerializeField] [Min(1)] private int maxReplenishSpawnsPerHole = 6;
+
     private bool _isEmergencyWaveSpawn;
     private bool _wasNoise100 = false;
     private bool _noiseEmergencyActive;
@@ -57,6 +64,9 @@ public class EnemySpawner : MonoBehaviour
     private readonly HashSet<int> _persistentEnemyInstanceIds = new HashSet<int>();
     private string _currentEmergencyTriggerSource = string.Empty;
     private bool _isSubscribedToEvents;
+    private float _lastNoisePercentageForDelta = -1f;
+    private Coroutine _continuousSpawnCoroutine;
+    private readonly Dictionary<Vector2Int, Coroutine> _holeRespawnCoroutines = new Dictionary<Vector2Int, Coroutine>();
 
     private void OnValidate()
     {
@@ -106,10 +116,42 @@ public class EnemySpawner : MonoBehaviour
 
         if (NoiseManager.Instance != null) NoiseManager.Instance.OnNoiseChanged += OnNoiseChanged;
         _isSubscribedToEvents = true;
+
+        if (UnitManager.Instance != null)
+        {
+            UnitManager.OnEnemyUnitRemoved -= HandleEnemyUnitRemoved;
+            UnitManager.OnEnemyUnitRemoved += HandleEnemyUnitRemoved;
+        }
+
+        if (_continuousSpawnCoroutine == null)
+        {
+            _continuousSpawnCoroutine = StartCoroutine(ContinuousSpawnRoutine());
+        }
     }
 
     private void OnDisable()
     {
+        if (UnitManager.Instance != null)
+        {
+            UnitManager.OnEnemyUnitRemoved -= HandleEnemyUnitRemoved;
+        }
+
+        if (_continuousSpawnCoroutine != null)
+        {
+            StopCoroutine(_continuousSpawnCoroutine);
+            _continuousSpawnCoroutine = null;
+        }
+
+        foreach (KeyValuePair<Vector2Int, Coroutine> kvp in _holeRespawnCoroutines)
+        {
+            if (kvp.Value != null)
+            {
+                StopCoroutine(kvp.Value);
+            }
+        }
+
+        _holeRespawnCoroutines.Clear();
+
         if (!_isSubscribedToEvents)
         {
             return;
@@ -126,16 +168,20 @@ public class EnemySpawner : MonoBehaviour
         ResetEmergencyState();
     }
 
+    private void Start()
+    {
+        if (NoiseManager.Instance != null)
+        {
+            _lastNoisePercentageForDelta = NoiseManager.Instance.NoisePercentage;
+        }
+
+        SpawnWaveFromBudget(continuousSpawnBudgetFraction);
+    }
+
     private void OnNightStarted()
     {
         if (NoiseManager.Instance == null) return;
         if (IsAnyEmergencyActive()) return;
-
-        float noisePercentage = NoiseManager.Instance.NoisePercentage;
-        if (noisePercentage < 100f)
-        {
-            SpawnWaveFromBudget();
-        }
 
         NoiseManager.NoiseZone zone = NoiseManager.Instance.GetCurrentNoiseZone();
         if (zone == NoiseManager.NoiseZone.Caution)
@@ -168,6 +214,21 @@ public class EnemySpawner : MonoBehaviour
             }
             StopNoiseEmergency();
         }
+
+        if (!IsAnyEmergencyActive())
+        {
+            if (_lastNoisePercentageForDelta >= 0f && noisePercentage > _lastNoisePercentageForDelta + 0.0001f)
+            {
+                float delta = noisePercentage - _lastNoisePercentageForDelta;
+                float scale = noisePercentDeltaBudgetMultiplier * Mathf.Clamp(delta, 0f, 100f) / 100f;
+                if (scale > 0.0001f)
+                {
+                    SpawnWaveFromBudget(scale);
+                }
+            }
+        }
+
+        _lastNoisePercentageForDelta = noisePercentage;
     }
 
     private void ActivateExistingEnemiesFromBudget(float multiplier, bool markAsPersistent = false)
@@ -224,22 +285,6 @@ public class EnemySpawner : MonoBehaviour
             {
                 damageable.RestoreToFullHealth();
             }
-
-            EnemyDaySinkingEffect sinkingEffect = unit.GetComponent<EnemyDaySinkingEffect>();
-            if (sinkingEffect != null)
-            {
-                sinkingEffect.StartSinking(() =>
-                {
-                    if (unit != null && unit.gameObject != null)
-                    {
-                        unit.gameObject.SetActive(false);
-                    }
-                });
-            }
-            else
-            {
-                unit.gameObject.SetActive(false);
-            }
         }
     }
 
@@ -256,10 +301,10 @@ public class EnemySpawner : MonoBehaviour
         return result;
     }
 
-    private void SpawnWaveFromBudget()
+    private void SpawnWaveFromBudget(float budgetScaleFactor = 1f)
     {
         float multiplier = _isEmergencyWaveSpawn ? GetCurrentEmergencyMultiplier() : 1f;
-        float totalBudget = CalculateWaveBudget(multiplier);
+        float totalBudget = CalculateWaveBudget(multiplier) * budgetScaleFactor;
         int spawnedEnemyCount = 0;
         int emergencyRemainingSlots = int.MaxValue;
         if (_isEmergencyWaveSpawn)
@@ -430,6 +475,7 @@ public class EnemySpawner : MonoBehaviour
                         UnitMovement movement = enemy.GetComponent<UnitMovement>();
                         if (movement != null) movement.StopMovement();
                         enemyScript.SetTerritoryCenter(center, homeRadius, territoryRadius);
+                        enemyScript.SetSpawnHoleMetadata(spawn.pos, spawn.data.cost);
                         if (spawn.isEnhanced)
                         {
                             float moveMult = 1f + spawn.data.moveSpeedBonusPercent / 100f;
@@ -800,5 +846,181 @@ public class EnemySpawner : MonoBehaviour
         }
 
         return center;
+    }
+
+    private IEnumerator ContinuousSpawnRoutine()
+    {
+        WaitForSeconds wait = CoroutineCache.GetWaitForSeconds(Mathf.Max(1f, continuousSpawnIntervalSeconds));
+        while (enabled)
+        {
+            yield return wait;
+            if (!enabled)
+            {
+                yield break;
+            }
+
+            if (IsAnyEmergencyActive())
+            {
+                continue;
+            }
+
+            SpawnWaveFromBudget(continuousSpawnBudgetFraction);
+        }
+    }
+
+    private void HandleEnemyUnitRemoved(EnemyUnitBase enemy)
+    {
+        if (enemy == null || IsPersistentEnemy(enemy) || !enemy.HasSpawnHoleKey)
+        {
+            return;
+        }
+
+        Vector2Int holeKey = enemy.SpawnHoleKey;
+        if (_holeRespawnCoroutines.ContainsKey(holeKey))
+        {
+            return;
+        }
+
+        _holeRespawnCoroutines[holeKey] = StartCoroutine(RespawnHoleAfterDelay(holeKey));
+    }
+
+    private IEnumerator RespawnHoleAfterDelay(Vector2Int holeKey)
+    {
+        yield return CoroutineCache.GetWaitForSeconds(enemyDeathRespawnDelaySeconds);
+
+        if (!enabled)
+        {
+            _holeRespawnCoroutines.Remove(holeKey);
+            yield break;
+        }
+
+        ReplenishHoleFromNoiseBudget(holeKey);
+        _holeRespawnCoroutines.Remove(holeKey);
+    }
+
+    private void ReplenishHoleFromNoiseBudget(Vector2Int holeKey)
+    {
+        if (IsAnyEmergencyActive() || UnitManager.Instance == null)
+        {
+            return;
+        }
+
+        MapGenerator mapGenerator = GameManager.Instance != null ? GameManager.Instance.mapGenerator : null;
+        if (mapGenerator == null)
+        {
+            return;
+        }
+
+        IReadOnlyList<Vector2Int> holes = mapGenerator.EnemySpawnHolePositions;
+        if (holes == null || holes.Count == 0)
+        {
+            return;
+        }
+
+        List<Vector2Int> uniqueHoles = holes.Distinct().ToList();
+        int holeCount = uniqueHoles.Count;
+        if (holeCount == 0 || !uniqueHoles.Contains(holeKey))
+        {
+            return;
+        }
+
+        float totalBudget = CalculateWaveBudget(1f);
+        float budgetPerHole = totalBudget / holeCount;
+        float usedBudget = GetUsedBudgetForHole(holeKey);
+        float deficit = budgetPerHole - usedBudget;
+        if (deficit < 1f)
+        {
+            return;
+        }
+
+        List<EnemySpawnData> validEnemies = enemyPrefabs
+            .Where(e => e != null && e.enemyPrefab != null && e.cost > 0)
+            .OrderBy(e => e.cost)
+            .ToList();
+
+        if (validEnemies.Count == 0)
+        {
+            return;
+        }
+
+        if (BuildingManager.Instance == null || BuildingManager.Instance.grid == null)
+        {
+            return;
+        }
+
+        Grid grid = BuildingManager.Instance.grid;
+        Vector3 center = mapGenerator.GetEnemySpawnHoleWorldPosition(holeKey);
+        (float homeRadius, float territoryRadius) = mapGenerator.GetHoleRadiusValues(holeKey);
+
+        if (homeRadius <= 0f || territoryRadius <= 0f || center == Vector3.zero)
+        {
+            return;
+        }
+
+        int spawned = 0;
+        while (deficit >= validEnemies[0].cost && spawned < maxReplenishSpawnsPerHole)
+        {
+            List<EnemySpawnData> affordable = validEnemies.Where(e => e.cost <= deficit).ToList();
+            if (affordable.Count == 0)
+            {
+                break;
+            }
+
+            EnemySpawnData pick = affordable[Random.Range(0, affordable.Count)];
+            Vector3 spawnPos = FindValidSpawnPosition(center, spawnRadiusOffset, grid);
+            if (spawnPos == Vector3.zero)
+            {
+                break;
+            }
+
+            string poolTag = GetPoolTagFromPrefab(pick.enemyPrefab);
+            GameObject enemyGo = ObjectPooler.Instance.SpawnFromPool(poolTag, spawnPos, Quaternion.identity);
+            if (enemyGo == null)
+            {
+                break;
+            }
+
+            EnemyUnitBase enemyScript = enemyGo.GetComponent<EnemyUnitBase>();
+            if (enemyScript == null)
+            {
+                break;
+            }
+
+            UnitMovement movement = enemyGo.GetComponent<UnitMovement>();
+            if (movement != null)
+            {
+                movement.StopMovement();
+            }
+
+            enemyScript.SetTerritoryCenter(center, homeRadius, territoryRadius);
+            enemyScript.SetSpawnHoleMetadata(holeKey, pick.cost);
+            UnmarkPersistentEnemy(enemyScript);
+
+            deficit -= pick.cost;
+            spawned++;
+        }
+
+        LogEnemyStats();
+    }
+
+    private float GetUsedBudgetForHole(Vector2Int holeKey)
+    {
+        float used = 0f;
+        foreach (UnitBase unit in UnitManager.Instance.EnemyUnits)
+        {
+            if (unit == null || unit.gameObject == null || !unit.gameObject.activeInHierarchy)
+            {
+                continue;
+            }
+
+            if (unit is not EnemyUnitBase enemy || !enemy.HasSpawnHoleKey || enemy.SpawnHoleKey != holeKey)
+            {
+                continue;
+            }
+
+            used += enemy.SpawnBudgetCost;
+        }
+
+        return used;
     }
 }

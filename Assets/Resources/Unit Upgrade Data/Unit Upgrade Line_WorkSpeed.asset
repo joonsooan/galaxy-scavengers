@@ -20,8 +20,8 @@ MonoBehaviour:
     - resourceType: 2
       amount: 100
     upgradeTime: 10
-    description: "\uC720\uB2DB \uC791\uC5C5\uC18D\uB3C4 +10%"
-    floatStatBonus: 0.1
+    description: "\uC720\uB2DB \uC791\uC5C5\uC18D\uB3C4 +50%"
+    floatStatBonus: 0.5
     intStatBonus: 0
   - costs:
     - resourceType: 0
@@ -29,6 +29,6 @@ MonoBehaviour:
     - resourceType: 5
       amount: 20
     upgradeTime: 30
-    description: "\uC720\uB2DB \uC791\uC5C5\uC18D\uB3C4 +20%"
-    floatStatBonus: 0.2
+    description: "\uC720\uB2DB \uC791\uC5C5\uC18D\uB3C4 +50%"
+    floatStatBonus: 0.5
     intStatBonus: 0

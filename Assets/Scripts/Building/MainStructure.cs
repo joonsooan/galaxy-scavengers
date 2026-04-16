@@ -228,6 +228,10 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
                     continue;
                 }
 
+                if (unit is Unit_Player) {
+                    continue;
+                }
+
                 if (unit.unitData == targetUnitData) {
                     count++;
                 }

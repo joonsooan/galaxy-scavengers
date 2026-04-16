@@ -8,6 +8,7 @@ public class UnitManager : MonoBehaviour
     public static UnitManager Instance { get; private set; }
 
     public static event Action<ResourceType[]> OnMineableTypesChanged;
+    public static event Action<EnemyUnitBase> OnEnemyUnitRemoved;
     public IReadOnlyList<ResourceType> CurrentMineableTypes => _currentMineableTypes;
     public Transform unitParent;
     
@@ -125,6 +126,11 @@ public class UnitManager : MonoBehaviour
     {
         if (unit.unitType == UnitBase.UnitType.Enemy)
         {
+            if (unit is EnemyUnitBase enemyUnit)
+            {
+                OnEnemyUnitRemoved?.Invoke(enemyUnit);
+            }
+
             _enemyUnits.Remove(unit);
         }
         else if (unit.unitType == UnitBase.UnitType.Ally)

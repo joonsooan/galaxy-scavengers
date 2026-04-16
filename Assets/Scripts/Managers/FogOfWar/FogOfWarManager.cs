@@ -159,6 +159,8 @@ public class FogOfWarManager : MonoBehaviour
         {
             MapObjectSpawner.Instance.UpdateResourceTileVisibility();
         }
+
+        RefreshAllStrategicOverlayTileVisibility();
     }
 
     private void ForceRebuildProviderTiles()
@@ -346,6 +348,8 @@ public class FogOfWarManager : MonoBehaviour
         {
             MapObjectSpawner.Instance.UpdateResourceTileVisibilityAtCell(tile);
         }
+
+        UpdateStrategicOverlayTileVisibilityAtCell(tile);
     }
 
     private void CleanupNullProviders()
@@ -541,6 +545,97 @@ public class FogOfWarManager : MonoBehaviour
         return false;
     }
 
+    public bool CanSeePersistentOverlay(Vector3Int cellPosition)
+    {
+        return CanSeeResources(cellPosition);
+    }
+
+    public void RefreshAllStrategicOverlayTileVisibility()
+    {
+        if (!IsInitialized)
+        {
+            return;
+        }
+
+        if (_cachedMapGenerator == null)
+        {
+            _cachedMapGenerator = FindFirstObjectByType<MapGenerator>();
+        }
+
+        if (_cachedMapGenerator == null)
+        {
+            return;
+        }
+
+        RefreshStrategicOverlayForTilemap(_cachedMapGenerator.EnemyHomeTilemap);
+        RefreshStrategicOverlayForTilemap(_cachedMapGenerator.EnemyTerritoryTilemap);
+
+        foreach (Vector3Int cell in _cachedMapGenerator.AncientRuinsCells)
+        {
+            UpdateStrategicOverlayTileVisibilityAtCell(cell);
+        }
+    }
+
+    private void RefreshStrategicOverlayForTilemap(Tilemap tilemap)
+    {
+        if (tilemap == null)
+        {
+            return;
+        }
+
+        foreach (Vector3Int pos in tilemap.cellBounds.allPositionsWithin)
+        {
+            if (tilemap.HasTile(pos))
+            {
+                UpdateStrategicOverlayTileVisibilityAtCell(pos);
+            }
+        }
+    }
+
+    private void UpdateStrategicOverlayTileVisibilityAtCell(Vector3Int tile)
+    {
+        if (!IsInitialized)
+        {
+            return;
+        }
+
+        if (_cachedMapGenerator == null)
+        {
+            _cachedMapGenerator = FindFirstObjectByType<MapGenerator>();
+        }
+
+        MapGenerator mapGenerator = _cachedMapGenerator;
+        if (mapGenerator == null)
+        {
+            return;
+        }
+
+        bool overlayVisible = CanSeePersistentOverlay(tile);
+        Color overlayColor = overlayVisible ? new Color(1f, 1f, 1f, 1f) : new Color(1f, 1f, 1f, 0f);
+
+        Tilemap enemyHome = mapGenerator.EnemyHomeTilemap;
+        if (enemyHome != null && enemyHome.HasTile(tile))
+        {
+            enemyHome.SetColor(tile, overlayColor);
+            enemyHome.RefreshTile(tile);
+        }
+
+        Tilemap enemyTerritory = mapGenerator.EnemyTerritoryTilemap;
+        if (enemyTerritory != null && enemyTerritory.HasTile(tile))
+        {
+            enemyTerritory.SetColor(tile, overlayColor);
+            enemyTerritory.RefreshTile(tile);
+        }
+
+        Tilemap decoration = mapGenerator.DecorationTilemap;
+        if (decoration != null && mapGenerator.IsAncientRuinsCell(tile) && decoration.HasTile(tile))
+        {
+            Color ruinsColor = new Color(1f, 1f, 1f, 1f);
+            decoration.SetColor(tile, ruinsColor);
+            decoration.RefreshTile(tile);
+        }
+    }
+
     public void ToggleFogVisibility()
     {
         _respectFog = !_respectFog;
@@ -556,6 +651,8 @@ public class FogOfWarManager : MonoBehaviour
         {
             MapObjectSpawner.Instance.UpdateResourceTileVisibility();
         }
+
+        RefreshAllStrategicOverlayTileVisibility();
     }
 
     private void UpdateAllVisibilityControllers()
@@ -595,6 +692,8 @@ public class FogOfWarManager : MonoBehaviour
         {
             MapObjectSpawner.Instance.UpdateResourceTileVisibility();
         }
+
+        RefreshAllStrategicOverlayTileVisibility();
     }
 
     public void ExploreTile(Vector3Int cellPosition)

@@ -135,6 +135,19 @@ public class CardDragger : MonoBehaviour
         _ghostBuildingInstance = Instantiate(_activeBuildingData.buildingPrefab, Vector3.zero, Quaternion.identity);
         SetGhostSortingLayer();
         _ghostBuildingRenderer = _ghostBuildingInstance.GetComponent<SpriteRenderer>();
+
+        const float ghostAlpha = 0.9f;
+        SpriteRenderer[] ghostRenderers = _ghostBuildingInstance.GetComponentsInChildren<SpriteRenderer>(true);
+        for (int i = 0; i < ghostRenderers.Length; i++)
+        {
+            SpriteRenderer r = ghostRenderers[i];
+            if (r != null)
+            {
+                Color c = r.color;
+                c.a = ghostAlpha;
+                r.color = c;
+            }
+        }
         
         Collider2D[] colliders = _ghostBuildingInstance.GetComponentsInChildren<Collider2D>(true);
         foreach (var collider in colliders)
@@ -229,16 +242,7 @@ public class CardDragger : MonoBehaviour
             return false;
         }
         
-        foreach (var piece in _activeBuildingData.recipe)
-        {
-            Vector3Int cellPos = anchorCell + piece.relativePosition;
-            if (!BuildingManager.Instance.CanPlaceBuilding(cellPos))
-            {
-                return false;
-            }
-        }
-        
-        return true;
+        return BuildingManager.Instance.CanPlaceBuildingAtAnchor(anchorCell, _activeBuildingData);
     }
     
     private bool HasEnoughResourcesForCombo()

@@ -330,6 +330,38 @@ public class BuildingManager : MonoBehaviour
         return true;
     }
 
+    public bool CanPlaceBuilding(Vector3Int cellPosition, BuildingData buildingData)
+    {
+        if (!CanPlaceBuilding(cellPosition)) {
+            return false;
+        }
+
+        if (buildingData != null && buildingData.buildingType == BuildingType.DataExtractor) {
+            MapGenerator mapGenerator = GetMapGenerator();
+            if (mapGenerator == null || !mapGenerator.IsAncientRuinsCell(cellPosition)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public bool CanPlaceBuildingAtAnchor(Vector3Int anchorCellPosition, BuildingData buildingData)
+    {
+        if (buildingData == null || buildingData.recipe == null || buildingData.recipe.Count == 0) {
+            return false;
+        }
+
+        foreach (BuildingData.BuildingPiece piece in buildingData.recipe) {
+            Vector3Int cellPos = anchorCellPosition + piece.relativePosition;
+            if (!CanPlaceBuilding(cellPos, buildingData)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public bool IsTemporaryTile(Vector3Int cellPosition)
     {
         return _temporaryTiles.Contains(cellPosition);
@@ -404,7 +436,7 @@ public class BuildingManager : MonoBehaviour
 
         foreach (BuildingData.BuildingPiece piece in buildingData.recipe) {
             Vector3Int cellPos = anchorCellPosition + piece.relativePosition;
-            if (!CanPlaceBuilding(cellPos)) {
+            if (!CanPlaceBuilding(cellPos, buildingData)) {
                 return;
             }
         }
