@@ -196,12 +196,6 @@ public class MapObjectSpawner : MonoBehaviour
             
             resourceCircles.AddRange(startingAreaCircles);
             
-            if (TutorialManager.Instance != null && TutorialManager.Instance.ShouldStartTutorial())
-            {
-                List<ResourceCircle> centerCircles = GenerateCenterResourceCircles();
-                resourceCircles.AddRange(centerCircles);
-            }
-            
             _cachedResourceCircles = new List<ResourceCircle>(resourceCircles);
             
             yield return StartCoroutine(SpawnResourcesInCirclesAsync(resourceCircles, progress));

@@ -6,14 +6,17 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Sprites/Legacy/TitleScene.unity
-    guid: a7ace856768a59e47806aa3a59739b30
+    path: Assets/Scenes/TitleScene.unity
+    guid: b842c54764ce0084b89329cdcc976c70
   - enabled: 1
     path: Assets/Scenes/BaseScene.unity
     guid: 2b498da6907400842b637299475137b0
   - enabled: 1
     path: Assets/Scenes/GameScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
+  - enabled: 1
+    path: Assets/Scenes/TutorialScene.unity
+    guid: 5b3ec7807eacd7a418aa6e1dd9fa8b05
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

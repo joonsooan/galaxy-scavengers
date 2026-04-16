@@ -446,10 +446,6 @@ public class EnemySpawner : MonoBehaviour
                         {
                             UnmarkPersistentEnemy(enemyScript);
                         }
-                        if (TutorialManager.Instance != null)
-                        {
-                            TutorialManager.Instance.RegisterSpawnedEnemy(enemyScript);
-                        }
                     }
 
                     int holeIdx = selectedHoles.IndexOf(spawn.pos);

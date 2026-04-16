@@ -78,10 +78,6 @@ public class StartingUnitsManager : MonoBehaviour
             if (config == null || config.unitData == null || config.count <= 0) {
                 continue;
             }
-            if (IsTutorialMode() && config.unitData.unitPrefab != null && config.unitData.unitPrefab.GetComponent<Unit_Construct>() != null) {
-                continue;
-            }
-
             for (int i = 0; i < config.count; i++) {
                 Vector3 spawnPosition = GetSpawnPositionAroundMainStructure(centerPosition, config.spawnRadius);
 
@@ -143,12 +139,6 @@ public class StartingUnitsManager : MonoBehaviour
                 }
             }
         }
-    }
-
-    private static bool IsTutorialMode()
-    {
-        return TutorialManager.Instance != null &&
-            (TutorialManager.Instance.IsTutorialActive() || TutorialManager.Instance.ShouldStartTutorial());
     }
 
     private Vector3 GetSpawnPositionAroundMainStructure(Vector3 center, float radius)

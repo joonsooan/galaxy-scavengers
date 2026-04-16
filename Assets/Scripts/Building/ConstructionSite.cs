@@ -119,12 +119,6 @@ public class ConstructionSite : MonoBehaviour
             if (AreAllPiecesConstructed())
             {
                 IsComplete = true;
-                
-                if (TutorialManager.Instance != null && buildingData != null)
-                {
-                    string buildingTypeName = buildingData.buildingType.ToString();
-                    TutorialManager.Instance.OnBuildingCompleted(buildingTypeName);
-                }
             }
         }
     }

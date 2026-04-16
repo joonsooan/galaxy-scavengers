@@ -435,9 +435,6 @@ public class Unit_Player : UnitBase
             if (minedAmount > 0) {
                 AddResourceToStorage(_targetResourceNode.resourceType, minedAmount);
 
-                if (TutorialManager.Instance != null) {
-                    TutorialManager.Instance.OnResourceMined(_targetResourceNode.resourceType, minedAmount);
-                }
             }
 
             yield return _miningDelay;
@@ -528,19 +525,7 @@ public class Unit_Player : UnitBase
 
     private bool CanEnableBulletFiring()
     {
-        if (TutorialManager.Instance == null) {
-            return true;
-        }
-
-        if (!TutorialManager.Instance.ShouldStartTutorial()) {
-            return true;
-        }
-
-        if (!TutorialManager.Instance.IsTutorialActive()) {
-            return true;
-        }
-
-        return TutorialManager.Instance.HasReachedStepType(TutorialStepType.BulletFired);
+        return true;
     }
 
     private void TryFireBullet(Vector3 targetPosition)
@@ -597,9 +582,6 @@ public class Unit_Player : UnitBase
             _spriteController.UpdateSpriteDirection(fireDirection);
         }
 
-        if (TutorialManager.Instance != null) {
-            TutorialManager.Instance.OnBulletFired();
-        }
     }
 
     private void CreateLaserRenderer()

@@ -458,18 +458,6 @@ public class BuildingManager : MonoBehaviour
             ConstructionManager.Instance.RegisterConstructionSite(site);
         }
 
-        if (TutorialManager.Instance != null && buildingData != null) {
-            string buildingTypeName = buildingData.buildingType.ToString();
-            if (buildingTypeName == "Storage") {
-                TutorialManager.Instance.OnBuildingPlaced("Storage");
-            }
-            else if (buildingTypeName == "MainStructure") {
-                TutorialManager.Instance.OnBuildingPlaced("MainStructure");
-            }
-            else if (buildingTypeName == "Smelter") {
-                TutorialManager.Instance.OnBuildingPlaced("Smelter");
-            }
-        }
     }
 
     public void PlaceBuildingPieceAtCell(BuildingData buildingData, Vector3Int pieceCell, Vector3Int anchorCellPosition)

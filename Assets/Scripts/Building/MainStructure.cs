@@ -508,15 +508,6 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
 
             OnUnitProduced?.Invoke(unitToProduce);
 
-            if (TutorialManager.Instance != null) {
-                string unitTypeName = unitToProduce.unitName;
-                if (unitTypeName.Contains("Miner") || unitTypeName.Contains("채굴")) {
-                    TutorialManager.Instance.OnUnitProduced("Miner");
-                }
-                else if (unitTypeName.Contains("Processor") || unitTypeName.Contains("가공")) {
-                    TutorialManager.Instance.OnUnitProduced("Processor");
-                }
-            }
         }
 
         _isProducing = false;

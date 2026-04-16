@@ -141,11 +141,6 @@ public class ResourceTileManager
             isVisible = FogOfWarManager.Instance.CanSeeResources(cellPos);
         }
         
-        if (!wasVisible && isVisible && TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive())
-        {
-            TutorialManager.Instance.OnResourceBlockRevealed();
-        }
-        
         Color tileColor = isVisible ? new Color(1f, 1f, 1f, 1f) : new Color(1f, 1f, 1f, 0f);
         _resourceTilemap.SetColor(cellPos, tileColor);
         _resourceTilemap.RefreshTile(cellPos);

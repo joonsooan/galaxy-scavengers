@@ -26,11 +26,6 @@ public class UnitAssignCell : MonoBehaviour
         _processor = processor;
         _assignedDrone = drone;
         
-        _tutorialID = "unit_assign_cell";
-        if (TutorialManager.Instance != null) {
-            TutorialManager.Instance.RegisterRuntimeUI(_tutorialID, gameObject, glowMaterial);
-        }
-        
         UpdateUI();
     }
 
