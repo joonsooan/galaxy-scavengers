@@ -86,11 +86,13 @@ public class DroneProduceUIManager : MonoBehaviour
     {
         ResolveUnitInfoPanel();
         UnitManager.OnUnitCountChanged += OnUnitCountChanged;
+        UnitUpgradeProgress.OnUpgradeStateChanged += OnUpgradeProgressStateChanged;
     }
 
     private void OnDisable()
     {
         UnitManager.OnUnitCountChanged -= OnUnitCountChanged;
+        UnitUpgradeProgress.OnUpgradeStateChanged -= OnUpgradeProgressStateChanged;
         ClearUnitInfo();
         if (unitInfoPanel != null) {
             unitInfoPanel.RestoreDefaultLayout();
@@ -98,6 +100,13 @@ public class DroneProduceUIManager : MonoBehaviour
     }
 
     private void OnUnitCountChanged(UnitBase unit)
+    {
+        if (_currentMainStructure != null) {
+            UpdateUnitCountText();
+        }
+    }
+
+    private void OnUpgradeProgressStateChanged()
     {
         if (_currentMainStructure != null) {
             UpdateUnitCountText();

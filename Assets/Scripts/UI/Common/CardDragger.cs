@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using FMODUnity;
 
 public class CardDragger : MonoBehaviour
 {

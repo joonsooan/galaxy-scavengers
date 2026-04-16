@@ -26,7 +26,12 @@ public class UnitManager : MonoBehaviour
 
     public int GetMaxPopulation()
     {
-        return baseMaxPopulation;
+        int bonus = 0;
+        if (UnitUpgradeProgress.Instance != null) {
+            bonus = UnitUpgradeProgress.Instance.GetMaxPopulationBonus();
+        }
+
+        return baseMaxPopulation + bonus;
     }
 
     public int GetPopulationCountedAllyCount()

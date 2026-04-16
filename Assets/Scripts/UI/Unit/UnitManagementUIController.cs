@@ -5,19 +5,24 @@ using UnityEngine.UI;
 
 public class UnitManagementUIController : MonoBehaviour
 {
+    [Header("Default Settings")]
     [SerializeField] private TMP_Text totalAllyUnitCountText;
 
+    [Header("Miner Settings")]
     [SerializeField] private Button minerTabButton;
-
     [SerializeField] private TMP_Text minerTabCountText;
-
     [SerializeField] private GameObject minerSubPanel;
-
     [SerializeField] private UnitMinerAssignmentUIController minerAssignmentUI;
+
+    [Header("Upgrade Settings")]
+    [SerializeField] private Button unitUpgradeTabButton;
+    [SerializeField] private GameObject unitUpgradeSubPanel;
+    [SerializeField] private UnitUpgradeUIController unitUpgradeUI;
 
     private void OnEnable()
     {
         UnitManager.OnUnitCountChanged += OnUnitCountChanged;
+        UnitUpgradeProgress.OnUpgradeStateChanged += OnUpgradeStateChanged;
         WireTabButtons(true);
         RefreshSummary();
         ShowTab(0);
@@ -26,7 +31,13 @@ public class UnitManagementUIController : MonoBehaviour
     private void OnDisable()
     {
         UnitManager.OnUnitCountChanged -= OnUnitCountChanged;
+        UnitUpgradeProgress.OnUpgradeStateChanged -= OnUpgradeStateChanged;
         WireTabButtons(false);
+    }
+
+    private void OnUpgradeStateChanged()
+    {
+        RefreshSummary();
     }
 
     private void WireTabButtons(bool add)
@@ -40,11 +51,25 @@ public class UnitManagementUIController : MonoBehaviour
             }
         }
 
+        if (unitUpgradeTabButton != null)
+        {
+            unitUpgradeTabButton.onClick.RemoveListener(OnUnitUpgradeTabClicked);
+            if (add)
+            {
+                unitUpgradeTabButton.onClick.AddListener(OnUnitUpgradeTabClicked);
+            }
+        }
+
     }
 
     private void OnMinerTabClicked()
     {
         ShowTab(0);
+    }
+
+    private void OnUnitUpgradeTabClicked()
+    {
+        ShowTab(1);
     }
 
     private void OnUnitCountChanged(UnitBase _)
@@ -81,9 +106,19 @@ public class UnitManagementUIController : MonoBehaviour
             minerSubPanel.SetActive(index == 0);
         }
 
+        if (unitUpgradeSubPanel != null)
+        {
+            unitUpgradeSubPanel.SetActive(index == 1);
+        }
+
         if (index == 0 && minerAssignmentUI != null)
         {
             minerAssignmentUI.RefreshUIFromSystem();
+        }
+
+        if (index == 1 && unitUpgradeUI != null)
+        {
+            unitUpgradeUI.Refresh();
         }
     }
 }

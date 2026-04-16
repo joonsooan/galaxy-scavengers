@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29190ef61972a714eb27fefe0bcaf895, type: 3}
+  m_Name: Unit Upgrade Catalog
+  m_EditorClassIdentifier: Assembly-CSharp::UnitUpgradeCatalog
+  moveSpeedLine: {fileID: 11400000, guid: cfdf90448b3dfb944b75da42f48faccd, type: 2}
+  workSpeedLine: {fileID: 11400000, guid: dbc83bb781a1ae04cb60f1ed8ba119fe, type: 2}
+  storageLine: {fileID: 11400000, guid: 05b7e36191672574090cf8b0f0046adc, type: 2}
+  maxPopulationLine: {fileID: 11400000, guid: 62dc5b8eee796b54b8c2f19c4b8415b3, type: 2}

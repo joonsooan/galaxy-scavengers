@@ -1,0 +1,175 @@
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class UnitUpgradeCell : MonoBehaviour
+{
+    [SerializeField] private TMP_Text titleText;
+    [SerializeField] private TMP_Text descText;
+    [SerializeField] private Image iconImage;
+    [SerializeField] private TMP_Text levelText;
+    [SerializeField] private string maxLevelLabel = "최대 레벨";
+    [SerializeField] private Transform resourceContent;
+    [SerializeField] private GameObject resourceInfoCellPrefab;
+    [SerializeField] private CustomButton upgradeButton;
+
+    private UnitUpgradeLineData _line;
+    private UnitUpgradeProgress _progress;
+
+    private void OnDestroy()
+    {
+        if (upgradeButton != null) {
+            upgradeButton.onClick.RemoveListener(OnUpgradeClicked);
+        }
+    }
+
+    public void Initialize(UnitUpgradeLineData line, UnitUpgradeProgress progress)
+    {
+        _line = line;
+        _progress = progress;
+        if (_progress == null) {
+            _progress = UnitUpgradeProgress.Instance;
+        }
+
+        if (_progress == null) {
+            _progress = FindFirstObjectByType<UnitUpgradeProgress>(FindObjectsInactive.Include);
+        }
+
+        if (upgradeButton != null) {
+            upgradeButton.onClick.RemoveListener(OnUpgradeClicked);
+            upgradeButton.onClick.AddListener(OnUpgradeClicked);
+        }
+
+        RefreshDisplay();
+    }
+
+    public void RefreshDisplay()
+    {
+        if (_line == null) {
+            return;
+        }
+
+        UnitUpgradeProgress progress = ResolveProgressReference();
+        if (progress != null) {
+            _progress = progress;
+        }
+
+        if (titleText != null) {
+            titleText.text = _line.displayName;
+        }
+
+        if (iconImage != null) {
+            iconImage.sprite = _line.icon;
+            iconImage.enabled = _line.icon != null;
+        }
+
+        int level = progress != null ? progress.GetLevel(_line.statType) : 0;
+        bool maxed = _line.tiers == null || level >= _line.tiers.Length;
+
+        if (levelText != null) {
+            levelText.text = maxed ? maxLevelLabel : $"Lv {level}.";
+        }
+
+        if (descText != null) {
+            descText.text = GetDescriptionTextForDisplay(level, maxed);
+        }
+
+        ClearResourceCells();
+        UnitUpgradeTier nextTier = GetNextTier(level);
+        if (upgradeButton != null) {
+            if (progress == null) {
+                upgradeButton.interactable = false;
+            }
+            else {
+                bool anyPending = progress.IsAnyUpgradeInProgress();
+                bool canAfford = !maxed && progress.CanAffordNextTier(_line);
+                upgradeButton.interactable = !maxed && !anyPending && canAfford;
+            }
+        }
+
+        if (nextTier != null && nextTier.costs != null && resourceContent != null && resourceInfoCellPrefab != null) {
+            foreach (ResourceCost cost in nextTier.costs) {
+                GameObject cellObj = Instantiate(resourceInfoCellPrefab, resourceContent);
+                ResourceInfoCell cell = cellObj.GetComponent<ResourceInfoCell>();
+                if (cell != null) {
+                    cell.SetInfo(cost.resourceType, cost.amount, false);
+                }
+            }
+
+            foreach (Transform child in resourceContent) {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(child as RectTransform);
+            }
+
+            LayoutRebuilder.ForceRebuildLayoutImmediate(resourceContent as RectTransform);
+        }
+    }
+
+    private static UnitUpgradeProgress ResolveProgressReference()
+    {
+        if (UnitUpgradeProgress.Instance != null) {
+            return UnitUpgradeProgress.Instance;
+        }
+
+        return FindFirstObjectByType<UnitUpgradeProgress>(FindObjectsInactive.Include);
+    }
+
+    private string GetDescriptionTextForDisplay(int currentLevel, bool isMaxed)
+    {
+        if (_line == null || _line.tiers == null || _line.tiers.Length == 0) {
+            return string.Empty;
+        }
+
+        if (isMaxed) {
+            UnitUpgradeTier last = _line.tiers[_line.tiers.Length - 1];
+            return last != null && last.description != null ? last.description : string.Empty;
+        }
+
+        UnitUpgradeTier next = _line.tiers[currentLevel];
+        return next != null && next.description != null ? next.description : string.Empty;
+    }
+
+    private UnitUpgradeTier GetNextTier(int currentLevel)
+    {
+        if (_line == null || _line.tiers == null) {
+            return null;
+        }
+
+        if (currentLevel >= _line.tiers.Length) {
+            return null;
+        }
+
+        return _line.tiers[currentLevel];
+    }
+
+    private void ClearResourceCells()
+    {
+        if (resourceContent == null) {
+            return;
+        }
+
+        for (int i = resourceContent.childCount - 1; i >= 0; i--) {
+            Destroy(resourceContent.GetChild(i).gameObject);
+        }
+    }
+
+    private void OnUpgradeClicked()
+    {
+        if (_line == null) {
+            return;
+        }
+
+        UnitUpgradeProgress progress = ResolveProgressReference();
+        if (progress == null) {
+            return;
+        }
+
+        _progress = progress;
+
+        if (progress.IsUpgradeInProgress(_line.statType)) {
+            return;
+        }
+
+        progress.TryQueueUpgrade(_line);
+        RefreshDisplay();
+    }
+}

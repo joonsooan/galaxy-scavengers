@@ -54,7 +54,6 @@ public class Unit_Miner : UnitBase
     private Coroutine _findResourceCoroutine;
 
     private Coroutine _mineCoroutine;
-    private WaitForSeconds _miningDelay;
     private EventInstance _miningSoundInstance;
     private Tween _miningVibrationTween;
     private bool _noResourceAlertActive;
@@ -73,6 +72,9 @@ public class Unit_Miner : UnitBase
     private Vector3Int _reservedMiningCell;
     private int _reservedStorageAmount;
 
+    private float _prefabMoveSpeed;
+    private int _prefabMaxCarry;
+
     protected override void Awake()
     {
         base.Awake();
@@ -80,6 +82,11 @@ public class Unit_Miner : UnitBase
         _searchWait = CoroutineCache.GetWaitForSeconds(resourceSearchInterval);
         _resourceImageSpawnWait = CoroutineCache.GetWaitForSeconds(resourceImageSpawnInterval);
         InitializeCarryAmounts();
+        if (unitMovement == null) {
+            unitMovement = GetComponent<UnitMovement>();
+        }
+        _prefabMoveSpeed = unitMovement != null ? unitMovement.moveSpeed : 5f;
+        _prefabMaxCarry = maxCarryAmount;
     }
 
     protected void Start()
@@ -109,6 +116,7 @@ public class Unit_Miner : UnitBase
     {
         base.OnEnable();
         SubscribeEvents();
+        ApplyMinerUpgradeModifiers();
     }
 
     protected override void OnDisable()
@@ -651,6 +659,23 @@ public class Unit_Miner : UnitBase
         GameManager.OnPauseStateChanged -= HandlePauseStateChanged;
     }
 
+    public void ApplyMinerUpgradeModifiers()
+    {
+        if (unitMovement == null) {
+            unitMovement = GetComponent<UnitMovement>();
+        }
+
+        float moveMult = 1f;
+        int storageBonus = 0;
+        if (UnitUpgradeProgress.Instance != null) {
+            moveMult = UnitUpgradeProgress.Instance.GetMoveSpeedMultiplier();
+            storageBonus = UnitUpgradeProgress.Instance.GetStorageCapacityBonus();
+        }
+
+        ApplyUpgradeMoveSpeed(_prefabMoveSpeed, moveMult);
+        maxCarryAmount = _prefabMaxCarry + storageBonus;
+    }
+
     public void ApplyMineableTypes(ResourceType[] newTypes)
     {
         mineableResourceTypes = newTypes != null && newTypes.Length > 0
@@ -1054,8 +1079,6 @@ public class Unit_Miner : UnitBase
         _targetResourceNode = target;
         _targetResourceNode?.BeginMining(this);
 
-        _miningDelay = CoroutineCache.GetWaitForSeconds(target.timeToMinePerUnit);
-
         if (_mineCoroutine == null) {
             _mineCoroutine = StartCoroutine(MineResourceCoroutine());
         }
@@ -1075,7 +1098,12 @@ public class Unit_Miner : UnitBase
 
     private IEnumerator MineResourceCoroutine()
     {
-        yield return _miningDelay;
+        if (_targetResourceNode == null) {
+            yield break;
+        }
+
+        float firstWait = GetEffectiveMiningInterval(_targetResourceNode.timeToMinePerUnit);
+        yield return CoroutineCache.GetWaitForSeconds(firstWait);
 
         while (true) {
             if (_targetResourceNode != null && !_targetResourceNode.IsDepleted) {
@@ -1086,8 +1114,20 @@ public class Unit_Miner : UnitBase
                 StopMining();
                 yield break;
             }
-            yield return _miningDelay;
+
+            float interval = GetEffectiveMiningInterval(_targetResourceNode.timeToMinePerUnit);
+            yield return CoroutineCache.GetWaitForSeconds(interval);
         }
+    }
+
+    private float GetEffectiveMiningInterval(float baseInterval)
+    {
+        float mult = UnitUpgradeProgress.Instance != null ? UnitUpgradeProgress.Instance.GetWorkSpeedMultiplier() : 1f;
+        if (mult <= 0.01f) {
+            mult = 0.01f;
+        }
+
+        return baseInterval / mult;
     }
 
     private bool TryReserveMiningCell(Vector3Int cell)
