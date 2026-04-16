@@ -1087,8 +1087,12 @@ public class Unit_Miner : UnitBase
 
         while (true) {
             if (_targetResourceNode != null && !_targetResourceNode.IsDepleted) {
+                ResourceType minedResourceType = _targetResourceNode.resourceType;
                 int minedAmount = _targetResourceNode.Mine(mineAmountPerAction);
-                OnResourceMined?.Invoke(_targetResourceNode.resourceType, minedAmount);
+                OnResourceMined?.Invoke(minedResourceType, minedAmount);
+                if (_targetResourceNode == null) {
+                    yield break;
+                }
             }
             else {
                 StopMining();
