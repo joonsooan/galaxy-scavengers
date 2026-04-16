@@ -44688,11 +44688,6 @@ MonoBehaviour:
   electricityConsumptionText: {fileID: 644993482}
   noisePanel: {fileID: 600780666}
   noiseText: {fileID: 210234862}
-  allPieceDatabase:
-  - {fileID: 11400000, guid: e22a64f09ec41444d8839854ab0cf12d, type: 2}
-  - {fileID: 11400000, guid: 4c8173cb4c763ac4a94d5d71eff20932, type: 2}
-  - {fileID: 11400000, guid: 68b4c758a3839aa4f948aaaff775f54d, type: 2}
-  - {fileID: 11400000, guid: c9bd8365310e1144ea58636ed7ab3655, type: 2}
 --- !u!1 &899945891
 GameObject:
   m_ObjectHideFlags: 0
@@ -80873,10 +80868,10 @@ MonoBehaviour:
   - {fileID: 7242802088552420798, guid: 5b644de4e058ce64a8684b1f4614a66c, type: 3}
   resourceStatsList:
   - resourceType: 0
-    amountToMine: 100
+    amountToMine: 50
     timeToMinePerUnit: 0.5
   - resourceType: 1
-    amountToMine: 100
+    amountToMine: 50
     timeToMinePerUnit: 0.5
   - resourceType: 2
     amountToMine: 50

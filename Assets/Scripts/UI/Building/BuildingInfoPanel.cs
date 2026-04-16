@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BuildingInfoPanel : MonoBehaviour
 {
@@ -18,11 +19,10 @@ public class BuildingInfoPanel : MonoBehaviour
     [SerializeField] private GameObject noisePanel;
     [SerializeField] private TMP_Text noiseText;
 
-    [SerializeField] private List<BuildingPieceData> allPieceDatabase;
-
     private BuildingData _selectedData;
     private Damageable _currentDamageable;
     private bool _showMaxHealthOnly;
+    private Dictionary<BuildingPieceType, BuildingPieceData> _pieceDataByType;
 
     public static BuildingInfoPanel Instance { get; private set; }
 
@@ -126,21 +126,14 @@ public class BuildingInfoPanel : MonoBehaviour
 
     private void UpdateAetherAndNoiseDisplay(BuildingData data)
     {
-        int electricityConsumption = 0;
-        IElectricityConsumer electricityConsumer = data != null && data.buildingPrefab != null ? data.buildingPrefab.GetComponent<IElectricityConsumer>() : null;
-        if (electricityConsumer != null)
-        {
-            electricityConsumption = electricityConsumer.ElectricityConsumptionPerSecond;
-        }
-
         if (aetherSpendPanel != null)
         {
-            aetherSpendPanel.SetActive(electricityConsumption > 0);
+            aetherSpendPanel.SetActive(false);
         }
 
-        if (electricityConsumptionText != null && electricityConsumption > 0)
+        if (electricityConsumptionText != null)
         {
-            electricityConsumptionText.text = $"소모량 : {electricityConsumption:F1}";
+            electricityConsumptionText.text = string.Empty;
         }
 
         if (data == null || data.buildingType != BuildingType.MainStructure)
@@ -213,8 +206,12 @@ public class BuildingInfoPanel : MonoBehaviour
         foreach (var piece in data.recipe)
         {
             BuildingPieceData pieceData = GetPieceDataByType(piece.buildingPieceType);
+            if (pieceData == null)
+            {
+                continue;
+            }
 
-            if (pieceData != null && pieceData.costs != null)
+            if (pieceData.costs != null)
             {
                 foreach (var cost in pieceData.costs)
                 {
@@ -240,21 +237,49 @@ public class BuildingInfoPanel : MonoBehaviour
             
             if (cell != null)
             {
-                cell.SetInfo(type, amount);
+                cell.SetInfo(type, amount, false);
             }
+        }
+
+        RectTransform panelRect = resourcePanel.GetComponent<RectTransform>();
+        if (panelRect != null)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
         }
     }
     
     private BuildingPieceData GetPieceDataByType(BuildingPieceType type)
     {
-        foreach (var data in allPieceDatabase)
+        EnsurePieceDataCache();
+        if (_pieceDataByType != null && _pieceDataByType.TryGetValue(type, out BuildingPieceData data))
         {
-            if (data.buildingPieceType == type)
+            return data;
+        }
+
+        return null;
+    }
+
+    private void EnsurePieceDataCache()
+    {
+        if (_pieceDataByType != null)
+        {
+            return;
+        }
+
+        _pieceDataByType = new Dictionary<BuildingPieceType, BuildingPieceData>();
+        BuildingPieceData[] allData = Resources.LoadAll<BuildingPieceData>("Building Pieces");
+        foreach (BuildingPieceData data in allData)
+        {
+            if (data == null || data.buildingPieceType == BuildingPieceType.None)
             {
-                return data;
+                continue;
+            }
+
+            if (!_pieceDataByType.ContainsKey(data.buildingPieceType))
+            {
+                _pieceDataByType[data.buildingPieceType] = data;
             }
         }
-        return null;
     }
 
     public void ClearInfo()

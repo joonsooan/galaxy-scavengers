@@ -124,7 +124,11 @@ public class ResourceInfoCell : MonoBehaviour
         BaseResourceDataManager resourceDataManager = FindFirstObjectByType<BaseResourceDataManager>();
         if (resourceDataManager != null)
         {
-            return resourceDataManager.GetResourceIcon(type);
+            Sprite baseIcon = resourceDataManager.GetResourceIcon(type);
+            if (baseIcon != null)
+            {
+                return baseIcon;
+            }
         }
         
         // Fallback to ResourceManager (for game scene compatibility)
