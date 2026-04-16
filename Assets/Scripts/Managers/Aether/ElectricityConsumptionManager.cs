@@ -90,13 +90,26 @@ public class ElectricityConsumptionManager : MonoBehaviour
     {
         get
         {
-            int total = 0;
-            foreach (MainStructure mainStructure in _mainStructures)
+            if (ResourceManager.Instance == null)
             {
-                if (mainStructure != null)
+                return 0;
+            }
+
+            int total = 0;
+            foreach (IStorage storage in ResourceManager.Instance.GetAllStorages())
+            {
+                if (storage == null || storage is Battery)
                 {
-                    total += mainStructure.BaseAetherCapacity;
+                    continue;
                 }
+
+                Component c = storage as Component;
+                if (c == null || c.gameObject == null || !c.gameObject.activeInHierarchy)
+                {
+                    continue;
+                }
+
+                total += storage.GetMaxCapacity();
             }
 
             return total;
@@ -994,11 +1007,6 @@ public class ElectricityConsumptionManager : MonoBehaviour
             _electricityWithdrawOrderBuffer.Add(outComp[i].b);
         }
 
-        MainStructure mainStructure = ResourceDataManager.Instance != null ? ResourceDataManager.Instance.GetMainStructure() : null;
-        if (mainStructure != null && mainStructure.GetCurrentResourceAmount(ResourceType.Electricity) > 0)
-        {
-            _electricityWithdrawOrderBuffer.Add(mainStructure);
-        }
     }
 
     public void ReleasePowerFloatingIcon(PowerStatusWorldFollower follower)

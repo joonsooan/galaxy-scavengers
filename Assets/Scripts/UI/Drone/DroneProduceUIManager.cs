@@ -69,7 +69,7 @@ public class DroneProduceUIManager : MonoBehaviour
             return;
         }
 
-        int current = UnitManager.Instance.AllyUnits.Count;
+        int current = UnitManager.Instance.GetPopulationCountedAllyCount();
         int max = UnitManager.Instance.GetMaxPopulation();
 
         unitCountText.text = $"{current} / {max}";

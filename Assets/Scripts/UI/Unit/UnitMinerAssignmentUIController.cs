@@ -43,6 +43,7 @@ public class UnitMinerAssignmentUIController : MonoBehaviour
 
     private void OnAllyUnitCountChanged(UnitBase _)
     {
+        assignmentSystem?.RefreshAssignments();
         RefreshUIFromSystem();
     }
 
@@ -408,7 +409,6 @@ public class UnitMinerAssignmentUIController : MonoBehaviour
         int[] ratios = assignmentSystem.GetRatioWeightsCopy();
         IReadOnlyList<int> lastSlots = assignmentSystem.LastSlotCounts;
 
-        bool ratio = assignmentSystem.RatioMode;
         if (countInputs != null)
         {
             for (int i = 0; i < 4 && i < countInputs.Length; i++)
@@ -419,7 +419,7 @@ public class UnitMinerAssignmentUIController : MonoBehaviour
                     continue;
                 }
 
-                int display = ratio ? lastSlots[i] : direct[i];
+                int display = lastSlots[i];
                 f.text = Mathf.Clamp(display, 0, 100).ToString();
             }
         }

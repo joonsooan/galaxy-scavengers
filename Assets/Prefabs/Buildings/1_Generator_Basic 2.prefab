@@ -203,7 +203,7 @@ MonoBehaviour:
   resourceAmount: 10
   supplyRangeN: 8
   powerCoverageCellOffset: {x: -1, y: -1}
-  electricityBufferMax: 1000
+  electricityBufferMax: 50
   electricityBufferCurrent: 0
   fuelCostsPerProduction:
   - resourceType: 1

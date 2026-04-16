@@ -19,9 +19,6 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
     [SerializeField] private ProductionProgressSlider productionSlider;
     [SerializeField] private Vector3 unitSpawnOffset = new Vector3(0f, -1f, 0f);
 
-    [Header("Aether Capacity")]
-    [SerializeField] private int baseAetherCapacity = 100;
-
     private readonly Dictionary<int, int> _producedUnitCounts = new();
     private readonly Queue<UnitData> _productionQueue = new();
     private readonly Dictionary<int, int> _targetUnitCounts = new();
@@ -37,8 +34,6 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
     private Coroutine _productionCoroutine;
     private WaitForSeconds _productionWaitWait;
     private bool _consumerRegistered;
-
-    public int BaseAetherCapacity => baseAetherCapacity;
 
     public string DroneProduceDisplayName => droneProduceDisplayName;
 
