@@ -6,22 +6,24 @@ using UnityEngine.SceneManagement;
 
 public class ResourceDataManager : MonoBehaviour
 {
-    private readonly HashSet<ResourceNode> _allResources = new ();
-    private readonly List<IStorage> _allStorages = new ();
+    private readonly HashSet<ResourceNode> _allResources = new();
+    private readonly List<IStorage> _allStorages = new();
     private readonly Dictionary<IStorage, int> _reservedCapacity = new Dictionary<IStorage, int>();
-    private readonly Dictionary<ResourceType, int> _resourceCounts = new ();
-    private readonly Dictionary<ResourceType, ResourceStats> _resourceStats = new ();
+    private readonly Dictionary<ResourceType, int> _resourceCounts = new();
+    private readonly Dictionary<ResourceType, ResourceStats> _resourceStats = new();
     private MainStructure _mainStructure;
 
     public static ResourceDataManager Instance { get; private set; }
 
     private void Awake()
     {
-        if (Instance == null) {
+        if (Instance == null)
+        {
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
-        else {
+        else
+        {
             Destroy(gameObject);
         }
     }
@@ -53,12 +55,15 @@ public class ResourceDataManager : MonoBehaviour
     public void ReleaseCapacity(IStorage storage, int amount)
     {
         if (storage == null || amount <= 0) return;
-        if (_reservedCapacity.TryGetValue(storage, out int current)) {
+        if (_reservedCapacity.TryGetValue(storage, out int current))
+        {
             int remaining = Mathf.Max(0, current - amount);
-            if (remaining <= 0) {
+            if (remaining <= 0)
+            {
                 _reservedCapacity.Remove(storage);
             }
-            else {
+            else
+            {
                 _reservedCapacity[storage] = remaining;
             }
         }
@@ -73,7 +78,8 @@ public class ResourceDataManager : MonoBehaviour
 
     public void NotifyStorageSpaceFreed(IStorage storage, int availableCapacity)
     {
-        if (storage != null && availableCapacity > 0) {
+        if (storage != null && availableCapacity > 0)
+        {
             OnStorageSpaceFreed?.Invoke(storage, availableCapacity);
         }
     }
@@ -81,14 +87,16 @@ public class ResourceDataManager : MonoBehaviour
     public void InitializeResourceStats(List<ResourceStats> resourceStatsList)
     {
         _resourceStats.Clear();
-        foreach (ResourceStats stats in resourceStatsList) {
+        foreach (ResourceStats stats in resourceStatsList)
+        {
             _resourceStats[stats.resourceType] = stats;
         }
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == "GameScene") {
+        if (scene.name == "GameScene")
+        {
             _mainStructure = null;
             _allStorages.Clear();
             _allResources.Clear();
@@ -97,18 +105,18 @@ public class ResourceDataManager : MonoBehaviour
             StartCoroutine(DelayedSceneInitialization());
         }
     }
-    
+
     private IEnumerator DelayedSceneInitialization()
     {
         yield return null;
-        
+
         ResetResourceCount();
-        
+
         yield return null;
-        
+
         RecalculateResourceCountsFromStorages();
     }
-    
+
     public void RecalculateResourceCountsFromStorages()
     {
         foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
@@ -121,7 +129,7 @@ public class ResourceDataManager : MonoBehaviour
             SetResource(type, totalAmount);
         }
     }
-    
+
     private void SetResource(ResourceType type, int amount)
     {
         _resourceCounts[type] = amount;
@@ -156,48 +164,60 @@ public class ResourceDataManager : MonoBehaviour
 
     public bool SpendResources(ResourceCost[] costs)
     {
-        if (!HasEnoughResources(costs)) {
+        if (!HasEnoughResources(costs))
+        {
             Debug.Log("Not Enough Resources");
             return false;
         }
 
         Dictionary<ResourceType, int> requiredResources = new Dictionary<ResourceType, int>();
-        foreach (ResourceCost cost in costs) {
-            if (requiredResources.ContainsKey(cost.resourceType)) {
+        foreach (ResourceCost cost in costs)
+        {
+            if (requiredResources.ContainsKey(cost.resourceType))
+            {
                 requiredResources[cost.resourceType] += cost.amount;
             }
-            else {
+            else
+            {
                 requiredResources.Add(cost.resourceType, cost.amount);
             }
         }
 
         Dictionary<ResourceType, int> availableInStorages = new Dictionary<ResourceType, int>();
         List<IStorage> storages = GetAllStorages();
-        foreach (ResourceType type in requiredResources.Keys) {
+
+        foreach (ResourceType type in requiredResources.Keys)
+        {
             int totalInStorages = 0;
-            foreach (IStorage storage in storages) {
+            foreach (IStorage storage in storages)
+            {
                 totalInStorages += storage.GetCurrentResourceAmount(type);
             }
             availableInStorages[type] = totalInStorages;
         }
 
-        foreach (KeyValuePair<ResourceType, int> req in requiredResources) {
-            if (GetResourceAmount(req.Key) < req.Value) {
+        foreach (KeyValuePair<ResourceType, int> req in requiredResources)
+        {
+            if (GetResourceAmount(req.Key) < req.Value)
+            {
                 Debug.Log($"Not Enough Resources for {req.Key} after final check.");
                 return false;
             }
         }
 
-        foreach (ResourceCost cost in costs) {
+        foreach (ResourceCost cost in costs)
+        {
             int remainingToWithdraw = cost.amount;
-            foreach (IStorage storage in storages) {
+            foreach (IStorage storage in storages)
+            {
                 if (remainingToWithdraw <= 0) break;
-                if (storage.TryWithdrawResource(cost.resourceType, remainingToWithdraw, out int amountWithdrawn)) {
+                if (storage.TryWithdrawResource(cost.resourceType, remainingToWithdraw, out int amountWithdrawn))
+                {
                     remainingToWithdraw -= amountWithdrawn;
                 }
             }
         }
-        
+
         RecalculateResourceCountsFromStorages();
 
         return true;
@@ -205,11 +225,37 @@ public class ResourceDataManager : MonoBehaviour
 
     public bool HasEnoughResources(ResourceCost[] costs)
     {
-        foreach (ResourceCost cost in costs) {
-            if (_resourceCounts.GetValueOrDefault(cost.resourceType) < cost.amount) {
+        if (costs == null || costs.Length == 0)
+        {
+            return true;
+        }
+
+        Dictionary<ResourceType, int> requiredResources = new Dictionary<ResourceType, int>();
+        foreach (ResourceCost cost in costs)
+        {
+            if (cost == null)
+            {
+                continue;
+            }
+
+            if (requiredResources.ContainsKey(cost.resourceType))
+            {
+                requiredResources[cost.resourceType] += cost.amount;
+            }
+            else
+            {
+                requiredResources[cost.resourceType] = cost.amount;
+            }
+        }
+
+        foreach (KeyValuePair<ResourceType, int> req in requiredResources)
+        {
+            if (GetResourceAmount(req.Key) < req.Value)
+            {
                 return false;
             }
         }
+
         return true;
     }
 
@@ -232,7 +278,8 @@ public class ResourceDataManager : MonoBehaviour
 
     public void AddStorage(IStorage storage)
     {
-        if (!_allStorages.Contains(storage)) {
+        if (!_allStorages.Contains(storage))
+        {
             _allStorages.Add(storage);
             OnNewStorageAdded?.Invoke();
         }
@@ -240,7 +287,8 @@ public class ResourceDataManager : MonoBehaviour
 
     public void RemoveStorage(IStorage storage)
     {
-        if (_allStorages.Remove(storage)) {
+        if (_allStorages.Remove(storage))
+        {
             _reservedCapacity.Remove(storage);
             OnStorageRemoved?.Invoke(storage);
         }
@@ -287,10 +335,13 @@ public class ResourceDataManager : MonoBehaviour
         IStorage closestStorage = null;
         float minDistance = float.MaxValue;
 
-        foreach (IStorage storage in _allStorages) {
-            if (storage.GetCurrentResourceAmount(type) >= minAmount) {
+        foreach (IStorage storage in _allStorages)
+        {
+            if (storage.GetCurrentResourceAmount(type) >= minAmount)
+            {
                 float dist = Vector3.Distance(position, storage.GetPosition());
-                if (dist < minDistance) {
+                if (dist < minDistance)
+                {
                     minDistance = dist;
                     closestStorage = storage;
                 }
