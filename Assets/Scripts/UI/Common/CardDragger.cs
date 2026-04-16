@@ -133,13 +133,6 @@ public class CardDragger : MonoBehaviour
         _ghostBuildingInstance = Instantiate(_activeBuildingData.buildingPrefab, Vector3.zero, Quaternion.identity);
         SetGhostSortingLayer();
         _ghostBuildingRenderer = _ghostBuildingInstance.GetComponent<SpriteRenderer>();
-
-        if (_ghostBuildingRenderer != null)
-        {
-            Color ghostColor = _ghostBuildingRenderer.color;
-            ghostColor.a = 0.5f;
-            _ghostBuildingRenderer.color = ghostColor;
-        }
         
         Collider2D[] colliders = _ghostBuildingInstance.GetComponentsInChildren<Collider2D>(true);
         foreach (var collider in colliders)
@@ -265,8 +258,9 @@ public class CardDragger : MonoBehaviour
     {
         if (_ghostBuildingRenderer == null) return;
 
-        Color color = canPlace ? Color.green : Color.red;
-        _ghostBuildingRenderer.color = new Color(color.r, color.g, color.b, 0.5f);
+        float a = _ghostBuildingRenderer.color.a;
+        Color tint = canPlace ? Color.green : Color.red;
+        _ghostBuildingRenderer.color = new Color(tint.r, tint.g, tint.b, a);
     }
     
     private void HandleMousePlacement()
