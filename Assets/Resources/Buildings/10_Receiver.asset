@@ -17,7 +17,7 @@ MonoBehaviour:
     \uAC74\uBB3C\uC785\uB2C8\uB2E4."
   icon: {fileID: 7145722935433674015, guid: 359d030a35d62864e86218b0c26fda90, type: 3}
   buildingPrefab: {fileID: 1574451153020646121, guid: d6a7f1f6686a6b6409a192083deeda77, type: 3}
-  buildingTile: {fileID: 11400000, guid: eb52d49e34f0a7349b188d1a0f47dcf8, type: 2}
+  buildingTile: {fileID: 11400000, guid: a9879f8451c56c0429aa389e7db66acc, type: 2}
   buildingType: 12
   recipe:
   - buildingPieceType: 1
