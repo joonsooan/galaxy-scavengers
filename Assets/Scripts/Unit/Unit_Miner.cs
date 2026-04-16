@@ -57,7 +57,6 @@ public class Unit_Miner : UnitBase
     private EventInstance _miningSoundInstance;
     private Tween _miningVibrationTween;
     private bool _noResourceAlertActive;
-    private bool _mineTypeAllOffAlertActive;
     private bool _isFullAlertActive;
     private WaitForSeconds _searchWait;
     private WaitForSeconds _resourceImageSpawnWait;
@@ -376,7 +375,6 @@ public class Unit_Miner : UnitBase
     private void FindAndSetTarget()
     {
         if (_currentCarryAmounts.Values.Sum() > 0) {
-            SetMineTypeAllOffAlert(!HasMineableTypesEnabled());
             SetMinerNoResourceAlert(false);
             GoToStorage();
             return;
@@ -401,7 +399,6 @@ public class Unit_Miner : UnitBase
                 if (unitMovement.SetNewTarget(BuildingManager.Instance.grid.GetCellCenterWorld(_targetMiningCell))) {
                     currentState = UnitState.Moving;
                     ResetIdleRoam();
-                    SetMineTypeAllOffAlert(false);
                     SetMinerNoResourceAlert(false);
                 }
                 else {
@@ -423,11 +420,9 @@ public class Unit_Miner : UnitBase
             _targetResourceNode = null;
             currentState = UnitState.Idle;
             if (!HasMineableTypesEnabled()) {
-                SetMineTypeAllOffAlert(true);
                 SetMinerNoResourceAlert(false);
             }
             else {
-                SetMineTypeAllOffAlert(false);
                 SetMinerNoResourceAlert(true);
             }
         }
@@ -682,7 +677,6 @@ public class Unit_Miner : UnitBase
             ? newTypes
             : Array.Empty<ResourceType>();
         bool hasMineableTypes = HasMineableTypesEnabled();
-        SetMineTypeAllOffAlert(!hasMineableTypes);
         if (!hasMineableTypes)
         {
             SetMinerNoResourceAlert(false);
@@ -778,7 +772,6 @@ public class Unit_Miner : UnitBase
     private void ClearMinerAlerts()
     {
         SetMinerNoResourceAlert(false);
-        SetMineTypeAllOffAlert(false);
         SetMinerIsFullAlert(false);
     }
 
@@ -798,19 +791,6 @@ public class Unit_Miner : UnitBase
             alertManager?.UnregisterAlert(GameAlertType.MinerNoResource, this);
         }
         _noResourceAlertActive = shouldEnable;
-    }
-
-    private void SetMineTypeAllOffAlert(bool shouldEnable)
-    {
-        if (shouldEnable == _mineTypeAllOffAlertActive) return;
-        GameAlertUIManager alertManager = FindFirstObjectByType<GameAlertUIManager>();
-        if (shouldEnable) {
-            alertManager?.RegisterAlert(GameAlertType.MineTypeAllOff, this);
-        }
-        else {
-            alertManager?.UnregisterAlert(GameAlertType.MineTypeAllOff, this);
-        }
-        _mineTypeAllOffAlertActive = shouldEnable;
     }
 
     private void SetMinerIsFullAlert(bool shouldEnable)

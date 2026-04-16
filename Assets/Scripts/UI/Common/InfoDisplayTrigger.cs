@@ -43,7 +43,7 @@ public abstract class InfoDisplayTrigger : MonoBehaviour, IPointerEnterHandler, 
     
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (!GameManager.Instance.IsDragging())
+        if (GameManager.Instance == null || !GameManager.Instance.IsDragging())
         {
             ShowInfo();
         }

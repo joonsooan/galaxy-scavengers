@@ -27,6 +27,7 @@ public class CardDragger : MonoBehaviour
     private List<Vector3Int> _placedCellsInDrag;
     private PointerEventData _pointerEventData;
     private List<ResourceCost> _cachedComboCosts;
+    private ResourceCost[] _cachedComboCostArray;
     
     private void Update()
     {
@@ -52,6 +53,7 @@ public class CardDragger : MonoBehaviour
             _placedCellsInDrag = new List<Vector3Int>();
             
             _cachedComboCosts = CalculateComboCosts(buildingData);
+            _cachedComboCostArray = _cachedComboCosts.Count == 0 ? null : _cachedComboCosts.ToArray();
 
             CreateGhostBuilding();
 
@@ -118,6 +120,7 @@ public class CardDragger : MonoBehaviour
         _isDragging = false;
         _activeBuildingData = null;
         _cachedComboCosts = null;
+        _cachedComboCostArray = null;
         _ghostBuildingRenderer = null;
 
         if (wasDraggingBuildingCard && PowerCoveragePreviewOverlay.Instance != null) {
@@ -250,7 +253,7 @@ public class CardDragger : MonoBehaviour
             return false;
         }
         
-        return ResourceManager.Instance.HasEnoughResources(_cachedComboCosts.ToArray());
+        return ResourceManager.Instance.HasEnoughResources(_cachedComboCostArray);
     }
 
     private void UpdateGhostColor(bool canPlace)

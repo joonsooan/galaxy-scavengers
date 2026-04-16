@@ -26,6 +26,7 @@ public class AreaBuildingDestroyer : MonoBehaviour
     private Vector3 _startWorldPos;
     private readonly HashSet<Vector3Int> _selectedCells = new ();
     private readonly HashSet<Vector3Int> _previouslySelectedCells = new ();
+    private static Dictionary<BuildingPieceType, BuildingPieceData> _buildingPieceDataByType;
 
     public bool HasMoved => _hasMoved;
     public bool JustFinishedAreaDrag => _justFinishedAreaDrag;
@@ -567,13 +568,23 @@ public class AreaBuildingDestroyer : MonoBehaviour
     private static BuildingPieceData GetBuildingPieceData(BuildingPieceType type)
     {
         if (type == BuildingPieceType.None) return null;
-        BuildingPieceData[] all = Resources.LoadAll<BuildingPieceData>("Building Pieces");
-        foreach (var data in all)
+
+        if (_buildingPieceDataByType == null)
         {
-            if (data.buildingPieceType == type)
-                return data;
+            _buildingPieceDataByType = new Dictionary<BuildingPieceType, BuildingPieceData>();
+            BuildingPieceData[] all = Resources.LoadAll<BuildingPieceData>("Building Pieces");
+            foreach (var data in all)
+            {
+                if (data != null && data.buildingPieceType != BuildingPieceType.None &&
+                    !_buildingPieceDataByType.ContainsKey(data.buildingPieceType))
+                {
+                    _buildingPieceDataByType[data.buildingPieceType] = data;
+                }
+            }
         }
-        return null;
+
+        _buildingPieceDataByType.TryGetValue(type, out BuildingPieceData pieceData);
+        return pieceData;
     }
     
     private void DestroyBuildingsInArea(HashSet<Vector3Int> selectedCells)
@@ -602,14 +613,7 @@ public class AreaBuildingDestroyer : MonoBehaviour
                     }
                 }
                 
-                if (_buildingManager.GetBuildingAt(cell, out _))
-                {
-                    buildingsToDestroy.Add(cell);
-                }
-                else
-                {
-                    buildingsToDestroy.Add(cell);
-                }
+                buildingsToDestroy.Add(cell);
             }
         }
         

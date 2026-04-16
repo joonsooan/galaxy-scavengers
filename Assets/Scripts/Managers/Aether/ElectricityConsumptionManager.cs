@@ -11,6 +11,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
     public static ElectricityConsumptionManager Instance { get; private set; }
 
     public bool IsElectricityDemandUnmet { get; private set; }
+    public bool HasActiveElectricityDemand { get; private set; }
 
     public event Action OnAfterElectricityConsumersResolved;
 
@@ -186,6 +187,34 @@ public class ElectricityConsumptionManager : MonoBehaviour
     }
 
     public float NetElectricityPerSecond => GetEffectiveElectricityProductionPerSecond() - GetTotalElectricityConsumptionPerSecond();
+
+    public bool HasAnyActiveElectricityDemandingBuilding()
+    {
+        for (int i = 0; i < _electricityConsumers.Count; i++)
+        {
+            IElectricityConsumer consumer = _electricityConsumers[i];
+            if (consumer == null || consumer.ElectricityConsumptionPerSecond <= 0)
+            {
+                continue;
+            }
+
+            Component component = consumer as Component;
+            if (component == null || !component.gameObject.activeInHierarchy)
+            {
+                continue;
+            }
+
+            Behaviour behaviour = component as Behaviour;
+            if (behaviour != null && !behaviour.isActiveAndEnabled)
+            {
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
 
     public PowerFeedVisualState GetConsumerVisualState(IElectricityConsumer consumer)
     {
@@ -624,6 +653,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
             }
         }
 
+        HasActiveElectricityDemand = HasAnyActiveElectricityDemandingBuilding();
         IsElectricityDemandUnmet = unmet;
         OnAfterElectricityConsumersResolved?.Invoke();
     }
