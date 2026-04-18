@@ -18,8 +18,6 @@ public class UnitUpgradeProgress : MonoBehaviour
     private UnitUpgradeStatType? _pendingType;
     private float _pendingCompleteUnscaledTime;
 
-    private const string PrefsPrefix = "UnitUpgrade_Level_";
-
     private void Awake()
     {
         if (Instance != null && Instance != this) {
@@ -28,7 +26,7 @@ public class UnitUpgradeProgress : MonoBehaviour
         }
 
         Instance = this;
-        LoadLevels();
+        ResetProgress();
     }
 
     private void OnDestroy()
@@ -51,7 +49,6 @@ public class UnitUpgradeProgress : MonoBehaviour
         UnitUpgradeStatType done = _pendingType.Value;
         _pendingType = null;
         IncrementLevel(done);
-        SaveLevel(done);
         OnUpgradeStateChanged?.Invoke();
         if (done == UnitUpgradeStatType.MoveSpeed || done == UnitUpgradeStatType.WorkSpeed ||
             done == UnitUpgradeStatType.Storage) {
@@ -232,22 +229,13 @@ public class UnitUpgradeProgress : MonoBehaviour
         return sum;
     }
 
-    private void LoadLevels()
+    private void ResetProgress()
     {
-        _levelMove = PlayerPrefs.GetInt(PrefsKey(UnitUpgradeStatType.MoveSpeed), 0);
-        _levelWork = PlayerPrefs.GetInt(PrefsKey(UnitUpgradeStatType.WorkSpeed), 0);
-        _levelStorage = PlayerPrefs.GetInt(PrefsKey(UnitUpgradeStatType.Storage), 0);
-        _levelMaxPopulation = PlayerPrefs.GetInt(PrefsKey(UnitUpgradeStatType.MaxPopulation), 0);
-    }
-
-    private void SaveLevel(UnitUpgradeStatType type)
-    {
-        PlayerPrefs.SetInt(PrefsKey(type), GetLevel(type));
-        PlayerPrefs.Save();
-    }
-
-    private static string PrefsKey(UnitUpgradeStatType type)
-    {
-        return PrefsPrefix + type;
+        _levelMove = 0;
+        _levelWork = 0;
+        _levelStorage = 0;
+        _levelMaxPopulation = 0;
+        _pendingType = null;
+        _pendingCompleteUnscaledTime = 0f;
     }
 }

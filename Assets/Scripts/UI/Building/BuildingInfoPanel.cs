@@ -193,6 +193,13 @@ public class BuildingInfoPanel : MonoBehaviour
             Destroy(child.gameObject);
         }
 
+        if (resourceInfoCellPrefab == null)
+        {
+            Debug.LogError(
+                "BuildingInfoPanel: resourceInfoCellPrefab is missing. Assign Assets/Prefabs/UI/Panels/Resource Info Cell.prefab on this component.");
+            return;
+        }
+
         if (data.recipe == null || data.recipe.Count == 0)
         {
             if (data.buildingType != BuildingType.MainStructure)

@@ -10,10 +10,7 @@ public class ResourceCircleGenerator
     private readonly float _maxCircleRadius;
     private readonly float _circleSpawnPercentage;
     private readonly int _maxCircles;
-    private readonly int _minSpawnRadius;
-    private readonly int _startingAreaRadius;
-    private readonly int _startingAreaCircleCount;
-    private readonly float _startingAreaMinDistance;
+    private readonly int _starterRingOuterRadius;
     private readonly List<ResourceSpawnSettings> _resourceSettings;
     
     private Vector2Int _mapCenter;
@@ -31,10 +28,7 @@ public class ResourceCircleGenerator
         float maxCircleRadius,
         float circleSpawnPercentage,
         int maxCircles,
-        int minSpawnRadius,
-        int startingAreaRadius,
-        int startingAreaCircleCount,
-        float startingAreaMinDistance,
+        int starterRingOuterRadius,
         List<ResourceSpawnSettings> resourceSettings)
     {
         _numberOfCircles = numberOfCircles;
@@ -43,10 +37,7 @@ public class ResourceCircleGenerator
         _maxCircleRadius = maxCircleRadius;
         _circleSpawnPercentage = circleSpawnPercentage;
         _maxCircles = maxCircles;
-        _minSpawnRadius = minSpawnRadius;
-        _startingAreaRadius = startingAreaRadius;
-        _startingAreaCircleCount = startingAreaCircleCount;
-        _startingAreaMinDistance = startingAreaMinDistance;
+        _starterRingOuterRadius = starterRingOuterRadius;
         _resourceSettings = resourceSettings;
         
         _divisionRadii = new List<float>();
@@ -124,69 +115,6 @@ public class ResourceCircleGenerator
         return circles;
     }
     
-    public List<ResourceCircle> GenerateStartingAreaCircles()
-    {
-        List<ResourceCircle> circles = new List<ResourceCircle>();
-        
-        if (_startingAreaCircleCount <= 0) return circles;
-        if (_startingAreaRadius <= _minSpawnRadius) return circles;
-        
-        int startingAreaCirclesSpawned = 0;
-        int attempts = 0;
-        int maxAttempts = _startingAreaCircleCount * 50;
-        
-        while (startingAreaCirclesSpawned < _startingAreaCircleCount && attempts < maxAttempts)
-        {
-            attempts++;
-            
-            float angle = Random.Range(0f, Mathf.PI * 2f);
-            float distance = Random.Range(_minSpawnRadius, _startingAreaRadius);
-            
-            int centerX = Mathf.RoundToInt(Mathf.Cos(angle) * distance);
-            int centerY = Mathf.RoundToInt(Mathf.Sin(angle) * distance);
-            Vector2Int center = new Vector2Int(centerX, centerY);
-            
-            float distanceFromCenter = Vector2.Distance(center, _mapCenter);
-            if (distanceFromCenter < _minSpawnRadius)
-            {
-                if (distanceFromCenter > 0)
-                {
-                    float scale = _minSpawnRadius / distanceFromCenter;
-                    center = new Vector2Int(
-                        Mathf.RoundToInt(center.x * scale),
-                        Mathf.RoundToInt(center.y * scale)
-                    );
-                }
-                else
-                {
-                    center = new Vector2Int(_minSpawnRadius, 0);
-                }
-            }
-            
-            float maxAllowedRadius = _startingAreaRadius - Vector2.Distance(center, _mapCenter);
-            if (maxAllowedRadius < _minCircleRadius) continue;
-            
-            float radius = Random.Range(_minCircleRadius, Mathf.Min(_maxCircleRadius, maxAllowedRadius));
-            
-            if (ValidateCirclePosition(center, radius, circles, _startingAreaMinDistance))
-            {
-                ResourceType? selectedType = SelectResourceTypeForCircle(center);
-                if (selectedType.HasValue)
-                {
-                    circles.Add(new ResourceCircle
-                    {
-                        center = center,
-                        radius = radius,
-                        resourceType = selectedType.Value
-                    });
-                    startingAreaCirclesSpawned++;
-                }
-            }
-        }
-        
-        return circles;
-    }
-    
     public List<float> GetDivisionRadii() => _divisionRadii;
     public List<float> GetSectorPowerValues() => _sectorPowerValues;
     
@@ -197,7 +125,7 @@ public class ResourceCircleGenerator
         Vector2Int center = new Vector2Int(centerX, centerY);
         
         float distanceFromCenter = Vector2.Distance(center, _mapCenter);
-        float minRequiredDistance = _startingAreaRadius + _maxCircleRadius;
+        float minRequiredDistance = _starterRingOuterRadius + _maxCircleRadius;
         if (distanceFromCenter < minRequiredDistance)
         {
             if (distanceFromCenter > 0)
@@ -316,4 +244,3 @@ public class ResourceCircleGenerator
         return selected.resourceType;
     }
 }
-

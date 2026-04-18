@@ -8106,26 +8106,30 @@ MonoBehaviour:
   numberOfCircles: 4
   borderPadding: 5
   minCircleRadius: 1
-  maxCircleRadius: 3
+  maxCircleRadius: 2.5
   circleSpawnPercentage: 70
-  maxCircles: 30
+  maxCircles: 25
   maxResourcesPerCircle: 25
   edgeBandRatio: 0.4
   edgeRemovalChance: 0.3
-  minSpawnRadius: 6
-  startingAreaRadius: 6
-  startingAreaCircleCount: 3
-  startingAreaMinDistance: 1
-  centerResourceCircleRadius: 1
-  centerResourceCircleDistanceFromCenter: 4
-  centerResourceCircleMaxDistanceFromCenter: 6
-  centerResourceCircleMinSpacing: 3
-  centerResourceCirclePlacementAttempts: 50
+  starterRingInnerRadius: 7
+  starterRingOuterRadius: 11
+  starterResourceTypes: 00000000010000000200000003000000
+  starterClusterRadiusByTypeIndex:
+  - 2
+  - 2
+  - 1.5
+  - 1.5
+  starterClusterDefaultRadius: 1
+  starterClusterPlacementMinDistance: 5
+  starterClusterPlacementMaxDistance: 8
+  starterClusterMinGap: 2.5
+  starterClusterPlacementAttempts: 500
   showGizmos: 1
   divisionCircleColor: {r: 1, g: 1, b: 0, a: 0.3}
   resourceCircleColor: {r: 0, g: 1, b: 0, a: 0.5}
-  startingAreaMinRadiusColor: {r: 1, g: 0, b: 0, a: 0.5}
-  startingAreaMaxRadiusColor: {r: 0, g: 0, b: 1, a: 0.5}
+  starterRingInnerGizmoColor: {r: 1, g: 0, b: 0, a: 0.5}
+  starterRingOuterGizmoColor: {r: 0, g: 0, b: 1, a: 0.5}
 --- !u!114 &313771331
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25576,7 +25580,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 11.25
+  orthographic size: 662.501
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -44697,7 +44701,7 @@ MonoBehaviour:
   resourcePanel: {fileID: 1171605817}
   buildingDesc: {fileID: 2056899316}
   healthText: {fileID: 857343298}
-  resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: e7df702f8dd92fa41af20175b6de5baf, type: 3}
+  resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: 87d776b852749c2428050baaea9b40b1, type: 3}
   aetherSpendPanel: {fileID: 908924617}
   electricityConsumptionText: {fileID: 644993482}
   noisePanel: {fileID: 600780666}

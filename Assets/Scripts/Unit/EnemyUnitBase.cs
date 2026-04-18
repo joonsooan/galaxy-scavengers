@@ -151,10 +151,11 @@ public abstract class EnemyUnitBase : UnitBase
         }
     }
 
-    public override void TakeDamage(int damage)
+    public override void TakeDamage(int damage, DamageContext context)
     {
-        base.TakeDamage(damage);
-        if (!_isInInfiniteAttackState) {
+        base.TakeDamage(damage, context);
+        if (!_isInInfiniteAttackState)
+        {
             _isInInfiniteAttackState = true;
             EnterAttackState();
         }
@@ -248,12 +249,9 @@ public abstract class EnemyUnitBase : UnitBase
 
         Vector3Int currentCell = BuildingManager.Instance.grid.WorldToCell(transform.position);
         bool isVisible = FogOfWarManager.Instance.CanSeeEnemies(currentCell);
-        if (!_hasFogVisibilityState || _lastFogVisibleState != isVisible)
-        {
-            _lastFogVisibleState = isVisible;
-            _hasFogVisibilityState = true;
-            SetFogBehaviorPaused(!isVisible);
-        }
+        _lastFogVisibleState = isVisible;
+        _hasFogVisibilityState = true;
+        SetFogBehaviorPaused(!isVisible && aiState == AIState.Idle);
     }
 
     public void ForceResetStateForSinking()

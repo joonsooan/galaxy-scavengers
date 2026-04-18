@@ -16,6 +16,9 @@ public class UnitUpgradeCell : MonoBehaviour
     private UnitUpgradeLineData _line;
     private UnitUpgradeProgress _progress;
     private Button _resolvedUpgradeButton;
+    private bool _hasCachedUpgradeButtonLabel;
+    private string _cachedUpgradeButtonLabel;
+    private const string UpgradeInProgressLabel = "업그레이드 중…";
 
     private void OnDestroy()
     {
@@ -167,6 +170,33 @@ public class UnitUpgradeCell : MonoBehaviour
                 bool canAffordResources = !maxed && TierResourceCostsSatisfied(nextTier);
                 btn.interactable = !maxed && !blockedByOtherLine && canAffordResources;
             }
+
+            ApplyUpgradeButtonLabel(btn, progress);
+        }
+    }
+
+    private void ApplyUpgradeButtonLabel(Button btn, UnitUpgradeProgress progress)
+    {
+        TMP_Text label = btn != null ? btn.GetComponentInChildren<TMP_Text>(true) : null;
+        if (label == null)
+        {
+            return;
+        }
+
+        bool upgrading = progress != null && progress.IsUpgradeInProgress(_line.statType);
+        if (upgrading)
+        {
+            if (!_hasCachedUpgradeButtonLabel)
+            {
+                _cachedUpgradeButtonLabel = label.text;
+                _hasCachedUpgradeButtonLabel = true;
+            }
+
+            label.text = UpgradeInProgressLabel;
+        }
+        else if (_hasCachedUpgradeButtonLabel)
+        {
+            label.text = _cachedUpgradeButtonLabel;
         }
     }
 
