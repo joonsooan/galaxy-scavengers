@@ -13,28 +13,20 @@ MonoBehaviour:
   m_Name: tutorial_step_12
   m_EditorClassIdentifier: 
   stepIndex: 12
-  text: "\uAC74\uBB3C\uC744 \uC124\uCE58\uD558\uBA74 <color=#FFC107>\uAC74\uC124
-    \uC720\uB2DB</color>\uC774 \uC790\uB3D9\uC73C\uB85C \uC790\uC6D0\uC744 \uC6B4\uBC18\uD558\uC5EC
-    \uAC74\uC124 \uC791\uC5C5\uC744 \uC9C4\uD589\uD569\uB2C8\uB2E4.\n\uD654\uBA74\uC744
-    <color=#FFC107>\uC6B0\uD074\uB9AD</color>\uD558\uBA74 \uD604\uC7AC \uC120\uD0DD\uD55C
-    \uAC74\uBB3C\uC774\uB098 UI\uB97C \uBE44\uD65C\uC131\uD654\uD560 \uC218 \uC788\uACE0,
-    <color=#FF7043>\uC6B0\uD074\uB9AD\uD55C \uC0C1\uD0DC\uB85C \uB4DC\uB798\uADF8</color>\uB97C
-    \uD558\uBA74 \uBC94\uC704 \uB0B4\uC758 \uAC74\uBB3C\uC774\uB098 \uC720\uB2DB\uC744
-    \uC81C\uAC70\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.\n\uAC74\uC124 \uC791\uC5C5\uC774
-    \uC9C4\uD589\uB418\uB294 \uB3D9\uC548 <color=#FFC107>\uC6B0\uD074\uB9AD</color>
-    \uAE30\uB2A5\uC744 \uBA87 \uBC88 \uC0AC\uC6A9\uD574\uBD05\uC2DC\uB2E4!"
-  stepType: 1
+  text: "\uC911\uC559\uC5D0 \uC788\uB294 \uAC74\uBB3C\uC5D0\uC11C \uC720\uB2DB\uC744
+    \uC0DD\uC0B0\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.\n\uAC74\uBB3C\uC744 \uD074\uB9AD\uD55C
+    \uB2E4\uC74C <color=#FFC107>\uAC74\uC124 \uC720\uB2DB</color> 1\uAC1C\uB97C \uC0DD\uC0B0\uD574\uBCF4\uC138\uC694."
+  stepType: 11
   duration: 0
-  count: 3
+  count: 1
   resourceType: 0
   buildingType: 
-  unitType: 
+  unitType: Construct
   itemType: 
   showProgressBar: 1
-  enableUIPanels: 07000000
+  enableUIPanels: 
   tutorialPanelMoveDownOffset: 0
-  spawnUnits:
-  - {fileID: 11400000, guid: 543df46f7aaa53f46be1a1b5736522f1, type: 2}
+  spawnUnits: []
   grantResources: []
   completionSound:
     Guid:
@@ -44,9 +36,10 @@ MonoBehaviour:
       Data4: 1624008095
     Path: event:/SFX_UI/SFX_UIClick
   enableMaterialHighlight: 0
-  highlightTargetIDs: []
+  highlightTargetIDs:
+  - 
   showArrowUI: 0
   arrowID: 
-  showTargetBracket: 0
-  targetBracketBuildingType: 
+  showTargetBracket: 1
+  targetBracketBuildingType: MainStructure
   includeConstructionSiteForTargetBracket: 1

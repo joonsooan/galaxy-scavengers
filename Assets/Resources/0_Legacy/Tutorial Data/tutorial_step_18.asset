@@ -13,25 +13,24 @@ MonoBehaviour:
   m_Name: tutorial_step_18
   m_EditorClassIdentifier: 
   stepIndex: 18
-  text: "<color=#FFC107>\uCC44\uAD74 \uC720\uB2DB</color>\uC740 \uD65C\uC131\uD654\uB41C
-    \uC885\uB958\uC758 \uC790\uC6D0\uB9CC \uD0D0\uC0C9\uD574\uC11C \uCC44\uAD74\uD569\uB2C8\uB2E4.\n\uD65C\uC131\uD654\uB41C
-    \uC790\uC6D0\uC774 \uD558\uB098\uB3C4 \uC5C6\uAC70\uB098 \uC790\uC6D0\uC774 \uB9F5\uC5D0\uC11C
-    \uBCF4\uC774\uC9C0 \uC54A\uC73C\uBA74 \uC791\uC5C5\uC744 \uC911\uB2E8\uD569\uB2C8\uB2E4.\n\uD654\uBA74
-    \uC67C\uCABD \uD558\uB2E8\uC758 <color=#FFC107>\uC790\uC6D0 \uC544\uC774\uCF58\uC744
-    \uD074\uB9AD</color>\uD574 \uCC44\uAD74\uD560 \uC790\uC6D0 \uC885\uB958\uB97C
-    \uD65C\uC131\uD654/\uBE44\uD65C\uC131\uD654 \uD574\uBCF4\uC138\uC694!"
-  stepType: 13
+  text: "\uC774\uC81C \uCC44\uAD74\uD55C \uC790\uC6D0\uC744 \uC0C1\uC704 \uC790\uC6D0\uC73C\uB85C
+    \uAC00\uACF5\uD574\uBD05\uC2DC\uB2E4.\n<color=#FFC107>\uC0DD\uC0B0 \uAC74\uBB3C
+    \uBC84\uD2BC</color>\uC744 \uD074\uB9AD\uD55C \uB2E4\uC74C, <color=#FFC107>\uC81C\uB828\uC18C</color>\uB97C
+    \uC120\uD0DD\uD574 \uC124\uCE58\uD574\uBCF4\uC138\uC694."
+  stepType: 10
   duration: 0
-  count: 2
+  count: 1
   resourceType: 0
-  buildingType: 
+  buildingType: Smelter
   unitType: 
   itemType: 
-  showProgressBar: 1
+  showProgressBar: 0
   enableUIPanels: 
   tutorialPanelMoveDownOffset: 0
   spawnUnits: []
-  grantResources: []
+  grantResources:
+  - resourceType: 2
+    amount: 100
   completionSound:
     Guid:
       Data1: -345895807
@@ -41,7 +40,8 @@ MonoBehaviour:
     Path: event:/SFX_UI/SFX_UIClick
   enableMaterialHighlight: 1
   highlightTargetIDs:
-  - mainControl_mineType
+  - mainControl_processor
+  - processor_smelter
   showArrowUI: 0
   arrowID: 
   showTargetBracket: 0
