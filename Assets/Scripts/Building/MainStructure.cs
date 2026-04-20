@@ -96,6 +96,8 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
         }
 
         ResourceManager.OnResourceAmountChanged += OnResourceAmountChanged;
+        UnitUpgradeProgress.OnUpgradeStateChanged += OnUnitUpgradeOrPopulationRelevantChange;
+        UnitManager.OnUnitCountChanged += OnUnitManagerUnitCountChanged;
 
         if (productionSlider != null) {
             productionSlider.Initialize(transform);
@@ -105,6 +107,8 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
     protected override void OnDisable()
     {
         ResourceManager.OnResourceAmountChanged -= OnResourceAmountChanged;
+        UnitUpgradeProgress.OnUpgradeStateChanged -= OnUnitUpgradeOrPopulationRelevantChange;
+        UnitManager.OnUnitCountChanged -= OnUnitManagerUnitCountChanged;
 
         if (_electricityConsumptionManager != null) {
             if (_consumerRegistered) {
@@ -203,6 +207,35 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
             if (_productionQueue.Count > 0) {
                 _productionCoroutine = StartCoroutine(ProcessProductionQueue());
             }
+        }
+    }
+
+    private void OnUnitUpgradeOrPopulationRelevantChange()
+    {
+        TryResumeProductionIfPopulationAllows();
+    }
+
+    private void OnUnitManagerUnitCountChanged(UnitBase _)
+    {
+        TryResumeProductionIfPopulationAllows();
+    }
+
+    private void TryResumeProductionIfPopulationAllows()
+    {
+        if (_isManualQueueProcessing) {
+            return;
+        }
+        if (_isProducing || !IsOperational) {
+            return;
+        }
+        if (UnitManager.Instance == null || !UnitManager.Instance.CanSpawnUnit()) {
+            return;
+        }
+        if (_productionQueue.Count == 0 && HasPendingTargets()) {
+            UpdateQueueFromTargets();
+        }
+        if (_productionQueue.Count > 0) {
+            _productionCoroutine = StartCoroutine(ProcessProductionQueue());
         }
     }
 

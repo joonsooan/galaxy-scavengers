@@ -19,7 +19,6 @@ public class ResourceCircleGenerator
     private float _maxMapRadius;
     private float _radiusStep;
     private readonly List<float> _divisionRadii;
-    private readonly List<float> _sectorPowerValues;
     
     public ResourceCircleGenerator(
         int numberOfCircles,
@@ -41,7 +40,6 @@ public class ResourceCircleGenerator
         _resourceSettings = resourceSettings;
         
         _divisionRadii = new List<float>();
-        _sectorPowerValues = new List<float>();
     }
     
     public void Initialize(int mapWidth, int mapHeight, Vector2Int mapCenter)
@@ -60,7 +58,6 @@ public class ResourceCircleGenerator
     public void DivideMapIntoConcentricCircles()
     {
         _divisionRadii.Clear();
-        _sectorPowerValues.Clear();
         
         _radiusStep = _maxMapRadius / _numberOfCircles;
         
@@ -68,10 +65,6 @@ public class ResourceCircleGenerator
         {
             float radius = i * _radiusStep;
             _divisionRadii.Add(radius);
-            
-            float normalizedDistance = radius / _maxMapRadius;
-            float powerValue = 1f + normalizedDistance;
-            _sectorPowerValues.Add(powerValue);
         }
     }
     
@@ -116,7 +109,6 @@ public class ResourceCircleGenerator
     }
     
     public List<float> GetDivisionRadii() => _divisionRadii;
-    public List<float> GetSectorPowerValues() => _sectorPowerValues;
     
     private Vector2Int GenerateCircleCenter()
     {

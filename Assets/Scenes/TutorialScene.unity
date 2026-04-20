@@ -8055,22 +8055,18 @@ MonoBehaviour:
     resourceRuleTile: {fileID: 11400000, guid: b854d79d0a9c6d84183a03c6ed842df9, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: 9e542c61b3b4f0745ab05a9dadeccb8f, type: 3}
     spawnFrequencyPercent: 40
-    baseRichness: 10
   - resourceType: 1
     resourceRuleTile: {fileID: 11400000, guid: 4ed74ad6401fc0c4bb693008c2603951, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: a3a2b3c4676bb844e898ce2cf3dd397b, type: 3}
     spawnFrequencyPercent: 25
-    baseRichness: 10
   - resourceType: 2
     resourceRuleTile: {fileID: 11400000, guid: 2490f43d9d7673e46af95351b327add5, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: 1a1e81616dceb074597d502c9527fe82, type: 3}
     spawnFrequencyPercent: 20
-    baseRichness: 10
   - resourceType: 3
     resourceRuleTile: {fileID: 11400000, guid: 6437740d5263b074da697b7e9e614fa5, type: 2}
     resourcePrefab: {fileID: 5453999205571622832, guid: 787e38d9be4ec414aad7efd4b33c7a60, type: 3}
     spawnFrequencyPercent: 15
-    baseRichness: 10
   numberOfCircles: 4
   borderPadding: 5
   minCircleRadius: 1

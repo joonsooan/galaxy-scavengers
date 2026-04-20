@@ -18,11 +18,6 @@ public class ResourceSpawnSettings
     [Tooltip("Percentage chance (0-100) for this resource type to spawn in a spawnable circle.")]
     [Range(0f, 100f)]
     public float spawnFrequencyPercent = 50f;
-    
-    [Header("Richness Settings")]
-    [Tooltip("Base richness (amount per tile) at map center.")]
-    [Range(0, 1000)]
-    public int baseRichness = 100;
 }
 
 [Serializable]
@@ -89,6 +84,12 @@ public class MapObjectSpawner : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] private float edgeRemovalChance = 0.35f;
     
+    [Header("Ring richness (per tile by map-center distance)")]
+    [Tooltip("Per-block amount in the innermost concentric sector (between first two division radii).")]
+    [SerializeField] private int ringRichnessInnermost = 50;
+    [Tooltip("Added per outer sector: ring 0 = innermost, ring 1 = innermost + step (e.g. 50, 100, 150…).")]
+    [SerializeField] private int ringRichnessStep = 50;
+
     [Header("Starter ring (one cluster per listed type)")]
     [Range(0, 50)]
     [SerializeField] private int starterRingInnerRadius = 5;
@@ -229,7 +230,6 @@ public class MapObjectSpawner : MonoBehaviour
     private IEnumerator SpawnResourcesInCirclesAsync(List<ResourceCircle> resourceCircles, IInitializationProgress progress = null)
     {
         List<float> divisionRadii = _circleGenerator.GetDivisionRadii();
-        List<float> sectorPowerValues = _circleGenerator.GetSectorPowerValues();
         Vector2Int mapCenter = Vector2Int.zero;
         
         int totalCircles = resourceCircles.Count;
@@ -244,22 +244,6 @@ public class MapObjectSpawner : MonoBehaviour
                 processedCircles++;
                 continue;
             }
-            
-            float distanceFromCenter = Vector2.Distance(circle.center, mapCenter);
-            int sectorIndex = 0;
-            for (int i = 0; i < divisionRadii.Count - 1; i++)
-            {
-                if (distanceFromCenter >= divisionRadii[i] && distanceFromCenter < divisionRadii[i + 1])
-                {
-                    sectorIndex = i;
-                    break;
-                }
-            }
-            
-            if (sectorIndex >= sectorPowerValues.Count) sectorIndex = sectorPowerValues.Count - 1;
-            float powerValue = sectorPowerValues[sectorIndex];
-            
-            int richness = Mathf.RoundToInt(settings.baseRichness * powerValue);
             
             int radiusInt = Mathf.CeilToInt(circle.radius);
             int minX = circle.center.x - radiusInt;
@@ -293,6 +277,9 @@ public class MapObjectSpawner : MonoBehaviour
             
             foreach (var cellPos in validPositions)
             {
+                float cellDistFromMapCenter = Vector2.Distance(new Vector2(cellPos.x, cellPos.y), mapCenter);
+                int sectorIndex = GetSectorIndexFromMapCenterDistance(cellDistFromMapCenter, divisionRadii);
+                int richness = GetRichnessForSectorIndex(sectorIndex);
                 SpawnResourceAtPosition(cellPos, settings, richness);
             }
             
@@ -314,33 +301,12 @@ public class MapObjectSpawner : MonoBehaviour
         }
         
         List<float> divisionRadii = _circleGenerator != null ? _circleGenerator.GetDivisionRadii() : new List<float>();
-        List<float> sectorPowerValues = _circleGenerator != null ? _circleGenerator.GetSectorPowerValues() : new List<float>();
         Vector2Int mapCenter = Vector2Int.zero;
         
         foreach (var circle in resourceCircles)
         {
             ResourceSpawnSettings settings = resourceSettings.Find(s => s.resourceType == circle.resourceType);
             if (settings == null || settings.resourcePrefab == null || settings.resourceRuleTile == null) continue;
-            
-            float distanceFromCenter = Vector2.Distance(circle.center, mapCenter);
-            int sectorIndex = 0;
-            for (int i = 0; i < divisionRadii.Count - 1; i++)
-            {
-                if (distanceFromCenter >= divisionRadii[i] && distanceFromCenter < divisionRadii[i + 1])
-                {
-                    sectorIndex = i;
-                    break;
-                }
-            }
-            
-            float powerValue = 1f;
-            if (sectorPowerValues.Count > 0)
-            {
-                if (sectorIndex >= sectorPowerValues.Count) sectorIndex = sectorPowerValues.Count - 1;
-                powerValue = sectorPowerValues[sectorIndex];
-            }
-            
-            int richness = Mathf.RoundToInt(settings.baseRichness * powerValue);
             
             int radiusInt = Mathf.CeilToInt(circle.radius);
             int minX = circle.center.x - radiusInt;
@@ -374,6 +340,9 @@ public class MapObjectSpawner : MonoBehaviour
             
             foreach (var cellPos in validPositions)
             {
+                float cellDistFromMapCenter = Vector2.Distance(new Vector2(cellPos.x, cellPos.y), mapCenter);
+                int sectorIndex = GetSectorIndexFromMapCenterDistance(cellDistFromMapCenter, divisionRadii);
+                int richness = GetRichnessForSectorIndex(sectorIndex);
                 SpawnResourceAtPosition(cellPos, settings, richness);
             }
         }
@@ -400,6 +369,35 @@ public class MapObjectSpawner : MonoBehaviour
         _pendingResourceNodes.Clear(); 
     }
     
+    private static int GetSectorIndexFromMapCenterDistance(float distanceFromMapCenter, List<float> divisionRadii)
+    {
+        if (divisionRadii == null || divisionRadii.Count < 2)
+        {
+            return 0;
+        }
+
+        for (int i = 0; i < divisionRadii.Count - 1; i++)
+        {
+            if (distanceFromMapCenter >= divisionRadii[i] && distanceFromMapCenter < divisionRadii[i + 1])
+            {
+                return i;
+            }
+        }
+
+        if (distanceFromMapCenter >= divisionRadii[divisionRadii.Count - 1])
+        {
+            return divisionRadii.Count - 2;
+        }
+
+        return 0;
+    }
+
+    private int GetRichnessForSectorIndex(int sectorIndex)
+    {
+        int step = Mathf.Max(0, ringRichnessStep);
+        return Mathf.Max(1, ringRichnessInnermost + sectorIndex * step);
+    }
+
     private bool IsValidSpawnPosition(Vector3Int cellPos)
     {
         Vector2Int mapSize = mapGenerator.MapSize;
@@ -446,7 +444,7 @@ public class MapObjectSpawner : MonoBehaviour
             if (resourceNodeObj == null) return;
             
             ResourceNode resourceNode = resourceNodeObj.GetComponent<ResourceNode>();
-            resourceNode.amountToMine = richness;
+            resourceNode.ApplyProceduralRichness(richness);
             resourceNode.cellPosition = cellPos;
             _pendingResourceNodes.Add(resourceNode);
             
