@@ -115,7 +115,7 @@ public class BtnManager_Base : MonoBehaviour
             }
         }
 
-        SceneLoader.Instance.LoadGameScene();
+        SceneLoader.Instance.LoadGameScene(PlanetSelectionState.GetSelectedSceneName());
     }
 
     private void OnTutorialLaunchClicked()

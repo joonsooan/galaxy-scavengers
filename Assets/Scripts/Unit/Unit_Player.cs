@@ -51,6 +51,7 @@ public class Unit_Player : UnitBase
     private Coroutine _mineCoroutine;
     private WaitForSeconds _miningDelay;
     private UnitSpriteController _spriteController;
+    private Vector2 _lockedMiningDirection;
 
     private ResourceNode _targetResourceNode;
 
@@ -173,11 +174,15 @@ public class Unit_Player : UnitBase
     {
         if (currentState == UnitState.Mining && _targetResourceNode != null) {
             if (_spriteController != null) {
-                Vector2 direction = (_targetResourceNode.transform.position - transform.position).normalized;
-                _spriteController.SetTargetTransform(_targetResourceNode.transform);
-
-                if (direction.sqrMagnitude > 0.01f) {
-                    _spriteController.UpdateSpriteDirection(direction);
+                if (IsMovingWhileMining()) {
+                    Vector2 liveDirection = (_targetResourceNode.transform.position - transform.position).normalized;
+                    if (liveDirection.sqrMagnitude > 0.01f) {
+                        _lockedMiningDirection = liveDirection;
+                        _spriteController.UpdateSpriteDirection(liveDirection);
+                    }
+                }
+                else if (_lockedMiningDirection.sqrMagnitude > 0.01f) {
+                    _spriteController.UpdateSpriteDirection(_lockedMiningDirection);
                 }
             }
         }
@@ -203,6 +208,12 @@ public class Unit_Player : UnitBase
                 }
             }
         }
+    }
+
+    private bool IsMovingWhileMining()
+    {
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
+        return rb != null && rb.linearVelocity.sqrMagnitude > 0.01f;
     }
 
     private void HandleInput()
@@ -352,6 +363,19 @@ public class Unit_Player : UnitBase
         return mouseWorldPos;
     }
 
+    private void UpdateLockedMiningDirection()
+    {
+        if (_targetResourceNode == null) {
+            _lockedMiningDirection = Vector2.zero;
+            return;
+        }
+
+        Vector2 direction = (_targetResourceNode.transform.position - transform.position).normalized;
+        if (direction.sqrMagnitude > 0.01f) {
+            _lockedMiningDirection = direction;
+        }
+    }
+
     private void TryMineResource(Vector3 clickPosition)
     {
         ResourceNode clickedResource = GetResourceAtPosition(clickPosition);
@@ -376,6 +400,10 @@ public class Unit_Player : UnitBase
             return;
         }
         _targetResourceNode.BeginMining(this);
+        UpdateLockedMiningDirection();
+        if (_spriteController != null) {
+            _spriteController.ClearTarget();
+        }
 
         if (_mineCoroutine == null) {
             _miningDelay = CoroutineCache.GetWaitForSeconds(_targetResourceNode.timeToMinePerUnit);
@@ -397,6 +425,7 @@ public class Unit_Player : UnitBase
             _mineCoroutine = null;
         }
         currentState = UnitState.Idle;
+        _lockedMiningDirection = Vector2.zero;
         StopMiningParticles();
         StopMiningSound();
 

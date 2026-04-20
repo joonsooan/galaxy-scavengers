@@ -90,6 +90,19 @@ public class SceneLoader : MonoBehaviour
         StartCoroutine(LoadGameplaySceneAsync(gameSceneName));
     }
 
+    public void LoadGameScene(string sceneName)
+    {
+        if (_isLoading) return;
+
+        if (string.IsNullOrWhiteSpace(sceneName))
+        {
+            StartCoroutine(LoadGameplaySceneAsync(gameSceneName));
+            return;
+        }
+
+        StartCoroutine(LoadGameplaySceneAsync(sceneName));
+    }
+
     public void LoadTutorialScene()
     {
         if (_isLoading) return;

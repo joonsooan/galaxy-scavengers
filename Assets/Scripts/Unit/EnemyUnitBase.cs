@@ -57,7 +57,6 @@ public abstract class EnemyUnitBase : UnitBase
     private bool _isBehaviorPaused;
     private bool _manualBehaviorPaused;
     private bool _fogBehaviorPaused;
-    private bool _hasFogVisibilityState;
     private bool _lastFogVisibleState;
     private Coroutine _fogVisibilityCoroutine;
     private WaitForSeconds _fogVisibilityCheckWait;
@@ -127,7 +126,6 @@ public abstract class EnemyUnitBase : UnitBase
             StopCoroutine(_fogVisibilityCoroutine);
             _fogVisibilityCoroutine = null;
         }
-        _hasFogVisibilityState = false;
         _lastFogVisibleState = false;
         _fogBehaviorPaused = false;
         ApplyBehaviorPauseState(_manualBehaviorPaused);
@@ -242,7 +240,6 @@ public abstract class EnemyUnitBase : UnitBase
     {
         if (FogOfWarManager.Instance == null || BuildingManager.Instance == null || BuildingManager.Instance.grid == null)
         {
-            _hasFogVisibilityState = false;
             SetFogBehaviorPaused(false);
             return;
         }
@@ -250,7 +247,6 @@ public abstract class EnemyUnitBase : UnitBase
         Vector3Int currentCell = BuildingManager.Instance.grid.WorldToCell(transform.position);
         bool isVisible = FogOfWarManager.Instance.CanSeeEnemies(currentCell);
         _lastFogVisibleState = isVisible;
-        _hasFogVisibilityState = true;
         SetFogBehaviorPaused(!isVisible && aiState == AIState.Idle);
     }
 
