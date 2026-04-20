@@ -11,9 +11,14 @@ public class CardDragger : MonoBehaviour
 
     public bool IsDraggingPowerGridPreviewBuilding =>
         IsDraggingBuildingCard &&
-        (_activeBuildingData.buildingType == BuildingType.Generator ||
-         _activeBuildingData.buildingType == BuildingType.Battery ||
-         _activeBuildingData.buildingType == BuildingType.PowerReceiver);
+        IsPowerGridPreviewBuildingType(_activeBuildingData.buildingType);
+
+    public static bool IsPowerGridPreviewBuildingType(BuildingType buildingType)
+    {
+        return buildingType == BuildingType.Generator ||
+               buildingType == BuildingType.Battery ||
+               buildingType == BuildingType.PowerReceiver;
+    }
 
     [Header("References")]
     [SerializeField] private Grid grid;

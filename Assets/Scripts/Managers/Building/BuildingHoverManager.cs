@@ -75,7 +75,7 @@ public class BuildingHoverManager : MonoBehaviour
         if (GameManager.Instance != null && GameManager.Instance.IsDragging())
         {
             CardDragger dragger = GameManager.Instance.cardDragger;
-            bool keepPowerPreview = dragger != null && dragger.IsDraggingBuildingCard;
+            bool keepPowerPreview = dragger != null && dragger.IsDraggingPowerGridPreviewBuilding;
             ClearHoverStateOnly(keepPowerPreview);
             return;
         }
@@ -86,6 +86,8 @@ public class BuildingHoverManager : MonoBehaviour
             ClearAllHovers();
             return;
         }
+
+        TryStartDragFromHoveredBuildingViaShortcut();
 
         if (_panelsJustClosed)
         {
@@ -101,6 +103,7 @@ public class BuildingHoverManager : MonoBehaviour
 
     public void OnBuildingEnter(BuildingDataHolder buildingDataHolder)
     {
+        if (GameManager.Instance != null && GameManager.Instance.IsDragging()) return;
         if (buildingDataHolder == null || buildingDataHolder.buildingData == null) return;
         if (buildingDataHolder == _currentHoveredBuilding) return;
 
@@ -133,6 +136,7 @@ public class BuildingHoverManager : MonoBehaviour
 
     public void OnStorageEnter(IStorage storage)
     {
+        if (GameManager.Instance != null && GameManager.Instance.IsDragging()) return;
         if (storage == null) return;
         if (storage == _currentHoveredStorage) return;
 
@@ -155,6 +159,7 @@ public class BuildingHoverManager : MonoBehaviour
 
     public void OnResourceEnter(ResourceNode node)
     {
+        if (GameManager.Instance != null && GameManager.Instance.IsDragging()) return;
         if (node == null)
         {
             return;
@@ -181,6 +186,7 @@ public class BuildingHoverManager : MonoBehaviour
 
     public void OnUnitEnter(UnitBase unit)
     {
+        if (GameManager.Instance != null && GameManager.Instance.IsDragging()) return;
         if (unit == null)
         {
             return;
@@ -259,9 +265,54 @@ public class BuildingHoverManager : MonoBehaviour
         if (buildingDataHolder == null || buildingDataHolder.buildingData == null) {
             return;
         }
+        if (!CardDragger.IsPowerGridPreviewBuildingType(buildingDataHolder.buildingData.buildingType)) {
+            return;
+        }
         PowerCoveragePreviewOverlay overlay = PowerCoveragePreviewOverlay.Instance;
         if (overlay != null) {
             overlay.Show();
+        }
+    }
+
+    private void TryStartDragFromHoveredBuildingViaShortcut()
+    {
+        if (!Input.GetKeyDown(KeyCode.Q))
+        {
+            return;
+        }
+        if (_currentHoveredBuilding == null)
+        {
+            return;
+        }
+        BuildingData data = _currentHoveredBuilding.buildingData;
+        if (data == null)
+        {
+            return;
+        }
+        if (BuildingUnlockManager.Instance != null && !BuildingUnlockManager.Instance.IsBuildingUnlocked(data))
+        {
+            return;
+        }
+        if (GameManager.Instance == null)
+        {
+            return;
+        }
+        UIManager uiManager = GameManager.Instance.uiManager;
+        if (uiManager != null)
+        {
+            if (uiManager.IsProcessorPanelActive())
+            {
+                uiManager.HideProcessorInfo();
+            }
+            if (uiManager.IsDroneHubPanelActive())
+            {
+                uiManager.HideDroneHubInfo();
+            }
+        }
+        GameManager.Instance.StartDrag(data);
+        if (BuildingInfoPanel.Instance != null)
+        {
+            BuildingInfoPanel.Instance.SelectBuilding(data);
         }
     }
 

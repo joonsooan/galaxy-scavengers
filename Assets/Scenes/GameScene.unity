@@ -1506,7 +1506,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &38915327
 RectTransform:
   m_ObjectHideFlags: 0
@@ -59812,7 +59812,7 @@ MonoBehaviour:
   inventoryGridContainer: {fileID: 1185129392}
   currentResourcePanel: {fileID: 471620567}
   launchStartButton: {fileID: 1044308504}
-  inventoryCellPrefab: {fileID: 3842191235755297668, guid: 79b3efe314470124eb00454f0b0f98c4, type: 3}
+  inventoryCellPrefab: {fileID: 3842191235755297668, guid: 0c93dfd6b41a96d4489a92b302206a7f, type: 3}
   resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: 87d776b852749c2428050baaea9b40b1, type: 3}
   baseCellCount: 20
   defaultMaxStackAmount: 100
@@ -95144,6 +95144,11 @@ MonoBehaviour:
   - {fileID: 1317769433}
   - {fileID: 28145577}
   - {fileID: 1954317249}
+  minerUnitSlotImages:
+  - {fileID: 105917266}
+  - {fileID: 721402883}
+  - {fileID: 1952332863}
+  - {fileID: 1953111771}
 --- !u!1 &2088475166
 GameObject:
   m_ObjectHideFlags: 0

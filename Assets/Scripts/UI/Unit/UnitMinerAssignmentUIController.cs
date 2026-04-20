@@ -15,6 +15,13 @@ public class UnitMinerAssignmentUIController : MonoBehaviour
     [SerializeField] private TMP_InputField[] countInputs;
     [SerializeField] private TMP_InputField[] ratioInputs;
 
+    [Header("Miner unit icons (4 resource slots)")]
+    [SerializeField] private Image[] minerUnitSlotImages;
+
+    private static readonly Color MinerSlotDimColor = new Color(0.35f, 0.35f, 0.35f, 1f);
+
+    private Sprite _cachedMinerIcon;
+
     private bool _suppress;
     private readonly List<TMP_InputField> _tabOrderedInputs = new List<TMP_InputField>();
     private UnityAction<string>[] _countEndEditHandlers;
@@ -31,6 +38,7 @@ public class UnitMinerAssignmentUIController : MonoBehaviour
         ConfigureInputFields();
         RebuildTabOrder();
         WireListeners(true);
+        TryResolveMinerSlotImagesFromInputs();
         RefreshUIFromSystem();
     }
 
@@ -439,6 +447,87 @@ public class UnitMinerAssignmentUIController : MonoBehaviour
         }
 
         _suppress = false;
+
+        RefreshMinerSlotUnitImages(lastSlots);
+    }
+
+    private void TryResolveMinerSlotImagesFromInputs()
+    {
+        if (countInputs == null)
+        {
+            return;
+        }
+        if (minerUnitSlotImages == null || minerUnitSlotImages.Length < 4)
+        {
+            minerUnitSlotImages = new Image[4];
+        }
+        for (int i = 0; i < 4 && i < countInputs.Length; i++)
+        {
+            if (minerUnitSlotImages[i] != null)
+            {
+                continue;
+            }
+            TMP_InputField field = countInputs[i];
+            if (field == null)
+            {
+                continue;
+            }
+            Transform row = field.transform.parent;
+            if (row == null)
+            {
+                continue;
+            }
+            foreach (Transform t in row)
+            {
+                Image im = t.GetComponent<Image>();
+                if (im == null || t == field.transform)
+                {
+                    continue;
+                }
+                minerUnitSlotImages[i] = im;
+                break;
+            }
+        }
+    }
+
+    private void EnsureMinerUnitIconLoaded()
+    {
+        if (_cachedMinerIcon != null)
+        {
+            return;
+        }
+        UnitData ud = Resources.Load<UnitData>("Unit Data/Unit_Miner");
+        if (ud != null)
+        {
+            _cachedMinerIcon = ud.unitIcon;
+        }
+    }
+
+    private void RefreshMinerSlotUnitImages(IReadOnlyList<int> lastSlots)
+    {
+        if (lastSlots == null || lastSlots.Count < 4)
+        {
+            return;
+        }
+        EnsureMinerUnitIconLoaded();
+        if (minerUnitSlotImages == null)
+        {
+            return;
+        }
+        for (int i = 0; i < 4 && i < minerUnitSlotImages.Length; i++)
+        {
+            Image img = minerUnitSlotImages[i];
+            if (img == null)
+            {
+                continue;
+            }
+            if (_cachedMinerIcon != null)
+            {
+                img.sprite = _cachedMinerIcon;
+                img.enabled = true;
+            }
+            img.color = lastSlots[i] > 0 ? Color.white : MinerSlotDimColor;
+        }
     }
 
     private static int ParseInput(string raw)
