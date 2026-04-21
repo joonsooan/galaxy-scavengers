@@ -19,9 +19,6 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
     [SerializeField] private ProductionProgressSlider productionSlider;
     [SerializeField] private Vector3 unitSpawnOffset = new Vector3(0f, -1f, 0f);
 
-    [Header("Aether Capacity")]
-    [SerializeField] private int baseAetherCapacity = 100;
-
     private readonly Dictionary<int, int> _producedUnitCounts = new();
     private readonly Queue<UnitData> _productionQueue = new();
     private readonly Dictionary<int, int> _targetUnitCounts = new();
@@ -37,8 +34,6 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
     private Coroutine _productionCoroutine;
     private WaitForSeconds _productionWaitWait;
     private bool _consumerRegistered;
-
-    public int BaseAetherCapacity => baseAetherCapacity;
 
     public string DroneProduceDisplayName => droneProduceDisplayName;
 
@@ -101,6 +96,8 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
         }
 
         ResourceManager.OnResourceAmountChanged += OnResourceAmountChanged;
+        UnitUpgradeProgress.OnUpgradeStateChanged += OnUnitUpgradeOrPopulationRelevantChange;
+        UnitManager.OnUnitCountChanged += OnUnitManagerUnitCountChanged;
 
         if (productionSlider != null) {
             productionSlider.Initialize(transform);
@@ -110,6 +107,8 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
     protected override void OnDisable()
     {
         ResourceManager.OnResourceAmountChanged -= OnResourceAmountChanged;
+        UnitUpgradeProgress.OnUpgradeStateChanged -= OnUnitUpgradeOrPopulationRelevantChange;
+        UnitManager.OnUnitCountChanged -= OnUnitManagerUnitCountChanged;
 
         if (_electricityConsumptionManager != null) {
             if (_consumerRegistered) {
@@ -211,6 +210,35 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
         }
     }
 
+    private void OnUnitUpgradeOrPopulationRelevantChange()
+    {
+        TryResumeProductionIfPopulationAllows();
+    }
+
+    private void OnUnitManagerUnitCountChanged(UnitBase _)
+    {
+        TryResumeProductionIfPopulationAllows();
+    }
+
+    private void TryResumeProductionIfPopulationAllows()
+    {
+        if (_isManualQueueProcessing) {
+            return;
+        }
+        if (_isProducing || !IsOperational) {
+            return;
+        }
+        if (UnitManager.Instance == null || !UnitManager.Instance.CanSpawnUnit()) {
+            return;
+        }
+        if (_productionQueue.Count == 0 && HasPendingTargets()) {
+            UpdateQueueFromTargets();
+        }
+        if (_productionQueue.Count > 0) {
+            _productionCoroutine = StartCoroutine(ProcessProductionQueue());
+        }
+    }
+
     public int GetCurrentUnitCount(int unitIndex)
     {
         if (producibleUnits != null &&
@@ -225,6 +253,10 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
             for (int i = 0; i < allyUnits.Count; i++) {
                 UnitBase unit = allyUnits[i];
                 if (unit == null) {
+                    continue;
+                }
+
+                if (unit is Unit_Player) {
                     continue;
                 }
 
@@ -508,15 +540,6 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
 
             OnUnitProduced?.Invoke(unitToProduce);
 
-            if (TutorialManager.Instance != null) {
-                string unitTypeName = unitToProduce.unitName;
-                if (unitTypeName.Contains("Miner") || unitTypeName.Contains("채굴")) {
-                    TutorialManager.Instance.OnUnitProduced("Miner");
-                }
-                else if (unitTypeName.Contains("Processor") || unitTypeName.Contains("가공")) {
-                    TutorialManager.Instance.OnUnitProduced("Processor");
-                }
-            }
         }
 
         _isProducing = false;

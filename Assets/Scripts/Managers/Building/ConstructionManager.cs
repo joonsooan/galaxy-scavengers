@@ -84,10 +84,6 @@ public class ConstructionManager : MonoBehaviour
         
         if (!_constructDrones.Contains(drone))
         {
-            if (_constructDrones.Count == 0)
-            {
-                drone.SetInvulnerable(true);
-            }
             _constructDrones.Add(drone);
             AssignDroneToSite(drone);
         }

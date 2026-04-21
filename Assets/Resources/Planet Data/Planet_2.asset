@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 210b3b56c4ac4734389dee35d15b9d21, type: 3}
+  m_Name: Planet_2
+  m_EditorClassIdentifier: Assembly-CSharp::PlanetData
+  planetId: 2
+  planetName: "\uD589\uC131 2"
+  descriptionText: "\uD589\uC131 2 \uC124\uBA85 \uD589\uC131 2 \uC124\uBA85 \uD589\uC131
+    2 \uC124\uBA85 \uD589\uC131 2 \uC124\uBA85 \uD589\uC131 2 \uC124\uBA85 \uD589\uC131
+    2 \uC124\uBA85 \uD589\uC131 2 \uC124\uBA85 \uD589\uC131 2 \uC124\uBA85 \uD589\uC131
+    2 \uC124\uBA85 "
+  planetImage: {fileID: 7845373079550816897, guid: f86e2b205e97dcf438af5295672e4c2b, type: 3}
+  planetThumbnail: {fileID: -7039789486510518208, guid: 69508c2961286694dba90a0f72411329, type: 3}
+  obtainableDataTypes: 03000000
+  expeditionDataAmount: 1500
+  targetSceneName: GameScene
+  isUnlockedByDefault: 1
+  displayOrder: 0
+  mapButtonName: btn_planet_2

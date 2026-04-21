@@ -63,7 +63,6 @@ public class LaunchUIController : MonoBehaviour
 
     private void OnEnable()
     {
-        TutorialManager.OnTutorialEnded += UpdateLaunchAvailability;
     }
 
     private void Start()
@@ -73,7 +72,6 @@ public class LaunchUIController : MonoBehaviour
 
     private void OnDisable()
     {
-        TutorialManager.OnTutorialEnded -= UpdateLaunchAvailability;
         SetLaunchPausePanelLock(false);
     }
 
@@ -333,11 +331,6 @@ public class LaunchUIController : MonoBehaviour
         {
             launchCompleteUI.Show();
             yield return _launchCompleteDisplayWait;
-        }
-
-        if (TutorialManager.Instance != null)
-        {
-            TutorialManager.Instance.HideAllUIPanels();
         }
 
         UpdateCachedWaits();

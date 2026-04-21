@@ -8,6 +8,7 @@ public class UnitManager : MonoBehaviour
     public static UnitManager Instance { get; private set; }
 
     public static event Action<ResourceType[]> OnMineableTypesChanged;
+    public static event Action<EnemyUnitBase> OnEnemyUnitRemoved;
     public IReadOnlyList<ResourceType> CurrentMineableTypes => _currentMineableTypes;
     public Transform unitParent;
     
@@ -26,7 +27,12 @@ public class UnitManager : MonoBehaviour
 
     public int GetMaxPopulation()
     {
-        return baseMaxPopulation;
+        int bonus = 0;
+        if (UnitUpgradeProgress.Instance != null) {
+            bonus = UnitUpgradeProgress.Instance.GetMaxPopulationBonus();
+        }
+
+        return baseMaxPopulation + bonus;
     }
 
     public int GetPopulationCountedAllyCount()
@@ -100,10 +106,6 @@ public class UnitManager : MonoBehaviour
         if (unit.unitType == UnitBase.UnitType.Enemy && !_enemyUnits.Contains(unit))
         {
             _enemyUnits.Add(unit);
-            if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive())
-            {
-                unit.gameObject.SetActive(false);
-            }
         }
         else if (unit.unitType == UnitBase.UnitType.Ally && !_allyUnits.Contains(unit))
         {
@@ -124,6 +126,11 @@ public class UnitManager : MonoBehaviour
     {
         if (unit.unitType == UnitBase.UnitType.Enemy)
         {
+            if (unit is EnemyUnitBase enemyUnit)
+            {
+                OnEnemyUnitRemoved?.Invoke(enemyUnit);
+            }
+
             _enemyUnits.Remove(unit);
         }
         else if (unit.unitType == UnitBase.UnitType.Ally)

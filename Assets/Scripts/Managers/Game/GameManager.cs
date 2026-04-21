@@ -16,10 +16,6 @@ public class GameManager : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool skipProceduralGenerationWhenLoadingGameScene;
 
-    [Header("Tutorial")]
-    [Tooltip("체크 시 저장된 튜토리얼 완료 여부와 관계없이 튜토리얼을 시작하지 않고, 일반 게임 시작 흐름(패널 표시·BGM 등)으로 진행합니다.")]
-    [SerializeField] private bool ignoreTutorial;
-
     [Header("Audio")]
     [SerializeField] private EventReference pauseSound;
     [SerializeField] private EventReference resumeSound;
@@ -34,7 +30,6 @@ public class GameManager : MonoBehaviour
     private float _savedTimeScale = 1f;
     private static readonly WaitForSeconds _wait05 = CoroutineCache.GetWaitForSeconds(0.5f);
     public static GameManager Instance { get; private set; }
-    public bool IgnoreTutorial => ignoreTutorial;
     public bool IsPaused { get; private set; }
 
     public bool IsGameSceneInitialized { get; private set; }
@@ -44,11 +39,13 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance == null) {
+        if (Instance == null)
+        {
             Instance = this;
             DontDestroyOnLoad(gameObject);
         }
-        else {
+        else
+        {
             Destroy(gameObject);
         }
     }
@@ -92,7 +89,8 @@ public class GameManager : MonoBehaviour
 
         HandleDebugTimeScale();
 
-        if (GameMenuManager.Instance != null && GameMenuManager.Instance.IsMenuOpen()) {
+        if (GameMenuManager.Instance != null && GameMenuManager.Instance.IsMenuOpen())
+        {
             return;
         }
 
@@ -101,26 +99,26 @@ public class GameManager : MonoBehaviour
         bool isLaunchMenuInputBlocked = launchUIController != null && launchUIController.IsMenuInputBlocked();
         bool isCountdownSequenceActive = launchUIController != null && launchUIController.IsCountdownSequenceActive();
 
-        if (!isPauseInputLocked && !isCountdownSequenceActive && Input.GetKeyDown(KeyCode.Space)) {
+        if (!isPauseInputLocked && !isCountdownSequenceActive && Input.GetKeyDown(KeyCode.Space))
+        {
             TogglePause();
         }
 
         if (IsPaused) return;
 
 #if UNITY_EDITOR
-        if (Input.GetKeyDown(KeyCode.F2)) {
-            if (FogOfWarManager.Instance != null) {
+        if (Input.GetKeyDown(KeyCode.F2))
+        {
+            if (FogOfWarManager.Instance != null)
+            {
                 FogOfWarManager.Instance.ToggleFogVisibility();
             }
         }
-        if (Input.GetKeyDown(KeyCode.T)) {
-            if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive()) {
-                TutorialManager.Instance.SkipAllTutorials();
-            }
-        }
-        if (Input.GetKeyDown(KeyCode.G)) {
+        if (Input.GetKeyDown(KeyCode.G))
+        {
             UnitData constructUnit = Resources.Load<UnitData>("Unit Data/Unit_Construct");
-            if (constructUnit != null && StartingUnitsManager.Instance != null) {
+            if (constructUnit != null && StartingUnitsManager.Instance != null)
+            {
                 StartingUnitsManager.Instance.SpawnUnitsForEditor(constructUnit, 1);
             }
         }
@@ -142,6 +140,10 @@ public class GameManager : MonoBehaviour
         {
             targetScale = 4f;
         }
+        else if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            targetScale = 10f;
+        }
 
         if (targetScale < 0f)
         {
@@ -159,21 +161,26 @@ public class GameManager : MonoBehaviour
     {
         IsPaused = !IsPaused;
 
-        if (IsPaused) {
+        if (IsPaused)
+        {
             _savedTimeScale = Time.timeScale;
             Time.timeScale = 0f;
-            if (!pauseSound.IsNull) {
+            if (!pauseSound.IsNull)
+            {
                 RuntimeManager.PlayOneShot(pauseSound);
             }
         }
-        else {
+        else
+        {
             Time.timeScale = _savedTimeScale;
-            if (!resumeSound.IsNull) {
+            if (!resumeSound.IsNull)
+            {
                 RuntimeManager.PlayOneShot(resumeSound);
             }
         }
 
-        if (uiManager != null) {
+        if (uiManager != null)
+        {
             uiManager.SetPausePanelActive(IsPaused);
         }
 
@@ -260,11 +267,13 @@ public class GameManager : MonoBehaviour
 
     public void EndDrag()
     {
-        if (uiManager != null) {
+        if (uiManager != null)
+        {
             uiManager.UnpinAndHideAllPanels();
         }
 
-        if (cardDragger != null) {
+        if (cardDragger != null)
+        {
             cardDragger.EndDrag();
         }
         _activeCardData = null;
@@ -289,7 +298,8 @@ public class GameManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == "GameScene") {
+        if (scene.name == "GameScene" || scene.name == "TutorialScene")
+        {
             _isGameOverProcessing = false;
             IsPaused = false;
             _savedTimeScale = 1f;
@@ -297,7 +307,8 @@ public class GameManager : MonoBehaviour
             OnPauseStateChanged?.Invoke(false);
             IsGameSceneInitialized = false;
             IsGameplayReady = false;
-            if (BuildingManager.Instance != null) {
+            if (BuildingManager.Instance != null)
+            {
                 BuildingManager.Instance.ClearWalkableCellCache();
             }
             InitializeGameScene();
@@ -315,14 +326,17 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator WaitForEntryAnimationAndInitialize()
     {
-        while (LoadingUIManager.Instance == null) {
+        while (LoadingUIManager.Instance == null)
+        {
             yield return null;
         }
 
         LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
-        while (loadingScreen == null || !loadingScreen.IsEntryAnimationComplete) {
+        while (loadingScreen == null || !loadingScreen.IsEntryAnimationComplete)
+        {
             yield return null;
-            if (LoadingUIManager.Instance != null) {
+            if (LoadingUIManager.Instance != null)
+            {
                 loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
             }
         }
@@ -335,7 +349,8 @@ public class GameManager : MonoBehaviour
 
     private IInitializationProgress GetInitializationProgress()
     {
-        if (LoadingUIManager.Instance != null) {
+        if (LoadingUIManager.Instance != null)
+        {
             return LoadingUIManager.Instance.GetProgressTracker();
         }
         return null;
@@ -350,26 +365,31 @@ public class GameManager : MonoBehaviour
 
         yield return null;
 
-        if (mapGenerator != null) {
+        if (mapGenerator != null)
+        {
             mapGenerator.PrepareStaticSceneMapMetadata();
-            if (!skipProceduralGenerationWhenLoadingGameScene) {
+            if (!skipProceduralGenerationWhenLoadingGameScene)
+            {
                 yield return StartCoroutine(mapGenerator.GenerateMapAsync(progress));
             }
         }
 
-        if (BuildingManager.Instance != null && mapGenerator != null) {
+        if (BuildingManager.Instance != null && mapGenerator != null)
+        {
             BuildingManager.Instance.InitializeWalkableCellCache(mapGenerator.GetMapBounds());
         }
 
         CameraTargetController cameraController = FindFirstObjectByType<CameraTargetController>();
-        if (cameraController != null) {
+        if (cameraController != null)
+        {
             cameraController.RefreshMapBounds();
         }
 
         yield return StartCoroutine(InitializeSpawnersAndUnitsAsync(progress, skipProceduralGenerationWhenLoadingGameScene));
         yield return StartCoroutine(WaitForFogOfWarInitializationAsync(progress));
 
-        if (progress != null) {
+        if (progress != null)
+        {
             progress.UpdateProgress(0.0f, "착륙 좌표 고정 중...");
             yield return _wait05;
         }
@@ -377,9 +397,11 @@ public class GameManager : MonoBehaviour
         IsGameSceneInitialized = true;
         OnGameSceneInitialized?.Invoke();
 
-        if (LoadingUIManager.Instance != null) {
+        if (LoadingUIManager.Instance != null)
+        {
             LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
-            if (loadingScreen != null) {
+            if (loadingScreen != null)
+            {
                 loadingScreen.SetInitializationComplete();
             }
         }
@@ -395,7 +417,8 @@ public class GameManager : MonoBehaviour
 
         yield return StartCoroutine(WaitForFogOfWarInitialization());
 
-        if (FogOfWarManager.Instance != null) {
+        if (FogOfWarManager.Instance != null)
+        {
             FogOfWarManager.Instance.RefreshFogOfWar();
         }
 
@@ -405,12 +428,14 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator WaitForFogOfWarInitializationAsync(IInitializationProgress progress = null)
     {
-        if (FogOfWarManager.Instance != null) {
+        if (FogOfWarManager.Instance != null)
+        {
             IInitializationProgress fogProgress = progress;
             FogOfWarManager.Instance.StartFogInitializationWithProgress(fogProgress);
         }
 
-        while (FogOfWarManager.Instance == null || !FogOfWarManager.Instance.IsInitialized) {
+        while (FogOfWarManager.Instance == null || !FogOfWarManager.Instance.IsInitialized)
+        {
             yield return null;
         }
 
@@ -419,7 +444,8 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator WaitForFogOfWarInitialization()
     {
-        while (FogOfWarManager.Instance == null || !FogOfWarManager.Instance.IsInitialized) {
+        while (FogOfWarManager.Instance == null || !FogOfWarManager.Instance.IsInitialized)
+        {
             yield return null;
         }
 
@@ -428,7 +454,8 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator InitializeSpawnersAndUnitsAsync(IInitializationProgress progress = null, bool skipProceduralResourceSpawn = false)
     {
-        foreach (BuildingSpawner spawner in FindObjectsByType<BuildingSpawner>(FindObjectsSortMode.None)) {
+        foreach (BuildingSpawner spawner in FindObjectsByType<BuildingSpawner>(FindObjectsSortMode.None))
+        {
             spawner.SpawnBuildings();
             if (spawner.BuildingTilemap != null) spawner.BuildingTilemap.gameObject.SetActive(false);
         }
@@ -437,25 +464,30 @@ public class GameManager : MonoBehaviour
         RegisterPrePlacedBuildings();
 
         MapObjectSpawner proceduralSpawner = FindFirstObjectByType<MapObjectSpawner>();
-        if (proceduralSpawner != null && !skipProceduralResourceSpawn) {
+        if (proceduralSpawner != null && !skipProceduralResourceSpawn)
+        {
             yield return StartCoroutine(proceduralSpawner.SpawnResourcesAsync(progress));
         }
 
         yield return null;
         yield return null;
 
-        if (mapGenerator != null) {
+        if (mapGenerator != null)
+        {
             mapGenerator.GenerateEnemyTerritoryRadiusValues();
         }
 
-        if (mapGenerator != null) {
+        if (mapGenerator != null)
+        {
             mapGenerator.DrawEnemyTerritoryTiles();
+            mapGenerator.SpawnAncientRuins();
         }
     }
 
     private IEnumerator InitializeSpawnersAndUnits()
     {
-        foreach (BuildingSpawner spawner in FindObjectsByType<BuildingSpawner>(FindObjectsSortMode.None)) {
+        foreach (BuildingSpawner spawner in FindObjectsByType<BuildingSpawner>(FindObjectsSortMode.None))
+        {
             spawner.SpawnBuildings();
             if (spawner.BuildingTilemap != null) spawner.BuildingTilemap.gameObject.SetActive(false);
         }
@@ -464,19 +496,23 @@ public class GameManager : MonoBehaviour
         RegisterPrePlacedBuildings();
 
         MapObjectSpawner proceduralSpawner = FindFirstObjectByType<MapObjectSpawner>();
-        if (proceduralSpawner != null) {
+        if (proceduralSpawner != null)
+        {
             proceduralSpawner.SpawnResources();
         }
 
         yield return null;
         yield return null;
 
-        if (mapGenerator != null) {
+        if (mapGenerator != null)
+        {
             mapGenerator.GenerateEnemyTerritoryRadiusValues();
         }
 
-        if (mapGenerator != null) {
+        if (mapGenerator != null)
+        {
             mapGenerator.DrawEnemyTerritoryTiles();
+            mapGenerator.SpawnAncientRuins();
         }
     }
 
@@ -484,29 +520,36 @@ public class GameManager : MonoBehaviour
     {
         MainStructure[] existingMainStructures = FindObjectsByType<MainStructure>(FindObjectsSortMode.None);
 
-        foreach (MainStructure mainStructure in existingMainStructures) {
-            if (ResourceManager.Instance != null) {
+        foreach (MainStructure mainStructure in existingMainStructures)
+        {
+            if (ResourceManager.Instance != null)
+            {
                 bool alreadyRegistered = false;
-                foreach (IStorage storage in ResourceManager.Instance.GetAllStorages()) {
-                    if ((MainStructure)storage == mainStructure) {
+                foreach (IStorage storage in ResourceManager.Instance.GetAllStorages())
+                {
+                    if ((MainStructure)storage == mainStructure)
+                    {
                         alreadyRegistered = true;
                         break;
                     }
                 }
 
-                if (!alreadyRegistered) {
+                if (!alreadyRegistered)
+                {
                     ResourceManager.Instance.RegisterMainStructure(mainStructure);
                     ResourceManager.Instance.AddStorage(mainStructure);
                 }
             }
 
-            if (BuildingManager.Instance != null && mainStructure.transform != null && BuildingManager.Instance.grid != null) {
+            if (BuildingManager.Instance != null && mainStructure.transform != null && BuildingManager.Instance.grid != null)
+            {
                 Vector3Int cellPos = BuildingManager.Instance.grid.WorldToCell(mainStructure.transform.position);
                 Vector3Int anchorCell = cellPos - new Vector3Int(1, 1, 0);
                 BuildingManager.Instance.RegisterMainStructure(anchorCell, new Vector2Int(3, 3), mainStructure);
             }
 
-            if (TargetManager.Instance != null) {
+            if (TargetManager.Instance != null)
+            {
                 TargetManager.Instance.RegisterTarget(mainStructure);
             }
         }
@@ -516,13 +559,16 @@ public class GameManager : MonoBehaviour
     {
         BuildingPiece[] existingBuildings = FindObjectsByType<BuildingPiece>(FindObjectsSortMode.None);
 
-        if (BuildingManager.Instance == null) {
+        if (BuildingManager.Instance == null)
+        {
             Debug.LogWarning("[GameManager] BuildingManager.Instance is null, cannot register pre-placed buildings.");
             return;
         }
 
-        foreach (BuildingPiece buildingPiece in existingBuildings) {
-            if (buildingPiece.GetComponent<MainStructure>() != null) {
+        foreach (BuildingPiece buildingPiece in existingBuildings)
+        {
+            if (buildingPiece.GetComponent<MainStructure>() != null)
+            {
                 continue;
             }
 
@@ -533,17 +579,19 @@ public class GameManager : MonoBehaviour
     public void SpawnUnitsAfterLoading()
     {
         StartingUnitsManager startingUnitsManager = FindFirstObjectByType<StartingUnitsManager>();
-        if (startingUnitsManager != null) {
+        if (startingUnitsManager != null)
+        {
             startingUnitsManager.SpawnStartingUnits();
         }
     }
 
     private bool IsLoadingScreenActive()
     {
-        if (LoadingUIManager.Instance == null) {
+        if (LoadingUIManager.Instance == null)
+        {
             return false;
         }
-        
+
         return LoadingUIManager.Instance.IsAnyLoadingScreenActive();
     }
 }

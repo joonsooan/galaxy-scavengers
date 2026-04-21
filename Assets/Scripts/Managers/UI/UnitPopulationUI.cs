@@ -8,12 +8,19 @@ public class UnitPopulationUI : MonoBehaviour
     private void OnEnable()
     {
         UnitManager.OnUnitCountChanged += HandleUnitCountChanged;
+        UnitUpgradeProgress.OnUpgradeStateChanged += OnUpgradeStateChanged;
         UpdateText();
     }
 
     private void OnDisable()
     {
         UnitManager.OnUnitCountChanged -= HandleUnitCountChanged;
+        UnitUpgradeProgress.OnUpgradeStateChanged -= OnUpgradeStateChanged;
+    }
+
+    private void OnUpgradeStateChanged()
+    {
+        UpdateText();
     }
 
     private void Start()

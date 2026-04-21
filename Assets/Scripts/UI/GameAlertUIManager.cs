@@ -12,12 +12,10 @@ public enum GameAlertType
     BuildingUnderAttack = 2,
     DroneNoResource = 3,
     StorageFull = 4,
-    AetherStorageFull = 5,
+    ElecInsufficient = 5,
     NoiseCaution = 6,
     NoiseWarning = 7,
     NoiseDanger = 8,
-    MainEngineRepair = 9,
-    MineTypeAllOff = 10,
     MinerIsFull = 11,
     DroneIsNotAssigned = 12,
     ConstructNoResource = 13
@@ -25,7 +23,6 @@ public enum GameAlertType
 
 public class GameAlertUIManager : MonoBehaviour
 {
-    [SerializeField] private GameObject minetypeallOffCell;
     [SerializeField] private GameObject minerNoResourceCell;
     [SerializeField] private GameObject minerIsFullCell;
     [SerializeField] private GameObject unitUnderAttackCell;
@@ -34,8 +31,7 @@ public class GameAlertUIManager : MonoBehaviour
     [SerializeField] private GameObject droneNoResourceCell;
     [SerializeField] private GameObject constructNoResourceCell;
     [SerializeField] private GameObject storageFullCell;
-    [SerializeField] private GameObject aetherStorageFullCell;
-    [SerializeField] private GameObject mainEngineRepairCell;
+    [SerializeField] private GameObject elecInsufficientCell;
     [SerializeField] private GameObject noiseCautionCell;
     [SerializeField] private GameObject noiseWarningCell;
     [SerializeField] private GameObject noiseDangerCell;
@@ -49,8 +45,7 @@ public class GameAlertUIManager : MonoBehaviour
     [SerializeField] private EventReference droneNoResourceSound;
     [SerializeField] private EventReference constructNoResourceSound;
     [SerializeField] private EventReference storageFullSound;
-    [SerializeField] private EventReference aetherStorageFullSound;
-    [SerializeField] private EventReference mainEngineRepairSound;
+    [SerializeField] private EventReference elecInsufficientSound;
     [SerializeField] private EventReference noiseCautionSound;
     [SerializeField] private EventReference noiseWarningSound;
     [SerializeField] private EventReference noiseDangerSound;
@@ -59,7 +54,6 @@ public class GameAlertUIManager : MonoBehaviour
     [SerializeField] private GameObject tooltipPanel;
     [SerializeField] private TMP_Text tooltipText;
     [Header("Tooltip Messages")]
-    [SerializeField, TextArea(2, 6)] private string tooltipMineTypeAllOff = "채굴 타입이 모두 비활성화되었습니다.";
     [SerializeField, TextArea(2, 6)] private string tooltipMinerNoResource = "채굴 유닛이 캘 자원이 없습니다.";
     [SerializeField, TextArea(2, 6)] private string tooltipMinerIsFull = "채굴 유닛이 자원을 저장할 공간이 없습니다.";
     [SerializeField, TextArea(2, 6)] private string tooltipUnitUnderAttack = "유닛이 공격당하고 있습니다!";
@@ -68,8 +62,7 @@ public class GameAlertUIManager : MonoBehaviour
     [SerializeField, TextArea(2, 6)] private string tooltipDroneNoResource = "가공 유닛이 가공할 자원이 없습니다.";
     [SerializeField, TextArea(2, 6)] private string tooltipConstructNoResource = "건설 유닛이 건설할 자원이 없습니다.";
     [SerializeField, TextArea(2, 6)] private string tooltipStorageFull = "모든 저장 공간이 가득 찼습니다!\n저장고를 더 건설해주세요.";
-    [SerializeField, TextArea(2, 6)] private string tooltipAetherStorageFull = "전력이 부족합니다!\n발전기·배터리·전력망을 확인해주세요.";
-    [SerializeField, TextArea(2, 6)] private string tooltipMainEngineRepair = "메인 엔진이 고장나\n시드 코어를 발사할 수 없습니다.\n퀘스트를 확인하세요.";
+    [SerializeField, TextArea(2, 6)] private string tooltipElecInsufficient = "전력이 부족합니다!\n발전기·배터리·전력망을 확인해주세요.";
     [SerializeField, TextArea(2, 6)] private string tooltipNoiseCaution = "소음 정도 : 주의\n적의 습격에 대비하세요!";
     [SerializeField, TextArea(2, 6)] private string tooltipNoiseWarning = "소음 정도 : 경고\n적의 습격에 대비하세요!";
     [SerializeField, TextArea(2, 6)] private string tooltipNoiseDanger = "소음 정도 : 위험\n적의 습격에 대비하세요!";
@@ -78,7 +71,6 @@ public class GameAlertUIManager : MonoBehaviour
 
     private GameAlertType? _currentTooltipType;
 
-    private readonly List<Damageable> _mineTypeAllOffSources = new List<Damageable>();
     private readonly List<Damageable> _minerNoResourceSources = new List<Damageable>();
     private readonly List<Damageable> _minerIsFullSources = new List<Damageable>();
     private readonly List<Damageable> _unitUnderAttackSources = new List<Damageable>();
@@ -87,17 +79,14 @@ public class GameAlertUIManager : MonoBehaviour
     private readonly List<Damageable> _droneNoResourceSources = new List<Damageable>();
     private readonly List<Damageable> _constructNoResourceSources = new List<Damageable>();
     private readonly List<Damageable> _storageFullSources = new List<Damageable>();
-    private readonly List<Damageable> _aetherStorageFullSources = new List<Damageable>();
-    private readonly List<Damageable> _mainEngineRepairSources = new List<Damageable>();
+    private readonly List<Damageable> _elecInsufficientSources = new List<Damageable>();
     private const int MaxSourcesPerType = 5;
     private Coroutine _tooltipRebuildCoroutine;
     private StorageTrackerManager _storageTrackerManager;
     private ElectricityConsumptionManager _electricityConsumptionManager;
     private Coroutine _bindStorageTrackerCoroutine;
     private bool _isStorageFullByTracker;
-    private bool _isAetherFullByTracker;
-
-    private int _mineTypeAllOffCount;
+    private bool _isElecInsufficientByTracker;
     private int _minerNoResourceCount;
     private int _minerIsFullCount;
     private int _unitUnderAttackCount;
@@ -106,8 +95,7 @@ public class GameAlertUIManager : MonoBehaviour
     private int _droneNoResourceCount;
     private int _constructNoResourceCount;
     private int _storageFullCount;
-    private int _aetherStorageFullCount;
-    private int _mainEngineRepairCount;
+    private int _elecInsufficientCount;
     [SerializeField] private CameraTargetController cameraTargetController;
     private readonly Dictionary<GameAlertType, int> _alertFocusIndices = new Dictionary<GameAlertType, int>();
     private bool _unitUnderAttackAlertActive;
@@ -125,7 +113,7 @@ public class GameAlertUIManager : MonoBehaviour
         LaunchUIController.OnLaunchSequenceStarted += OnLaunchSequenceStarted;
         LaunchUIController.OnLaunchSequenceFinished += OnLaunchSequenceFinished;
         _isStorageFullByTracker = false;
-        _isAetherFullByTracker = false;
+        _isElecInsufficientByTracker = false;
         if (_bindStorageTrackerCoroutine != null)
             StopCoroutine(_bindStorageTrackerCoroutine);
         _bindStorageTrackerCoroutine = StartCoroutine(BindStorageTrackerWhenReady());
@@ -214,13 +202,13 @@ public class GameAlertUIManager : MonoBehaviour
         _electricityConsumptionManager = ecm;
         _electricityConsumptionManager.OnAfterElectricityConsumersResolved -= OnElectricityPowerTickResolved;
         _electricityConsumptionManager.OnAfterElectricityConsumersResolved += OnElectricityPowerTickResolved;
-        SyncAetherFullAlertWithTracker();
+        SyncElecInsufficientAlertWithTracker();
         _bindStorageTrackerCoroutine = null;
     }
 
     private void OnElectricityPowerTickResolved()
     {
-        SyncAetherFullAlertWithTracker();
+        SyncElecInsufficientAlertWithTracker();
     }
 
     private void OnTrackedStorageChanged()
@@ -247,7 +235,7 @@ public class GameAlertUIManager : MonoBehaviour
             UnregisterAlert(GameAlertType.StorageFull);
     }
 
-    private void SyncAetherFullAlertWithTracker()
+    private void SyncElecInsufficientAlertWithTracker()
     {
         ElectricityConsumptionManager ecm = _electricityConsumptionManager != null
             ? _electricityConsumptionManager
@@ -255,16 +243,16 @@ public class GameAlertUIManager : MonoBehaviour
         if (ecm == null)
             return;
 
-        bool shouldAlert = ecm.IsElectricityDemandUnmet;
+        bool shouldAlert = ecm.GetTotalElectricityAmount() <= 0 && ecm.HasActiveElectricityDemand;
 
-        if (shouldAlert == _isAetherFullByTracker)
+        if (shouldAlert == _isElecInsufficientByTracker)
             return;
 
-        _isAetherFullByTracker = shouldAlert;
+        _isElecInsufficientByTracker = shouldAlert;
         if (shouldAlert)
-            RegisterAlert(GameAlertType.AetherStorageFull);
+            RegisterAlert(GameAlertType.ElecInsufficient);
         else
-            UnregisterAlert(GameAlertType.AetherStorageFull);
+            UnregisterAlert(GameAlertType.ElecInsufficient);
     }
 
     public void RegisterAlert(GameAlertType type)
@@ -280,10 +268,6 @@ public class GameAlertUIManager : MonoBehaviour
         }
         switch (type)
         {
-            case GameAlertType.MineTypeAllOff:
-                _mineTypeAllOffCount++;
-                AddSource(_mineTypeAllOffSources, source);
-                break;
             case GameAlertType.MinerNoResource:
                 _minerNoResourceCount++;
                 AddSource(_minerNoResourceSources, source);
@@ -316,13 +300,9 @@ public class GameAlertUIManager : MonoBehaviour
                 _storageFullCount++;
                 AddSource(_storageFullSources, source);
                 break;
-            case GameAlertType.AetherStorageFull:
-                _aetherStorageFullCount++;
-                AddSource(_aetherStorageFullSources, source);
-                break;
-            case GameAlertType.MainEngineRepair:
-                _mainEngineRepairCount++;
-                AddSource(_mainEngineRepairSources, source);
+            case GameAlertType.ElecInsufficient:
+                _elecInsufficientCount++;
+                AddSource(_elecInsufficientSources, source);
                 break;
         }
 
@@ -374,10 +354,6 @@ public class GameAlertUIManager : MonoBehaviour
     {
         switch (type)
         {
-            case GameAlertType.MineTypeAllOff:
-                _mineTypeAllOffCount = Mathf.Max(0, _mineTypeAllOffCount - 1);
-                RemoveSource(_mineTypeAllOffSources, source);
-                break;
             case GameAlertType.MinerNoResource:
                 _minerNoResourceCount = Mathf.Max(0, _minerNoResourceCount - 1);
                 RemoveSource(_minerNoResourceSources, source);
@@ -410,13 +386,9 @@ public class GameAlertUIManager : MonoBehaviour
                 _storageFullCount = Mathf.Max(0, _storageFullCount - 1);
                 RemoveSource(_storageFullSources, source);
                 break;
-            case GameAlertType.AetherStorageFull:
-                _aetherStorageFullCount = Mathf.Max(0, _aetherStorageFullCount - 1);
-                RemoveSource(_aetherStorageFullSources, source);
-                break;
-            case GameAlertType.MainEngineRepair:
-                _mainEngineRepairCount = Mathf.Max(0, _mainEngineRepairCount - 1);
-                RemoveSource(_mainEngineRepairSources, source);
+            case GameAlertType.ElecInsufficient:
+                _elecInsufficientCount = Mathf.Max(0, _elecInsufficientCount - 1);
+                RemoveSource(_elecInsufficientSources, source);
                 break;
         }
 
@@ -442,9 +414,6 @@ public class GameAlertUIManager : MonoBehaviour
     {
         switch (type)
         {
-            case GameAlertType.MineTypeAllOff:
-                if (minetypeallOffCell != null) minetypeallOffCell.SetActive(active);
-                break;
             case GameAlertType.MinerNoResource:
                 if (minerNoResourceCell != null) minerNoResourceCell.SetActive(active);
                 break;
@@ -469,11 +438,8 @@ public class GameAlertUIManager : MonoBehaviour
             case GameAlertType.StorageFull:
                 if (storageFullCell != null) storageFullCell.SetActive(active);
                 break;
-            case GameAlertType.AetherStorageFull:
-                if (aetherStorageFullCell != null) aetherStorageFullCell.SetActive(active);
-                break;
-            case GameAlertType.MainEngineRepair:
-                if (mainEngineRepairCell != null) mainEngineRepairCell.SetActive(active);
+            case GameAlertType.ElecInsufficient:
+                if (elecInsufficientCell != null) elecInsufficientCell.SetActive(active);
                 break;
         }
 
@@ -485,17 +451,6 @@ public class GameAlertUIManager : MonoBehaviour
     {
         switch (type)
         {
-            case GameAlertType.MineTypeAllOff:
-                if (minetypeallOffCell != null)
-                {
-                    bool active = _mineTypeAllOffCount > 0;
-                    if (active && !minetypeallOffCell.activeSelf && !minerNoResourceSound.IsNull)
-                        RuntimeManager.PlayOneShot(minerNoResourceSound);
-                    minetypeallOffCell.SetActive(active);
-                    if (!active && _currentTooltipType == GameAlertType.MineTypeAllOff)
-                        HideTooltip();
-                }
-                break;
             case GameAlertType.MinerNoResource:
                 if (minerNoResourceCell != null)
                 {
@@ -589,25 +544,14 @@ public class GameAlertUIManager : MonoBehaviour
                         HideTooltip();
                 }
                 break;
-            case GameAlertType.AetherStorageFull:
-                if (aetherStorageFullCell != null)
+            case GameAlertType.ElecInsufficient:
+                if (elecInsufficientCell != null)
                 {
-                    bool active = _aetherStorageFullCount > 0;
-                    if (active && !aetherStorageFullCell.activeSelf && !aetherStorageFullSound.IsNull)
-                        RuntimeManager.PlayOneShot(aetherStorageFullSound);
-                    aetherStorageFullCell.SetActive(active);
-                    if (!active && _currentTooltipType == GameAlertType.AetherStorageFull)
-                        HideTooltip();
-                }
-                break;
-            case GameAlertType.MainEngineRepair:
-                if (mainEngineRepairCell != null)
-                {
-                    bool active = _mainEngineRepairCount > 0;
-                    if (active && !mainEngineRepairCell.activeSelf && !mainEngineRepairSound.IsNull)
-                        RuntimeManager.PlayOneShot(mainEngineRepairSound);
-                    mainEngineRepairCell.SetActive(active);
-                    if (!active && _currentTooltipType == GameAlertType.MainEngineRepair)
+                    bool active = _elecInsufficientCount > 0;
+                    if (active && !elecInsufficientCell.activeSelf && !elecInsufficientSound.IsNull)
+                        RuntimeManager.PlayOneShot(elecInsufficientSound);
+                    elecInsufficientCell.SetActive(active);
+                    if (!active && _currentTooltipType == GameAlertType.ElecInsufficient)
                         HideTooltip();
                 }
                 break;
@@ -616,7 +560,6 @@ public class GameAlertUIManager : MonoBehaviour
 
     private void SetAllInactive()
     {
-        if (minetypeallOffCell != null) minetypeallOffCell.SetActive(false);
         if (minerNoResourceCell != null) minerNoResourceCell.SetActive(false);
         if (minerIsFullCell != null) minerIsFullCell.SetActive(false);
         if (unitUnderAttackCell != null) unitUnderAttackCell.SetActive(false);
@@ -625,8 +568,7 @@ public class GameAlertUIManager : MonoBehaviour
         if (droneNoResourceCell != null) droneNoResourceCell.SetActive(false);
         if (constructNoResourceCell != null) constructNoResourceCell.SetActive(false);
         if (storageFullCell != null) storageFullCell.SetActive(false);
-        if (aetherStorageFullCell != null) aetherStorageFullCell.SetActive(false);
-        if (mainEngineRepairCell != null) mainEngineRepairCell.SetActive(false);
+        if (elecInsufficientCell != null) elecInsufficientCell.SetActive(false);
         if (noiseCautionCell != null) noiseCautionCell.SetActive(false);
         if (noiseWarningCell != null) noiseWarningCell.SetActive(false);
         if (noiseDangerCell != null) noiseDangerCell.SetActive(false);
@@ -664,7 +606,7 @@ public class GameAlertUIManager : MonoBehaviour
             if (!string.IsNullOrEmpty(name)) names.Add(name);
         }
         
-        if (type == GameAlertType.StorageFull || type == GameAlertType.AetherStorageFull || type == GameAlertType.MainEngineRepair ||
+        if (type == GameAlertType.StorageFull || type == GameAlertType.ElecInsufficient ||
             type == GameAlertType.NoiseCaution || type == GameAlertType.NoiseWarning || type == GameAlertType.NoiseDanger)
             tooltipText.text = header;
         else if (names.Count > 0)
@@ -679,7 +621,6 @@ public class GameAlertUIManager : MonoBehaviour
     {
         switch (type)
         {
-            case GameAlertType.MineTypeAllOff: return tooltipMineTypeAllOff;
             case GameAlertType.MinerNoResource: return tooltipMinerNoResource;
             case GameAlertType.MinerIsFull: return tooltipMinerIsFull;
             case GameAlertType.UnitUnderAttack: return tooltipUnitUnderAttack;
@@ -688,8 +629,7 @@ public class GameAlertUIManager : MonoBehaviour
             case GameAlertType.DroneNoResource: return tooltipDroneNoResource;
             case GameAlertType.ConstructNoResource: return tooltipConstructNoResource;
             case GameAlertType.StorageFull: return tooltipStorageFull;
-            case GameAlertType.AetherStorageFull: return tooltipAetherStorageFull;
-            case GameAlertType.MainEngineRepair: return tooltipMainEngineRepair;
+            case GameAlertType.ElecInsufficient: return tooltipElecInsufficient;
             case GameAlertType.NoiseCaution: return tooltipNoiseCaution;
             case GameAlertType.NoiseWarning: return tooltipNoiseWarning;
             case GameAlertType.NoiseDanger: return tooltipNoiseDanger;
@@ -701,7 +641,6 @@ public class GameAlertUIManager : MonoBehaviour
     {
         switch (type)
         {
-            case GameAlertType.MineTypeAllOff: return toolTipExtraTextUnit;
             case GameAlertType.MinerNoResource: return toolTipExtraTextUnit;
             case GameAlertType.MinerIsFull: return toolTipExtraTextUnit;
             case GameAlertType.UnitUnderAttack: return toolTipExtraTextUnit;
@@ -759,7 +698,6 @@ public class GameAlertUIManager : MonoBehaviour
     {
         switch (type)
         {
-            case GameAlertType.MineTypeAllOff: return _mineTypeAllOffSources;
             case GameAlertType.MinerNoResource: return _minerNoResourceSources;
             case GameAlertType.MinerIsFull: return _minerIsFullSources;
             case GameAlertType.UnitUnderAttack: return _unitUnderAttackSources;
@@ -768,8 +706,7 @@ public class GameAlertUIManager : MonoBehaviour
             case GameAlertType.DroneNoResource: return _droneNoResourceSources;
             case GameAlertType.ConstructNoResource: return _constructNoResourceSources;
             case GameAlertType.StorageFull: return _storageFullSources;
-            case GameAlertType.AetherStorageFull: return _aetherStorageFullSources;
-            case GameAlertType.MainEngineRepair: return _mainEngineRepairSources;
+            case GameAlertType.ElecInsufficient: return _elecInsufficientSources;
             default: return new List<Damageable>();
         }
     }
@@ -832,7 +769,6 @@ public class GameAlertUIManager : MonoBehaviour
     {
         switch (type)
         {
-            case GameAlertType.MineTypeAllOff:
             case GameAlertType.MinerNoResource:
             case GameAlertType.MinerIsFull:
             case GameAlertType.UnitUnderAttack:

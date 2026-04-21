@@ -49,7 +49,6 @@ public class RequestQuestManager : MonoBehaviour
             return;
         }
 
-        TutorialManager.OnTutorialEnded += OnTutorialEnded;
         SceneManager.sceneLoaded += OnSceneLoaded;
         _eventsSubscribed = true;
     }
@@ -61,7 +60,6 @@ public class RequestQuestManager : MonoBehaviour
             return;
         }
 
-        TutorialManager.OnTutorialEnded -= OnTutorialEnded;
         SceneManager.sceneLoaded -= OnSceneLoaded;
         _eventsSubscribed = false;
     }
@@ -70,7 +68,6 @@ public class RequestQuestManager : MonoBehaviour
     {
         if (_eventsSubscribed)
         {
-            TutorialManager.OnTutorialEnded -= OnTutorialEnded;
             SceneManager.sceneLoaded -= OnSceneLoaded;
             _eventsSubscribed = false;
         }
@@ -80,26 +77,11 @@ public class RequestQuestManager : MonoBehaviour
     {
         if (scene.name == "GameScene")
         {
-            StartCoroutine(CheckTutorialStatusInGameScene());
-        }
-    }
-    
-    private IEnumerator CheckTutorialStatusInGameScene()
-    {
-        yield return null;
-        
-        while (TutorialManager.Instance == null)
-        {
-            yield return null;
-        }
-        
-        bool isTutorialActive = TutorialManager.Instance.IsTutorialActive();
-        bool shouldStartTutorial = TutorialManager.Instance.ShouldStartTutorial();
-        
-        if (!isTutorialActive && !shouldStartTutorial && !_isInitialized)
-        {
-            _isInitialized = true;
-            StartQuestSpawnLoop();
+            if (!_isInitialized)
+            {
+                _isInitialized = true;
+                StartQuestSpawnLoop();
+            }
         }
     }
     
@@ -116,16 +98,6 @@ public class RequestQuestManager : MonoBehaviour
         }
     }
     
-    private void OnTutorialEnded()
-    {
-        if (_isInitialized)
-        {
-            return;
-        }
-        
-        _isInitialized = true;
-        StartQuestSpawnLoop();
-    }
 
     private void StartQuestSpawnLoop()
     {
@@ -147,13 +119,6 @@ public class RequestQuestManager : MonoBehaviour
             }
 
             if (IsLaunchCountdownActive())
-            {
-                yield return CoroutineCache.GetWaitForSeconds(QuestSpawnCheckInterval);
-                continue;
-            }
-
-            bool isTutorialActive = TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive();
-            if (isTutorialActive)
             {
                 yield return CoroutineCache.GetWaitForSeconds(QuestSpawnCheckInterval);
                 continue;
@@ -201,12 +166,6 @@ public class RequestQuestManager : MonoBehaviour
         }
 
         if (IsLaunchCountdownActive())
-        {
-            return;
-        }
-        
-        bool isTutorialActive = TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive();
-        if (isTutorialActive)
         {
             return;
         }

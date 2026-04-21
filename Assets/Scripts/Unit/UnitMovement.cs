@@ -52,8 +52,10 @@ public class UnitMovement : MonoBehaviour
     private UnitBase _unitBase;
     private bool _isEnemy;
 
-    public bool IsMoving {
-        get {
+    public bool IsMoving
+    {
+        get
+        {
             return _rb.linearVelocity.sqrMagnitude > 0.01f || _path.Count > 0 || _currentWaypoint != default;
         }
     }
@@ -83,15 +85,19 @@ public class UnitMovement : MonoBehaviour
         if (Time.frameCount == _lastProcessedFrame) return;
         _lastProcessedFrame = Time.frameCount;
         _pathfindingCallsThisFrame = 0;
-        while (_pathfindingCallsThisFrame < MaxPathfindingPerFrame && _pendingRepathRequests.Count > 0) {
+        while (_pathfindingCallsThisFrame < MaxPathfindingPerFrame && _pendingRepathRequests.Count > 0)
+        {
             var (unit, targetPos, stoppingDistance) = _pendingRepathRequests.Dequeue();
-            if (unit != null && unit.isActiveAndEnabled) {
+            if (unit != null && unit.isActiveAndEnabled)
+            {
                 unit.SetNewTarget(targetPos, stoppingDistance);
             }
         }
-        while (_pathfindingCallsThisFrame < MaxPathfindingPerFrame && _deferredPathfindingRequests.Count > 0) {
+        while (_pathfindingCallsThisFrame < MaxPathfindingPerFrame && _deferredPathfindingRequests.Count > 0)
+        {
             var (unit, targetPos, stoppingDistance) = _deferredPathfindingRequests.Dequeue();
-            if (unit != null && unit.isActiveAndEnabled) {
+            if (unit != null && unit.isActiveAndEnabled)
+            {
                 unit.SetNewTarget(targetPos, stoppingDistance);
             }
         }
@@ -99,27 +105,33 @@ public class UnitMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (_isForceStopped) {
+        if (_isForceStopped)
+        {
             _rb.linearVelocity = Vector2.zero;
             return;
         }
 
-        if (_currentWaypoint == default) {
-            if (_rb.linearVelocity.sqrMagnitude > 0.01f) {
+        if (_currentWaypoint == default)
+        {
+            if (_rb.linearVelocity.sqrMagnitude > 0.01f)
+            {
                 StopMovement();
             }
             return;
         }
 
-        if (!_isEnemy && _grid != null && FogOfWarManager.Instance != null) {
+        if (!_isEnemy && _grid != null && FogOfWarManager.Instance != null)
+        {
             Vector3Int currentCell = _grid.WorldToCell(transform.position);
-            if (currentCell != _lastExploredCell) {
+            if (currentCell != _lastExploredCell)
+            {
                 FogOfWarManager.Instance.ExploreTile(currentCell);
                 _lastExploredCell = currentCell;
             }
         }
 
-        if (_rb.linearVelocity.sqrMagnitude > 0.01f) {
+        if (_rb.linearVelocity.sqrMagnitude > 0.01f)
+        {
             Vector2 normalizedVelocity = _rb.linearVelocity.normalized;
             _spriteController?.UpdateSpriteDirection(normalizedVelocity);
         }
@@ -129,11 +141,14 @@ public class UnitMovement : MonoBehaviour
 
         float currentTolerance = isFinalWaypoint ? 0.02f : waypointTolerance;
 
-        if (distanceToWaypoint < currentTolerance) {
-            if (!isFinalWaypoint) {
+        if (distanceToWaypoint < currentTolerance)
+        {
+            if (!isFinalWaypoint)
+            {
                 _currentWaypoint = _path.Dequeue();
             }
-            else {
+            else
+            {
                 _isAtFinalTarget = true;
                 StopMovement();
                 return;
@@ -142,17 +157,20 @@ public class UnitMovement : MonoBehaviour
 
         Vector3 direction = (_currentWaypoint - transform.position).normalized;
 
-        if (direction.sqrMagnitude > 0.001f) {
+        if (direction.sqrMagnitude > 0.001f)
+        {
             float currentSpeed = moveSpeed;
 
-            if (isFinalWaypoint && distanceToWaypoint < 0.5f) {
+            if (isFinalWaypoint && distanceToWaypoint < 0.5f)
+            {
                 float slowDownFactor = Mathf.Clamp01(distanceToWaypoint / 0.5f);
                 currentSpeed = Mathf.Lerp(0.5f, moveSpeed, slowDownFactor);
             }
 
             _rb.linearVelocity = direction * currentSpeed;
         }
-        else {
+        else
+        {
             _rb.linearVelocity = Vector2.zero;
         }
     }
@@ -174,7 +192,8 @@ public class UnitMovement : MonoBehaviour
 
         Gizmos.color = Color.yellow;
         Vector3 prevPos = transform.position;
-        foreach (Vector3 waypoint in _path) {
+        foreach (Vector3 waypoint in _path)
+        {
             Gizmos.DrawLine(prevPos, waypoint);
             prevPos = waypoint;
         }
@@ -182,7 +201,8 @@ public class UnitMovement : MonoBehaviour
 
     public bool HasReachedTarget(float tolerance = 0.1f)
     {
-        if (FinalTargetPosition == default) {
+        if (FinalTargetPosition == default)
+        {
             return false;
         }
         return _isAtFinalTarget || Vector3.Distance(transform.position, FinalTargetPosition) <= tolerance;
@@ -190,10 +210,12 @@ public class UnitMovement : MonoBehaviour
 
     public Vector3 GetMoveDirection()
     {
-        if (_rb.linearVelocity.sqrMagnitude > 0.01f) {
+        if (_rb.linearVelocity.sqrMagnitude > 0.01f)
+        {
             return _rb.linearVelocity.normalized;
         }
-        if (_currentWaypoint != default && _path.Count > 0) {
+        if (_currentWaypoint != default && _path.Count > 0)
+        {
             return (_currentWaypoint - transform.position).normalized;
         }
         return Vector3.zero;
@@ -211,7 +233,8 @@ public class UnitMovement : MonoBehaviour
 
     public bool SetNewTarget(Vector2 targetPosition, float stoppingDistance)
     {
-        if (_rb == null || _grid == null) {
+        if (_rb == null || _grid == null)
+        {
             return false;
         }
 
@@ -220,19 +243,23 @@ public class UnitMovement : MonoBehaviour
         Vector3Int targetCellPos = _grid.WorldToCell(targetPosition);
         Vector3Int targetCellForPathfinding = targetCellPos;
 
-        if (BuildingManager.Instance != null && BuildingManager.Instance.GetBuildingAt(targetCellPos, out List<Vector3Int> cells)) {
+        if (BuildingManager.Instance != null && BuildingManager.Instance.GetBuildingAt(targetCellPos, out List<Vector3Int> cells))
+        {
             targetCellForPathfinding = FindBestInteractionCell(cells, transform.position);
 
-            if (targetCellForPathfinding == new Vector3Int(int.MinValue, int.MinValue, int.MinValue)) {
+            if (targetCellForPathfinding == new Vector3Int(int.MinValue, int.MinValue, int.MinValue))
+            {
                 Debug.LogWarning($"[{name}] No valid interaction cell found for building at {targetCellPos}");
                 return false;
             }
         }
-        else if (!BuildingManager.Instance.IsCellWalkable(targetCellPos, _unitBase is Unit_Construct)) {
+        else if (!BuildingManager.Instance.IsCellWalkable(targetCellPos, _unitBase is Unit_Construct))
+        {
             List<Vector3Int> occupiedCells = new List<Vector3Int> { targetCellPos };
             targetCellForPathfinding = FindBestInteractionCell(occupiedCells, transform.position);
 
-            if (targetCellForPathfinding == new Vector3Int(int.MinValue, int.MinValue, int.MinValue)) {
+            if (targetCellForPathfinding == new Vector3Int(int.MinValue, int.MinValue, int.MinValue))
+            {
                 Debug.LogWarning($"[{name}] No valid interaction cell found for resource at {targetCellPos}");
                 return false;
             }
@@ -246,24 +273,28 @@ public class UnitMovement : MonoBehaviour
 
         RegisterInteractionCell(targetCellForPathfinding);
 
-        if (!TryConsumePathfindingBudget()) {
+        if (!TryConsumePathfindingBudget())
+        {
             _deferredPathfindingRequests.Enqueue((this, (Vector2)FinalTargetPosition, stoppingDistance));
             return false;
         }
 
         _path = FindPath(transform.position, FinalTargetPosition);
 
-        if (_path.Count > 1) {
+        if (_path.Count > 1)
+        {
             Vector3 firstPoint = _path.Peek();
             Vector3Int firstCell = _grid.WorldToCell(firstPoint);
             Vector3Int currentCell = _grid.WorldToCell(transform.position);
 
-            if (firstCell == currentCell) {
+            if (firstCell == currentCell)
+            {
                 _path.Dequeue();
             }
         }
 
-        if (_path.Count > 0) {
+        if (_path.Count > 0)
+        {
             _currentWaypoint = _path.Dequeue();
             return true;
         }
@@ -307,11 +338,13 @@ public class UnitMovement : MonoBehaviour
         if (_path.Count == 0 && _rb.linearVelocity == Vector2.zero) return;
 
         bool pathIsBlocked = _path.Any(waypoint => _grid.WorldToCell(waypoint) == changedCellPosition);
-        if (_grid.WorldToCell(_currentWaypoint) == changedCellPosition) {
+        if (_grid.WorldToCell(_currentWaypoint) == changedCellPosition)
+        {
             pathIsBlocked = true;
         }
 
-        if (pathIsBlocked) {
+        if (pathIsBlocked)
+        {
             _pendingRepathRequests.Enqueue((this, FinalTargetPosition, _finalStoppingDistance));
         }
     }
@@ -334,33 +367,39 @@ public class UnitMovement : MonoBehaviour
         int iterations = 0;
         int dx = Mathf.Abs(endCell.x - startCell.x);
         int dy = Mathf.Abs(endCell.y - startCell.y);
-        int maxIterations = Mathf.Clamp((dx + dy) * 20, 2000, 12000);
+        int maxIterations = Mathf.Clamp((dx + dy) * 20, 2000, 50000);
 
-        while (OpenSet.Count > 0 && iterations < maxIterations) {
+        while (OpenSet.Count > 0 && iterations < maxIterations)
+        {
             iterations++;
             Node currentNode = OpenSet.Pop();
             if (ClosedSet.Contains(currentNode.position)) continue;
             ClosedSet.Add(currentNode.position);
-            if (currentNode.position == endCell) {
+            if (currentNode.position == endCell)
+            {
                 return ReconstructPath(currentNode);
             }
 
-            foreach (Vector3Int offset in NeighborOffsets) {
+            foreach (Vector3Int offset in NeighborOffsets)
+            {
                 Vector3Int neighborPos = currentNode.position + offset;
                 if (ClosedSet.Contains(neighborPos)) continue;
 
-                if (!BuildingManager.Instance.IsCellWalkable(neighborPos, _unitBase is Unit_Construct)) {
+                if (!BuildingManager.Instance.IsCellWalkable(neighborPos, _unitBase is Unit_Construct))
+                {
                     continue;
                 }
 
                 float newGCost = currentNode.gCost + GetDistance(currentNode.position, neighborPos);
 
-                if (!AllNodes.TryGetValue(neighborPos, out Node neighborNode)) {
+                if (!AllNodes.TryGetValue(neighborPos, out Node neighborNode))
+                {
                     neighborNode = GetNodeFromPool(neighborPos, currentNode, newGCost, GetDistance(neighborPos, endCell));
                     AllNodes.Add(neighborPos, neighborNode);
                     OpenSet.Push(neighborNode);
                 }
-                else if (newGCost < neighborNode.gCost) {
+                else if (newGCost < neighborNode.gCost)
+                {
                     neighborNode.parent = currentNode;
                     neighborNode.gCost = newGCost;
                     OpenSet.Push(neighborNode);
@@ -368,7 +407,8 @@ public class UnitMovement : MonoBehaviour
             }
         }
 
-        if (iterations >= maxIterations) {
+        if (iterations >= maxIterations)
+        {
         }
 
         Debug.LogWarning($"Path not found. start={startCell}, end={endCell}, iter={iterations}/{maxIterations}");
@@ -380,11 +420,14 @@ public class UnitMovement : MonoBehaviour
         HashSet<Vector3Int> interactionCells = new HashSet<Vector3Int>();
         HashSet<Vector3Int> occupiedSet = new HashSet<Vector3Int>(occupiedCells);
 
-        foreach (Vector3Int occupiedCell in occupiedSet) {
-            foreach (Vector3Int offset in CardinalOffsets) {
+        foreach (Vector3Int occupiedCell in occupiedSet)
+        {
+            foreach (Vector3Int offset in CardinalOffsets)
+            {
                 Vector3Int neighbor = occupiedCell + offset;
 
-                if (!occupiedSet.Contains(neighbor) && BuildingManager.Instance.IsCellWalkable(neighbor, _unitBase is Unit_Construct)) {
+                if (!occupiedSet.Contains(neighbor) && BuildingManager.Instance.IsCellWalkable(neighbor, _unitBase is Unit_Construct))
+                {
                     interactionCells.Add(neighbor);
                 }
             }
@@ -400,27 +443,33 @@ public class UnitMovement : MonoBehaviour
         Vector3Int bestCell = new Vector3Int(int.MinValue, int.MinValue, int.MinValue);
         float minDistance = float.MaxValue;
 
-        foreach (Vector3Int cell in potentialCells) {
+        foreach (Vector3Int cell in potentialCells)
+        {
             if (!BuildingManager.Instance.IsCellWalkable(cell, _unitBase is Unit_Construct)) continue;
 
-            bool isAssigned = _cellAssignments.TryGetValue(cell, out var assignedUnits) && 
+            bool isAssigned = _cellAssignments.TryGetValue(cell, out var assignedUnits) &&
                              assignedUnits != null && assignedUnits.Count > 0 &&
                              !assignedUnits.Contains(this);
 
             if (isAssigned) continue;
 
             float distance = GetDistance(startCell, cell);
-            if (distance < minDistance) {
+            if (distance < minDistance)
+            {
                 minDistance = distance;
                 bestCell = cell;
             }
         }
 
-        if (bestCell == new Vector3Int(int.MinValue, int.MinValue, int.MinValue)) {
-            foreach (Vector3Int cell in potentialCells) {
-                if (BuildingManager.Instance.IsCellWalkable(cell, _unitBase is Unit_Construct)) {
+        if (bestCell == new Vector3Int(int.MinValue, int.MinValue, int.MinValue))
+        {
+            foreach (Vector3Int cell in potentialCells)
+            {
+                if (BuildingManager.Instance.IsCellWalkable(cell, _unitBase is Unit_Construct))
+                {
                     float distance = GetDistance(startCell, cell);
-                    if (distance < minDistance) {
+                    if (distance < minDistance)
+                    {
                         minDistance = distance;
                         bestCell = cell;
                     }
@@ -433,13 +482,15 @@ public class UnitMovement : MonoBehaviour
 
     private void RegisterInteractionCell(Vector3Int cell)
     {
-        if (cell == new Vector3Int(int.MinValue, int.MinValue, int.MinValue)) {
+        if (cell == new Vector3Int(int.MinValue, int.MinValue, int.MinValue))
+        {
             return;
         }
 
         _assignedInteractionCell = cell;
 
-        if (!_cellAssignments.TryGetValue(cell, out var units)) {
+        if (!_cellAssignments.TryGetValue(cell, out var units))
+        {
             units = new HashSet<UnitMovement>();
             _cellAssignments[cell] = units;
         }
@@ -449,13 +500,16 @@ public class UnitMovement : MonoBehaviour
 
     private void UnregisterInteractionCell()
     {
-        if (_assignedInteractionCell == new Vector3Int(int.MinValue, int.MinValue, int.MinValue)) {
+        if (_assignedInteractionCell == new Vector3Int(int.MinValue, int.MinValue, int.MinValue))
+        {
             return;
         }
 
-        if (_cellAssignments.TryGetValue(_assignedInteractionCell, out var units)) {
+        if (_cellAssignments.TryGetValue(_assignedInteractionCell, out var units))
+        {
             units.Remove(this);
-            if (units.Count == 0) {
+            if (units.Count == 0)
+            {
                 _cellAssignments.Remove(_assignedInteractionCell);
             }
         }
@@ -467,7 +521,8 @@ public class UnitMovement : MonoBehaviour
     {
         List<Vector3> path = new List<Vector3>();
         Node currentNode = endNode;
-        while (currentNode != null) {
+        while (currentNode != null)
+        {
             path.Add(_grid.GetCellCenterWorld(currentNode.position));
             currentNode = currentNode.parent;
         }
@@ -484,7 +539,8 @@ public class UnitMovement : MonoBehaviour
 
     private Node GetNodeFromPool(Vector3Int position, Node parent, float gCost, float hCost)
     {
-        if (nodePoolIndex >= NodePool.Count) {
+        if (nodePoolIndex >= NodePool.Count)
+        {
             NodePool.Add(new Node());
         }
 
@@ -503,8 +559,10 @@ public class UnitMovement : MonoBehaviour
         public Node parent;
         public Vector3Int position;
 
-        public float FCost {
-            get {
+        public float FCost
+        {
+            get
+            {
                 return gCost + hCost;
             }
         }
@@ -512,7 +570,8 @@ public class UnitMovement : MonoBehaviour
         public int CompareTo(Node other)
         {
             int compare = FCost.CompareTo(other.FCost);
-            if (compare == 0) {
+            if (compare == 0)
+            {
                 compare = hCost.CompareTo(other.hCost);
             }
             return compare;
@@ -555,9 +614,11 @@ public class UnitMovement : MonoBehaviour
 
         private void SortUp(int index)
         {
-            while (index > 0) {
+            while (index > 0)
+            {
                 int parentIndex = (index - 1) / 2;
-                if (_items[index].FCost < _items[parentIndex].FCost) {
+                if (_items[index].FCost < _items[parentIndex].FCost)
+                {
                     Swap(index, parentIndex);
                     index = parentIndex;
                 }
@@ -567,19 +628,23 @@ public class UnitMovement : MonoBehaviour
 
         private void SortDown(int index)
         {
-            while (true) {
+            while (true)
+            {
                 int childIndexLeft = index * 2 + 1;
                 int childIndexRight = index * 2 + 2;
                 int swapIndex = 0;
 
-                if (childIndexLeft < Count) {
+                if (childIndexLeft < Count)
+                {
                     swapIndex = childIndexLeft;
-                    if (childIndexRight < Count) {
+                    if (childIndexRight < Count)
+                    {
                         if (_items[childIndexRight].FCost < _items[childIndexLeft].FCost)
                             swapIndex = childIndexRight;
                     }
 
-                    if (_items[swapIndex].FCost < _items[index].FCost) {
+                    if (_items[swapIndex].FCost < _items[index].FCost)
+                    {
                         Swap(index, swapIndex);
                         index = swapIndex;
                     }

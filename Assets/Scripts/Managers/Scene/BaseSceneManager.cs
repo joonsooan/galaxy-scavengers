@@ -32,28 +32,48 @@ public class BaseSceneManager : MonoBehaviour
 
     private void Awake()
     {
-        titleButton.onClick.AddListener(LoadTitle);
-        inventoryButton.onClick.AddListener(ToggleInventoryPanel);
-        moduleButton.onClick.AddListener(() => {
-            PlayButtonSound();
-            OpenUIPanel(1);
-        });
-        laboratoryButton.onClick.AddListener(() => {
-            PlayButtonSound();
-            OpenUIPanel(2);
-        });
-        farmButton.onClick.AddListener(() => {
-            PlayButtonSound();
-            OpenUIPanel(3);
-        });
-        mapButton.onClick.AddListener(() => {
-            PlayButtonSound();
-            OpenUIPanel(4);
-        });
-        coreLaunchButton.onClick.AddListener(() => {
-            PlayButtonSound();
-            OpenUIPanel(5);
-        });
+        if (titleButton != null) {
+            titleButton.onClick.AddListener(LoadTitle);
+        }
+
+        if (inventoryButton != null) {
+            inventoryButton.onClick.AddListener(ToggleInventoryPanel);
+        }
+
+        if (moduleButton != null) {
+            moduleButton.onClick.AddListener(() => {
+                PlayButtonSound();
+                OpenUIPanel(1);
+            });
+        }
+
+        if (laboratoryButton != null) {
+            laboratoryButton.onClick.AddListener(() => {
+                PlayButtonSound();
+                OpenUIPanel(2);
+            });
+        }
+
+        if (farmButton != null) {
+            farmButton.onClick.AddListener(() => {
+                PlayButtonSound();
+                OpenUIPanel(3);
+            });
+        }
+
+        if (mapButton != null) {
+            mapButton.onClick.AddListener(() => {
+                PlayButtonSound();
+                OpenUIPanel(4);
+            });
+        }
+
+        if (coreLaunchButton != null) {
+            coreLaunchButton.onClick.AddListener(() => {
+                PlayButtonSound();
+                OpenUIPanel(5);
+            });
+        }
 
         if (BgmManager.Instance != null) {
             // BgmManager.Instance.PlayBaseBgm();
@@ -113,24 +133,78 @@ public class BaseSceneManager : MonoBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.Escape)) {
-            CloseUIPanel(_currentPanelIndex);
-        }
-
         if (Input.GetKeyDown(KeyCode.Tab)) {
             ToggleInventoryPanel();
         }
     }
 
+    public bool TryClosePanelForEscape()
+    {
+        if (_baseInventorySystem == null)
+        {
+            _baseInventorySystem = FindFirstObjectByType<BaseInventorySystem>();
+        }
+
+        if (_currentPanelIndex < 0)
+        {
+            if (_baseInventorySystem != null)
+            {
+                GameObject inv = _baseInventorySystem.GetInventoryPanel();
+                if (inv != null && inv.activeSelf)
+                {
+                    _baseInventorySystem.ToggleInventory();
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        int idx = _currentPanelIndex;
+
+        if (idx == 0 && _baseInventorySystem != null)
+        {
+            GameObject inv = _baseInventorySystem.GetInventoryPanel();
+            if (inv != null && inv.activeSelf)
+            {
+                _baseInventorySystem.ToggleInventory();
+                _currentPanelIndex = -1;
+                return true;
+            }
+        }
+
+        CloseUIPanel(idx);
+        return true;
+    }
+
     private void OnDestroy()
     {
-        titleButton.onClick.RemoveAllListeners();
-        inventoryButton.onClick.RemoveAllListeners();
-        moduleButton.onClick.RemoveAllListeners();
-        laboratoryButton.onClick.RemoveAllListeners();
-        farmButton.onClick.RemoveAllListeners();
-        mapButton.onClick.RemoveAllListeners();
-        coreLaunchButton.onClick.RemoveAllListeners();
+        if (titleButton != null) {
+            titleButton.onClick.RemoveAllListeners();
+        }
+
+        if (inventoryButton != null) {
+            inventoryButton.onClick.RemoveAllListeners();
+        }
+
+        if (moduleButton != null) {
+            moduleButton.onClick.RemoveAllListeners();
+        }
+
+        if (laboratoryButton != null) {
+            laboratoryButton.onClick.RemoveAllListeners();
+        }
+
+        if (farmButton != null) {
+            farmButton.onClick.RemoveAllListeners();
+        }
+
+        if (mapButton != null) {
+            mapButton.onClick.RemoveAllListeners();
+        }
+
+        if (coreLaunchButton != null) {
+            coreLaunchButton.onClick.RemoveAllListeners();
+        }
     }
 
     private void PlayButtonSound()
@@ -238,15 +312,6 @@ public class BaseSceneManager : MonoBehaviour
         if (targetPanel != null) {
             targetPanel.SetActive(false);
         }
-    }
-
-    private void CloseAllPanels()
-    {
-        if (moduleUIPanel != null) moduleUIPanel.SetActive(false);
-        if (laboratoryUIPanel != null) laboratoryUIPanel.SetActive(false);
-        if (farmUIPanel != null) farmUIPanel.SetActive(false);
-        if (mapUIPanel != null) mapUIPanel.SetActive(false);
-        if (coreLaunchUIPanel != null) coreLaunchUIPanel.SetActive(false);
     }
 
     private bool IsLoadingScreenActive()

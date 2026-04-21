@@ -88,11 +88,6 @@ public class DroneProduceCell : MonoBehaviour, IPointerEnterHandler, IPointerExi
             LayoutRebuilder.ForceRebuildLayoutImmediate(contentParent);
         }
 
-        _tutorialID = $"{unitData.tutorialKey}";
-        if (TutorialManager.Instance != null) {
-            TutorialManager.Instance.RegisterRuntimeUI(_tutorialID, gameObject, glowMaterial);
-        }
-
         _currentProducedCount = _mainStructure.GetCurrentUnitCount(_unitIndex);
         _targetCount = _mainStructure.GetTargetUnitCount(_unitIndex);
         UpdateUI();
@@ -169,22 +164,8 @@ public class DroneProduceCell : MonoBehaviour, IPointerEnterHandler, IPointerExi
 
         _mainStructure.SetTargetUnitCount(_unitIndex, newTarget);
 
-        if (TutorialManager.Instance != null) {
-            Transform panelParent = transform.parent;
-            while (panelParent != null && !panelParent.name.Contains("Panel") && !panelParent.name.Contains("panel")) {
-                panelParent = panelParent.parent;
-            }
-            if (panelParent != null) {
-                TutorialManager.Instance.DisableHighlightForTarget(panelParent.gameObject);
-            }
-        }
-
         if (!plusButtonSound.IsNull) {
             RuntimeManager.PlayOneShot(plusButtonSound);
-        }
-
-        if (TutorialManager.Instance != null) {
-            TutorialManager.Instance.DisableHighlightForTarget(gameObject);
         }
     }
 
@@ -205,16 +186,6 @@ public class DroneProduceCell : MonoBehaviour, IPointerEnterHandler, IPointerExi
         int newTarget = Mathf.Max(_targetCount - amountToSubtract, 0);
 
         _mainStructure.SetTargetUnitCount(_unitIndex, newTarget);
-
-        if (TutorialManager.Instance != null) {
-            Transform panelParent = transform.parent;
-            while (panelParent != null && !panelParent.name.Contains("Panel") && !panelParent.name.Contains("panel")) {
-                panelParent = panelParent.parent;
-            }
-            if (panelParent != null) {
-                TutorialManager.Instance.DisableHighlightForTarget(panelParent.gameObject);
-            }
-        }
 
         if (!minusButtonSound.IsNull) {
             RuntimeManager.PlayOneShot(minusButtonSound);

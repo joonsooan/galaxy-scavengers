@@ -751,10 +751,6 @@ public class QuestDataManager : MonoBehaviour
 
         SaveQuestProgress();
 
-        TutorialManager tutorialManager = FindFirstObjectByType<TutorialManager>();
-        if (tutorialManager != null) {
-            tutorialManager.OnQuestProgressReset();
-        }
     }
 
     private void SaveQuestProgress()

@@ -95,6 +95,12 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private int maxEnemyTerritoryRadius = 8;
     [SerializeField] private bool drawEnemyTerritoryTiles = true;
 
+    [Header("Ancient Ruins")]
+    [SerializeField] private TileBase ancientRuinsTile;
+    [SerializeField] [Min(1)] private int ancientRuinsSiteCount = 3;
+    [Tooltip("Terrain punch radius (same mechanism as enemy spawn holes).")]
+    [SerializeField] [Min(0.5f)] private float ancientRuinsPunchHoleRadius = 1.5f;
+
     [Header("Decoration Settings")]
     [SerializeField] private Tilemap decorationTilemap;
     [SerializeField] private TileBase grassTiles;
@@ -118,7 +124,11 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private int polishOperationsPerFrame = 1000;
 
     private readonly List<Vector2Int> _enemySpawnHolePositions = new List<Vector2Int>();
+    private readonly List<Vector2Int> _ancientRuinsHolePositions = new List<Vector2Int>();
     private readonly Dictionary<Vector2Int, (float homeRadius, float territoryRadius)> _holeRadiusValues = new Dictionary<Vector2Int, (float homeRadius, float territoryRadius)>();
+    private readonly HashSet<Vector3Int> _ancientRuinsCells = new HashSet<Vector3Int>();
+
+    private const int AncientRuinsFootprint = 3;
     private float _enemyHomeRadius;
     private float _enemyTerritoryRadius;
     private float[,] _gradientMap;
@@ -172,11 +182,309 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
+    public Tilemap DecorationTilemap {
+        get {
+            return decorationTilemap;
+        }
+    }
+
     public bool IsEnemyTerritoryCell(Vector3Int cellPosition)
     {
         if (enemyHomeTilemap != null && enemyHomeTilemap.HasTile(cellPosition)) return true;
         if (enemyTerritoryTilemap != null && enemyTerritoryTilemap.HasTile(cellPosition)) return true;
         return false;
+    }
+
+    public bool IsAncientRuinsCell(Vector3Int cellPosition)
+    {
+        return _ancientRuinsCells.Contains(cellPosition);
+    }
+
+    public IReadOnlyCollection<Vector3Int> AncientRuinsCells => _ancientRuinsCells;
+
+    public void SpawnAncientRuins()
+    {
+        _ancientRuinsCells.Clear();
+
+        if (ancientRuinsTile == null || decorationTilemap == null || ancientRuinsSiteCount <= 0) {
+            return;
+        }
+
+        foreach (Vector2Int holeCenter in _ancientRuinsHolePositions) {
+            PaintAncientRuins3x3(holeCenter);
+        }
+
+        decorationTilemap.CompressBounds();
+    }
+
+    private void PaintAncientRuins3x3(Vector2Int centerArray)
+    {
+        int cx = centerArray.x;
+        int cy = centerArray.y;
+
+        for (int ox = -1; ox <= 1; ox++) {
+            for (int oy = -1; oy <= 1; oy++) {
+                int ax = cx + ox;
+                int ay = cy + oy;
+                Vector3Int cell = new Vector3Int(ax - _mapCenterXOffset, ay - _mapCenterYOffset, 0);
+                _ancientRuinsCells.Add(cell);
+                decorationTilemap.SetTile(cell, ancientRuinsTile);
+            }
+        }
+    }
+
+    private bool IsAncientRuinsFootprintWalkable(int centerX, int centerY)
+    {
+        for (int ox = -1; ox <= 1; ox++) {
+            for (int oy = -1; oy <= 1; oy++) {
+                int x = centerX + ox;
+                int y = centerY + oy;
+
+                if (x < 1 || x >= width - 1 || y < 1 || y >= height - 1) {
+                    return false;
+                }
+
+                Vector3Int cellPos = new Vector3Int(x - _mapCenterXOffset, y - _mapCenterYOffset, 0);
+                bool hasGround = groundTilemap != null && groundTilemap.HasTile(cellPos);
+                bool hasLowGround = lowGroundTilemap != null && lowGroundTilemap.HasTile(cellPos);
+
+                if (!hasGround && !hasLowGround) {
+                    return false;
+                }
+
+                if (IsTerrainCell(cellPos)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private static bool IsAncientRuinsCenterFarEnough(Vector2Int candidate, HashSet<Vector2Int> usedCenters)
+    {
+        foreach (Vector2Int u in usedCenters) {
+            if (Mathf.Max(Mathf.Abs(candidate.x - u.x), Mathf.Abs(candidate.y - u.y)) < AncientRuinsFootprint) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private bool IsAncientRuinsFootprintOverlappingEnemyTerritory(int centerX, int centerY)
+    {
+        for (int ox = -1; ox <= 1; ox++) {
+            for (int oy = -1; oy <= 1; oy++) {
+                int x = centerX + ox;
+                int y = centerY + oy;
+                Vector3Int cellPos = new Vector3Int(x - _mapCenterXOffset, y - _mapCenterYOffset, 0);
+                if (IsEnemyTerritoryCell(cellPos)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private int[,] BuildWalkablePathDistanceMapFromCenter(int mapCenterX, int mapCenterY)
+    {
+        int[,] distanceMap = new int[width, height];
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                distanceMap[x, y] = -1;
+            }
+        }
+
+        bool IsWalkableCell(int x, int y)
+        {
+            if (x < 1 || x >= width - 1 || y < 1 || y >= height - 1) {
+                return false;
+            }
+
+            Vector3Int cellPos = new Vector3Int(x - _mapCenterXOffset, y - _mapCenterYOffset, 0);
+            bool hasGround = groundTilemap != null && groundTilemap.HasTile(cellPos);
+            bool hasLowGround = lowGroundTilemap != null && lowGroundTilemap.HasTile(cellPos);
+            return (hasGround || hasLowGround) && !IsTerrainCell(cellPos);
+        }
+
+        if (!IsWalkableCell(mapCenterX, mapCenterY)) {
+            return distanceMap;
+        }
+
+        Queue<Vector2Int> queue = new Queue<Vector2Int>();
+        distanceMap[mapCenterX, mapCenterY] = 0;
+        queue.Enqueue(new Vector2Int(mapCenterX, mapCenterY));
+
+        Vector2Int[] offsets = {
+            new Vector2Int(1, 0),
+            new Vector2Int(-1, 0),
+            new Vector2Int(0, 1),
+            new Vector2Int(0, -1)
+        };
+
+        while (queue.Count > 0) {
+            Vector2Int current = queue.Dequeue();
+            int nextDistance = distanceMap[current.x, current.y] + 1;
+
+            foreach (Vector2Int offset in offsets) {
+                int nx = current.x + offset.x;
+                int ny = current.y + offset.y;
+
+                if (!IsWalkableCell(nx, ny) || distanceMap[nx, ny] >= 0) {
+                    continue;
+                }
+
+                distanceMap[nx, ny] = nextDistance;
+                queue.Enqueue(new Vector2Int(nx, ny));
+            }
+        }
+
+        return distanceMap;
+    }
+
+    private bool TryFindAncientRuinsCenterInAnnulus(
+        int mapCenterX,
+        int mapCenterY,
+        float minRadius,
+        float maxRadius,
+        HashSet<Vector2Int> usedCenters,
+        out Vector2Int pos
+    )
+    {
+        for (int x = 2; x < width - 2; x++) {
+            for (int y = 2; y < height - 2; y++) {
+                Vector2Int c = new Vector2Int(x, y);
+                float dx = x - mapCenterX;
+                float dy = y - mapCenterY;
+                float d = Mathf.Sqrt(dx * dx + dy * dy);
+                if (d < minRadius || d > maxRadius) {
+                    continue;
+                }
+
+                if (!IsAncientRuinsCenterFarEnough(c, usedCenters)) {
+                    continue;
+                }
+
+                if (!IsValidHolePosition(x, y, ancientRuinsPunchHoleRadius)) {
+                    continue;
+                }
+
+                if (!IsAncientRuinsFootprintWalkable(x, y)) {
+                    continue;
+                }
+
+                pos = c;
+                return true;
+            }
+        }
+
+        pos = default;
+        return false;
+    }
+
+    private bool TryFindAncientRuinsCenterFarthestByPathDistance(
+        int[,] pathDistanceMap,
+        HashSet<Vector2Int> usedCenters,
+        out Vector2Int pos
+    )
+    {
+        Vector2Int best = default;
+        int bestDistance = -1;
+
+        for (int x = 2; x < width - 2; x++) {
+            for (int y = 2; y < height - 2; y++) {
+                Vector2Int c = new Vector2Int(x, y);
+                if (!IsAncientRuinsCenterFarEnough(c, usedCenters)) {
+                    continue;
+                }
+
+                if (!IsValidHolePosition(x, y, ancientRuinsPunchHoleRadius)) {
+                    continue;
+                }
+
+                if (!IsAncientRuinsFootprintWalkable(x, y)) {
+                    continue;
+                }
+
+                if (IsAncientRuinsFootprintOverlappingEnemyTerritory(x, y)) {
+                    continue;
+                }
+
+                int pathDistance = pathDistanceMap[x, y];
+                if (pathDistance < 0) {
+                    continue;
+                }
+
+                if (pathDistance > bestDistance) {
+                    bestDistance = pathDistance;
+                    best = c;
+                }
+            }
+        }
+
+        if (bestDistance < 0) {
+            pos = default;
+            return false;
+        }
+
+        pos = best;
+        return true;
+    }
+
+    private void AddAncientRuinsSite(Vector2Int holeCenter, HashSet<Vector2Int> usedCenters)
+    {
+        _ancientRuinsHolePositions.Add(holeCenter);
+        usedCenters.Add(holeCenter);
+        PunchHoleWithThreshold(holeCenter.x, holeCenter.y, ancientRuinsPunchHoleRadius);
+    }
+
+    private void PunchAncientRuinsSites()
+    {
+        _ancientRuinsHolePositions.Clear();
+
+        if (ancientRuinsSiteCount <= 0) {
+            return;
+        }
+
+        HashSet<Vector2Int> usedCenters = new HashSet<Vector2Int>();
+
+        int centerX = width / 2;
+        int centerY = height / 2;
+        int[,] pathDistanceMap = BuildWalkablePathDistanceMapFromCenter(centerX, centerY);
+
+        while (_ancientRuinsHolePositions.Count < ancientRuinsSiteCount) {
+            if (!TryFindAncientRuinsCenterFarthestByPathDistance(pathDistanceMap, usedCenters, out Vector2Int hole)) {
+                break;
+            }
+
+            AddAncientRuinsSite(hole, usedCenters);
+        }
+    }
+
+    private IEnumerator PunchAncientRuinsSitesAsync()
+    {
+        _ancientRuinsHolePositions.Clear();
+
+        if (ancientRuinsSiteCount <= 0) {
+            yield break;
+        }
+
+        HashSet<Vector2Int> usedCenters = new HashSet<Vector2Int>();
+
+        int centerX = width / 2;
+        int centerY = height / 2;
+        int[,] pathDistanceMap = BuildWalkablePathDistanceMapFromCenter(centerX, centerY);
+
+        while (_ancientRuinsHolePositions.Count < ancientRuinsSiteCount) {
+            if (!TryFindAncientRuinsCenterFarthestByPathDistance(pathDistanceMap, usedCenters, out Vector2Int hole)) {
+                break;
+            }
+
+            AddAncientRuinsSite(hole, usedCenters);
+            yield return null;
+        }
     }
 
     public IReadOnlyList<Vector2Int> EnemySpawnHolePositions {
@@ -618,6 +926,7 @@ public class MapGenerator : MonoBehaviour
         if (enableEnemySpawnHoles) {
             yield return StartCoroutine(PunchEnemySpawnHolesAsync());
         }
+        yield return StartCoroutine(PunchAncientRuinsSitesAsync());
         if (fillDisconnectedAreas) {
             yield return StartCoroutine(FillDisconnectedAreasAsync());
         }
@@ -707,6 +1016,8 @@ public class MapGenerator : MonoBehaviour
 
     private void ClearEnemyTerritoryTilemaps()
     {
+        _ancientRuinsHolePositions.Clear();
+
         if (enemyHomeTilemap != null) {
             enemyHomeTilemap.ClearAllTiles();
         }
@@ -736,6 +1047,7 @@ public class MapGenerator : MonoBehaviour
         if (enableCenterCircle) PunchCenterCircle();
         if (fillDisconnectedAreas) FillDisconnectedAreas();
         if (enableEnemySpawnHoles) PunchEnemySpawnHoles();
+        PunchAncientRuinsSites();
         if (fillDisconnectedAreas) FillDisconnectedAreas();
         ConnectWallsToBorders();
         RemoveIsolatedLowWalls();

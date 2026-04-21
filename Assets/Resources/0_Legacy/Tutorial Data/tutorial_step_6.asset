@@ -14,23 +14,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stepIndex: 6
   text: "\uC88B\uC2B5\uB2C8\uB2E4! \uC774\uC81C \uC790\uC6D0\uC744 \uCC44\uAD74\uD560
-    \uC900\uBE44\uAC00 \uB41C \uAC83 \uAC19\uB124\uC694.\n\uCC44\uAD74\uD560 \uC218
-    \uC788\uB294 \uC790\uC6D0\uC740 \uCD1D 4\uAC00\uC9C0\uB85C, <color=#DBD1C7>\uD68C\uC0C9</color>,
-    <color=#FFC107>\uB178\uB780\uC0C9</color>, <color=#52AE68>\uCD08\uB85D\uC0C9</color>,
-    <color=#6358D8>\uD30C\uB780\uC0C9</color> \uC790\uC6D0\uC774 \uC874\uC7AC\uD569\uB2C8\uB2E4.\n\uBA54\uC778
-    \uC720\uB2DB\uC744 \uC790\uC6D0 \uBB34\uB354\uAE30 \uADFC\uCC98\uB85C \uC774\uB3D9\uC2DC\uD0A8
-    \uB2E4\uC74C, <color=#FFC107>\uC790\uC6D0 \uBE14\uB85D\uC744 \uD074\uB9AD</color>\uD558\uBA74
+    \uC900\uBE44\uAC00 \uB41C \uAC83 \uAC19\uB124\uC694.\n\uBA54\uC778 \uC720\uB2DB\uC744
+    \uC790\uC6D0 \uBB34\uB354\uAE30 \uADFC\uCC98\uB85C \uC774\uB3D9\uC2DC\uD0A8 \uB2E4\uC74C,
+    <color=#FFC107>\uC790\uC6D0 \uBE14\uB85D\uC744 \uD074\uB9AD</color>\uD558\uBA74
     \uCC44\uAD74\uC744 \uC2DC\uC791\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4.\n<color=#DBD1C7>\uD68C\uC0C9
     \uC790\uC6D0</color>\uC744 \uD55C\uBC88 \uCC44\uAD74\uD574\uBCF4\uC8E0!"
   stepType: 6
   duration: 0
-  count: 20
+  count: 10
   resourceType: 0
   buildingType: 
   unitType: 
   itemType: 
   showProgressBar: 1
   enableUIPanels: 
+  tutorialPanelMoveDownOffset: 0
   spawnUnits: []
   grantResources: []
   completionSound:
@@ -44,3 +42,6 @@ MonoBehaviour:
   highlightTargetIDs: []
   showArrowUI: 0
   arrowID: 
+  showTargetBracket: 0
+  targetBracketBuildingType: 
+  includeConstructionSiteForTargetBracket: 1

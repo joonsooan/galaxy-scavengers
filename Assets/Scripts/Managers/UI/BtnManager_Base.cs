@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class BtnManager_Base : MonoBehaviour
 {
     [SerializeField] private Button coreLaunchButton;
+    [SerializeField] private Button tutorialLaunchButton;
     [SerializeField] private Button titleButton;
     [SerializeField] private EventReference coreLaunchSound;
     [SerializeField] private CanvasGroup fadeCanvasGroup;
@@ -15,8 +16,18 @@ public class BtnManager_Base : MonoBehaviour
 
     private void Awake()
     {
+        if (tutorialLaunchButton == null) {
+            GameObject tutorialButtonObject = GameObject.Find("Tutorial Btn");
+            if (tutorialButtonObject != null) {
+                tutorialLaunchButton = tutorialButtonObject.GetComponent<Button>();
+            }
+        }
+
         if (coreLaunchButton != null) {
             coreLaunchButton.onClick.AddListener(OnCoreLaunchClicked);
+        }
+        if (tutorialLaunchButton != null) {
+            tutorialLaunchButton.onClick.AddListener(OnTutorialLaunchClicked);
         }
 
         if (titleButton != null) {
@@ -43,6 +54,9 @@ public class BtnManager_Base : MonoBehaviour
     {
         if (coreLaunchButton != null) {
             coreLaunchButton.onClick.RemoveListener(OnCoreLaunchClicked);
+        }
+        if (tutorialLaunchButton != null) {
+            tutorialLaunchButton.onClick.RemoveListener(OnTutorialLaunchClicked);
         }
         if (titleButton != null) {
             titleButton.onClick.RemoveListener(BackToTitle);
@@ -101,7 +115,51 @@ public class BtnManager_Base : MonoBehaviour
             }
         }
 
-        SceneLoader.Instance.LoadGameScene();
+        SceneLoader.Instance.LoadGameScene(PlanetSelectionState.GetSelectedSceneName());
+    }
+
+    private void OnTutorialLaunchClicked()
+    {
+        if (_isLaunching) {
+            return;
+        }
+
+        _isLaunching = true;
+
+        if (!coreLaunchSound.IsNull) {
+            RuntimeManager.PlayOneShot(coreLaunchSound);
+        }
+
+        if (BgmManager.Instance != null) {
+            BgmManager.Instance.StopBgm(fadeDuration);
+        }
+
+        StartCoroutine(TutorialLaunchSequence());
+    }
+
+    private IEnumerator TutorialLaunchSequence()
+    {
+        if (fadeCanvasGroup != null) {
+            if (fadeCanvasGroup.gameObject != null) {
+                fadeCanvasGroup.gameObject.SetActive(true);
+            }
+
+            if (fadeDuration > 0f) {
+                float elapsed = 0f;
+                while (elapsed < fadeDuration) {
+                    elapsed += Time.deltaTime;
+                    float t = Mathf.Clamp01(elapsed / fadeDuration);
+                    fadeCanvasGroup.alpha = t;
+                    yield return null;
+                }
+                fadeCanvasGroup.alpha = 1f;
+            }
+            else {
+                fadeCanvasGroup.alpha = 1f;
+            }
+        }
+
+        SceneLoader.Instance.LoadTutorialScene();
     }
 
     private void BackToTitle()

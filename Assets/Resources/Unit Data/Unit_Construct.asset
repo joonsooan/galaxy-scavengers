@@ -13,10 +13,7 @@ MonoBehaviour:
   m_Name: Unit_Construct
   m_EditorClassIdentifier: 
   unitName: "\uAC74\uC124 \uC720\uB2DB"
-  description: "\uAC74\uBB3C \uAC74\uC124\uC744 \uB2F4\uB2F9\uD558\uB294 \uB4EC\uC9C1\uD55C
-    \uC720\uB2DB\uC785\uB2C8\uB2E4.\n\uBA38\uB9AC\uC758 \uC548\uC804\uBAA8\uB294
-    \uACF5\uC0AC\uC7A5\uC758 \uB099\uD558\uBB3C\uACFC \uC801\uB4E4\uC758 \uACF5\uACA9\uC73C\uB85C\uBD80\uD130
-    \uBCF4\uD638\uD574\uC8FC\uC8E0."
+  description: "\uAC74\uBB3C \uAC74\uC124\uC744 \uB2F4\uB2F9\uD558\uB294 \uC720\uB2DB\uC785\uB2C8\uB2E4."
   tutorialKey: unit_construct
   unitIcon: {fileID: -4285660500280345620, guid: 30f01861364baa14a97fcbce326e83db, type: 3}
   unitPrefab: {fileID: 6649466925040614564, guid: 20209a0e29d055c4b8ec63641b9ca28e, type: 3}

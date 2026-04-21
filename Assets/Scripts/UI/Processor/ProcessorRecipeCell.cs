@@ -54,11 +54,6 @@ public class ProcessorRecipeCell : MonoBehaviour
         _ingredients = _recipeData.ingredients;
         _produceMaxAmount = _activeRecipe.maxProductionLimit;
 
-        _tutorialID = $"processor_{_recipeData.resourceType}";
-        if (TutorialManager.Instance != null) {
-            TutorialManager.Instance.RegisterRuntimeUI(_tutorialID, gameObject, glowMaterial);
-        }
-
         UpdateCurrentAmount();
         UpdateUI();
 
@@ -162,22 +157,8 @@ public class ProcessorRecipeCell : MonoBehaviour
             _activeRecipe.SetProductionLimit(_produceMaxAmount);
         }
 
-        if (TutorialManager.Instance != null) {
-            Transform panelParent = transform.parent;
-            while (panelParent != null && !panelParent.name.Contains("Panel") && !panelParent.name.Contains("panel")) {
-                panelParent = panelParent.parent;
-            }
-            if (panelParent != null) {
-                TutorialManager.Instance.DisableHighlightForTarget(panelParent.gameObject);
-            }
-        }
-
         if (!plusButtonSound.IsNull) {
             RuntimeManager.PlayOneShot(plusButtonSound);
-        }
-
-        if (TutorialManager.Instance != null) {
-            TutorialManager.Instance.DisableHighlightForTarget(gameObject);
         }
     }
 
@@ -197,16 +178,6 @@ public class ProcessorRecipeCell : MonoBehaviour
             UpdateUI();
 
             _activeRecipe.SetProductionLimit(_produceMaxAmount);
-        }
-
-        if (TutorialManager.Instance != null) {
-            Transform panelParent = transform.parent;
-            while (panelParent != null && !panelParent.name.Contains("Panel") && !panelParent.name.Contains("panel")) {
-                panelParent = panelParent.parent;
-            }
-            if (panelParent != null) {
-                TutorialManager.Instance.DisableHighlightForTarget(panelParent.gameObject);
-            }
         }
 
         if (!minusButtonSound.IsNull) {

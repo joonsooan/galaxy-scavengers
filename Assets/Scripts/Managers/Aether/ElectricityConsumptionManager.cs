@@ -11,6 +11,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
     public static ElectricityConsumptionManager Instance { get; private set; }
 
     public bool IsElectricityDemandUnmet { get; private set; }
+    public bool HasActiveElectricityDemand { get; private set; }
 
     public event Action OnAfterElectricityConsumersResolved;
 
@@ -89,13 +90,26 @@ public class ElectricityConsumptionManager : MonoBehaviour
     {
         get
         {
-            int total = 0;
-            foreach (MainStructure mainStructure in _mainStructures)
+            if (ResourceManager.Instance == null)
             {
-                if (mainStructure != null)
+                return 0;
+            }
+
+            int total = 0;
+            foreach (IStorage storage in ResourceManager.Instance.GetAllStorages())
+            {
+                if (storage == null || storage is Battery)
                 {
-                    total += mainStructure.BaseAetherCapacity;
+                    continue;
                 }
+
+                Component c = storage as Component;
+                if (c == null || c.gameObject == null || !c.gameObject.activeInHierarchy)
+                {
+                    continue;
+                }
+
+                total += storage.GetMaxCapacity();
             }
 
             return total;
@@ -186,6 +200,34 @@ public class ElectricityConsumptionManager : MonoBehaviour
     }
 
     public float NetElectricityPerSecond => GetEffectiveElectricityProductionPerSecond() - GetTotalElectricityConsumptionPerSecond();
+
+    public bool HasAnyActiveElectricityDemandingBuilding()
+    {
+        for (int i = 0; i < _electricityConsumers.Count; i++)
+        {
+            IElectricityConsumer consumer = _electricityConsumers[i];
+            if (consumer == null || consumer.ElectricityConsumptionPerSecond <= 0)
+            {
+                continue;
+            }
+
+            Component component = consumer as Component;
+            if (component == null || !component.gameObject.activeInHierarchy)
+            {
+                continue;
+            }
+
+            Behaviour behaviour = component as Behaviour;
+            if (behaviour != null && !behaviour.isActiveAndEnabled)
+            {
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
 
     public PowerFeedVisualState GetConsumerVisualState(IElectricityConsumer consumer)
     {
@@ -624,6 +666,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
             }
         }
 
+        HasActiveElectricityDemand = HasAnyActiveElectricityDemandingBuilding();
         IsElectricityDemandUnmet = unmet;
         OnAfterElectricityConsumersResolved?.Invoke();
     }
@@ -964,11 +1007,6 @@ public class ElectricityConsumptionManager : MonoBehaviour
             _electricityWithdrawOrderBuffer.Add(outComp[i].b);
         }
 
-        MainStructure mainStructure = ResourceDataManager.Instance != null ? ResourceDataManager.Instance.GetMainStructure() : null;
-        if (mainStructure != null && mainStructure.GetCurrentResourceAmount(ResourceType.Electricity) > 0)
-        {
-            _electricityWithdrawOrderBuffer.Add(mainStructure);
-        }
     }
 
     public void ReleasePowerFloatingIcon(PowerStatusWorldFollower follower)

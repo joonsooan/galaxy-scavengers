@@ -163,6 +163,26 @@ public abstract class UnitBase : Damageable
         }
     }
 
+    protected void ApplyUpgradeMoveSpeed(float prefabBaseMoveSpeed, float multiplier)
+    {
+        if (_idleRoamMovement == null) {
+            _idleRoamMovement = GetComponent<UnitMovement>();
+        }
+
+        if (_idleRoamMovement == null) {
+            return;
+        }
+
+        float fullSpeed = prefabBaseMoveSpeed * multiplier;
+        if (_idleRoamSpeedReduced) {
+            _idleRoamOriginalSpeed = fullSpeed;
+            _idleRoamMovement.moveSpeed = fullSpeed * 0.5f;
+        }
+        else {
+            _idleRoamMovement.moveSpeed = fullSpeed;
+        }
+    }
+
     private Vector3 FindWalkableIdleDestination()
     {
         Grid grid = BuildingManager.Instance.grid;

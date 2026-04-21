@@ -35,8 +35,6 @@ public struct HighlightableUI
 
 public class TutorialManager : MonoBehaviour
 {
-    private const string TutorialCompletedPrefsKey = "GalaxyScavengers_TutorialCompleted";
-
     [Header("Tutorial Settings")]
     [SerializeField] private GameObject tutorialUI;
     [SerializeField] private TutorialStepData[] tutorialStepDataList;
@@ -93,6 +91,7 @@ public class TutorialManager : MonoBehaviour
     private Transform _currentTargetBracketTransform;
 
     private float _wasdInputTime;
+    private bool _isTutorialScene;
     public static TutorialManager Instance { get; private set; }
     
     public static event Action OnTutorialEnded;
@@ -126,6 +125,17 @@ public class TutorialManager : MonoBehaviour
 
     private void Start()
     {
+        _isTutorialScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "TutorialScene";
+        if (!_isTutorialScene) {
+            _isTutorialActive = false;
+            BuildUIPanelDictionary();
+            ShowAllUIPanels(true);
+            if (_tutorialUI != null) {
+                _tutorialUI.HideTutorial();
+            }
+            return;
+        }
+
         bool shouldStart = ShouldStartTutorial();
 
         if (shouldStart) {
@@ -172,17 +182,7 @@ public class TutorialManager : MonoBehaviour
 
     public bool ShouldStartTutorial()
     {
-        if (GameManager.Instance != null && GameManager.Instance.IgnoreTutorial) {
-            return false;
-        }
-
-        return PlayerPrefs.GetInt(TutorialCompletedPrefsKey, 0) == 0;
-    }
-
-    private static void MarkTutorialCompletedInPrefs()
-    {
-        PlayerPrefs.SetInt(TutorialCompletedPrefsKey, 1);
-        PlayerPrefs.Save();
+        return _isTutorialScene;
     }
 
     private IEnumerator WaitForGameInitialization()
@@ -757,7 +757,6 @@ public class TutorialManager : MonoBehaviour
             BgmManager.Instance.PlayGameBgm();
         }
 
-        MarkTutorialCompletedInPrefs();
         OnTutorialEnded?.Invoke();
     }
 
@@ -780,7 +779,6 @@ public class TutorialManager : MonoBehaviour
             _tutorialUI.HideTutorial();
         }
 
-        MarkTutorialCompletedInPrefs();
         OnTutorialEnded?.Invoke();
     }
 
@@ -804,9 +802,6 @@ public class TutorialManager : MonoBehaviour
                 _tutorialUI.HideTutorial();
             }
         }
-
-        PlayerPrefs.DeleteKey(TutorialCompletedPrefsKey);
-        PlayerPrefs.Save();
 
         if (ShouldStartTutorial()) {
             InitializeTutorialSteps();

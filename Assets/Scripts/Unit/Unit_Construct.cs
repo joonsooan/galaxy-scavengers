@@ -323,11 +323,10 @@ public class Unit_Construct : UnitBase
 
                 if (!movedToNext) {
                     if (_carriedAmount > 0 && CanDepositResource()) {
-                        Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
-                        Vector3 interactionPos = _currentRequest.site.AssignDeliveryInteractionCell(this, targetPieceCell);
-                        movement.ResumeMovement();
-                        movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
-                        _currentState = ConstructState.DeliveringResource;
+                        if (!TryBeginDeliveringToConstructionSite()) {
+                            _currentRequest?.site?.CancelRequest(_currentRequest);
+                            SetTask_Idle();
+                        }
                     }
                     else {
                         _currentRequest?.site?.CancelRequest(_currentRequest);
@@ -337,11 +336,10 @@ public class Unit_Construct : UnitBase
             }
             else {
                 if (_carriedAmount > 0 && CanDepositResource()) {
-                    Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
-                    Vector3 interactionPos = _currentRequest.site.AssignDeliveryInteractionCell(this, targetPieceCell);
-                    movement.ResumeMovement();
-                    movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
-                    _currentState = ConstructState.DeliveringResource;
+                    if (!TryBeginDeliveringToConstructionSite()) {
+                        _currentRequest?.site?.CancelRequest(_currentRequest);
+                        SetTask_Idle();
+                    }
                 }
                 else {
                     _currentRequest?.site?.CancelRequest(_currentRequest);
@@ -351,11 +349,10 @@ public class Unit_Construct : UnitBase
         }
         else {
             if (_carriedAmount > 0 && CanDepositResource()) {
-                Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
-                Vector3 interactionPos = _currentRequest.site.AssignDeliveryInteractionCell(this, targetPieceCell);
-                movement.ResumeMovement();
-                movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
-                _currentState = ConstructState.DeliveringResource;
+                if (!TryBeginDeliveringToConstructionSite()) {
+                    _currentRequest?.site?.CancelRequest(_currentRequest);
+                    SetTask_Idle();
+                }
             }
             else {
                 _currentRequest?.site?.CancelRequest(_currentRequest);
@@ -554,6 +551,28 @@ public class Unit_Construct : UnitBase
         }
     }
 
+    private bool TryBeginDeliveringToConstructionSite()
+    {
+        if (_currentRequest == null || _currentRequest.site == null || movement == null) {
+            return false;
+        }
+
+        if (_carriedAmount <= 0 || !CanDepositResource()) {
+            return false;
+        }
+
+        Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
+        Vector3 interactionPos = _currentRequest.site.AssignDeliveryInteractionCell(this, targetPieceCell);
+        movement.ResumeMovement();
+        bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
+        if (!hasPath) {
+            return false;
+        }
+
+        _currentState = ConstructState.DeliveringResource;
+        return true;
+    }
+
     public void SetTask_FetchResource(ConstructionSite.ConstructionRequest request, ConstructionSite site)
     {
         ResetIdleRoam();
@@ -562,6 +581,12 @@ public class Unit_Construct : UnitBase
                 request.site.CancelRequest(request);
             }
             return;
+        }
+
+        if (_carriedAmount > 0 && ResourceManager.Instance != null) {
+            ReturnCarriedResourcesToStorage();
+            _carriedAmount = 0;
+            _carriedResourceType = default;
         }
 
         _currentRequest = request;

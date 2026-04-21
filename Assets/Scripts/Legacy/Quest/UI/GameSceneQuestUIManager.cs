@@ -86,8 +86,6 @@ public class GameSceneQuestUIManager : MonoBehaviour
         if (QuestDataManager.Instance != null)
             QuestDataManager.Instance.OnQuestStateChanged += OnQuestStateChanged;
         SubscribeToGameSceneInitialized();
-        TutorialManager.OnTutorialEnded += OnTutorialEnded;
-        
         if (RequestQuestManager.Instance != null)
         {
             RequestQuestManager.OnRequestQuestSpawned += OnRequestQuestSpawned;
@@ -145,7 +143,6 @@ public class GameSceneQuestUIManager : MonoBehaviour
             QuestDataManager.Instance.OnQuestStateChanged -= OnQuestStateChanged;
         RequestQuestManager.OnRequestQuestSpawned -= OnRequestQuestSpawned;
         GameManager.OnGameSceneInitialized -= OnGameSceneInitialized;
-        TutorialManager.OnTutorialEnded -= OnTutorialEnded;
     }
 
     private void SubscribeToGameSceneInitialized()
@@ -246,12 +243,6 @@ public class GameSceneQuestUIManager : MonoBehaviour
         }
     }
 
-    private void OnTutorialEnded()
-    {
-        LoadActiveQuests();
-        UpdateNotifierIcons();
-    }
-    
     private void DisableShaderMaterial()
     {
         if (shaderMaterial != null)
@@ -318,19 +309,9 @@ public class GameSceneQuestUIManager : MonoBehaviour
         DisableShaderMaterial();
     }
 
-    private bool IsTutorialActive()
-    {
-        return TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive();
-    }
-
     private bool IsQuestVisibleDuringTutorial(QuestData quest)
     {
-        if (!IsTutorialActive())
-        {
-            return true;
-        }
-        
-        return false;
+        return true;
     }
     
     private IEnumerator RefreshQuestListAfterSpawn()
@@ -510,17 +491,6 @@ public class GameSceneQuestUIManager : MonoBehaviour
 
     private void ShowNotifierForNewQuest(int questId, bool playSound = false)
     {
-        if (IsTutorialActive())
-        {
-            if (notifierIcon != null)
-            {
-                notifierIcon.SetActive(false);
-            }
-            _questPanelShaderSuppressed = true;
-            DisableShaderMaterial();
-            return;
-        }
-
         if (notifierIcon != null)
         {
             notifierIcon.SetActive(true);
@@ -537,17 +507,6 @@ public class GameSceneQuestUIManager : MonoBehaviour
     
     private void UpdateNotifierIcons()
     {
-        if (IsTutorialActive())
-        {
-            if (notifierIcon != null)
-            {
-                notifierIcon.SetActive(false);
-            }
-            _questPanelShaderSuppressed = true;
-            DisableShaderMaterial();
-            return;
-        }
-
         bool hasActiveNotifier = false;
         
         foreach (QuestCell cell in _questCells)

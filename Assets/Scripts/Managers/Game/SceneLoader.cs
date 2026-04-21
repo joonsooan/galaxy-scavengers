@@ -12,6 +12,7 @@ public class SceneLoader : MonoBehaviour
     [SerializeField] private string titleSceneName = "TitleScene";
     [SerializeField] private string baseSceneName = "BaseScene";
     [SerializeField] private string gameSceneName = "GameScene";
+    [SerializeField] private string tutorialSceneName = "TutorialScene";
 
     [Header("Fade Settings")]
     [SerializeField] private float fadeDuration = 0.5f;
@@ -86,7 +87,26 @@ public class SceneLoader : MonoBehaviour
     public void LoadGameScene()
     {
         if (_isLoading) return;
-        StartCoroutine(LoadGameSceneAsync());
+        StartCoroutine(LoadGameplaySceneAsync(gameSceneName));
+    }
+
+    public void LoadGameScene(string sceneName)
+    {
+        if (_isLoading) return;
+
+        if (string.IsNullOrWhiteSpace(sceneName))
+        {
+            StartCoroutine(LoadGameplaySceneAsync(gameSceneName));
+            return;
+        }
+
+        StartCoroutine(LoadGameplaySceneAsync(sceneName));
+    }
+
+    public void LoadTutorialScene()
+    {
+        if (_isLoading) return;
+        StartCoroutine(LoadGameplaySceneAsync(tutorialSceneName));
     }
 
     public void LoadBaseScene(ReturnFromGameState returnState = ReturnFromGameState.None)
@@ -112,7 +132,7 @@ public class SceneLoader : MonoBehaviour
         _isLoading = false;
     }
 
-    private IEnumerator LoadGameSceneAsync()
+    private IEnumerator LoadGameplaySceneAsync(string targetSceneName)
     {
         _isLoading = true;
         UpdateCachedWaits();
@@ -124,7 +144,7 @@ public class SceneLoader : MonoBehaviour
             yield return StartCoroutine(WaitForLoadingEntry(LoadingUIManager.Instance.GetLoadingScreenComponent()));
         }
 
-        yield return StartCoroutine(AsyncLoadRoutine(gameSceneName, true));
+        yield return StartCoroutine(AsyncLoadRoutine(targetSceneName, true));
 
         while (GameManager.Instance == null || !GameManager.Instance.IsGameSceneInitialized) yield return null;
 
@@ -135,10 +155,7 @@ public class SceneLoader : MonoBehaviour
         yield return StartCoroutine(FadeRoutine(0f, fadeDuration));
         yield return _gameScenePostFadeDelayWait;
         
-        if (TutorialManager.Instance == null || (!TutorialManager.Instance.IsTutorialActive() && !TutorialManager.Instance.ShouldStartTutorial()))
-        {
-            BgmManager.Instance?.PlayGameBgm();
-        }
+        BgmManager.Instance?.PlayGameBgm();
         GameManager.Instance?.SpawnUnitsAfterLoading();
         if (GameManager.Instance != null) GameManager.IsGameplayReady = true;
 

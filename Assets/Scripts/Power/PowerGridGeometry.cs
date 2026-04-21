@@ -32,16 +32,6 @@ public static class PowerGridGeometry
         Gizmos.color = prev;
     }
 
-    /// <summary>nxn square with <paramref name="anchorMin"/> as the minimum corner cell (legacy / tile-aligned).</summary>
-    public static BoundsInt ComputeSquareCoverage(Vector3Int anchorMin, int n)
-    {
-        if (n <= 0) {
-            return new BoundsInt(anchorMin.x, anchorMin.y, anchorMin.z, 0, 0, 1);
-        }
-
-        return new BoundsInt(anchorMin.x, anchorMin.y, anchorMin.z, n, n, 1);
-    }
-
     /// <summary>nxn square on the grid centered on <paramref name="centerCell"/> (odd n: exact center; even n: slight left/bottom bias).</summary>
     public static BoundsInt ComputeSquareCoverageCentered(Vector3Int centerCell, int n)
     {

@@ -9,6 +9,7 @@ public abstract class EnemyUnitBase : UnitBase
     private const float TerritoryCheckIntervalIdle = 1.0f;
     private const float TerritoryCheckIntervalWarning = 0.3f;
     private const float AttackHysteresisBuffer = 0.5f;
+    private const float FogVisibilityCheckInterval = 0.2f;
 
     [Header("Zones")]
     [SerializeField] protected float warningStatePersist = 5f;
@@ -54,7 +55,22 @@ public abstract class EnemyUnitBase : UnitBase
     private float _enhancementAttackMult = 1f;
     private float _enhancementHealthMult = 1f;
     private bool _isBehaviorPaused;
+    private bool _manualBehaviorPaused;
+    private bool _fogBehaviorPaused;
+    private bool _lastFogVisibleState;
+    private Coroutine _fogVisibilityCoroutine;
+    private WaitForSeconds _fogVisibilityCheckWait;
     protected AIState aiState;
+
+    private Vector2Int _spawnHoleKey;
+    private bool _hasSpawnHoleKey;
+    private int _spawnBudgetCost = 10;
+
+    public bool HasSpawnHoleKey => _hasSpawnHoleKey;
+
+    public Vector2Int SpawnHoleKey => _spawnHoleKey;
+
+    public int SpawnBudgetCost => _spawnBudgetCost;
 
     public bool IsEnhanced => _isEnhanced;
 
@@ -68,6 +84,7 @@ public abstract class EnemyUnitBase : UnitBase
         aiState = AIState.Idle;
         _isInInfiniteAttackState = false;
         _aiUpdateWait = CoroutineCache.GetWaitForSeconds(0.15f);
+        _fogVisibilityCheckWait = CoroutineCache.GetWaitForSeconds(FogVisibilityCheckInterval);
     }
 
     protected void Start()
@@ -90,6 +107,10 @@ public abstract class EnemyUnitBase : UnitBase
         if (_currentRoamInterval <= 0f) SetNewRoamInterval();
         _roamTimer = _currentRoamInterval;
         _pathUpdateTimer = Time.time + Random.Range(0f, 1f) + (GetInstanceID() % 20) * 0.05f;
+        UpdateFogBehaviorPauseState();
+        if (_fogVisibilityCheckWait != null) {
+            _fogVisibilityCoroutine = StartCoroutine(FogVisibilityRoutine());
+        }
         if (_aiUpdateWait != null) {
             _aiUpdateCoroutine = StartCoroutine(AIUpdateRoutine());
         }
@@ -101,6 +122,13 @@ public abstract class EnemyUnitBase : UnitBase
             StopCoroutine(_aiUpdateCoroutine);
             _aiUpdateCoroutine = null;
         }
+        if (_fogVisibilityCoroutine != null) {
+            StopCoroutine(_fogVisibilityCoroutine);
+            _fogVisibilityCoroutine = null;
+        }
+        _lastFogVisibleState = false;
+        _fogBehaviorPaused = false;
+        ApplyBehaviorPauseState(_manualBehaviorPaused);
         ResetEnhancement();
         base.OnDisable();
     }
@@ -121,10 +149,11 @@ public abstract class EnemyUnitBase : UnitBase
         }
     }
 
-    public override void TakeDamage(int damage)
+    public override void TakeDamage(int damage, DamageContext context)
     {
-        base.TakeDamage(damage);
-        if (!_isInInfiniteAttackState) {
+        base.TakeDamage(damage, context);
+        if (!_isInInfiniteAttackState)
+        {
             _isInInfiniteAttackState = true;
             EnterAttackState();
         }
@@ -149,6 +178,23 @@ public abstract class EnemyUnitBase : UnitBase
     public bool IsInInfiniteAttackState() => _isInInfiniteAttackState;
 
     public void SetBehaviorPaused(bool paused)
+    {
+        _manualBehaviorPaused = paused;
+        ApplyBehaviorPauseState(_manualBehaviorPaused || _fogBehaviorPaused);
+    }
+
+    private void SetFogBehaviorPaused(bool paused)
+    {
+        if (_fogBehaviorPaused == paused)
+        {
+            return;
+        }
+
+        _fogBehaviorPaused = paused;
+        ApplyBehaviorPauseState(_manualBehaviorPaused || _fogBehaviorPaused);
+    }
+
+    private void ApplyBehaviorPauseState(bool paused)
     {
         if (_isBehaviorPaused == paused)
         {
@@ -178,6 +224,30 @@ public abstract class EnemyUnitBase : UnitBase
                 unitMovement.ResumeMovement();
             }
         }
+    }
+
+    private IEnumerator FogVisibilityRoutine()
+    {
+        int initialDelayFrames = Random.Range(0, 10);
+        for (int i = 0; i < initialDelayFrames; i++) yield return null;
+        while (true) {
+            UpdateFogBehaviorPauseState();
+            yield return _fogVisibilityCheckWait;
+        }
+    }
+
+    private void UpdateFogBehaviorPauseState()
+    {
+        if (FogOfWarManager.Instance == null || BuildingManager.Instance == null || BuildingManager.Instance.grid == null)
+        {
+            SetFogBehaviorPaused(false);
+            return;
+        }
+
+        Vector3Int currentCell = BuildingManager.Instance.grid.WorldToCell(transform.position);
+        bool isVisible = FogOfWarManager.Instance.CanSeeEnemies(currentCell);
+        _lastFogVisibleState = isVisible;
+        SetFogBehaviorPaused(!isVisible && aiState == AIState.Idle);
     }
 
     public void ForceResetStateForSinking()
@@ -215,6 +285,13 @@ public abstract class EnemyUnitBase : UnitBase
         _spawnPosition = territoryCenter;
         _homeRadius = hRadius;
         _territoryRadius = tRadius;
+    }
+
+    public void SetSpawnHoleMetadata(Vector2Int holeKey, int budgetCost)
+    {
+        _spawnHoleKey = holeKey;
+        _hasSpawnHoleKey = true;
+        _spawnBudgetCost = Mathf.Max(1, budgetCost);
     }
 
     public void ApplyEnhancement(Color spriteColor, float moveSpeedMult, float attackMult, float healthMult)

@@ -106,46 +106,4 @@ namespace Systems.Jobs
             return cellX * 10000 + cellY;
         }
     }
-
-    [BurstCompile]
-    public struct CalculateResourceRichnessJob : IJobParallelFor
-    {
-        [ReadOnly]
-        public NativeArray<ResourceCircleData> circles;
-        
-        [ReadOnly]
-        public NativeArray<float> divisionRadii;
-        
-        [ReadOnly]
-        public NativeArray<float> sectorPowerValues;
-        
-        [ReadOnly]
-        public NativeArray<int> baseRichness;
-        
-        [WriteOnly]
-        public NativeArray<int> richnessValues;
-
-        public void Execute(int index)
-        {
-            ResourceCircleData circle = circles[index];
-            float distanceFromCenter = math.length(circle.center);
-            
-            int sectorIndex = 0;
-            for (int i = 0; i < divisionRadii.Length - 1; i++)
-            {
-                if (distanceFromCenter >= divisionRadii[i] && distanceFromCenter < divisionRadii[i + 1])
-                {
-                    sectorIndex = i;
-                    break;
-                }
-            }
-            
-            if (sectorIndex >= sectorPowerValues.Length)
-                sectorIndex = sectorPowerValues.Length - 1;
-            
-            float powerValue = sectorPowerValues[sectorIndex];
-            int baseRich = baseRichness[circle.resourceType];
-            richnessValues[index] = (int)math.round(baseRich * powerValue);
-        }
-    }
 }

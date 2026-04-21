@@ -137,6 +137,11 @@ public class ResourceGenerator : Damageable, IPowerGridNode
             return;
         }
 
+        if (electricityBufferCurrent >= electricityBufferMax)
+        {
+            return;
+        }
+
         FindAndCacheElectricityManager();
         if (_electricityConsumptionManager != null && _electricityConsumptionManager.IsElectricityStorageFull)
         {

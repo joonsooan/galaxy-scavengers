@@ -15,6 +15,7 @@ public class ResourceNode : MonoBehaviour
 
     private Unit_Miner _reservedUnit;
     private int _initialAmountToMine;
+    private bool _spawnAmountFromProcedural;
     private ProductionProgressSlider _progressSliderInstance;
     private float _lastMinedTime = -999f;
     private readonly HashSet<int> _activeMiningUnitIds = new HashSet<int>();
@@ -23,6 +24,14 @@ public class ResourceNode : MonoBehaviour
     public bool IsReserved { get; private set; }
     public bool IsDepleted => amountToMine <= 0;
     public int InitialAmountToMine => _initialAmountToMine;
+
+    public void ApplyProceduralRichness(int richness)
+    {
+        int clamped = Mathf.Max(0, richness);
+        amountToMine = clamped;
+        _initialAmountToMine = clamped;
+        _spawnAmountFromProcedural = true;
+    }
 
     private VisibilityController _visibilityController;
     
@@ -86,9 +95,12 @@ public class ResourceNode : MonoBehaviour
             
             if (stats != null)
             {
-                amountToMine = stats.amountToMine;
                 timeToMinePerUnit = stats.timeToMinePerUnit;
-                _initialAmountToMine = stats.amountToMine;
+                if (!_spawnAmountFromProcedural)
+                {
+                    amountToMine = stats.amountToMine;
+                    _initialAmountToMine = stats.amountToMine;
+                }
             }
         }
     }

@@ -18,11 +18,6 @@ public class ResourceSpawnSettings
     [Tooltip("Percentage chance (0-100) for this resource type to spawn in a spawnable circle.")]
     [Range(0f, 100f)]
     public float spawnFrequencyPercent = 50f;
-    
-    [Header("Richness Settings")]
-    [Tooltip("Base richness (amount per tile) at map center.")]
-    [Range(0, 1000)]
-    public int baseRichness = 100;
 }
 
 [Serializable]
@@ -89,32 +84,40 @@ public class MapObjectSpawner : MonoBehaviour
     [Range(0f, 1f)]
     [SerializeField] private float edgeRemovalChance = 0.35f;
     
-    [Header("Starting Area")]
+    [Header("Ring richness (per tile by map-center distance)")]
+    [Tooltip("Per-block amount in the innermost concentric sector (between first two division radii).")]
+    [SerializeField] private int ringRichnessInnermost = 50;
+    [Tooltip("Added per outer sector: ring 0 = innermost, ring 1 = innermost + step (e.g. 50, 100, 150…).")]
+    [SerializeField] private int ringRichnessStep = 50;
+
+    [Header("Starter ring (one cluster per listed type)")]
     [Range(0, 50)]
-    [SerializeField] private int minSpawnRadius = 5;
-    
+    [SerializeField] private int starterRingInnerRadius = 5;
+    [Tooltip("Global procedural circles stay outside this radius from map center (plus max circle radius).")]
     [Range(0, 50)]
-    [SerializeField] private int startingAreaRadius = 15;
-    
-    [Range(0, 20)]
-    [SerializeField] private int startingAreaCircleCount = 3;
-    
-    [Range(0f, 1f)]
-    [SerializeField] private float startingAreaMinDistance = 0.3f;
-    
-    [Header("Center Resource Circles")]
-    [SerializeField] private float centerResourceCircleRadius = 1f;
-    [SerializeField] private int centerResourceCircleDistanceFromCenter = 3;
-    [SerializeField] private int centerResourceCircleMaxDistanceFromCenter = 8;
-    [SerializeField] private float centerResourceCircleMinSpacing = 2.5f;
-    [SerializeField] private int centerResourceCirclePlacementAttempts = 50;
+    [SerializeField] private int starterRingOuterRadius = 15;
+    [Tooltip("Order matches Starter Cluster Radius By Type Index. Duplicate types spawn multiple clusters.")]
+    [SerializeField] private ResourceType[] starterResourceTypes =
+    {
+        ResourceType.Ferrite,
+        ResourceType.Aether,
+        ResourceType.Biomass,
+        ResourceType.CryoCrystal
+    };
+    [Tooltip("Cluster radius per starterResourceTypes index. Use 0 to use Starter Cluster Default Radius.")]
+    [SerializeField] private float[] starterClusterRadiusByTypeIndex = new float[4];
+    [SerializeField] private float starterClusterDefaultRadius = 1f;
+    [SerializeField] private int starterClusterPlacementMinDistance = 3;
+    [SerializeField] private int starterClusterPlacementMaxDistance = 8;
+    [SerializeField] private float starterClusterMinGap = 2.5f;
+    [SerializeField] private int starterClusterPlacementAttempts = 50;
     
     [Header("Debug")]
     [SerializeField] private bool showGizmos = true;
     [SerializeField] private Color divisionCircleColor = new(1f, 1f, 0f, 0.3f);
     [SerializeField] private Color resourceCircleColor = new(0f, 1f, 0f, 0.5f);
-    [SerializeField] private Color startingAreaMinRadiusColor = new(1f, 0f, 0f, 0.5f);
-    [SerializeField] private Color startingAreaMaxRadiusColor = new(0f, 0f, 1f, 0.5f);
+    [SerializeField] private Color starterRingInnerGizmoColor = new(1f, 0f, 0f, 0.5f);
+    [SerializeField] private Color starterRingOuterGizmoColor = new(0f, 0f, 1f, 0.5f);
     
     private readonly List<ResourceNode> _pendingResourceNodes = new ();
     private readonly Dictionary<Vector3Int, ResourceType> _resourceTilePositions = new ();
@@ -154,8 +157,7 @@ public class MapObjectSpawner : MonoBehaviour
         Vector2Int mapSize = mapGenerator.MapSize;
         _circleGenerator = new ResourceCircleGenerator(
             numberOfCircles, borderPadding, minCircleRadius, maxCircleRadius,
-            circleSpawnPercentage, maxCircles, minSpawnRadius, startingAreaRadius,
-            startingAreaCircleCount, startingAreaMinDistance, resourceSettings);
+            circleSpawnPercentage, maxCircles, starterRingOuterRadius, resourceSettings);
         _circleGenerator.Initialize(mapSize.x, mapSize.y, Vector2Int.zero);
     }
     
@@ -192,15 +194,7 @@ public class MapObjectSpawner : MonoBehaviour
         try
         {
             List<ResourceCircle> resourceCircles = _circleGenerator.GenerateResourceCircles();
-            List<ResourceCircle> startingAreaCircles = _circleGenerator.GenerateStartingAreaCircles();
-            
-            resourceCircles.AddRange(startingAreaCircles);
-            
-            if (TutorialManager.Instance != null && TutorialManager.Instance.ShouldStartTutorial())
-            {
-                List<ResourceCircle> centerCircles = GenerateCenterResourceCircles();
-                resourceCircles.AddRange(centerCircles);
-            }
+            AppendStarterRingResourceCircles(resourceCircles);
             
             _cachedResourceCircles = new List<ResourceCircle>(resourceCircles);
             
@@ -236,7 +230,6 @@ public class MapObjectSpawner : MonoBehaviour
     private IEnumerator SpawnResourcesInCirclesAsync(List<ResourceCircle> resourceCircles, IInitializationProgress progress = null)
     {
         List<float> divisionRadii = _circleGenerator.GetDivisionRadii();
-        List<float> sectorPowerValues = _circleGenerator.GetSectorPowerValues();
         Vector2Int mapCenter = Vector2Int.zero;
         
         int totalCircles = resourceCircles.Count;
@@ -251,22 +244,6 @@ public class MapObjectSpawner : MonoBehaviour
                 processedCircles++;
                 continue;
             }
-            
-            float distanceFromCenter = Vector2.Distance(circle.center, mapCenter);
-            int sectorIndex = 0;
-            for (int i = 0; i < divisionRadii.Count - 1; i++)
-            {
-                if (distanceFromCenter >= divisionRadii[i] && distanceFromCenter < divisionRadii[i + 1])
-                {
-                    sectorIndex = i;
-                    break;
-                }
-            }
-            
-            if (sectorIndex >= sectorPowerValues.Count) sectorIndex = sectorPowerValues.Count - 1;
-            float powerValue = sectorPowerValues[sectorIndex];
-            
-            int richness = Mathf.RoundToInt(settings.baseRichness * powerValue);
             
             int radiusInt = Mathf.CeilToInt(circle.radius);
             int minX = circle.center.x - radiusInt;
@@ -300,6 +277,9 @@ public class MapObjectSpawner : MonoBehaviour
             
             foreach (var cellPos in validPositions)
             {
+                float cellDistFromMapCenter = Vector2.Distance(new Vector2(cellPos.x, cellPos.y), mapCenter);
+                int sectorIndex = GetSectorIndexFromMapCenterDistance(cellDistFromMapCenter, divisionRadii);
+                int richness = GetRichnessForSectorIndex(sectorIndex);
                 SpawnResourceAtPosition(cellPos, settings, richness);
             }
             
@@ -321,33 +301,12 @@ public class MapObjectSpawner : MonoBehaviour
         }
         
         List<float> divisionRadii = _circleGenerator != null ? _circleGenerator.GetDivisionRadii() : new List<float>();
-        List<float> sectorPowerValues = _circleGenerator != null ? _circleGenerator.GetSectorPowerValues() : new List<float>();
         Vector2Int mapCenter = Vector2Int.zero;
         
         foreach (var circle in resourceCircles)
         {
             ResourceSpawnSettings settings = resourceSettings.Find(s => s.resourceType == circle.resourceType);
             if (settings == null || settings.resourcePrefab == null || settings.resourceRuleTile == null) continue;
-            
-            float distanceFromCenter = Vector2.Distance(circle.center, mapCenter);
-            int sectorIndex = 0;
-            for (int i = 0; i < divisionRadii.Count - 1; i++)
-            {
-                if (distanceFromCenter >= divisionRadii[i] && distanceFromCenter < divisionRadii[i + 1])
-                {
-                    sectorIndex = i;
-                    break;
-                }
-            }
-            
-            float powerValue = 1f;
-            if (sectorPowerValues.Count > 0)
-            {
-                if (sectorIndex >= sectorPowerValues.Count) sectorIndex = sectorPowerValues.Count - 1;
-                powerValue = sectorPowerValues[sectorIndex];
-            }
-            
-            int richness = Mathf.RoundToInt(settings.baseRichness * powerValue);
             
             int radiusInt = Mathf.CeilToInt(circle.radius);
             int minX = circle.center.x - radiusInt;
@@ -381,6 +340,9 @@ public class MapObjectSpawner : MonoBehaviour
             
             foreach (var cellPos in validPositions)
             {
+                float cellDistFromMapCenter = Vector2.Distance(new Vector2(cellPos.x, cellPos.y), mapCenter);
+                int sectorIndex = GetSectorIndexFromMapCenterDistance(cellDistFromMapCenter, divisionRadii);
+                int richness = GetRichnessForSectorIndex(sectorIndex);
                 SpawnResourceAtPosition(cellPos, settings, richness);
             }
         }
@@ -407,6 +369,35 @@ public class MapObjectSpawner : MonoBehaviour
         _pendingResourceNodes.Clear(); 
     }
     
+    private static int GetSectorIndexFromMapCenterDistance(float distanceFromMapCenter, List<float> divisionRadii)
+    {
+        if (divisionRadii == null || divisionRadii.Count < 2)
+        {
+            return 0;
+        }
+
+        for (int i = 0; i < divisionRadii.Count - 1; i++)
+        {
+            if (distanceFromMapCenter >= divisionRadii[i] && distanceFromMapCenter < divisionRadii[i + 1])
+            {
+                return i;
+            }
+        }
+
+        if (distanceFromMapCenter >= divisionRadii[divisionRadii.Count - 1])
+        {
+            return divisionRadii.Count - 2;
+        }
+
+        return 0;
+    }
+
+    private int GetRichnessForSectorIndex(int sectorIndex)
+    {
+        int step = Mathf.Max(0, ringRichnessStep);
+        return Mathf.Max(1, ringRichnessInnermost + sectorIndex * step);
+    }
+
     private bool IsValidSpawnPosition(Vector3Int cellPos)
     {
         Vector2Int mapSize = mapGenerator.MapSize;
@@ -453,7 +444,7 @@ public class MapObjectSpawner : MonoBehaviour
             if (resourceNodeObj == null) return;
             
             ResourceNode resourceNode = resourceNodeObj.GetComponent<ResourceNode>();
-            resourceNode.amountToMine = richness;
+            resourceNode.ApplyProceduralRichness(richness);
             resourceNode.cellPosition = cellPos;
             _pendingResourceNodes.Add(resourceNode);
             
@@ -505,64 +496,141 @@ public class MapObjectSpawner : MonoBehaviour
         return (hash & 0x00FFFFFF) / 16777215f;
     }
     
-    private List<ResourceCircle> GenerateCenterResourceCircles()
+    private static readonly ResourceType[] DefaultStarterResourceTypes =
     {
-        List<ResourceCircle> circles = new List<ResourceCircle>();
-        
-        if (resourceSettings == null || resourceSettings.Count == 0)
-            return circles;
-        
-        Vector2Int mapCenter = Vector2Int.zero;
-        int minRadius = centerResourceCircleDistanceFromCenter;
-        int maxRadius = Mathf.Max(minRadius, centerResourceCircleMaxDistanceFromCenter);
-        float minDistBetweenCircles = centerResourceCircleMinSpacing;
-        List<Vector2Int> usedCenters = new List<Vector2Int>();
-        
-        for (int i = 0; i < resourceSettings.Count; i++)
+        ResourceType.Ferrite,
+        ResourceType.Aether,
+        ResourceType.Biomass,
+        ResourceType.CryoCrystal
+    };
+
+    private float GetStarterClusterRadiusForTypeIndex(int typeIndex)
+    {
+        if (starterClusterRadiusByTypeIndex != null &&
+            typeIndex >= 0 &&
+            typeIndex < starterClusterRadiusByTypeIndex.Length)
         {
-            ResourceSpawnSettings settings = resourceSettings[i];
-            if (settings == null)
+            float r = starterClusterRadiusByTypeIndex[typeIndex];
+            if (r > 0f)
+            {
+                return r;
+            }
+        }
+
+        return Mathf.Max(0.01f, starterClusterDefaultRadius);
+    }
+
+    private bool StarterResourceDiskHasInvalidCell(Vector2Int center, float radius)
+    {
+        if (mapGenerator == null || BuildingManager.Instance == null)
+        {
+            return false;
+        }
+
+        float rSq = radius * radius;
+        int ri = Mathf.CeilToInt(radius);
+        for (int dx = -ri; dx <= ri; dx++)
+        {
+            for (int dy = -ri; dy <= ri; dy++)
+            {
+                if (dx * dx + dy * dy > rSq + 0.01f)
+                {
+                    continue;
+                }
+
+                Vector3Int c = new Vector3Int(center.x + dx, center.y + dy, 0);
+                if (!IsValidSpawnPosition(c))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private void AppendStarterRingResourceCircles(List<ResourceCircle> resourceCircles)
+    {
+        if (resourceCircles == null || resourceSettings == null || resourceSettings.Count == 0)
+        {
+            return;
+        }
+
+        ResourceType[] types = starterResourceTypes;
+        if (types == null || types.Length == 0)
+        {
+            types = DefaultStarterResourceTypes;
+        }
+
+        Vector2Int mapCenter = Vector2Int.zero;
+        int minDist = starterClusterPlacementMinDistance;
+        int maxDist = Mathf.Max(minDist, starterClusterPlacementMaxDistance);
+        float minGapBetweenEdges = starterClusterMinGap;
+        int maxAttemptsPerType = Mathf.Max(starterClusterPlacementAttempts, 80);
+
+        for (int ti = 0; ti < types.Length; ti++)
+        {
+            ResourceType type = types[ti];
+            ResourceSpawnSettings settings = resourceSettings.Find(s => s != null && s.resourceType == type);
+            if (settings == null || settings.resourcePrefab == null || settings.resourceRuleTile == null)
+            {
                 continue;
-            
-            Vector2Int center;
+            }
+
+            float clusterRadius = GetStarterClusterRadiusForTypeIndex(ti);
+
+            Vector2Int center = Vector2Int.zero;
             int attempts = 0;
+            bool placed = false;
             do
             {
-                float angle = Random.Range(0f, Mathf.PI);
-                float radius = Random.Range(minRadius, maxRadius + 1f);
+                float angle = Random.Range(0f, Mathf.PI * 2f);
+                float radius = Random.Range(minDist, maxDist + 1f);
                 int x = Mathf.RoundToInt(Mathf.Cos(angle) * radius);
                 int y = Mathf.RoundToInt(Mathf.Sin(angle) * radius);
                 center = new Vector2Int(x, y);
-                
+
                 float distFromMapCenter = Vector2.Distance(center, mapCenter);
-                if (distFromMapCenter > 0.01f && distFromMapCenter < minRadius)
-                    center = new Vector2Int(Mathf.RoundToInt(center.x * minRadius / distFromMapCenter), Mathf.RoundToInt(center.y * minRadius / distFromMapCenter));
-                
-                bool tooClose = false;
-                foreach (var used in usedCenters)
+                if (distFromMapCenter > 0.01f && distFromMapCenter < minDist)
                 {
-                    if (Vector2.Distance(center, used) < minDistBetweenCircles)
+                    center = new Vector2Int(
+                        Mathf.RoundToInt(center.x * minDist / distFromMapCenter),
+                        Mathf.RoundToInt(center.y * minDist / distFromMapCenter));
+                }
+
+                bool tooClose = false;
+                foreach (ResourceCircle existing in resourceCircles)
+                {
+                    float separationNeeded = clusterRadius + existing.radius + minGapBetweenEdges;
+                    if (Vector2.Distance(center, existing.center) < separationNeeded)
                     {
                         tooClose = true;
                         break;
                     }
                 }
-                if (!tooClose)
+
+                if (!tooClose && !StarterResourceDiskHasInvalidCell(center, clusterRadius))
+                {
+                    placed = true;
                     break;
+                }
+
                 attempts++;
             }
-            while (attempts < centerResourceCirclePlacementAttempts);
-            
-            usedCenters.Add(center);
-            circles.Add(new ResourceCircle
+            while (attempts < maxAttemptsPerType);
+
+            if (!placed)
+            {
+                continue;
+            }
+
+            resourceCircles.Add(new ResourceCircle
             {
                 center = center,
-                radius = centerResourceCircleRadius,
-                resourceType = settings.resourceType
+                radius = clusterRadius,
+                resourceType = type
             });
         }
-        
-        return circles;
     }
     
     public void UpdateResourceTileVisibility()
@@ -584,12 +652,12 @@ public class MapObjectSpawner : MonoBehaviour
         
         float cellSize = grid != null ? grid.cellSize.x : 1f;
         
-        Gizmos.color = startingAreaMinRadiusColor;
-        float minRadiusWorld = minSpawnRadius * cellSize;
+        Gizmos.color = starterRingInnerGizmoColor;
+        float minRadiusWorld = starterRingInnerRadius * cellSize;
         DrawCircleGizmo(centerWorld, minRadiusWorld);
         
-        Gizmos.color = startingAreaMaxRadiusColor;
-        float maxRadiusWorld = startingAreaRadius * cellSize;
+        Gizmos.color = starterRingOuterGizmoColor;
+        float maxRadiusWorld = starterRingOuterRadius * cellSize;
         DrawCircleGizmo(centerWorld, maxRadiusWorld);
         
         Gizmos.color = divisionCircleColor;

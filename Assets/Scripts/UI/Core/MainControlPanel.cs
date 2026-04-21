@@ -147,11 +147,6 @@ public class MainControlPanel : MonoBehaviour
 
     private void OnBaseBuildingBtnClicked()
     {
-        if (TutorialManager.Instance != null)
-        {
-            TutorialManager.Instance.DisableHighlightForTarget(baseBuildingBtn.gameObject);
-        }
-
         GameManager.Instance.uiManager.UnpinAndHideAllPanels();
         buildingInfoPanel.SetActive(true);
         ShowPanel(baseBuildingPanel);
@@ -159,22 +154,12 @@ public class MainControlPanel : MonoBehaviour
 
     private void OnProcessorBtnClicked()
     {
-        if (TutorialManager.Instance != null)
-        {
-            TutorialManager.Instance.DisableHighlightForTarget(processorBtn.gameObject);
-        }
-
         GameManager.Instance.uiManager.UnpinAndHideAllPanels();
         buildingInfoPanel.SetActive(true);
     }
 
     private void OnResourceStatBtnClicked()
     {
-        if (TutorialManager.Instance != null)
-        {
-            TutorialManager.Instance.DisableHighlightForTarget(resourceStatBtn.gameObject);
-        }
-
         if (IsResourceStatPanelActive())
         {
             CloseResourceStatPanel();
@@ -196,11 +181,6 @@ public class MainControlPanel : MonoBehaviour
 
     private void OnUnitManagementBtnClicked()
     {
-        if (TutorialManager.Instance != null && unitManagementBtn != null)
-        {
-            TutorialManager.Instance.DisableHighlightForTarget(unitManagementBtn.gameObject);
-        }
-
         if (IsUnitManagementPanelActive())
         {
             CloseUnitManagementPanel();

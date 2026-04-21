@@ -8,14 +8,10 @@ public class CoreCustomizationManager : MonoBehaviour
     public static CoreCustomizationManager Instance { get; private set; }
 
     private const string SelectedModulesKey = "CoreCustomization_SelectedModules";
-    private const string UnlockedSlotCountKey = "CoreCustomization_UnlockedSlotCount";
     private const int MaxSlots = 3;
     private readonly Module[] _selectedModules = new Module[MaxSlots];
 
-    [SerializeField] private int unlockedSlotCount;
-
     public event Action<int, Module> OnModuleSlotChanged;
-    public event Action<int> OnUnlockedSlotCountChanged;
     public static event Action<Module, int> OnModulePlacedOnCore;
 
     private void Awake()
@@ -31,9 +27,7 @@ public class CoreCustomizationManager : MonoBehaviour
 
     private void Start()
     {
-        LoadUnlockedSlotCount();
         StartCoroutine(LoadSelectedModulesDelayed());
-        SetUnlockedSlotCount(unlockedSlotCount);
     }
 
     private IEnumerator LoadSelectedModulesDelayed()
@@ -67,11 +61,6 @@ public class CoreCustomizationManager : MonoBehaviour
             return;
         }
 
-        if (slotIndex >= unlockedSlotCount) {
-            Debug.LogWarning($"CoreCustomizationManager: Cannot set module in slot {slotIndex} - slot is locked (only {unlockedSlotCount} slots unlocked)");
-            return;
-        }
-
         _selectedModules[slotIndex] = module;
         SaveSelectedModules();
         OnModuleSlotChanged?.Invoke(slotIndex, module);
@@ -93,11 +82,6 @@ public class CoreCustomizationManager : MonoBehaviour
     public void RemoveModuleFromSlot(int slotIndex)
     {
         if (slotIndex < 0 || slotIndex >= MaxSlots) {
-            return;
-        }
-
-        if (slotIndex >= unlockedSlotCount) {
-            Debug.LogWarning($"CoreCustomizationManager: Cannot remove module from slot {slotIndex} - slot is locked (only {unlockedSlotCount} slots unlocked)");
             return;
         }
 
@@ -136,22 +120,6 @@ public class CoreCustomizationManager : MonoBehaviour
         return activeModules;
     }
 
-    public bool IsSlotLocked(int slotIndex)
-    {
-        if (slotIndex < 0 || slotIndex >= MaxSlots) {
-            return true;
-        }
-        return slotIndex >= unlockedSlotCount;
-    }
-
-    public void SetUnlockedSlotCount(int count)
-    {
-        int newCount = Mathf.Clamp(count, 0, MaxSlots);
-        unlockedSlotCount = newCount;
-        SaveUnlockedSlotCount();
-        OnUnlockedSlotCountChanged?.Invoke(unlockedSlotCount);
-    }
-
     private void SaveSelectedModules()
     {
         List<ModuleSlotData> slotDataList = new List<ModuleSlotData>();
@@ -187,13 +155,11 @@ public class CoreCustomizationManager : MonoBehaviour
             return;
         }
 
-        // Try to load from new format first (with slotDataList)
         if (data.slotDataList != null && data.slotDataList.Count > 0) {
             LoadSelectedModulesFromSlotData(data.slotDataList);
             return;
         }
 
-        // Fallback to old format (moduleNames) for backward compatibility
         if (data.moduleNames != null && data.moduleNames.Count > 0) {
             LoadSelectedModulesFromNames(data.moduleNames);
         }
@@ -210,7 +176,6 @@ public class CoreCustomizationManager : MonoBehaviour
                 continue;
             }
 
-            // Try to find existing module in inventory first
             BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
             Module existingModule = null;
             if (inventoryManager != null) {
@@ -227,10 +192,8 @@ public class CoreCustomizationManager : MonoBehaviour
             if (existingModule != null) {
                 _selectedModules[i] = existingModule;
             } else if (recipeMap.TryGetValue(slotData.moduleName, out ModuleRecipe recipe)) {
-                // Recreate module from recipe if not found in inventory
                 Module recreatedModule = new Module(recipe);
                 _selectedModules[i] = recreatedModule;
-                // Debug.Log($"CoreCustomizationManager: Recreated module '{slotData.moduleName}' for slot {i} from recipe");
             } else {
                 _selectedModules[i] = null;
                 Debug.LogWarning($"CoreCustomizationManager: Could not find recipe for module '{slotData.moduleName}' in slot {i}");
@@ -261,7 +224,6 @@ public class CoreCustomizationManager : MonoBehaviour
                 if (moduleMap.TryGetValue(moduleNames[i], out Module module)) {
                     _selectedModules[i] = module;
                 } else if (recipeMap.TryGetValue(moduleNames[i], out ModuleRecipe recipe)) {
-                    // Recreate from recipe if not in inventory
                     Module recreatedModule = new Module(recipe);
                     _selectedModules[i] = recreatedModule;
                     Debug.Log($"CoreCustomizationManager: Recreated module '{moduleNames[i]}' for slot {i} from recipe (backward compatibility)");
@@ -278,7 +240,6 @@ public class CoreCustomizationManager : MonoBehaviour
     {
         Dictionary<string, ModuleRecipe> recipeMap = new Dictionary<string, ModuleRecipe>();
 
-        // Load ModuleRecipe ScriptableObjects directly from Resources
         ModuleRecipe[] allRecipes = Resources.LoadAll<ModuleRecipe>("");
         foreach (ModuleRecipe recipe in allRecipes) {
             if (recipe != null && !string.IsNullOrEmpty(recipe.moduleName) && !recipeMap.ContainsKey(recipe.moduleName)) {
@@ -286,7 +247,6 @@ public class CoreCustomizationManager : MonoBehaviour
             }
         }
 
-        // Also load from ModuleData (for backward compatibility and module stations)
         ModuleData[] allModuleData = Resources.LoadAll<ModuleData>("");
         foreach (ModuleData moduleData in allModuleData) {
             if (moduleData.Recipes != null) {
@@ -298,7 +258,6 @@ public class CoreCustomizationManager : MonoBehaviour
             }
         }
 
-        // Also check ModuleStations in the scene
         ModuleStation[] moduleStations = FindObjectsByType<ModuleStation>(FindObjectsSortMode.None);
         foreach (ModuleStation station in moduleStations) {
             if (station.ModuleData != null && station.ModuleData.Recipes != null) {
@@ -313,20 +272,6 @@ public class CoreCustomizationManager : MonoBehaviour
         return recipeMap;
     }
 
-    private void SaveUnlockedSlotCount()
-    {
-        PlayerPrefs.SetInt(UnlockedSlotCountKey, unlockedSlotCount);
-        PlayerPrefs.Save();
-    }
-
-    private void LoadUnlockedSlotCount()
-    {
-        // if (PlayerPrefs.HasKey(UnlockedSlotCountKey)) {
-        //     unlockedSlotCount = PlayerPrefs.GetInt(UnlockedSlotCountKey, MaxSlots);
-        // }
-        unlockedSlotCount = Mathf.Clamp(unlockedSlotCount, 0, MaxSlots);
-    }
-
     public void DeleteCurrentCoreModules()
     {
         for (int i = 0; i < MaxSlots; i++) {
@@ -336,7 +281,6 @@ public class CoreCustomizationManager : MonoBehaviour
         }
         SaveSelectedModules();
         
-        // Invoke events for all cleared slots
         for (int i = 0; i < MaxSlots; i++) {
             OnModuleSlotChanged?.Invoke(i, null);
         }

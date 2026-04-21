@@ -770,13 +770,6 @@ public class Processor : Damageable, IClickable, IElectricityConsumer
         ResourceManager.Instance.AddResource(recipeData.resourceType, recipeData.produceAmount);
         UnitProcessResourceStatTracker.RecordProduce(recipeData.resourceType, recipeData.produceAmount);
 
-        if (TutorialManager.Instance != null) {
-            string itemTypeName = recipeData.resourceType.ToString();
-            if (itemTypeName.Contains("Alloy") || itemTypeName.Contains("합금")) {
-                TutorialManager.Instance.OnItemProduced("AlloyPlate");
-            }
-        }
-
         List<IStorage> storages = ResourceManager.Instance.GetAllStorages();
         foreach (IStorage storage in storages) {
             if (storage is MainStructure mainStructure) {

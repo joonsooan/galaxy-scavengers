@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using FMODUnity;
 
 public class CardDragger : MonoBehaviour
 {
@@ -12,9 +11,14 @@ public class CardDragger : MonoBehaviour
 
     public bool IsDraggingPowerGridPreviewBuilding =>
         IsDraggingBuildingCard &&
-        (_activeBuildingData.buildingType == BuildingType.Generator ||
-         _activeBuildingData.buildingType == BuildingType.Battery ||
-         _activeBuildingData.buildingType == BuildingType.PowerReceiver);
+        IsPowerGridPreviewBuildingType(_activeBuildingData.buildingType);
+
+    public static bool IsPowerGridPreviewBuildingType(BuildingType buildingType)
+    {
+        return buildingType == BuildingType.Generator ||
+               buildingType == BuildingType.Battery ||
+               buildingType == BuildingType.PowerReceiver;
+    }
 
     [Header("References")]
     [SerializeField] private Grid grid;
@@ -28,6 +32,7 @@ public class CardDragger : MonoBehaviour
     private List<Vector3Int> _placedCellsInDrag;
     private PointerEventData _pointerEventData;
     private List<ResourceCost> _cachedComboCosts;
+    private ResourceCost[] _cachedComboCostArray;
     
     private void Update()
     {
@@ -53,6 +58,7 @@ public class CardDragger : MonoBehaviour
             _placedCellsInDrag = new List<Vector3Int>();
             
             _cachedComboCosts = CalculateComboCosts(buildingData);
+            _cachedComboCostArray = _cachedComboCosts.Count == 0 ? null : _cachedComboCosts.ToArray();
 
             CreateGhostBuilding();
 
@@ -119,6 +125,7 @@ public class CardDragger : MonoBehaviour
         _isDragging = false;
         _activeBuildingData = null;
         _cachedComboCosts = null;
+        _cachedComboCostArray = null;
         _ghostBuildingRenderer = null;
 
         if (wasDraggingBuildingCard && PowerCoveragePreviewOverlay.Instance != null) {
@@ -133,6 +140,19 @@ public class CardDragger : MonoBehaviour
         _ghostBuildingInstance = Instantiate(_activeBuildingData.buildingPrefab, Vector3.zero, Quaternion.identity);
         SetGhostSortingLayer();
         _ghostBuildingRenderer = _ghostBuildingInstance.GetComponent<SpriteRenderer>();
+
+        const float ghostAlpha = 0.9f;
+        SpriteRenderer[] ghostRenderers = _ghostBuildingInstance.GetComponentsInChildren<SpriteRenderer>(true);
+        for (int i = 0; i < ghostRenderers.Length; i++)
+        {
+            SpriteRenderer r = ghostRenderers[i];
+            if (r != null)
+            {
+                Color c = r.color;
+                c.a = ghostAlpha;
+                r.color = c;
+            }
+        }
         
         Collider2D[] colliders = _ghostBuildingInstance.GetComponentsInChildren<Collider2D>(true);
         foreach (var collider in colliders)
@@ -227,16 +247,7 @@ public class CardDragger : MonoBehaviour
             return false;
         }
         
-        foreach (var piece in _activeBuildingData.recipe)
-        {
-            Vector3Int cellPos = anchorCell + piece.relativePosition;
-            if (!BuildingManager.Instance.CanPlaceBuilding(cellPos))
-            {
-                return false;
-            }
-        }
-        
-        return true;
+        return BuildingManager.Instance.CanPlaceBuildingAtAnchor(anchorCell, _activeBuildingData);
     }
     
     private bool HasEnoughResourcesForCombo()
@@ -251,7 +262,7 @@ public class CardDragger : MonoBehaviour
             return false;
         }
         
-        return ResourceManager.Instance.HasEnoughResources(_cachedComboCosts.ToArray());
+        return ResourceManager.Instance.HasEnoughResources(_cachedComboCostArray);
     }
 
     private void UpdateGhostColor(bool canPlace)
