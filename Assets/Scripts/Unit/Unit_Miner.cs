@@ -160,9 +160,6 @@ public class Unit_Miner : UnitBase
                 }
                 TryStartActions();
             }
-            if (currentState == UnitState.Idle && _targetResourceNode == null) {
-                UpdateIdleRoam();
-            }
             break;
 
         case UnitState.Moving:

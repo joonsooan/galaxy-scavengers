@@ -21,6 +21,7 @@ public class MinerAssignmentSystem : MonoBehaviour
     [SerializeField] private int[] ratioWeights = { 1, 1, 1, 1 };
 
     private int[] _lastSlotCounts = { 0, 0, 0, 0 };
+    private readonly Dictionary<int, ResourceType> _minerAssignedTypeById = new Dictionary<int, ResourceType>();
 
     public IReadOnlyList<int> LastSlotCounts => _lastSlotCounts;
 
@@ -140,49 +141,99 @@ public class MinerAssignmentSystem : MonoBehaviour
             return;
         }
 
-        List<ResourceType> perMinerAssignedTypes = BuildPerMinerAssignedTypes(slotCounts, n);
-        for (int i = 0; i < miners.Count; i++)
+        CleanupMissingMinerAssignments(miners);
+
+        Dictionary<int, ResourceType> assignmentMap = BuildStickyAssignmentMap(miners, slotCounts);
+        foreach (Unit_Miner miner in miners)
         {
-            Unit_Miner miner = miners[i];
-            ResourceType assignedType = perMinerAssignedTypes[i];
+            int minerId = miner.GetInstanceID();
+            if (!assignmentMap.TryGetValue(minerId, out ResourceType assignedType))
+            {
+                continue;
+            }
+
+            _minerAssignedTypeById[minerId] = assignedType;
+            if (HasSameSingleAssignment(miner, assignedType))
+            {
+                continue;
+            }
+
             miner.ApplyMineableTypes(new[] { assignedType });
         }
     }
 
-    private List<ResourceType> BuildPerMinerAssignedTypes(int[] slotCounts, int minerCount)
+    private Dictionary<int, ResourceType> BuildStickyAssignmentMap(List<Unit_Miner> miners, int[] slotCounts)
     {
-        List<ResourceType> assigned = new List<ResourceType>(minerCount);
-        for (int i = 0; i < 4; i++)
+        Dictionary<int, ResourceType> assigned = new Dictionary<int, ResourceType>(miners.Count);
+        int[] remaining = (int[])slotCounts.Clone();
+
+        foreach (Unit_Miner miner in miners)
         {
-            int count = Mathf.Max(0, slotCounts[i]);
-            for (int j = 0; j < count; j++)
+            int minerId = miner.GetInstanceID();
+            if (_minerAssignedTypeById.TryGetValue(minerId, out ResourceType previousType))
             {
-                assigned.Add(BaseResourceOrder[i]);
+                int slotIndex = Array.IndexOf(BaseResourceOrder, previousType);
+                if (slotIndex >= 0 && remaining[slotIndex] > 0)
+                {
+                    assigned[minerId] = previousType;
+                    remaining[slotIndex]--;
+                }
             }
         }
 
-        if (assigned.Count == 0)
+        foreach (Unit_Miner miner in miners)
         {
-            int idx = 0;
-            while (assigned.Count < minerCount)
+            int minerId = miner.GetInstanceID();
+            if (assigned.ContainsKey(minerId))
             {
-                assigned.Add(BaseResourceOrder[idx % BaseResourceOrder.Length]);
-                idx++;
+                continue;
             }
-            return assigned;
-        }
 
-        while (assigned.Count < minerCount)
-        {
-            assigned.Add(assigned[assigned.Count % Mathf.Min(assigned.Count, 4)]);
-        }
+            int slotIndex = GetNextAvailableSlotIndex(remaining);
+            if (slotIndex < 0)
+            {
+                slotIndex = 0;
+            }
 
-        if (assigned.Count > minerCount)
-        {
-            assigned.RemoveRange(minerCount, assigned.Count - minerCount);
+            assigned[minerId] = BaseResourceOrder[slotIndex];
+            if (remaining[slotIndex] > 0)
+            {
+                remaining[slotIndex]--;
+            }
         }
 
         return assigned;
+    }
+
+    private static int GetNextAvailableSlotIndex(int[] remaining)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            if (remaining[i] > 0)
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private void CleanupMissingMinerAssignments(List<Unit_Miner> miners)
+    {
+        HashSet<int> liveIds = new HashSet<int>(miners.Select(m => m.GetInstanceID()));
+        List<int> staleIds = _minerAssignedTypeById.Keys.Where(id => !liveIds.Contains(id)).ToList();
+        foreach (int staleId in staleIds)
+        {
+            _minerAssignedTypeById.Remove(staleId);
+        }
+    }
+
+    private static bool HasSameSingleAssignment(Unit_Miner miner, ResourceType assignedType)
+    {
+        return miner != null &&
+            miner.mineableResourceTypes != null &&
+            miner.mineableResourceTypes.Length == 1 &&
+            miner.mineableResourceTypes[0] == assignedType;
     }
 
     private List<ResourceType> BuildUnionMineableTypes(int[] slotCounts)
