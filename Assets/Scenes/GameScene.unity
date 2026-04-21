@@ -8102,12 +8102,14 @@ MonoBehaviour:
   numberOfCircles: 4
   borderPadding: 5
   minCircleRadius: 1
-  maxCircleRadius: 2.5
+  maxCircleRadius: 2
   circleSpawnPercentage: 70
   maxCircles: 20
   maxResourcesPerCircle: 25
   edgeBandRatio: 0.4
   edgeRemovalChance: 0.3
+  ringRichnessInnermost: 50
+  ringRichnessStep: 50
   starterRingInnerRadius: 7
   starterRingOuterRadius: 11
   starterResourceTypes: 00000000010000000200000003000000
