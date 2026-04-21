@@ -930,4 +930,53 @@ public class Unit_Drone : UnitBase
         Processing,
         ReturnHome
     }
+
+    public void OnChargeStateEnter()
+    {
+        InterruptForCharging();
+    }
+
+    public void OnChargeStateExit()
+    {
+        _currentState = DroneState.Idle;
+        currentState = UnitState.Idle;
+        movement?.StopMovement();
+        ResetIdleRoam();
+        if (_currentProcessor != null) {
+            _currentProcessor.RequestTask(this);
+        }
+    }
+
+    private void InterruptForCharging()
+    {
+        HideProgressBar();
+        ReleaseFromRecipeTask();
+        if (_currentRequest != null) {
+            _currentProcessor?.CancelRequest(_currentRequest);
+            _currentRequest = null;
+        }
+        if (_loadingCoroutine != null) {
+            StopCoroutine(_loadingCoroutine);
+            _loadingCoroutine = null;
+        }
+        if (_unloadingCoroutine != null) {
+            StopCoroutine(_unloadingCoroutine);
+            _unloadingCoroutine = null;
+        }
+        if (_assignmentCoroutine != null) {
+            StopCoroutine(_assignmentCoroutine);
+            _assignmentCoroutine = null;
+        }
+        _carriedAmount = 0;
+        _targetStorage = null;
+        _storageRoute = null;
+        _storageRouteIndex = 0;
+        _remainingRequestAmount = 0;
+        _currentState = DroneState.Idle;
+        currentState = UnitState.Idle;
+        movement?.StopMovement();
+        SetDroneNoResourceAlert(false);
+        SetDroneIsNotAssignedAlert(false);
+        ResetIdleRoam();
+    }
 }

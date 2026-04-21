@@ -200,14 +200,14 @@ MonoBehaviour:
   flashDuration: 0.3
   currentHealth: 0
   generationInterval: 2
-  resourceAmount: 10
+  resourceAmount: 100
   supplyRangeN: 8
   powerCoverageCellOffset: {x: -1, y: -1}
-  electricityBufferMax: 50
+  electricityBufferMax: 500
   electricityBufferCurrent: 0
   fuelCostsPerProduction:
   - resourceType: 1
-    amount: 5
+    amount: 1
   fuelRequirementMode: 1
   showPowerCoverageGizmo: 1
   powerCoverageGizmoColor: {r: 1, g: 0.92, b: 0.2, a: 1}

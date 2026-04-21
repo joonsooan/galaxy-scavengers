@@ -4,6 +4,8 @@ using UnityEngine;
 public class UnitAllyBatteryDriver : MonoBehaviour
 {
     [SerializeField] private float approachStoppingDistance = 0.35f;
+    [SerializeField] private float stationCenterArrivalDistance = 0.15f;
+    [SerializeField] private float seekRetryCooldown = 0.75f;
 
     private UnitBase _unit;
     private UnitMovement _movement;
@@ -11,6 +13,9 @@ public class UnitAllyBatteryDriver : MonoBehaviour
     private ChargingStation _targetStation;
     private bool _arrivalHandshakeComplete;
     private ChargingStation _boundStation;
+    private bool _didInterruptForCharging;
+    private float _nextSeekRetryTime;
+    private float _nextRepathTime;
 
     public UnitBattery Battery => _battery;
 
@@ -47,6 +52,9 @@ public class UnitAllyBatteryDriver : MonoBehaviour
 
         _targetStation = null;
         _arrivalHandshakeComplete = false;
+        _didInterruptForCharging = false;
+        _nextSeekRetryTime = 0f;
+        _nextRepathTime = 0f;
 
         if (_battery != null && _battery.FlowState != AllyBatteryFlowState.Normal)
         {
@@ -59,12 +67,14 @@ public class UnitAllyBatteryDriver : MonoBehaviour
         _boundStation = null;
         _targetStation = null;
         _arrivalHandshakeComplete = false;
+        _didInterruptForCharging = false;
         if (_battery != null)
         {
             _battery.SetFlowState(AllyBatteryFlowState.Normal);
         }
 
         _movement?.StopMovement();
+        ForceUnitIdleAfterCharging();
     }
 
     private void Update()
@@ -86,6 +96,11 @@ public class UnitAllyBatteryDriver : MonoBehaviour
             UpdateGoingToStation();
             return;
         case AllyBatteryFlowState.Normal:
+            if (Time.time < _nextSeekRetryTime)
+            {
+                return;
+            }
+
             if (_battery.IsWorkableChargeLevel)
             {
                 return;
@@ -101,13 +116,26 @@ public class UnitAllyBatteryDriver : MonoBehaviour
         ChargingStation station = ChargingStationRegistry.GetNearest(transform.position);
         if (station == null)
         {
+            _nextSeekRetryTime = Time.time + seekRetryCooldown;
             return;
         }
 
+        PrepareUnitForCharging();
         _targetStation = station;
         _arrivalHandshakeComplete = false;
         _battery.SetFlowState(AllyBatteryFlowState.GoingToStation);
-        _movement?.SetNewTarget(station.transform.position, approachStoppingDistance);
+        bool hasPath = _movement != null && _movement.SetNewTarget(station.transform.position, approachStoppingDistance);
+        if (!hasPath)
+        {
+            _battery.SetFlowState(AllyBatteryFlowState.Normal);
+            _targetStation = null;
+            _didInterruptForCharging = false;
+            _nextSeekRetryTime = Time.time + seekRetryCooldown;
+        }
+        else
+        {
+            _nextRepathTime = Time.time + seekRetryCooldown;
+        }
     }
 
     private void UpdateGoingToStation()
@@ -118,16 +146,29 @@ public class UnitAllyBatteryDriver : MonoBehaviour
             _movement?.StopMovement();
             _targetStation = null;
             _arrivalHandshakeComplete = false;
+            _didInterruptForCharging = false;
+            _nextSeekRetryTime = Time.time + seekRetryCooldown;
             return;
         }
 
-        float r = _targetStation.InteractionRadius;
         float dist = Vector3.Distance(transform.position, _targetStation.transform.position);
-        bool inRange = dist <= r + 0.05f;
-        bool pathDone = _movement != null && _movement.HasReachedTarget(Mathf.Max(approachStoppingDistance, 0.15f));
+        bool atStationCenter = dist <= Mathf.Max(0.01f, stationCenterArrivalDistance);
 
-        if (!inRange && !pathDone)
+        if (!atStationCenter)
         {
+            if (_movement != null && !_movement.IsMoving && Time.time >= _nextRepathTime)
+            {
+                bool repath = _movement.SetNewTarget(_targetStation.transform.position, approachStoppingDistance);
+                _nextRepathTime = Time.time + seekRetryCooldown;
+                if (!repath)
+                {
+                    _battery.SetFlowState(AllyBatteryFlowState.Normal);
+                    _targetStation = null;
+                    _arrivalHandshakeComplete = false;
+                    _didInterruptForCharging = false;
+                    _nextSeekRetryTime = Time.time + seekRetryCooldown;
+                }
+            }
             return;
         }
 
@@ -163,5 +204,31 @@ public class UnitAllyBatteryDriver : MonoBehaviour
         _battery.SetFlowState(AllyBatteryFlowState.Normal);
         _targetStation = null;
         _arrivalHandshakeComplete = false;
+        ForceUnitIdleAfterCharging();
+    }
+
+    private void PrepareUnitForCharging()
+    {
+        if (_didInterruptForCharging)
+        {
+            return;
+        }
+
+        gameObject.SendMessage("OnChargeStateEnter", SendMessageOptions.DontRequireReceiver);
+        if (_unit != null)
+        {
+            _unit.currentState = UnitBase.UnitState.Idle;
+        }
+        _didInterruptForCharging = true;
+    }
+
+    private void ForceUnitIdleAfterCharging()
+    {
+        gameObject.SendMessage("OnChargeStateExit", SendMessageOptions.DontRequireReceiver);
+        if (_unit != null)
+        {
+            _unit.currentState = UnitBase.UnitState.Idle;
+        }
+        _didInterruptForCharging = false;
     }
 }

@@ -933,4 +933,21 @@ public class Unit_Construct : UnitBase
         FetchingResource,
         DeliveringResource
     }
+
+    public void OnChargeStateEnter()
+    {
+        ResetIdleRoam();
+        ReleaseFromConstruction();
+        _currentState = ConstructState.Idle;
+        currentState = UnitState.Idle;
+        movement?.StopMovement();
+    }
+
+    public void OnChargeStateExit()
+    {
+        _currentState = ConstructState.Idle;
+        currentState = UnitState.Idle;
+        movement?.StopMovement();
+        ResetIdleRoam();
+    }
 }

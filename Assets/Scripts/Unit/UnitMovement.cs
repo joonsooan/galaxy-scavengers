@@ -71,7 +71,7 @@ public class UnitMovement : MonoBehaviour
     {
         _rb = GetComponent<Rigidbody2D>();
         _unitBase = GetComponent<UnitBase>();
-        _spriteController = GetComponent<UnitSpriteController>();
+        _spriteController = GetComponentInChildren<UnitSpriteController>();
         _isEnemy = _unitBase != null && _unitBase.unitType == UnitBase.UnitType.Enemy;
     }
 
@@ -313,6 +313,8 @@ public class UnitMovement : MonoBehaviour
         _rb.linearVelocity = Vector2.zero;
         _path.Clear();
         _currentWaypoint = default;
+        _isAtFinalTarget = false;
+        FinalTargetPosition = default;
         UnregisterInteractionCell();
     }
 

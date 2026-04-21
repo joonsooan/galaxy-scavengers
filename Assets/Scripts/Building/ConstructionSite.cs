@@ -130,7 +130,12 @@ public class ConstructionSite : MonoBehaviour
     
     private Vector3 AssignInteractionCellInternal(Unit_Construct drone, Vector3Int pieceCell)
     {
-        if (drone == null || BuildingManager.Instance == null || BuildingManager.Instance.grid == null)
+        if (BuildingManager.Instance == null || BuildingManager.Instance.grid == null)
+        {
+            return transform.position;
+        }
+
+        if (drone == null)
         {
             return BuildingManager.Instance.grid.GetCellCenterWorld(pieceCell);
         }
@@ -319,8 +324,6 @@ public class ConstructionSite : MonoBehaviour
         {
             ConstructionManager.Instance.UnregisterConstructionSite(this);
         }
-        
-        Destroy(gameObject);
     }
     
     public bool AreAllPiecesConstructed()
@@ -429,51 +432,43 @@ public class ConstructionSite : MonoBehaviour
     public bool CanDepositResource(ResourceType type, Unit_Construct drone)
     {
         if (drone == null) return false;
-        
+
         ConstructionRequest request = _pendingRequests.FirstOrDefault(r => r.assignedDrone == drone && r.type == type);
-        
-        if (request == null)
-        {
-            bool isDuplicate = _requestsBeingDelivered.Any(r => r.assignedDrone == drone && r.type == type);
-            if (isDuplicate)
-            {
-                return false;
-            }
-            return false;
-        }
-        
-        if (_requestsBeingDelivered.Contains(request))
+        if (request != null && _requestsBeingDelivered.Contains(request))
         {
             return false;
         }
-        
+
         int totalNeeded = _requiredResources.TryGetValue(type, out var requiredResource) ? requiredResource : 0;
         int totalDelivered = _deliveredResources.TryGetValue(type, out var resource) ? resource : 0;
-        
+
         if (totalNeeded <= totalDelivered)
         {
             return false;
         }
-        
+
         return true;
     }
     
     public void TryDepositResource(ResourceType type, int amount, Unit_Construct drone)
     {
+        if (drone == null || amount <= 0)
+        {
+            return;
+        }
+
         ConstructionRequest request = _pendingRequests.FirstOrDefault(r => r.assignedDrone == drone && r.type == type);
-        
-        if (request == null)
+
+        if (request != null && !_requestsBeingDelivered.Add(request))
         {
             return;
         }
-        
-        if (!_requestsBeingDelivered.Add(request))
+
+        if (request != null)
         {
-            return;
+            _pendingRequests.Remove(request);
         }
-        
-        _pendingRequests.Remove(request);
-        
+
         try
         {
             int remainingAmount = amount;
@@ -525,7 +520,10 @@ public class ConstructionSite : MonoBehaviour
         }
         finally
         {
-            _requestsBeingDelivered.Remove(request);
+            if (request != null)
+            {
+                _requestsBeingDelivered.Remove(request);
+            }
         }
     }
     
@@ -572,12 +570,12 @@ public class ConstructionSite : MonoBehaviour
     {
         _pendingRequests.RemoveAll(r => {
             if (r.assignedDrone == null) return true;
-            return r.assignedDrone.IsIdle();
+            return !r.assignedDrone.isActiveAndEnabled;
         });
-        
+
         _requestsBeingDelivered.RemoveWhere(r => {
             if (r.assignedDrone == null) return true;
-            return r.assignedDrone.IsIdle();
+            return !r.assignedDrone.isActiveAndEnabled;
         });
     }
     

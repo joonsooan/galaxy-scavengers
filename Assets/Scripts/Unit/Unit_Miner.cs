@@ -54,6 +54,7 @@ public class Unit_Miner : UnitBase
     private Coroutine _findResourceCoroutine;
 
     private Coroutine _mineCoroutine;
+    private Coroutine _unloadCoroutine;
     private EventInstance _miningSoundInstance;
     private Tween _miningVibrationTween;
     private bool _noResourceAlertActive;
@@ -159,7 +160,9 @@ public class Unit_Miner : UnitBase
                 }
                 TryStartActions();
             }
-            UpdateIdleRoam();
+            if (currentState == UnitState.Idle && _targetResourceNode == null) {
+                UpdateIdleRoam();
+            }
             break;
 
         case UnitState.Moving:
@@ -262,11 +265,20 @@ public class Unit_Miner : UnitBase
         currentState = UnitState.Unloading;
 
         AdjustSpriteDirectionForUnloading();
-        StartCoroutine(UnloadResourceCoroutine());
+        if (_unloadCoroutine == null) {
+            _unloadCoroutine = StartCoroutine(UnloadResourceCoroutine());
+        }
     }
 
     public void TryStartActions()
     {
+        if (currentState == UnitState.Idle) {
+            FindAndSetTarget();
+            if (currentState != UnitState.Idle) {
+                return;
+            }
+        }
+
         if (_findResourceCoroutine != null) {
             StopCoroutine(_findResourceCoroutine);
         }
@@ -312,6 +324,7 @@ public class Unit_Miner : UnitBase
                     _targetResourceNode = null;
                     _targetStorage = null;
                     currentState = UnitState.Idle;
+                    _unloadCoroutine = null;
                     yield break;
                 }
             }
@@ -365,6 +378,7 @@ public class Unit_Miner : UnitBase
                 ReleaseStorageReservation();
                 _targetStorage = null;
                 GoToStorage();
+                _unloadCoroutine = null;
                 yield break;
             }
 
@@ -376,6 +390,7 @@ public class Unit_Miner : UnitBase
         _targetStorage = null;
 
         currentState = UnitState.Idle;
+        _unloadCoroutine = null;
     }
 
     private void FindAndSetTarget()
@@ -1079,6 +1094,54 @@ public class Unit_Miner : UnitBase
         if (_mineCoroutine != null) {
             StopCoroutine(_mineCoroutine);
             _mineCoroutine = null;
+        }
+    }
+
+    public void OnChargeStateEnter()
+    {
+        InterruptForCharging();
+    }
+
+    public void OnChargeStateExit()
+    {
+        ResetToIdleAfterCharging();
+    }
+
+    private void InterruptForCharging()
+    {
+        StopMining();
+        if (_unloadCoroutine != null) {
+            StopCoroutine(_unloadCoroutine);
+            _unloadCoroutine = null;
+        }
+        if (_findResourceCoroutine != null) {
+            StopCoroutine(_findResourceCoroutine);
+            _findResourceCoroutine = null;
+        }
+        StopMiningVibration();
+        StopMiningParticles();
+        StopMiningSound();
+        HideProgressBar();
+        _targetResourceNode?.EndMining(this);
+        _targetResourceNode?.Unreserve();
+        _targetResourceNode = null;
+        _targetStorage = null;
+        ReleaseMiningCellReservation();
+        ReleaseStorageReservation();
+        unitMovement?.StopMovement();
+        currentState = UnitState.Idle;
+        ResetIdleRoam();
+        SetMinerNoResourceAlert(false);
+        SetMinerIsFullAlert(false);
+    }
+
+    private void ResetToIdleAfterCharging()
+    {
+        currentState = UnitState.Idle;
+        unitMovement?.StopMovement();
+        ResetIdleRoam();
+        if (_findResourceCoroutine == null) {
+            TryStartActions();
         }
     }
 

@@ -214,7 +214,7 @@ MonoBehaviour:
   timerSlider: {fileID: 173340493}
   timerText: {fileID: 1645516040}
   sliderFillImage: {fileID: 1468426923}
-  safeColor: {r: 0, g: 1, b: 0, a: 1}
+  safeColor: {r: 0.5058824, g: 1, b: 0.2627451, a: 1}
   dangerColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &7701078
 GameObject:
@@ -8476,9 +8476,9 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1676293402}
-  - {fileID: 424609975}
-  - {fileID: 1110589741}
   - {fileID: 1615531724}
+  - {fileID: 1110589741}
+  - {fileID: 424609975}
   - {fileID: 792256376}
   - {fileID: 1734363911}
   - {fileID: 482066711}
@@ -25691,7 +25691,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0.5, z: -20}
+  m_LocalPosition: {x: 0.5, y: 0.5, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -43347,7 +43347,7 @@ MonoBehaviour:
   noiseValueText: {fileID: 276513568}
   noiseZoneText: {fileID: 313389594}
   sliderFillImage: {fileID: 2127102774}
-  safeColor: {r: 0, g: 1, b: 0, a: 1}
+  safeColor: {r: 0.5058824, g: 1, b: 0.2627451, a: 1}
   cautionColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   warningColor: {r: 1, g: 0.5, b: 0, a: 1}
   dangerColor: {r: 1, g: 0, b: 0, a: 1}
@@ -50821,7 +50821,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.5480592, g: 0.9308176, b: 0.21367812, a: 1}
+  m_Color: {r: 0.5058824, g: 1, b: 0.2627451, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -81094,6 +81094,31 @@ MonoBehaviour:
   neuralMatrixInitialAmount: 0
   electricityInitialAmount: 0
   tutorialElectricityInitialAmount: 0
+  cheatFerriteAmount: 200
+  cheatAetherAmount: 200
+  cheatBiomassAmount: 200
+  cheatCryoCrystalAmount: 200
+  cheatAlloyPlateAmount: 0
+  cheatCompositeFrameAmount: 0
+  cheatEChipAmount: 0
+  cheatBioCableAmount: 0
+  cheatPowerCubeAmount: 0
+  cheatBioFuelAmount: 0
+  cheatCryoGelAmount: 0
+  cheatSolanaAmount: 0
+  cheatCoreAmount: 0
+  cheatAmmunitionAmount: 0
+  cheatHeavyPlatingAmount: 0
+  cheatActuatorAmount: 0
+  cheatGenomeChipAmount: 0
+  cheatPatchKitAmount: 0
+  cheatSensorUnitAmount: 0
+  cheatPlasmaCubeAmount: 0
+  cheatCryoConduitAmount: 0
+  cheatSeekerMissileAmount: 0
+  cheatNexusDataAmount: 0
+  cheatNeuralMatrixAmount: 0
+  cheatElectricityAmount: 0
   resourceIcons:
   - {fileID: -4716559796490163538, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
   - {fileID: -6245384556211576076, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
@@ -94228,7 +94253,7 @@ MonoBehaviour:
   unitBatterySliderColorEmpty: {r: 0.21960786, g: 0.21960786, b: 0.21960786, a: 1}
   unitBatterySliderColorNeedCharge: {r: 0.9215687, g: 0.21960786, b: 0.21960786, a: 1}
   unitBatterySliderColorCharging: {r: 1, g: 0.7490196, b: 0.20000002, a: 1}
-  unitBatterySliderColorFull: {r: 0.25, g: 0.78, b: 0.35, a: 1}
+  unitBatterySliderColorFull: {r: 0.5058824, g: 1, b: 0.2627451, a: 1}
 --- !u!1 &2052577638
 GameObject:
   m_ObjectHideFlags: 0

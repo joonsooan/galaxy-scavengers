@@ -127,7 +127,7 @@ public class ConstructionManager : MonoBehaviour
         ConstructionSite.ConstructionRequest request = site.GetAndAssignNextResourceRequest(drone, drone.carryCapacity);
         if (request == null) return false;
         
-        IStorage storage = ResourceManager.Instance?.FindClosestStorageWithResource(site.GetPosition(), request.type, 1);
+        IStorage storage = ResourceManager.Instance?.FindClosestStorageWithResource(site.GetPosition(), request.type, request.amount);
         if (storage == null)
         {
             site.CancelRequest(request);
