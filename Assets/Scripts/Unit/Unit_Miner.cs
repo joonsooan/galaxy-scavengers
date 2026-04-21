@@ -73,10 +73,12 @@ public class Unit_Miner : UnitBase
 
     private float _prefabMoveSpeed;
     private int _prefabMaxCarry;
+    private UnitAllyBatteryDriver _allyBatteryDriver;
 
     protected override void Awake()
     {
         base.Awake();
+        _allyBatteryDriver = GetComponent<UnitAllyBatteryDriver>();
         _canvas = GameManager.Instance?.uiManager?.GetObjectUICanvas() ?? GameObject.Find(canvasName)?.GetComponent<Canvas>();
         _searchWait = CoroutineCache.GetWaitForSeconds(resourceSearchInterval);
         _resourceImageSpawnWait = CoroutineCache.GetWaitForSeconds(resourceImageSpawnInterval);
@@ -145,6 +147,10 @@ public class Unit_Miner : UnitBase
 
     private void DecideNextAction()
     {
+        if (_allyBatteryDriver != null && _allyBatteryDriver.BlocksWorkLogic) {
+            return;
+        }
+
         switch (currentState) {
         case UnitState.Idle:
             if (_findResourceCoroutine == null) {

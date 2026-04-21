@@ -143,6 +143,8 @@ GameObject:
   - component: {fileID: 150192344788057646}
   - component: {fileID: 6662310284160247807}
   - component: {fileID: 1147014195592708155}
+  - component: {fileID: 1902155147533868974}
+  - component: {fileID: 353307122976055208}
   m_Layer: 7
   m_Name: Unit_Construct
   m_TagString: Untagged
@@ -258,7 +260,7 @@ MonoBehaviour:
   flashDuration: 0.3
   currentHealth: 0
   unitType: 0
-  unitData: {fileID: 0}
+  unitData: {fileID: 11400000, guid: 543df46f7aaa53f46be1a1b5736522f1, type: 2}
   progressBarPrefab: {fileID: 5648413654597824292, guid: 0e7c462c413987749bca6d734a5a807f, type: 3}
   healthBarPrefab: {fileID: 5648413654597824292, guid: 5d743151f1ca85d45ab75ff0d9fd86fc, type: 3}
   healthBarYOffset: 0.75
@@ -329,6 +331,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42d3cc28f087d6543a0c45f7c0f3cefe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1902155147533868974
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6649466925040614564}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f8a3dae2e9753c4da2c4879b622c169, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnitBattery
+  chargeThresholdNormalized: 0.25
+--- !u!114 &353307122976055208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6649466925040614564}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c5ab5bd9388a9243a6e62fc6467b1f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UnitAllyBatteryDriver
+  approachStoppingDistance: 0.35
 --- !u!1 &7649486685686648739
 GameObject:
   m_ObjectHideFlags: 0

@@ -19,6 +19,11 @@ public class UnitManagementUIController : MonoBehaviour
     [SerializeField] private GameObject unitUpgradeSubPanel;
     [SerializeField] private UnitUpgradeUIController unitUpgradeUI;
 
+    [Header("Charge Settings")]
+    [SerializeField] private Button unitChargeTabButton;
+    [SerializeField] private GameObject unitChargeSubPanel;
+    [SerializeField] private UnitChargeManagementUIController unitChargeUI;
+
     private void OnEnable()
     {
         UnitManager.OnUnitCountChanged += OnUnitCountChanged;
@@ -60,6 +65,15 @@ public class UnitManagementUIController : MonoBehaviour
             }
         }
 
+        if (unitChargeTabButton != null)
+        {
+            unitChargeTabButton.onClick.RemoveListener(OnUnitChargeTabClicked);
+            if (add)
+            {
+                unitChargeTabButton.onClick.AddListener(OnUnitChargeTabClicked);
+            }
+        }
+
     }
 
     private void OnMinerTabClicked()
@@ -70,6 +84,11 @@ public class UnitManagementUIController : MonoBehaviour
     private void OnUnitUpgradeTabClicked()
     {
         ShowTab(1);
+    }
+
+    private void OnUnitChargeTabClicked()
+    {
+        ShowTab(2);
     }
 
     private void OnUnitCountChanged(UnitBase _)
@@ -111,6 +130,11 @@ public class UnitManagementUIController : MonoBehaviour
             unitUpgradeSubPanel.SetActive(index == 1);
         }
 
+        if (unitChargeSubPanel != null)
+        {
+            unitChargeSubPanel.SetActive(index == 2);
+        }
+
         if (index == 0 && minerAssignmentUI != null)
         {
             minerAssignmentUI.RefreshUIFromSystem();
@@ -119,6 +143,11 @@ public class UnitManagementUIController : MonoBehaviour
         if (index == 1 && unitUpgradeUI != null)
         {
             unitUpgradeUI.Refresh();
+        }
+
+        if (index == 2 && unitChargeUI != null)
+        {
+            unitChargeUI.Refresh();
         }
     }
 }

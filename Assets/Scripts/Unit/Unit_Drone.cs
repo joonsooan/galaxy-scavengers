@@ -38,6 +38,7 @@ public class Unit_Drone : UnitBase
     private bool _noResourceAlertActive;
     private float _notAssignedAlertEnableTime;
 
+    private UnitAllyBatteryDriver _allyBatteryDriver;
     private UnitSpriteController _spriteController;
     private Transform _spriteTransform;
     private IStorage _targetStorage;
@@ -60,6 +61,7 @@ public class Unit_Drone : UnitBase
     {
         base.Awake();
         movement = GetComponent<UnitMovement>();
+        _allyBatteryDriver = GetComponent<UnitAllyBatteryDriver>();
     }
 
     protected void Start()
@@ -107,6 +109,10 @@ public class Unit_Drone : UnitBase
 
     private void DecideNextAction()
     {
+        if (_allyBatteryDriver != null && _allyBatteryDriver.BlocksWorkLogic) {
+            return;
+        }
+
         switch (_currentState) {
         case DroneState.Idle:
             UpdateIdle();

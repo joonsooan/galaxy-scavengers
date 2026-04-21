@@ -55,6 +55,7 @@ public class Unit_Construct : UnitBase
     private GameObject _currentSiteAnimation;
     private Animator _currentSiteAnimator;
     private bool _isInvulnerable;
+    private UnitAllyBatteryDriver _allyBatteryDriver;
 
     public bool IsInvulnerable => _isInvulnerable;
 
@@ -80,6 +81,7 @@ public class Unit_Construct : UnitBase
         base.Awake();
         movement = GetComponent<UnitMovement>();
         _rb = GetComponent<Rigidbody2D>();
+        _allyBatteryDriver = GetComponent<UnitAllyBatteryDriver>();
     }
 
     protected void Start()
@@ -167,6 +169,10 @@ public class Unit_Construct : UnitBase
 
     private void DecideNextAction()
     {
+        if (_allyBatteryDriver != null && _allyBatteryDriver.BlocksWorkLogic) {
+            return;
+        }
+
         switch (_currentState) {
         case ConstructState.Idle:
             UpdateIdle();
