@@ -3627,7 +3627,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c90e03b4b8f687648b584f96455ef6ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RealSecondsPerInGameHour: 4
+  RealSecondsPerInGameHour: 10
   currentTime: 6
   gameStartTime: 6
   autoAdvanceTime: 1
@@ -25691,7 +25691,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0.5, z: -10}
+  m_LocalPosition: {x: 0.5, y: 0.5, z: -20}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -81064,8 +81064,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 163725887cf43a3418506d1a895ccbed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ferriteInitialAmount: 0
-  aetherInitialAmount: 0
+  ferriteInitialAmount: 20
+  aetherInitialAmount: 20
   biomassInitialAmount: 0
   cryoCrystalInitialAmount: 0
   tutorialFerriteInitialAmount: 0
