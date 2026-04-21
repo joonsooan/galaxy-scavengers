@@ -13,6 +13,8 @@ public class PlanetDetailPanel : MonoBehaviour
 
     private readonly List<BaseInventoryCell> _spawnedCells = new();
 
+    public BaseInventoryCell DataCellPrefab => dataCellPrefab;
+
     private void OnEnable()
     {
         PlanetData selectedPlanet = PlanetSelectionState.SelectedPlanet;
@@ -52,40 +54,12 @@ public class PlanetDetailPanel : MonoBehaviour
 
     private void RenderDataCells(PlanetData planetData)
     {
-        if (dataCellRoot == null || dataCellPrefab == null)
-        {
-            return;
-        }
-
-        ClearDataCells();
-
-        IReadOnlyList<ResourceType> dataTypes = planetData.ObtainableDataTypes;
-        if (dataTypes == null || dataTypes.Count == 0)
-        {
-            return;
-        }
-
-        for (int i = 0; i < dataTypes.Count; i++)
-        {
-            BaseInventoryCell cell = Instantiate(dataCellPrefab, dataCellRoot);
-            cell.Initialize(null);
-            cell.SetResource(dataTypes[i], planetData.ExpeditionDataAmount);
-            _spawnedCells.Add(cell);
-        }
+        PlanetResourceCellsRenderer.RenderCells(dataCellRoot, dataCellPrefab, planetData, _spawnedCells);
     }
 
     private void ClearDataCells()
     {
-        for (int i = 0; i < _spawnedCells.Count; i++)
-        {
-            BaseInventoryCell cell = _spawnedCells[i];
-            if (cell != null)
-            {
-                Destroy(cell.gameObject);
-            }
-        }
-
-        _spawnedCells.Clear();
+        PlanetResourceCellsRenderer.ClearSpawnedCells(_spawnedCells);
     }
 
     private void OnDisable()

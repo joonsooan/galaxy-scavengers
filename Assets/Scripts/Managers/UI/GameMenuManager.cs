@@ -290,6 +290,15 @@ public class GameMenuManager : MonoBehaviour
                 return;
             }
 
+            if (SceneManager.GetActiveScene().name == "BaseScene")
+            {
+                BaseSceneManager baseSceneManager = FindFirstObjectByType<BaseSceneManager>();
+                if (baseSceneManager != null && baseSceneManager.TryClosePanelForEscape())
+                {
+                    return;
+                }
+            }
+
             if (GameManager.Instance != null && GameManager.Instance.uiManager != null &&
                 GameManager.Instance.uiManager.TryCloseExtractorPanelWithEscape()) {
                 return;

@@ -8,6 +8,7 @@ public class PlanetData : ScriptableObject
     [SerializeField] private string planetName;
     [SerializeField] [TextArea] private string descriptionText;
     [SerializeField] private Sprite planetImage;
+    [SerializeField] private Sprite planetThumbnail;
     [SerializeField] private List<ResourceType> obtainableDataTypes = new();
     [SerializeField] private int expeditionDataAmount;
     [SerializeField] private string targetSceneName = "GameScene";
@@ -19,6 +20,7 @@ public class PlanetData : ScriptableObject
     public string PlanetName => planetName;
     public string DescriptionText => descriptionText;
     public Sprite PlanetImage => planetImage;
+    public Sprite PlanetThumbnail => planetThumbnail;
     public IReadOnlyList<ResourceType> ObtainableDataTypes => obtainableDataTypes;
     public int ExpeditionDataAmount => expeditionDataAmount;
     public string TargetSceneName => targetSceneName;

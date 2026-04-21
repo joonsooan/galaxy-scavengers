@@ -10,7 +10,6 @@ public class CoreCustomizationSlot : MonoBehaviour
     [SerializeField] private TMP_Text moduleNameText;
     [SerializeField] private GameObject emptySlotIndicator;
     [SerializeField] private Button slotButton;
-    [SerializeField] private GameObject lockIndicator;
     private CoreCustomizationManager _customizationManager;
     private EventTrigger _eventTrigger;
 
@@ -45,23 +44,7 @@ public class CoreCustomizationSlot : MonoBehaviour
         SlotIndex = slotIndex;
         _customizationManager = manager;
         
-        if (_customizationManager != null) {
-            _customizationManager.OnUnlockedSlotCountChanged += OnUnlockedSlotCountChanged;
-        }
-        
         RefreshSlot();
-    }
-
-    private void OnDestroy()
-    {
-        if (_customizationManager != null) {
-            _customizationManager.OnUnlockedSlotCountChanged -= OnUnlockedSlotCountChanged;
-        }
-    }
-
-    private void OnUnlockedSlotCountChanged(int unlockedSlotCount)
-    {
-        UpdateLockUI();
     }
 
     public void RefreshSlot()
@@ -89,29 +72,14 @@ public class CoreCustomizationSlot : MonoBehaviour
             emptySlotIndicator.SetActive(!hasModule);
         }
 
-        UpdateLockUI();
-    }
-
-    private void UpdateLockUI()
-    {
-        bool isLocked = _customizationManager != null && _customizationManager.IsSlotLocked(SlotIndex);
-        
-        if (lockIndicator != null) {
-            lockIndicator.SetActive(isLocked);
-        }
-
         if (slotButton != null) {
-            slotButton.interactable = !isLocked;
+            slotButton.interactable = true;
         }
     }
 
     private void OnRightClick()
     {
         if (CurrentModule != null && _customizationManager != null) {
-            if (_customizationManager.IsSlotLocked(SlotIndex)) {
-                Debug.LogWarning($"CoreCustomizationSlot: Cannot remove module from slot {SlotIndex} - slot is locked");
-                return;
-            }
             _customizationManager.RemoveModuleFromSlot(SlotIndex);
         }
     }

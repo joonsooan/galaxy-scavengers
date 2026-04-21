@@ -19,6 +19,7 @@ MonoBehaviour:
     2 \uC124\uBA85 \uD589\uC131 2 \uC124\uBA85 \uD589\uC131 2 \uC124\uBA85 \uD589\uC131
     2 \uC124\uBA85 "
   planetImage: {fileID: 7845373079550816897, guid: f86e2b205e97dcf438af5295672e4c2b, type: 3}
+  planetThumbnail: {fileID: -7039789486510518208, guid: 69508c2961286694dba90a0f72411329, type: 3}
   obtainableDataTypes: 03000000
   expeditionDataAmount: 1500
   targetSceneName: GameScene

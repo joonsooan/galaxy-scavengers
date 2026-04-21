@@ -227,9 +227,9 @@ public class CoreCustomUIManager : MonoBehaviour
             FindManagers();
         }
         
-        int targetSlotIndex = FindEmptyUnlockedSlot();
+        int targetSlotIndex = FindEmptySlot();
         if (targetSlotIndex < 0) {
-            Debug.LogWarning("CoreCustomUIManager: No empty, unlocked slot available for module placement");
+            Debug.LogWarning("CoreCustomUIManager: No empty slot available for module placement");
             return;
         }
 
@@ -248,10 +248,10 @@ public class CoreCustomUIManager : MonoBehaviour
         RefreshModuleSelectionGrid();
     }
 
-    private int FindEmptyUnlockedSlot()
+    private int FindEmptySlot()
     {
         for (int i = 0; i < 3; i++) {
-            if (!_customizationManager.IsSlotLocked(i) && _customizationManager.GetModuleInSlot(i) == null) {
+            if (_customizationManager.GetModuleInSlot(i) == null) {
                 return i;
             }
         }
