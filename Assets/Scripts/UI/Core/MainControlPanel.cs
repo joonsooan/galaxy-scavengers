@@ -120,6 +120,12 @@ public class MainControlPanel : MonoBehaviour
 
         if (Input.GetMouseButtonUp(1))
         {
+            if (BuildingHoverManager.Instance != null && BuildingHoverManager.Instance.IsUnitInfoLocked())
+            {
+                BuildingHoverManager.Instance.ClearLockedUnitInfo();
+                return;
+            }
+
             if (UIUtils.IsPointerOverUI())
             {
                 return;

@@ -26,5 +26,5 @@ MonoBehaviour:
   noiseCoefficient: 0.5
   useInternalBattery: 0
   maxBattery: 100
-  batteryDrainPerSecond: 0.1
+  batteryDrainPerSecond: 0.15
   chargeDurationSecondsAtStation: 5

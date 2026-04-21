@@ -18,16 +18,16 @@ MonoBehaviour:
   tiers:
   - costs:
     - resourceType: 3
-      amount: 100
+      amount: 500
     upgradeTime: 10
     description: "\uC790\uC6D0 \uC6B4\uBC18\uB7C9 +10"
     floatStatBonus: 0
     intStatBonus: 10
   - costs:
     - resourceType: 1
-      amount: 100
+      amount: 500
     - resourceType: 6
-      amount: 20
+      amount: 50
     upgradeTime: 30
     description: "\uC790\uC6D0 \uC6B4\uBC18\uB7C9 +20"
     floatStatBonus: 0

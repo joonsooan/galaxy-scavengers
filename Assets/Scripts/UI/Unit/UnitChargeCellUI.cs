@@ -90,6 +90,15 @@ public class UnitChargeCellUI : MonoBehaviour
             return;
         }
 
+        if (BuildingHoverManager.Instance != null)
+        {
+            BuildingHoverManager.Instance.LockUnitInfo(_unit);
+        }
+        else if (UnitInfoPanel.Instance != null)
+        {
+            UnitInfoPanel.Instance.PreviewInfo(_unit);
+        }
+
         MainControlPanel mainPanel = FindFirstObjectByType<MainControlPanel>(FindObjectsInactive.Include);
         if (mainPanel != null)
         {

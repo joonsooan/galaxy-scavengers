@@ -5,6 +5,9 @@ using UnityEngine.UI;
 
 public class UnitManagementUIController : MonoBehaviour
 {
+    private const int TabCount = 3;
+    private static int s_lastSelectedTabIndex;
+
     [Header("Default Settings")]
     [SerializeField] private TMP_Text totalAllyUnitCountText;
 
@@ -30,7 +33,7 @@ public class UnitManagementUIController : MonoBehaviour
         UnitUpgradeProgress.OnUpgradeStateChanged += OnUpgradeStateChanged;
         WireTabButtons(true);
         RefreshSummary();
-        ShowTab(0);
+        ShowTab(GetValidTabIndex(s_lastSelectedTabIndex));
     }
 
     private void OnDisable()
@@ -120,34 +123,42 @@ public class UnitManagementUIController : MonoBehaviour
 
     private void ShowTab(int index)
     {
+        int safeIndex = GetValidTabIndex(index);
+        s_lastSelectedTabIndex = safeIndex;
+
         if (minerSubPanel != null)
         {
-            minerSubPanel.SetActive(index == 0);
+            minerSubPanel.SetActive(safeIndex == 0);
         }
 
         if (unitUpgradeSubPanel != null)
         {
-            unitUpgradeSubPanel.SetActive(index == 1);
+            unitUpgradeSubPanel.SetActive(safeIndex == 1);
         }
 
         if (unitChargeSubPanel != null)
         {
-            unitChargeSubPanel.SetActive(index == 2);
+            unitChargeSubPanel.SetActive(safeIndex == 2);
         }
 
-        if (index == 0 && minerAssignmentUI != null)
+        if (safeIndex == 0 && minerAssignmentUI != null)
         {
             minerAssignmentUI.RefreshUIFromSystem();
         }
 
-        if (index == 1 && unitUpgradeUI != null)
+        if (safeIndex == 1 && unitUpgradeUI != null)
         {
             unitUpgradeUI.Refresh();
         }
 
-        if (index == 2 && unitChargeUI != null)
+        if (safeIndex == 2 && unitChargeUI != null)
         {
             unitChargeUI.Refresh();
         }
+    }
+
+    private static int GetValidTabIndex(int index)
+    {
+        return Mathf.Clamp(index, 0, TabCount - 1);
     }
 }

@@ -310,7 +310,8 @@ public class UnitInfoPanel : MonoBehaviour
                 ApplyUnitBatteryStatusVisuals(b);
             }
 
-            bool showRow = b != null && IsWorldPointerOverUnitCollider(_currentUnit);
+            bool isLockedUnitInfo = BuildingHoverManager.Instance != null && BuildingHoverManager.Instance.IsUnitInfoLocked();
+            bool showRow = b != null && (isLockedUnitInfo || IsWorldPointerOverUnitCollider(_currentUnit));
             if (internalBatteryRow != null)
             {
                 internalBatteryRow.SetActive(showRow);

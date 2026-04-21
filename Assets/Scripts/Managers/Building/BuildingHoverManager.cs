@@ -11,6 +11,7 @@ public class BuildingHoverManager : MonoBehaviour
     private IStorage _currentHoveredStorage;
     private ResourceNode _currentHoveredResource;
     private UnitBase _currentHoveredUnit;
+    private UnitBase _lockedUnitForInfo;
     private UnitInfoPanel _unitInfoPanel;
     private bool _keepPanelVisible = false;
     private bool _panelsJustClosed = false;
@@ -205,6 +206,11 @@ public class BuildingHoverManager : MonoBehaviour
 
     public void OnUnitExit(UnitBase unit)
     {
+        if (_lockedUnitForInfo != null && unit == _lockedUnitForInfo)
+        {
+            return;
+        }
+
         if (unit == _currentHoveredUnit)
         {
             ClearUnitHover();
@@ -559,8 +565,63 @@ public class BuildingHoverManager : MonoBehaviour
         unitInfoPanel.PreviewInfo(unit);
     }
 
+    public void LockUnitInfo(UnitBase unit)
+    {
+        if (unit == null || !unit.gameObject.activeInHierarchy || unit.CurrentHealth <= 0)
+        {
+            return;
+        }
+
+        _lockedUnitForInfo = unit;
+        _currentHoveredUnit = unit;
+        ShowUnitInfo(unit);
+    }
+
+    public void UnlockUnitInfo()
+    {
+        _lockedUnitForInfo = null;
+    }
+
+    public bool IsUnitInfoLocked()
+    {
+        return _lockedUnitForInfo != null;
+    }
+
+    public void ClearLockedUnitInfo()
+    {
+        _lockedUnitForInfo = null;
+
+        if (_currentHoveredUnit == null)
+        {
+            return;
+        }
+
+        UnitInfoPanel unitInfoPanel = GetUnitInfoPanel();
+        if (unitInfoPanel != null)
+        {
+            unitInfoPanel.CancelPreview();
+            unitInfoPanel.gameObject.SetActive(false);
+        }
+
+        _currentHoveredUnit = null;
+    }
+
     private void ClearUnitHover()
     {
+        if (_lockedUnitForInfo != null)
+        {
+            if (!_lockedUnitForInfo.gameObject.activeInHierarchy || _lockedUnitForInfo.CurrentHealth <= 0)
+            {
+                _lockedUnitForInfo = null;
+            }
+            else
+            {
+                _currentHoveredUnit = _lockedUnitForInfo;
+                ShowUnitInfo(_lockedUnitForInfo);
+                return;
+            }
+        }
+
         if (_currentHoveredUnit != null)
         {
             UnitInfoPanel unitInfoPanel = GetUnitInfoPanel();
@@ -584,6 +645,8 @@ public class BuildingHoverManager : MonoBehaviour
 
     public void ClearHoverOnClick()
     {
+        UnlockUnitInfo();
+
         bool panelsActive = IsProcessorOrDroneHubPanelActive();
         if (!panelsActive && _currentHoveredBuilding != null)
         {

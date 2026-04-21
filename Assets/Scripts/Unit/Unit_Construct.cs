@@ -519,7 +519,17 @@ public class Unit_Construct : UnitBase
 
     private bool IsAtTarget()
     {
-        return movement.HasReachedTarget(movement.waypointTolerance + 0.1f) &&
+        if (movement == null || _rb == null || _currentRequest == null || _currentRequest.site == null)
+        {
+            return false;
+        }
+
+        Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
+        Vector3 targetPosition = _currentRequest.site.AssignDeliveryInteractionCell(this, targetPieceCell);
+        float sqrDistanceToTarget = (transform.position - targetPosition).sqrMagnitude;
+        float arrivalTolerance = movement.waypointTolerance + 0.2f;
+
+        return sqrDistanceToTarget <= arrivalTolerance * arrivalTolerance &&
             !movement.IsMoving &&
             _rb.linearVelocity.sqrMagnitude < 0.01f;
     }
