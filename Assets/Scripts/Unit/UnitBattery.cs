@@ -33,9 +33,12 @@ public class UnitBattery : MonoBehaviour
 
     public float ChargeDurationSecondsAtStation => _chargeDurationSecondsAtStation;
 
+    public bool IsBatteryEmpty =>
+        NormalizedRatio <= 0.0001f || _currentAmount <= 0.0001f;
+
     public bool IsWorkableChargeLevel =>
         _flowState == AllyBatteryFlowState.Normal &&
-        _currentAmount > 0.0001f &&
+        !IsBatteryEmpty &&
         NormalizedRatio > chargeThresholdNormalized;
 
     public void ConfigureFromUnitData(UnitData data)

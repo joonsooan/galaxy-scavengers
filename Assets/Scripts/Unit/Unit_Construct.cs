@@ -281,10 +281,11 @@ public class Unit_Construct : UnitBase
 
         ShowProgressBar();
         float elapsedTime = 0f;
+        float loadDuration = loadingTime / Mathf.Max(0.05f, _allyBatteryDriver != null ? _allyBatteryDriver.GetWorkSpeedMultiplier() : 1f);
 
-        while (elapsedTime < loadingTime) {
+        while (elapsedTime < loadDuration) {
             elapsedTime += Time.deltaTime;
-            float progress = elapsedTime / loadingTime;
+            float progress = loadDuration > 0f ? elapsedTime / loadDuration : 1f;
             UpdateProgressBar(progress);
             yield return null;
         }
@@ -451,7 +452,8 @@ public class Unit_Construct : UnitBase
         float elapsedTime = 0f;
 
         float constructionSpeedMultiplier = GetConstructionSpeedMultiplier();
-        float adjustedUnloadingTime = unloadingTime / constructionSpeedMultiplier;
+        float batteryWorkMult = _allyBatteryDriver != null ? _allyBatteryDriver.GetWorkSpeedMultiplier() : 1f;
+        float adjustedUnloadingTime = unloadingTime / (constructionSpeedMultiplier * Mathf.Max(0.05f, batteryWorkMult));
 
         while (elapsedTime < adjustedUnloadingTime) {
             elapsedTime += Time.deltaTime;

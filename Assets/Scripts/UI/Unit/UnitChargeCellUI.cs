@@ -108,7 +108,7 @@ public class UnitChargeCellUI : MonoBehaviour
         CameraTargetController cam = FindFirstObjectByType<CameraTargetController>();
         if (cam != null)
         {
-            cam.SetFollowTarget(_unit.transform);
+            cam.SetFollowTargetImmediate(_unit.transform);
         }
 
         TargetBracketEffect.Show(_unit.transform);

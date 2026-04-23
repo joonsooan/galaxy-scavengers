@@ -6,6 +6,8 @@ public class UnitAllyBatteryDriver : MonoBehaviour
     [SerializeField] private float approachStoppingDistance = 0.35f;
     [SerializeField] private float stationCenterArrivalDistance = 0.15f;
     [SerializeField] private float seekRetryCooldown = 0.75f;
+    [SerializeField] [Range(0.05f, 1f)] private float movementSpeedMultiplierPowerEmpty = 0.5f;
+    [SerializeField] [Range(0.05f, 1f)] private float workSpeedMultiplierPowerEmpty = 0.5f;
 
     private UnitBase _unit;
     private UnitMovement _movement;
@@ -25,7 +27,7 @@ public class UnitAllyBatteryDriver : MonoBehaviour
         _unit.unitData != null &&
         _unit.unitData.useInternalBattery &&
         !(_unit is Unit_Player) &&
-        (!_battery.IsWorkableChargeLevel || _battery.FlowState != AllyBatteryFlowState.Normal);
+        (_battery.FlowState != AllyBatteryFlowState.Normal || _battery.IsBatteryEmpty);
 
     private void Awake()
     {
@@ -50,7 +52,12 @@ public class UnitAllyBatteryDriver : MonoBehaviour
             _boundStation = null;
         }
 
-        _targetStation = null;
+        if (_targetStation != null)
+        {
+            _targetStation.ClearApproach(this);
+            _targetStation = null;
+        }
+
         _arrivalHandshakeComplete = false;
         _didInterruptForCharging = false;
         _nextSeekRetryTime = 0f;
@@ -64,6 +71,11 @@ public class UnitAllyBatteryDriver : MonoBehaviour
 
     public void NotifyStationInvalid()
     {
+        if (_targetStation != null)
+        {
+            _targetStation.ClearApproach(this);
+        }
+
         _boundStation = null;
         _targetStation = null;
         _arrivalHandshakeComplete = false;
@@ -113,8 +125,7 @@ public class UnitAllyBatteryDriver : MonoBehaviour
 
     private void BeginSeekChargingStation()
     {
-        ChargingStation station = ChargingStationRegistry.GetNearest(transform.position);
-        if (station == null)
+        if (!ChargingStationRegistry.TryGetNearestStationForApproach(transform.position, this, out ChargingStation station))
         {
             _nextSeekRetryTime = Time.time + seekRetryCooldown;
             return;
@@ -127,8 +138,13 @@ public class UnitAllyBatteryDriver : MonoBehaviour
         bool hasPath = _movement != null && _movement.SetNewTarget(station.transform.position, approachStoppingDistance);
         if (!hasPath)
         {
+            if (_targetStation != null)
+            {
+                _targetStation.ClearApproach(this);
+                _targetStation = null;
+            }
+
             _battery.SetFlowState(AllyBatteryFlowState.Normal);
-            _targetStation = null;
             _didInterruptForCharging = false;
             _nextSeekRetryTime = Time.time + seekRetryCooldown;
         }
@@ -142,6 +158,11 @@ public class UnitAllyBatteryDriver : MonoBehaviour
     {
         if (_targetStation == null || !_targetStation.isActiveAndEnabled)
         {
+            if (_targetStation != null)
+            {
+                _targetStation.ClearApproach(this);
+            }
+
             _battery.SetFlowState(AllyBatteryFlowState.Normal);
             _movement?.StopMovement();
             _targetStation = null;
@@ -162,6 +183,7 @@ public class UnitAllyBatteryDriver : MonoBehaviour
                 _nextRepathTime = Time.time + seekRetryCooldown;
                 if (!repath)
                 {
+                    _targetStation.ClearApproach(this);
                     _battery.SetFlowState(AllyBatteryFlowState.Normal);
                     _targetStation = null;
                     _arrivalHandshakeComplete = false;
@@ -169,6 +191,7 @@ public class UnitAllyBatteryDriver : MonoBehaviour
                     _nextSeekRetryTime = Time.time + seekRetryCooldown;
                 }
             }
+
             return;
         }
 
@@ -219,6 +242,7 @@ public class UnitAllyBatteryDriver : MonoBehaviour
         {
             _unit.currentState = UnitBase.UnitState.Idle;
         }
+
         _didInterruptForCharging = true;
     }
 
@@ -229,6 +253,39 @@ public class UnitAllyBatteryDriver : MonoBehaviour
         {
             _unit.currentState = UnitBase.UnitState.Idle;
         }
+
         _didInterruptForCharging = false;
+    }
+
+    public float GetMovementSpeedMultiplier()
+    {
+        if (_unit is Unit_Player || _battery == null || _unit == null || _unit.unitData == null ||
+            !_unit.unitData.useInternalBattery)
+        {
+            return 1f;
+        }
+
+        if (_battery.IsBatteryEmpty && _battery.FlowState == AllyBatteryFlowState.Normal)
+        {
+            return movementSpeedMultiplierPowerEmpty;
+        }
+
+        return 1f;
+    }
+
+    public float GetWorkSpeedMultiplier()
+    {
+        if (_unit is Unit_Player || _battery == null || _unit == null || _unit.unitData == null ||
+            !_unit.unitData.useInternalBattery)
+        {
+            return 1f;
+        }
+
+        if (_battery.IsBatteryEmpty && _battery.FlowState == AllyBatteryFlowState.Normal)
+        {
+            return workSpeedMultiplierPowerEmpty;
+        }
+
+        return 1f;
     }
 }

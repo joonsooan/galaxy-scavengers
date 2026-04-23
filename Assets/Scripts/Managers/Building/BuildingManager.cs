@@ -253,12 +253,12 @@ public class BuildingManager : MonoBehaviour
     private void LoadAllBuildings()
     {
         _buildingDataList = new List<BuildingData>(
-            Resources.LoadAll<BuildingData>("Buildings"));
+            Resources.LoadAll<BuildingData>("Building Data"));
     }
 
     private void CacheAllBuildingPieces()
     {
-        BuildingPieceData[] allData = Resources.LoadAll<BuildingPieceData>("Building Pieces");
+        BuildingPieceData[] allData = Resources.LoadAll<BuildingPieceData>("Building Piece Data");
 
         foreach (BuildingPieceData data in allData) {
             if (data.buildingPieceType != BuildingPieceType.None && data.buildingPieceTile != null) {
@@ -499,7 +499,7 @@ public class BuildingManager : MonoBehaviour
         foreach (BuildingData.BuildingPiece piece in buildingData.recipe) {
             Vector3Int cellPos = anchorCellPosition + piece.relativePosition;
             if (cellPos == pieceCell) {
-                BuildingPieceData[] allData = Resources.LoadAll<BuildingPieceData>("Building Pieces");
+                BuildingPieceData[] allData = Resources.LoadAll<BuildingPieceData>("Building Piece Data");
                 foreach (BuildingPieceData data in allData) {
                     if (data.buildingPieceType == piece.buildingPieceType) {
                         if (_temporaryTiles.Contains(pieceCell)) {

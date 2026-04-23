@@ -13,6 +13,7 @@ public class ChargingStation : Damageable, IElectricityConsumer
     private ElectricityConsumptionManager _electricityConsumptionManager;
     private readonly Queue<UnitAllyBatteryDriver> _waitingDrivers = new Queue<UnitAllyBatteryDriver>();
     private UnitAllyBatteryDriver _activeDriver;
+    private UnitAllyBatteryDriver _approachingDriver;
     private Coroutine _chargeCoroutine;
     private bool _consumerOperational = true;
 
@@ -22,6 +23,30 @@ public class ChargingStation : Damageable, IElectricityConsumer
     public bool IsOperational => _consumerOperational;
 
     public float InteractionRadius => interactionRadius;
+
+    public bool WouldAcceptNewApproach()
+    {
+        return IsOperational && _activeDriver == null && _waitingDrivers.Count == 0 && _approachingDriver == null;
+    }
+
+    public bool TryBeginApproach(UnitAllyBatteryDriver driver)
+    {
+        if (driver == null || !WouldAcceptNewApproach())
+        {
+            return false;
+        }
+
+        _approachingDriver = driver;
+        return true;
+    }
+
+    public void ClearApproach(UnitAllyBatteryDriver driver)
+    {
+        if (driver != null && _approachingDriver == driver)
+        {
+            _approachingDriver = null;
+        }
+    }
 
     protected override void OnEnable()
     {
@@ -54,6 +79,13 @@ public class ChargingStation : Damageable, IElectricityConsumer
         {
             StopCoroutine(_chargeCoroutine);
             _chargeCoroutine = null;
+        }
+
+        if (_approachingDriver != null)
+        {
+            UnitAllyBatteryDriver approaching = _approachingDriver;
+            _approachingDriver = null;
+            approaching.NotifyStationInvalid();
         }
 
         while (_waitingDrivers.Count > 0)
@@ -104,6 +136,11 @@ public class ChargingStation : Damageable, IElectricityConsumer
             return false;
         }
 
+        if (_approachingDriver == driver)
+        {
+            _approachingDriver = null;
+        }
+
         if (_activeDriver == driver)
         {
             return true;
@@ -135,6 +172,11 @@ public class ChargingStation : Damageable, IElectricityConsumer
         if (driver == null)
         {
             return;
+        }
+
+        if (_approachingDriver == driver)
+        {
+            _approachingDriver = null;
         }
 
         if (_activeDriver == driver)

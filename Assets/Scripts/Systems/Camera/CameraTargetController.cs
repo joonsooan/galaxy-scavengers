@@ -483,8 +483,50 @@ public class CameraTargetController : MonoBehaviour
             _isManualMode = false;
 
             if (target.GetComponent<Unit_Player>() != null)
+            {
                 TargetBracketEffect.Hide();
+                DismissLockedUnitInfoAfterFollowPlayer();
+            }
         }
+    }
+
+    public void SetFollowTargetImmediate(Transform target)
+    {
+        SetFollowTarget(target);
+        if (target == null)
+        {
+            return;
+        }
+
+        Vector3 targetPosition = target.position;
+        if (_grid != null)
+        {
+            Vector3 cellSize = _grid.cellSize;
+            targetPosition.x -= cellSize.x * 0.5f;
+            targetPosition.y -= cellSize.y * 0.5f;
+        }
+        else
+        {
+            targetPosition.x -= 0.5f;
+            targetPosition.y -= 0.5f;
+        }
+
+        targetPosition.z = transform.position.z;
+        Vector3 delta = targetPosition - transform.position;
+
+        transform.position = targetPosition;
+        for (int i = 0; i < _zoomLevelPositions.Length; i++)
+        {
+            _zoomLevelPositions[i] = targetPosition;
+            _zoomLevelInitialized[i] = true;
+        }
+        _currentVelocity = Vector3.zero;
+        if (delta.sqrMagnitude > 0.0001f)
+        {
+            WarpCameras(delta);
+        }
+
+        ClampTargetPosition();
     }
 
     public void ResetFollowTargetToPlayer()
@@ -500,6 +542,15 @@ public class CameraTargetController : MonoBehaviour
         followTarget = _defaultFollowTarget;
         _isManualMode = false;
         TargetBracketEffect.Hide();
+        DismissLockedUnitInfoAfterFollowPlayer();
+    }
+
+    private static void DismissLockedUnitInfoAfterFollowPlayer()
+    {
+        if (BuildingHoverManager.Instance != null)
+        {
+            BuildingHoverManager.Instance.ClearLockedUnitInfo();
+        }
     }
 
     private bool IsLoadingScreenActive()

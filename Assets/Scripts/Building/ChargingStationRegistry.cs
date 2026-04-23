@@ -4,6 +4,7 @@ using UnityEngine;
 public static class ChargingStationRegistry
 {
     private static readonly List<ChargingStation> Stations = new List<ChargingStation>();
+    private static readonly HashSet<ChargingStation> RejectForApproachPass = new HashSet<ChargingStation>();
 
     public static void Register(ChargingStation station)
     {
@@ -46,5 +47,55 @@ public static class ChargingStationRegistry
         }
 
         return best;
+    }
+
+    public static bool TryGetNearestStationForApproach(Vector3 worldPosition, UnitAllyBatteryDriver driver, out ChargingStation station)
+    {
+        station = null;
+        if (driver == null)
+        {
+            return false;
+        }
+
+        RejectForApproachPass.Clear();
+
+        while (true)
+        {
+            ChargingStation best = null;
+            float bestSq = float.MaxValue;
+            for (int i = 0; i < Stations.Count; i++)
+            {
+                ChargingStation s = Stations[i];
+                if (s == null || !s.isActiveAndEnabled || RejectForApproachPass.Contains(s))
+                {
+                    continue;
+                }
+
+                if (!s.WouldAcceptNewApproach())
+                {
+                    continue;
+                }
+
+                float sq = (s.transform.position - worldPosition).sqrMagnitude;
+                if (sq < bestSq)
+                {
+                    bestSq = sq;
+                    best = s;
+                }
+            }
+
+            if (best == null)
+            {
+                return false;
+            }
+
+            if (best.TryBeginApproach(driver))
+            {
+                station = best;
+                return true;
+            }
+
+            RejectForApproachPass.Add(best);
+        }
     }
 }

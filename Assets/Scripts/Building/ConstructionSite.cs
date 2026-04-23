@@ -35,7 +35,7 @@ public class ConstructionSite : MonoBehaviour
         _pieceRequiredResources.Clear();
         _pieceDeliveredResources.Clear();
         
-        BuildingPieceData[] buildingPieceDataList = Resources.LoadAll<BuildingPieceData>("Building Pieces");
+        BuildingPieceData[] buildingPieceDataList = Resources.LoadAll<BuildingPieceData>("Building Piece Data");
         Dictionary<BuildingPieceType, BuildingPieceData> buildingPieceAndDataMap = new Dictionary<BuildingPieceType, BuildingPieceData>();
         
         foreach (var data in buildingPieceDataList)
@@ -281,7 +281,7 @@ public class ConstructionSite : MonoBehaviour
             return;
         }
         
-        BuildingPieceData[] buildingPieceDataList = Resources.LoadAll<BuildingPieceData>("Building Pieces");
+        BuildingPieceData[] buildingPieceDataList = Resources.LoadAll<BuildingPieceData>("Building Piece Data");
         Dictionary<BuildingPieceType, BuildingPieceData> buildingPieceAndDataMap = new Dictionary<BuildingPieceType, BuildingPieceData>();
         
         foreach (var data in buildingPieceDataList)
@@ -351,7 +351,7 @@ public class ConstructionSite : MonoBehaviour
         Dictionary<ResourceType, int> result = new Dictionary<ResourceType, int>();
         if (buildingData == null || buildingData.recipe == null) return result;
 
-        BuildingPieceData[] all = Resources.LoadAll<BuildingPieceData>("Building Pieces");
+        BuildingPieceData[] all = Resources.LoadAll<BuildingPieceData>("Building Piece Data");
         Dictionary<BuildingPieceType, BuildingPieceData> map = new Dictionary<BuildingPieceType, BuildingPieceData>();
         foreach (var data in all)
         {

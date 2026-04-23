@@ -7,6 +7,7 @@ public class UnitManagementUIController : MonoBehaviour
 {
     private const int TabCount = 3;
     private static int s_lastSelectedTabIndex;
+    private string _lastPopulationSummary;
 
     [Header("Default Settings")]
     [SerializeField] private TMP_Text totalAllyUnitCountText;
@@ -112,7 +113,13 @@ public class UnitManagementUIController : MonoBehaviour
 
         if (totalAllyUnitCountText != null)
         {
-            totalAllyUnitCountText.text = $"{total} / {max}";
+            string nextSummary = $"{total} / {max}";
+            totalAllyUnitCountText.text = nextSummary;
+            if (_lastPopulationSummary != nextSummary)
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(totalAllyUnitCountText.rectTransform);
+                _lastPopulationSummary = nextSummary;
+            }
         }
 
         if (minerTabCountText != null)

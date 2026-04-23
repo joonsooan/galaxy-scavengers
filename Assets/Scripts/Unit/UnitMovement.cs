@@ -51,6 +51,7 @@ public class UnitMovement : MonoBehaviour
     private UnitSpriteController _spriteController;
     private UnitBase _unitBase;
     private bool _isEnemy;
+    private UnitAllyBatteryDriver _allyBatteryDriver;
 
     public bool IsMoving
     {
@@ -73,6 +74,7 @@ public class UnitMovement : MonoBehaviour
         _unitBase = GetComponent<UnitBase>();
         _spriteController = GetComponentInChildren<UnitSpriteController>();
         _isEnemy = _unitBase != null && _unitBase.unitType == UnitBase.UnitType.Enemy;
+        _allyBatteryDriver = GetComponent<UnitAllyBatteryDriver>();
     }
 
     private void Start()
@@ -167,7 +169,8 @@ public class UnitMovement : MonoBehaviour
                 currentSpeed = Mathf.Lerp(0.5f, moveSpeed, slowDownFactor);
             }
 
-            _rb.linearVelocity = direction * currentSpeed;
+            float batteryMoveMult = _allyBatteryDriver != null ? _allyBatteryDriver.GetMovementSpeedMultiplier() : 1f;
+            _rb.linearVelocity = direction * (currentSpeed * batteryMoveMult);
         }
         else
         {

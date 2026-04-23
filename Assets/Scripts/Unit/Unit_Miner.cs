@@ -299,10 +299,11 @@ public class Unit_Miner : UnitBase
         // Show progress bar during unloading
         ShowProgressBar();
         float elapsedTime = 0f;
+        float unloadDuration = unloadingTime / Mathf.Max(0.05f, _allyBatteryDriver != null ? _allyBatteryDriver.GetWorkSpeedMultiplier() : 1f);
 
-        while (elapsedTime < unloadingTime) {
+        while (elapsedTime < unloadDuration) {
             elapsedTime += Time.deltaTime;
-            float progress = elapsedTime / unloadingTime;
+            float progress = unloadDuration > 0f ? elapsedTime / unloadDuration : 1f;
             UpdateProgressBar(progress);
             yield return null;
         }
@@ -1152,6 +1153,11 @@ public class Unit_Miner : UnitBase
         yield return CoroutineCache.GetWaitForSeconds(firstWait);
 
         while (true) {
+            if (_allyBatteryDriver != null && _allyBatteryDriver.Battery != null && _allyBatteryDriver.Battery.IsBatteryEmpty) {
+                StopMining();
+                yield break;
+            }
+
             if (_targetResourceNode != null && !_targetResourceNode.IsDepleted) {
                 ResourceType minedResourceType = _targetResourceNode.resourceType;
                 int minedAmount = _targetResourceNode.Mine(mineAmountPerAction);
@@ -1177,7 +1183,12 @@ public class Unit_Miner : UnitBase
             mult = 0.01f;
         }
 
-        return baseInterval / mult;
+        float bat = _allyBatteryDriver != null ? _allyBatteryDriver.GetWorkSpeedMultiplier() : 1f;
+        if (bat <= 0.01f) {
+            bat = 0.01f;
+        }
+
+        return baseInterval / (mult * bat);
     }
 
     private bool TryReserveMiningCell(Vector3Int cell)

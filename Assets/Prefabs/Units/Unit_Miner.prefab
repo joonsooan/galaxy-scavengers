@@ -436,7 +436,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f8a3dae2e9753c4da2c4879b622c169, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitBattery
-  chargeThresholdNormalized: 0.25
+  chargeThresholdNormalized: 0.1
 --- !u!114 &2980517108152546075
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -450,6 +450,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitAllyBatteryDriver
   approachStoppingDistance: 0.35
+  stationCenterArrivalDistance: 0.15
+  seekRetryCooldown: 0.75
+  movementSpeedMultiplierPowerEmpty: 0.25
+  workSpeedMultiplierPowerEmpty: 0.25
 --- !u!1001 &8607328120833195960
 PrefabInstance:
   m_ObjectHideFlags: 0

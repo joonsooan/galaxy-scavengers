@@ -23,7 +23,6 @@ public class Unit_Drone : UnitBase
     private Coroutine _assignmentCoroutine;
     private Coroutine _autoAssignCoroutine;
     private Vector3 _baseHoverLocalPosition;
-    private WaitForSeconds _assignmentWait;
 
     private int _carriedAmount;
 
@@ -71,7 +70,6 @@ public class Unit_Drone : UnitBase
             _spriteTransform = _spriteController.transform;
             _baseHoverLocalPosition = _spriteTransform.localPosition;
         }
-        _assignmentWait = CoroutineCache.GetWaitForSeconds(assignmentTime);
         if (!IsAssigned) {
             _autoAssignCoroutine = StartCoroutine(AutoAssignNearestProcessorCoroutine());
         }
@@ -417,10 +415,11 @@ public class Unit_Drone : UnitBase
         // Show progress bar during loading
         ShowProgressBar();
         float elapsedTime = 0f;
+        float loadDuration = loadingTime / Mathf.Max(0.05f, _allyBatteryDriver != null ? _allyBatteryDriver.GetWorkSpeedMultiplier() : 1f);
 
-        while (elapsedTime < loadingTime) {
+        while (elapsedTime < loadDuration) {
             elapsedTime += Time.deltaTime;
-            float progress = elapsedTime / loadingTime;
+            float progress = loadDuration > 0f ? elapsedTime / loadDuration : 1f;
             UpdateProgressBar(progress);
             yield return null;
         }
@@ -531,10 +530,11 @@ public class Unit_Drone : UnitBase
 
         ShowProgressBar();
         float elapsedTime = 0f;
+        float unloadDuration = unloadingTime / Mathf.Max(0.05f, _allyBatteryDriver != null ? _allyBatteryDriver.GetWorkSpeedMultiplier() : 1f);
 
-        while (elapsedTime < unloadingTime) {
+        while (elapsedTime < unloadDuration) {
             elapsedTime += Time.deltaTime;
-            float progress = unloadingTime > 0f ? elapsedTime / unloadingTime : 1f;
+            float progress = unloadDuration > 0f ? elapsedTime / unloadDuration : 1f;
             UpdateProgressBar(progress);
             yield return null;
         }
@@ -579,7 +579,12 @@ public class Unit_Drone : UnitBase
             _spriteController.UpdateSpriteDirection(moveDir);
         }
 
-        yield return _assignmentWait;
+        float assignDuration = assignmentTime / Mathf.Max(0.05f, _allyBatteryDriver != null ? _allyBatteryDriver.GetWorkSpeedMultiplier() : 1f);
+        float assignElapsed = 0f;
+        while (assignElapsed < assignDuration) {
+            assignElapsed += Time.deltaTime;
+            yield return null;
+        }
 
         HasCheckedIn = true;
 
@@ -629,7 +634,8 @@ public class Unit_Drone : UnitBase
             }
 
             if (_currentProcessor != null && CurrentRecipeTask != null) {
-                _currentProcessor.ProcessRecipeWork(CurrentRecipeTask, Time.deltaTime * processingSpeed);
+                float workMult = _allyBatteryDriver != null ? _allyBatteryDriver.GetWorkSpeedMultiplier() : 1f;
+                _currentProcessor.ProcessRecipeWork(CurrentRecipeTask, Time.deltaTime * processingSpeed * workMult);
             }
 
             if (CurrentRecipeTask == null || CurrentRecipeTask != null && !CurrentRecipeTask.isProcessing && CurrentRecipeTask.assignedDrone == null) {
