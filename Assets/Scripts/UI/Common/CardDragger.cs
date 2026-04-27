@@ -322,6 +322,7 @@ public class CardDragger : MonoBehaviour
         {
             BuildingManager.Instance.CreateConstructionSite(_activeBuildingData, cellPos);
             _placedCellsInDrag.Add(cellPos);
+            TutorialManager.Instance?.OnBuildingPlaced(_activeBuildingData.buildingType.ToString());
 
         }
     }

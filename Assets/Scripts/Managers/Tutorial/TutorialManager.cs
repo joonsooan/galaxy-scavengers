@@ -35,7 +35,6 @@ public class TutorialManager : MonoBehaviour
     [Header("Tutorial Settings")]
     [SerializeField] private GameObject tutorialUI;
     [SerializeField] private TutorialStepData[] tutorialStepDataList;
-    [SerializeField] private bool enableTutorialDebugLogs;
 
     [Header("UI Panels")]
     [SerializeField] private GameObject resourcePanel;
@@ -86,6 +85,7 @@ public class TutorialManager : MonoBehaviour
 
     private float _wasdInputTime;
     private bool _isTutorialScene;
+    private bool _isRoundTimerPausedByTutorial;
     public static TutorialManager Instance { get; private set; }
     
     public static event Action OnTutorialEnded;
@@ -122,6 +122,7 @@ public class TutorialManager : MonoBehaviour
         _isTutorialScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "TutorialScene";
         if (!_isTutorialScene) {
             _isTutorialActive = false;
+            _isRoundTimerPausedByTutorial = false;
             BuildUIPanelDictionary();
             ShowAllUIPanels(true);
             if (_tutorialUI != null) {
@@ -156,11 +157,13 @@ public class TutorialManager : MonoBehaviour
     private void OnEnable()
     {
         GameManager.OnGameSceneInitialized += OnGameSceneInitialized;
+        MainStructure.OnUnitProduced += HandleMainStructureUnitProduced;
     }
 
     private void OnDisable()
     {
         GameManager.OnGameSceneInitialized -= OnGameSceneInitialized;
+        MainStructure.OnUnitProduced -= HandleMainStructureUnitProduced;
     }
 
     private void OnGameSceneInitialized()
@@ -230,6 +233,7 @@ public class TutorialManager : MonoBehaviour
         }
 
         _isTutorialActive = true;
+        _isRoundTimerPausedByTutorial = true;
         _currentStepIndex = 0;
         ResourceManager.Instance?.ApplyTutorialStartResources();
 
@@ -253,7 +257,6 @@ public class TutorialManager : MonoBehaviour
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
         ResetStepCounters();
-        LogTutorialDebug($"Step started: index={currentStep.stepIndex}, type={currentStep.stepType}, count={currentStep.count}, duration={currentStep.duration}, resourceType={currentStep.resourceType}");
 
         if (_tutorialUI != null) {
             _tutorialUI.ShowTutorialStep(currentStep);
@@ -513,7 +516,6 @@ public class TutorialManager : MonoBehaviour
 
             if (conditionMet) {
                 _isWaitingForCondition = false;
-                LogTutorialDebug($"Step condition met: index={step.stepIndex}, type={step.stepType}");
                 PlayCompletionSound(step);
                 DisableCurrentHighlights();
                 HideArrowUI();
@@ -555,20 +557,9 @@ public class TutorialManager : MonoBehaviour
         if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
-        LogTutorialDebug($"OnResourceMined received: incomingType={resourceType}, amount={amount}, currentStep={currentStep.stepIndex}, currentType={currentStep.stepType}, targetResourceType={currentStep.resourceType}, currentMined={_resourceMinedAmount}, targetCount={currentStep.count}");
         if (currentStep.stepType == TutorialStepType.ResourceMined && currentStep.resourceType == resourceType) {
             _resourceMinedAmount += amount;
-            LogTutorialDebug($"ResourceMined accepted: newMined={_resourceMinedAmount}/{currentStep.count} (step {currentStep.stepIndex})");
         }
-    }
-
-    private void LogTutorialDebug(string message)
-    {
-        if (!enableTutorialDebugLogs) {
-            return;
-        }
-
-        Debug.Log($"[TutorialDebug] {message}");
     }
 
     public void OnBulletFired()
@@ -635,6 +626,15 @@ public class TutorialManager : MonoBehaviour
         return currentStep.showTargetBracket && !string.IsNullOrEmpty(currentStep.targetBracketBuildingType);
     }
 
+    public bool ShouldPauseRoundTimer()
+    {
+        if (!_isTutorialScene) {
+            return false;
+        }
+
+        return _isRoundTimerPausedByTutorial;
+    }
+
     public void OnBuildingPlaced(string buildingType)
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
@@ -669,6 +669,80 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
+    private void HandleMainStructureUnitProduced(UnitData unitData)
+    {
+        if (unitData == null) {
+            return;
+        }
+
+        if (!_isTutorialActive || !_isWaitingForCondition) {
+            return;
+        }
+
+        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) {
+            return;
+        }
+
+        TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
+        if (currentStep == null || currentStep.stepType != TutorialStepType.UnitProduced) {
+            return;
+        }
+
+        if (IsProducedUnitMatch(currentStep.unitType, unitData)) {
+            _unitProducedCount++;
+        }
+    }
+
+    private bool IsProducedUnitMatch(string expectedUnitType, UnitData producedUnit)
+    {
+        if (producedUnit == null || string.IsNullOrEmpty(expectedUnitType)) {
+            return false;
+        }
+
+        string normalizedExpected = NormalizeUnitKey(expectedUnitType);
+        if (string.IsNullOrEmpty(normalizedExpected)) {
+            return false;
+        }
+
+        string normalizedTutorialKey = NormalizeUnitKey(producedUnit.tutorialKey);
+        string normalizedUnitName = NormalizeUnitKey(producedUnit.unitName);
+        string normalizedAssetName = NormalizeUnitKey(producedUnit.name);
+
+        if (!string.IsNullOrEmpty(normalizedTutorialKey) &&
+            (normalizedTutorialKey == normalizedExpected || normalizedTutorialKey.Contains(normalizedExpected))) {
+            return true;
+        }
+
+        if (!string.IsNullOrEmpty(normalizedUnitName) &&
+            (normalizedUnitName == normalizedExpected || normalizedUnitName.Contains(normalizedExpected))) {
+            return true;
+        }
+
+        if (!string.IsNullOrEmpty(normalizedAssetName) &&
+            (normalizedAssetName == normalizedExpected || normalizedAssetName.Contains(normalizedExpected))) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private string NormalizeUnitKey(string value)
+    {
+        if (string.IsNullOrEmpty(value)) {
+            return string.Empty;
+        }
+
+        System.Text.StringBuilder builder = new System.Text.StringBuilder(value.Length);
+        for (int i = 0; i < value.Length; i++) {
+            char c = value[i];
+            if (char.IsLetterOrDigit(c)) {
+                builder.Append(char.ToLowerInvariant(c));
+            }
+        }
+
+        return builder.ToString();
+    }
+
     public void OnItemProduced(string itemType)
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
@@ -684,6 +758,7 @@ public class TutorialManager : MonoBehaviour
     {
         _isTutorialActive = false;
         _isWaitingForCondition = false;
+        _isRoundTimerPausedByTutorial = false;
 
         if (DayNightCycleManager.Instance != null) {
             DayNightCycleManager.Instance.SetAutoAdvanceTime(true);
@@ -709,6 +784,7 @@ public class TutorialManager : MonoBehaviour
     {
         _isTutorialActive = false;
         _isWaitingForCondition = false;
+        _isRoundTimerPausedByTutorial = false;
         StopAllCoroutines();
 
         if (DayNightCycleManager.Instance != null) {
@@ -732,6 +808,7 @@ public class TutorialManager : MonoBehaviour
         if (_isTutorialActive) {
             _isTutorialActive = false;
             _isWaitingForCondition = false;
+            _isRoundTimerPausedByTutorial = false;
             StopAllCoroutines();
 
             if (DayNightCycleManager.Instance != null) {
@@ -846,6 +923,10 @@ public class TutorialManager : MonoBehaviour
             if (_uiPanels.TryGetValue(panelType, out GameObject panel) && panel != null) {
                 panel.SetActive(true);
             }
+        }
+
+        if (_isTutorialScene && step.enableUIPanels.Contains(TutorialUIPanel.TimeSlider)) {
+            _isRoundTimerPausedByTutorial = false;
         }
     }
 

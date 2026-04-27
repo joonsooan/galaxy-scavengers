@@ -51,6 +51,10 @@ public class GameSceneRoundTimer : MonoBehaviour
             return;
         }
 
+        if (TutorialManager.Instance != null && TutorialManager.Instance.ShouldPauseRoundTimer()) {
+            return;
+        }
+
         float dt = useUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
         _remainingSeconds = Mathf.Max(0f, _remainingSeconds - dt);
         RefreshDisplay();

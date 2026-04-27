@@ -61,9 +61,9 @@ public class ObjClickManager : MonoBehaviour
 
         foreach (RaycastHit2D hit in hits)
         {
-            if (hit.collider != null && hit.collider is BoxCollider2D)
+            if (hit.collider != null && hit.collider is CapsuleCollider2D)
             {
-                MainStructure mainStructure = hit.collider.GetComponent<MainStructure>();
+                MainStructure mainStructure = hit.collider.GetComponentInParent<MainStructure>();
                 if (mainStructure != null)
                 {
                     BuildingHoverManager.Instance?.ClearHoverOnClick();
@@ -93,7 +93,7 @@ public class ObjClickManager : MonoBehaviour
                     }
                 }
 
-                DataExtractor dataExtractor = hit.collider.gameObject.GetComponent<DataExtractor>();
+                DataExtractor dataExtractor = hit.collider.GetComponentInParent<DataExtractor>();
                 if (dataExtractor != null)
                 {
                     BuildingHoverManager.Instance?.ClearHoverOnClick();
@@ -117,6 +117,10 @@ public class ObjClickManager : MonoBehaviour
             BuildingDataHolder buildingHolder = hit.collider.GetComponentInParent<BuildingDataHolder>();
             if (buildingHolder != null && buildingHolder.buildingData != null)
             {
+                if (!IsPrimaryBuildingClickCollider(hit.collider)) {
+                    continue;
+                }
+
                 BuildingType t = buildingHolder.buildingData.buildingType;
                 if (t == BuildingType.MainStructure || t == BuildingType.DataExtractor || t == BuildingType.Smelter)
                 {
@@ -135,8 +139,16 @@ public class ObjClickManager : MonoBehaviour
                 if (hit.collider.GetComponent<ConstructionSite>() != null) {
                     continue;
                 }
+
+                if (!IsPrimaryBuildingClickCollider(hit.collider) &&
+                    hit.collider.GetComponentInParent<BuildingDataHolder>() != null) {
+                    continue;
+                }
                 
                 IClickable clickableObject = hit.collider.GetComponent<IClickable>();
+                if (clickableObject == null) {
+                    clickableObject = hit.collider.GetComponentInParent<IClickable>();
+                }
                 if (clickableObject != null) {
                     clickableObject.OnClicked();
                     return;
@@ -181,6 +193,10 @@ public class ObjClickManager : MonoBehaviour
                 continue;
             }
 
+            if (!IsPrimaryBuildingClickCollider(hit.collider)) {
+                continue;
+            }
+
             BuildingDataHolder buildingHolder = hit.collider.GetComponentInParent<BuildingDataHolder>();
             if (buildingHolder != null && buildingHolder.buildingData != null)
             {
@@ -189,6 +205,11 @@ public class ObjClickManager : MonoBehaviour
         }
 
         return null;
+    }
+
+    private static bool IsPrimaryBuildingClickCollider(Collider2D collider)
+    {
+        return collider is CapsuleCollider2D;
     }
 }
 

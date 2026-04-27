@@ -82,6 +82,7 @@ public class BuildingHoverManager : MonoBehaviour
         }
 
         if (UIUtils.IsPointerOverUI() && !IsPointerOverFloatingNumText() && !IsPointerOverProgressSlider() &&
+            !IsPointerOverBuildingButton() &&
             !IsPointerOverPowerStatusWorldFollower())
         {
             ClearAllHovers();
@@ -446,6 +447,38 @@ public class BuildingHoverManager : MonoBehaviour
                     }
                     current = current.parent;
                 }
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsPointerOverBuildingButton()
+    {
+        if (EventSystem.current == null) return false;
+
+        PointerEventData pointerEventData = new PointerEventData(EventSystem.current);
+        pointerEventData.position = Input.mousePosition;
+
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerEventData, results);
+
+        foreach (RaycastResult result in results)
+        {
+            if (result.gameObject == null)
+            {
+                continue;
+            }
+
+            BuildingButton buildingButton = result.gameObject.GetComponent<BuildingButton>();
+            if (buildingButton == null)
+            {
+                buildingButton = result.gameObject.GetComponentInParent<BuildingButton>();
+            }
+
+            if (buildingButton != null)
+            {
+                return true;
             }
         }
 

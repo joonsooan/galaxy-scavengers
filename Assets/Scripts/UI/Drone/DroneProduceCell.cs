@@ -52,6 +52,8 @@ public class DroneProduceCell : MonoBehaviour, IPointerEnterHandler, IPointerExi
             return;
         }
 
+        _tutorialID = !string.IsNullOrEmpty(unitData.tutorialKey) ? unitData.tutorialKey : unitData.unitName;
+
         if (unitName != null) {
             unitName.text = unitData.unitName;
         }
@@ -91,6 +93,9 @@ public class DroneProduceCell : MonoBehaviour, IPointerEnterHandler, IPointerExi
         _currentProducedCount = _mainStructure.GetCurrentUnitCount(_unitIndex);
         _targetCount = _mainStructure.GetTargetUnitCount(_unitIndex);
         UpdateUI();
+        if (!string.IsNullOrEmpty(_tutorialID) && glowMaterial != null) {
+            TutorialManager.Instance?.RegisterRuntimeUI(_tutorialID, gameObject, glowMaterial);
+        }
 
         MainStructure.OnUnitTargetChanged += HandleUnitTargetChanged;
     }

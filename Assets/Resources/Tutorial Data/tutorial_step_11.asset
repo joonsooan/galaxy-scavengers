@@ -27,7 +27,9 @@ MonoBehaviour:
   enableUIPanels: 09000000
   tutorialPanelMoveDownOffset: 0
   spawnUnits: []
-  grantResources: []
+  grantResources:
+  - resourceType: 0
+    amount: 50
   completionSound:
     Guid:
       Data1: -345895807

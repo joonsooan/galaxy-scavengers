@@ -567,6 +567,14 @@ public class Unit_Player : UnitBase
 
     private bool CanEnableBulletFiring()
     {
+        bool isTutorialScene = SceneManager.GetActiveScene().name == "TutorialScene";
+        if (isTutorialScene) {
+            TutorialManager tutorialManager = TutorialManager.Instance;
+            if (tutorialManager == null || !tutorialManager.HasReachedStepType(TutorialStepType.BulletFired)) {
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -606,6 +614,8 @@ public class Unit_Player : UnitBase
             bulletScript.speed = 10f;
             bulletScript.lifeTime = 3f;
             bulletScript.Initialize(attackDamage, fireDirection);
+
+            TutorialManager.Instance?.OnBulletFired();
         }
 
         _lastFireTime = Time.time;
