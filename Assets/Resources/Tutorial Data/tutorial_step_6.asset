@@ -10,16 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c74002d918083e14eb5bcbcc12257fde, type: 3}
-  m_Name: tutorial_step_15
+  m_Name: tutorial_step_6
   m_EditorClassIdentifier: 
-  stepIndex: 15
-  text: "\uC911\uC559\uC5D0 \uC788\uB294 \uAC74\uBB3C\uC778 <color=#FFC107>\uC2DC\uB4DC
-    \uCF54\uC5B4</color>\uB3C4 \uC790\uC6D0\uC744 \uC800\uC7A5\uD558\uC9C0\uB9CC,
-    \uCD5C\uB300 \uC800\uC7A5\uB7C9\uC744 \uB298\uB9AC\uAE30 \uC704\uD574 \uC800\uC7A5\uACE0\uB97C
-    \uC5EC\uB7EC \uAC1C \uC9C0\uC5B4\uC8FC\uB294 \uAC83\uC740 \uD544\uC218\uC801\uC785\uB2C8\uB2E4.\n<color=#FFC107>\uC2DC\uB4DC
-    \uCF54\uC5B4</color>\uAC00 \uD30C\uAD34\uB418\uBA74 \uAC8C\uC784 \uC624\uBC84\uC774\uB2C8
-    \uC870\uC2EC\uD558\uC138\uC694.\n<color=#DBD1C7>(\uD654\uBA74\uC744 \uD074\uB9AD\uD574\uC11C
-    \uB2E4\uC74C)</color>"
+  stepIndex: 6
+  text: "\uC790\uC6D0 \uBE14\uB85D\uB4E4\uC740 \uB9F5 \uACF3\uACF3\uC5D0 \uD769\uC5B4\uC838
+    \uC788\uC73C\uBA70, \uCC44\uAD74\uD560 \uC790\uC6D0\uC774 \uBAA8\uC790\uB77C\uC9C0
+    \uC54A\uB3C4\uB85D \uD0D0\uC0AC\uB97C \uAFB8\uC900\uD788 \uD574\uC57C \uD569\uB2C8\uB2E4.\n<color=#DBD1C7>(\uD654\uBA74\uC744
+    \uD074\uB9AD\uD574\uC11C \uB2E4\uC74C)</color>"
   stepType: 0
   duration: 0
   count: 1
@@ -43,6 +40,6 @@ MonoBehaviour:
   highlightTargetIDs: []
   showArrowUI: 0
   arrowID: 
-  showTargetBracket: 1
-  targetBracketBuildingType: MainStructure
-  includeConstructionSiteForTargetBracket: 0
+  showTargetBracket: 0
+  targetBracketBuildingType: 
+  includeConstructionSiteForTargetBracket: 1

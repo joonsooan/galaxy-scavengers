@@ -8,20 +8,17 @@ using UnityEngine.UI;
 
 public enum TutorialStepType
 {
-    Click,
-    RightClick,
-    WASDInput,
-    MouseWheel,
-    SpacebarPress,
-    NumberKeyPress,
-    ResourceMined,
-    ResourceBlockRevealed,
-    BulletFired,
-    BuildingPlaced,
-    BuildingCompleted,
-    UnitProduced,
-    ItemProduced,
-    MineableTypesChanged
+    Click = 0,
+    RightClick = 1,
+    WASDInput = 2,
+    MouseWheel = 3,
+    SpacebarPress = 4,
+    ResourceMined = 6,
+    BulletFired = 8,
+    BuildingPlaced = 9,
+    BuildingCompleted = 10,
+    UnitProduced = 11,
+    ItemProduced = 12,
 }
 
 [Serializable]
@@ -38,6 +35,7 @@ public class TutorialManager : MonoBehaviour
     [Header("Tutorial Settings")]
     [SerializeField] private GameObject tutorialUI;
     [SerializeField] private TutorialStepData[] tutorialStepDataList;
+    [SerializeField] private bool enableTutorialDebugLogs;
 
     [Header("UI Panels")]
     [SerializeField] private GameObject resourcePanel;
@@ -74,12 +72,8 @@ public class TutorialManager : MonoBehaviour
     private int _itemProducedCount;
     private float _lastMouseWheelValue;
     private bool _lastPausedState;
-    private int _mineableTypesChangedCount;
     private int _mouseWheelScrollCount;
-
-    private int _numberKeyPressCount;
     private RectTransform _rect;
-    private int _resourceBlockRevealCount;
     private int _resourceMinedAmount;
     private int _rightClickCount;
     private int _spacebarPressCount;
@@ -161,13 +155,11 @@ public class TutorialManager : MonoBehaviour
 
     private void OnEnable()
     {
-        UnitManager.OnMineableTypesChanged += OnMineableTypesChanged;
         GameManager.OnGameSceneInitialized += OnGameSceneInitialized;
     }
 
     private void OnDisable()
     {
-        UnitManager.OnMineableTypesChanged -= OnMineableTypesChanged;
         GameManager.OnGameSceneInitialized -= OnGameSceneInitialized;
     }
 
@@ -261,6 +253,7 @@ public class TutorialManager : MonoBehaviour
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
         ResetStepCounters();
+        LogTutorialDebug($"Step started: index={currentStep.stepIndex}, type={currentStep.stepType}, count={currentStep.count}, duration={currentStep.duration}, resourceType={currentStep.resourceType}");
 
         if (_tutorialUI != null) {
             _tutorialUI.ShowTutorialStep(currentStep);
@@ -357,15 +350,12 @@ public class TutorialManager : MonoBehaviour
         _wasdInputTime = 0f;
         _mouseWheelScrollCount = 0;
         _spacebarPressCount = 0;
-        _numberKeyPressCount = 0;
         _resourceMinedAmount = 0;
         _bulletFireCount = 0;
         _buildingPlacedCount = 0;
         _buildingCompletedCount = 0;
         _unitProducedCount = 0;
         _itemProducedCount = 0;
-        _resourceBlockRevealCount = 0;
-        _mineableTypesChangedCount = 0;
         _rightClickCount = 0;
         _lastMouseWheelValue = Input.mouseScrollDelta.y;
         if (GameManager.Instance != null) {
@@ -463,20 +453,6 @@ public class TutorialManager : MonoBehaviour
                 }
                 break;
 
-            case TutorialStepType.NumberKeyPress:
-                bool numberKeyPressed = Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Alpha3);
-
-                if (numberKeyPressed) {
-                    _numberKeyPressCount++;
-                    if (_tutorialUI != null && step.showProgressBar) {
-                        _tutorialUI.UpdateProgress((float)_numberKeyPressCount / step.count);
-                    }
-                    if (_numberKeyPressCount >= step.count) {
-                        conditionMet = true;
-                    }
-                }
-                break;
-
             case TutorialStepType.ResourceMined:
                 if (step.count <= 0) {
                     break;
@@ -485,27 +461,6 @@ public class TutorialManager : MonoBehaviour
                     _tutorialUI.UpdateProgress((float)_resourceMinedAmount / step.count);
                 }
                 if (_resourceMinedAmount >= step.count) {
-                    conditionMet = true;
-                }
-                break;
-
-            case TutorialStepType.ResourceBlockRevealed:
-                int targetBlocks = Mathf.Max(1, step.count);
-                if (_tutorialUI != null && step.showProgressBar) {
-                    float progress = Mathf.Clamp01((float)_resourceBlockRevealCount / targetBlocks);
-                    _tutorialUI.UpdateProgress(progress);
-                }
-                if (_resourceBlockRevealCount >= targetBlocks) {
-                    conditionMet = true;
-                }
-                break;
-
-            case TutorialStepType.MineableTypesChanged:
-                if (_tutorialUI != null && step.showProgressBar && step.count > 0) {
-                    float progress = Mathf.Clamp01((float)_mineableTypesChangedCount / step.count);
-                    _tutorialUI.UpdateProgress(progress);
-                }
-                if (step.count > 0 && _mineableTypesChangedCount >= step.count) {
                     conditionMet = true;
                 }
                 break;
@@ -558,6 +513,7 @@ public class TutorialManager : MonoBehaviour
 
             if (conditionMet) {
                 _isWaitingForCondition = false;
+                LogTutorialDebug($"Step condition met: index={step.stepIndex}, type={step.stepType}");
                 PlayCompletionSound(step);
                 DisableCurrentHighlights();
                 HideArrowUI();
@@ -599,9 +555,20 @@ public class TutorialManager : MonoBehaviour
         if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
+        LogTutorialDebug($"OnResourceMined received: incomingType={resourceType}, amount={amount}, currentStep={currentStep.stepIndex}, currentType={currentStep.stepType}, targetResourceType={currentStep.resourceType}, currentMined={_resourceMinedAmount}, targetCount={currentStep.count}");
         if (currentStep.stepType == TutorialStepType.ResourceMined && currentStep.resourceType == resourceType) {
             _resourceMinedAmount += amount;
+            LogTutorialDebug($"ResourceMined accepted: newMined={_resourceMinedAmount}/{currentStep.count} (step {currentStep.stepIndex})");
         }
+    }
+
+    private void LogTutorialDebug(string message)
+    {
+        if (!enableTutorialDebugLogs) {
+            return;
+        }
+
+        Debug.Log($"[TutorialDebug] {message}");
     }
 
     public void OnBulletFired()
@@ -612,28 +579,6 @@ public class TutorialManager : MonoBehaviour
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
         if (currentStep.stepType == TutorialStepType.BulletFired) {
             _bulletFireCount++;
-        }
-    }
-
-    public void OnResourceBlockRevealed()
-    {
-        if (!_isTutorialActive || !_isWaitingForCondition) return;
-        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
-
-        TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
-        if (currentStep.stepType == TutorialStepType.ResourceBlockRevealed) {
-            _resourceBlockRevealCount++;
-        }
-    }
-
-    private void OnMineableTypesChanged(ResourceType[] newTypes)
-    {
-        if (!_isTutorialActive || !_isWaitingForCondition) return;
-        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
-
-        TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
-        if (currentStep.stepType == TutorialStepType.MineableTypesChanged) {
-            _mineableTypesChangedCount++;
         }
     }
 

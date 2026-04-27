@@ -13,19 +13,17 @@ MonoBehaviour:
   m_Name: tutorial_step_8
   m_EditorClassIdentifier: 
   stepIndex: 8
-  text: "\uC88B\uC2B5\uB2C8\uB2E4!\n\uC544\uC9C1 \uD0D0\uC0AC\uD558\uC9C0 \uC54A\uC740
-    \uC5B4\uB450\uC6B4 \uC9C0\uC5ED\uC740 \uC790\uC6D0 \uBE14\uB85D\uC758 \uC704\uCE58\uB97C
-    \uC54C \uC218 \uC5C6\uC73C\uBA70, \uBA54\uC778 \uC720\uB2DB\uC744 \uC6C0\uC9C1\uC5EC
-    \uC9C1\uC811 \uCC3E\uC73C\uB7EC \uB098\uC11C\uC57C \uD569\uB2C8\uB2E4.\n\uC544\uC9C1
-    \uBC1C\uACAC\uB418\uC9C0 \uC54A\uC740 \uC790\uC6D0 \uBE14\uB85D\uB4E4\uC744 \uCC3E\uC544\uBCF4\uC8E0!"
-  stepType: 7
+  text: "\uC88B\uC2B5\uB2C8\uB2E4.\n\uC774\uC81C \uC911\uC559\uC5D0 \uC788\uB294
+    <color=#FFC107>\uC2DC\uB4DC \uCF54\uC5B4</color>\uB97C \uD074\uB9AD\uD55C \uB2E4\uC74C
+    <color=#FFC107>\uCC44\uAD74 \uC720\uB2DB</color>\uC744 \uD558\uB098 \uC0DD\uC0B0\uD574\uBD05\uC2DC\uB2E4."
+  stepType: 11
   duration: 0
-  count: 10
+  count: 1
   resourceType: 0
   buildingType: 
-  unitType: 
+  unitType: Miner
   itemType: 
-  showProgressBar: 1
+  showProgressBar: 0
   enableUIPanels: 
   tutorialPanelMoveDownOffset: 0
   spawnUnits: []
@@ -37,10 +35,11 @@ MonoBehaviour:
       Data3: -73339495
       Data4: 1624008095
     Path: event:/SFX_UI/SFX_UIClick
-  enableMaterialHighlight: 0
-  highlightTargetIDs: []
+  enableMaterialHighlight: 1
+  highlightTargetIDs:
+  - unit_miner
   showArrowUI: 0
   arrowID: 
-  showTargetBracket: 0
-  targetBracketBuildingType: 
-  includeConstructionSiteForTargetBracket: 1
+  showTargetBracket: 1
+  targetBracketBuildingType: MainStructure
+  includeConstructionSiteForTargetBracket: 0

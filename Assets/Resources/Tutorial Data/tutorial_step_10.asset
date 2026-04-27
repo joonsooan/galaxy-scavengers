@@ -10,21 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c74002d918083e14eb5bcbcc12257fde, type: 3}
-  m_Name: tutorial_step_4
+  m_Name: tutorial_step_10
   m_EditorClassIdentifier: 
-  stepIndex: 4
-  text: "<color=#FFC107>Space \uD0A4</color>\uB97C \uB204\uB974\uAC70\uB098 <color=#FFC107>\uC544\uC774\uCF58\uC744
-    \uD074\uB9AD</color>\uD574 \uC2DC\uAC04\uC744 \uC77C\uC2DC\uC815\uC9C0\uD560
-    \uC218 \uC788\uC2B5\uB2C8\uB2E4."
-  stepType: 4
+  stepIndex: 10
+  text: "\uB2E4\uC2DC \uC2DC\uB4DC \uCF54\uC5B4\uB97C \uD074\uB9AD\uD55C \uB2E4\uC74C
+    <color=#FFC107>\uAC74\uC124 \uC720\uB2DB</color> 1\uAC1C\uB97C \uC0DD\uC0B0\uD574\uBD05\uC2DC\uB2E4."
+  stepType: 11
   duration: 0
-  count: 4
+  count: 1
   resourceType: 0
   buildingType: 
-  unitType: 
+  unitType: Construct
   itemType: 
   showProgressBar: 1
-  enableUIPanels: 05000000
+  enableUIPanels: 
+  tutorialPanelMoveDownOffset: 0
   spawnUnits: []
   grantResources: []
   completionSound:
@@ -34,7 +34,11 @@ MonoBehaviour:
       Data3: -73339495
       Data4: 1624008095
     Path: event:/SFX_UI/SFX_UIClick
-  enableMaterialHighlight: 0
-  highlightTargetIDs: []
-  showArrowUI: 1
-  arrowID: resume_btn
+  enableMaterialHighlight: 1
+  highlightTargetIDs:
+  - unit_construct
+  showArrowUI: 0
+  arrowID: 
+  showTargetBracket: 1
+  targetBracketBuildingType: MainStructure
+  includeConstructionSiteForTargetBracket: 1

@@ -2365,9 +2365,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71a28a19517aea743af4d60adab88c78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitProcessorActivityUIController
+  resourceTabButton: {fileID: 0}
+  electricityTabButton: {fileID: 0}
+  resourceTabPanel: {fileID: 0}
+  electricityTabPanel: {fileID: 0}
   resourceSliderCellPrefab: {fileID: 3807928144824550500, guid: 70ecd5cf7c3bce148abf2f2c2769fba1, type: 3}
   produceContentParent: {fileID: 1754264023}
   spendContentParent: {fileID: 1365624262}
+  electricityInfoCellPrefab: {fileID: 0}
+  electricityProduceContentParent: {fileID: 0}
+  electricitySpendContentParent: {fileID: 0}
   movingAverageWindowMinutes: 5
   refreshInterval: 0.5
 --- !u!114 &64098323
@@ -8076,6 +8083,8 @@ MonoBehaviour:
   maxResourcesPerCircle: 25
   edgeBandRatio: 0.4
   edgeRemovalChance: 0.3
+  ringRichnessInnermost: 50
+  ringRichnessStep: 50
   starterRingInnerRadius: 7
   starterRingOuterRadius: 11
   starterResourceTypes: 00000000010000000200000003000000
@@ -41855,27 +41864,15 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 339a08f0b1d65514d9c9ba77dfd1cab6, type: 2}
   - {fileID: 11400000, guid: 8c4515d2b865f1b40afb7b07adbd0d7c, type: 2}
   - {fileID: 11400000, guid: 4019e054f36abd742a15dc516f38a50b, type: 2}
-  - {fileID: 11400000, guid: bb60669d84ed43c40bef7703d37ebfa4, type: 2}
   - {fileID: 11400000, guid: 61d3fb1921531544ab8803ce6f59e44d, type: 2}
-  - {fileID: 11400000, guid: 4be62746899fc0c4b8cb99fd554a5bcb, type: 2}
-  - {fileID: 11400000, guid: ad2ba75bc2a09fc49b94f5007208c359, type: 2}
   - {fileID: 11400000, guid: 829966317fc1c2241a6da0b0c445ae8f, type: 2}
   - {fileID: 11400000, guid: 1c2e0916c0c00aa48b8d000fb2896d77, type: 2}
-  - {fileID: 11400000, guid: c3a282dab0cc9de4e96d12de6b91b0c5, type: 2}
-  - {fileID: 11400000, guid: 9811aba7cc1a52d4780b678ccde44be3, type: 2}
-  - {fileID: 11400000, guid: a3e194e131105704699b903e622b66c0, type: 2}
-  - {fileID: 11400000, guid: 58258b9f4afbd4e41a0f3ca13f0b73e6, type: 2}
-  - {fileID: 11400000, guid: 482d25f2254f45148a654110ca2bdcc2, type: 2}
   - {fileID: 11400000, guid: 2f4d1a2fcdceaef40ac2ab213405be66, type: 2}
   - {fileID: 11400000, guid: e4ae52ed79a21f64c87db0e0c284aae6, type: 2}
-  - {fileID: 11400000, guid: f848c2a21b34b264f843658e823fae06, type: 2}
-  - {fileID: 11400000, guid: 5b80fd8997f9803419cabc412b7dec07, type: 2}
-  - {fileID: 11400000, guid: fc787208e2d466e4ca8ad74dfa9c4da7, type: 2}
-  - {fileID: 11400000, guid: 481b95b9f4893534c9d7fc9f97f1e79e, type: 2}
-  - {fileID: 11400000, guid: 2394150a712e7044b842872191a2305d, type: 2}
-  - {fileID: 11400000, guid: 30bce811d1a873e4aa01acc122d66b8f, type: 2}
-  - {fileID: 11400000, guid: 0cbafad54ee898a4e839a1e28bb528eb, type: 2}
-  - {fileID: 11400000, guid: b34c104154aa62246bfe8e827a3bc050, type: 2}
+  - {fileID: 11400000, guid: 6e5a7d3357f54af488e627bab42b3551, type: 2}
+  - {fileID: 11400000, guid: c3a282dab0cc9de4e96d12de6b91b0c5, type: 2}
+  - {fileID: 11400000, guid: a3e194e131105704699b903e622b66c0, type: 2}
+  enableTutorialDebugLogs: 1
   resourcePanel: {fileID: 1089803132}
   resourceInfoPanel: {fileID: 333748361}
   statsPanel: {fileID: 0}
@@ -42329,6 +42326,9 @@ MonoBehaviour:
   unitUpgradeTabButton: {fileID: 1155633860}
   unitUpgradeSubPanel: {fileID: 38915326}
   unitUpgradeUI: {fileID: 38915330}
+  unitChargeTabButton: {fileID: 0}
+  unitChargeSubPanel: {fileID: 0}
+  unitChargeUI: {fileID: 0}
 --- !u!1001 &792256375
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -44663,6 +44663,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   buildingName: {fileID: 1034809628}
   resourcePanel: {fileID: 1171605817}
+  postConstructPanel: {fileID: 0}
   buildingDesc: {fileID: 2056899316}
   healthText: {fileID: 857343298}
   resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: 87d776b852749c2428050baaea9b40b1, type: 3}
@@ -59645,7 +59646,7 @@ MonoBehaviour:
   inventoryGridContainer: {fileID: 1185129392}
   currentResourcePanel: {fileID: 471620567}
   launchStartButton: {fileID: 1044308504}
-  inventoryCellPrefab: {fileID: 3842191235755297668, guid: 79b3efe314470124eb00454f0b0f98c4, type: 3}
+  inventoryCellPrefab: {fileID: 3842191235755297668, guid: 0c93dfd6b41a96d4489a92b302206a7f, type: 3}
   resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: 87d776b852749c2428050baaea9b40b1, type: 3}
   baseCellCount: 20
   defaultMaxStackAmount: 100
@@ -78396,9 +78397,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45d85924d24d1f04c98d6140bc672c5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ResourceStatsUIController
+  resourceTabButton: {fileID: 0}
+  electricityTabButton: {fileID: 0}
+  resourceTabPanel: {fileID: 0}
+  electricityTabPanel: {fileID: 0}
   resourceSliderCellPrefab: {fileID: 3807928144824550500, guid: 70ecd5cf7c3bce148abf2f2c2769fba1, type: 3}
   produceContentParent: {fileID: 1754264023}
   spendContentParent: {fileID: 1365624262}
+  electricityInfoCellPrefab: {fileID: 0}
+  electricityProduceContentParent: {fileID: 0}
+  electricitySpendContentParent: {fileID: 0}
   movingAverageWindowMinutes: 5
   refreshInterval: 0.5
 --- !u!1 &1898005837
@@ -80568,6 +80576,31 @@ MonoBehaviour:
   neuralMatrixInitialAmount: 0
   electricityInitialAmount: 0
   tutorialElectricityInitialAmount: 0
+  cheatFerriteAmount: 0
+  cheatAetherAmount: 0
+  cheatBiomassAmount: 0
+  cheatCryoCrystalAmount: 0
+  cheatAlloyPlateAmount: 0
+  cheatCompositeFrameAmount: 0
+  cheatEChipAmount: 0
+  cheatBioCableAmount: 0
+  cheatPowerCubeAmount: 0
+  cheatBioFuelAmount: 0
+  cheatCryoGelAmount: 0
+  cheatSolanaAmount: 0
+  cheatCoreAmount: 0
+  cheatAmmunitionAmount: 0
+  cheatHeavyPlatingAmount: 0
+  cheatActuatorAmount: 0
+  cheatGenomeChipAmount: 0
+  cheatPatchKitAmount: 0
+  cheatSensorUnitAmount: 0
+  cheatPlasmaCubeAmount: 0
+  cheatCryoConduitAmount: 0
+  cheatSeekerMissileAmount: 0
+  cheatNexusDataAmount: 0
+  cheatNeuralMatrixAmount: 0
+  cheatElectricityAmount: 0
   resourceIcons:
   - {fileID: -4716559796490163538, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
   - {fileID: -6245384556211576076, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
@@ -93686,6 +93719,22 @@ MonoBehaviour:
   unitNameText: {fileID: 1022252243}
   unitDescText: {fileID: 2052577640}
   unitHealthText: {fileID: 2014928281}
+  internalBatteryRow: {fileID: 0}
+  unitBatteryRatioSlider: {fileID: 0}
+  unitBatteryAmountText: {fileID: 0}
+  unitBatteryStatusText: {fileID: 0}
+  unitBatteryStatusProblemIcon: {fileID: 0}
+  unitBatteryStatusOkIcon: {fileID: 0}
+  unitBatteryTextPowerEmpty: "\uC804\uB825 \uBD80\uC871"
+  unitBatteryTextNeedCharge: "\uCDA9\uC804 \uD544\uC694"
+  unitBatteryTextGoingToCharge: "\uCDA9\uC804\uC18C \uC774\uB3D9 \uC911"
+  unitBatteryTextQueued: "\uB300\uAE30 \uC911"
+  unitBatteryTextCharging: "\uCDA9\uC804 \uC911"
+  unitBatteryTextOk: "\uC815\uC0C1"
+  unitBatterySliderColorEmpty: {r: 0.92, g: 0.22, b: 0.22, a: 1}
+  unitBatterySliderColorNeedCharge: {r: 1, g: 0.75, b: 0.2, a: 1}
+  unitBatterySliderColorCharging: {r: 0.22, g: 0.65, b: 1, a: 1}
+  unitBatterySliderColorFull: {r: 0.25, g: 0.78, b: 0.35, a: 1}
 --- !u!1 &2052577638
 GameObject:
   m_ObjectHideFlags: 0
@@ -94844,6 +94893,7 @@ MonoBehaviour:
   - {fileID: 1317769433}
   - {fileID: 28145577}
   - {fileID: 1954317249}
+  minerUnitSlotImages: []
 --- !u!1 &2088475166
 GameObject:
   m_ObjectHideFlags: 0

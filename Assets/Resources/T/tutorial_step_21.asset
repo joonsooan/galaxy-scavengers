@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c74002d918083e14eb5bcbcc12257fde, type: 3}
   m_Name: tutorial_step_21
   m_EditorClassIdentifier: 
-  stepIndex: 21
+  stepIndex: 19
   text: "\uAC00\uACF5 \uC720\uB2DB\uC740 \uC0DD\uC0B0 \uC2DC \uC0DD\uC0B0 \uAC74\uBB3C\uC5D0
     \uC790\uB3D9\uC73C\uB85C \uBC30\uC815\uB418\uBA70, \uC0DD\uC0B0 \uAC74\uBB3C\uC758
     \uC720\uB2DB \uC544\uC774\uCF58\uC744 \uD074\uB9AD\uD574 \uC218\uB3D9\uC73C\uB85C

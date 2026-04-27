@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
 {
@@ -675,7 +676,15 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
 
     protected override void OnDestroy()
     {
-        if (GameManager.Instance != null) {
+        bool isGameplayScene = gameObject.scene.IsValid() && gameObject.scene.name == "GameScene";
+        bool isActiveGameplayScene = SceneManager.GetActiveScene().name == "GameScene";
+        bool shouldTriggerGameOver = isGameplayScene &&
+            isActiveGameplayScene &&
+            GameManager.Instance != null &&
+            GameManager.Instance.IsGameSceneInitialized &&
+            GameManager.IsGameplayReady;
+
+        if (shouldTriggerGameOver) {
             GameManager.Instance.GameOver(transform);
         }
 

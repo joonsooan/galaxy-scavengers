@@ -1162,6 +1162,9 @@ public class Unit_Miner : UnitBase
                 ResourceType minedResourceType = _targetResourceNode.resourceType;
                 int minedAmount = _targetResourceNode.Mine(mineAmountPerAction);
                 OnResourceMined?.Invoke(minedResourceType, minedAmount);
+                if (minedAmount > 0) {
+                    TutorialManager.Instance?.OnResourceMined(minedResourceType, minedAmount);
+                }
                 if (_targetResourceNode == null) {
                     yield break;
                 }

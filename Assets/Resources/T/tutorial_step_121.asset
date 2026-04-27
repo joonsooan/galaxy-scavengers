@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c74002d918083e14eb5bcbcc12257fde, type: 3}
-  m_Name: tutorial_step_14
+  m_Name: tutorial_step_121
   m_EditorClassIdentifier: 
-  stepIndex: 14
+  stepIndex: 12
   text: "<color=#FFC107>\uC800\uC7A5\uACE0</color>\uB294 \uC790\uC6D0 \uC800\uC7A5\uB7C9\uC744
     \uB298\uB824\uC8FC\uBA70, \uBAA8\uB4E0 \uC800\uC7A5\uACE0\uC5D0 \uC790\uC6D0\uC774
     \uAC00\uB4DD\uCC28\uBA74 \uD68D\uB4DD\uD55C \uC790\uC6D0\uC744 \uC800\uC7A5\uD558\uC9C0

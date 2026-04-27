@@ -5,6 +5,7 @@ using FMOD.Studio;
 using FMODUnity;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using STOP_MODE = FMOD.Studio.STOP_MODE;
 
 public class Unit_Player : UnitBase
@@ -134,7 +135,15 @@ public class Unit_Player : UnitBase
             Destroy(_laserRenderer.gameObject);
         }
 
-        if (GameManager.Instance != null)
+        bool isGameplayScene = gameObject.scene.IsValid() && gameObject.scene.name == "GameScene";
+        bool isActiveGameplayScene = SceneManager.GetActiveScene().name == "GameScene";
+        bool shouldTriggerGameOver = isGameplayScene &&
+            isActiveGameplayScene &&
+            GameManager.Instance != null &&
+            GameManager.Instance.IsGameSceneInitialized &&
+            GameManager.IsGameplayReady;
+
+        if (shouldTriggerGameOver)
         {
             GameManager.Instance.GameOver();
         }
@@ -499,7 +508,9 @@ public class Unit_Player : UnitBase
 
             int minedAmount = _targetResourceNode.Mine(mineAmountPerAction);
             if (minedAmount > 0) {
-                AddResourceToStorage(_targetResourceNode.resourceType, minedAmount);
+                ResourceType minedResourceType = _targetResourceNode.resourceType;
+                AddResourceToStorage(minedResourceType, minedAmount);
+                TutorialManager.Instance?.OnResourceMined(minedResourceType, minedAmount);
 
             }
 
