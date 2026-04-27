@@ -66,7 +66,7 @@ public class ObjClickManager : MonoBehaviour
                 MainStructure mainStructure = hit.collider.GetComponentInParent<MainStructure>();
                 if (mainStructure != null)
                 {
-                    BuildingHoverManager.Instance?.ClearHoverOnClick();
+                    BuildingHoverManager.Instance?.ClearHoverOnClick(false);
                     if (BuildingInfoPanel.Instance != null)
                     {
                         BuildingInfoPanel.Instance.gameObject.SetActive(false);

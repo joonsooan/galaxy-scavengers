@@ -48,15 +48,7 @@ public class UnitInfoPanel : MonoBehaviour
             return;
         }
         Instance = this;
-
-        _rectTransform = GetComponent<RectTransform>();
-        if (_rectTransform != null)
-        {
-            _defaultAnchorMin = _rectTransform.anchorMin;
-            _defaultAnchorMax = _rectTransform.anchorMax;
-            _defaultPivot = _rectTransform.pivot;
-            _defaultAnchoredPosition = _rectTransform.anchoredPosition;
-        }
+        EnsureLayoutDefaultsInitialized();
 
         ClearAllInfo();
     }
@@ -119,7 +111,7 @@ public class UnitInfoPanel : MonoBehaviour
 
     public void ApplyFixedAnchorLayout(Vector2 anchor, Vector2 anchoredPosition)
     {
-        if (_rectTransform == null)
+        if (!EnsureLayoutDefaultsInitialized())
         {
             return;
         }
@@ -141,7 +133,7 @@ public class UnitInfoPanel : MonoBehaviour
 
     public void RestoreDefaultLayout()
     {
-        if (_rectTransform == null || !_isLayoutOverridden)
+        if (!EnsureLayoutDefaultsInitialized() || !_isLayoutOverridden)
         {
             return;
         }
@@ -151,6 +143,28 @@ public class UnitInfoPanel : MonoBehaviour
         _rectTransform.pivot = _defaultPivot;
         _rectTransform.anchoredPosition = _defaultAnchoredPosition;
         _isLayoutOverridden = false;
+    }
+
+    private bool EnsureLayoutDefaultsInitialized()
+    {
+        if (_rectTransform == null)
+        {
+            _rectTransform = GetComponent<RectTransform>();
+            if (_rectTransform == null)
+            {
+                return false;
+            }
+        }
+
+        if (!_isLayoutOverridden)
+        {
+            _defaultAnchorMin = _rectTransform.anchorMin;
+            _defaultAnchorMax = _rectTransform.anchorMax;
+            _defaultPivot = _rectTransform.pivot;
+            _defaultAnchoredPosition = _rectTransform.anchoredPosition;
+        }
+
+        return true;
     }
 
     private void Update()

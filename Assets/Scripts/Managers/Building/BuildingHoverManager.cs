@@ -681,7 +681,7 @@ public class BuildingHoverManager : MonoBehaviour
         return _unitInfoPanel;
     }
 
-    public void ClearHoverOnClick()
+    public void ClearHoverOnClick(bool clearStorageHover = true)
     {
         UnlockUnitInfo();
 
@@ -692,7 +692,9 @@ public class BuildingHoverManager : MonoBehaviour
         }
 
         ClearHover();
-        ClearStorageHover();
+        if (clearStorageHover) {
+            ClearStorageHover();
+        }
     }
 
     public void HandleNormalBuildingClick(BuildingDataHolder holder)

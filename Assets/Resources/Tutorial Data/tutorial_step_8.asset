@@ -24,7 +24,7 @@ MonoBehaviour:
   unitType: Miner
   itemType: 
   showProgressBar: 0
-  enableUIPanels: 
+  enableUIPanels: 080000000a0000000b0000000d000000
   tutorialPanelMoveDownOffset: 0
   spawnUnits: []
   grantResources:
