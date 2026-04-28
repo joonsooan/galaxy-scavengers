@@ -301,29 +301,27 @@ public class Processor : Damageable, IClickable, IElectricityConsumer
 
     public void RequestTask(Unit_Drone drone)
     {
-        if (!drone.HasCheckedIn) {
+        if (drone == null || !drone.HasCheckedIn) {
             return;
         }
 
-        if (drone.CurrentRecipeTask != null) {
-            ActiveRecipe assignedRecipe = _activeRecipes.FirstOrDefault(r => r.assignedDrone == drone && r == drone.CurrentRecipeTask);
-
-            if (assignedRecipe != null && assignedRecipe.assignedDrone == drone) {
-                if (!IsEligibleForCurrentOutput(assignedRecipe)) {
-                    ReleaseDroneFromRecipe(drone);
-                    drone.SetTask_Idle();
-                    return;
-                }
-
-                drone.SetTask_Process(this, assignedRecipe);
-                return;
-            }
+        if (!IsOperational) {
+            Debug.Log($"[ProcessorTask] Skip assign: processor not operational ({name}) for drone {drone.name}");
             ReleaseDroneFromRecipe(drone);
             drone.SetTask_Idle();
+            return;
         }
 
-        ResourceRequest existingRequest = _pendingRequests.FirstOrDefault(r => r.assignedDrone == drone);
-        if (existingRequest != null) {
+        if (TryResumeExistingRecipeTask(drone)) {
+            return;
+        }
+
+        if (HasPendingRequestForDrone(drone)) {
+            return;
+        }
+
+        if (!_selectedOutputResource.HasValue) {
+            drone.SetTask_Idle();
             return;
         }
 
@@ -335,35 +333,80 @@ public class Processor : Damageable, IClickable, IElectricityConsumer
             return;
         }
 
-        foreach (ActiveRecipe recipe in _activeRecipes) {
-            if (recipe.assignedDrone == null &&
-                !recipe.isProcessing &&
-                HasIngredientsFor(recipe.recipeData) &&
-                PassesProductionCapCheck(recipe) &&
-                !IsRecipeLockedByOtherDrone(recipe, drone)) {
-                recipe.assignedDrone = drone;
-                recipe.processingProgress = 0f;
-
-                drone.SetTask_Process(this, recipe);
-                return;
-            }
+        if (TryAssignProcessingTask(drone)) {
+            return;
         }
 
+        if (_selectedOutputResource.HasValue) {
+            Debug.Log($"[ProcessorTask] No task available for drone {drone.name} at processor {name}");
+        }
+        drone.SetTask_Idle();
+    }
+
+    private bool TryResumeExistingRecipeTask(Unit_Drone drone)
+    {
+        if (drone.CurrentRecipeTask == null) {
+            return false;
+        }
+
+        ActiveRecipe assignedRecipe = _activeRecipes.FirstOrDefault(r => r.assignedDrone == drone && r == drone.CurrentRecipeTask);
+        if (assignedRecipe == null || assignedRecipe.assignedDrone != drone || !IsEligibleForCurrentOutput(assignedRecipe)) {
+            Debug.Log($"[ProcessorTask] Clear stale recipe task for drone {drone.name} at processor {name}");
+            ReleaseDroneFromRecipe(drone);
+            drone.SetTask_Idle();
+            return true;
+        }
+
+        drone.SetTask_Process(this, assignedRecipe);
+        return true;
+    }
+
+    private bool HasPendingRequestForDrone(Unit_Drone drone)
+    {
+        return _pendingRequests.Any(r => r.assignedDrone == drone);
+    }
+
+    private bool TryAssignProcessingTask(Unit_Drone drone)
+    {
         foreach (ActiveRecipe recipe in _activeRecipes) {
-            if (!IsEligibleForCurrentOutput(recipe)) {
+            if (!CanStartNewRecipe(recipe, drone)) {
                 continue;
             }
 
-            if (recipe.assignedDrone == null &&
-                recipe.isProcessing &&
-                !IsRecipeLockedByOtherDrone(recipe, drone)) {
-                recipe.assignedDrone = drone;
-                drone.SetTask_Process(this, recipe);
-                return;
-            }
+            recipe.assignedDrone = drone;
+            recipe.processingProgress = 0f;
+            drone.SetTask_Process(this, recipe);
+            return true;
         }
 
-        drone.SetTask_Idle();
+        foreach (ActiveRecipe recipe in _activeRecipes) {
+            if (!CanResumeProcessingRecipe(recipe, drone)) {
+                continue;
+            }
+
+            recipe.assignedDrone = drone;
+            drone.SetTask_Process(this, recipe);
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool CanStartNewRecipe(ActiveRecipe recipe, Unit_Drone drone)
+    {
+        return recipe.assignedDrone == null &&
+               !recipe.isProcessing &&
+               HasIngredientsFor(recipe.recipeData) &&
+               PassesProductionCapCheck(recipe) &&
+               !IsRecipeLockedByOtherDrone(recipe, drone);
+    }
+
+    private bool CanResumeProcessingRecipe(ActiveRecipe recipe, Unit_Drone drone)
+    {
+        return IsEligibleForCurrentOutput(recipe) &&
+               recipe.assignedDrone == null &&
+               recipe.isProcessing &&
+               !IsRecipeLockedByOtherDrone(recipe, drone);
     }
 
     public bool HasWorkForDrone(int droneCapacity)
@@ -515,14 +558,9 @@ public class Processor : Damageable, IClickable, IElectricityConsumer
             CheckAndAssignReadyRecipes();
 
             if (drone != null && drone.HasCheckedIn && drone.CurrentRecipeTask == null) {
-                bool hasPendingRequest = _pendingRequests.Any(r => r.assignedDrone == drone);
-                if (!hasPendingRequest) {
+                if (!HasPendingRequestForDrone(drone)) {
                     foreach (ActiveRecipe recipe in _activeRecipes) {
-                        if (recipe.assignedDrone == null &&
-                            !recipe.isProcessing &&
-                            HasIngredientsFor(recipe.recipeData) &&
-                            PassesProductionCapCheck(recipe) &&
-                            !IsRecipeLockedByOtherDrone(recipe, drone)) {
+                        if (CanStartNewRecipe(recipe, drone)) {
                             recipe.assignedDrone = drone;
                             recipe.processingProgress = 0f;
                             drone.SetTask_Process(this, recipe);

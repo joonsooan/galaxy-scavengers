@@ -598,11 +598,13 @@ public class Unit_Drone : UnitBase
     private void UpdateProcessing()
     {
         if (CurrentRecipeTask == null) {
+            Debug.Log($"[DroneProcess] Cancel: no current recipe task ({name})");
             SetTask_Idle();
             return;
         }
 
         if (_currentProcessor != null && _currentProcessor is IElectricityConsumer consumer && !consumer.IsOperational) {
+            Debug.Log($"[DroneProcess] Cancel: processor not operational ({_currentProcessor.name}) for drone {name}");
             SetTask_Idle();
             return;
         }
@@ -638,8 +640,15 @@ public class Unit_Drone : UnitBase
                 _currentProcessor.ProcessRecipeWork(CurrentRecipeTask, Time.deltaTime * processingSpeed * workMult);
             }
 
-            if (CurrentRecipeTask == null || CurrentRecipeTask != null && !CurrentRecipeTask.isProcessing && CurrentRecipeTask.assignedDrone == null) {
+            bool processingEnded = CurrentRecipeTask == null ||
+                (!CurrentRecipeTask.isProcessing && CurrentRecipeTask.assignedDrone == null);
+            if (processingEnded) {
+                string recipeName = CurrentRecipeTask != null && CurrentRecipeTask.recipeData != null
+                    ? CurrentRecipeTask.recipeData.resourceType.ToString()
+                    : "null";
+                Debug.Log($"[DroneProcess] Processing ended: drone={name}, processor={(_currentProcessor != null ? _currentProcessor.name : "null")}, recipe={recipeName}");
                 HideProgressBar();
+                SetTask_Idle();
                 return;
             }
         }
@@ -658,6 +667,7 @@ public class Unit_Drone : UnitBase
                         : 0f;
                 }
                 else {
+                    Debug.Log($"[DroneProcess] Cancel: path to processor interaction cell failed ({name})");
                     SetTask_Idle();
                 }
             }

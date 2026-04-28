@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class ProcessorUIManager : MonoBehaviour
 {
+    private const int DefaultProductionLimit = 999;
     [Header("UI References")]
     public GameObject recipeCellPrefab;
     public Transform contentParent;
@@ -198,11 +199,12 @@ public class ProcessorUIManager : MonoBehaviour
                 continue;
             }
 
-            if (ResourceManager.Instance != null) {
-                Sprite spr = ResourceManager.Instance.GetResourceIcon(type);
-                if (spr != null) {
-                    img.sprite = spr;
-                }
+            Sprite recipeSprite = recipe.recipeIcon;
+            if (recipeSprite == null && ResourceManager.Instance != null) {
+                recipeSprite = ResourceManager.Instance.GetResourceIcon(type);
+            }
+            if (recipeSprite != null) {
+                img.sprite = recipeSprite;
             }
 
             btn.onClick.RemoveAllListeners();
@@ -225,6 +227,10 @@ public class ProcessorUIManager : MonoBehaviour
         }
         else {
             _currentProcessor.SetSelectedOutputResource(type);
+            ActiveRecipe pickedRecipe = _currentProcessor.GetActiveRecipeForResource(type);
+            if (pickedRecipe != null && pickedRecipe.maxProductionLimit <= 0) {
+                pickedRecipe.SetProductionLimit(DefaultProductionLimit);
+            }
             _showResourcePicker = false;
         }
 
