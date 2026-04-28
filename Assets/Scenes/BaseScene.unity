@@ -7434,7 +7434,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   resourceIcons:
   - {fileID: -4716559796490163538, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
-  - {fileID: 7242802088552420798, guid: 5b644de4e058ce64a8684b1f4614a66c, type: 3}
+  - {fileID: -6245384556211576076, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
   - {fileID: 8999891839495180843, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
   - {fileID: 8256525898410203829, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
   - {fileID: -6291453560396589059, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}

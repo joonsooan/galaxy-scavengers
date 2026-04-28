@@ -42507,6 +42507,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 6e5a7d3357f54af488e627bab42b3551, type: 2}
   - {fileID: 11400000, guid: c3a282dab0cc9de4e96d12de6b91b0c5, type: 2}
   - {fileID: 11400000, guid: a3e194e131105704699b903e622b66c0, type: 2}
+  - {fileID: 11400000, guid: f848c2a21b34b264f843658e823fae06, type: 2}
+  - {fileID: 11400000, guid: 47b983dd4deaa024cbef23a745cfc6c5, type: 2}
+  - {fileID: 11400000, guid: fc787208e2d466e4ca8ad74dfa9c4da7, type: 2}
+  - {fileID: 11400000, guid: 481b95b9f4893534c9d7fc9f97f1e79e, type: 2}
   resourcePanel: {fileID: 1089803132}
   gameSpeedPanel: {fileID: 1029636134}
   dayNightPanel: {fileID: 432427245}
@@ -42518,15 +42522,15 @@ MonoBehaviour:
   storageResourceInfoPanel: {fileID: 1063455837}
   processorInfoPanel: {fileID: 1300553939}
   droneProduceInfoPanel: {fileID: 1666371508}
-  buildingInfoPanel: {fileID: 886580898}
   extractorInfoPanel: {fileID: 1539508033}
   mainControlPanel: {fileID: 152035975}
-  unitManagePanel: {fileID: 790458799}
-  resourceStatsPanel: {fileID: 1890566047}
+  unitManagePanel: {fileID: 1581555304}
+  resourceStatsPanel: {fileID: 1495220785}
   buildingDestroyPanel: {fileID: 2013807532}
   baseBuildingPanel: {fileID: 327025569}
   resourceInfoPanel: {fileID: 333748361}
   unitInfoPanel: {fileID: 2052224119}
+  buildingInfoPanel: {fileID: 886580898}
   launchButton: {fileID: 1774833543}
   launchResultUI: {fileID: 350766404}
   launchPanel: {fileID: 2010602832}
@@ -60328,7 +60332,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1495220786
 RectTransform:
   m_ObjectHideFlags: 0
@@ -62451,7 +62455,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1581555305
 RectTransform:
   m_ObjectHideFlags: 0

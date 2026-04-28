@@ -10,26 +10,29 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c74002d918083e14eb5bcbcc12257fde, type: 3}
-  m_Name: tutorial_step_8
+  m_Name: tutorial_step_13
   m_EditorClassIdentifier: 
-  stepIndex: 8
-  text: "\uC88B\uC2B5\uB2C8\uB2E4.\n\uC774\uC81C \uC911\uC559\uC5D0 \uC788\uB294
-    <color=#FFC107>\uC2DC\uB4DC \uCF54\uC5B4</color>\uB97C \uD074\uB9AD\uD55C \uB2E4\uC74C
-    <color=#FFC107>\uCC44\uAD74 \uC720\uB2DB</color>\uC744 \uD558\uB098 \uC0DD\uC0B0\uD574\uBD05\uC2DC\uB2E4."
-  stepType: 11
+  stepIndex: 13
+  text: "\uC774\uC81C \uCC44\uAD74\uD55C \uC790\uC6D0\uC744 \uC0C1\uC704 \uC790\uC6D0\uC73C\uB85C
+    \uAC00\uACF5\uD574\uBD05\uC2DC\uB2E4.\n\uC790\uC6D0\uC744 \uAC00\uACF5\uD558\uB824\uBA74
+    \uC804\uB825\uC774 \uD544\uC694\uD569\uB2C8\uB2E4.\n<color=#FFC107>\uBC1C\uC804\uAE30</color>\uB97C
+    \uC120\uD0DD\uD55C \uB2E4\uC74C \uD558\uB298\uC0C9 \uBC94\uC704 \uC548\uC5D0
+    \uC800\uC7A5\uACE0\uB098 \uC2DC\uB4DC \uCF54\uC5B4\uAC00 \uB4E4\uC5B4\uAC00\uB3C4\uB85D
+    \uC124\uCE58\uD558\uC138\uC694."
+  stepType: 10
   duration: 0
   count: 1
   resourceType: -1
-  buildingType: -1
-  unitType: 2
+  buildingType: 1
+  unitType: 0
   itemType: 
   showProgressBar: 0
-  enableUIPanels: 080000000a0000000b0000000d000000
+  enableUIPanels: 
   grantResources:
-  - resourceType: 0
-    amount: 100
   - resourceType: 1
-    amount: 100
+    amount: 50
+  - resourceType: 2
+    amount: 50
   completionSound:
     Guid:
       Data1: -345895807
@@ -39,9 +42,9 @@ MonoBehaviour:
     Path: event:/SFX_UI/SFX_UIClick
   enableMaterialHighlight: 1
   highlightTargetIDs:
-  - unit_miner
+  - building_generator
   showArrowUI: 0
   arrowID: 
-  showTargetBracket: 1
-  targetBracketBuildingType: MainStructure
+  showTargetBracket: 0
+  targetBracketBuildingType: 
   includeConstructionSiteForTargetBracket: 0

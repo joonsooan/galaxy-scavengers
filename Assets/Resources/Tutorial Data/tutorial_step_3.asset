@@ -18,13 +18,12 @@ MonoBehaviour:
   stepType: 3
   duration: 0
   count: 10
-  resourceType: 0
-  buildingType: 
-  unitType: 
+  resourceType: -1
+  buildingType: -1
+  unitType: 0
   itemType: 
   showProgressBar: 1
   enableUIPanels: 
-  spawnUnits: []
   grantResources: []
   completionSound:
     Guid:
@@ -37,3 +36,6 @@ MonoBehaviour:
   highlightTargetIDs: []
   showArrowUI: 0
   arrowID: 
+  showTargetBracket: 0
+  targetBracketBuildingType: 
+  includeConstructionSiteForTargetBracket: 1

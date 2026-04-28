@@ -317,36 +317,8 @@ public class TutorialManager : MonoBehaviour
 
     private void ProcessStepStartActions(TutorialStepData step)
     {
-        if (step.spawnUnits != null && step.spawnUnits.Length > 0) {
-            SpawnUnits(step.spawnUnits);
-        }
-
         if (step.grantResources != null && step.grantResources.Length > 0) {
             GrantResources(step.grantResources);
-        }
-    }
-
-    private void SpawnUnits(UnitData[] unitsToSpawn)
-    {
-        if (UnitManager.Instance == null || UnitManager.Instance.unitParent == null) {
-            return;
-        }
-
-        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
-        Vector3 spawnPosition = mainStructure != null ? mainStructure.transform.position : Vector3.zero;
-
-        foreach (UnitData unitData in unitsToSpawn) {
-            if (unitData == null || unitData.unitPrefab == null) {
-                continue;
-            }
-
-            Vector3 offSet = new Vector3(0f, -2f, 0f);
-            GameObject unitObj = Instantiate(unitData.unitPrefab, spawnPosition + offSet, Quaternion.identity, UnitManager.Instance.unitParent);
-            UnitBase unitBase = unitObj.GetComponent<UnitBase>();
-            if (unitBase != null) {
-                unitBase.unitType = UnitBase.UnitType.Ally;
-                unitBase.unitData = unitData;
-            }
         }
     }
 
@@ -707,31 +679,32 @@ public class TutorialManager : MonoBehaviour
         return _isRoundTimerPausedByTutorial;
     }
 
-    public void OnBuildingPlaced(string buildingType)
+    public void OnBuildingPlaced(BuildingType buildingType)
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
         if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
-        if (currentStep.stepType == TutorialStepType.BuildingPlaced && currentStep.buildingType == buildingType) {
+        if (currentStep.stepType == TutorialStepType.BuildingPlaced &&
+            currentStep.buildingType == buildingType) {
             _buildingPlacedCount++;
             _buildingPlacedWaitingForRelease = Input.GetMouseButton(0);
         }
     }
 
-    public void OnBuildingCompleted(string buildingType)
+    public void OnBuildingCompleted(BuildingType buildingType)
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
         if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
         if (currentStep.stepType == TutorialStepType.BuildingCompleted &&
-            (string.IsNullOrEmpty(currentStep.buildingType) || currentStep.buildingType == buildingType)) {
+            currentStep.buildingType == buildingType) {
             _buildingCompletedCount++;
         }
     }
 
-    public void OnUnitProduced(string unitType)
+    public void OnUnitProduced(TutorialUnitType unitType)
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
         if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
@@ -761,42 +734,43 @@ public class TutorialManager : MonoBehaviour
             return;
         }
 
-        if (IsProducedUnitMatch(currentStep.unitType, unitData)) {
+        if (currentStep.unitType != TutorialUnitType.None &&
+            currentStep.unitType == GetTutorialUnitType(unitData)) {
             _unitProducedCount++;
         }
     }
 
-    private bool IsProducedUnitMatch(string expectedUnitType, UnitData producedUnit)
+    private TutorialUnitType GetTutorialUnitType(UnitData unitData)
     {
-        if (producedUnit == null || string.IsNullOrEmpty(expectedUnitType)) {
-            return false;
+        if (unitData == null) {
+            return TutorialUnitType.None;
         }
 
-        string normalizedExpected = NormalizeUnitKey(expectedUnitType);
-        if (string.IsNullOrEmpty(normalizedExpected)) {
-            return false;
+        string normalizedTutorialKey = NormalizeUnitKey(unitData.tutorialKey);
+        switch (normalizedTutorialKey) {
+        case "unitscout":
+            return TutorialUnitType.Scout;
+        case "unitminer":
+            return TutorialUnitType.Miner;
+        case "unitconstruct":
+            return TutorialUnitType.Construct;
+        case "unitprocessor":
+            return TutorialUnitType.Processor;
         }
 
-        string normalizedTutorialKey = NormalizeUnitKey(producedUnit.tutorialKey);
-        string normalizedUnitName = NormalizeUnitKey(producedUnit.unitName);
-        string normalizedAssetName = NormalizeUnitKey(producedUnit.name);
-
-        if (!string.IsNullOrEmpty(normalizedTutorialKey) &&
-            (normalizedTutorialKey == normalizedExpected || normalizedTutorialKey.Contains(normalizedExpected))) {
-            return true;
+        string normalizedAssetName = NormalizeUnitKey(unitData.name);
+        switch (normalizedAssetName) {
+        case "unitscout":
+            return TutorialUnitType.Scout;
+        case "unitminer":
+            return TutorialUnitType.Miner;
+        case "unitconstruct":
+            return TutorialUnitType.Construct;
+        case "unitprocessor":
+            return TutorialUnitType.Processor;
         }
 
-        if (!string.IsNullOrEmpty(normalizedUnitName) &&
-            (normalizedUnitName == normalizedExpected || normalizedUnitName.Contains(normalizedExpected))) {
-            return true;
-        }
-
-        if (!string.IsNullOrEmpty(normalizedAssetName) &&
-            (normalizedAssetName == normalizedExpected || normalizedAssetName.Contains(normalizedExpected))) {
-            return true;
-        }
-
-        return false;
+        return TutorialUnitType.None;
     }
 
     private string NormalizeUnitKey(string value)
@@ -1083,6 +1057,7 @@ public class TutorialManager : MonoBehaviour
     {
         switch (panelType) {
         case TutorialUIPanel.StorageResourceInfoPanel:
+        case TutorialUIPanel.ProcessorInfoPanel:
         case TutorialUIPanel.DroneProduceInfoPanel:
             return true;
         default:

@@ -14,18 +14,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stepIndex: 10
   text: "\uB2E4\uC2DC \uC2DC\uB4DC \uCF54\uC5B4\uB97C \uD074\uB9AD\uD55C \uB2E4\uC74C
-    <color=#FFC107>\uAC74\uC124 \uC720\uB2DB</color> 1\uAC1C\uB97C \uC0DD\uC0B0\uD574\uBD05\uC2DC\uB2E4."
+    <color=#FFC107>\uAC74\uC124 \uC720\uB2DB</color> 2\uAC1C\uB97C \uC0DD\uC0B0\uD574\uBD05\uC2DC\uB2E4."
   stepType: 11
   duration: 0
-  count: 1
-  resourceType: 0
-  buildingType: 
-  unitType: Construct
+  count: 2
+  resourceType: -1
+  buildingType: -1
+  unitType: 3
   itemType: 
   showProgressBar: 1
   enableUIPanels: 
-  tutorialPanelMoveDownOffset: 0
-  spawnUnits: []
   grantResources:
   - resourceType: 0
     amount: 200

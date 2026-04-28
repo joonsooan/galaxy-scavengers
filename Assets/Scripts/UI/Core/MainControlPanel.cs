@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
@@ -91,11 +91,19 @@ public class MainControlPanel : MonoBehaviour
         }
         else if (Input.GetKeyDown(KeyCode.R))
         {
+            if (TutorialManager.Instance != null &&
+                !TutorialManager.Instance.IsUIPanelEnabledForCurrentStep(TutorialUIPanel.UnitManagePanel)) {
+                return;
+            }
             PlayShortcutClickSound(unitManagementBtn);
             OnUnitManagementBtnClicked();
         }
         else if (Input.GetKeyDown(KeyCode.F))
         {
+            if (TutorialManager.Instance != null &&
+                !TutorialManager.Instance.IsUIPanelEnabledForCurrentStep(TutorialUIPanel.ResourceStatsPanel)) {
+                return;
+            }
             PlayShortcutClickSound(resourceStatBtn);
             OnResourceStatBtnClicked();
         }

@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
 public enum BuildingType
 {
+    None = -1,
     Storage,
     Generator,
     DroneHub,

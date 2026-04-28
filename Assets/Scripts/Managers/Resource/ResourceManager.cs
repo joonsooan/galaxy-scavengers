@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 
 public enum ResourceType
 {
+    None = -1,
     Ferrite,
     Aether,
     Biomass,

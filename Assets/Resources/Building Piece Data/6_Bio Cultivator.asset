@@ -19,5 +19,5 @@ MonoBehaviour:
   buildingPieceType: 7
   buildingPieceTile: {fileID: 0}
   costs:
-  - resourceType: 7
+  - resourceType: 5
     amount: 25

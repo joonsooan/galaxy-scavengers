@@ -19,14 +19,12 @@ MonoBehaviour:
   stepType: 4
   duration: 0
   count: 2
-  resourceType: 0
-  buildingType: 
-  unitType: 
+  resourceType: -1
+  buildingType: -1
+  unitType: 0
   itemType: 
   showProgressBar: 1
   enableUIPanels: 01000000
-  tutorialPanelMoveDownOffset: 0
-  spawnUnits: []
   grantResources: []
   completionSound:
     Guid:

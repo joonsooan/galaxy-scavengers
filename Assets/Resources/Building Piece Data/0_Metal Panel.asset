@@ -17,7 +17,7 @@ MonoBehaviour:
   icon: {fileID: 1732918837650927639, guid: 6047a3701996c444e8238b6a1daa0afa, type: 3}
   buildingPiecePrefab: {fileID: 1574451153020646121, guid: 75b5f4fdfe3bb4f4e8798fd4745e0c30, type: 3}
   buildingPieceType: 1
-  buildingPieceTile: {fileID: 11400000, guid: 4324964c49dd69a4789c7460b9814183, type: 2}
+  buildingPieceTile: {fileID: 0}
   costs:
   - resourceType: 0
     amount: 25

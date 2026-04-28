@@ -769,6 +769,7 @@ public class Processor : Damageable, IClickable, IElectricityConsumer
     {
         ResourceManager.Instance.AddResource(recipeData.resourceType, recipeData.produceAmount);
         UnitProcessResourceStatTracker.RecordProduce(recipeData.resourceType, recipeData.produceAmount);
+        TutorialManager.Instance?.OnItemProduced(recipeData.resourceType.ToString());
 
         List<IStorage> storages = ResourceManager.Instance.GetAllStorages();
         foreach (IStorage storage in storages) {

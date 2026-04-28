@@ -26030,7 +26030,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0.5, z: -10}
+  m_LocalPosition: {x: 0.5, y: 0.5, z: -20}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -42553,17 +42553,31 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 0cbafad54ee898a4e839a1e28bb528eb, type: 2}
   - {fileID: 11400000, guid: b34c104154aa62246bfe8e827a3bc050, type: 2}
   resourcePanel: {fileID: 1089803132}
-  resourceInfoPanel: {fileID: 333748361}
-  statsPanel: {fileID: 0}
-  debuffPanel: {fileID: 2111770750}
-  timeSlider: {fileID: 432427245}
-  gameSpeed: {fileID: 1029636134}
+  gameSpeedPanel: {fileID: 1029636134}
+  dayNightPanel: {fileID: 0}
+  leftTimePanel: {fileID: 432427245}
   noisePanel: {fileID: 850145275}
-  unitPopulationPanel: {fileID: 393683347}
-  alertPanel: {fileID: 1078723809}
+  pausePanel: {fileID: 0}
+  tutorialPanel: {fileID: 0}
+  tutorialArrows: {fileID: 0}
+  storageResourceInfoPanel: {fileID: 0}
+  processorInfoPanel: {fileID: 0}
+  droneProduceInfoPanel: {fileID: 0}
+  extractorInfoPanel: {fileID: 0}
   mainControlPanel: {fileID: 152035975}
-  questPanel: {fileID: 53596316}
+  unitManagePanel: {fileID: 0}
+  resourceStatsPanel: {fileID: 0}
+  buildingDestroyPanel: {fileID: 0}
+  baseBuildingPanel: {fileID: 0}
+  resourceInfoPanel: {fileID: 333748361}
+  unitInfoPanel: {fileID: 0}
+  buildingInfoPanel: {fileID: 0}
   launchButton: {fileID: 0}
+  launchResultUI: {fileID: 0}
+  launchPanel: {fileID: 0}
+  launchPreparePanel: {fileID: 0}
+  alertPanelParent: {fileID: 1078723809}
+  alertTooltipPanel: {fileID: 0}
   highlightableList:
   - id: mainControl_baseBuilding
     uiObject: {fileID: 664278389}
@@ -82976,6 +82990,7 @@ MonoBehaviour:
   cheatElectricityAmount: 0
   resourceIcons:
   - {fileID: -4716559796490163538, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
+  - {fileID: -4716559796490163538, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
   - {fileID: -6245384556211576076, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
   - {fileID: 8999891839495180843, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
   - {fileID: 8256525898410203829, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
@@ -82989,7 +83004,6 @@ MonoBehaviour:
   - {fileID: -3423204301100993705, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
   - {fileID: 7710585031511037781, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
   - {fileID: -5146700307962209370, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
-  - {fileID: 7242802088552420798, guid: 5b644de4e058ce64a8684b1f4614a66c, type: 3}
   resourceStatsList:
   - resourceType: 0
     amountToMine: 50

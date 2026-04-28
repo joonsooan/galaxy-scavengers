@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -14,10 +14,9 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject buildingResourcePanel;
     [SerializeField] private GameObject resourceInfoCellPrefab;
 
-    [Header("Processor Info Panel")]
+    [Header("Production Info Panels")]
     [SerializeField] private GameObject processorInfoPanel;
 
-    [Header("Drone Hub Info Panel")]
     [SerializeField] private GameObject droneHubInfoPanel;
 
     [Header("Extractor Info Panel")]
@@ -120,6 +119,11 @@ public class UIManager : MonoBehaviour
     private void HandleProcessorClicked(Processor processor)
     {
         if (processor == null) return;
+
+        if (TutorialManager.Instance != null &&
+            !TutorialManager.Instance.IsUIPanelEnabledForCurrentStep(TutorialUIPanel.ProcessorInfoPanel)) {
+            return;
+        }
 
         HideCurrentIClickableUI();
         HideBuildingInfoPanel();
