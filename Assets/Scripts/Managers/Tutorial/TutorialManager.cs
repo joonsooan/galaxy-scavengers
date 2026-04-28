@@ -33,11 +33,11 @@ public struct HighlightableUI
 
 public class TutorialManager : MonoBehaviour
 {
-    [Header("Tutorial Settings")]
+    [Header("Tutorial Core")]
     [SerializeField] private GameObject tutorialUI;
     [SerializeField] private TutorialStepData[] tutorialStepDataList;
 
-    [Header("UI Panels - Menu")]
+    [Header("UI Panels - Top Bar")]
     [SerializeField] private GameObject resourcePanel;
     [FormerlySerializedAs("gameSpeed")]
     [SerializeField] private GameObject gameSpeedPanel;
@@ -45,27 +45,31 @@ public class TutorialManager : MonoBehaviour
     [FormerlySerializedAs("timeSlider")]
     [SerializeField] private GameObject leftTimePanel;
     [SerializeField] private GameObject noisePanel;
-    [SerializeField] private GameObject tutorialPanel;
     [SerializeField] private GameObject pausePanel;
 
-    [Header("UI Panels - Flash Panels")]
-    [SerializeField] private GameObject resourceInfoPanel;
-    [SerializeField] private GameObject unitInfoPanel;
-
-    [Header("UI Panels - Solid Panels")]
+    [Header("UI Panels - Tutorial")]
+    [SerializeField] private GameObject tutorialPanel;
     [SerializeField] private GameObject tutorialArrows;
+
+    [Header("UI Panels - Contextual Info")]
     [SerializeField] private GameObject storageResourceInfoPanel;
     [SerializeField] private GameObject processorInfoPanel;
     [SerializeField] private GameObject droneProduceInfoPanel;
-    [SerializeField] private GameObject buildingInfoPanel;
     [SerializeField] private GameObject extractorInfoPanel;
+
+    [Header("UI Panels - Main Controls")]
     [SerializeField] private GameObject mainControlPanel;
     [SerializeField] private GameObject unitManagePanel;
     [SerializeField] private GameObject resourceStatsPanel;
     [SerializeField] private GameObject buildingDestroyPanel;
     [SerializeField] private GameObject baseBuildingPanel;
 
-    [Header("UI Panels - Rightside UI")]
+    [Header("UI Panels - Flash Unlock")]
+    [SerializeField] private GameObject resourceInfoPanel;
+    [SerializeField] private GameObject unitInfoPanel;
+    [SerializeField] private GameObject buildingInfoPanel;
+
+    [Header("UI Panels - Launch And Alert")]
     [SerializeField] private GameObject launchButton;
     [SerializeField] private GameObject launchResultUI;
     [SerializeField] private GameObject launchPanel;
@@ -82,13 +86,14 @@ public class TutorialManager : MonoBehaviour
     private readonly List<GameObject> _currentHighlightTargets = new List<GameObject>();
     private readonly Dictionary<string, HighlightableUI> _highlightLookup = new Dictionary<string, HighlightableUI>();
     private readonly Dictionary<string, GameObject> _arrowUILookup = new Dictionary<string, GameObject>();
-    private readonly Dictionary<GameObject, Material> _highlightMaterials = new Dictionary<GameObject, Material>();
     private readonly Dictionary<GameObject, Material> _originalMaterials = new Dictionary<GameObject, Material>();
     private readonly List<UnitBase> _spawnedEnemyUnits = new List<UnitBase>();
     private readonly Dictionary<TutorialUIPanel, GameObject> _uiPanels = new Dictionary<TutorialUIPanel, GameObject>();
     private readonly HashSet<TutorialUIPanel> _unlockedFlashPanels = new HashSet<TutorialUIPanel>();
+    private readonly HashSet<TutorialUIPanel> _unlockedInteractivePanels = new HashSet<TutorialUIPanel>();
     private int _buildingCompletedCount;
     private int _buildingPlacedCount;
+    private bool _buildingPlacedWaitingForRelease;
     private int _bulletFireCount;
     private int _currentStepIndex = -1;
     private bool _isTutorialActive;
@@ -278,6 +283,7 @@ public class TutorialManager : MonoBehaviour
         DisableAllEnemyUnits();
         BuildUIPanelDictionary();
         _unlockedFlashPanels.Clear();
+        _unlockedInteractivePanels.Clear();
         HideAllUIPanels();
 
         NextStep();
@@ -391,6 +397,7 @@ public class TutorialManager : MonoBehaviour
         _resourceMinedAmount = 0;
         _bulletFireCount = 0;
         _buildingPlacedCount = 0;
+        _buildingPlacedWaitingForRelease = false;
         _buildingCompletedCount = 0;
         _unitProducedCount = 0;
         _itemProducedCount = 0;
@@ -514,7 +521,15 @@ public class TutorialManager : MonoBehaviour
 
             case TutorialStepType.BuildingPlaced:
                 if (_buildingPlacedCount > 0) {
-                    conditionMet = true;
+                    if (_buildingPlacedWaitingForRelease) {
+                        if (Input.GetMouseButtonUp(0)) {
+                            _buildingPlacedWaitingForRelease = false;
+                            conditionMet = true;
+                        }
+                    }
+                    else {
+                        conditionMet = true;
+                    }
                 }
                 break;
 
@@ -637,6 +652,10 @@ public class TutorialManager : MonoBehaviour
             return _unlockedFlashPanels.Contains(panelType);
         }
 
+        if (IsUnlockOnlyPanel(panelType)) {
+            return _unlockedInteractivePanels.Contains(panelType);
+        }
+
         return currentStep.enableUIPanels.Contains(panelType);
     }
     
@@ -696,6 +715,7 @@ public class TutorialManager : MonoBehaviour
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
         if (currentStep.stepType == TutorialStepType.BuildingPlaced && currentStep.buildingType == buildingType) {
             _buildingPlacedCount++;
+            _buildingPlacedWaitingForRelease = Input.GetMouseButton(0);
         }
     }
 
@@ -819,7 +839,7 @@ public class TutorialManager : MonoBehaviour
 
         EnableAllEnemyUnits();
         _unlockedFlashPanels.Clear();
-        ShowAllUIPanels(true);
+        _unlockedInteractivePanels.Clear();
         HideArrowUI();
         HideTargetBracket();
 
@@ -847,6 +867,7 @@ public class TutorialManager : MonoBehaviour
 
         EnableAllEnemyUnits();
         _unlockedFlashPanels.Clear();
+        _unlockedInteractivePanels.Clear();
         ShowAllUIPanels(true);
         HideArrowUI();
         HideTargetBracket();
@@ -872,6 +893,7 @@ public class TutorialManager : MonoBehaviour
 
             EnableAllEnemyUnits();
             _unlockedFlashPanels.Clear();
+            _unlockedInteractivePanels.Clear();
             ShowAllUIPanels(true);
             HideArrowUI();
             HideTargetBracket();
@@ -996,6 +1018,10 @@ public class TutorialManager : MonoBehaviour
                 _unlockedFlashPanels.Add(panelType);
                 continue;
             }
+            if (IsUnlockOnlyPanel(panelType)) {
+                _unlockedInteractivePanels.Add(panelType);
+                continue;
+            }
             if (_uiPanels.TryGetValue(panelType, out GameObject panel) && panel != null) {
                 panel.SetActive(true);
             }
@@ -1046,6 +1072,18 @@ public class TutorialManager : MonoBehaviour
         switch (panelType) {
         case TutorialUIPanel.ResourceInfoPanel:
         case TutorialUIPanel.UnitInfoPanel:
+        case TutorialUIPanel.BuildingInfoPanel:
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    private bool IsUnlockOnlyPanel(TutorialUIPanel panelType)
+    {
+        switch (panelType) {
+        case TutorialUIPanel.StorageResourceInfoPanel:
+        case TutorialUIPanel.DroneProduceInfoPanel:
             return true;
         default:
             return false;

@@ -37,6 +37,10 @@ public class TutorialUI : MonoBehaviour
 
     public void ShowTutorialStep(TutorialStepData step)
     {
+        if (!gameObject.activeSelf) {
+            gameObject.SetActive(true);
+        }
+
         if (tutorialPanel != null) {
             tutorialPanel.SetActive(true);
         }
@@ -47,7 +51,14 @@ public class TutorialUI : MonoBehaviour
             if (_flashRoutine != null) {
                 StopCoroutine(_flashRoutine);
             }
-            _flashRoutine = StartCoroutine(FlashRoutine());
+            if (isActiveAndEnabled) {
+                _flashRoutine = StartCoroutine(FlashRoutine());
+            }
+            else {
+                Material mat = flashTarget.material;
+                mat.SetFloat("_FlashIntensity", 0f);
+                _flashRoutine = null;
+            }
         }
 
         if (tutorialText != null) {
