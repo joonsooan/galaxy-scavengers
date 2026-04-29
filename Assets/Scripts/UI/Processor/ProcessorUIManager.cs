@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 public class ProcessorUIManager : MonoBehaviour
 {
-    private const int DefaultProductionLimit = 999;
     [Header("UI References")]
     public GameObject recipeCellPrefab;
     public Transform contentParent;
@@ -227,10 +226,6 @@ public class ProcessorUIManager : MonoBehaviour
         }
         else {
             _currentProcessor.SetSelectedOutputResource(type);
-            ActiveRecipe pickedRecipe = _currentProcessor.GetActiveRecipeForResource(type);
-            if (pickedRecipe != null && pickedRecipe.maxProductionLimit <= 0) {
-                pickedRecipe.SetProductionLimit(DefaultProductionLimit);
-            }
             _showResourcePicker = false;
         }
 
@@ -281,14 +276,14 @@ public class ProcessorUIManager : MonoBehaviour
         if (unitAssignCellPrefab == null || _currentProcessor == null) return;
 
         int maxDrones = _currentProcessor.ProcessorData.MaxAssignedDrones;
-        IReadOnlyList<Unit_Drone> assignedDrones = _currentProcessor.AssignedDrones;
+        IReadOnlyList<Unit_Processor> assignedDrones = _currentProcessor.AssignedDrones;
 
         for (int i = 0; i < maxDrones; i++) {
             GameObject cellObj = Instantiate(unitAssignCellPrefab, unitAssignContentParent);
             UnitAssignCell cell = cellObj.GetComponent<UnitAssignCell>();
 
             if (cell != null) {
-                Unit_Drone drone = i < assignedDrones.Count ? assignedDrones[i] : null;
+                Unit_Processor drone = i < assignedDrones.Count ? assignedDrones[i] : null;
                 cell.Initialize(_currentProcessor, drone);
             }
         }

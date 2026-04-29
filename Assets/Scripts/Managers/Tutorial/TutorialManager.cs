@@ -115,7 +115,6 @@ public class TutorialManager : MonoBehaviour
 
     private float _wasdInputTime;
     private bool _isTutorialScene;
-    private bool _isRoundTimerPausedByTutorial;
     public static TutorialManager Instance { get; private set; }
     
     public static event Action OnTutorialEnded;
@@ -152,7 +151,6 @@ public class TutorialManager : MonoBehaviour
         _isTutorialScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "TutorialScene";
         if (!_isTutorialScene) {
             _isTutorialActive = false;
-            _isRoundTimerPausedByTutorial = false;
             BuildUIPanelDictionary();
             ShowAllUIPanels(true);
             if (_tutorialUI != null) {
@@ -272,7 +270,6 @@ public class TutorialManager : MonoBehaviour
         }
 
         _isTutorialActive = true;
-        _isRoundTimerPausedByTutorial = true;
         _currentStepIndex = 0;
         ResourceManager.Instance?.ApplyTutorialStartResources();
 
@@ -676,7 +673,7 @@ public class TutorialManager : MonoBehaviour
             return false;
         }
 
-        return _isRoundTimerPausedByTutorial;
+        return _isTutorialActive;
     }
 
     public void OnBuildingPlaced(BuildingType buildingType)
@@ -805,7 +802,6 @@ public class TutorialManager : MonoBehaviour
     {
         _isTutorialActive = false;
         _isWaitingForCondition = false;
-        _isRoundTimerPausedByTutorial = false;
 
         if (DayNightCycleManager.Instance != null) {
             DayNightCycleManager.Instance.SetAutoAdvanceTime(true);
@@ -832,7 +828,6 @@ public class TutorialManager : MonoBehaviour
     {
         _isTutorialActive = false;
         _isWaitingForCondition = false;
-        _isRoundTimerPausedByTutorial = false;
         StopAllCoroutines();
 
         if (DayNightCycleManager.Instance != null) {
@@ -858,7 +853,6 @@ public class TutorialManager : MonoBehaviour
         if (_isTutorialActive) {
             _isTutorialActive = false;
             _isWaitingForCondition = false;
-            _isRoundTimerPausedByTutorial = false;
             StopAllCoroutines();
 
             if (DayNightCycleManager.Instance != null) {
@@ -898,6 +892,11 @@ public class TutorialManager : MonoBehaviour
 
     private void DisableAllEnemyUnits()
     {
+        EnemyUnitBase[] sceneEnemies = FindObjectsByType<EnemyUnitBase>(FindObjectsSortMode.None);
+        foreach (EnemyUnitBase enemy in sceneEnemies) {
+            RegisterSpawnedEnemy(enemy);
+        }
+
         foreach (UnitBase enemyUnit in _spawnedEnemyUnits) {
             if (enemyUnit != null && enemyUnit.gameObject != null) {
                 enemyUnit.gameObject.SetActive(false);
@@ -999,10 +998,6 @@ public class TutorialManager : MonoBehaviour
             if (_uiPanels.TryGetValue(panelType, out GameObject panel) && panel != null) {
                 panel.SetActive(true);
             }
-        }
-
-        if (_isTutorialScene && step.enableUIPanels.Contains(TutorialUIPanel.LeftTimePanel)) {
-            _isRoundTimerPausedByTutorial = false;
         }
     }
 

@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 public class ProcessorRecipeCell : MonoBehaviour
 {
-    private const int MaxProduceAmount = 999;
     private const float ButtonClickCooldown = 0.1f;
     [Header("UI References")]
     [SerializeField] private Image recipeIcon;
@@ -148,7 +147,8 @@ public class ProcessorRecipeCell : MonoBehaviour
         _lastButtonClickTime = currentTime;
 
         int amountToAdd = GetAmountChange();
-        int newAmount = Mathf.Min(_produceMaxAmount + amountToAdd, MaxProduceAmount);
+        long increasedAmount = (long)_produceMaxAmount + amountToAdd;
+        int newAmount = increasedAmount > int.MaxValue ? int.MaxValue : (int)increasedAmount;
 
         if (_produceMaxAmount != newAmount) {
             _produceMaxAmount = newAmount;

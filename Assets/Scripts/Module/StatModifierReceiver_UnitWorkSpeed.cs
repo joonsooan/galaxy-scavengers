@@ -3,13 +3,13 @@ using UnityEngine;
 
 public class StatModifierReceiver_UnitWorkSpeed : MonoBehaviour
 {
-    private Unit_Drone _drone;
+    private Unit_Processor _drone;
     private bool _modifiersApplied;
     private float _originalProcessingSpeed;
 
     private void Awake()
     {
-        _drone = GetComponent<Unit_Drone>();
+        _drone = GetComponent<Unit_Processor>();
     }
 
     private void Start()
@@ -38,14 +38,14 @@ public class StatModifierReceiver_UnitWorkSpeed : MonoBehaviour
 
     private float GetProcessingSpeed()
     {
-        FieldInfo field = typeof(Unit_Drone).GetField("processingSpeed",
+        FieldInfo field = typeof(Unit_Processor).GetField("processingSpeed",
             BindingFlags.NonPublic | BindingFlags.Instance);
         return field != null ? (float)field.GetValue(_drone) : 1f;
     }
 
     private void SetProcessingSpeed(float value)
     {
-        FieldInfo field = typeof(Unit_Drone).GetField("processingSpeed",
+        FieldInfo field = typeof(Unit_Processor).GetField("processingSpeed",
             BindingFlags.NonPublic | BindingFlags.Instance);
         if (field != null) {
             field.SetValue(_drone, value);

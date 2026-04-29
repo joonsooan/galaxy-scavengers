@@ -4,7 +4,7 @@ using System.Linq;
 using DG.Tweening;
 using UnityEngine;
 
-public class Unit_Drone : UnitBase
+public class Unit_Processor : UnitBase
 {
     private const float RepathInterval = 0.5f;
 
@@ -20,6 +20,7 @@ public class Unit_Drone : UnitBase
     [Header("Hover Animation")]
     [SerializeField] private float hoverHeight = 0.2f;
     [SerializeField] private float hoverDuration = 1.5f;
+
     private Coroutine _assignmentCoroutine;
     private Coroutine _autoAssignCoroutine;
     private Vector3 _baseHoverLocalPosition;
@@ -82,6 +83,15 @@ public class Unit_Drone : UnitBase
         DecideNextAction();
         UpdateHoverAnimation();
         UpdateUnitLightAlpha();
+    }
+
+    private void SetDroneState(DroneState newState)
+    {
+        if (_currentState == newState) {
+            return;
+        }
+
+        _currentState = newState;
     }
 
     protected override void OnEnable()
@@ -157,7 +167,7 @@ public class Unit_Drone : UnitBase
             currentState = UnitState.Moving;
             break;
         case DroneState.Processing:
-            currentState = UnitState.Idle;
+            currentState = UnitState.Constructing;
             break;
         }
     }
@@ -195,7 +205,7 @@ public class Unit_Drone : UnitBase
         if (_currentProcessor != null) {
             movement?.ForceStopAllMovement();
             _currentProcessor.AssignDrone(this);
-            _currentState = DroneState.Idle;
+            SetDroneState(DroneState.Idle);
 
             if (_spriteController != null) {
                 _spriteController.SetTargetTransform(_currentProcessor.transform);
@@ -206,7 +216,7 @@ public class Unit_Drone : UnitBase
             }
         }
         else {
-            _currentState = DroneState.Idle;
+            SetDroneState(DroneState.Idle);
         }
 
         UpdateUnitBaseState();
@@ -333,9 +343,9 @@ public class Unit_Drone : UnitBase
                 return;
             }
 
-            Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
-            bool isAtProcessorByDistance = Vector3.Distance(transform.position, interactionPos) <= movement.waypointTolerance;
-            bool isAtProcessorForCheckIn = movement.HasReachedTarget(movement.waypointTolerance) || isAtProcessorByDistance;
+            Vector3 checkInInteractionPos = _currentProcessor.AssignInteractionCell(this);
+            bool isAtProcessorByDistanceForCheckIn = Vector3.Distance(transform.position, checkInInteractionPos) <= movement.waypointTolerance;
+            bool isAtProcessorForCheckIn = movement.HasReachedTarget(movement.waypointTolerance) || isAtProcessorByDistanceForCheckIn;
 
             if (isAtProcessorForCheckIn) {
                 if (_assignmentCoroutine == null) {
@@ -345,7 +355,7 @@ public class Unit_Drone : UnitBase
             }
 
             if (!movement.IsMoving) {
-                bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
+                bool hasPath = movement.SetNewTargetDirect(checkInInteractionPos, movement.waypointTolerance);
                 if (!hasPath) {
                     if (_assignmentCoroutine == null) {
                         _assignmentCoroutine = StartCoroutine(AssignmentCoroutine());
@@ -355,7 +365,9 @@ public class Unit_Drone : UnitBase
             return;
         }
 
-        bool isAtProcessor = movement.HasReachedTarget(movement.waypointTolerance);
+        Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
+        bool isAtProcessorByDistance = Vector3.Distance(transform.position, interactionPos) <= movement.waypointTolerance;
+        bool isAtProcessor = movement.HasReachedTarget(movement.waypointTolerance) || isAtProcessorByDistance;
 
         if (isAtProcessor) {
             if (!movement.IsMoving) {
@@ -372,8 +384,7 @@ public class Unit_Drone : UnitBase
         }
         else {
             if (!movement.IsMoving) {
-                _currentProcessor.AssignInteractionCell(this);
-                _currentProcessor.RequestTask(this);
+                movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
             }
         }
     }
@@ -449,7 +460,7 @@ public class Unit_Drone : UnitBase
                         if (!hasPath) continue;
                         _storageRouteIndex = i;
                         _targetStorage = nextStorage;
-                        _currentState = DroneState.FetchingResource;
+                        SetDroneState(DroneState.FetchingResource);
                         movement.ResumeMovement();
                         movedToNext = true;
                         break;
@@ -461,7 +472,7 @@ public class Unit_Drone : UnitBase
                         Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
                         movement.ResumeMovement();
                         movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
-                        _currentState = DroneState.DeliveringResource;
+                        SetDroneState(DroneState.DeliveringResource);
                     }
                     else {
                         SetTask_ReturnHome();
@@ -473,7 +484,7 @@ public class Unit_Drone : UnitBase
                     Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
                     movement.ResumeMovement();
                     movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
-                    _currentState = DroneState.DeliveringResource;
+                    SetDroneState(DroneState.DeliveringResource);
                 }
                 else {
                     SetTask_ReturnHome();
@@ -485,7 +496,7 @@ public class Unit_Drone : UnitBase
                 Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
                 movement.ResumeMovement();
                 movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
-                _currentState = DroneState.DeliveringResource;
+                SetDroneState(DroneState.DeliveringResource);
             }
             else {
                 SetTask_ReturnHome();
@@ -497,7 +508,9 @@ public class Unit_Drone : UnitBase
 
     private void UpdateDelivering()
     {
-        bool isAtProcessor = movement.HasReachedTarget(movement.waypointTolerance);
+        Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
+        bool isAtProcessorByDistance = Vector3.Distance(transform.position, interactionPos) <= movement.waypointTolerance;
+        bool isAtProcessor = movement.HasReachedTarget(movement.waypointTolerance) || isAtProcessorByDistance;
 
         if (isAtProcessor && !movement.IsMoving) {
             if (_spriteController != null && _currentProcessor != null) {
@@ -540,21 +553,19 @@ public class Unit_Drone : UnitBase
         }
 
         HideProgressBar();
-        bool taskAssigned = false;
 
         if (_currentProcessor != null) {
             _currentProcessor.TryDepositIngredient(_carriedResourceType, _carriedAmount, this);
-
-            if (_currentState == DroneState.Processing) {
-                taskAssigned = true;
-            }
         }
 
         _carriedAmount = 0;
-        _currentRequest = null;
 
-        if (!taskAssigned) {
-            _currentState = DroneState.Idle;
+        if (_currentState != DroneState.FetchingResource) {
+            _currentRequest = null;
+        }
+
+        if (_currentState == DroneState.DeliveringResource) {
+            SetDroneState(DroneState.Idle);
             if (_currentProcessor != null) {
                 _currentProcessor.RequestTask(this);
             }
@@ -598,18 +609,18 @@ public class Unit_Drone : UnitBase
     private void UpdateProcessing()
     {
         if (CurrentRecipeTask == null) {
-            Debug.Log($"[DroneProcess] Cancel: no current recipe task ({name})");
             SetTask_Idle();
             return;
         }
 
         if (_currentProcessor != null && _currentProcessor is IElectricityConsumer consumer && !consumer.IsOperational) {
-            Debug.Log($"[DroneProcess] Cancel: processor not operational ({_currentProcessor.name}) for drone {name}");
             SetTask_Idle();
             return;
         }
 
-        bool isAtProcessor = movement.HasReachedTarget(movement.waypointTolerance);
+        Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
+        bool isAtProcessorByDistance = Vector3.Distance(transform.position, interactionPos) <= movement.waypointTolerance;
+        bool isAtProcessor = movement.HasReachedTarget(movement.waypointTolerance) || isAtProcessorByDistance;
 
         if (isAtProcessor) {
             if (movement.IsMoving) {
@@ -640,13 +651,13 @@ public class Unit_Drone : UnitBase
                 _currentProcessor.ProcessRecipeWork(CurrentRecipeTask, Time.deltaTime * processingSpeed * workMult);
             }
 
+            if (CurrentRecipeTask == null || _currentState != DroneState.Processing) {
+                return;
+            }
+
             bool processingEnded = CurrentRecipeTask == null ||
                 (!CurrentRecipeTask.isProcessing && CurrentRecipeTask.assignedDrone == null);
             if (processingEnded) {
-                string recipeName = CurrentRecipeTask != null && CurrentRecipeTask.recipeData != null
-                    ? CurrentRecipeTask.recipeData.resourceType.ToString()
-                    : "null";
-                Debug.Log($"[DroneProcess] Processing ended: drone={name}, processor={(_currentProcessor != null ? _currentProcessor.name : "null")}, recipe={recipeName}");
                 HideProgressBar();
                 SetTask_Idle();
                 return;
@@ -659,16 +670,11 @@ public class Unit_Drone : UnitBase
         if (!movement.IsMoving && !isAtProcessor) {
             if (Time.time >= _nextRepathTime) {
                 _nextRepathTime = Time.time + RepathInterval;
-                Vector3 interactionPos = _currentProcessor.AssignInteractionCell(this);
                 bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
                 if (hasPath) {
                     _ = movement.FinalTargetPosition != default
                         ? Vector3.Distance(transform.position, movement.FinalTargetPosition)
                         : 0f;
-                }
-                else {
-                    Debug.Log($"[DroneProcess] Cancel: path to processor interaction cell failed ({name})");
-                    SetTask_Idle();
                 }
             }
         }
@@ -678,7 +684,7 @@ public class Unit_Drone : UnitBase
     {
         if (_currentProcessor == null) {
             movement.StopMovement();
-            _currentState = DroneState.Idle;
+            SetDroneState(DroneState.Idle);
             return;
         }
 
@@ -686,7 +692,7 @@ public class Unit_Drone : UnitBase
         movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
 
         if (!movement.IsMoving) {
-            _currentState = DroneState.Idle;
+            SetDroneState(DroneState.Idle);
         }
     }
 
@@ -741,7 +747,7 @@ public class Unit_Drone : UnitBase
                                 _storageRoute = route;
                                 _storageRouteIndex = i;
                                 _targetStorage = storage;
-                                _currentState = DroneState.FetchingResource;
+                                SetDroneState(DroneState.FetchingResource);
                                 SetDroneNoResourceAlert(false);
                                 return;
                             }
@@ -774,15 +780,15 @@ public class Unit_Drone : UnitBase
             return;
         }
 
-        _currentState = DroneState.Processing;
         CurrentRecipeTask = recipeTask;
+        SetDroneState(DroneState.Processing);
     }
 
     public void SetTask_Idle()
     {
         ReleaseFromRecipeTask();
         HideProgressBar();
-        _currentState = DroneState.Idle;
+        SetDroneState(DroneState.Idle);
         SetDroneNoResourceAlert(false);
     }
 
@@ -797,7 +803,7 @@ public class Unit_Drone : UnitBase
             _currentRequest = null;
         }
 
-        _currentState = DroneState.ReturnHome;
+        SetDroneState(DroneState.ReturnHome);
 
         if (stopMovement) {
             movement.StopMovement();
@@ -954,7 +960,7 @@ public class Unit_Drone : UnitBase
 
     public void OnChargeStateExit()
     {
-        _currentState = DroneState.Idle;
+        SetDroneState(DroneState.Idle);
         currentState = UnitState.Idle;
         movement?.StopMovement();
         ResetIdleRoam();
@@ -988,7 +994,7 @@ public class Unit_Drone : UnitBase
         _storageRoute = null;
         _storageRouteIndex = 0;
         _remainingRequestAmount = 0;
-        _currentState = DroneState.Idle;
+        SetDroneState(DroneState.Idle);
         currentState = UnitState.Idle;
         movement?.StopMovement();
         SetDroneNoResourceAlert(false);

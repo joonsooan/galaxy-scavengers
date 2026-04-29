@@ -175,11 +175,19 @@ public class EnemySpawner : MonoBehaviour
             _lastNoisePercentageForDelta = NoiseManager.Instance.NoisePercentage;
         }
 
-        SpawnWaveFromBudget(continuousSpawnBudgetFraction);
+        if (!ShouldBlockSpawnsForTutorial())
+        {
+            SpawnWaveFromBudget(continuousSpawnBudgetFraction);
+        }
     }
 
     private void OnNightStarted()
     {
+        if (ShouldBlockSpawnsForTutorial())
+        {
+            return;
+        }
+
         if (NoiseManager.Instance == null) return;
         if (IsAnyEmergencyActive()) return;
 
@@ -196,6 +204,12 @@ public class EnemySpawner : MonoBehaviour
 
     private void OnNoiseChanged(float noisePercentage)
     {
+        if (ShouldBlockSpawnsForTutorial())
+        {
+            _lastNoisePercentageForDelta = noisePercentage;
+            return;
+        }
+
         if (noisePercentage >= 100f)
         {
             if (!_wasNoise100)
@@ -233,6 +247,11 @@ public class EnemySpawner : MonoBehaviour
 
     private void ActivateExistingEnemiesFromBudget(float multiplier, bool markAsPersistent = false)
     {
+        if (ShouldBlockSpawnsForTutorial())
+        {
+            return;
+        }
+
         if (UnitManager.Instance == null) return;
 
         List<EnemyUnitBase> allEnemies = UnitManager.Instance.EnemyUnits
@@ -273,6 +292,11 @@ public class EnemySpawner : MonoBehaviour
 
     private void OnDayStarted()
     {
+        if (ShouldBlockSpawnsForTutorial())
+        {
+            return;
+        }
+
         if (UnitManager.Instance == null) return;
 
         List<UnitBase> enemies = new List<UnitBase>(UnitManager.Instance.EnemyUnits);
@@ -303,6 +327,11 @@ public class EnemySpawner : MonoBehaviour
 
     private void SpawnWaveFromBudget(float budgetScaleFactor = 1f)
     {
+        if (ShouldBlockSpawnsForTutorial())
+        {
+            return;
+        }
+
         float multiplier = _isEmergencyWaveSpawn ? GetCurrentEmergencyMultiplier() : 1f;
         float totalBudget = CalculateWaveBudget(multiplier) * budgetScaleFactor;
         int spawnedEnemyCount = 0;
@@ -859,6 +888,11 @@ public class EnemySpawner : MonoBehaviour
                 yield break;
             }
 
+            if (ShouldBlockSpawnsForTutorial())
+            {
+                continue;
+            }
+
             if (IsAnyEmergencyActive())
             {
                 continue;
@@ -866,6 +900,11 @@ public class EnemySpawner : MonoBehaviour
 
             SpawnWaveFromBudget(continuousSpawnBudgetFraction);
         }
+    }
+
+    private static bool ShouldBlockSpawnsForTutorial()
+    {
+        return TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive();
     }
 
     private void HandleEnemyUnitRemoved(EnemyUnitBase enemy)
@@ -900,6 +939,11 @@ public class EnemySpawner : MonoBehaviour
 
     private void ReplenishHoleFromNoiseBudget(Vector2Int holeKey)
     {
+        if (ShouldBlockSpawnsForTutorial())
+        {
+            return;
+        }
+
         if (IsAnyEmergencyActive() || UnitManager.Instance == null)
         {
             return;

@@ -1,6 +1,6 @@
 public class ActiveRecipe
 {
-    public Unit_Drone assignedDrone;
+    public Unit_Processor assignedDrone;
     public bool isProcessing;
     public float processingProgress;
     public readonly ProcessorRecipe recipeData;
