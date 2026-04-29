@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
@@ -38,6 +39,7 @@ public class CameraTargetController : MonoBehaviour
     private Vector3[] _zoomLevelPositions;
     private Vector3 _currentVelocity;
     private Transform _defaultFollowTarget;
+    private bool _openingSequenceActive;
 
     private void Awake()
     {
@@ -148,8 +150,100 @@ public class CameraTargetController : MonoBehaviour
         InitializeMapBounds();
     }
 
+    public Vector3 GetMapBoundsCenterWorld()
+    {
+        if (!_hasBounds)
+        {
+            return transform.position;
+        }
+
+        Vector3 c = _mapBounds.center;
+        c.z = transform.position.z;
+        return c;
+    }
+
+    public void BeginOpeningSequence()
+    {
+        DOTween.Kill(transform);
+        followTarget = null;
+        _isManualMode = true;
+        _openingSequenceActive = true;
+        _currentVelocity = Vector3.zero;
+    }
+
+    public void EndOpeningSequence()
+    {
+        if (!_openingSequenceActive)
+        {
+            return;
+        }
+
+        _openingSequenceActive = false;
+        ResetFollowTargetToPlayer();
+    }
+
+    public void SnapRigToWorldXY(Vector3 worldXY)
+    {
+        if (_zoomLevelPositions == null || _zoomLevelPositions.Length == 0)
+        {
+            return;
+        }
+
+        Vector3 rigPosition = ConvertWorldFocusToRigPosition(worldXY);
+        rigPosition.z = transform.position.z;
+        Vector3 delta = rigPosition - transform.position;
+
+        transform.position = rigPosition;
+        for (int i = 0; i < _zoomLevelPositions.Length; i++)
+        {
+            _zoomLevelPositions[i] = rigPosition;
+            _zoomLevelInitialized[i] = true;
+        }
+
+        if (delta.sqrMagnitude > 0.0001f)
+        {
+            WarpCameras(delta);
+        }
+
+        ClampTargetPosition();
+    }
+
+    public Tween TweenRigToWorldXY(Vector3 worldXY, float duration)
+    {
+        Vector3 rigPosition = ConvertWorldFocusToRigPosition(worldXY);
+        rigPosition.z = transform.position.z;
+        return transform.DOMove(rigPosition, duration)
+            .SetEase(Ease.InOutQuad)
+            .SetUpdate(true);
+    }
+
+    private Vector3 ConvertWorldFocusToRigPosition(Vector3 focusWorld)
+    {
+        Vector3 offset = _grid != null ? _grid.cellSize * 0.5f : new Vector3(0.5f, 0.5f, 0f);
+        focusWorld.x -= offset.x;
+        focusWorld.y -= offset.y;
+        return focusWorld;
+    }
+
     private void ClampTargetPosition()
     {
+        if (_openingSequenceActive)
+        {
+            if (!_hasBounds || _zoomLevelPositions == null || _zoomLevelPositions.Length == 0) return;
+
+            Vector3 p = transform.position;
+            GetBoundsForZoomLevel(_currentZoomIndex, out float openingMinX, out float openingMaxX, out float openingMinY, out float openingMaxY);
+            p.x = Mathf.Clamp(p.x, openingMinX, openingMaxX);
+            p.y = Mathf.Clamp(p.y, openingMinY, openingMaxY);
+            p.z = transform.position.z;
+            transform.position = p;
+            for (int i = 0; i < _zoomLevelPositions.Length; i++)
+            {
+                _zoomLevelPositions[i] = p;
+            }
+            return;
+        }
+
         if (!_hasBounds) return;
 
         GetBoundsForZoomLevel(_currentZoomIndex, out float minX, out float maxX, out float minY, out float maxY);
@@ -231,6 +325,11 @@ public class CameraTargetController : MonoBehaviour
 
     private void HandleMovement()
     {
+        if (_openingSequenceActive)
+        {
+            return;
+        }
+
         if (GameManager.Instance != null && !GameManager.IsGameplayReady)
         {
             return;
@@ -309,19 +408,7 @@ public class CameraTargetController : MonoBehaviour
 
         if (!_isManualMode && followTarget != null)
         {
-            Vector3 targetPosition = followTarget.position;
-
-            if (_grid != null)
-            {
-                Vector3 cellSize = _grid.cellSize;
-                targetPosition.x -= cellSize.x * 0.5f;
-                targetPosition.y -= cellSize.y * 0.5f;
-            }
-            else
-            {
-                targetPosition.x -= 0.5f;
-                targetPosition.y -= 0.5f;
-            }
+            Vector3 targetPosition = ConvertWorldFocusToRigPosition(followTarget.position);
 
             targetPosition.z = transform.position.z;
             Vector3 newPos;
@@ -342,6 +429,11 @@ public class CameraTargetController : MonoBehaviour
 
     private void HandleZoom()
     {
+        if (_openingSequenceActive)
+        {
+            return;
+        }
+
         if (GameManager.Instance != null && !GameManager.IsGameplayReady)
         {
             return;
@@ -498,18 +590,7 @@ public class CameraTargetController : MonoBehaviour
             return;
         }
 
-        Vector3 targetPosition = target.position;
-        if (_grid != null)
-        {
-            Vector3 cellSize = _grid.cellSize;
-            targetPosition.x -= cellSize.x * 0.5f;
-            targetPosition.y -= cellSize.y * 0.5f;
-        }
-        else
-        {
-            targetPosition.x -= 0.5f;
-            targetPosition.y -= 0.5f;
-        }
+        Vector3 targetPosition = ConvertWorldFocusToRigPosition(target.position);
 
         targetPosition.z = transform.position.z;
         Vector3 delta = targetPosition - transform.position;

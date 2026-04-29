@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using DG.Tweening;
 using UnityEngine;
@@ -19,6 +20,7 @@ public class SceneLoader : MonoBehaviour
 
     [Header("Game Scene Loading Settings")]
     [SerializeField] private float gameScenePostFadeDelay = 1f;
+    [SerializeField] private float gameScenePostOpeningUiDelay = 0.5f;
 
     [Header("Base Scene Loading Settings")]
     [SerializeField] private float baseSceneBgmStopDelay = 0.5f;
@@ -27,9 +29,11 @@ public class SceneLoader : MonoBehaviour
 
     private static readonly WaitForSecondsRealtime _wait01Realtime = CoroutineCache.GetWaitForSecondsRealtime(0.1f);
     private WaitForSecondsRealtime _gameScenePostFadeDelayWait;
+    private WaitForSecondsRealtime _gameScenePostOpeningUiDelayWait;
     private WaitForSecondsRealtime _baseSceneBgmStopDelayWait;
     private WaitForSecondsRealtime _gameOverLoadingScreenDelayWait;
     private float _cachedGameScenePostFadeDelay;
+    private float _cachedGameScenePostOpeningUiDelay;
     private float _cachedBaseSceneBgmStopDelay;
     private float _cachedGameOverLoadingScreenDelay;
 
@@ -57,6 +61,12 @@ public class SceneLoader : MonoBehaviour
         {
             _cachedGameScenePostFadeDelay = gameScenePostFadeDelay;
             _gameScenePostFadeDelayWait = CoroutineCache.GetWaitForSecondsRealtime(gameScenePostFadeDelay);
+        }
+        
+        if (_gameScenePostOpeningUiDelayWait == null || Mathf.Abs(_cachedGameScenePostOpeningUiDelay - gameScenePostOpeningUiDelay) > 0.001f)
+        {
+            _cachedGameScenePostOpeningUiDelay = gameScenePostOpeningUiDelay;
+            _gameScenePostOpeningUiDelayWait = CoroutineCache.GetWaitForSecondsRealtime(gameScenePostOpeningUiDelay);
         }
 
         if (_baseSceneBgmStopDelayWait == null || Mathf.Abs(_cachedBaseSceneBgmStopDelay - baseSceneBgmStopDelay) > 0.001f)
@@ -152,18 +162,33 @@ public class SceneLoader : MonoBehaviour
 
         while (GameManager.Instance == null || !GameManager.Instance.IsGameSceneInitialized) yield return null;
 
-        Time.timeScale = 0f;
+        bool isGameScene = string.Equals(SceneManager.GetActiveScene().name, gameSceneName, StringComparison.Ordinal);
+        if (isGameScene && GameManager.Instance != null)
+        {
+            GameManager.Instance.SetMainCanvasVisible(false);
+        }
 
         if (LoadingUIManager.Instance != null) yield return LoadingUIManager.Instance.HideLoadingScreenWithFadeAsync();
         
         yield return StartCoroutine(FadeRoutine(0f, fadeDuration));
         yield return _gameScenePostFadeDelayWait;
-        
-        BgmManager.Instance?.PlayGameBgm();
-        GameManager.Instance?.SpawnUnitsAfterLoading();
-        if (GameManager.Instance != null) GameManager.IsGameplayReady = true;
 
-        Time.timeScale = 1f;
+        GameManager.Instance?.SpawnUnitsAfterLoading();
+
+        if (isGameScene && GameManager.Instance != null)
+        {
+            yield return GameManager.Instance.StartCoroutine(GameManager.Instance.RunGameSceneOpeningSequence());
+            yield return _gameScenePostOpeningUiDelayWait;
+            GameManager.Instance.SetMainCanvasVisible(true);
+        }
+
+        BgmManager.Instance?.PlayGameBgm();
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.EndGameSceneOpeningSequence();
+            GameManager.IsGameplayReady = true;
+        }
+
         _isLoading = false;
     }
 
