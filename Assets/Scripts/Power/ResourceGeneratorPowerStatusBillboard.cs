@@ -7,6 +7,7 @@ public class ResourceGeneratorPowerStatusBillboard : MonoBehaviour
     private PowerFeedVisualState _iconShownFor = PowerFeedVisualState.Ok;
 
     [SerializeField] private float iconHeightVsBuilding = 0.35f;
+    [SerializeField] private Vector3 powerStatusIconWorldOffset;
 
     private void Awake()
     {
@@ -36,7 +37,7 @@ public class ResourceGeneratorPowerStatusBillboard : MonoBehaviour
         }
 
         ReleaseFollower();
-        _follower = mgr.SpawnPowerFloatingIcon(st, transform);
+        _follower = mgr.SpawnPowerFloatingIcon(st, transform, powerStatusIconWorldOffset);
         _iconShownFor = st;
         if (_follower != null) {
             RectTransform rt = _follower.GetComponent<RectTransform>();

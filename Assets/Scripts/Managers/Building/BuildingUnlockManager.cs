@@ -34,7 +34,7 @@ public class BuildingUnlockManager : MonoBehaviour
 
     private void UnlockAllBuildings()
     {
-        BuildingData[] allBuildings = Resources.LoadAll<BuildingData>("Buildings");
+        BuildingData[] allBuildings = Resources.LoadAll<BuildingData>("Building Data");
         foreach (BuildingData building in allBuildings)
         {
             if (building != null)
@@ -135,7 +135,7 @@ public class BuildingUnlockManager : MonoBehaviour
     [ContextMenu("Unlock All Buildings (Debug)")]
     public void UnlockAllBuildingsDebug()
     {
-        BuildingData[] allBuildings = Resources.LoadAll<BuildingData>("Buildings");
+        BuildingData[] allBuildings = Resources.LoadAll<BuildingData>("Building Data");
         foreach (BuildingData building in allBuildings)
         {
             UnlockBuilding(building);
@@ -182,7 +182,7 @@ public class BuildingUnlockManager : MonoBehaviour
         }
         
         string[] buildingNames = savedData.Split(',');
-        BuildingData[] allBuildings = Resources.LoadAll<BuildingData>("Buildings");
+        BuildingData[] allBuildings = Resources.LoadAll<BuildingData>("Building Data");
         
         foreach (string buildingName in buildingNames)
         {

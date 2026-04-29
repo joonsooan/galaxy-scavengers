@@ -25,3 +25,7 @@ MonoBehaviour:
   - resourceType: 3
     amount: 50
   noiseCoefficient: 0.5
+  useInternalBattery: 1
+  maxBattery: 100
+  batteryDrainPerSecond: 0.15
+  chargeDurationSecondsAtStation: 10

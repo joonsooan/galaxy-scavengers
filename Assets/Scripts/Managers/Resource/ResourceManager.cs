@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 
 public enum ResourceType
 {
+    None = -1,
     Ferrite,
     Aether,
     Biomass,
@@ -83,6 +84,33 @@ public class ResourceManager : MonoBehaviour
     [Header("Electricity (power grid)")]
     [SerializeField] private int electricityInitialAmount;
     [SerializeField] private int tutorialElectricityInitialAmount;
+
+    [Header("Cheat Resource Amounts (F1)")]
+    [SerializeField] private int cheatFerriteAmount;
+    [SerializeField] private int cheatAetherAmount;
+    [SerializeField] private int cheatBiomassAmount;
+    [SerializeField] private int cheatCryoCrystalAmount;
+    [SerializeField] private int cheatAlloyPlateAmount;
+    [SerializeField] private int cheatCompositeFrameAmount;
+    [SerializeField] private int cheatEChipAmount;
+    [SerializeField] private int cheatBioCableAmount;
+    [SerializeField] private int cheatPowerCubeAmount;
+    [SerializeField] private int cheatBioFuelAmount;
+    [SerializeField] private int cheatCryoGelAmount;
+    [SerializeField] private int cheatSolanaAmount;
+    [SerializeField] private int cheatCoreAmount;
+    [SerializeField] private int cheatAmmunitionAmount;
+    [SerializeField] private int cheatHeavyPlatingAmount;
+    [SerializeField] private int cheatActuatorAmount;
+    [SerializeField] private int cheatGenomeChipAmount;
+    [SerializeField] private int cheatPatchKitAmount;
+    [SerializeField] private int cheatSensorUnitAmount;
+    [SerializeField] private int cheatPlasmaCubeAmount;
+    [SerializeField] private int cheatCryoConduitAmount;
+    [SerializeField] private int cheatSeekerMissileAmount;
+    [SerializeField] private int cheatNexusDataAmount;
+    [SerializeField] private int cheatNeuralMatrixAmount;
+    [SerializeField] private int cheatElectricityAmount;
 
     [Header("Resource Icons")]
     [SerializeField] private List<Sprite> resourceIcons;
@@ -498,14 +526,54 @@ public class ResourceManager : MonoBehaviour
     {
         if (ResourceDataManager.Instance == null) return;
 
-        const int cheatAmount = 999999;
-        Debug.Log($"<color=orange>CHEAT ACTIVATED:</color> All resources set to {cheatAmount}.");
+        Debug.Log("<color=orange>CHEAT ACTIVATED:</color> Applied inspector-configured cheat resources.");
 
         foreach (ResourceType type in Enum.GetValues(typeof(ResourceType))) {
+            int cheatAmount = GetCheatAmount(type);
+            if (cheatAmount == 0) {
+                continue;
+            }
+
             ResourceDataManager.Instance.AddResource(type, cheatAmount);
             MainStructure mainStructure = ResourceDataManager.Instance.GetMainStructure();
-            mainStructure?.InitializeStorage(type, cheatAmount);
+            if (mainStructure != null) {
+                int current = mainStructure.GetCurrentResourceAmount(type);
+                mainStructure.InitializeStorage(type, current + cheatAmount);
+            }
         }
+    }
+
+    private int GetCheatAmount(ResourceType type)
+    {
+        return type switch
+        {
+            ResourceType.Ferrite => cheatFerriteAmount,
+            ResourceType.Aether => cheatAetherAmount,
+            ResourceType.Biomass => cheatBiomassAmount,
+            ResourceType.CryoCrystal => cheatCryoCrystalAmount,
+            ResourceType.AlloyPlate => cheatAlloyPlateAmount,
+            ResourceType.CompositeFrame => cheatCompositeFrameAmount,
+            ResourceType.EChip => cheatEChipAmount,
+            ResourceType.BioCable => cheatBioCableAmount,
+            ResourceType.PowerCube => cheatPowerCubeAmount,
+            ResourceType.BioFuel => cheatBioFuelAmount,
+            ResourceType.CryoGel => cheatCryoGelAmount,
+            ResourceType.Solana => cheatSolanaAmount,
+            ResourceType.Core => cheatCoreAmount,
+            ResourceType.Ammunition => cheatAmmunitionAmount,
+            ResourceType.HeavyPlating => cheatHeavyPlatingAmount,
+            ResourceType.Actuator => cheatActuatorAmount,
+            ResourceType.GenomeChip => cheatGenomeChipAmount,
+            ResourceType.PatchKit => cheatPatchKitAmount,
+            ResourceType.SensorUnit => cheatSensorUnitAmount,
+            ResourceType.PlasmaCube => cheatPlasmaCubeAmount,
+            ResourceType.CryoConduit => cheatCryoConduitAmount,
+            ResourceType.SeekerMissile => cheatSeekerMissileAmount,
+            ResourceType.NexusData => cheatNexusDataAmount,
+            ResourceType.NeuralMatrix => cheatNeuralMatrixAmount,
+            ResourceType.Electricity => cheatElectricityAmount,
+            _ => 0
+        };
     }
 
     public IStorage FindClosestStorageWithResource(Vector3 position, ResourceType type, int minAmount)

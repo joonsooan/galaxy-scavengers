@@ -4,24 +4,22 @@ using System.Collections.Generic;
 using FMODUnity;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public enum TutorialStepType
 {
-    Click,
-    RightClick,
-    WASDInput,
-    MouseWheel,
-    SpacebarPress,
-    NumberKeyPress,
-    ResourceMined,
-    ResourceBlockRevealed,
-    BulletFired,
-    BuildingPlaced,
-    BuildingCompleted,
-    UnitProduced,
-    ItemProduced,
-    MineableTypesChanged
+    Click = 0,
+    RightClick = 1,
+    WASDInput = 2,
+    MouseWheel = 3,
+    SpacebarPress = 4,
+    ResourceMined = 6,
+    BulletFired = 8,
+    BuildingPlaced = 9,
+    BuildingCompleted = 10,
+    UnitProduced = 11,
+    ItemProduced = 12,
 }
 
 [Serializable]
@@ -35,23 +33,50 @@ public struct HighlightableUI
 
 public class TutorialManager : MonoBehaviour
 {
-    [Header("Tutorial Settings")]
+    [Header("Tutorial Core")]
     [SerializeField] private GameObject tutorialUI;
     [SerializeField] private TutorialStepData[] tutorialStepDataList;
 
-    [Header("UI Panels")]
+    [Header("UI Panels - Top Bar")]
     [SerializeField] private GameObject resourcePanel;
-    [SerializeField] private GameObject resourceInfoPanel;
-    [SerializeField] private GameObject statsPanel;
-    [SerializeField] private GameObject debuffPanel;
-    [SerializeField] private GameObject timeSlider;
-    [SerializeField] private GameObject gameSpeed;
+    [FormerlySerializedAs("gameSpeed")]
+    [SerializeField] private GameObject gameSpeedPanel;
+    [SerializeField] private GameObject dayNightPanel;
+    [FormerlySerializedAs("timeSlider")]
+    [SerializeField] private GameObject leftTimePanel;
     [SerializeField] private GameObject noisePanel;
-    [SerializeField] private GameObject unitPopulationPanel;
-    [SerializeField] private GameObject alertPanel;
+    [SerializeField] private GameObject pausePanel;
+
+    [Header("UI Panels - Tutorial")]
+    [SerializeField] private GameObject tutorialPanel;
+    [SerializeField] private GameObject tutorialArrows;
+
+    [Header("UI Panels - Contextual Info")]
+    [SerializeField] private GameObject storageResourceInfoPanel;
+    [SerializeField] private GameObject processorInfoPanel;
+    [SerializeField] private GameObject droneProduceInfoPanel;
+    [SerializeField] private GameObject extractorInfoPanel;
+
+    [Header("UI Panels - Main Controls")]
     [SerializeField] private GameObject mainControlPanel;
-    [SerializeField] private GameObject questPanel;
+    [SerializeField] private GameObject unitManagePanel;
+    [SerializeField] private GameObject resourceStatsPanel;
+    [SerializeField] private GameObject buildingDestroyPanel;
+    [SerializeField] private GameObject baseBuildingPanel;
+
+    [Header("UI Panels - Flash Unlock")]
+    [SerializeField] private GameObject resourceInfoPanel;
+    [SerializeField] private GameObject unitInfoPanel;
+    [SerializeField] private GameObject buildingInfoPanel;
+
+    [Header("UI Panels - Launch And Alert")]
     [SerializeField] private GameObject launchButton;
+    [SerializeField] private GameObject launchResultUI;
+    [SerializeField] private GameObject launchPanel;
+    [SerializeField] private GameObject launchPreparePanel;
+    [FormerlySerializedAs("alertPanel")]
+    [SerializeField] private GameObject alertPanelParent;
+    [SerializeField] private GameObject alertTooltipPanel;
 
     [Header("Highlight Settings")]
     [SerializeField] private List<HighlightableUI> highlightableList = new List<HighlightableUI>();
@@ -61,12 +86,14 @@ public class TutorialManager : MonoBehaviour
     private readonly List<GameObject> _currentHighlightTargets = new List<GameObject>();
     private readonly Dictionary<string, HighlightableUI> _highlightLookup = new Dictionary<string, HighlightableUI>();
     private readonly Dictionary<string, GameObject> _arrowUILookup = new Dictionary<string, GameObject>();
-    private readonly Dictionary<GameObject, Material> _highlightMaterials = new Dictionary<GameObject, Material>();
     private readonly Dictionary<GameObject, Material> _originalMaterials = new Dictionary<GameObject, Material>();
     private readonly List<UnitBase> _spawnedEnemyUnits = new List<UnitBase>();
     private readonly Dictionary<TutorialUIPanel, GameObject> _uiPanels = new Dictionary<TutorialUIPanel, GameObject>();
+    private readonly HashSet<TutorialUIPanel> _unlockedFlashPanels = new HashSet<TutorialUIPanel>();
+    private readonly HashSet<TutorialUIPanel> _unlockedInteractivePanels = new HashSet<TutorialUIPanel>();
     private int _buildingCompletedCount;
     private int _buildingPlacedCount;
+    private bool _buildingPlacedWaitingForRelease;
     private int _bulletFireCount;
     private int _currentStepIndex = -1;
     private bool _isTutorialActive;
@@ -74,12 +101,8 @@ public class TutorialManager : MonoBehaviour
     private int _itemProducedCount;
     private float _lastMouseWheelValue;
     private bool _lastPausedState;
-    private int _mineableTypesChangedCount;
     private int _mouseWheelScrollCount;
-
-    private int _numberKeyPressCount;
     private RectTransform _rect;
-    private int _resourceBlockRevealCount;
     private int _resourceMinedAmount;
     private int _rightClickCount;
     private int _spacebarPressCount;
@@ -161,14 +184,23 @@ public class TutorialManager : MonoBehaviour
 
     private void OnEnable()
     {
-        UnitManager.OnMineableTypesChanged += OnMineableTypesChanged;
         GameManager.OnGameSceneInitialized += OnGameSceneInitialized;
+        MainStructure.OnUnitProduced += HandleMainStructureUnitProduced;
     }
 
     private void OnDisable()
     {
-        UnitManager.OnMineableTypesChanged -= OnMineableTypesChanged;
         GameManager.OnGameSceneInitialized -= OnGameSceneInitialized;
+        MainStructure.OnUnitProduced -= HandleMainStructureUnitProduced;
+    }
+
+    private void LateUpdate()
+    {
+        if (!_isTutorialActive) {
+            return;
+        }
+
+        EnforceLockedFlashPanelsHidden();
     }
 
     private void OnGameSceneInitialized()
@@ -247,6 +279,8 @@ public class TutorialManager : MonoBehaviour
 
         DisableAllEnemyUnits();
         BuildUIPanelDictionary();
+        _unlockedFlashPanels.Clear();
+        _unlockedInteractivePanels.Clear();
         HideAllUIPanels();
 
         NextStep();
@@ -280,36 +314,8 @@ public class TutorialManager : MonoBehaviour
 
     private void ProcessStepStartActions(TutorialStepData step)
     {
-        if (step.spawnUnits != null && step.spawnUnits.Length > 0) {
-            SpawnUnits(step.spawnUnits);
-        }
-
         if (step.grantResources != null && step.grantResources.Length > 0) {
             GrantResources(step.grantResources);
-        }
-    }
-
-    private void SpawnUnits(UnitData[] unitsToSpawn)
-    {
-        if (UnitManager.Instance == null || UnitManager.Instance.unitParent == null) {
-            return;
-        }
-
-        MainStructure mainStructure = FindFirstObjectByType<MainStructure>();
-        Vector3 spawnPosition = mainStructure != null ? mainStructure.transform.position : Vector3.zero;
-
-        foreach (UnitData unitData in unitsToSpawn) {
-            if (unitData == null || unitData.unitPrefab == null) {
-                continue;
-            }
-
-            Vector3 offSet = new Vector3(0f, -2f, 0f);
-            GameObject unitObj = Instantiate(unitData.unitPrefab, spawnPosition + offSet, Quaternion.identity, UnitManager.Instance.unitParent);
-            UnitBase unitBase = unitObj.GetComponent<UnitBase>();
-            if (unitBase != null) {
-                unitBase.unitType = UnitBase.UnitType.Ally;
-                unitBase.unitData = unitData;
-            }
         }
     }
 
@@ -357,15 +363,13 @@ public class TutorialManager : MonoBehaviour
         _wasdInputTime = 0f;
         _mouseWheelScrollCount = 0;
         _spacebarPressCount = 0;
-        _numberKeyPressCount = 0;
         _resourceMinedAmount = 0;
         _bulletFireCount = 0;
         _buildingPlacedCount = 0;
+        _buildingPlacedWaitingForRelease = false;
         _buildingCompletedCount = 0;
         _unitProducedCount = 0;
         _itemProducedCount = 0;
-        _resourceBlockRevealCount = 0;
-        _mineableTypesChangedCount = 0;
         _rightClickCount = 0;
         _lastMouseWheelValue = Input.mouseScrollDelta.y;
         if (GameManager.Instance != null) {
@@ -463,20 +467,6 @@ public class TutorialManager : MonoBehaviour
                 }
                 break;
 
-            case TutorialStepType.NumberKeyPress:
-                bool numberKeyPressed = Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Alpha3);
-
-                if (numberKeyPressed) {
-                    _numberKeyPressCount++;
-                    if (_tutorialUI != null && step.showProgressBar) {
-                        _tutorialUI.UpdateProgress((float)_numberKeyPressCount / step.count);
-                    }
-                    if (_numberKeyPressCount >= step.count) {
-                        conditionMet = true;
-                    }
-                }
-                break;
-
             case TutorialStepType.ResourceMined:
                 if (step.count <= 0) {
                     break;
@@ -485,27 +475,6 @@ public class TutorialManager : MonoBehaviour
                     _tutorialUI.UpdateProgress((float)_resourceMinedAmount / step.count);
                 }
                 if (_resourceMinedAmount >= step.count) {
-                    conditionMet = true;
-                }
-                break;
-
-            case TutorialStepType.ResourceBlockRevealed:
-                int targetBlocks = Mathf.Max(1, step.count);
-                if (_tutorialUI != null && step.showProgressBar) {
-                    float progress = Mathf.Clamp01((float)_resourceBlockRevealCount / targetBlocks);
-                    _tutorialUI.UpdateProgress(progress);
-                }
-                if (_resourceBlockRevealCount >= targetBlocks) {
-                    conditionMet = true;
-                }
-                break;
-
-            case TutorialStepType.MineableTypesChanged:
-                if (_tutorialUI != null && step.showProgressBar && step.count > 0) {
-                    float progress = Mathf.Clamp01((float)_mineableTypesChangedCount / step.count);
-                    _tutorialUI.UpdateProgress(progress);
-                }
-                if (step.count > 0 && _mineableTypesChangedCount >= step.count) {
                     conditionMet = true;
                 }
                 break;
@@ -521,7 +490,15 @@ public class TutorialManager : MonoBehaviour
 
             case TutorialStepType.BuildingPlaced:
                 if (_buildingPlacedCount > 0) {
-                    conditionMet = true;
+                    if (_buildingPlacedWaitingForRelease) {
+                        if (Input.GetMouseButtonUp(0)) {
+                            _buildingPlacedWaitingForRelease = false;
+                            conditionMet = true;
+                        }
+                    }
+                    else {
+                        conditionMet = true;
+                    }
                 }
                 break;
 
@@ -615,28 +592,6 @@ public class TutorialManager : MonoBehaviour
         }
     }
 
-    public void OnResourceBlockRevealed()
-    {
-        if (!_isTutorialActive || !_isWaitingForCondition) return;
-        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
-
-        TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
-        if (currentStep.stepType == TutorialStepType.ResourceBlockRevealed) {
-            _resourceBlockRevealCount++;
-        }
-    }
-
-    private void OnMineableTypesChanged(ResourceType[] newTypes)
-    {
-        if (!_isTutorialActive || !_isWaitingForCondition) return;
-        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
-
-        TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
-        if (currentStep.stepType == TutorialStepType.MineableTypesChanged) {
-            _mineableTypesChangedCount++;
-        }
-    }
-
     public bool IsTutorialActive()
     {
         return _isTutorialActive;
@@ -649,6 +604,28 @@ public class TutorialManager : MonoBehaviour
             return _tutorialSteps[_currentStepIndex];
         }
         return null;
+    }
+
+    public bool IsUIPanelEnabledForCurrentStep(TutorialUIPanel panelType)
+    {
+        if (!_isTutorialActive) {
+            return true;
+        }
+
+        TutorialStepData currentStep = GetCurrentTutorialStep();
+        if (currentStep == null || currentStep.enableUIPanels == null) {
+            return false;
+        }
+
+        if (IsFlashPanel(panelType)) {
+            return _unlockedFlashPanels.Contains(panelType);
+        }
+
+        if (IsUnlockOnlyPanel(panelType)) {
+            return _unlockedInteractivePanels.Contains(panelType);
+        }
+
+        return currentStep.enableUIPanels.Contains(panelType);
     }
     
     public bool HasReachedStepType(TutorialStepType stepType)
@@ -690,30 +667,41 @@ public class TutorialManager : MonoBehaviour
         return currentStep.showTargetBracket && !string.IsNullOrEmpty(currentStep.targetBracketBuildingType);
     }
 
-    public void OnBuildingPlaced(string buildingType)
+    public bool ShouldPauseRoundTimer()
+    {
+        if (!_isTutorialScene) {
+            return false;
+        }
+
+        return _isTutorialActive;
+    }
+
+    public void OnBuildingPlaced(BuildingType buildingType)
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
         if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
-        if (currentStep.stepType == TutorialStepType.BuildingPlaced && currentStep.buildingType == buildingType) {
+        if (currentStep.stepType == TutorialStepType.BuildingPlaced &&
+            currentStep.buildingType == buildingType) {
             _buildingPlacedCount++;
+            _buildingPlacedWaitingForRelease = Input.GetMouseButton(0);
         }
     }
 
-    public void OnBuildingCompleted(string buildingType)
+    public void OnBuildingCompleted(BuildingType buildingType)
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
         if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
 
         TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
         if (currentStep.stepType == TutorialStepType.BuildingCompleted &&
-            (string.IsNullOrEmpty(currentStep.buildingType) || currentStep.buildingType == buildingType)) {
+            currentStep.buildingType == buildingType) {
             _buildingCompletedCount++;
         }
     }
 
-    public void OnUnitProduced(string unitType)
+    public void OnUnitProduced(TutorialUnitType unitType)
     {
         if (!_isTutorialActive || !_isWaitingForCondition) return;
         if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) return;
@@ -722,6 +710,81 @@ public class TutorialManager : MonoBehaviour
         if (currentStep.stepType == TutorialStepType.UnitProduced && currentStep.unitType == unitType) {
             _unitProducedCount++;
         }
+    }
+
+    private void HandleMainStructureUnitProduced(UnitData unitData)
+    {
+        if (unitData == null) {
+            return;
+        }
+
+        if (!_isTutorialActive || !_isWaitingForCondition) {
+            return;
+        }
+
+        if (_currentStepIndex < 0 || _currentStepIndex >= _tutorialSteps.Count) {
+            return;
+        }
+
+        TutorialStepData currentStep = _tutorialSteps[_currentStepIndex];
+        if (currentStep == null || currentStep.stepType != TutorialStepType.UnitProduced) {
+            return;
+        }
+
+        if (currentStep.unitType != TutorialUnitType.None &&
+            currentStep.unitType == GetTutorialUnitType(unitData)) {
+            _unitProducedCount++;
+        }
+    }
+
+    private TutorialUnitType GetTutorialUnitType(UnitData unitData)
+    {
+        if (unitData == null) {
+            return TutorialUnitType.None;
+        }
+
+        string normalizedTutorialKey = NormalizeUnitKey(unitData.tutorialKey);
+        switch (normalizedTutorialKey) {
+        case "unitscout":
+            return TutorialUnitType.Scout;
+        case "unitminer":
+            return TutorialUnitType.Miner;
+        case "unitconstruct":
+            return TutorialUnitType.Construct;
+        case "unitprocessor":
+            return TutorialUnitType.Processor;
+        }
+
+        string normalizedAssetName = NormalizeUnitKey(unitData.name);
+        switch (normalizedAssetName) {
+        case "unitscout":
+            return TutorialUnitType.Scout;
+        case "unitminer":
+            return TutorialUnitType.Miner;
+        case "unitconstruct":
+            return TutorialUnitType.Construct;
+        case "unitprocessor":
+            return TutorialUnitType.Processor;
+        }
+
+        return TutorialUnitType.None;
+    }
+
+    private string NormalizeUnitKey(string value)
+    {
+        if (string.IsNullOrEmpty(value)) {
+            return string.Empty;
+        }
+
+        System.Text.StringBuilder builder = new System.Text.StringBuilder(value.Length);
+        for (int i = 0; i < value.Length; i++) {
+            char c = value[i];
+            if (char.IsLetterOrDigit(c)) {
+                builder.Append(char.ToLowerInvariant(c));
+            }
+        }
+
+        return builder.ToString();
     }
 
     public void OnItemProduced(string itemType)
@@ -745,7 +808,8 @@ public class TutorialManager : MonoBehaviour
         }
 
         EnableAllEnemyUnits();
-        ShowAllUIPanels(true);
+        _unlockedFlashPanels.Clear();
+        _unlockedInteractivePanels.Clear();
         HideArrowUI();
         HideTargetBracket();
 
@@ -771,6 +835,8 @@ public class TutorialManager : MonoBehaviour
         }
 
         EnableAllEnemyUnits();
+        _unlockedFlashPanels.Clear();
+        _unlockedInteractivePanels.Clear();
         ShowAllUIPanels(true);
         HideArrowUI();
         HideTargetBracket();
@@ -794,6 +860,8 @@ public class TutorialManager : MonoBehaviour
             }
 
             EnableAllEnemyUnits();
+            _unlockedFlashPanels.Clear();
+            _unlockedInteractivePanels.Clear();
             ShowAllUIPanels(true);
             HideArrowUI();
             HideTargetBracket();
@@ -824,6 +892,11 @@ public class TutorialManager : MonoBehaviour
 
     private void DisableAllEnemyUnits()
     {
+        EnemyUnitBase[] sceneEnemies = FindObjectsByType<EnemyUnitBase>(FindObjectsSortMode.None);
+        foreach (EnemyUnitBase enemy in sceneEnemies) {
+            RegisterSpawnedEnemy(enemy);
+        }
+
         foreach (UnitBase enemyUnit in _spawnedEnemyUnits) {
             if (enemyUnit != null && enemyUnit.gameObject != null) {
                 enemyUnit.gameObject.SetActive(false);
@@ -845,17 +918,33 @@ public class TutorialManager : MonoBehaviour
         _uiPanels.Clear();
 
         _uiPanels[TutorialUIPanel.ResourcePanel] = resourcePanel;
-        _uiPanels[TutorialUIPanel.ResourceInfoPanel] = resourceInfoPanel;
-        _uiPanels[TutorialUIPanel.StatsPanel] = statsPanel;
-        _uiPanels[TutorialUIPanel.DebuffPanel] = debuffPanel;
-        _uiPanels[TutorialUIPanel.TimeSlider] = timeSlider;
-        _uiPanels[TutorialUIPanel.GameSpeed] = gameSpeed;
+        _uiPanels[TutorialUIPanel.GameSpeedPanel] = gameSpeedPanel;
+        _uiPanels[TutorialUIPanel.DayNightPanel] = dayNightPanel;
+        _uiPanels[TutorialUIPanel.LeftTimePanel] = leftTimePanel;
         _uiPanels[TutorialUIPanel.NoisePanel] = noisePanel;
-        _uiPanels[TutorialUIPanel.UnitPopulationPanel] = unitPopulationPanel;
-        _uiPanels[TutorialUIPanel.AlertPanel] = alertPanel;
+        _uiPanels[TutorialUIPanel.TutorialPanel] = tutorialPanel;
+        _uiPanels[TutorialUIPanel.PausePanel] = pausePanel;
+
+        _uiPanels[TutorialUIPanel.TutorialArrows] = tutorialArrows;
+        _uiPanels[TutorialUIPanel.StorageResourceInfoPanel] = storageResourceInfoPanel;
+        _uiPanels[TutorialUIPanel.ProcessorInfoPanel] = processorInfoPanel;
+        _uiPanels[TutorialUIPanel.DroneProduceInfoPanel] = droneProduceInfoPanel;
+        _uiPanels[TutorialUIPanel.BuildingInfoPanel] = buildingInfoPanel;
+        _uiPanels[TutorialUIPanel.ResourceInfoPanel] = resourceInfoPanel;
+        _uiPanels[TutorialUIPanel.UnitInfoPanel] = unitInfoPanel;
+        _uiPanels[TutorialUIPanel.ExtractorInfoPanel] = extractorInfoPanel;
         _uiPanels[TutorialUIPanel.MainControlPanel] = mainControlPanel;
+        _uiPanels[TutorialUIPanel.UnitManagePanel] = unitManagePanel;
+        _uiPanels[TutorialUIPanel.ResourceStatsPanel] = resourceStatsPanel;
+        _uiPanels[TutorialUIPanel.BuildingDestroyPanel] = buildingDestroyPanel;
+        _uiPanels[TutorialUIPanel.BaseBuildingPanel] = baseBuildingPanel;
+
         _uiPanels[TutorialUIPanel.LaunchButton] = launchButton;
-        _uiPanels[TutorialUIPanel.QuestPanel] = questPanel;
+        _uiPanels[TutorialUIPanel.LaunchResultUI] = launchResultUI;
+        _uiPanels[TutorialUIPanel.LaunchPanel] = launchPanel;
+        _uiPanels[TutorialUIPanel.LaunchPreparePanel] = launchPreparePanel;
+        _uiPanels[TutorialUIPanel.AlertPanelParent] = alertPanelParent;
+        _uiPanels[TutorialUIPanel.AlertTooltipPanel] = alertTooltipPanel;
     }
 
     public void HideAllUIPanels()
@@ -873,7 +962,7 @@ public class TutorialManager : MonoBehaviour
             if (entry.Key == TutorialUIPanel.ResourceInfoPanel) {
                 continue;
             }
-            if (entry.Key == TutorialUIPanel.AlertPanel && !includeAlertPanel) {
+            if (entry.Key == TutorialUIPanel.AlertPanelParent && !includeAlertPanel) {
                 continue;
             }
 
@@ -883,8 +972,8 @@ public class TutorialManager : MonoBehaviour
             }
         }
 
-        if (includeAlertPanel && alertPanel != null) {
-            alertPanel.SetActive(true);
+        if (includeAlertPanel && alertPanelParent != null) {
+            alertPanelParent.SetActive(true);
         }
     }
 
@@ -895,7 +984,15 @@ public class TutorialManager : MonoBehaviour
         }
 
         foreach (TutorialUIPanel panelType in step.enableUIPanels) {
-            if (_isTutorialActive && panelType == TutorialUIPanel.AlertPanel) {
+            if (_isTutorialActive && panelType == TutorialUIPanel.AlertPanelParent) {
+                continue;
+            }
+            if (IsFlashPanel(panelType)) {
+                _unlockedFlashPanels.Add(panelType);
+                continue;
+            }
+            if (IsUnlockOnlyPanel(panelType)) {
+                _unlockedInteractivePanels.Add(panelType);
                 continue;
             }
             if (_uiPanels.TryGetValue(panelType, out GameObject panel) && panel != null) {
@@ -916,9 +1013,50 @@ public class TutorialManager : MonoBehaviour
             yield break;
         }
 
-        if (alertPanel != null)
+        if (alertPanelParent != null)
         {
-            alertPanel.SetActive(true);
+            alertPanelParent.SetActive(true);
+        }
+    }
+
+    private void EnforceLockedFlashPanelsHidden()
+    {
+        foreach (KeyValuePair<TutorialUIPanel, GameObject> entry in _uiPanels) {
+            if (!IsFlashPanel(entry.Key)) {
+                continue;
+            }
+            if (_unlockedFlashPanels.Contains(entry.Key)) {
+                continue;
+            }
+
+            GameObject panel = entry.Value;
+            if (panel != null && panel.activeSelf) {
+                panel.SetActive(false);
+            }
+        }
+    }
+
+    private bool IsFlashPanel(TutorialUIPanel panelType)
+    {
+        switch (panelType) {
+        case TutorialUIPanel.ResourceInfoPanel:
+        case TutorialUIPanel.UnitInfoPanel:
+        case TutorialUIPanel.BuildingInfoPanel:
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    private bool IsUnlockOnlyPanel(TutorialUIPanel panelType)
+    {
+        switch (panelType) {
+        case TutorialUIPanel.StorageResourceInfoPanel:
+        case TutorialUIPanel.ProcessorInfoPanel:
+        case TutorialUIPanel.DroneProduceInfoPanel:
+            return true;
+        default:
+            return false;
         }
     }
 

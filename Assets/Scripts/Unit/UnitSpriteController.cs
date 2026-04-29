@@ -44,7 +44,7 @@ public class UnitSpriteController : MonoBehaviour
             _animator.speed = 1.0f;
         }
 
-        Unit_Drone parentDrone = GetComponentInParent<Unit_Drone>();
+        Unit_Processor parentDrone = GetComponentInParent<Unit_Processor>();
         if (parentDrone != null) {
             return;
         }

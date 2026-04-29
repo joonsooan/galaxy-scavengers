@@ -581,10 +581,10 @@ public class ElectricityConsumptionManager : MonoBehaviour
                 continue;
             }
 
-            bool canProduce = gen.IsConstructed && gen.HasFuelAvailableInRange() && !IsElectricityStorageFull;
+            bool constructedAndFueled = gen.IsConstructed && gen.HasFuelAvailableInRange();
             int buffer = gen.ElectricityBufferCurrent;
             PowerFeedVisualState gvs;
-            if (canProduce)
+            if (constructedAndFueled)
             {
                 gvs = PowerFeedVisualState.Ok;
             }
@@ -1048,7 +1048,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
         _powerIconPoolsEnsured = true;
     }
 
-    public PowerStatusWorldFollower SpawnPowerFloatingIcon(PowerFeedVisualState state, Transform followTarget)
+    public PowerStatusWorldFollower SpawnPowerFloatingIcon(PowerFeedVisualState state, Transform followTarget, Vector3 additionalWorldOffset = default)
     {
         if (state != PowerFeedVisualState.Disconnected && state != PowerFeedVisualState.InsufficientPool)
         {
@@ -1109,7 +1109,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
         {
             follower = go.AddComponent<PowerStatusWorldFollower>();
         }
-        follower.Initialize(followTarget, Vector3.up * powerIconWorldYOffset, usePoolTag);
+        follower.Initialize(followTarget, Vector3.up * powerIconWorldYOffset + additionalWorldOffset, usePoolTag);
         return follower;
     }
 

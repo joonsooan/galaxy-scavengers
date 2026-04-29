@@ -12,7 +12,7 @@ public class UnitAssignCell : MonoBehaviour
     [Header("Tutorial Settings")]
     [SerializeField] private Material glowMaterial;
 
-    private Unit_Drone _assignedDrone;
+    private Unit_Processor _assignedDrone;
     private Processor _processor;
     private string _tutorialID;
 
@@ -21,7 +21,7 @@ public class UnitAssignCell : MonoBehaviour
         cellButton.onClick.AddListener(OnCellClicked);
     }
 
-    public void Initialize(Processor processor, Unit_Drone drone)
+    public void Initialize(Processor processor, Unit_Processor drone)
     {
         _processor = processor;
         _assignedDrone = drone;
@@ -44,8 +44,8 @@ public class UnitAssignCell : MonoBehaviour
     private void OnCellClicked()
     {
         if (_assignedDrone == null) {
-            Unit_Drone droneToAssign = UnitManager.Instance.AllyUnits
-                .OfType<Unit_Drone>()
+            Unit_Processor droneToAssign = UnitManager.Instance.AllyUnits
+                .OfType<Unit_Processor>()
                 .FirstOrDefault(d => !d.IsAssigned);
 
             if (droneToAssign != null) {
@@ -59,7 +59,7 @@ public class UnitAssignCell : MonoBehaviour
         }
     }
 
-    private void SetAssignedDrone(Unit_Drone drone)
+    private void SetAssignedDrone(Unit_Processor drone)
     {
         _assignedDrone = drone;
         UpdateUI();

@@ -114,6 +114,10 @@ public class SceneLoader : MonoBehaviour
         if (_isLoading) return;
         
         string currentScene = SceneManager.GetActiveScene().name;
+        if (currentScene == baseSceneName) {
+            return;
+        }
+
         if (currentScene == gameSceneName) {
             _returnState = returnState;
             StartCoroutine(LoadBaseSceneFromGameAsync());
@@ -234,6 +238,10 @@ public class SceneLoader : MonoBehaviour
     private IEnumerator AsyncLoadRoutine(string sceneName, bool autoActivate)
     {
         AsyncOperation op = SceneManager.LoadSceneAsync(sceneName);
+        if (op == null) {
+            Debug.LogError($"[SceneLoader] Failed to load scene '{sceneName}'. Check if scene is in Build Settings.");
+            yield break;
+        }
         op.allowSceneActivation = autoActivate;
         while (op.progress < 0.9f) yield return null;
         if (autoActivate) {

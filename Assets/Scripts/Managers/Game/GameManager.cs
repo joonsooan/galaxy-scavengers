@@ -300,6 +300,7 @@ public class GameManager : MonoBehaviour
     {
         if (scene.name == "GameScene" || scene.name == "TutorialScene")
         {
+            UnitProcessResourceStatTracker.ResetAllStats();
             _isGameOverProcessing = false;
             IsPaused = false;
             _savedTimeScale = 1f;

@@ -18,4 +18,13 @@ public class UnitData : ScriptableObject
     [Tooltip("Noise coefficient value for this unit (0-100)")]
     [Range(0f, 100f)]
     public float noiseCoefficient;
+
+    [Header("Internal Battery (ally AI units)")]
+    public bool useInternalBattery;
+    [Tooltip("Max charge amount; spawned units start at this value.")]
+    public float maxBattery = 100f;
+    [Tooltip("Drain per second while not charging at a station.")]
+    public float batteryDrainPerSecond = 1f;
+    [Tooltip("Seconds to refill from empty to full while charging at a station.")]
+    public float chargeDurationSecondsAtStation = 5f;
 }

@@ -9,6 +9,7 @@ public class BuildingInfoPanel : MonoBehaviour
     [Header("UI References")]
     [SerializeField] private TMP_Text buildingName;
     [SerializeField] private GameObject resourcePanel;
+    [SerializeField] private GameObject postConstructPanel;
     [SerializeField] private TMP_Text buildingDesc;
     [SerializeField] private TMP_Text healthText;
     [SerializeField] private GameObject resourceInfoCellPrefab;
@@ -46,7 +47,7 @@ public class BuildingInfoPanel : MonoBehaviour
     public void SelectBuilding(BuildingData data)
     {
         _selectedData = data;
-        UpdateUI(data);
+        UpdateUI(data, false, null);
         Damageable damageable = data != null && data.buildingPrefab != null ? data.buildingPrefab.GetComponent<Damageable>() : null;
         SetCurrentDamageable(damageable, true);
         if (damageable != null)
@@ -55,7 +56,17 @@ public class BuildingInfoPanel : MonoBehaviour
 
     public void PreviewInfo(BuildingData data, Damageable damageable = null, bool showMaxHealthOnly = false)
     {
-        UpdateUI(data);
+        PreviewInfo(data, damageable, showMaxHealthOnly, false, null);
+    }
+
+    public void PreviewInfo(
+        BuildingData data,
+        Damageable damageable,
+        bool showMaxHealthOnly,
+        bool showPostConstructInfo,
+        IElectricityConsumer runtimeConsumer = null)
+    {
+        UpdateUI(data, showPostConstructInfo, runtimeConsumer);
         SetCurrentDamageable(damageable, showMaxHealthOnly);
         if (damageable != null)
             UpdateHealthDisplay(damageable, showMaxHealthOnly);
@@ -65,7 +76,7 @@ public class BuildingInfoPanel : MonoBehaviour
     {
         if (_selectedData != null)
         {
-            UpdateUI(_selectedData);
+            UpdateUI(_selectedData, false, null);
             Damageable damageable = _selectedData.buildingPrefab != null ? _selectedData.buildingPrefab.GetComponent<Damageable>() : null;
             SetCurrentDamageable(damageable, true);
             if (damageable != null)
@@ -101,54 +112,39 @@ public class BuildingInfoPanel : MonoBehaviour
             UpdateHealthDisplay(_currentDamageable, _showMaxHealthOnly);
     }
     
-    private void UpdateUI(BuildingData data)
+    private void UpdateUI(BuildingData data, bool showPostConstructInfo, IElectricityConsumer runtimeConsumer)
     {
         if (data == null) return;
 
         if (buildingName != null) buildingName.text = data.displayName;
         if (buildingDesc != null) buildingDesc.text = data.description;
-        if (resourcePanel != null)
-        {
-            gameObject.SetActive(true);
-            resourcePanel.SetActive(true);
-            if (data.buildingType == BuildingType.MainStructure)
-            {
-                if (noisePanel != null) noisePanel.SetActive(false);
-            }
-            else
-            {
-                UpdateResourceDisplay(data);
-            }
-        }
+        gameObject.SetActive(true);
 
-        UpdateAetherAndNoiseDisplay(data);
+        if (showPostConstructInfo)
+        {
+            SetResourcePanelActive(false);
+            SetPostConstructPanelActive(true);
+            UpdatePostConstructDisplay(data, runtimeConsumer);
+        }
+        else
+        {
+            SetPostConstructPanelActive(false);
+            SetResourcePanelActive(true);
+            UpdateResourceDisplay(data);
+            ClearPostConstructTexts();
+        }
     }
 
-    private void UpdateAetherAndNoiseDisplay(BuildingData data)
+    private void UpdatePostConstructDisplay(BuildingData data, IElectricityConsumer runtimeConsumer)
     {
-        if (aetherSpendPanel != null)
-        {
-            aetherSpendPanel.SetActive(false);
-        }
+        if (noisePanel != null) noisePanel.SetActive(true);
+        if (aetherSpendPanel != null) aetherSpendPanel.SetActive(true);
 
-        if (electricityConsumptionText != null)
-        {
-            electricityConsumptionText.text = string.Empty;
-        }
+        float noiseCoefficient = data != null ? data.noiseCoefficient : 0f;
+        if (noiseText != null) noiseText.text = $": {noiseCoefficient:F1}";
 
-        if (data == null || data.buildingType != BuildingType.MainStructure)
-        {
-            float noiseCoefficient = data != null ? data.noiseCoefficient : 0f;
-            if (noisePanel != null)
-            {
-                noisePanel.SetActive(true);
-            }
-
-            if (noiseText != null)
-            {
-                noiseText.text = $"소음 정도 : {noiseCoefficient:F1}";
-            }
-        }
+        float electricityConsumption = GetElectricityConsumptionPerSecond(data, runtimeConsumer);
+        if (electricityConsumptionText != null) electricityConsumptionText.text = $": {electricityConsumption:F1} / s";
     }
 
     private void UpdateHealthDisplay(Damageable damageable, bool showMaxHealth = false)
@@ -181,13 +177,19 @@ public class BuildingInfoPanel : MonoBehaviour
             {
                 Destroy(child.gameObject);
             }
-            resourcePanel.SetActive(false);
         }
+        SetResourcePanelActive(false);
+        SetPostConstructPanelActive(false);
         HideAetherAndNoiseDisplay();
     }
     
     private void UpdateResourceDisplay(BuildingData data)
     {
+        if (resourcePanel == null)
+        {
+            return;
+        }
+
         foreach (Transform child in resourcePanel.transform)
         {
             Destroy(child.gameObject);
@@ -202,10 +204,7 @@ public class BuildingInfoPanel : MonoBehaviour
 
         if (data.recipe == null || data.recipe.Count == 0)
         {
-            if (data.buildingType != BuildingType.MainStructure)
-            {
-                return;
-            }
+            return;
         }
 
         Dictionary<ResourceType, int> totalCosts = new Dictionary<ResourceType, int>();
@@ -274,7 +273,7 @@ public class BuildingInfoPanel : MonoBehaviour
         }
 
         _pieceDataByType = new Dictionary<BuildingPieceType, BuildingPieceData>();
-        BuildingPieceData[] allData = Resources.LoadAll<BuildingPieceData>("Building Pieces");
+        BuildingPieceData[] allData = Resources.LoadAll<BuildingPieceData>("Building Piece Data");
         foreach (BuildingPieceData data in allData)
         {
             if (data == null || data.buildingPieceType == BuildingPieceType.None)
@@ -311,8 +310,9 @@ public class BuildingInfoPanel : MonoBehaviour
 
         if (resourcePanel != null)
         {
-            resourcePanel.SetActive(false);
+            SetResourcePanelActive(false);
         }
+        SetPostConstructPanelActive(false);
         HideAetherAndNoiseDisplay();
     }
 
@@ -320,8 +320,66 @@ public class BuildingInfoPanel : MonoBehaviour
     {
         if (aetherSpendPanel != null) aetherSpendPanel.SetActive(false);
         if (noisePanel != null) noisePanel.SetActive(false);
+        ClearPostConstructTexts();
+    }
+
+    private void SetResourcePanelActive(bool isActive)
+    {
+        if (resourcePanel != null) resourcePanel.SetActive(isActive);
+    }
+
+    private void SetPostConstructPanelActive(bool isActive)
+    {
+        if (postConstructPanel == null)
+        {
+            ResolvePostConstructPanelReference();
+        }
+
+        if (postConstructPanel != null)
+        {
+            postConstructPanel.SetActive(isActive);
+        }
+    }
+
+    private void ResolvePostConstructPanelReference()
+    {
+        if (aetherSpendPanel != null && aetherSpendPanel.transform.parent != null)
+        {
+            postConstructPanel = aetherSpendPanel.transform.parent.gameObject;
+            return;
+        }
+
+        if (noisePanel != null && noisePanel.transform.parent != null)
+        {
+            postConstructPanel = noisePanel.transform.parent.gameObject;
+        }
+    }
+
+    private void ClearPostConstructTexts()
+    {
         if (electricityConsumptionText != null) electricityConsumptionText.text = string.Empty;
         if (noiseText != null) noiseText.text = string.Empty;
+    }
+
+    private static float GetElectricityConsumptionPerSecond(BuildingData data, IElectricityConsumer runtimeConsumer)
+    {
+        if (runtimeConsumer != null)
+        {
+            return runtimeConsumer.ElectricityConsumptionPerSecond;
+        }
+
+        if (data == null || data.buildingPrefab == null)
+        {
+            return 0f;
+        }
+
+        IElectricityConsumer prefabConsumer = data.buildingPrefab.GetComponent<IElectricityConsumer>();
+        if (prefabConsumer == null)
+        {
+            prefabConsumer = data.buildingPrefab.GetComponentInChildren<IElectricityConsumer>();
+        }
+
+        return prefabConsumer != null ? prefabConsumer.ElectricityConsumptionPerSecond : 0f;
     }
 
 }

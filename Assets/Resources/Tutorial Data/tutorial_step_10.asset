@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c74002d918083e14eb5bcbcc12257fde, type: 3}
+  m_Name: tutorial_step_10
+  m_EditorClassIdentifier: 
+  stepIndex: 10
+  text: "\uB2E4\uC2DC \uC2DC\uB4DC \uCF54\uC5B4\uB97C \uD074\uB9AD\uD55C \uB2E4\uC74C
+    <color=#FFC107>\uAC74\uC124 \uC720\uB2DB</color> 2\uAC1C\uB97C \uC0DD\uC0B0\uD574\uBD05\uC2DC\uB2E4."
+  stepType: 11
+  duration: 0
+  count: 2
+  resourceType: -1
+  buildingType: -1
+  unitType: 3
+  itemType: 
+  showProgressBar: 1
+  enableUIPanels: 
+  grantResources:
+  - resourceType: 0
+    amount: 200
+  - resourceType: 1
+    amount: 200
+  completionSound:
+    Guid:
+      Data1: -345895807
+      Data2: 1210214295
+      Data3: -73339495
+      Data4: 1624008095
+    Path: event:/SFX_UI/SFX_UIClick
+  enableMaterialHighlight: 1
+  highlightTargetIDs:
+  - unit_construct
+  showArrowUI: 0
+  arrowID: 
+  showTargetBracket: 1
+  targetBracketBuildingType: MainStructure
+  includeConstructionSiteForTargetBracket: 1

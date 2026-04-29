@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c74002d918083e14eb5bcbcc12257fde, type: 3}
+  m_Name: tutorial_step_17
+  m_EditorClassIdentifier: 
+  stepIndex: 17
+  text: "\uAC00\uACF5 \uC720\uB2DB\uC740 \uAC00\uAE4C\uC6B4 \uC800\uC7A5\uC18C\uC5D0\uC11C
+    \uC790\uC6D0\uC744 \uAC00\uC838\uC628 \uB2E4\uC74C \uAC00\uACF5\uD558\uAE30 \uC2DC\uC791\uD569\uB2C8\uB2E4.\n\uBC29\uAE08
+    \uAC74\uC124\uD55C <color=#FFC107>\uC81C\uB828\uC18C</color>\uB97C \uD074\uB9AD\uD55C
+    \uB2E4\uC74C, <color=#DBD1C7>\uD569\uAE08 \uD310 5\uAC1C</color>\uB97C \uC0DD\uC0B0\uD574\uBD05\uC2DC\uB2E4.\nCtrl
+    \uD074\uB9AD\uC73C\uB85C 10\uAC1C, Shift \uD074\uB9AD\uC73C\uB85C 100\uAC1C \uB2E8\uC704\uB85C
+    \uC0DD\uC0B0\uB7C9\uC744 \uC870\uC808\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+  stepType: 12
+  duration: 0
+  count: 5
+  resourceType: 4
+  buildingType: -1
+  unitType: 0
+  itemType: AlloyPlate
+  showProgressBar: 1
+  enableUIPanels: 
+  grantResources:
+  - resourceType: 0
+    amount: 100
+  - resourceType: 1
+    amount: 200
+  completionSound:
+    Guid:
+      Data1: -345895807
+      Data2: 1210214295
+      Data3: -73339495
+      Data4: 1624008095
+    Path: event:/SFX_UI/SFX_UIClick
+  enableMaterialHighlight: 1
+  highlightTargetIDs:
+  - processor_AlloyPlate
+  showArrowUI: 0
+  arrowID: 
+  showTargetBracket: 1
+  targetBracketBuildingType: Smelter
+  includeConstructionSiteForTargetBracket: 0

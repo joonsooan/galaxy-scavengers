@@ -5,6 +5,7 @@ using FMOD.Studio;
 using FMODUnity;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using STOP_MODE = FMOD.Studio.STOP_MODE;
 
 public class Unit_Player : UnitBase
@@ -52,6 +53,7 @@ public class Unit_Player : UnitBase
     private WaitForSeconds _miningDelay;
     private UnitSpriteController _spriteController;
     private Vector2 _lockedMiningDirection;
+    private bool _wasInputBlockedLastFrame = true;
 
     private ResourceNode _targetResourceNode;
 
@@ -71,6 +73,11 @@ public class Unit_Player : UnitBase
 
         if (cameraController != null) {
             cameraController.SetFollowTarget(transform);
+        }
+
+        if (miningParticleSystem != null) {
+            var main = miningParticleSystem.main;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
         }
     }
 
@@ -100,7 +107,15 @@ public class Unit_Player : UnitBase
             }
         }
 
-        HandleInput();
+        if (ShouldBlockPlayerInput()) {
+            _wasInputBlockedLastFrame = true;
+        }
+        else if (_wasInputBlockedLastFrame) {
+            _wasInputBlockedLastFrame = false;
+        }
+        else {
+            HandleInput();
+        }
         CheckMiningRange();
         UpdateUnitState();
         UpdateAnimationState();
@@ -120,7 +135,15 @@ public class Unit_Player : UnitBase
             Destroy(_laserRenderer.gameObject);
         }
 
-        if (GameManager.Instance != null)
+        bool isGameplayScene = gameObject.scene.IsValid() && gameObject.scene.name == "GameScene";
+        bool isActiveGameplayScene = SceneManager.GetActiveScene().name == "GameScene";
+        bool shouldTriggerGameOver = isGameplayScene &&
+            isActiveGameplayScene &&
+            GameManager.Instance != null &&
+            GameManager.Instance.IsGameSceneInitialized &&
+            GameManager.IsGameplayReady;
+
+        if (shouldTriggerGameOver)
         {
             GameManager.Instance.GameOver();
         }
@@ -262,6 +285,39 @@ public class Unit_Player : UnitBase
                 TryFireBullet(mouseWorldPos);
             }
         }
+    }
+
+    private bool ShouldBlockPlayerInput()
+    {
+        if (GameManager.Instance != null) {
+            if (!GameManager.IsGameplayReady || !GameManager.Instance.IsGameSceneInitialized || GameManager.Instance.IsPaused) {
+                return true;
+            }
+        }
+
+        if (IsLoadingScreenActive()) {
+            return true;
+        }
+
+        if (cameraController == null) {
+            cameraController = FindFirstObjectByType<CameraTargetController>(FindObjectsInactive.Include);
+        }
+
+        return cameraController == null || cameraController.followTarget != transform;
+    }
+
+    private bool IsLoadingScreenActive()
+    {
+        if (LoadingUIManager.Instance == null) {
+            return false;
+        }
+
+        LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
+        if (loadingScreen == null) {
+            return false;
+        }
+
+        return loadingScreen.gameObject.activeSelf;
     }
 
     private bool IsPointerOverUI()
@@ -440,17 +496,7 @@ public class Unit_Player : UnitBase
 
         while (true) {
             if (_targetResourceNode == null || _targetResourceNode.IsDepleted) {
-                if (_targetResourceNode != null && _targetResourceNode.IsDepleted) {
-                    Vector3Int depletedCell = _targetResourceNode.cellPosition;
-                    yield return null;
-                    bool foundAdjacent = TryMineAdjacentResource(depletedCell);
-                    if (!foundAdjacent) {
-                        StopMining();
-                    }
-                }
-                else {
-                    StopMining();
-                }
+                StopMining();
                 yield break;
             }
 
@@ -462,51 +508,18 @@ public class Unit_Player : UnitBase
 
             int minedAmount = _targetResourceNode.Mine(mineAmountPerAction);
             if (minedAmount > 0) {
-                AddResourceToStorage(_targetResourceNode.resourceType, minedAmount);
+                ResourceType minedResourceType = _targetResourceNode.resourceType;
+                AddResourceToStorage(minedResourceType, minedAmount);
+                TutorialManager.Instance?.OnResourceMined(minedResourceType, minedAmount);
 
+            }
+
+            if (_targetResourceNode == null || _targetResourceNode.IsDepleted) {
+                continue;
             }
 
             yield return _miningDelay;
         }
-    }
-
-    private bool TryMineAdjacentResource(Vector3Int depletedCell)
-    {
-        if (_grid == null) return false;
-
-        Vector3Int[] neighborOffsets = {
-            new Vector3Int(1, 0, 0), new Vector3Int(-1, 0, 0), new Vector3Int(0, 1, 0), new Vector3Int(0, -1, 0)
-        };
-
-        List<ResourceNode> allResources = ResourceManager.Instance.GetAllResources();
-        ResourceNode closestAdjacentResource = null;
-        float minDistance = float.MaxValue;
-
-        foreach (Vector3Int offset in neighborOffsets) {
-            Vector3Int neighborCell = depletedCell + offset;
-
-            foreach (ResourceNode resource in allResources) {
-                if (resource == null || resource.IsDepleted || !resource.gameObject.activeInHierarchy)
-                    continue;
-
-                if (resource.cellPosition == neighborCell) {
-                    float distance = Vector3.Distance(transform.position, resource.transform.position);
-                    if (distance <= interactionRange && distance < minDistance) {
-                        minDistance = distance;
-                        closestAdjacentResource = resource;
-                    }
-                }
-            }
-        }
-
-        if (closestAdjacentResource != null) {
-            _targetResourceNode = closestAdjacentResource;
-            _mineCoroutine = null;
-            StartMining();
-            return true;
-        }
-
-        return false;
     }
 
     private void CheckMiningRange()
@@ -554,6 +567,14 @@ public class Unit_Player : UnitBase
 
     private bool CanEnableBulletFiring()
     {
+        bool isTutorialScene = SceneManager.GetActiveScene().name == "TutorialScene";
+        if (isTutorialScene) {
+            TutorialManager tutorialManager = TutorialManager.Instance;
+            if (tutorialManager == null || !tutorialManager.HasReachedStepType(TutorialStepType.BulletFired)) {
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -593,6 +614,8 @@ public class Unit_Player : UnitBase
             bulletScript.speed = 10f;
             bulletScript.lifeTime = 3f;
             bulletScript.Initialize(attackDamage, fireDirection);
+
+            TutorialManager.Instance?.OnBulletFired();
         }
 
         _lastFireTime = Time.time;
@@ -717,7 +740,7 @@ public class Unit_Player : UnitBase
     {
         if (miningParticleSystem == null) return;
 
-        if (currentState == UnitState.Mining && _targetResourceNode != null) {
+        if (currentState == UnitState.Mining && _targetResourceNode != null && !_targetResourceNode.IsDepleted && miningParticleSystem.isPlaying) {
             Transform particleTransform = miningParticleSystem.transform;
             Vector3 offsetPosition = _targetResourceNode.transform.position - new Vector3(0, yOffset, 0);
             particleTransform.position = offsetPosition;

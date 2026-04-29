@@ -55,6 +55,7 @@ public class Unit_Construct : UnitBase
     private GameObject _currentSiteAnimation;
     private Animator _currentSiteAnimator;
     private bool _isInvulnerable;
+    private UnitAllyBatteryDriver _allyBatteryDriver;
 
     public bool IsInvulnerable => _isInvulnerable;
 
@@ -80,6 +81,7 @@ public class Unit_Construct : UnitBase
         base.Awake();
         movement = GetComponent<UnitMovement>();
         _rb = GetComponent<Rigidbody2D>();
+        _allyBatteryDriver = GetComponent<UnitAllyBatteryDriver>();
     }
 
     protected void Start()
@@ -167,6 +169,10 @@ public class Unit_Construct : UnitBase
 
     private void DecideNextAction()
     {
+        if (_allyBatteryDriver != null && _allyBatteryDriver.BlocksWorkLogic) {
+            return;
+        }
+
         switch (_currentState) {
         case ConstructState.Idle:
             UpdateIdle();
@@ -275,10 +281,11 @@ public class Unit_Construct : UnitBase
 
         ShowProgressBar();
         float elapsedTime = 0f;
+        float loadDuration = loadingTime / Mathf.Max(0.05f, _allyBatteryDriver != null ? _allyBatteryDriver.GetWorkSpeedMultiplier() : 1f);
 
-        while (elapsedTime < loadingTime) {
+        while (elapsedTime < loadDuration) {
             elapsedTime += Time.deltaTime;
-            float progress = elapsedTime / loadingTime;
+            float progress = loadDuration > 0f ? elapsedTime / loadDuration : 1f;
             UpdateProgressBar(progress);
             yield return null;
         }
@@ -445,7 +452,8 @@ public class Unit_Construct : UnitBase
         float elapsedTime = 0f;
 
         float constructionSpeedMultiplier = GetConstructionSpeedMultiplier();
-        float adjustedUnloadingTime = unloadingTime / constructionSpeedMultiplier;
+        float batteryWorkMult = _allyBatteryDriver != null ? _allyBatteryDriver.GetWorkSpeedMultiplier() : 1f;
+        float adjustedUnloadingTime = unloadingTime / (constructionSpeedMultiplier * Mathf.Max(0.05f, batteryWorkMult));
 
         while (elapsedTime < adjustedUnloadingTime) {
             elapsedTime += Time.deltaTime;
@@ -513,7 +521,17 @@ public class Unit_Construct : UnitBase
 
     private bool IsAtTarget()
     {
-        return movement.HasReachedTarget(movement.waypointTolerance + 0.1f) &&
+        if (movement == null || _rb == null || _currentRequest == null || _currentRequest.site == null)
+        {
+            return false;
+        }
+
+        Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
+        Vector3 targetPosition = _currentRequest.site.AssignDeliveryInteractionCell(this, targetPieceCell);
+        float sqrDistanceToTarget = (transform.position - targetPosition).sqrMagnitude;
+        float arrivalTolerance = movement.waypointTolerance + 0.2f;
+
+        return sqrDistanceToTarget <= arrivalTolerance * arrivalTolerance &&
             !movement.IsMoving &&
             _rb.linearVelocity.sqrMagnitude < 0.01f;
     }
@@ -926,5 +944,22 @@ public class Unit_Construct : UnitBase
         Idle,
         FetchingResource,
         DeliveringResource
+    }
+
+    public void OnChargeStateEnter()
+    {
+        ResetIdleRoam();
+        ReleaseFromConstruction();
+        _currentState = ConstructState.Idle;
+        currentState = UnitState.Idle;
+        movement?.StopMovement();
+    }
+
+    public void OnChargeStateExit()
+    {
+        _currentState = ConstructState.Idle;
+        currentState = UnitState.Idle;
+        movement?.StopMovement();
+        ResetIdleRoam();
     }
 }

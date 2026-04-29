@@ -572,7 +572,7 @@ public class AreaBuildingDestroyer : MonoBehaviour
         if (_buildingPieceDataByType == null)
         {
             _buildingPieceDataByType = new Dictionary<BuildingPieceType, BuildingPieceData>();
-            BuildingPieceData[] all = Resources.LoadAll<BuildingPieceData>("Building Pieces");
+            BuildingPieceData[] all = Resources.LoadAll<BuildingPieceData>("Building Piece Data");
             foreach (var data in all)
             {
                 if (data != null && data.buildingPieceType != BuildingPieceType.None &&

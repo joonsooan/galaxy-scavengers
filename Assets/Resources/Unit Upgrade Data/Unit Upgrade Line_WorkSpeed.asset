@@ -18,17 +18,17 @@ MonoBehaviour:
   tiers:
   - costs:
     - resourceType: 2
-      amount: 100
+      amount: 500
     upgradeTime: 10
-    description: "\uC720\uB2DB \uC791\uC5C5\uC18D\uB3C4 +50%"
-    floatStatBonus: 0.5
+    description: "\uC720\uB2DB \uC791\uC5C5\uC18D\uB3C4 +20%"
+    floatStatBonus: 0.2
     intStatBonus: 0
   - costs:
     - resourceType: 0
-      amount: 100
+      amount: 500
     - resourceType: 5
-      amount: 20
+      amount: 50
     upgradeTime: 30
-    description: "\uC720\uB2DB \uC791\uC5C5\uC18D\uB3C4 +50%"
-    floatStatBonus: 0.5
+    description: "\uC720\uB2DB \uC791\uC5C5\uC18D\uB3C4 +30%"
+    floatStatBonus: 0.3
     intStatBonus: 0

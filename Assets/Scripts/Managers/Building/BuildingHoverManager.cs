@@ -11,6 +11,7 @@ public class BuildingHoverManager : MonoBehaviour
     private IStorage _currentHoveredStorage;
     private ResourceNode _currentHoveredResource;
     private UnitBase _currentHoveredUnit;
+    private UnitBase _lockedUnitForInfo;
     private UnitInfoPanel _unitInfoPanel;
     private bool _keepPanelVisible = false;
     private bool _panelsJustClosed = false;
@@ -75,12 +76,13 @@ public class BuildingHoverManager : MonoBehaviour
         if (GameManager.Instance != null && GameManager.Instance.IsDragging())
         {
             CardDragger dragger = GameManager.Instance.cardDragger;
-            bool keepPowerPreview = dragger != null && dragger.IsDraggingPowerGridPreviewBuilding;
+            bool keepPowerPreview = dragger != null && dragger.IsDraggingBuildingCard;
             ClearHoverStateOnly(keepPowerPreview);
             return;
         }
 
         if (UIUtils.IsPointerOverUI() && !IsPointerOverFloatingNumText() && !IsPointerOverProgressSlider() &&
+            !IsPointerOverBuildingButton() &&
             !IsPointerOverPowerStatusWorldFollower())
         {
             ClearAllHovers();
@@ -205,6 +207,11 @@ public class BuildingHoverManager : MonoBehaviour
 
     public void OnUnitExit(UnitBase unit)
     {
+        if (_lockedUnitForInfo != null && unit == _lockedUnitForInfo)
+        {
+            return;
+        }
+
         if (unit == _currentHoveredUnit)
         {
             ClearUnitHover();
@@ -289,6 +296,10 @@ public class BuildingHoverManager : MonoBehaviour
         {
             return;
         }
+        if (data.buildingType == BuildingType.MainStructure)
+        {
+            return;
+        }
         if (BuildingUnlockManager.Instance != null && !BuildingUnlockManager.Instance.IsBuildingUnlocked(data))
         {
             return;
@@ -328,7 +339,8 @@ public class BuildingHoverManager : MonoBehaviour
 
         BuildingInfoPanel.Instance.gameObject.SetActive(true);
         Damageable damageable = buildingDataHolder.GetDamageable();
-        BuildingInfoPanel.Instance.PreviewInfo(buildingDataHolder.buildingData, damageable);
+        IElectricityConsumer runtimeConsumer = GetElectricityConsumer(buildingDataHolder);
+        BuildingInfoPanel.Instance.PreviewInfo(buildingDataHolder.buildingData, damageable, false, true, runtimeConsumer);
     }
 
     private bool IsProcessorOrDroneHubPanelActive()
@@ -435,6 +447,38 @@ public class BuildingHoverManager : MonoBehaviour
                     }
                     current = current.parent;
                 }
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsPointerOverBuildingButton()
+    {
+        if (EventSystem.current == null) return false;
+
+        PointerEventData pointerEventData = new PointerEventData(EventSystem.current);
+        pointerEventData.position = Input.mousePosition;
+
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointerEventData, results);
+
+        foreach (RaycastResult result in results)
+        {
+            if (result.gameObject == null)
+            {
+                continue;
+            }
+
+            BuildingButton buildingButton = result.gameObject.GetComponent<BuildingButton>();
+            if (buildingButton == null)
+            {
+                buildingButton = result.gameObject.GetComponentInParent<BuildingButton>();
+            }
+
+            if (buildingButton != null)
+            {
+                return true;
             }
         }
 
@@ -559,8 +603,63 @@ public class BuildingHoverManager : MonoBehaviour
         unitInfoPanel.PreviewInfo(unit);
     }
 
+    public void LockUnitInfo(UnitBase unit)
+    {
+        if (unit == null || !unit.gameObject.activeInHierarchy || unit.CurrentHealth <= 0)
+        {
+            return;
+        }
+
+        _lockedUnitForInfo = unit;
+        _currentHoveredUnit = unit;
+        ShowUnitInfo(unit);
+    }
+
+    public void UnlockUnitInfo()
+    {
+        _lockedUnitForInfo = null;
+    }
+
+    public bool IsUnitInfoLocked()
+    {
+        return _lockedUnitForInfo != null;
+    }
+
+    public void ClearLockedUnitInfo()
+    {
+        _lockedUnitForInfo = null;
+
+        if (_currentHoveredUnit == null)
+        {
+            return;
+        }
+
+        UnitInfoPanel unitInfoPanel = GetUnitInfoPanel();
+        if (unitInfoPanel != null)
+        {
+            unitInfoPanel.CancelPreview();
+            unitInfoPanel.gameObject.SetActive(false);
+        }
+
+        _currentHoveredUnit = null;
+    }
+
     private void ClearUnitHover()
     {
+        if (_lockedUnitForInfo != null)
+        {
+            if (!_lockedUnitForInfo.gameObject.activeInHierarchy || _lockedUnitForInfo.CurrentHealth <= 0)
+            {
+                _lockedUnitForInfo = null;
+            }
+            else
+            {
+                _currentHoveredUnit = _lockedUnitForInfo;
+                ShowUnitInfo(_lockedUnitForInfo);
+                return;
+            }
+        }
+
         if (_currentHoveredUnit != null)
         {
             UnitInfoPanel unitInfoPanel = GetUnitInfoPanel();
@@ -582,8 +681,10 @@ public class BuildingHoverManager : MonoBehaviour
         return _unitInfoPanel;
     }
 
-    public void ClearHoverOnClick()
+    public void ClearHoverOnClick(bool clearStorageHover = true)
     {
+        UnlockUnitInfo();
+
         bool panelsActive = IsProcessorOrDroneHubPanelActive();
         if (!panelsActive && _currentHoveredBuilding != null)
         {
@@ -591,7 +692,50 @@ public class BuildingHoverManager : MonoBehaviour
         }
 
         ClearHover();
+        if (clearStorageHover) {
+            ClearStorageHover();
+        }
+    }
+
+    public void HandleNormalBuildingClick(BuildingDataHolder holder)
+    {
+        UnlockUnitInfo();
         ClearStorageHover();
+        if (holder == null || holder.buildingData == null)
+        {
+            return;
+        }
+
+        if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
+        {
+            GameManager.Instance.uiManager.HideProcessorAndDroneHubPanels();
+        }
+
+        _currentHoveredBuilding = holder;
+        _keepPanelVisible = true;
+        if (BuildingInfoPanel.Instance != null)
+        {
+            BuildingInfoPanel.Instance.gameObject.SetActive(true);
+            Damageable damageable = holder.GetDamageable();
+            IElectricityConsumer runtimeConsumer = GetElectricityConsumer(holder);
+            BuildingInfoPanel.Instance.PreviewInfo(holder.buildingData, damageable, false, true, runtimeConsumer);
+        }
+    }
+
+    private static IElectricityConsumer GetElectricityConsumer(BuildingDataHolder holder)
+    {
+        if (holder == null)
+        {
+            return null;
+        }
+
+        IElectricityConsumer consumer = holder.GetComponent<IElectricityConsumer>();
+        if (consumer == null)
+        {
+            consumer = holder.GetComponentInChildren<IElectricityConsumer>();
+        }
+
+        return consumer;
     }
 
     public void NotifyPanelsClosed()

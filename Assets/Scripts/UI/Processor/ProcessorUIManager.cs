@@ -198,11 +198,12 @@ public class ProcessorUIManager : MonoBehaviour
                 continue;
             }
 
-            if (ResourceManager.Instance != null) {
-                Sprite spr = ResourceManager.Instance.GetResourceIcon(type);
-                if (spr != null) {
-                    img.sprite = spr;
-                }
+            Sprite recipeSprite = recipe.recipeIcon;
+            if (recipeSprite == null && ResourceManager.Instance != null) {
+                recipeSprite = ResourceManager.Instance.GetResourceIcon(type);
+            }
+            if (recipeSprite != null) {
+                img.sprite = recipeSprite;
             }
 
             btn.onClick.RemoveAllListeners();
@@ -275,14 +276,14 @@ public class ProcessorUIManager : MonoBehaviour
         if (unitAssignCellPrefab == null || _currentProcessor == null) return;
 
         int maxDrones = _currentProcessor.ProcessorData.MaxAssignedDrones;
-        IReadOnlyList<Unit_Drone> assignedDrones = _currentProcessor.AssignedDrones;
+        IReadOnlyList<Unit_Processor> assignedDrones = _currentProcessor.AssignedDrones;
 
         for (int i = 0; i < maxDrones; i++) {
             GameObject cellObj = Instantiate(unitAssignCellPrefab, unitAssignContentParent);
             UnitAssignCell cell = cellObj.GetComponent<UnitAssignCell>();
 
             if (cell != null) {
-                Unit_Drone drone = i < assignedDrones.Count ? assignedDrones[i] : null;
+                Unit_Processor drone = i < assignedDrones.Count ? assignedDrones[i] : null;
                 cell.Initialize(_currentProcessor, drone);
             }
         }

@@ -54,6 +54,7 @@ public class Unit_Miner : UnitBase
     private Coroutine _findResourceCoroutine;
 
     private Coroutine _mineCoroutine;
+    private Coroutine _unloadCoroutine;
     private EventInstance _miningSoundInstance;
     private Tween _miningVibrationTween;
     private bool _noResourceAlertActive;
@@ -73,10 +74,12 @@ public class Unit_Miner : UnitBase
 
     private float _prefabMoveSpeed;
     private int _prefabMaxCarry;
+    private UnitAllyBatteryDriver _allyBatteryDriver;
 
     protected override void Awake()
     {
         base.Awake();
+        _allyBatteryDriver = GetComponent<UnitAllyBatteryDriver>();
         _canvas = GameManager.Instance?.uiManager?.GetObjectUICanvas() ?? GameObject.Find(canvasName)?.GetComponent<Canvas>();
         _searchWait = CoroutineCache.GetWaitForSeconds(resourceSearchInterval);
         _resourceImageSpawnWait = CoroutineCache.GetWaitForSeconds(resourceImageSpawnInterval);
@@ -145,6 +148,10 @@ public class Unit_Miner : UnitBase
 
     private void DecideNextAction()
     {
+        if (_allyBatteryDriver != null && _allyBatteryDriver.BlocksWorkLogic) {
+            return;
+        }
+
         switch (currentState) {
         case UnitState.Idle:
             if (_findResourceCoroutine == null) {
@@ -153,7 +160,6 @@ public class Unit_Miner : UnitBase
                 }
                 TryStartActions();
             }
-            UpdateIdleRoam();
             break;
 
         case UnitState.Moving:
@@ -256,11 +262,20 @@ public class Unit_Miner : UnitBase
         currentState = UnitState.Unloading;
 
         AdjustSpriteDirectionForUnloading();
-        StartCoroutine(UnloadResourceCoroutine());
+        if (_unloadCoroutine == null) {
+            _unloadCoroutine = StartCoroutine(UnloadResourceCoroutine());
+        }
     }
 
     public void TryStartActions()
     {
+        if (currentState == UnitState.Idle) {
+            FindAndSetTarget();
+            if (currentState != UnitState.Idle) {
+                return;
+            }
+        }
+
         if (_findResourceCoroutine != null) {
             StopCoroutine(_findResourceCoroutine);
         }
@@ -284,10 +299,11 @@ public class Unit_Miner : UnitBase
         // Show progress bar during unloading
         ShowProgressBar();
         float elapsedTime = 0f;
+        float unloadDuration = unloadingTime / Mathf.Max(0.05f, _allyBatteryDriver != null ? _allyBatteryDriver.GetWorkSpeedMultiplier() : 1f);
 
-        while (elapsedTime < unloadingTime) {
+        while (elapsedTime < unloadDuration) {
             elapsedTime += Time.deltaTime;
-            float progress = elapsedTime / unloadingTime;
+            float progress = unloadDuration > 0f ? elapsedTime / unloadDuration : 1f;
             UpdateProgressBar(progress);
             yield return null;
         }
@@ -306,6 +322,7 @@ public class Unit_Miner : UnitBase
                     _targetResourceNode = null;
                     _targetStorage = null;
                     currentState = UnitState.Idle;
+                    _unloadCoroutine = null;
                     yield break;
                 }
             }
@@ -359,6 +376,7 @@ public class Unit_Miner : UnitBase
                 ReleaseStorageReservation();
                 _targetStorage = null;
                 GoToStorage();
+                _unloadCoroutine = null;
                 yield break;
             }
 
@@ -370,6 +388,7 @@ public class Unit_Miner : UnitBase
         _targetStorage = null;
 
         currentState = UnitState.Idle;
+        _unloadCoroutine = null;
     }
 
     private void FindAndSetTarget()
@@ -1076,6 +1095,54 @@ public class Unit_Miner : UnitBase
         }
     }
 
+    public void OnChargeStateEnter()
+    {
+        InterruptForCharging();
+    }
+
+    public void OnChargeStateExit()
+    {
+        ResetToIdleAfterCharging();
+    }
+
+    private void InterruptForCharging()
+    {
+        StopMining();
+        if (_unloadCoroutine != null) {
+            StopCoroutine(_unloadCoroutine);
+            _unloadCoroutine = null;
+        }
+        if (_findResourceCoroutine != null) {
+            StopCoroutine(_findResourceCoroutine);
+            _findResourceCoroutine = null;
+        }
+        StopMiningVibration();
+        StopMiningParticles();
+        StopMiningSound();
+        HideProgressBar();
+        _targetResourceNode?.EndMining(this);
+        _targetResourceNode?.Unreserve();
+        _targetResourceNode = null;
+        _targetStorage = null;
+        ReleaseMiningCellReservation();
+        ReleaseStorageReservation();
+        unitMovement?.StopMovement();
+        currentState = UnitState.Idle;
+        ResetIdleRoam();
+        SetMinerNoResourceAlert(false);
+        SetMinerIsFullAlert(false);
+    }
+
+    private void ResetToIdleAfterCharging()
+    {
+        currentState = UnitState.Idle;
+        unitMovement?.StopMovement();
+        ResetIdleRoam();
+        if (_findResourceCoroutine == null) {
+            TryStartActions();
+        }
+    }
+
     private IEnumerator MineResourceCoroutine()
     {
         if (_targetResourceNode == null) {
@@ -1086,10 +1153,18 @@ public class Unit_Miner : UnitBase
         yield return CoroutineCache.GetWaitForSeconds(firstWait);
 
         while (true) {
+            if (_allyBatteryDriver != null && _allyBatteryDriver.Battery != null && _allyBatteryDriver.Battery.IsBatteryEmpty) {
+                StopMining();
+                yield break;
+            }
+
             if (_targetResourceNode != null && !_targetResourceNode.IsDepleted) {
                 ResourceType minedResourceType = _targetResourceNode.resourceType;
                 int minedAmount = _targetResourceNode.Mine(mineAmountPerAction);
                 OnResourceMined?.Invoke(minedResourceType, minedAmount);
+                if (minedAmount > 0) {
+                    TutorialManager.Instance?.OnResourceMined(minedResourceType, minedAmount);
+                }
                 if (_targetResourceNode == null) {
                     yield break;
                 }
@@ -1111,7 +1186,12 @@ public class Unit_Miner : UnitBase
             mult = 0.01f;
         }
 
-        return baseInterval / mult;
+        float bat = _allyBatteryDriver != null ? _allyBatteryDriver.GetWorkSpeedMultiplier() : 1f;
+        if (bat <= 0.01f) {
+            bat = 0.01f;
+        }
+
+        return baseInterval / (mult * bat);
     }
 
     private bool TryReserveMiningCell(Vector3Int cell)

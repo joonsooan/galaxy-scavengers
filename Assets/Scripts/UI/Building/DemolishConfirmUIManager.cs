@@ -179,7 +179,7 @@ public class DemolishConfirmUIManager : MonoBehaviour
         Dictionary<ResourceType, int> result = new Dictionary<ResourceType, int>();
         if (target.buildingData != null && target.buildingData.recipe != null)
         {
-            BuildingPieceData[] all = Resources.LoadAll<BuildingPieceData>("Building Pieces");
+            BuildingPieceData[] all = Resources.LoadAll<BuildingPieceData>("Building Piece Data");
             Dictionary<BuildingPieceType, BuildingPieceData> map = new Dictionary<BuildingPieceType, BuildingPieceData>();
             foreach (var data in all)
             {
@@ -225,7 +225,7 @@ public class DemolishConfirmUIManager : MonoBehaviour
     private static BuildingPieceData GetBuildingPieceData(BuildingPieceType type)
     {
         if (type == BuildingPieceType.None) return null;
-        BuildingPieceData[] all = Resources.LoadAll<BuildingPieceData>("Building Pieces");
+        BuildingPieceData[] all = Resources.LoadAll<BuildingPieceData>("Building Piece Data");
         foreach (var data in all)
         {
             if (data.buildingPieceType == type)

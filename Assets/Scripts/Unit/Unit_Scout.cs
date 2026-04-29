@@ -11,6 +11,7 @@ public class Unit_Scout : UnitBase
     [SerializeField] private float hoverHeight = 0.2f;
     [SerializeField] private float hoverDuration = 1.5f;
 
+    private UnitAllyBatteryDriver _allyBatteryDriver;
     private UnitSpriteController _spriteController;
     private Tween _hoverTween;
     private Vector3 _baseHoverLocalPosition;
@@ -24,6 +25,7 @@ public class Unit_Scout : UnitBase
     {
         base.Awake();
         unitMovement = GetComponent<UnitMovement>();
+        _allyBatteryDriver = GetComponent<UnitAllyBatteryDriver>();
     }
 
     protected void Start()
@@ -37,8 +39,10 @@ public class Unit_Scout : UnitBase
 
     private void Update()
     {
-        if (currentState == UnitState.Idle) {
-            UpdateIdleRoam();
+        if (_allyBatteryDriver == null || !_allyBatteryDriver.BlocksWorkLogic) {
+            if (currentState == UnitState.Idle) {
+                UpdateIdleRoam();
+            }
         }
 
         UpdateAnimationState();

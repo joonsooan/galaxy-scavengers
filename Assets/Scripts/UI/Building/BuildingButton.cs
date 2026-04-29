@@ -86,7 +86,7 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
             {
                 damageable = buildingData.buildingPrefab.GetComponent<Damageable>();
             }
-            BuildingInfoPanel.Instance.PreviewInfo(buildingData, damageable, true);
+            BuildingInfoPanel.Instance.PreviewInfo(buildingData, damageable, true, false, null);
         }
     }
 

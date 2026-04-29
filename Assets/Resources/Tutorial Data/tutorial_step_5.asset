@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c74002d918083e14eb5bcbcc12257fde, type: 3}
+  m_Name: tutorial_step_5
+  m_EditorClassIdentifier: 
+  stepIndex: 5
+  text: "\uBA54\uC778 \uC720\uB2DB\uC744 \uC790\uC6D0 \uBB34\uB354\uAE30 \uADFC\uCC98\uB85C
+    \uC774\uB3D9\uC2DC\uD0A8 \uB2E4\uC74C, <color=#FFC107>\uC790\uC6D0 \uBE14\uB85D\uC744
+    \uD074\uB9AD</color>\uD558\uBA74 \uCC44\uAD74\uC744 \uC2DC\uC791\uD560 \uC218
+    \uC788\uC2B5\uB2C8\uB2E4.\n\uD68C\uC0C9 \uC790\uC6D0\uC778 <color=#DBD1C7>\uD398\uB77C\uC774\uD2B8</color>\uB97C
+    10\uAC1C \uCC44\uAD74\uD574\uBD05\uC2DC\uB2E4."
+  stepType: 6
+  duration: 0
+  count: 10
+  resourceType: 0
+  buildingType: -1
+  unitType: 0
+  itemType: 
+  showProgressBar: 1
+  enableUIPanels: 000000000c000000
+  grantResources: []
+  completionSound:
+    Guid:
+      Data1: -345895807
+      Data2: 1210214295
+      Data3: -73339495
+      Data4: 1624008095
+    Path: event:/SFX_UI/SFX_UIClick
+  enableMaterialHighlight: 0
+  highlightTargetIDs: []
+  showArrowUI: 0
+  arrowID: 
+  showTargetBracket: 0
+  targetBracketBuildingType: 
+  includeConstructionSiteForTargetBracket: 1

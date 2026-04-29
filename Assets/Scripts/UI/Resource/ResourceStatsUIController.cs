@@ -2,13 +2,28 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ResourceStatsUIController : MonoBehaviour
 {
-    [Header("Cell Setup")]
+    private const int TabCount = 2;
+    private static int s_lastSelectedTabIndex;
+
+    [Header("Tab Setup")]
+    [SerializeField] private Button resourceTabButton;
+    [SerializeField] private Button electricityTabButton;
+    [SerializeField] private GameObject resourceTabPanel;
+    [SerializeField] private GameObject electricityTabPanel;
+
+    [Header("Resource Cell Setup")]
     [SerializeField] private UnitProcessorActivityCellView resourceSliderCellPrefab;
     [SerializeField] private Transform produceContentParent;
     [SerializeField] private Transform spendContentParent;
+
+    [Header("Electricity Cell Setup")]
+    [SerializeField] private ElectricityInfoCellView electricityInfoCellPrefab;
+    [SerializeField] private Transform electricityProduceContentParent;
+    [SerializeField] private Transform electricitySpendContentParent;
 
     [Header("Sampling")]
     [SerializeField] private float movingAverageWindowMinutes = 5f;
@@ -20,17 +35,30 @@ public class ResourceStatsUIController : MonoBehaviour
     private readonly List<ResourceType> _spendTypes = new List<ResourceType>();
     private readonly Dictionary<ResourceType, UnitProcessorActivityCellView> _produceCells = new Dictionary<ResourceType, UnitProcessorActivityCellView>();
     private readonly Dictionary<ResourceType, UnitProcessorActivityCellView> _spendCells = new Dictionary<ResourceType, UnitProcessorActivityCellView>();
+    private readonly List<ElectricityInfoCellView> _spawnedElectricityCells = new List<ElectricityInfoCellView>();
+    private readonly Dictionary<BuildingType, ElectricityInfoCellView> _electricityProduceCells = new Dictionary<BuildingType, ElectricityInfoCellView>();
+    private readonly Dictionary<BuildingType, ElectricityInfoCellView> _electricitySpendCells = new Dictionary<BuildingType, ElectricityInfoCellView>();
+
+    private struct ElectricityAggregate
+    {
+        public int count;
+        public float perMinute;
+        public Sprite icon;
+    }
 
     protected virtual void OnEnable()
     {
         _nextRefresh = 0f;
-        BuildCellListsIfNeeded();
-        Refresh();
+        BuildResourceCellListsIfNeeded();
+        WireTabButtons(true);
+        ShowTab(GetValidTabIndex(s_lastSelectedTabIndex));
     }
 
     protected virtual void OnDisable()
     {
+        WireTabButtons(false);
         ClearSpawnedCells();
+        ClearSpawnedElectricityCells();
     }
 
     private void Update()
@@ -46,6 +74,18 @@ public class ResourceStatsUIController : MonoBehaviour
 
     public void Refresh()
     {
+        if (GetValidTabIndex(s_lastSelectedTabIndex) == 0)
+        {
+            RefreshResourceTab();
+        }
+        else
+        {
+            RefreshElectricityTab();
+        }
+    }
+
+    private void RefreshResourceTab()
+    {
         if (resourceSliderCellPrefab == null || produceContentParent == null || spendContentParent == null)
         {
             return;
@@ -53,7 +93,7 @@ public class ResourceStatsUIController : MonoBehaviour
 
         if (_produceCells.Count == 0 || _spendCells.Count == 0)
         {
-            BuildCellListsIfNeeded();
+            BuildResourceCellListsIfNeeded();
         }
 
         float safeWindow = Mathf.Max(0.01f, movingAverageWindowMinutes);
@@ -74,7 +114,24 @@ public class ResourceStatsUIController : MonoBehaviour
             rm);
     }
 
-    private void BuildCellListsIfNeeded()
+    private void RefreshElectricityTab()
+    {
+        if (electricityInfoCellPrefab == null || electricityProduceContentParent == null || electricitySpendContentParent == null)
+        {
+            return;
+        }
+
+        Dictionary<BuildingType, ElectricityAggregate> produce = BuildElectricityProduceAggregates();
+        Dictionary<BuildingType, ElectricityAggregate> spend = BuildElectricitySpendAggregates();
+
+        EnsureElectricityCells(produce.Keys, electricityProduceContentParent, _electricityProduceCells);
+        EnsureElectricityCells(spend.Keys, electricitySpendContentParent, _electricitySpendCells);
+
+        UpdateElectricityPanel(produce, _electricityProduceCells);
+        UpdateElectricityPanel(spend, _electricitySpendCells);
+    }
+
+    private void BuildResourceCellListsIfNeeded()
     {
         if (resourceSliderCellPrefab == null || produceContentParent == null || spendContentParent == null)
         {
@@ -82,8 +139,8 @@ public class ResourceStatsUIController : MonoBehaviour
         }
 
         ClearSpawnedCells();
-        ClearExistingCellsUnderParent(produceContentParent);
-        ClearExistingCellsUnderParent(spendContentParent);
+        ClearExistingResourceCellsUnderParent(produceContentParent);
+        ClearExistingResourceCellsUnderParent(spendContentParent);
         _produceCells.Clear();
         _spendCells.Clear();
         _produceTypes.Clear();
@@ -178,6 +235,264 @@ public class ResourceStatsUIController : MonoBehaviour
         }
     }
 
+    private Dictionary<BuildingType, ElectricityAggregate> BuildElectricityProduceAggregates()
+    {
+        Dictionary<BuildingType, ElectricityAggregate> aggregates = new Dictionary<BuildingType, ElectricityAggregate>();
+        ResourceGenerator[] generators = FindObjectsByType<ResourceGenerator>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        ElectricityConsumptionManager manager = ElectricityConsumptionManager.Instance;
+
+        for (int i = 0; i < generators.Length; i++)
+        {
+            ResourceGenerator generator = generators[i];
+            if (generator == null || !generator.isActiveAndEnabled || !generator.gameObject.activeInHierarchy)
+            {
+                continue;
+            }
+
+            if (!BuildingManager.IsBuildingProperlyPlaced(generator.transform) || !generator.IsConstructed)
+            {
+                continue;
+            }
+
+            if (!TryGetBuildingInfo(generator, out BuildingType type, out Sprite icon))
+            {
+                continue;
+            }
+
+            float perSecond = GetGeneratorProducePerSecond(generator, manager);
+            ElectricityAggregate current = aggregates.TryGetValue(type, out ElectricityAggregate existing)
+                ? existing
+                : new ElectricityAggregate { icon = icon };
+
+            current.icon = current.icon != null ? current.icon : icon;
+            current.count += 1;
+            current.perMinute += Mathf.Max(0f, perSecond) * 60f;
+            aggregates[type] = current;
+        }
+
+        return aggregates;
+    }
+
+    private Dictionary<BuildingType, ElectricityAggregate> BuildElectricitySpendAggregates()
+    {
+        Dictionary<BuildingType, ElectricityAggregate> aggregates = new Dictionary<BuildingType, ElectricityAggregate>();
+        Damageable[] damageables = FindObjectsByType<Damageable>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+
+        for (int i = 0; i < damageables.Length; i++)
+        {
+            Damageable damageable = damageables[i];
+            if (damageable is not IElectricityConsumer consumer)
+            {
+                continue;
+            }
+
+            if (!damageable.isActiveAndEnabled || !damageable.gameObject.activeInHierarchy)
+            {
+                continue;
+            }
+
+            if (!BuildingManager.IsBuildingProperlyPlaced(damageable.transform))
+            {
+                continue;
+            }
+
+            if (!TryGetBuildingInfo(damageable, out BuildingType type, out Sprite icon))
+            {
+                continue;
+            }
+
+            float perSecond = Mathf.Max(0f, consumer.ElectricityConsumptionPerSecond);
+            ElectricityAggregate current = aggregates.TryGetValue(type, out ElectricityAggregate existing)
+                ? existing
+                : new ElectricityAggregate { icon = icon };
+
+            current.icon = current.icon != null ? current.icon : icon;
+            current.count += 1;
+            current.perMinute += perSecond * 60f;
+            aggregates[type] = current;
+        }
+
+        return aggregates;
+    }
+
+    private static float GetGeneratorProducePerSecond(ResourceGenerator generator, ElectricityConsumptionManager manager)
+    {
+        if (generator == null)
+        {
+            return 0f;
+        }
+
+        if (generator.GenerationInterval <= 0f || generator.ElectricityBufferCurrent >= generator.ElectricityBufferMax)
+        {
+            return 0f;
+        }
+
+        if (manager != null && manager.IsElectricityStorageFull)
+        {
+            return 0f;
+        }
+
+        if (!generator.HasFuelAvailableInRange())
+        {
+            return 0f;
+        }
+
+        return generator.ResourceAmount / generator.GenerationInterval;
+    }
+
+    private void EnsureElectricityCells(
+        IEnumerable<BuildingType> targetTypes,
+        Transform parent,
+        Dictionary<BuildingType, ElectricityInfoCellView> destination)
+    {
+        if (parent == null || electricityInfoCellPrefab == null)
+        {
+            return;
+        }
+
+        HashSet<BuildingType> targetSet = new HashSet<BuildingType>(targetTypes);
+        List<BuildingType> staleTypes = destination.Keys.Where(type => !targetSet.Contains(type)).ToList();
+        for (int i = 0; i < staleTypes.Count; i++)
+        {
+            BuildingType staleType = staleTypes[i];
+            if (destination.TryGetValue(staleType, out ElectricityInfoCellView staleCell) && staleCell != null)
+            {
+                _spawnedElectricityCells.Remove(staleCell);
+                Destroy(staleCell.gameObject);
+            }
+            destination.Remove(staleType);
+        }
+
+        foreach (BuildingType type in targetSet)
+        {
+            if (destination.ContainsKey(type) && destination[type] != null)
+            {
+                continue;
+            }
+
+            ElectricityInfoCellView cell = Instantiate(electricityInfoCellPrefab, parent);
+            cell.SetVisible(true);
+            destination[type] = cell;
+            _spawnedElectricityCells.Add(cell);
+        }
+    }
+
+    private static void UpdateElectricityPanel(
+        Dictionary<BuildingType, ElectricityAggregate> aggregates,
+        Dictionary<BuildingType, ElectricityInfoCellView> cellsByType)
+    {
+        float maxPerMinute = 0f;
+        foreach (KeyValuePair<BuildingType, ElectricityAggregate> pair in aggregates)
+        {
+            if (pair.Value.perMinute > maxPerMinute)
+            {
+                maxPerMinute = pair.Value.perMinute;
+            }
+        }
+
+        List<BuildingType> sortedTypes = aggregates.Keys
+            .OrderByDescending(type => aggregates[type].perMinute)
+            .ThenBy(type => (int)type)
+            .ToList();
+
+        for (int i = 0; i < sortedTypes.Count; i++)
+        {
+            BuildingType type = sortedTypes[i];
+            if (cellsByType.TryGetValue(type, out ElectricityInfoCellView cell) && cell != null)
+            {
+                cell.transform.SetSiblingIndex(i);
+            }
+        }
+
+        foreach (BuildingType type in sortedTypes)
+        {
+            if (!cellsByType.TryGetValue(type, out ElectricityInfoCellView cell) || cell == null)
+            {
+                continue;
+            }
+
+            ElectricityAggregate aggregate = aggregates[type];
+            float normalized = maxPerMinute > 0f ? aggregate.perMinute / maxPerMinute : 0f;
+            cell.SetVisible(true);
+            cell.SetData(aggregate.icon, aggregate.count, normalized, aggregate.perMinute);
+        }
+    }
+
+    private static bool TryGetBuildingInfo(Component component, out BuildingType type, out Sprite icon)
+    {
+        type = default;
+        icon = null;
+
+        if (component == null)
+        {
+            return false;
+        }
+
+        BuildingDataHolder dataHolder = component.GetComponentInParent<BuildingDataHolder>();
+        if (dataHolder == null || dataHolder.buildingData == null)
+        {
+            return false;
+        }
+
+        type = dataHolder.buildingData.buildingType;
+        icon = dataHolder.buildingData.icon;
+        return true;
+    }
+
+    private void WireTabButtons(bool add)
+    {
+        if (resourceTabButton != null)
+        {
+            resourceTabButton.onClick.RemoveListener(OnResourceTabClicked);
+            if (add)
+            {
+                resourceTabButton.onClick.AddListener(OnResourceTabClicked);
+            }
+        }
+
+        if (electricityTabButton != null)
+        {
+            electricityTabButton.onClick.RemoveListener(OnElectricityTabClicked);
+            if (add)
+            {
+                electricityTabButton.onClick.AddListener(OnElectricityTabClicked);
+            }
+        }
+    }
+
+    private void OnResourceTabClicked()
+    {
+        ShowTab(0);
+    }
+
+    private void OnElectricityTabClicked()
+    {
+        ShowTab(1);
+    }
+
+    private void ShowTab(int index)
+    {
+        int safeIndex = GetValidTabIndex(index);
+        s_lastSelectedTabIndex = safeIndex;
+
+        if (resourceTabPanel != null)
+        {
+            resourceTabPanel.SetActive(safeIndex == 0);
+        }
+
+        if (electricityTabPanel != null)
+        {
+            electricityTabPanel.SetActive(safeIndex == 1);
+        }
+
+        Refresh();
+    }
+
+    private static int GetValidTabIndex(int index)
+    {
+        return Mathf.Clamp(index, 0, TabCount - 1);
+    }
+
     private void ClearSpawnedCells()
     {
         for (int i = 0; i < _spawnedCells.Count; i++)
@@ -192,7 +507,23 @@ public class ResourceStatsUIController : MonoBehaviour
         _spawnedCells.Clear();
     }
 
-    private static void ClearExistingCellsUnderParent(Transform parent)
+    private void ClearSpawnedElectricityCells()
+    {
+        for (int i = 0; i < _spawnedElectricityCells.Count; i++)
+        {
+            ElectricityInfoCellView cell = _spawnedElectricityCells[i];
+            if (cell != null)
+            {
+                Destroy(cell.gameObject);
+            }
+        }
+
+        _spawnedElectricityCells.Clear();
+        _electricityProduceCells.Clear();
+        _electricitySpendCells.Clear();
+    }
+
+    private static void ClearExistingResourceCellsUnderParent(Transform parent)
     {
         if (parent == null)
         {

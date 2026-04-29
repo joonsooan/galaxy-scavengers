@@ -73,7 +73,7 @@ public class CardDragger : MonoBehaviour
         List<ResourceCost> totalCosts = new List<ResourceCost>();
         Dictionary<ResourceType, int> costDict = new Dictionary<ResourceType, int>();
         
-        BuildingPieceData[] allCards = Resources.LoadAll<BuildingPieceData>("Building Pieces");
+        BuildingPieceData[] allCards = Resources.LoadAll<BuildingPieceData>("Building Piece Data");
         Dictionary<BuildingPieceType, BuildingPieceData> gadgetToCardMap = new Dictionary<BuildingPieceType, BuildingPieceData>();
         
         foreach (var card in allCards)
@@ -322,6 +322,7 @@ public class CardDragger : MonoBehaviour
         {
             BuildingManager.Instance.CreateConstructionSite(_activeBuildingData, cellPos);
             _placedCellsInDrag.Add(cellPos);
+            TutorialManager.Instance?.OnBuildingPlaced(_activeBuildingData.buildingType);
 
         }
     }

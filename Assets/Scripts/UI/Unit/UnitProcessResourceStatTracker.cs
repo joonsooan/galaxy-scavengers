@@ -19,6 +19,23 @@ public static class UnitProcessResourceStatTracker
     private static readonly Dictionary<ResourceType, Queue<Sample>> SpendSamples = new Dictionary<ResourceType, Queue<Sample>>();
     private static readonly Dictionary<ResourceType, Queue<Sample>> PowerFuelSpendSamples = new Dictionary<ResourceType, Queue<Sample>>();
 
+    public static void ResetAllStats()
+    {
+        ClearTable(ProduceSamples);
+        ClearTable(SpendSamples);
+        ClearTable(PowerFuelSpendSamples);
+    }
+
+    private static void ClearTable(Dictionary<ResourceType, Queue<Sample>> table)
+    {
+        foreach (Queue<Sample> queue in table.Values)
+        {
+            queue?.Clear();
+        }
+
+        table.Clear();
+    }
+
     public static void RecordProduce(ResourceType type, int amount)
     {
         if (amount <= 0)
