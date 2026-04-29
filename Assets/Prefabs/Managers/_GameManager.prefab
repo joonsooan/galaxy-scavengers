@@ -63,9 +63,9 @@ MonoBehaviour:
       Data3: 995189914
       Data4: -85904115
     Path: event:/SFX_UI/SFX_GameStart
-  openingPanDuration: 2
-  openingCenterDwellSeconds: 2
-  openingRuinsDwellSeconds: 2.5
+  openingPanDuration: 1
+  openingCenterDwellSeconds: 1
+  openingRuinsDwellSeconds: 2
   logOpeningSequence: 1
   onStartDrag:
     m_PersistentCalls:
