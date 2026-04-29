@@ -53,6 +53,9 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField] [Min(0.5f)] private float enemyDeathRespawnDelaySeconds = 12f;
     [SerializeField] [Min(1)] private int maxReplenishSpawnsPerHole = 6;
 
+    [Header("Attack Activation (Noise Zone)")]
+    [SerializeField] [Min(0.1f)] private float attackActivationIntervalSeconds = 6f;
+
     private bool _isEmergencyWaveSpawn;
     private bool _wasNoise100 = false;
     private bool _noiseEmergencyActive;
@@ -67,6 +70,10 @@ public class EnemySpawner : MonoBehaviour
     private float _lastNoisePercentageForDelta = -1f;
     private Coroutine _continuousSpawnCoroutine;
     private readonly Dictionary<Vector2Int, Coroutine> _holeRespawnCoroutines = new Dictionary<Vector2Int, Coroutine>();
+
+    private Coroutine _attackActivationCoroutine;
+    private NoiseManager.NoiseZone _activeAttackZone = NoiseManager.NoiseZone.Safe;
+    private float _activeAttackMultiplier;
 
     private void OnValidate()
     {
@@ -177,8 +184,14 @@ public class EnemySpawner : MonoBehaviour
 
         if (!ShouldBlockSpawnsForTutorial())
         {
-            SpawnWaveFromBudget(continuousSpawnBudgetFraction);
+            int spawned = SpawnWaveFromBudget(continuousSpawnBudgetFraction);
+            if (spawned <= 0)
+            {
+                SpawnWaveFromBudget(1f);
+            }
         }
+
+        SyncAttackActivationToCurrentNoise();
     }
 
     private void OnNightStarted()
@@ -188,18 +201,7 @@ public class EnemySpawner : MonoBehaviour
             return;
         }
 
-        if (NoiseManager.Instance == null) return;
-        if (IsAnyEmergencyActive()) return;
-
-        NoiseManager.NoiseZone zone = NoiseManager.Instance.GetCurrentNoiseZone();
-        if (zone == NoiseManager.NoiseZone.Caution)
-        {
-            ActivateExistingEnemiesFromBudget(ConvertPercentToMultiplier(noiseCautionBudgetMultiplierPercent));
-        }
-        else if (zone == NoiseManager.NoiseZone.Warning || zone == NoiseManager.NoiseZone.Danger)
-        {
-            ActivateExistingEnemiesFromBudget(ConvertPercentToMultiplier(noiseWarningBudgetMultiplierPercent));
-        }
+        SyncAttackActivationToCurrentNoise();
     }
 
     private void OnNoiseChanged(float noisePercentage)
@@ -207,6 +209,7 @@ public class EnemySpawner : MonoBehaviour
         if (ShouldBlockSpawnsForTutorial())
         {
             _lastNoisePercentageForDelta = noisePercentage;
+            StopAttackActivationCoroutine();
             return;
         }
 
@@ -243,6 +246,91 @@ public class EnemySpawner : MonoBehaviour
         }
 
         _lastNoisePercentageForDelta = noisePercentage;
+
+        SyncAttackActivationToCurrentNoise();
+    }
+
+    private void SyncAttackActivationToCurrentNoise()
+    {
+        if (ShouldBlockSpawnsForTutorial() || IsAnyEmergencyActive())
+        {
+            StopAttackActivationCoroutine();
+            _activeAttackZone = NoiseManager.NoiseZone.Safe;
+            _activeAttackMultiplier = 0f;
+            return;
+        }
+
+        if (NoiseManager.Instance == null)
+        {
+            StopAttackActivationCoroutine();
+            _activeAttackZone = NoiseManager.NoiseZone.Safe;
+            _activeAttackMultiplier = 0f;
+            return;
+        }
+
+        NoiseManager.NoiseZone zone = NoiseManager.Instance.GetCurrentNoiseZone();
+        float desiredMultiplier;
+        if (zone == NoiseManager.NoiseZone.Caution)
+        {
+            desiredMultiplier = ConvertPercentToMultiplier(noiseCautionBudgetMultiplierPercent);
+        }
+        else if (zone == NoiseManager.NoiseZone.Warning || zone == NoiseManager.NoiseZone.Danger)
+        {
+            desiredMultiplier = ConvertPercentToMultiplier(noiseWarningBudgetMultiplierPercent);
+        }
+        else
+        {
+            desiredMultiplier = 0f;
+        }
+
+        if (_attackActivationCoroutine != null)
+        {
+            if (zone == _activeAttackZone && Mathf.Abs(desiredMultiplier - _activeAttackMultiplier) < 0.0001f)
+            {
+                return;
+            }
+        }
+        else
+        {
+            if (zone == _activeAttackZone && Mathf.Abs(desiredMultiplier - _activeAttackMultiplier) < 0.0001f)
+            {
+                return;
+            }
+        }
+
+        _activeAttackZone = zone;
+        _activeAttackMultiplier = desiredMultiplier;
+
+        StopAttackActivationCoroutine();
+
+        if (_activeAttackMultiplier <= 0f || _activeAttackZone == NoiseManager.NoiseZone.Safe)
+        {
+            ActivateExistingEnemiesFromBudget(0f, false);
+            return;
+        }
+
+        ActivateExistingEnemiesFromBudget(_activeAttackMultiplier, false);
+        _attackActivationCoroutine = StartCoroutine(AttackActivationLoop());
+    }
+
+    private void StopAttackActivationCoroutine()
+    {
+        if (_attackActivationCoroutine == null) return;
+        StopCoroutine(_attackActivationCoroutine);
+        _attackActivationCoroutine = null;
+    }
+
+    private IEnumerator AttackActivationLoop()
+    {
+        WaitForSeconds wait = CoroutineCache.GetWaitForSeconds(Mathf.Max(0.1f, attackActivationIntervalSeconds));
+
+        while (enabled && !IsAnyEmergencyActive() && !ShouldBlockSpawnsForTutorial() && _activeAttackZone != NoiseManager.NoiseZone.Safe)
+        {
+            ActivateExistingEnemiesFromBudget(_activeAttackMultiplier, false);
+            yield return wait;
+        }
+
+        _attackActivationCoroutine = null;
     }
 
     private void ActivateExistingEnemiesFromBudget(float multiplier, bool markAsPersistent = false)
@@ -261,28 +349,74 @@ public class EnemySpawner : MonoBehaviour
         int totalSpawned = allEnemies.Count;
         if (totalSpawned == 0) return;
 
-        int targetAttackCount = Mathf.FloorToInt(totalSpawned * multiplier);
+        int targetAttackCount = Mathf.Max(0, Mathf.FloorToInt(totalSpawned * multiplier));
         int alreadyInAttack = allEnemies.Count(e => e.IsInInfiniteAttackState());
-        int slotsRemaining = Mathf.Max(0, targetAttackCount - alreadyInAttack);
 
-        List<EnemyUnitBase> candidates = allEnemies
-            .Where(e => !e.IsInInfiniteAttackState())
-            .ToList();
-        if (candidates.Count == 0 || slotsRemaining <= 0) return;
-
-        int toActivate = Mathf.Min(slotsRemaining, candidates.Count);
-        for (int i = 0; i < toActivate; i++)
+        if (markAsPersistent)
         {
-            int idx = Random.Range(0, candidates.Count);
-            EnemyUnitBase selected = candidates[idx];
-            candidates.RemoveAt(idx);
-            if (markAsPersistent)
+            int slotsRemaining = Mathf.Max(0, targetAttackCount - alreadyInAttack);
+            List<EnemyUnitBase> candidates = allEnemies
+                .Where(e => !e.IsInInfiniteAttackState())
+                .ToList();
+            if (candidates.Count == 0 || slotsRemaining <= 0) return;
+
+            int toActivate = Mathf.Min(slotsRemaining, candidates.Count);
+            for (int i = 0; i < toActivate; i++)
             {
+                int idx = Random.Range(0, candidates.Count);
+                EnemyUnitBase selected = candidates[idx];
+                candidates.RemoveAt(idx);
                 MarkPersistentEnemy(selected);
+                selected.ActivateInfiniteAttackState();
             }
-            selected.ActivateInfiniteAttackState();
+
+            LogEnemyStats();
+            return;
         }
-        LogEnemyStats();
+
+        bool didChange = false;
+
+        if (alreadyInAttack > targetAttackCount)
+        {
+            int toDeactivate = alreadyInAttack - targetAttackCount;
+            List<EnemyUnitBase> attackingNonPersistent = allEnemies
+                .Where(e => e.IsInInfiniteAttackState() && !IsPersistentEnemy(e))
+                .ToList();
+
+            int canDeactivate = Mathf.Min(toDeactivate, attackingNonPersistent.Count);
+            for (int i = 0; i < canDeactivate; i++)
+            {
+                int idx = Random.Range(0, attackingNonPersistent.Count);
+                EnemyUnitBase selected = attackingNonPersistent[idx];
+                attackingNonPersistent.RemoveAt(idx);
+                selected.DeactivateInfiniteAttackState();
+                didChange = true;
+            }
+        }
+        else if (alreadyInAttack < targetAttackCount)
+        {
+            int slotsRemaining = targetAttackCount - alreadyInAttack;
+            List<EnemyUnitBase> candidates = allEnemies
+                .Where(e => !e.IsInInfiniteAttackState())
+                .ToList();
+            if (candidates.Count > 0 && slotsRemaining > 0)
+            {
+                int toActivate = Mathf.Min(slotsRemaining, candidates.Count);
+                for (int i = 0; i < toActivate; i++)
+                {
+                    int idx = Random.Range(0, candidates.Count);
+                    EnemyUnitBase selected = candidates[idx];
+                    candidates.RemoveAt(idx);
+                    selected.ActivateInfiniteAttackState();
+                    didChange = true;
+                }
+            }
+        }
+
+        if (didChange)
+        {
+            LogEnemyStats();
+        }
     }
 
     private void ActivateExistingEnemiesFromBudget()
@@ -325,11 +459,11 @@ public class EnemySpawner : MonoBehaviour
         return result;
     }
 
-    private void SpawnWaveFromBudget(float budgetScaleFactor = 1f)
+    private int SpawnWaveFromBudget(float budgetScaleFactor = 1f)
     {
         if (ShouldBlockSpawnsForTutorial())
         {
-            return;
+            return 0;
         }
 
         float multiplier = _isEmergencyWaveSpawn ? GetCurrentEmergencyMultiplier() : 1f;
@@ -342,7 +476,7 @@ public class EnemySpawner : MonoBehaviour
             if (emergencyRemainingSlots <= 0)
             {
                 Debug.Log($"[EnemySpawner] Emergency wave skipped. Active enemies already at cap ({maxSpawnCountPerWave}).");
-                return;
+                return 0;
             }
         }
 
@@ -350,13 +484,15 @@ public class EnemySpawner : MonoBehaviour
             .Where(e => e != null && e.enemyPrefab != null && e.cost > 0)
             .ToList();
 
-        if (validEnemies.Count == 0) return;
+        if (validEnemies.Count == 0) return 0;
+
+        float costBiasExponent = GetCostBiasExponent();
 
         MapGenerator mapGenerator = GameManager.Instance.mapGenerator;
-        if (mapGenerator == null) return;
+        if (mapGenerator == null) return 0;
 
         IReadOnlyList<Vector2Int> holes = mapGenerator.EnemySpawnHolePositions;
-        if (holes == null || holes.Count == 0) return;
+        if (holes == null || holes.Count == 0) return 0;
 
         List<Vector2Int> uniqueHoles = holes.Distinct().ToList();
         List<Vector2Int> selectedHoles;
@@ -392,9 +528,9 @@ public class EnemySpawner : MonoBehaviour
                 $"countdownBonus={_countdownEmergencyMultiplierBonus:0.###}, noiseBonus={_noiseEmergencyMultiplierBonus:0.###}");
         }
 
-        if (BuildingManager.Instance == null) return;
+        if (BuildingManager.Instance == null) return 0;
         Grid grid = BuildingManager.Instance.grid;
-        if (grid == null) return;
+        if (grid == null) return 0;
 
         List<(EnemySpawnData data, Vector2Int pos)> allSpawnsUncapped = new List<(EnemySpawnData, Vector2Int)>();
 
@@ -416,7 +552,8 @@ public class EnemySpawner : MonoBehaviour
                 List<EnemySpawnData> affordable = validEnemies.Where(e => e.cost <= remainingBudget).ToList();
                 if (affordable.Count == 0) break;
 
-                EnemySpawnData selectedEnemy = affordable[Random.Range(0, affordable.Count)];
+                EnemySpawnData selectedEnemy = PickWeightedAffordableEnemy(affordable, costBiasExponent);
+                if (selectedEnemy == null) break;
                 allSpawnsUncapped.Add((selectedEnemy, holePos));
                 remainingBudget -= selectedEnemy.cost;
             }
@@ -538,6 +675,7 @@ public class EnemySpawner : MonoBehaviour
             Debug.Log($"[EnemySpawner] Emergency wave spawned. Trigger={_currentEmergencyTriggerSource}, Spawned={spawnedEnemyCount}, Multiplier={multiplier:0.##}, AreaCount={selectedHoles.Count}, NoiseEmergency={_noiseEmergencyActive}, CountdownEmergency={_countdownEmergencyActive}");
         }
         LogEnemyStats();
+        return spawnedEnemyCount;
     }
 
     private int GetActiveEnemyCount()
@@ -987,6 +1125,8 @@ public class EnemySpawner : MonoBehaviour
             return;
         }
 
+        float costBiasExponent = GetCostBiasExponent();
+
         if (BuildingManager.Instance == null || BuildingManager.Instance.grid == null)
         {
             return;
@@ -1010,7 +1150,8 @@ public class EnemySpawner : MonoBehaviour
                 break;
             }
 
-            EnemySpawnData pick = affordable[Random.Range(0, affordable.Count)];
+            EnemySpawnData pick = PickWeightedAffordableEnemy(affordable, costBiasExponent);
+            if (pick == null) break;
             Vector3 spawnPos = FindValidSpawnPosition(center, spawnRadiusOffset, grid);
             if (spawnPos == Vector3.zero)
             {
@@ -1066,5 +1207,54 @@ public class EnemySpawner : MonoBehaviour
         }
 
         return used;
+    }
+
+    private float GetCostBiasExponent()
+    {
+        float totalElapsedHours = DayNightCycleManager.Instance != null ? DayNightCycleManager.Instance.GetTotalElapsedInGameHours() : 0f;
+        float timeProgress = Mathf.Clamp01(totalElapsedHours / 6f);
+
+        float noisePct = NoiseManager.Instance != null ? NoiseManager.Instance.NoisePercentage : 0f;
+        float noiseProgress = Mathf.Clamp01(noisePct / 100f);
+
+        float earlyFactor = 1f - timeProgress;
+        float noiseFactor = 0.5f + 0.5f * noiseProgress;
+
+        float exponent = earlyFactor * noiseFactor * 3f;
+        return Mathf.Max(0f, exponent);
+    }
+
+    private EnemySpawnData PickWeightedAffordableEnemy(List<EnemySpawnData> affordable, float biasExponent)
+    {
+        if (affordable == null || affordable.Count == 0) return null;
+        if (affordable.Count == 1) return affordable[0];
+
+        int minCost = affordable.Min(e => e.cost);
+        if (minCost <= 0) return affordable[Random.Range(0, affordable.Count)];
+        if (biasExponent <= 0f) return affordable[Random.Range(0, affordable.Count)];
+
+        float sumWeights = 0f;
+        for (int i = 0; i < affordable.Count; i++)
+        {
+            EnemySpawnData e = affordable[i];
+            float ratio = (float)e.cost / minCost;
+            float w = Mathf.Pow(ratio, biasExponent);
+            sumWeights += w;
+        }
+
+        if (sumWeights <= 0f) return affordable[Random.Range(0, affordable.Count)];
+
+        float roll = Random.value * sumWeights;
+        float cumulative = 0f;
+        for (int i = 0; i < affordable.Count; i++)
+        {
+            EnemySpawnData e = affordable[i];
+            float ratio = (float)e.cost / minCost;
+            float w = Mathf.Pow(ratio, biasExponent);
+            cumulative += w;
+            if (roll <= cumulative) return e;
+        }
+
+        return affordable[affordable.Count - 1];
     }
 }
