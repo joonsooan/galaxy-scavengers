@@ -344,5 +344,6 @@ public class ProceduralQuestPanelController : MonoBehaviour
         }
 
         questManager.CompleteActiveQuest();
+        RefreshView();
     }
 }

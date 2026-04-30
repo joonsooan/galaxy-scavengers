@@ -20,4 +20,4 @@ MonoBehaviour:
   buildingPieceTile: {fileID: 0}
   costs:
   - resourceType: 4
-    amount: 25
+    amount: 10

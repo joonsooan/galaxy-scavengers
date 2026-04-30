@@ -889,15 +889,6 @@ public class QuestDataManager : MonoBehaviour
             return false;
         }
 
-        if (questId == 0)
-        {
-            string sceneName = SceneManager.GetActiveScene().name;
-            if (sceneName != "BaseScene")
-            {
-                return false;
-            }
-        }
-
         QuestState currentState = GetQuestState(questId);
 
         if (currentState != QuestState.Active && currentState != QuestState.Completable) {

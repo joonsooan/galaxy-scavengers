@@ -8539,8 +8539,8 @@ MonoBehaviour:
   maxResourcesPerCircle: 25
   edgeBandRatio: 0.4
   edgeRemovalChance: 0.3
-  ringRichnessInnermost: 50
-  ringRichnessStep: 50
+  ringRichnessInnermost: 100
+  ringRichnessStep: 100
   starterRingInnerRadius: 7
   starterRingOuterRadius: 11
   starterResourceTypes: 00000000010000000200000003000000
@@ -84279,16 +84279,16 @@ MonoBehaviour:
   - {fileID: 0}
   resourceStatsList:
   - resourceType: 0
-    amountToMine: 50
+    amountToMine: 100
     timeToMinePerUnit: 0.5
   - resourceType: 1
-    amountToMine: 50
+    amountToMine: 100
     timeToMinePerUnit: 0.5
   - resourceType: 2
-    amountToMine: 50
+    amountToMine: 100
     timeToMinePerUnit: 1
   - resourceType: 3
-    amountToMine: 50
+    amountToMine: 100
     timeToMinePerUnit: 1
   resourceDisplayNames:
   - "\uD398\uB77C\uC774\uD2B8"

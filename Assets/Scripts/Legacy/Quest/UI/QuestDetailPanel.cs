@@ -646,28 +646,29 @@ public class QuestDetailPanel : MonoBehaviour
             bool canFinish = QuestDataManager.Instance.CheckQuestCompletion(_currentQuestId);
             if (canFinish)
             {
-                if (QuestManager.Instance != null)
-                {
-                    bool completed = QuestManager.Instance.CompleteQuest(_currentQuestId);
-                    if (completed)
-                    {
-                        FinishQuestAndGiveRewards(_currentQuestId);
-                    }
-                }
+                TryCompleteAndFinishCurrentQuest();
             }
         }
         else if (questState == QuestState.Completable)
         {
-            if (QuestManager.Instance != null)
-            {
-                bool completed = QuestManager.Instance.CompleteQuest(_currentQuestId);
-                if (completed)
-                {
-                    FinishQuestAndGiveRewards(_currentQuestId);
-                }
-            }
+            TryCompleteAndFinishCurrentQuest();
         }
         else if (questState == QuestState.Completed)
+        {
+            FinishQuestAndGiveRewards(_currentQuestId);
+        }
+    }
+
+    private void TryCompleteAndFinishCurrentQuest()
+    {
+        if (_currentQuestId == -1 || QuestDataManager.Instance == null)
+        {
+            return;
+        }
+
+        QuestManager.Instance?.CompleteQuest(_currentQuestId);
+        QuestState latestState = QuestDataManager.Instance.GetQuestState(_currentQuestId);
+        if (latestState == QuestState.Completed)
         {
             FinishQuestAndGiveRewards(_currentQuestId);
         }

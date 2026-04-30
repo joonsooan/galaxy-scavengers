@@ -242,7 +242,6 @@ public class ResourceStatsUIController : MonoBehaviour
     {
         Dictionary<BuildingType, ElectricityAggregate> aggregates = new Dictionary<BuildingType, ElectricityAggregate>();
         ResourceGenerator[] generators = FindObjectsByType<ResourceGenerator>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-        ElectricityConsumptionManager manager = ElectricityConsumptionManager.Instance;
 
         for (int i = 0; i < generators.Length; i++)
         {
@@ -266,7 +265,7 @@ public class ResourceStatsUIController : MonoBehaviour
                 continue;
             }
 
-            float perSecond = GetGeneratorProducePerSecond(generator, manager);
+            float perSecond = GetGeneratorProducePerSecond(generator);
             ElectricityAggregate current = aggregates.TryGetValue(type, out ElectricityAggregate existing)
                 ? existing
                 : new ElectricityAggregate { icon = icon };
@@ -326,19 +325,19 @@ public class ResourceStatsUIController : MonoBehaviour
         return aggregates;
     }
 
-    private static float GetGeneratorProducePerSecond(ResourceGenerator generator, ElectricityConsumptionManager manager)
+    private static float GetGeneratorProducePerSecond(ResourceGenerator generator)
     {
         if (generator == null)
         {
             return 0f;
         }
 
-        if (generator.GenerationInterval <= 0f || generator.ElectricityBufferCurrent >= generator.ElectricityBufferMax)
+        if (!generator.isActiveAndEnabled || !generator.gameObject.activeInHierarchy || !generator.IsConstructed)
         {
             return 0f;
         }
 
-        if (manager != null && manager.IsElectricityStorageFull)
+        if (generator.GenerationInterval <= 0f || generator.ElectricityBufferCurrent >= generator.ElectricityBufferMax)
         {
             return 0f;
         }

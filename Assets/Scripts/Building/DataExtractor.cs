@@ -353,6 +353,7 @@ public class DataExtractor : Damageable, IClickable, IElectricityConsumer
         BoundsInt coverage = PowerGridGeometry.ComputeSquareCoverageCenteredOnFootprint(bm.grid, occupied, connectionRangeCells);
         foreach (Vector3Int cell in coverage.allPositionsWithin) {
             BuildingPiece piece = bm.GetPieceAt(cell);
+            MainStructure mainAtCell = null;
             if (piece != null) {
                 MainStructure mainStructure = piece.GetComponentInParent<MainStructure>();
                 if (mainStructure != null && BuildingManager.IsBuildingProperlyPlaced(mainStructure.transform)) {
@@ -364,7 +365,7 @@ public class DataExtractor : Damageable, IClickable, IElectricityConsumer
                     set.Add(storage);
                 }
             }
-            else if (bm.TryGetMainStructureAtCell(cell, out MainStructure mainAtCell)) {
+            if (bm.TryGetMainStructureAtCell(cell, out mainAtCell)) {
                 set.Add(mainAtCell);
             }
         }

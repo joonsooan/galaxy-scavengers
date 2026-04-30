@@ -196,6 +196,10 @@ public class UnitUpgradeProgress : MonoBehaviour
             if (u is Unit_Miner miner) {
                 miner.ApplyMinerUpgradeModifiers();
             }
+            else if (u is Unit_Construct construct)
+            {
+                construct.ApplyConstructUpgradeModifiers();
+            }
         }
     }
 

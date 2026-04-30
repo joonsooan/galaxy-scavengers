@@ -71,12 +71,12 @@ public class ElectricityConsumptionManager : MonoBehaviour
         float total = 0f;
         foreach (ResourceGenerator generator in _resourceGenerators)
         {
-            if (generator == null || !generator.IsConstructed)
+            if (generator == null || !generator.IsConstructed || !generator.isActiveAndEnabled || !generator.gameObject.activeInHierarchy)
             {
                 continue;
             }
 
-            if (!generator.HasFuelAvailableInRange() || IsElectricityStorageFull)
+            if (!generator.HasFuelAvailableInRange())
             {
                 continue;
             }

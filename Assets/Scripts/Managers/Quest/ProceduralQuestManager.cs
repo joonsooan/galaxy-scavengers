@@ -169,9 +169,18 @@ public class ProceduralQuestManager : MonoBehaviour
 
     public bool CompleteActiveQuest()
     {
-        if (_activeQuest == null || _state != ProceduralQuestState.Completable)
+        if (_activeQuest == null)
         {
             return false;
+        }
+
+        if (_state != ProceduralQuestState.Completable)
+        {
+            EvaluateActiveQuest();
+            if (_state != ProceduralQuestState.Completable)
+            {
+                return false;
+            }
         }
 
         bool spent = ResourceManager.Instance != null &&

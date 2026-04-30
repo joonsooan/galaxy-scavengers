@@ -330,6 +330,7 @@ public class ResourceGenerator : Damageable, IPowerGridNode
         foreach (Vector3Int cell in coverage.allPositionsWithin)
         {
             BuildingPiece piece = bm.GetPieceAt(cell);
+            MainStructure mainAtCell = null;
             if (piece != null) {
                 MainStructure mainStructure = piece.GetComponentInParent<MainStructure>();
                 if (mainStructure != null && BuildingManager.IsBuildingProperlyPlaced(mainStructure.transform))
@@ -342,7 +343,7 @@ public class ResourceGenerator : Damageable, IPowerGridNode
                     set.Add(storage);
                 }
             }
-            else if (bm.TryGetMainStructureAtCell(cell, out MainStructure mainAtCell)) {
+            if (bm.TryGetMainStructureAtCell(cell, out mainAtCell)) {
                 set.Add(mainAtCell);
             }
         }

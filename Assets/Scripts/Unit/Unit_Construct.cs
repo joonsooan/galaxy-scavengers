@@ -56,6 +56,7 @@ public class Unit_Construct : UnitBase
     private Animator _currentSiteAnimator;
     private bool _isInvulnerable;
     private UnitAllyBatteryDriver _allyBatteryDriver;
+    private float _prefabMoveSpeed;
 
     public bool IsInvulnerable => _isInvulnerable;
 
@@ -82,6 +83,7 @@ public class Unit_Construct : UnitBase
         movement = GetComponent<UnitMovement>();
         _rb = GetComponent<Rigidbody2D>();
         _allyBatteryDriver = GetComponent<UnitAllyBatteryDriver>();
+        _prefabMoveSpeed = movement != null ? movement.moveSpeed : 5f;
     }
 
     protected void Start()
@@ -114,6 +116,7 @@ public class Unit_Construct : UnitBase
     {
         base.OnEnable();
         UnitManager.Instance?.AddUnit(this);
+        ApplyConstructUpgradeModifiers();
 
         if (ConstructionManager.Instance != null) {
             ConstructionManager.Instance.RegisterConstructDrone(this);
@@ -694,6 +697,20 @@ public class Unit_Construct : UnitBase
     private float GetConstructionSpeedMultiplier()
     {
         return 1f;
+    }
+
+    public void ApplyConstructUpgradeModifiers()
+    {
+        if (movement == null) {
+            movement = GetComponent<UnitMovement>();
+        }
+
+        float moveMult = 1f;
+        if (UnitUpgradeProgress.Instance != null) {
+            moveMult = UnitUpgradeProgress.Instance.GetMoveSpeedMultiplier();
+        }
+
+        ApplyUpgradeMoveSpeed(_prefabMoveSpeed, moveMult);
     }
 
     public void NotifySiteDestroyed(ConstructionSite site)
