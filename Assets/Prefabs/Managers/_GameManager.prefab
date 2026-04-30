@@ -48,6 +48,7 @@ MonoBehaviour:
   mapGenerator: {fileID: 0}
   uiManager: {fileID: 0}
   cardDragger: {fileID: 0}
+  skipProceduralGenerationWhenLoadingGameScene: 0
   pauseSound:
     Guid:
       Data1: -1936566649
@@ -62,27 +63,10 @@ MonoBehaviour:
       Data3: 995189914
       Data4: -85904115
     Path: event:/SFX_UI/SFX_GameStart
-  speed1Sound:
-    Guid:
-      Data1: -765664001
-      Data2: 1302141166
-      Data3: 995189914
-      Data4: -85904115
-    Path: event:/SFX_UI/SFX_GameStart
-  speed2Sound:
-    Guid:
-      Data1: -765664001
-      Data2: 1302141166
-      Data3: 995189914
-      Data4: -85904115
-    Path: event:/SFX_UI/SFX_GameStart
-  speed3Sound:
-    Guid:
-      Data1: -765664001
-      Data2: 1302141166
-      Data3: 995189914
-      Data4: -85904115
-    Path: event:/SFX_UI/SFX_GameStart
+  openingPanDuration: 2
+  openingCenterDwellSeconds: 1
+  openingRuinsDwellSeconds: 2
+  logOpeningSequence: 1
   onStartDrag:
     m_PersistentCalls:
       m_Calls: []

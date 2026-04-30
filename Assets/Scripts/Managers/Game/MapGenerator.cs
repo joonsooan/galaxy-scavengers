@@ -202,6 +202,30 @@ public class MapGenerator : MonoBehaviour
 
     public IReadOnlyCollection<Vector3Int> AncientRuinsCells => _ancientRuinsCells;
 
+    public Vector3 GetAncientRuinsFocusWorldPosition(Vector3 fallbackWorld)
+    {
+        Grid g = grid;
+        if (g == null && groundTilemap != null)
+        {
+            g = groundTilemap.layoutGrid;
+        }
+
+        if (g == null || _ancientRuinsCells == null || _ancientRuinsCells.Count == 0)
+        {
+            return fallbackWorld;
+        }
+
+        Vector3 sum = Vector3.zero;
+        foreach (Vector3Int cell in _ancientRuinsCells)
+        {
+            sum += g.GetCellCenterWorld(cell);
+        }
+
+        sum /= _ancientRuinsCells.Count;
+        sum.z = fallbackWorld.z;
+        return sum;
+    }
+
     public void SpawnAncientRuins()
     {
         _ancientRuinsCells.Clear();

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using DG.Tweening;
 using FMODUnity;
 using Systems.Jobs;
 using UnityEngine;
@@ -19,6 +20,12 @@ public class GameManager : MonoBehaviour
     [Header("Audio")]
     [SerializeField] private EventReference pauseSound;
     [SerializeField] private EventReference resumeSound;
+
+    [Header("Game Scene Opening Sequence")]
+    [SerializeField] [Min(0f)] private float openingPanDuration = 0.35f;
+    [SerializeField] [Min(0f)] private float openingCenterDwellSeconds = 0.5f;
+    [SerializeField] [Min(0f)] private float openingRuinsDwellSeconds = 2.5f;
+    [SerializeField] private bool logOpeningSequence = true;
 
 
     [HideInInspector] public UnityEvent<DisplayableData> onStartDrag;
@@ -242,18 +249,101 @@ public class GameManager : MonoBehaviour
             mainControlPanel.HideAllPanels();
         }
 
+        SetMainCanvasVisible(false);
+    }
+
+    public void SetMainCanvasVisible(bool visible)
+    {
         Scene activeScene = SceneManager.GetActiveScene();
-        Canvas[] sceneCanvases = FindObjectsByType<Canvas>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        Canvas[] sceneCanvases = FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         foreach (Canvas canvas in sceneCanvases)
         {
             if (canvas == null || canvas.gameObject == null) continue;
             if (canvas.gameObject.scene != activeScene) continue;
             if (canvas.gameObject.name == "Main Canvas")
             {
-                canvas.gameObject.SetActive(false);
+                canvas.gameObject.SetActive(visible);
                 break;
             }
         }
+    }
+
+    public IEnumerator RunGameSceneOpeningSequence()
+    {
+        CameraTargetController ctc = FindFirstObjectByType<CameraTargetController>();
+        if (ctc == null)
+        {
+            LogOpening("CameraTargetController not found. Skip opening sequence.");
+            yield break;
+        }
+
+        if (mapGenerator == null)
+        {
+            mapGenerator = FindFirstObjectByType<MapGenerator>();
+        }
+
+        ctc.RefreshMapBounds();
+        ctc.BeginOpeningSequence();
+        LogOpening("Opening sequence started.");
+
+        Vector3 startFocus = ctc.transform.position;
+        bool hasRuins = mapGenerator != null && mapGenerator.AncientRuinsCells != null && mapGenerator.AncientRuinsCells.Count > 0;
+        Vector3 ruins = hasRuins ? mapGenerator.GetAncientRuinsFocusWorldPosition(startFocus) : startFocus;
+        float distanceToRuins = Vector2.Distance(new Vector2(startFocus.x, startFocus.y), new Vector2(ruins.x, ruins.y));
+
+        if (openingCenterDwellSeconds > 0f)
+        {
+            LogOpening($"Start dwell ({openingCenterDwellSeconds:F2}s).");
+            yield return CoroutineCache.GetWaitForSecondsRealtime(openingCenterDwellSeconds);
+        }
+
+        bool shouldMoveToRuins = hasRuins && distanceToRuins > 0.05f;
+        if (shouldMoveToRuins)
+        {
+            Tween toRuins = ctc.TweenRigToWorldXY(ruins, openingPanDuration);
+            yield return toRuins.WaitForCompletion();
+        }
+
+        if (openingRuinsDwellSeconds > 0f)
+        {
+            yield return CoroutineCache.GetWaitForSecondsRealtime(openingRuinsDwellSeconds);
+        }
+
+        Unit_Player mainUnit = FindFirstObjectByType<Unit_Player>(FindObjectsInactive.Include);
+        if (mainUnit != null)
+        {
+            LogOpening($"Move to main unit start ({openingPanDuration:F2}s).");
+            Tween toMainUnit = ctc.TweenRigToWorldXY(mainUnit.transform.position, openingPanDuration);
+            yield return toMainUnit.WaitForCompletion();
+            ctc.SetFollowTargetImmediate(mainUnit.transform);
+            LogOpening("Move to main unit complete.");
+        }
+        else
+        {
+            LogOpening("Main unit not found. Skipping move to main unit.");
+        }
+
+        LogOpening("Opening sequence finished.");
+    }
+
+    public void EndGameSceneOpeningSequence()
+    {
+        CameraTargetController ctc = FindFirstObjectByType<CameraTargetController>();
+        if (ctc != null)
+        {
+            ctc.EndOpeningSequence();
+            LogOpening("Camera opening lock released.");
+        }
+    }
+
+    private void LogOpening(string message)
+    {
+        if (!logOpeningSequence)
+        {
+            return;
+        }
+
+        Debug.Log($"[GameOpening] {message}");
     }
 
     public void StartDrag(DisplayableData data)
@@ -406,8 +496,6 @@ public class GameManager : MonoBehaviour
                 loadingScreen.SetInitializationComplete();
             }
         }
-
-        IsGameplayReady = true;
     }
 
     private IEnumerator DelayedInitialization()

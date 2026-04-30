@@ -18,7 +18,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &3527890300224991109
 RectTransform:
   m_ObjectHideFlags: 0
@@ -92,4 +92,3 @@ MonoBehaviour:
   scaleUpAmount: 2
   scaleDownAmount: 0.9
   scaleUp2Amount: 1.5
-  heartbeatEase: 6
