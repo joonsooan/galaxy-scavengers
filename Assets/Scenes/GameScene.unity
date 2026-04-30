@@ -8451,7 +8451,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 313771324}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c1b6965b69088843b0d523477f7dc1b, type: 3}
   m_Name: 
@@ -54034,8 +54034,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c93dce01b31df34d8c4f3dd6079aa99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProceduralQuestManager
-  firstOfferDelaySeconds: 30
-  nextOfferDelaySeconds: 10
+  firstOfferDelaySeconds: 60
+  nextOfferDelaySeconds: 60
   fallbackCheckIntervalSeconds: 0.5
   switchToLateRuleQuestIndex: 3
   choicesPerCycle: 3
@@ -54043,9 +54043,9 @@ MonoBehaviour:
   useDeterministicSeed: 0
   deterministicSeed: 1234
   earlyBasicResourcePool: 00000000010000000200000003000000
-  earlyBasicAmountRange: {x: 50, y: 200}
+  earlyBasicAmountRange: {x: 200, y: 500}
   lateBasicResourcePool: 00000000010000000200000003000000
-  lateBasicAmountRange: {x: 500, y: 2000}
+  lateBasicAmountRange: {x: 1000, y: 2500}
   lateProcessedResourcePool: 0400000005000000060000000700000008000000090000000a0000000b0000000c00000000000000
   lateProcessedAmountRange: {x: 50, y: 100}
   rewardAmountRange: {x: 1, y: 2}
@@ -84206,8 +84206,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 163725887cf43a3418506d1a895ccbed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ferriteInitialAmount: 20
-  aetherInitialAmount: 20
+  ferriteInitialAmount: 80
+  aetherInitialAmount: 80
   biomassInitialAmount: 0
   cryoCrystalInitialAmount: 0
   tutorialFerriteInitialAmount: 0
