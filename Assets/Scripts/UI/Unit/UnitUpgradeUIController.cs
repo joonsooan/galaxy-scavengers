@@ -6,8 +6,6 @@ public class UnitUpgradeUIController : MonoBehaviour
     [SerializeField] private UnitUpgradeCatalog catalog;
     [SerializeField] private Transform cellParent;
     [SerializeField] private GameObject unitUpgradeCellPrefab;
-    [SerializeField] private UnityEngine.UI.Button questButton;
-    [SerializeField] private ProceduralQuestPanelController proceduralQuestPanelController;
 
     private UnitUpgradeProgress _progress;
 
@@ -15,7 +13,6 @@ public class UnitUpgradeUIController : MonoBehaviour
     {
         ResourceManager.OnResourceAmountChanged += OnResourceAmountChanged;
         UnitUpgradeProgress.OnUpgradeStateChanged += OnUpgradeStateChanged;
-        WireQuestButton(true);
         ResolveProgressReference();
         Refresh();
         StartCoroutine(RefreshAfterProgressReady());
@@ -32,31 +29,6 @@ public class UnitUpgradeUIController : MonoBehaviour
     {
         ResourceManager.OnResourceAmountChanged -= OnResourceAmountChanged;
         UnitUpgradeProgress.OnUpgradeStateChanged -= OnUpgradeStateChanged;
-        WireQuestButton(false);
-    }
-
-    private void WireQuestButton(bool add)
-    {
-        if (questButton == null)
-        {
-            return;
-        }
-
-        questButton.onClick.RemoveListener(OnQuestButtonClicked);
-        if (add)
-        {
-            questButton.onClick.AddListener(OnQuestButtonClicked);
-        }
-    }
-
-    private void OnQuestButtonClicked()
-    {
-        if (proceduralQuestPanelController == null)
-        {
-            proceduralQuestPanelController = FindFirstObjectByType<ProceduralQuestPanelController>(FindObjectsInactive.Include);
-        }
-
-        proceduralQuestPanelController?.TogglePanel();
     }
 
     private void OnResourceAmountChanged(ResourceType _, int __)

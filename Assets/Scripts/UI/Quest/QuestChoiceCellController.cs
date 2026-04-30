@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 public class QuestChoiceCellController : MonoBehaviour
 {
-    [SerializeField] private TMP_Text resourceNameText;
     [SerializeField] private Image resourceIconImage;
     [SerializeField] private TMP_Text requiredAmountText;
     [SerializeField] private Button acceptButton;
@@ -29,19 +28,10 @@ public class QuestChoiceCellController : MonoBehaviour
 
         if (ResourceManager.Instance != null)
         {
-            if (resourceNameText != null)
-            {
-                resourceNameText.text = ResourceManager.Instance.GetResourceDisplayName(choice.targetResourceType);
-            }
-
             if (resourceIconImage != null)
             {
                 resourceIconImage.sprite = ResourceManager.Instance.GetResourceIcon(choice.targetResourceType);
             }
-        }
-        else if (resourceNameText != null)
-        {
-            resourceNameText.text = choice.targetResourceType.ToString();
         }
 
         if (requiredAmountText != null)

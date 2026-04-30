@@ -65,7 +65,6 @@ public class CameraTargetController : MonoBehaviour
 
         if (zoomCameras == null || zoomCameras.Length == 0)
         {
-            Debug.LogWarning("CameraTargetController: zoomCameras array is null or empty. Camera controls will not work.");
             _zoomLevelPositions = new Vector3[0];
             _zoomLevelInitialized = new bool[0];
             return;

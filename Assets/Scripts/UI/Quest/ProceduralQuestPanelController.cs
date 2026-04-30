@@ -12,15 +12,22 @@ public class ProceduralQuestPanelController : MonoBehaviour
     [SerializeField] private Transform choiceContainer;
     [SerializeField] private QuestChoiceCellController questChoiceCellPrefab;
     [SerializeField] private GameObject progressSection;
+    [SerializeField] private TMP_Text progressSectionStatusText;
+    [SerializeField] private string progressInProgressLabel = "진행 중인 퀘스트";
+    [SerializeField] private string progressCompletableLabel = "퀘스트 완료 가능";
+    [SerializeField] private TMP_Text progressActionButtonText;
+    [SerializeField] private string progressActionInProgressLabel = "진행 중";
+    [SerializeField] private string progressActionCompletableLabel = "완료";
+
+    [Header("Quest entry")]
+    [SerializeField] private Button questButton;
+    [SerializeField] private GameObject notifierIcon;
 
     [Header("Active Quest UI")]
-    [SerializeField] private TMP_Text activeResourceNameText;
     [SerializeField] private Image activeResourceIcon;
-    [SerializeField] private TMP_Text activeRequiredAmountText;
-    [SerializeField] private TMP_Text activeCurrentAmountText;
+    [SerializeField] private TMP_Text activeAmountPairText;
     [SerializeField] private TMP_Text activeStateText;
     [SerializeField] private Button completeButton;
-    [SerializeField] private Button closeButton;
 
     private readonly List<QuestChoiceCellController> _spawnedChoices = new();
 
@@ -38,16 +45,18 @@ public class ProceduralQuestPanelController : MonoBehaviour
 
     private void OnEnable()
     {
+        ResourceManager.OnResourceAmountChanged += OnResourceAmountChanged;
+
+        if (questButton != null)
+        {
+            questButton.onClick.RemoveListener(OnQuestButtonClicked);
+            questButton.onClick.AddListener(OnQuestButtonClicked);
+        }
+
         if (completeButton != null)
         {
             completeButton.onClick.RemoveListener(OnCompleteButtonClicked);
             completeButton.onClick.AddListener(OnCompleteButtonClicked);
-        }
-
-        if (closeButton != null)
-        {
-            closeButton.onClick.RemoveListener(ClosePanel);
-            closeButton.onClick.AddListener(ClosePanel);
         }
 
         if (questManager != null)
@@ -61,12 +70,75 @@ public class ProceduralQuestPanelController : MonoBehaviour
 
     private void OnDisable()
     {
+        ResourceManager.OnResourceAmountChanged -= OnResourceAmountChanged;
+
+        if (questButton != null)
+        {
+            questButton.onClick.RemoveListener(OnQuestButtonClicked);
+        }
+
         if (questManager != null)
         {
             questManager.OnChoicesOffered -= OnChoicesOffered;
             questManager.OnActiveQuestChanged -= OnActiveQuestChanged;
             questManager.OnQuestStateChanged -= OnQuestStateChanged;
         }
+    }
+
+    private void Update()
+    {
+        if (rootPanel == null)
+        {
+            return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            if (rootPanel.activeSelf || CanOpenPanelByHotkey())
+            {
+                TogglePanel();
+            }
+            return;
+        }
+
+        if (rootPanel.activeSelf && Input.GetMouseButtonDown(1))
+        {
+            ClosePanel();
+        }
+    }
+
+    private void OnResourceAmountChanged(ResourceType _, int __)
+    {
+        if (questManager == null)
+        {
+            return;
+        }
+
+        ProceduralQuestState state = questManager.CurrentState;
+        bool showProgress = state == ProceduralQuestState.InProgress || state == ProceduralQuestState.Completable;
+        if (!showProgress)
+        {
+            return;
+        }
+
+        RefreshActiveQuest(questManager.ActiveQuest, state);
+    }
+
+    private bool CanOpenPanelByHotkey()
+    {
+        if (questManager == null)
+        {
+            return false;
+        }
+
+        bool hasActiveQuest = questManager.ActiveQuest != null;
+        bool hasAcceptableChoices = questManager.CurrentState == ProceduralQuestState.ChoiceOffered;
+        return hasActiveQuest || hasAcceptableChoices;
+    }
+
+    private void OnQuestButtonClicked()
+    {
+        TogglePanel();
     }
 
     public void TogglePanel()
@@ -76,10 +148,13 @@ public class ProceduralQuestPanelController : MonoBehaviour
             return;
         }
 
-        bool next = !rootPanel.activeSelf;
-        rootPanel.SetActive(next);
-        if (next)
+        if (rootPanel.activeSelf)
         {
+            ClosePanel();
+        }
+        else
+        {
+            rootPanel.SetActive(true);
             RefreshView();
         }
     }
@@ -97,10 +172,13 @@ public class ProceduralQuestPanelController : MonoBehaviour
 
     private void ClosePanel()
     {
-        if (rootPanel != null)
+        if (rootPanel == null || !rootPanel.activeSelf)
         {
-            rootPanel.SetActive(false);
+            return;
         }
+
+        rootPanel.SetActive(false);
+        RefreshNotifier();
     }
 
     private void OnChoicesOffered(List<ProceduralQuestChoiceData> _)
@@ -152,6 +230,21 @@ public class ProceduralQuestPanelController : MonoBehaviour
         {
             RefreshActiveQuest(questManager.ActiveQuest, state);
         }
+
+        RefreshNotifier();
+    }
+
+    private void RefreshNotifier()
+    {
+        if (notifierIcon == null || questManager == null)
+        {
+            return;
+        }
+
+        ProceduralQuestState state = questManager.CurrentState;
+        bool needsAttention = state == ProceduralQuestState.ChoiceOffered || state == ProceduralQuestState.Completable;
+        bool panelOpen = rootPanel != null && rootPanel.activeSelf;
+        notifierIcon.SetActive(needsAttention && !panelOpen);
     }
 
     private void RebuildChoiceCells(IReadOnlyList<ProceduralQuestChoiceData> choices)
@@ -196,39 +289,40 @@ public class ProceduralQuestPanelController : MonoBehaviour
 
         if (ResourceManager.Instance != null)
         {
-            if (activeResourceNameText != null)
-            {
-                activeResourceNameText.text = ResourceManager.Instance.GetResourceDisplayName(activeQuest.targetResourceType);
-            }
-
             if (activeResourceIcon != null)
             {
                 activeResourceIcon.sprite = ResourceManager.Instance.GetResourceIcon(activeQuest.targetResourceType);
             }
         }
-        else if (activeResourceNameText != null)
+
+        if (activeAmountPairText != null)
         {
-            activeResourceNameText.text = activeQuest.targetResourceType.ToString();
+            activeAmountPairText.text = $"{currentAmount} / {activeQuest.requiredAmount}";
         }
 
-        if (activeRequiredAmountText != null)
+        string progressLine = state == ProceduralQuestState.Completable
+            ? progressCompletableLabel
+            : progressInProgressLabel;
+        if (progressSectionStatusText != null)
         {
-            activeRequiredAmountText.text = activeQuest.requiredAmount.ToString();
-        }
-
-        if (activeCurrentAmountText != null)
-        {
-            activeCurrentAmountText.text = currentAmount.ToString();
+            progressSectionStatusText.text = progressLine;
         }
 
         if (activeStateText != null)
         {
-            activeStateText.text = state == ProceduralQuestState.Completable ? "완료 가능" : "진행 중";
+            activeStateText.text = progressLine;
         }
 
         if (completeButton != null)
         {
             completeButton.interactable = state == ProceduralQuestState.Completable;
+        }
+
+        if (progressActionButtonText != null)
+        {
+            progressActionButtonText.text = state == ProceduralQuestState.Completable
+                ? progressActionCompletableLabel
+                : progressActionInProgressLabel;
         }
     }
 

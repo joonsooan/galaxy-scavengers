@@ -30,9 +30,6 @@ public class ProceduralQuestManager : MonoBehaviour
     [Header("Reward")]
     [SerializeField] private Vector2Int rewardAmountRange = new(5, 15);
 
-    [Header("Notifier")]
-    [SerializeField] private GameObject notifierIcon;
-
     public static ProceduralQuestManager Instance { get; private set; }
 
     public event Action<List<ProceduralQuestChoiceData>> OnChoicesOffered;
@@ -64,7 +61,6 @@ public class ProceduralQuestManager : MonoBehaviour
         Instance = this;
         BuildGenerator();
         SetState(ProceduralQuestState.Waiting);
-        SetNotifier(false);
     }
 
     private void OnEnable()
@@ -275,14 +271,5 @@ public class ProceduralQuestManager : MonoBehaviour
     {
         _state = nextState;
         OnQuestStateChanged?.Invoke(_state);
-        SetNotifier(_state == ProceduralQuestState.ChoiceOffered || _state == ProceduralQuestState.Completable);
-    }
-
-    private void SetNotifier(bool isOn)
-    {
-        if (notifierIcon != null)
-        {
-            notifierIcon.SetActive(isOn);
-        }
     }
 }

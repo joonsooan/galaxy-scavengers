@@ -291,8 +291,6 @@ public class GameManager : MonoBehaviour
         Vector3 ruins = hasRuins ? mapGenerator.GetAncientRuinsFocusWorldPosition(startFocus) : startFocus;
         float distanceToRuins = Vector2.Distance(new Vector2(startFocus.x, startFocus.y), new Vector2(ruins.x, ruins.y));
 
-        LogOpening($"Start: {startFocus}, Ruins: {ruins}, RuinsCellCount: {(mapGenerator != null && mapGenerator.AncientRuinsCells != null ? mapGenerator.AncientRuinsCells.Count : 0)}, Distance: {distanceToRuins:F2}");
-
         if (openingCenterDwellSeconds > 0f)
         {
             LogOpening($"Start dwell ({openingCenterDwellSeconds:F2}s).");
@@ -302,19 +300,12 @@ public class GameManager : MonoBehaviour
         bool shouldMoveToRuins = hasRuins && distanceToRuins > 0.05f;
         if (shouldMoveToRuins)
         {
-            LogOpening($"Move to ruins start ({openingPanDuration:F2}s).");
             Tween toRuins = ctc.TweenRigToWorldXY(ruins, openingPanDuration);
             yield return toRuins.WaitForCompletion();
-            LogOpening("Move to ruins complete.");
-        }
-        else
-        {
-            LogOpening("Ruins focus unavailable or too close to center. Skipping ruins move.");
         }
 
         if (openingRuinsDwellSeconds > 0f)
         {
-            LogOpening($"Ruins dwell start ({openingRuinsDwellSeconds:F2}s).");
             yield return CoroutineCache.GetWaitForSecondsRealtime(openingRuinsDwellSeconds);
         }
 
