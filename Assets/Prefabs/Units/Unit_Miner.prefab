@@ -358,8 +358,8 @@ MonoBehaviour:
       Data4: 80405572
     Path: event:/SFX_InGame/SFX_Mining
   unloadingTime: 1
-  mineAmountPerAction: 1
-  maxCarryAmount: 10
+  mineAmountPerAction: 2
+  maxCarryAmount: 20
   resourceSearchInterval: 1
   maxSearchRadius: 100
   mineableResourceTypes: 

@@ -29,6 +29,9 @@ public class ResourceStatsUIController : MonoBehaviour
     [SerializeField] private float movingAverageWindowMinutes = 5f;
     [SerializeField] private float refreshInterval = 0.5f;
 
+    [Header("Resource Filter")]
+    [SerializeField] private ResourceType maxVisibleResourceType = ResourceType.AlloyPlate;
+
     private float _nextRefresh;
     private readonly List<UnitProcessorActivityCellView> _spawnedCells = new List<UnitProcessorActivityCellView>();
     private readonly List<ResourceType> _produceTypes = new List<ResourceType>();
@@ -153,12 +156,12 @@ public class ResourceStatsUIController : MonoBehaviour
 
         foreach (ResourceType type in allTypes)
         {
-            if (type != ResourceType.Electricity)
+            if (IsVisibleResourceType(type))
             {
                 _spendTypes.Add(type);
             }
 
-            if (type != ResourceType.Electricity)
+            if (IsVisibleResourceType(type))
             {
                 _produceTypes.Add(type);
             }
@@ -258,6 +261,10 @@ public class ResourceStatsUIController : MonoBehaviour
             {
                 continue;
             }
+            if (type == BuildingType.MainStructure)
+            {
+                continue;
+            }
 
             float perSecond = GetGeneratorProducePerSecond(generator, manager);
             ElectricityAggregate current = aggregates.TryGetValue(type, out ElectricityAggregate existing)
@@ -297,6 +304,10 @@ public class ResourceStatsUIController : MonoBehaviour
             }
 
             if (!TryGetBuildingInfo(damageable, out BuildingType type, out Sprite icon))
+            {
+                continue;
+            }
+            if (type == BuildingType.MainStructure)
             {
                 continue;
             }
@@ -437,6 +448,13 @@ public class ResourceStatsUIController : MonoBehaviour
         type = dataHolder.buildingData.buildingType;
         icon = dataHolder.buildingData.icon;
         return true;
+    }
+
+    private bool IsVisibleResourceType(ResourceType type)
+    {
+        return type != ResourceType.None &&
+               type != ResourceType.Electricity &&
+               type <= maxVisibleResourceType;
     }
 
     private void WireTabButtons(bool add)

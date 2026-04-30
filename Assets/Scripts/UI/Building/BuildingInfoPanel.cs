@@ -120,7 +120,8 @@ public class BuildingInfoPanel : MonoBehaviour
         if (buildingDesc != null) buildingDesc.text = data.description;
         gameObject.SetActive(true);
 
-        if (showPostConstructInfo)
+        bool shouldShowPostConstructInfo = showPostConstructInfo && data.buildingType != BuildingType.MainStructure;
+        if (shouldShowPostConstructInfo)
         {
             SetResourcePanelActive(false);
             SetPostConstructPanelActive(true);

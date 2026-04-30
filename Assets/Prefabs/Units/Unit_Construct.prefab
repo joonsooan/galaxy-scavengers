@@ -267,7 +267,7 @@ MonoBehaviour:
   currentState: 0
   carryCapacity: 1000
   loadingTime: 1
-  unloadingTime: 5
+  unloadingTime: 3
   movement: {fileID: 4483249089817793867}
   constructingParticleSystem: {fileID: 2654175848666590096}
   particleOffsetDistance: 0.75
