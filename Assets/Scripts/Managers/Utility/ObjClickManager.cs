@@ -17,6 +17,8 @@ public class ObjClickManager : MonoBehaviour
     {
         if (mainCamera == null) return;
 
+        if (GameManager.Instance != null && !GameManager.IsGameplayReady) return;
+
         if (IsLoadingScreenActive()) return;
 
         if (Input.GetMouseButtonDown(0)) {
