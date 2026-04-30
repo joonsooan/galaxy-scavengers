@@ -251,6 +251,12 @@ public class Unit_Construct : UnitBase
         }
 
         ConstructionManager.Instance?.RequestTask(this);
+
+        if (_currentState != ConstructState.Idle)
+        {
+            return;
+        }
+
         UpdateIdleRoam();
     }
 
