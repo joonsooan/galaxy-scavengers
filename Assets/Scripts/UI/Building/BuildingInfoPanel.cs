@@ -162,7 +162,7 @@ public class BuildingInfoPanel : MonoBehaviour
         }
         else
         {
-            healthText.text = $"현재 체력 : {damageable.CurrentHealth} / {damageable.MaxHealth}";
+            healthText.text = $"{damageable.CurrentHealth} / {damageable.MaxHealth}";
         }
     }
 

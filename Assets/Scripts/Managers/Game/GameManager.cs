@@ -22,11 +22,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private EventReference resumeSound;
 
     [Header("Game Scene Opening Sequence")]
-    [SerializeField] [Min(0f)] private float openingPanDuration = 0.35f;
-    [SerializeField] [Min(0f)] private float openingCenterDwellSeconds = 0.5f;
-    [SerializeField] [Min(0f)] private float openingRuinsDwellSeconds = 2.5f;
-    [SerializeField] private bool logOpeningSequence = true;
-
+    [SerializeField][Min(0f)] private float openingPanDuration = 0.35f;
+    [SerializeField][Min(0f)] private float openingCenterDwellSeconds = 0.5f;
+    [SerializeField][Min(0f)] private float openingRuinsDwellSeconds = 2.5f;
 
     [HideInInspector] public UnityEvent<DisplayableData> onStartDrag;
     [HideInInspector] public UnityEvent onEndDrag;
@@ -271,11 +269,6 @@ public class GameManager : MonoBehaviour
     public IEnumerator RunGameSceneOpeningSequence()
     {
         CameraTargetController ctc = FindFirstObjectByType<CameraTargetController>();
-        if (ctc == null)
-        {
-            LogOpening("CameraTargetController not found. Skip opening sequence.");
-            yield break;
-        }
 
         if (mapGenerator == null)
         {
@@ -284,7 +277,6 @@ public class GameManager : MonoBehaviour
 
         ctc.RefreshMapBounds();
         ctc.BeginOpeningSequence();
-        LogOpening("Opening sequence started.");
 
         Vector3 startFocus = ctc.transform.position;
         bool hasRuins = mapGenerator != null && mapGenerator.AncientRuinsCells != null && mapGenerator.AncientRuinsCells.Count > 0;
@@ -293,7 +285,6 @@ public class GameManager : MonoBehaviour
 
         if (openingCenterDwellSeconds > 0f)
         {
-            LogOpening($"Start dwell ({openingCenterDwellSeconds:F2}s).");
             yield return CoroutineCache.GetWaitForSecondsRealtime(openingCenterDwellSeconds);
         }
 
@@ -312,18 +303,10 @@ public class GameManager : MonoBehaviour
         Unit_Player mainUnit = FindFirstObjectByType<Unit_Player>(FindObjectsInactive.Include);
         if (mainUnit != null)
         {
-            LogOpening($"Move to main unit start ({openingPanDuration:F2}s).");
             Tween toMainUnit = ctc.TweenRigToWorldXY(mainUnit.transform.position, openingPanDuration);
             yield return toMainUnit.WaitForCompletion();
             ctc.SetFollowTargetImmediate(mainUnit.transform);
-            LogOpening("Move to main unit complete.");
         }
-        else
-        {
-            LogOpening("Main unit not found. Skipping move to main unit.");
-        }
-
-        LogOpening("Opening sequence finished.");
     }
 
     public void EndGameSceneOpeningSequence()
@@ -332,18 +315,7 @@ public class GameManager : MonoBehaviour
         if (ctc != null)
         {
             ctc.EndOpeningSequence();
-            LogOpening("Camera opening lock released.");
         }
-    }
-
-    private void LogOpening(string message)
-    {
-        if (!logOpeningSequence)
-        {
-            return;
-        }
-
-        Debug.Log($"[GameOpening] {message}");
     }
 
     public void StartDrag(DisplayableData data)
