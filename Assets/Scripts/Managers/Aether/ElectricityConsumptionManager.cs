@@ -381,6 +381,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
             _batteries.Remove(battery);
             _batteryVisualStates.Remove(battery);
         }
+        PowerCoveragePreviewOverlay.Instance?.RefreshIfShowing();
     }
 
     public void RegisterResourceGenerator(ResourceGenerator generator)
@@ -403,6 +404,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
             _resourceGenerators.Remove(generator);
             _resourceGeneratorVisualStates.Remove(generator);
         }
+        PowerCoveragePreviewOverlay.Instance?.RefreshIfShowing();
     }
 
     private void SanitizeDeadResourceGenerators()
@@ -447,6 +449,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
             _powerReceivers.Remove(receiver);
             _powerReceiverVisualStates.Remove(receiver);
         }
+        PowerCoveragePreviewOverlay.Instance?.RefreshIfShowing();
     }
 
     public void RegisterMainStructure(MainStructure mainStructure)

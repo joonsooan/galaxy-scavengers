@@ -19,6 +19,11 @@ public class ResourceGeneratorPowerStatusBillboard : MonoBehaviour
         if (_generator == null) {
             return;
         }
+        if (GameManager.Instance != null && GameManager.Instance.IsDragging()) {
+            ReleaseFollower();
+            _iconShownFor = PowerFeedVisualState.Ok;
+            return;
+        }
 
         ElectricityConsumptionManager mgr = ElectricityConsumptionManager.Instance;
         if (mgr == null) {

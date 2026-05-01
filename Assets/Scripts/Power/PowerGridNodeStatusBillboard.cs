@@ -18,6 +18,11 @@ public class PowerGridNodeStatusBillboard : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (GameManager.Instance != null && GameManager.Instance.IsDragging()) {
+            ReleaseFollower();
+            _iconShownFor = PowerFeedVisualState.Ok;
+            return;
+        }
         ElectricityConsumptionManager mgr = ElectricityConsumptionManager.Instance;
         if (mgr == null) {
             return;

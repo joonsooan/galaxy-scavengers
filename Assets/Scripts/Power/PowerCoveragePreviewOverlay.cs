@@ -239,6 +239,15 @@ public class PowerCoveragePreviewOverlay : MonoBehaviour
         ClearInternal();
     }
 
+    public void RefreshIfShowing()
+    {
+        if (!IsShowing)
+        {
+            return;
+        }
+        Show();
+    }
+
     private void ClearInternal()
     {
         if (previewTilemap == null) {

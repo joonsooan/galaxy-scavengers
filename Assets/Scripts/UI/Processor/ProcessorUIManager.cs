@@ -220,7 +220,14 @@ public class ProcessorUIManager : MonoBehaviour
 
         bool pickerMode = !_currentProcessor.SelectedOutputResource.HasValue || _showResourcePicker;
 
-        if (pickerMode && _currentProcessor.SelectedOutputResource.HasValue &&
+        if (pickerMode && _showResourcePicker && _currentProcessor.SelectedOutputResource.HasValue &&
+            _currentProcessor.SelectedOutputResource.Value == type) {
+            _showResourcePicker = false;
+            RefreshRecipeDisplay();
+            return;
+        }
+
+        if (pickerMode && !_showResourcePicker && _currentProcessor.SelectedOutputResource.HasValue &&
             _currentProcessor.SelectedOutputResource.Value == type) {
             _currentProcessor.SetSelectedOutputResource(null);
         }
