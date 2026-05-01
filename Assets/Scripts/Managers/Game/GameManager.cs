@@ -6,6 +6,7 @@ using Systems.Jobs;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -316,6 +317,25 @@ public class GameManager : MonoBehaviour
         {
             ctc.EndOpeningSequence();
         }
+    }
+
+    public IEnumerator WarmUpGameplayUiCoroutine()
+    {
+        yield return null;
+        if (BuildingInfoPanel.Instance != null)
+        {
+            BuildingInfoPanel.Instance.WarmupFirstUse();
+        }
+        if (ResourceInfoPanel.Instance != null)
+        {
+            ResourceInfoPanel.Instance.WarmupFirstUse();
+        }
+        if (UnitInfoPanel.Instance != null)
+        {
+            UnitInfoPanel.Instance.WarmupFirstUse();
+        }
+        yield return null;
+        Canvas.ForceUpdateCanvases();
     }
 
     public void StartDrag(DisplayableData data)

@@ -179,6 +179,7 @@ public class SceneLoader : MonoBehaviour
         {
             yield return GameManager.Instance.StartCoroutine(GameManager.Instance.RunGameSceneOpeningSequence());
             yield return _gameScenePostOpeningUiDelayWait;
+            yield return GameManager.Instance.StartCoroutine(GameManager.Instance.WarmUpGameplayUiCoroutine());
             GameManager.Instance.SetMainCanvasVisible(true);
         }
 

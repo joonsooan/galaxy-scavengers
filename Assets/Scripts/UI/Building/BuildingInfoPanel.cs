@@ -20,10 +20,24 @@ public class BuildingInfoPanel : MonoBehaviour
     [SerializeField] private GameObject noisePanel;
     [SerializeField] private TMP_Text noiseText;
 
+    [Header("Resource generator (post-build)")]
+    [SerializeField] private GameObject resourceGeneratorBatteryPanel;
+    [SerializeField] private Slider generatorBatterySlider;
+    [SerializeField] private TMP_Text generatorBatteryAmountText;
+    [SerializeField] private TMP_Text generatorPowerStatusText;
+    [SerializeField] private GameObject generatorPowerStatusOkIcon;
+    [SerializeField] private GameObject generatorPowerStatusProblemIcon;
+    [SerializeField] private Color generatorBatterySliderColorOk = new Color(0.25f, 0.78f, 0.35f, 1f);
+    [SerializeField] private Color generatorBatterySliderColorWarn = new Color(1f, 0.75f, 0.2f, 1f);
+    [SerializeField] private string generatorStatusTextProducing = "\uC804\uB825 \uC0DD\uC0B0 \uC911";
+    [SerializeField] private string generatorStatusTextBufferFull = "\uC804\uB825 \uCDA9\uBD84";
+    [SerializeField] private string generatorStatusTextNoFuel = "\uC790\uC6D0 \uBD80\uC871";
+
     private BuildingData _selectedData;
     private Damageable _currentDamageable;
     private bool _showMaxHealthOnly;
     private Dictionary<BuildingPieceType, BuildingPieceData> _pieceDataByType;
+    private ResourceGenerator _generatorForBatteryPanel;
 
     public static BuildingInfoPanel Instance { get; private set; }
 
@@ -39,16 +53,31 @@ public class BuildingInfoPanel : MonoBehaviour
         ClearAllInfo();
     }
 
+    private void Update()
+    {
+        if (resourceGeneratorBatteryPanel == null || !resourceGeneratorBatteryPanel.activeSelf)
+        {
+            return;
+        }
+        if (_generatorForBatteryPanel == null || !_generatorForBatteryPanel)
+        {
+            ClearGeneratorBatteryPanel();
+            return;
+        }
+        RefreshGeneratorBatteryPanel(_generatorForBatteryPanel);
+    }
+
     private void OnDisable()
     {
+        ClearGeneratorBatteryPanel();
         SetCurrentDamageable(null, false);
     }
-    
+
     public void SelectBuilding(BuildingData data)
     {
         _selectedData = data;
-        UpdateUI(data, false, null);
         Damageable damageable = data != null && data.buildingPrefab != null ? data.buildingPrefab.GetComponent<Damageable>() : null;
+        UpdateUI(data, false, null, damageable);
         SetCurrentDamageable(damageable, true);
         if (damageable != null)
             UpdateHealthDisplay(damageable, true);
@@ -66,7 +95,7 @@ public class BuildingInfoPanel : MonoBehaviour
         bool showPostConstructInfo,
         IElectricityConsumer runtimeConsumer = null)
     {
-        UpdateUI(data, showPostConstructInfo, runtimeConsumer);
+        UpdateUI(data, showPostConstructInfo, runtimeConsumer, damageable);
         SetCurrentDamageable(damageable, showMaxHealthOnly);
         if (damageable != null)
             UpdateHealthDisplay(damageable, showMaxHealthOnly);
@@ -76,8 +105,8 @@ public class BuildingInfoPanel : MonoBehaviour
     {
         if (_selectedData != null)
         {
-            UpdateUI(_selectedData, false, null);
             Damageable damageable = _selectedData.buildingPrefab != null ? _selectedData.buildingPrefab.GetComponent<Damageable>() : null;
+            UpdateUI(_selectedData, false, null, damageable);
             SetCurrentDamageable(damageable, true);
             if (damageable != null)
                 UpdateHealthDisplay(damageable, true);
@@ -111,8 +140,8 @@ public class BuildingInfoPanel : MonoBehaviour
         if (_currentDamageable != null)
             UpdateHealthDisplay(_currentDamageable, _showMaxHealthOnly);
     }
-    
-    private void UpdateUI(BuildingData data, bool showPostConstructInfo, IElectricityConsumer runtimeConsumer)
+
+    private void UpdateUI(BuildingData data, bool showPostConstructInfo, IElectricityConsumer runtimeConsumer, Damageable runtimeContextDamageable = null)
     {
         if (data == null) return;
 
@@ -126,13 +155,39 @@ public class BuildingInfoPanel : MonoBehaviour
             SetResourcePanelActive(false);
             SetPostConstructPanelActive(true);
             UpdatePostConstructDisplay(data, runtimeConsumer);
+            SyncResourceGeneratorBatteryPanel(data, runtimeContextDamageable);
         }
         else
         {
+            ClearGeneratorBatteryPanel();
             SetPostConstructPanelActive(false);
-            SetResourcePanelActive(true);
-            UpdateResourceDisplay(data);
+            if (data.buildingType == BuildingType.MainStructure)
+            {
+                if (resourcePanel != null)
+                {
+                    foreach (Transform child in resourcePanel.transform)
+                    {
+                        Destroy(child.gameObject);
+                    }
+                }
+                SetResourcePanelActive(false);
+            }
+            else
+            {
+                SetResourcePanelActive(true);
+                UpdateResourceDisplay(data);
+            }
             ClearPostConstructTexts();
+        }
+        RebuildPanelLayout();
+    }
+
+    private void RebuildPanelLayout()
+    {
+        RectTransform rt = transform as RectTransform;
+        if (rt != null)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
         }
     }
 
@@ -142,10 +197,10 @@ public class BuildingInfoPanel : MonoBehaviour
         if (aetherSpendPanel != null) aetherSpendPanel.SetActive(true);
 
         float noiseCoefficient = data != null ? data.noiseCoefficient : 0f;
-        if (noiseText != null) noiseText.text = $": {noiseCoefficient:F1}";
+        if (noiseText != null) noiseText.text = $"{noiseCoefficient:F1}";
 
         float electricityConsumption = GetElectricityConsumptionPerSecond(data, runtimeConsumer);
-        if (electricityConsumptionText != null) electricityConsumptionText.text = $": {electricityConsumption:F1} / s";
+        if (electricityConsumptionText != null) electricityConsumptionText.text = $"{electricityConsumption:F1} / s";
     }
 
     private void UpdateHealthDisplay(Damageable damageable, bool showMaxHealth = false)
@@ -154,6 +209,7 @@ public class BuildingInfoPanel : MonoBehaviour
         if (damageable == null)
         {
             healthText.text = string.Empty;
+            RebuildPanelLayout();
             return;
         }
 
@@ -165,10 +221,12 @@ public class BuildingInfoPanel : MonoBehaviour
         {
             healthText.text = $"{damageable.CurrentHealth} / {damageable.MaxHealth}";
         }
+        RebuildPanelLayout();
     }
 
     private void ClearUI()
     {
+        ClearGeneratorBatteryPanel();
         if (buildingName != null) buildingName.text = string.Empty;
         if (buildingDesc != null) buildingDesc.text = string.Empty;
         if (healthText != null) healthText.text = string.Empty;
@@ -182,8 +240,9 @@ public class BuildingInfoPanel : MonoBehaviour
         SetResourcePanelActive(false);
         SetPostConstructPanelActive(false);
         HideAetherAndNoiseDisplay();
+        RebuildPanelLayout();
     }
-    
+
     private void UpdateResourceDisplay(BuildingData data)
     {
         if (resourcePanel == null)
@@ -241,20 +300,14 @@ public class BuildingInfoPanel : MonoBehaviour
 
             GameObject cellObj = Instantiate(resourceInfoCellPrefab, resourcePanel.transform);
             ResourceInfoCell cell = cellObj.GetComponent<ResourceInfoCell>();
-            
+
             if (cell != null)
             {
                 cell.SetInfo(type, amount, false);
             }
         }
-
-        RectTransform panelRect = resourcePanel.GetComponent<RectTransform>();
-        if (panelRect != null)
-        {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(panelRect);
-        }
     }
-    
+
     private BuildingPieceData GetPieceDataByType(BuildingPieceType type)
     {
         EnsurePieceDataCache();
@@ -293,6 +346,7 @@ public class BuildingInfoPanel : MonoBehaviour
     {
         _selectedData = null;
         SetCurrentDamageable(null, false);
+        ClearGeneratorBatteryPanel();
 
         if (buildingName != null)
         {
@@ -315,6 +369,7 @@ public class BuildingInfoPanel : MonoBehaviour
         }
         SetPostConstructPanelActive(false);
         HideAetherAndNoiseDisplay();
+        RebuildPanelLayout();
     }
 
     private void HideAetherAndNoiseDisplay()
@@ -381,6 +436,179 @@ public class BuildingInfoPanel : MonoBehaviour
         }
 
         return prefabConsumer != null ? prefabConsumer.ElectricityConsumptionPerSecond : 0f;
+    }
+
+    private void SyncResourceGeneratorBatteryPanel(BuildingData data, Damageable runtimeContextDamageable)
+    {
+        if (resourceGeneratorBatteryPanel == null || data == null || data.buildingType != BuildingType.Generator)
+        {
+            ClearGeneratorBatteryPanel();
+            return;
+        }
+        if (runtimeContextDamageable == null)
+        {
+            ClearGeneratorBatteryPanel();
+            return;
+        }
+        ResourceGenerator rg = runtimeContextDamageable.GetComponent<ResourceGenerator>();
+        if (rg == null)
+        {
+            rg = runtimeContextDamageable.GetComponentInChildren<ResourceGenerator>(true);
+        }
+        if (rg == null || !rg.IsConstructed)
+        {
+            ClearGeneratorBatteryPanel();
+            return;
+        }
+        _generatorForBatteryPanel = rg;
+        resourceGeneratorBatteryPanel.SetActive(true);
+        RefreshGeneratorBatteryPanel(rg);
+    }
+
+    private void RefreshGeneratorBatteryPanel(ResourceGenerator rg)
+    {
+        if (rg == null || !rg)
+        {
+            ClearGeneratorBatteryPanel();
+            return;
+        }
+        int maxCap = Mathf.Max(1, rg.ElectricityBufferMax);
+        int current = rg.ElectricityBufferCurrent;
+        float ratio = Mathf.Clamp01(current / (float)maxCap);
+        if (generatorBatterySlider != null)
+        {
+            generatorBatterySlider.minValue = 0f;
+            generatorBatterySlider.maxValue = 1f;
+            generatorBatterySlider.SetValueWithoutNotify(ratio);
+            generatorBatterySlider.interactable = false;
+        }
+        if (generatorBatteryAmountText != null)
+        {
+            generatorBatteryAmountText.text = BatteryAmountTextFormatter.Format(current, rg.ElectricityBufferMax);
+        }
+        bool fuelOk = rg.HasFuelAvailableInRange();
+        bool bufferFull = current >= rg.ElectricityBufferMax;
+        bool showOkIcon;
+        bool showProblemIcon;
+        string statusText;
+        if (!fuelOk)
+        {
+            showOkIcon = false;
+            showProblemIcon = true;
+            statusText = generatorStatusTextNoFuel;
+        }
+        else if (bufferFull)
+        {
+            showOkIcon = true;
+            showProblemIcon = false;
+            statusText = generatorStatusTextBufferFull;
+        }
+        else
+        {
+            showOkIcon = true;
+            showProblemIcon = false;
+            statusText = generatorStatusTextProducing;
+        }
+        if (generatorPowerStatusText != null)
+        {
+            generatorPowerStatusText.text = statusText;
+        }
+        if (generatorPowerStatusOkIcon != null)
+        {
+            generatorPowerStatusOkIcon.SetActive(showOkIcon);
+        }
+        if (generatorPowerStatusProblemIcon != null)
+        {
+            generatorPowerStatusProblemIcon.SetActive(showProblemIcon);
+        }
+        if (generatorBatterySlider != null)
+        {
+            BatterySliderFillColorUtility.ApplyDiscreteByRatio(
+                generatorBatterySlider,
+                showProblemIcon ? 0f : 1f,
+                generatorBatterySliderColorWarn,
+                generatorBatterySliderColorOk);
+        }
+    }
+
+    private void ClearGeneratorBatteryPanel()
+    {
+        _generatorForBatteryPanel = null;
+        if (resourceGeneratorBatteryPanel != null)
+        {
+            resourceGeneratorBatteryPanel.SetActive(false);
+        }
+        if (generatorBatteryAmountText != null)
+        {
+            generatorBatteryAmountText.text = string.Empty;
+        }
+        if (generatorPowerStatusText != null)
+        {
+            generatorPowerStatusText.text = string.Empty;
+        }
+        if (generatorPowerStatusOkIcon != null)
+        {
+            generatorPowerStatusOkIcon.SetActive(false);
+        }
+        if (generatorPowerStatusProblemIcon != null)
+        {
+            generatorPowerStatusProblemIcon.SetActive(false);
+        }
+        if (generatorBatterySlider != null)
+        {
+            generatorBatterySlider.SetValueWithoutNotify(0f);
+            BatterySliderFillColorUtility.ApplyDiscreteByRatio(
+                generatorBatterySlider,
+                0f,
+                generatorBatterySliderColorWarn,
+                generatorBatterySliderColorOk);
+        }
+    }
+
+    public void WarmupFirstUse()
+    {
+        bool wasActive = gameObject.activeSelf;
+        gameObject.SetActive(true);
+        WarmTouchTmp(buildingName);
+        WarmTouchTmp(buildingDesc);
+        WarmTouchTmp(healthText);
+        WarmTouchTmp(electricityConsumptionText);
+        WarmTouchTmp(noiseText);
+        WarmTouchTmp(generatorBatteryAmountText);
+        WarmTouchTmp(generatorPowerStatusText);
+        if (resourcePanel != null && resourceInfoCellPrefab != null)
+        {
+            GameObject cellObj = Instantiate(resourceInfoCellPrefab, resourcePanel.transform);
+            ResourceInfoCell cell = cellObj.GetComponent<ResourceInfoCell>();
+            if (cell != null)
+            {
+                cell.SetInfo(ResourceType.Ferrite, 1, false);
+            }
+            RectTransform resourceRt = resourcePanel.GetComponent<RectTransform>();
+            if (resourceRt != null)
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(resourceRt);
+            }
+            Destroy(cellObj);
+        }
+        RebuildPanelLayout();
+        Canvas.ForceUpdateCanvases();
+        ClearAllInfo();
+        if (!wasActive)
+        {
+            gameObject.SetActive(false);
+        }
+    }
+
+    private static void WarmTouchTmp(TMP_Text text)
+    {
+        if (text == null)
+        {
+            return;
+        }
+        text.text = " ";
+        text.ForceMeshUpdate(true);
+        text.text = string.Empty;
     }
 
 }

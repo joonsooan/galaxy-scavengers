@@ -42,6 +42,10 @@ public class ObjClickManager : MonoBehaviour
             return;
         }
 
+        if (UIUtils.IsPointerOverUI()) {
+            return;
+        }
+
         LaunchUIController launchUIController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
         if (launchUIController != null && launchUIController.IsLaunchInputLockActive())
         {

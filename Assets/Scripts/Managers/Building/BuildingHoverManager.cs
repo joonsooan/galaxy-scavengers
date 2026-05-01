@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
 public class BuildingHoverManager : MonoBehaviour
@@ -66,27 +65,40 @@ public class BuildingHoverManager : MonoBehaviour
             CreateMouseHoverDetector();
         }
 
-        if (_mouseHoverDetector != null)
-        {
-            Vector3 mouseWorldPos = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
-            mouseWorldPos.z = 0f;
-            _mouseHoverDetector.transform.position = mouseWorldPos;
-        }
-
         if (GameManager.Instance != null && GameManager.Instance.IsDragging())
         {
             CardDragger dragger = GameManager.Instance.cardDragger;
             bool keepPowerPreview = dragger != null && dragger.IsDraggingBuildingCard;
             ClearHoverStateOnly(keepPowerPreview);
+            if (_mouseHoverDetector != null)
+            {
+                Vector3 mouseWorldPos = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
+                mouseWorldPos.z = 0f;
+                _mouseHoverDetector.transform.position = mouseWorldPos;
+            }
             return;
         }
 
-        if (UIUtils.IsPointerOverUI() && !IsPointerOverFloatingNumText() && !IsPointerOverProgressSlider() &&
-            !IsPointerOverBuildingButton() &&
-            !IsPointerOverPowerStatusWorldFollower())
+        if (UIUtils.IsPointerOverUI())
         {
             ClearAllHovers();
+            if (_mouseDetectorCollider != null)
+            {
+                _mouseDetectorCollider.enabled = false;
+            }
             return;
+        }
+
+        if (_mouseDetectorCollider != null)
+        {
+            _mouseDetectorCollider.enabled = true;
+        }
+
+        if (_mouseHoverDetector != null)
+        {
+            Vector3 mouseWorldPos = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
+            mouseWorldPos.z = 0f;
+            _mouseHoverDetector.transform.position = mouseWorldPos;
         }
 
         TryStartDragFromHoveredBuildingViaShortcut();
@@ -105,6 +117,7 @@ public class BuildingHoverManager : MonoBehaviour
 
     public void OnBuildingEnter(BuildingDataHolder buildingDataHolder)
     {
+        if (UIUtils.IsPointerOverUI()) return;
         if (GameManager.Instance != null && GameManager.Instance.IsDragging()) return;
         if (buildingDataHolder == null || buildingDataHolder.buildingData == null) return;
         if (buildingDataHolder == _currentHoveredBuilding) return;
@@ -138,6 +151,7 @@ public class BuildingHoverManager : MonoBehaviour
 
     public void OnStorageEnter(IStorage storage)
     {
+        if (UIUtils.IsPointerOverUI()) return;
         if (GameManager.Instance != null && GameManager.Instance.IsDragging()) return;
         if (storage == null) return;
         if (storage == _currentHoveredStorage) return;
@@ -161,6 +175,7 @@ public class BuildingHoverManager : MonoBehaviour
 
     public void OnResourceEnter(ResourceNode node)
     {
+        if (UIUtils.IsPointerOverUI()) return;
         if (GameManager.Instance != null && GameManager.Instance.IsDragging()) return;
         if (node == null)
         {
@@ -188,6 +203,7 @@ public class BuildingHoverManager : MonoBehaviour
 
     public void OnUnitEnter(UnitBase unit)
     {
+        if (UIUtils.IsPointerOverUI()) return;
         if (GameManager.Instance != null && GameManager.Instance.IsDragging()) return;
         if (unit == null)
         {
@@ -360,126 +376,6 @@ public class BuildingHoverManager : MonoBehaviour
         if (uiManager.IsDroneHubPanelActive())
         {
             return true;
-        }
-
-        return false;
-    }
-
-    private bool IsPointerOverFloatingNumText()
-    {
-        if (EventSystem.current == null) return false;
-
-        PointerEventData pointerEventData = new PointerEventData(EventSystem.current);
-        pointerEventData.position = Input.mousePosition;
-
-        List<RaycastResult> results = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(pointerEventData, results);
-
-        foreach (RaycastResult result in results)
-        {
-            if (result.gameObject != null && result.gameObject.GetComponent<FloatingNumText>() != null)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static bool IsPointerOverPowerStatusWorldFollower()
-    {
-        if (EventSystem.current == null) {
-            return false;
-        }
-
-        PointerEventData pointerEventData = new PointerEventData(EventSystem.current);
-        pointerEventData.position = Input.mousePosition;
-
-        List<RaycastResult> results = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(pointerEventData, results);
-
-        foreach (RaycastResult result in results) {
-            if (result.gameObject == null) {
-                continue;
-            }
-            if (result.gameObject.GetComponentInParent<PowerStatusWorldFollower>() != null) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private bool IsPointerOverProgressSlider()
-    {
-        if (EventSystem.current == null) return false;
-
-        PointerEventData pointerEventData = new PointerEventData(EventSystem.current);
-        pointerEventData.position = Input.mousePosition;
-
-        List<RaycastResult> results = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(pointerEventData, results);
-
-        foreach (RaycastResult result in results)
-        {
-            if (result.gameObject != null)
-            {
-                ProductionProgressSlider slider = result.gameObject.GetComponent<ProductionProgressSlider>();
-                if (slider == null)
-                {
-                    slider = result.gameObject.GetComponentInParent<ProductionProgressSlider>();
-                }
-                if (slider == null)
-                {
-                    slider = result.gameObject.GetComponentInChildren<ProductionProgressSlider>();
-                }
-                if (slider != null)
-                {
-                    return true;
-                }
-                
-                Transform current = result.gameObject.transform;
-                while (current != null)
-                {
-                    if (current.GetComponent<ProductionProgressSlider>() != null)
-                    {
-                        return true;
-                    }
-                    current = current.parent;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    private static bool IsPointerOverBuildingButton()
-    {
-        if (EventSystem.current == null) return false;
-
-        PointerEventData pointerEventData = new PointerEventData(EventSystem.current);
-        pointerEventData.position = Input.mousePosition;
-
-        List<RaycastResult> results = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(pointerEventData, results);
-
-        foreach (RaycastResult result in results)
-        {
-            if (result.gameObject == null)
-            {
-                continue;
-            }
-
-            BuildingButton buildingButton = result.gameObject.GetComponent<BuildingButton>();
-            if (buildingButton == null)
-            {
-                buildingButton = result.gameObject.GetComponentInParent<BuildingButton>();
-            }
-
-            if (buildingButton != null)
-            {
-                return true;
-            }
         }
 
         return false;
