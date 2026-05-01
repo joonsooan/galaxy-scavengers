@@ -4,7 +4,7 @@ using UnityEngine;
 [Serializable]
 public class UnitUpgradeTier
 {
-    public ResourceCost[] costs;
+    public int tokenCost;
     public float upgradeTime;
     [TextArea(2, 8)]
     public string description;

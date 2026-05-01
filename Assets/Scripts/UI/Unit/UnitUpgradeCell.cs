@@ -136,16 +136,13 @@ public class UnitUpgradeCell : MonoBehaviour
         ClearResourceCells();
         UnitUpgradeTier nextTier = GetNextTier(level);
 
-        if (nextTier != null && nextTier.costs != null && resourceContent != null && resourceInfoCellPrefab != null)
+        if (nextTier != null && nextTier.tokenCost > 0 && resourceContent != null && resourceInfoCellPrefab != null)
         {
-            foreach (ResourceCost cost in nextTier.costs)
+            GameObject cellObj = Instantiate(resourceInfoCellPrefab, resourceContent);
+            ResourceInfoCell cell = cellObj.GetComponent<ResourceInfoCell>();
+            if (cell != null)
             {
-                GameObject cellObj = Instantiate(resourceInfoCellPrefab, resourceContent);
-                ResourceInfoCell cell = cellObj.GetComponent<ResourceInfoCell>();
-                if (cell != null)
-                {
-                    cell.SetInfo(cost.resourceType, cost.amount, false);
-                }
+                cell.SetTokenCost(nextTier.tokenCost, false);
             }
 
             foreach (Transform child in resourceContent)
@@ -167,8 +164,8 @@ public class UnitUpgradeCell : MonoBehaviour
             {
                 bool blockedByOtherLine = progress.IsAnyUpgradeInProgress() &&
                     !progress.IsUpgradeInProgress(_line.statType);
-                bool canAffordResources = !maxed && TierResourceCostsSatisfied(nextTier);
-                btn.interactable = !maxed && !blockedByOtherLine && canAffordResources;
+                bool canAffordTokens = !maxed && TierTokenCostsSatisfied(nextTier);
+                btn.interactable = !maxed && !blockedByOtherLine && canAffordTokens;
             }
 
             ApplyUpgradeButtonLabel(btn, progress);
@@ -200,20 +197,20 @@ public class UnitUpgradeCell : MonoBehaviour
         }
     }
 
-    private static bool TierResourceCostsSatisfied(UnitUpgradeTier tier)
+    private static bool TierTokenCostsSatisfied(UnitUpgradeTier tier)
     {
         if (tier == null)
         {
             return false;
         }
 
-        if (tier.costs == null || tier.costs.Length == 0)
+        if (tier.tokenCost <= 0)
         {
             return true;
         }
 
-        return ResourceManager.Instance != null &&
-            ResourceManager.Instance.HasEnoughResources(tier.costs);
+        return GameplayTokenWallet.Instance != null &&
+            GameplayTokenWallet.Instance.CanAfford(tier.tokenCost);
     }
 
     private static UnitUpgradeProgress ResolveProgressReference()

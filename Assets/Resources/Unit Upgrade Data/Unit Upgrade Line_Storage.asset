@@ -16,18 +16,12 @@ MonoBehaviour:
   displayName: "\uC800\uC7A5\uB7C9"
   icon: {fileID: 1113022141554812988, guid: a4eebf007e7d79649baac3ab7d16b7c4, type: 3}
   tiers:
-  - costs:
-    - resourceType: 3
-      amount: 500
+  - tokenCost: 10
     upgradeTime: 10
     description: "\uC790\uC6D0 \uC6B4\uBC18\uB7C9 +10"
     floatStatBonus: 0
     intStatBonus: 10
-  - costs:
-    - resourceType: 1
-      amount: 500
-    - resourceType: 6
-      amount: 50
+  - tokenCost: 20
     upgradeTime: 30
     description: "\uC790\uC6D0 \uC6B4\uBC18\uB7C9 +20"
     floatStatBonus: 0

@@ -11,7 +11,8 @@ public class UnitUpgradeUIController : MonoBehaviour
 
     private void OnEnable()
     {
-        ResourceManager.OnResourceAmountChanged += OnResourceAmountChanged;
+        GameplayTokenWallet.EnsureExists(this);
+        GameplayTokenWallet.OnBalanceChanged += OnTokenBalanceChanged;
         UnitUpgradeProgress.OnUpgradeStateChanged += OnUpgradeStateChanged;
         ResolveProgressReference();
         Refresh();
@@ -27,11 +28,11 @@ public class UnitUpgradeUIController : MonoBehaviour
 
     private void OnDisable()
     {
-        ResourceManager.OnResourceAmountChanged -= OnResourceAmountChanged;
+        GameplayTokenWallet.OnBalanceChanged -= OnTokenBalanceChanged;
         UnitUpgradeProgress.OnUpgradeStateChanged -= OnUpgradeStateChanged;
     }
 
-    private void OnResourceAmountChanged(ResourceType _, int __)
+    private void OnTokenBalanceChanged()
     {
         RefreshCellsOnly();
     }

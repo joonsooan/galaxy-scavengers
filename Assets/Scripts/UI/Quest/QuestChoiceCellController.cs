@@ -36,7 +36,22 @@ public class QuestChoiceCellController : MonoBehaviour
 
         if (requiredAmountText != null)
         {
-            requiredAmountText.text = choice.requiredAmount.ToString();
+            int tokenReward = 0;
+            if (choice.rewardSpecs != null)
+            {
+                for (int i = 0; i < choice.rewardSpecs.Count; i++)
+                {
+                    ProceduralQuestRewardSpec spec = choice.rewardSpecs[i];
+                    if (spec != null && spec.kind == ProceduralQuestRewardKind.Token && spec.amount > 0)
+                    {
+                        tokenReward += spec.amount;
+                    }
+                }
+            }
+
+            requiredAmountText.text = tokenReward > 0
+                ? $"{choice.requiredAmount}\n토큰 +{tokenReward}"
+                : choice.requiredAmount.ToString();
         }
     }
 

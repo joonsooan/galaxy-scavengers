@@ -14,8 +14,8 @@ public class ProceduralQuestGenerator
         public int switchToLateRuleQuestIndex = 4;
         public float lateBasicWeight = 0.65f;
         public int choicesPerCycle = 3;
-        public int rewardAmountMin = 5;
-        public int rewardAmountMax = 15;
+        public int tokenRewardAmountMin = 5;
+        public int tokenRewardAmountMax = 15;
         public bool useDeterministicSeed;
         public int deterministicSeed;
     }
@@ -56,21 +56,21 @@ public class ProceduralQuestGenerator
             ? PickUniqueType(_settings.earlyBasicResourcePool, usedResources)
             : PickLateRuleResourceType(usedResources);
         int requiredAmount = useEarlyRule
-            ? PickRange(_settings.earlyBasicAmountRange)
-            : PickLateRuleAmount(targetType);
+            ? PickTenMultipleInRange(_settings.earlyBasicAmountRange)
+            : PickLateRuleAmountAsTenMultiple(targetType);
 
         ProceduralQuestChoiceData choice = new()
         {
             questId = questId,
             targetResourceType = targetType,
-            requiredAmount = Mathf.Max(1, requiredAmount),
+            requiredAmount = Mathf.Max(10, requiredAmount),
             createdAtQuestIndex = questIndex
         };
 
         choice.rewardSpecs.Add(new ProceduralQuestRewardSpec
         {
-            resourceType = targetType,
-            amount = Mathf.Max(0, PickInt(_settings.rewardAmountMin, _settings.rewardAmountMax))
+            kind = ProceduralQuestRewardKind.Token,
+            amount = Mathf.Max(0, PickInt(_settings.tokenRewardAmountMin, _settings.tokenRewardAmountMax))
         });
 
         return choice;
@@ -97,14 +97,34 @@ public class ProceduralQuestGenerator
         return PickUniqueType(_settings.earlyBasicResourcePool, usedResources);
     }
 
-    private int PickLateRuleAmount(ResourceType targetType)
+    private int PickLateRuleAmountAsTenMultiple(ResourceType targetType)
     {
         if (_settings.lateProcessedResourcePool != null && _settings.lateProcessedResourcePool.Contains(targetType))
         {
-            return PickRange(_settings.lateProcessedAmountRange);
+            return PickTenMultipleInRange(_settings.lateProcessedAmountRange);
         }
 
-        return PickRange(_settings.lateBasicAmountRange);
+        return PickTenMultipleInRange(_settings.lateBasicAmountRange);
+    }
+
+    private int PickTenMultipleInRange(Vector2Int range)
+    {
+        int min = Mathf.Min(range.x, range.y);
+        int max = Mathf.Max(range.x, range.y);
+        int minT = min <= 0 ? 1 : (min + 9) / 10;
+        int maxT = max / 10;
+        if (minT > maxT)
+        {
+            int snappedDown = (max / 10) * 10;
+            if (snappedDown <= 0)
+            {
+                return Mathf.Clamp(max, 1, max);
+            }
+
+            return Mathf.Max(min, snappedDown);
+        }
+
+        return PickInt(minT, maxT) * 10;
     }
 
     private ResourceType PickUniqueType(List<ResourceType> pool, HashSet<ResourceType> usedResources)
@@ -135,13 +155,6 @@ public class ProceduralQuestGenerator
         }
 
         return available[PickInt(0, available.Count - 1)];
-    }
-
-    private int PickRange(Vector2Int range)
-    {
-        int min = Mathf.Min(range.x, range.y);
-        int max = Mathf.Max(range.x, range.y);
-        return PickInt(min, max);
     }
 
     private int PickInt(int minInclusive, int maxInclusive)
