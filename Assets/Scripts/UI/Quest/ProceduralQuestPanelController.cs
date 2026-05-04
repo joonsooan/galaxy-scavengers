@@ -26,6 +26,7 @@ public class ProceduralQuestPanelController : MonoBehaviour
     [Header("Active Quest UI")]
     [SerializeField] private Image activeResourceIcon;
     [SerializeField] private TMP_Text activeAmountPairText;
+    [SerializeField] private TMP_Text activeTokenAmountText;
     [SerializeField] private TMP_Text activeStateText;
     [SerializeField] private Button completeButton;
 
@@ -280,6 +281,11 @@ public class ProceduralQuestPanelController : MonoBehaviour
     {
         if (activeQuest == null)
         {
+            if (activeTokenAmountText != null)
+            {
+                activeTokenAmountText.text = string.Empty;
+            }
+
             return;
         }
 
@@ -298,6 +304,12 @@ public class ProceduralQuestPanelController : MonoBehaviour
         if (activeAmountPairText != null)
         {
             activeAmountPairText.text = $"{currentAmount} / {activeQuest.requiredAmount}";
+        }
+
+        if (activeTokenAmountText != null)
+        {
+            int tokenReward = SumTokenRewardAmount(activeQuest.rewardSpecs);
+            activeTokenAmountText.text = tokenReward > 0 ? $"+{tokenReward}" : string.Empty;
         }
 
         string progressLine = state == ProceduralQuestState.Completable
@@ -345,5 +357,25 @@ public class ProceduralQuestPanelController : MonoBehaviour
 
         questManager.CompleteActiveQuest();
         RefreshView();
+    }
+
+    private static int SumTokenRewardAmount(List<ProceduralQuestRewardSpec> rewardSpecs)
+    {
+        if (rewardSpecs == null)
+        {
+            return 0;
+        }
+
+        int sum = 0;
+        for (int i = 0; i < rewardSpecs.Count; i++)
+        {
+            ProceduralQuestRewardSpec spec = rewardSpecs[i];
+            if (spec != null && spec.kind == ProceduralQuestRewardKind.Token && spec.amount > 0)
+            {
+                sum += spec.amount;
+            }
+        }
+
+        return sum;
     }
 }

@@ -1191,7 +1191,6 @@ MonoBehaviour:
   rewardGridContainer: {fileID: 2304933594906312899}
   baseInventoryCellPrefab: {fileID: 3842191235755297668, guid: 0c93dfd6b41a96d4489a92b302206a7f, type: 3}
   moduleInventoryCellPrefab: {fileID: 3842191235755297668, guid: 7e4a0cf64cb16f149bb12534ac540ab8, type: 3}
-  creditRewardCellPrefab: {fileID: 3842191235755297668, guid: e0d1db81afafdbc448806e0b544320fc, type: 3}
   buildingRewardCellPrefab: {fileID: 3842191235755297668, guid: 97dfa7726b241f945ac8cd662b44ae19, type: 3}
   unitRewardCellPrefab: {fileID: 3842191235755297668, guid: 27899abcd552db54084667e9a47f68e2, type: 3}
   requirementTextPrefab: {fileID: 3910177617370362157, guid: d628bd7f832ecbb479ff2b0c504e7627, type: 3}

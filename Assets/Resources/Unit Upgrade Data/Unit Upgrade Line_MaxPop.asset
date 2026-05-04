@@ -16,12 +16,12 @@ MonoBehaviour:
   displayName: "\uC720\uB2DB \uC22B\uC790"
   icon: {fileID: -1289070501367566007, guid: a4eebf007e7d79649baac3ab7d16b7c4, type: 3}
   tiers:
-  - tokenCost: 10
+  - tokenCost: 100
     upgradeTime: 10
     description: "\uCD5C\uB300 \uC720\uB2DB +5"
     floatStatBonus: 0
     intStatBonus: 5
-  - tokenCost: 20
+  - tokenCost: 200
     upgradeTime: 30
     description: "\uCD5C\uB300 \uC720\uB2DB +5"
     floatStatBonus: 0

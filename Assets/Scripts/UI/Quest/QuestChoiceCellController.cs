@@ -7,6 +7,10 @@ public class QuestChoiceCellController : MonoBehaviour
 {
     [SerializeField] private Image resourceIconImage;
     [SerializeField] private TMP_Text requiredAmountText;
+    [SerializeField] private GameObject tokenRewardRoot;
+    [SerializeField] private Image tokenIconImage;
+    [SerializeField] private TMP_Text tokenRewardText;
+    [SerializeField] private Sprite questTokenIconSprite;
     [SerializeField] private Button acceptButton;
 
     private int _questId;
@@ -36,22 +40,49 @@ public class QuestChoiceCellController : MonoBehaviour
 
         if (requiredAmountText != null)
         {
-            int tokenReward = 0;
-            if (choice.rewardSpecs != null)
+            requiredAmountText.text = choice.requiredAmount.ToString();
+        }
+
+        int tokenReward = 0;
+        if (choice.rewardSpecs != null)
+        {
+            for (int i = 0; i < choice.rewardSpecs.Count; i++)
             {
-                for (int i = 0; i < choice.rewardSpecs.Count; i++)
+                ProceduralQuestRewardSpec spec = choice.rewardSpecs[i];
+                if (spec != null && spec.kind == ProceduralQuestRewardKind.Token && spec.amount > 0)
                 {
-                    ProceduralQuestRewardSpec spec = choice.rewardSpecs[i];
-                    if (spec != null && spec.kind == ProceduralQuestRewardKind.Token && spec.amount > 0)
-                    {
-                        tokenReward += spec.amount;
-                    }
+                    tokenReward += spec.amount;
                 }
             }
+        }
 
-            requiredAmountText.text = tokenReward > 0
-                ? $"{choice.requiredAmount}\n토큰 +{tokenReward}"
-                : choice.requiredAmount.ToString();
+        bool showToken = tokenReward > 0;
+        if (tokenRewardRoot != null)
+        {
+            tokenRewardRoot.SetActive(showToken);
+        }
+
+        if (tokenIconImage != null)
+        {
+            if (showToken && questTokenIconSprite != null)
+            {
+                tokenIconImage.sprite = questTokenIconSprite;
+                tokenIconImage.enabled = true;
+            }
+            else
+            {
+                tokenIconImage.sprite = null;
+                tokenIconImage.enabled = false;
+            }
+        }
+
+        if (tokenRewardText != null)
+        {
+            tokenRewardText.gameObject.SetActive(showToken);
+            if (showToken)
+            {
+                tokenRewardText.text = $"+{tokenReward}";
+            }
         }
     }
 

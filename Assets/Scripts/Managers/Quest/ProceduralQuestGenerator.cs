@@ -67,10 +67,15 @@ public class ProceduralQuestGenerator
             createdAtQuestIndex = questIndex
         };
 
+        int tMin = Mathf.Min(_settings.tokenRewardAmountMin, _settings.tokenRewardAmountMax);
+        int tMax = Mathf.Max(_settings.tokenRewardAmountMin, _settings.tokenRewardAmountMax);
+        int tokenRewardAmount = PickTenMultipleInRange(new Vector2Int(tMin, tMax));
+        tokenRewardAmount = Mathf.Max(10, tokenRewardAmount);
+
         choice.rewardSpecs.Add(new ProceduralQuestRewardSpec
         {
             kind = ProceduralQuestRewardKind.Token,
-            amount = Mathf.Max(0, PickInt(_settings.tokenRewardAmountMin, _settings.tokenRewardAmountMax))
+            amount = tokenRewardAmount
         });
 
         return choice;

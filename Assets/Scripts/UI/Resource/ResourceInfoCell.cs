@@ -13,6 +13,7 @@ public class ResourceInfoCell : MonoBehaviour
     private Color _originalTextColor;
     private bool _isTrackingResources;
     private bool _tracksToken;
+    private bool _tokenCostLabelShowsBalanceFraction = true;
 
     private void OnEnable()
     {
@@ -106,8 +107,19 @@ public class ResourceInfoCell : MonoBehaviour
 
     public void SetTokenCost(int tokenCost, bool rebuildImmediately)
     {
+        SetTokenCost(tokenCost, null, rebuildImmediately, true);
+    }
+
+    public void SetTokenCost(int tokenCost, Sprite tokenIcon, bool rebuildImmediately)
+    {
+        SetTokenCost(tokenCost, tokenIcon, rebuildImmediately, true);
+    }
+
+    public void SetTokenCost(int tokenCost, Sprite tokenIcon, bool rebuildImmediately, bool labelShowsBalanceFraction)
+    {
         _tracksToken = true;
         _isTrackingResources = true;
+        _tokenCostLabelShowsBalanceFraction = labelShowsBalanceFraction;
         _requiredAmount = tokenCost;
         _resourceType = ResourceType.None;
 
@@ -118,8 +130,16 @@ public class ResourceInfoCell : MonoBehaviour
 
         if (resourceImage != null)
         {
-            resourceImage.sprite = null;
-            resourceImage.enabled = false;
+            if (tokenIcon != null)
+            {
+                resourceImage.sprite = tokenIcon;
+                resourceImage.enabled = true;
+            }
+            else
+            {
+                resourceImage.sprite = null;
+                resourceImage.enabled = false;
+            }
         }
 
         RefreshTokenCostDisplay();
@@ -149,7 +169,9 @@ public class ResourceInfoCell : MonoBehaviour
         }
 
         int current = GameplayTokenWallet.Instance != null ? GameplayTokenWallet.Instance.Balance : 0;
-        resourceAmount.text = $"{current}/{_requiredAmount}";
+        resourceAmount.text = _tokenCostLabelShowsBalanceFraction
+            ? $"{current}/{_requiredAmount}"
+            : _requiredAmount.ToString();
 
         if (current < _requiredAmount)
         {

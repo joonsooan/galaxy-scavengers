@@ -248,7 +248,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -72}
+  m_AnchoredPosition: {x: 0, y: -68}
   m_SizeDelta: {x: 0, y: 8}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &3377530101737658328
@@ -306,7 +306,7 @@ MonoBehaviour:
     m_Right: 8
     m_Top: 0
     m_Bottom: 0
-  m_ChildAlignment: 0
+  m_ChildAlignment: 1
   m_Spacing: 2
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
@@ -550,8 +550,9 @@ MonoBehaviour:
   iconImage: {fileID: 7169620814835030147}
   levelText: {fileID: 8282898609205538328}
   maxLevelLabel: "\uCD5C\uB300 \uB808\uBCA8"
-  resourceContent: {fileID: 555347038602907405}
-  resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: 87d776b852749c2428050baaea9b40b1, type: 3}
+  tokenCostContainer: {fileID: 555347038602907405}
+  tokenInfoCellPrefab: {fileID: 6155155196410172978, guid: 9bf466cf4eb3e024fbeb41abea4a05bb, type: 3}
+  gameplayTokenIcon: {fileID: 5529022320273088708, guid: 2f045daff8f3d3845a408fd2791ebe17, type: 3}
   upgradeButton: {fileID: 8602646091580618626}
 --- !u!1 &7372812349713803699
 GameObject:

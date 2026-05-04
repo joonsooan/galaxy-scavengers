@@ -14,7 +14,6 @@ public class QuestDetailPanel : MonoBehaviour
     [SerializeField] private GameObject rewardGridContainer;
     [SerializeField] private GameObject baseInventoryCellPrefab;
     [SerializeField] private GameObject moduleInventoryCellPrefab;
-    [SerializeField] private GameObject creditRewardCellPrefab;
     [SerializeField] private GameObject buildingRewardCellPrefab;
     [SerializeField] private GameObject unitRewardCellPrefab;
     [SerializeField] private GameObject requirementTextPrefab;
@@ -397,36 +396,7 @@ public class QuestDetailPanel : MonoBehaviour
                     }
                 }
             }
-            
-            if (questData.questFinishReward.creditReward > 0)
-            {
-                if (creditRewardCellPrefab != null)
-                {
-                    GameObject cellObj = Instantiate(creditRewardCellPrefab, rewardGridContainer.transform);
-                    CreditRewardCell cell = cellObj.GetComponent<CreditRewardCell>();
-                    if (cell != null)
-                    {
-                        cell.SetCreditAmount(questData.questFinishReward.creditReward);
-                    }
-                    else
-                    {
-                    }
-                }
-                else
-                {
-                    GameObject cellObj = Instantiate(baseInventoryCellPrefab, rewardGridContainer.transform);
-                    BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
-                    if (cell != null)
-                    {
-                        TMP_Text creditText = cellObj.GetComponentInChildren<TMP_Text>();
-                        if (creditText != null)
-                        {
-                            creditText.text = $"{questData.questFinishReward.creditReward} Credits";
-                        }
-                    }
-                }
-            }
-            
+
             if (questData.questFinishReward.unlockedBuildings != null && questData.questFinishReward.unlockedBuildings.Length > 0)
             {
                 foreach (BuildingData building in questData.questFinishReward.unlockedBuildings)
@@ -755,18 +725,7 @@ public class QuestDetailPanel : MonoBehaviour
                     inventoryManager.AddModule(module);
                 }
             }
-            
-            if (quest.questFinishReward.creditReward > 0)
-            {
-                if (CreditManager.Instance != null)
-                {
-                    CreditManager.Instance.AddCredits(quest.questFinishReward.creditReward);
-                }
-                else
-                {
-                }
-            }
-            
+
             if (quest.questFinishReward.unlockedBuildings != null && quest.questFinishReward.unlockedBuildings.Length > 0)
             {
                 if (BuildingUnlockManager.Instance == null)
