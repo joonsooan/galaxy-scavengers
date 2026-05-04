@@ -276,7 +276,6 @@ public class GameManager : MonoBehaviour
             mapGenerator = FindFirstObjectByType<MapGenerator>();
         }
 
-        ctc.RefreshMapBounds();
         ctc.BeginOpeningSequence();
 
         Vector3 startFocus = ctc.transform.position;
@@ -460,12 +459,6 @@ public class GameManager : MonoBehaviour
         if (BuildingManager.Instance != null && mapGenerator != null)
         {
             BuildingManager.Instance.InitializeWalkableCellCache(mapGenerator.GetMapBounds());
-        }
-
-        CameraTargetController cameraController = FindFirstObjectByType<CameraTargetController>();
-        if (cameraController != null)
-        {
-            cameraController.RefreshMapBounds();
         }
 
         yield return StartCoroutine(InitializeSpawnersAndUnitsAsync(progress, skipProceduralGenerationWhenLoadingGameScene));
