@@ -78,6 +78,11 @@ public class ProceduralQuestPanelController : MonoBehaviour
             questButton.onClick.RemoveListener(OnQuestButtonClicked);
         }
 
+        if (completeButton != null)
+        {
+            completeButton.onClick.RemoveListener(OnCompleteButtonClicked);
+        }
+
         if (questManager != null)
         {
             questManager.OnChoicesOffered -= OnChoicesOffered;
@@ -348,7 +353,7 @@ public class ProceduralQuestPanelController : MonoBehaviour
         questManager.AcceptChoice(questId);
     }
 
-    private void OnCompleteButtonClicked()
+    public void OnCompleteButtonClicked()
     {
         if (questManager == null)
         {

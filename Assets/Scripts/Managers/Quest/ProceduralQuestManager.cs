@@ -186,12 +186,28 @@ public class ProceduralQuestManager : MonoBehaviour
             }
         }
 
+        ResourceCost[] costs = new ResourceCost[1];
+        costs[0] = new ResourceCost
+        {
+            resourceType = _activeQuest.targetResourceType,
+            amount = _activeQuest.requiredAmount
+        };
+
         bool spent = ResourceManager.Instance != null &&
-                     ResourceManager.Instance.RemoveResource(_activeQuest.targetResourceType, _activeQuest.requiredAmount);
+                     ResourceManager.Instance.SpendResources(costs);
         if (!spent)
         {
-            EvaluateActiveQuest();
-            return false;
+            int currentAmount = ResourceManager.Instance != null
+                ? ResourceManager.Instance.GetResourceAmount(_activeQuest.targetResourceType)
+                : 0;
+            bool removedByCount = ResourceManager.Instance != null &&
+                                  currentAmount >= _activeQuest.requiredAmount &&
+                                  ResourceManager.Instance.RemoveResource(_activeQuest.targetResourceType, _activeQuest.requiredAmount);
+            if (!removedByCount)
+            {
+                EvaluateActiveQuest();
+                return false;
+            }
         }
 
         if (_activeQuest.rewardSpecs != null)

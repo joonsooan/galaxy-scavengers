@@ -757,14 +757,22 @@ public class QuestDataManager : MonoBehaviour
     {
         foreach (KeyValuePair<int, QuestState> kvp in _questStates) {
             string key = $"QuestState_{kvp.Key}";
-            PlayerPrefs.SetInt(key, (int)kvp.Value);
+            if (kvp.Value == QuestState.Completed || kvp.Value == QuestState.Finished) {
+                if (PlayerPrefs.HasKey(key)) {
+                    PlayerPrefs.DeleteKey(key);
+                }
+            }
+            else {
+                PlayerPrefs.SetInt(key, (int)kvp.Value);
+            }
         }
 
         string activeIds = string.Join(",", _activeQuestIds);
         PlayerPrefs.SetString("QuestActiveIds", activeIds);
 
-        string completedIds = string.Join(",", _completedQuestIds);
-        PlayerPrefs.SetString("QuestCompletedIds", completedIds);
+        if (PlayerPrefs.HasKey("QuestCompletedIds")) {
+            PlayerPrefs.DeleteKey("QuestCompletedIds");
+        }
 
         PlayerPrefs.Save();
     }
@@ -779,16 +787,15 @@ public class QuestDataManager : MonoBehaviour
                 int savedState = PlayerPrefs.GetInt(stateKey);
                 QuestState loadedState = (QuestState)savedState;
 
+                if (loadedState == QuestState.Completed || loadedState == QuestState.Finished) {
+                    continue;
+                }
+
                 _questStates[quest.questId] = loadedState;
 
                 if (_questStates[quest.questId] == QuestState.Active ||
                     _questStates[quest.questId] == QuestState.Completable) {
                     _activeQuestIds.Add(quest.questId);
-                }
-
-                if (_questStates[quest.questId] == QuestState.Completed ||
-                    _questStates[quest.questId] == QuestState.Finished) {
-                    _completedQuestIds.Add(quest.questId);
                 }
             }
         }
@@ -800,18 +807,6 @@ public class QuestDataManager : MonoBehaviour
                 foreach (string idStr in ids) {
                     if (int.TryParse(idStr, out int questId)) {
                         _activeQuestIds.Add(questId);
-                    }
-                }
-            }
-        }
-
-        if (PlayerPrefs.HasKey("QuestCompletedIds")) {
-            string completedIds = PlayerPrefs.GetString("QuestCompletedIds");
-            if (!string.IsNullOrEmpty(completedIds)) {
-                string[] ids = completedIds.Split(',');
-                foreach (string idStr in ids) {
-                    if (int.TryParse(idStr, out int questId)) {
-                        _completedQuestIds.Add(questId);
                     }
                 }
             }
