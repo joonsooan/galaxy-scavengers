@@ -266,7 +266,7 @@ MonoBehaviour:
   healthBarYOffset: 0.75
   currentState: 0
   carryCapacity: 1000
-  processingSpeed: 3
+  processingSpeed: 4
   loadingTime: 0.5
   unloadingTime: 0.5
   assignmentTime: 1

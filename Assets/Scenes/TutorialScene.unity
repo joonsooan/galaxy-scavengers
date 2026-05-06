@@ -61367,7 +61367,7 @@ MonoBehaviour:
   inventoryGridContainer: {fileID: 1185129392}
   currentResourcePanel: {fileID: 471620567}
   launchStartButton: {fileID: 1044308504}
-  inventoryCellPrefab: {fileID: 0}
+  inventoryCellPrefab: {fileID: 3842191235755297668, guid: 8498ec9675c94044fb15b7a2df1b1878, type: 3}
   resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: 87d776b852749c2428050baaea9b40b1, type: 3}
   baseCellCount: 20
   defaultMaxStackAmount: 100
