@@ -93,7 +93,9 @@ public class GameManager : MonoBehaviour
 
         if (IsLoadingScreenActive()) return;
 
+#if UNITY_EDITOR
         HandleDebugTimeScale();
+#endif
 
         if (GameMenuManager.Instance != null && GameMenuManager.Instance.IsMenuOpen())
         {
@@ -131,6 +133,7 @@ public class GameManager : MonoBehaviour
 #endif
     }
 
+#if UNITY_EDITOR
     private void HandleDebugTimeScale()
     {
         float targetScale = -1f;
@@ -162,6 +165,7 @@ public class GameManager : MonoBehaviour
             Time.timeScale = targetScale;
         }
     }
+#endif
 
     public void TogglePause()
     {
