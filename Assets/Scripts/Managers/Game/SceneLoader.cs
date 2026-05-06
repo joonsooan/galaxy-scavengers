@@ -183,7 +183,10 @@ public class SceneLoader : MonoBehaviour
             GameManager.Instance.SetMainCanvasVisible(true);
         }
 
-        BgmManager.Instance?.PlayGameBgm();
+        if (isGameScene)
+        {
+            BgmManager.Instance?.PlayGameBgm();
+        }
         if (GameManager.Instance != null)
         {
             GameManager.Instance.EndGameSceneOpeningSequence();

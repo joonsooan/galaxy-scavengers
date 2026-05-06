@@ -208,6 +208,12 @@ public partial class BgmManager : MonoBehaviour
         yield return StartCoroutine(FadeInGameBgm(gameBgmFadeInTime));
 
         _playGameBgmCoroutine = null;
+        if (_gameBgmCooldownCoroutine != null)
+        {
+            StopCoroutine(_gameBgmCooldownCoroutine);
+            _gameBgmCooldownCoroutine = null;
+        }
+        _gameBgmCooldownCoroutine = StartCoroutine(GameBgmCooldown());
     }
 
     private IEnumerator GameBgmEndFadeOut()
