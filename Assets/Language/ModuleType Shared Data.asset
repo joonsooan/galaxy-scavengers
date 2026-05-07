@@ -14,7 +14,35 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.SharedTableData
   m_TableCollectionName: ModuleType
   m_TableCollectionNameGuidString: 3cf9942b1053c754aacf948fd9e39432
-  m_Entries: []
+  m_Entries:
+  - m_Id: 22676391137280
+    m_Key: moduleType.Default
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22676416303104
+    m_Key: moduleType.Power
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22676416303105
+    m_Key: moduleType.Defense
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22676416303106
+    m_Key: moduleType.Offense
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22676416303107
+    m_Key: moduleType.Utility
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22676416303108
+    m_Key: moduleType.Production
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22676416303109
+    m_Key: moduleType.Research
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

@@ -504,8 +504,16 @@ public class ResourceManager : MonoBehaviour
 
     public string GetResourceDisplayName(ResourceType type)
     {
-        string localized = GameLocalization.Get("Resource", $"resourceType.{type}");
-        if (localized != $"resourceType.{type}")
+        string nameKey = $"resourceType.{type}.name";
+        string localized = GameLocalization.Get("Resource", nameKey);
+        if (localized != nameKey)
+        {
+            return localized;
+        }
+
+        string legacyKey = $"resourceType.{type}";
+        localized = GameLocalization.Get("Resource", legacyKey);
+        if (localized != legacyKey)
         {
             return localized;
         }
@@ -520,8 +528,16 @@ public class ResourceManager : MonoBehaviour
 
     public string GetResourceDescription(ResourceType type)
     {
-        string localized = GameLocalization.Get("Resource", $"resourceType.{type}.description");
-        if (localized != $"resourceType.{type}.description")
+        string descKey = $"resourceType.{type}.desc";
+        string localized = GameLocalization.Get("Resource", descKey);
+        if (localized != descKey)
+        {
+            return localized;
+        }
+
+        string legacyKey = $"resourceType.{type}.description";
+        localized = GameLocalization.Get("Resource", legacyKey);
+        if (localized != legacyKey)
         {
             return localized;
         }

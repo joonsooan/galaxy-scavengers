@@ -17,7 +17,35 @@ MonoBehaviour:
   m_SharedData: {fileID: 11400000, guid: 3cf9942b1053c754aacf948fd9e39432, type: 2}
   m_Metadata:
     m_Items: []
-  m_TableData: []
+  m_TableData:
+  - m_Id: 22676391137280
+    m_Localized: Default
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22676416303104
+    m_Localized: Power
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22676416303105
+    m_Localized: Defense
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22676416303106
+    m_Localized: Offense
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22676416303107
+    m_Localized: Utility
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22676416303108
+    m_Localized: Production
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22676416303109
+    m_Localized: Research
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

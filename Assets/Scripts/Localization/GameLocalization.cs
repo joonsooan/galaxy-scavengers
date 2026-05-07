@@ -42,7 +42,22 @@ public static class GameLocalization
 
     public static string GetResourceType(ResourceType resourceType)
     {
-        return GetOrDefault("Resource", $"resourceType.{resourceType}", resourceType.ToString());
+        string fallback = resourceType.ToString();
+        string nameKey = $"resourceType.{resourceType}.name";
+        string localized = Get("Resource", nameKey);
+        if (localized != nameKey)
+        {
+            return localized;
+        }
+
+        string legacyKey = $"resourceType.{resourceType}";
+        localized = Get("Resource", legacyKey);
+        if (localized != legacyKey)
+        {
+            return localized;
+        }
+
+        return fallback;
     }
 
     public static string GetModuleType(ModuleType moduleType)
