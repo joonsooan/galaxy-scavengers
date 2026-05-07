@@ -54,7 +54,7 @@ public class CoreDetailPanel : MonoBehaviour
         List<Module> activeModules = _customizationManager.GetActiveModules();
 
         if (activeModules == null || activeModules.Count == 0) {
-            moduleNameText.text = "장착된 모듈이 없습니다.";
+            moduleNameText.text = GameLocalization.GetOrDefault("UI_Common", "module.noneEquipped", "장착된 모듈이 없습니다.");
             moduleEffectText.text = "";
             return;
         }
@@ -68,7 +68,7 @@ public class CoreDetailPanel : MonoBehaviour
         }
 
         if (moduleEffectText.text.Length == 0) {
-            moduleEffectText.text = "활성화된 모듈 효과가 없습니다.";
+            moduleEffectText.text = GameLocalization.GetOrDefault("UI_Common", "module.noActiveEffects", "활성화된 모듈 효과가 없습니다.");
         }
     }
     
@@ -76,7 +76,7 @@ public class CoreDetailPanel : MonoBehaviour
     {
         if (moduleNameText != null)
         {
-            moduleNameText.text = "장착된 모듈이 없습니다.";
+            moduleNameText.text = GameLocalization.GetOrDefault("UI_Common", "module.noneEquipped", "장착된 모듈이 없습니다.");
         }
         if (moduleEffectText != null)
         {

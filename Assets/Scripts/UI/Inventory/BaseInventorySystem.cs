@@ -387,7 +387,7 @@ public class BaseInventorySystem : MonoBehaviour
         int totalItems = GetUsedSlotCount();
         int totalSlots = TotalGridSlots;
         
-        inventoryInfoText.text = $"기지 창고 ({totalItems.ToString()}/{totalSlots})";
+        inventoryInfoText.text = GameLocalization.GetOrDefault("UI_Common", "label.baseStorageFormat", "기지 창고 ({0}/{1})", totalItems, totalSlots);
     }
 
     public bool TryAddResourceToInventory(ResourceType type, int amount, bool moveAll = false)

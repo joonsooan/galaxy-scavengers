@@ -22,7 +22,7 @@ public class UnitUpgradeCell : MonoBehaviour
     private Button _resolvedUpgradeButton;
     private bool _hasCachedUpgradeButtonLabel;
     private string _cachedUpgradeButtonLabel;
-    private const string UpgradeInProgressLabel = "업그레이드 중…";
+    private const string UpgradeInProgressLabelFallback = "업그레이드 중…";
 
     private void OnDestroy()
     {
@@ -35,6 +35,7 @@ public class UnitUpgradeCell : MonoBehaviour
 
     public void Initialize(UnitUpgradeLineData line, UnitUpgradeProgress progress)
     {
+        maxLevelLabel = GameLocalization.GetOrDefault("UI_Common", "status.maxLevel", maxLevelLabel);
         _line = line;
         _progress = progress;
         if (_progress == null)
@@ -193,7 +194,7 @@ public class UnitUpgradeCell : MonoBehaviour
                 _hasCachedUpgradeButtonLabel = true;
             }
 
-            label.text = UpgradeInProgressLabel;
+            label.text = GameLocalization.GetOrDefault("UI_Common", "status.upgradeInProgress", UpgradeInProgressLabelFallback);
         }
         else if (_hasCachedUpgradeButtonLabel)
         {

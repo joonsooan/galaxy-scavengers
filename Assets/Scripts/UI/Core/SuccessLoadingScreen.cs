@@ -76,6 +76,7 @@ public class SuccessLoadingScreen : MonoBehaviour
 
     private void Awake()
     {
+        loadingTextString = GameLocalization.GetOrDefault("UI_Common", "loading.success", loadingTextString);
         InitializeUI();
         _hasStartedEntryAnimation = false;
         _imageEntryDelayWait = CoroutineCache.GetWaitForSeconds(imageEntryDelay);

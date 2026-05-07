@@ -42,7 +42,7 @@ public class AetherStatusUI : MonoBehaviour
         float netElectricity = _electricityConsumptionManager.NetElectricityPerSecond;
         int maxCapacity = _electricityConsumptionManager.MaxElectricityStorageCapacity;
         
-        aetherStatusText.text = $" 초당 전기 변화량 : {netElectricity:F1} / {maxCapacity}";
+        aetherStatusText.text = GameLocalization.GetOrDefault("UI_Common", "label.netElectricityPerSecondFormat", "초당 전기 변화량 : {0:F1} / {1}", netElectricity, maxCapacity);
     }
     
     private void UpdateStorageText()

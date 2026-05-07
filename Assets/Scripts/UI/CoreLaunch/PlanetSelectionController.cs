@@ -115,7 +115,7 @@ public class PlanetSelectionController : MonoBehaviour
         TMP_Text text = mapSelectTabButton.GetComponentInChildren<TMP_Text>(true);
         if (text != null)
         {
-            text.text = "맵 선택";
+            text.text = GameLocalization.GetOrDefault("UI_Common", "title.mapSelection", "맵 선택");
         }
     }
 

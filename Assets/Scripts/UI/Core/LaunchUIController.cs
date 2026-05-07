@@ -418,7 +418,7 @@ public class LaunchUIController : MonoBehaviour
             TMP_Text buttonText = launchButton.GetComponentInChildren<TMP_Text>();
             if (buttonText != null)
             {
-                buttonText.text = "탈출";
+                buttonText.text = GameLocalization.GetOrDefault("UI_Common", "button.launch", "탈출");
             }
         }
     }

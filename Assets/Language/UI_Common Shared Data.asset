@@ -14,7 +14,131 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.SharedTableData
   m_TableCollectionName: UI_Common
   m_TableCollectionNameGuidString: 7df6e1ed9eab24a4eaa459166388c266
-  m_Entries: []
+  m_Entries:
+  - m_Id: 26494256353280
+    m_Key: label.typeFormat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324800
+    m_Key: label.healthFormat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324801
+    m_Key: label.populationFormat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324802
+    m_Key: label.baseStorageFormat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324803
+    m_Key: label.netElectricityPerSecondFormat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324804
+    m_Key: label.timeSecondsFormat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324805
+    m_Key: button.launch
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324806
+    m_Key: title.mapSelection
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324807
+    m_Key: status.maxLevel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324808
+    m_Key: status.upgradeInProgress
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324809
+    m_Key: status.powerInsufficient
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324810
+    m_Key: status.needCharge
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324811
+    m_Key: status.movingToChargingStation
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324812
+    m_Key: status.queued
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324813
+    m_Key: status.charging
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324814
+    m_Key: status.normal
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324815
+    m_Key: status.powerProducing
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324816
+    m_Key: status.powerSufficient
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324817
+    m_Key: status.resourceInsufficient
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324818
+    m_Key: status.extracting
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324819
+    m_Key: title.connectedStorageAndResource
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324820
+    m_Key: title.availableInputResources
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324821
+    m_Key: loading.inProgress
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324822
+    m_Key: loading.success
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324823
+    m_Key: loading.gameOver
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324824
+    m_Key: launchComplete.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324825
+    m_Key: launchComplete.message
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324826
+    m_Key: module.noneEquipped
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324827
+    m_Key: module.noActiveEffects
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324828
+    m_Key: label.effectFormat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324829
+    m_Key: label.mainUnit
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

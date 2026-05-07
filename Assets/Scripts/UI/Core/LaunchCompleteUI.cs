@@ -21,6 +21,8 @@ public class LaunchCompleteUI : MonoBehaviour
 
     private void Awake()
     {
+        titleString = GameLocalization.GetOrDefault("UI_Common", "launchComplete.title", titleString);
+        messageString = GameLocalization.GetOrDefault("UI_Common", "launchComplete.message", messageString);
         InitializeUI();
     }
 

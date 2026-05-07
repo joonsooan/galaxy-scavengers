@@ -52,6 +52,9 @@ public class BuildingInfoPanel : MonoBehaviour
         }
 
         Instance = this;
+        generatorStatusTextProducing = GameLocalization.GetOrDefault("UI_Common", "status.powerProducing", generatorStatusTextProducing);
+        generatorStatusTextBufferFull = GameLocalization.GetOrDefault("UI_Common", "status.powerSufficient", generatorStatusTextBufferFull);
+        generatorStatusTextNoFuel = GameLocalization.GetOrDefault("UI_Common", "status.resourceInsufficient", generatorStatusTextNoFuel);
         ClearAllInfo();
     }
 
@@ -223,7 +226,7 @@ public class BuildingInfoPanel : MonoBehaviour
 
         if (showMaxHealth)
         {
-            healthText.text = $"체력 : {damageable.MaxHealth}";
+            healthText.text = GameLocalization.GetOrDefault("UI_Common", "label.healthFormat", "체력 : {0}", damageable.MaxHealth);
         }
         else
         {

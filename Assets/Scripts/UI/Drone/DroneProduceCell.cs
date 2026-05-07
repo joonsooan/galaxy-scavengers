@@ -59,7 +59,7 @@ public class DroneProduceCell : MonoBehaviour, IPointerEnterHandler, IPointerExi
         }
 
         if (productionTime != null) {
-            productionTime.text = $"Time: {unitData.productionTime}s";
+            productionTime.text = GameLocalization.GetOrDefault("UI_Common", "label.timeSecondsFormat", "Time: {0}s", unitData.productionTime);
         }
 
         if (unitIcon != null && unitData.unitIcon != null) {

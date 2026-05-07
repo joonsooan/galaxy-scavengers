@@ -21,6 +21,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - Locale-ko
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 577da6030bb0c064c9ba6971a2730e87
+    m_Address: UnitData_ko
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-ko
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 873396aae65aec4418ed380e732bb9d0
     m_Address: GameData_ko
     m_ReadOnly: 1

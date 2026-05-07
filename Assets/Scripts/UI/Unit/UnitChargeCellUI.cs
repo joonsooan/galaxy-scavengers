@@ -44,6 +44,12 @@ public class UnitChargeCellUI : MonoBehaviour
         UnbindBattery();
         _unit = unit;
         _battery = unit != null ? unit.GetComponent<UnitBattery>() : null;
+        textPowerEmpty = GameLocalization.GetOrDefault("UI_Common", "status.powerInsufficient", textPowerEmpty);
+        textNeedCharge = GameLocalization.GetOrDefault("UI_Common", "status.needCharge", textNeedCharge);
+        textGoingToCharge = GameLocalization.GetOrDefault("UI_Common", "status.movingToChargingStation", textGoingToCharge);
+        textQueued = GameLocalization.GetOrDefault("UI_Common", "status.queued", textQueued);
+        textCharging = GameLocalization.GetOrDefault("UI_Common", "status.charging", textCharging);
+        textOk = GameLocalization.GetOrDefault("UI_Common", "status.normal", textOk);
 
         if (_battery != null)
         {

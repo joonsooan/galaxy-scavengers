@@ -17,7 +17,131 @@ MonoBehaviour:
   m_SharedData: {fileID: 11400000, guid: 7df6e1ed9eab24a4eaa459166388c266, type: 2}
   m_Metadata:
     m_Items: []
-  m_TableData: []
+  m_TableData:
+  - m_Id: 26494256353280
+    m_Localized: 'Type : {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324800
+    m_Localized: 'Health : {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324801
+    m_Localized: 'Current pop : {0} / {1}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324802
+    m_Localized: Base storage ({0}/{1})
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324803
+    m_Localized: 'Net elec per second : {0:F1} / {1}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324804
+    m_Localized: 'Time: {0}s'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324805
+    m_Localized: Launch
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324806
+    m_Localized: Map select
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324807
+    m_Localized: Max level
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324808
+    m_Localized: Upgrading...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324809
+    m_Localized: Power low
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324810
+    m_Localized: Need charging
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324811
+    m_Localized: Moving to station
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324812
+    m_Localized: Queued
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324813
+    m_Localized: Charging
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324814
+    m_Localized: Normal
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324815
+    m_Localized: Producing power
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324816
+    m_Localized: Power full
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324817
+    m_Localized: Need resources
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324818
+    m_Localized: Extracting
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324819
+    m_Localized: Connected storages / resources
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324820
+    m_Localized: Available inputs
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324821
+    m_Localized: In progress...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324822
+    m_Localized: Exit Success!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324823
+    m_Localized: Game Over
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324824
+    m_Localized: Launch success!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324825
+    m_Localized: Escape has been successful.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324826
+    m_Localized: No modules equipped.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324827
+    m_Localized: No active modules.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324828
+    m_Localized: 'Effect : {0}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324829
+    m_Localized: Main unit
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []
