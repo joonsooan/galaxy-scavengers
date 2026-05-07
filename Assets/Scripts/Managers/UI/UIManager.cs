@@ -281,8 +281,8 @@ public class UIManager : MonoBehaviour
     {
         if (data == null) return;
         buildingInfoPanel.SetActive(true);
-        buildingNameText.text = data.displayName;
-        buildingDescText.text = data.description;
+        buildingNameText.text = data.GetDisplayName();
+        buildingDescText.text = data.GetDescription();
 
         foreach (Transform child in buildingResourcePanel.transform) Destroy(child.gameObject);
         foreach (ResourceCost cost in data.costs) {

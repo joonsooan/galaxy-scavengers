@@ -1,0 +1,100 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: GameData Shared Data
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.SharedTableData
+  m_TableCollectionName: GameData
+  m_TableCollectionNameGuidString: 45bfd075af41d444398d0bcd56727079
+  m_Entries:
+  - m_Id: 236655022080
+    m_Key: building.storage.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 714168143872
+    m_Key: building.storage.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9262927253504
+    m_Key: building.generator.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9295831568384
+    m_Key: building.generator.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9309643411456
+    m_Key: building.smelter.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9312180965376
+    m_Key: building.smelter.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9313510559744
+    m_Key: building.battery.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9314135511040
+    m_Key: building.battery.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9314676576256
+    m_Key: building.chargingStation.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9315234418688
+    m_Key: building.chargingStation.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9315746123776
+    m_Key: building.turret.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9316333326336
+    m_Key: building.turret.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9316853420032
+    m_Key: building.extractor.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9317344153600
+    m_Key: building.extractor.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9317893607424
+    m_Key: building.receiver.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9318392729600
+    m_Key: building.receiver.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9319030263808
+    m_Key: building.mainStructure.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680704
+    m_Key: building.mainStructure.desc
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 8864326685844308186
+  references:
+    version: 2
+    RefIds:
+    - rid: 8864326685844308186
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1778164240122

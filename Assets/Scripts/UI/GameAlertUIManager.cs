@@ -715,9 +715,9 @@ public class GameAlertUIManager : MonoBehaviour
     {
         if (d == null) return string.Empty;
         if (d.GetComponent<Unit_Player>() != null) return "메인 유닛";
-        if (d is UnitBase ub && ub.unitData != null) return ub.unitData.unitName;
+        if (d is UnitBase ub && ub.unitData != null) return ub.unitData.GetDisplayName();
         BuildingDataHolder b = d.GetComponent<BuildingDataHolder>();
-        if (b != null && b.buildingData != null) return b.buildingData.displayName;
+        if (b != null && b.buildingData != null) return b.buildingData.GetDisplayName();
         return d.gameObject.name;
     }
 

@@ -504,6 +504,12 @@ public class ResourceManager : MonoBehaviour
 
     public string GetResourceDisplayName(ResourceType type)
     {
+        string localized = GameLocalization.Get("Resource", $"resourceType.{type}");
+        if (localized != $"resourceType.{type}")
+        {
+            return localized;
+        }
+
         int index = (int)type;
         if (resourceDisplayNames != null && index >= 0 && index < resourceDisplayNames.Count && !string.IsNullOrEmpty(resourceDisplayNames[index]))
         {
@@ -514,6 +520,12 @@ public class ResourceManager : MonoBehaviour
 
     public string GetResourceDescription(ResourceType type)
     {
+        string localized = GameLocalization.Get("Resource", $"resourceType.{type}.description");
+        if (localized != $"resourceType.{type}.description")
+        {
+            return localized;
+        }
+
         int index = (int)type;
         if (resourceDescriptions != null && index >= 0 && index < resourceDescriptions.Count)
         {

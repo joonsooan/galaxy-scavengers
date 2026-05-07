@@ -123,7 +123,7 @@ public class UnitChargeCellUI : MonoBehaviour
     {
         if (unitNameText != null)
         {
-            unitNameText.text = _unit != null && _unit.unitData != null ? _unit.unitData.unitName : string.Empty;
+            unitNameText.text = _unit != null && _unit.unitData != null ? _unit.unitData.GetDisplayName() : string.Empty;
         }
 
         if (unitIconImage != null)

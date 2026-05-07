@@ -6,6 +6,10 @@ public class UnitData : ScriptableObject
     [Header("Base Information")]
     public string unitName;
     [TextArea] public string description;
+    [Header("Localization")]
+    [SerializeField] private string localizationTable = "UnitData";
+    [SerializeField] private string unitNameKey;
+    [SerializeField] private string descriptionKey;
     public string tutorialKey;
     public Sprite unitIcon;
     public GameObject unitPrefab;
@@ -27,4 +31,24 @@ public class UnitData : ScriptableObject
     public float batteryDrainPerSecond = 1f;
     [Tooltip("Seconds to refill from empty to full while charging at a station.")]
     public float chargeDurationSecondsAtStation = 5f;
+
+    public string GetDisplayName()
+    {
+        string fallback = string.IsNullOrEmpty(unitName) ? name : unitName;
+        if (string.IsNullOrWhiteSpace(unitNameKey))
+        {
+            return fallback;
+        }
+        return GameLocalization.GetOrDefault(localizationTable, unitNameKey, fallback);
+    }
+
+    public string GetDescription()
+    {
+        string fallback = description ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(descriptionKey))
+        {
+            return fallback;
+        }
+        return GameLocalization.GetOrDefault(localizationTable, descriptionKey, fallback);
+    }
 }

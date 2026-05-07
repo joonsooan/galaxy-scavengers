@@ -71,7 +71,7 @@ public class CardDisplay : InfoDisplayTrigger, IPointerClickHandler, IPointerExi
 
     private void UpdateCardUI()
     {
-        nameText.text = buildingPieceData.displayName;
+        nameText.text = buildingPieceData.GetDisplayName();
         cardIcon.sprite = buildingPieceData.icon;
     }
 }

@@ -1,5 +1,7 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class UnitInfoPanel : MonoBehaviour
@@ -51,6 +53,16 @@ public class UnitInfoPanel : MonoBehaviour
         EnsureLayoutDefaultsInitialized();
 
         ClearAllInfo();
+    }
+
+    private void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += HandleLocaleChanged;
+    }
+
+    private void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= HandleLocaleChanged;
     }
 
     public void PreviewInfo(UnitBase unit)
@@ -230,11 +242,11 @@ public class UnitInfoPanel : MonoBehaviour
         {
             if (unitNameText != null)
             {
-                unitNameText.text = _previewUnitData.unitName;
+                unitNameText.text = _previewUnitData.GetDisplayName();
             }
             if (unitDescText != null)
             {
-                unitDescText.text = _previewUnitData.description;
+                unitDescText.text = _previewUnitData.GetDescription();
             }
             if (unitHealthText != null)
             {
@@ -256,11 +268,11 @@ public class UnitInfoPanel : MonoBehaviour
         {
             if (unitNameText != null)
             {
-                unitNameText.text = _currentUnit.unitData.unitName;
+                unitNameText.text = _currentUnit.unitData.GetDisplayName();
             }
             if (unitDescText != null)
             {
-                unitDescText.text = _currentUnit.unitData.description;
+                unitDescText.text = _currentUnit.unitData.GetDescription();
             }
         }
         RefreshHealthText();
@@ -532,6 +544,15 @@ public class UnitInfoPanel : MonoBehaviour
         text.text = " ";
         text.ForceMeshUpdate(true);
         text.text = string.Empty;
+    }
+
+    private void HandleLocaleChanged(Locale _)
+    {
+        if (!gameObject.activeInHierarchy)
+        {
+            return;
+        }
+        RefreshUI();
     }
 
     private void OnDestroy()

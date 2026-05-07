@@ -334,7 +334,7 @@ public class AreaBuildingDestroyer : MonoBehaviour
 
                 if (data != null && !isSingleCellStructure)
                 {
-                    string name = !string.IsNullOrEmpty(data.displayName) ? data.displayName : data.name;
+                    string name = data.GetDisplayName();
                     targets.Add(new DemolishTarget
                     {
                         displayName = name,
@@ -349,7 +349,7 @@ public class AreaBuildingDestroyer : MonoBehaviour
                     BuildingPieceData pieceData = GetBuildingPieceData(piece.buildingPieceType);
                     if (pieceData != null)
                     {
-                        string name = !string.IsNullOrEmpty(pieceData.displayName) ? pieceData.displayName : pieceData.name;
+                        string name = pieceData.GetDisplayName();
                         targets.Add(new DemolishTarget
                         {
                             displayName = name,
@@ -372,7 +372,7 @@ public class AreaBuildingDestroyer : MonoBehaviour
                     BuildingPieceData pieceData = GetBuildingPieceData(piece.buildingPieceType);
                     if (pieceData != null)
                     {
-                        string name = !string.IsNullOrEmpty(pieceData.displayName) ? pieceData.displayName : pieceData.name;
+                        string name = pieceData.GetDisplayName();
                         targets.Add(new DemolishTarget
                         {
                             displayName = name,
@@ -422,7 +422,7 @@ public class AreaBuildingDestroyer : MonoBehaviour
                 {
                     string name = "Construction";
                     if (site.buildingData != null)
-                        name = !string.IsNullOrEmpty(site.buildingData.displayName) ? site.buildingData.displayName : site.buildingData.name;
+                        name = site.buildingData.GetDisplayName();
                     Dictionary<ResourceType, int> refund = site.GetConstructedPiecesCost();
                     targets.Add(new DemolishTarget
                     {
@@ -464,7 +464,7 @@ public class AreaBuildingDestroyer : MonoBehaviour
             {
                 return;
             }
-            string displayName = unit.unitData != null && !string.IsNullOrEmpty(unit.unitData.unitName) ? unit.unitData.unitName : (unit.unitData != null ? unit.unitData.name : unit.GetType().Name);
+            string displayName = unit.unitData != null ? unit.unitData.GetDisplayName() : unit.GetType().Name;
             Dictionary<ResourceType, int> cost = GetUnitProductionCost(unit.unitData);
 
             targets.Add(new DemolishTarget

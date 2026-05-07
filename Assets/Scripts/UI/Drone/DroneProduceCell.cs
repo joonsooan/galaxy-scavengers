@@ -52,10 +52,10 @@ public class DroneProduceCell : MonoBehaviour, IPointerEnterHandler, IPointerExi
             return;
         }
 
-        _tutorialID = !string.IsNullOrEmpty(unitData.tutorialKey) ? unitData.tutorialKey : unitData.unitName;
+        _tutorialID = !string.IsNullOrEmpty(unitData.tutorialKey) ? unitData.tutorialKey : unitData.name;
 
         if (unitName != null) {
-            unitName.text = unitData.unitName;
+            unitName.text = unitData.GetDisplayName();
         }
 
         if (productionTime != null) {

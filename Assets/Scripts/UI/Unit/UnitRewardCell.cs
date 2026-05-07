@@ -14,7 +14,7 @@ public class UnitRewardCell : MonoBehaviour
         
         if (unitNameText != null)
         {
-            unitNameText.text = unitData.unitName;
+            unitNameText.text = unitData.GetDisplayName();
         }
         
         if (unitIcon != null)

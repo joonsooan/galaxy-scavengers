@@ -199,7 +199,7 @@ public class ExtractorUIManager : MonoBehaviour
     {
         ExtractorData data = _currentExtractor.ExtractorDataAsset;
         if (extractorTitleText != null) {
-            extractorTitleText.text = data != null ? data.displayName : string.Empty;
+            extractorTitleText.text = data != null ? data.GetDisplayName() : string.Empty;
         }
 
         CellPool.Clear(connectedStorageContent, _storageCells);

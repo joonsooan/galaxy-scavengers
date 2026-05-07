@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: Resource Shared Data
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.SharedTableData
+  m_TableCollectionName: Resource
+  m_TableCollectionNameGuidString: 4028475228bbd574b9ffc2e599745be7
+  m_Entries:
+  - m_Id: 35466842112
+    m_Key: 'resourceType.Ferrite
+
+'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 156195688448
+    m_Key: 'resourceType.Aether
+
+'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1366407581696
+    m_Key: New Entry
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1383440650240
+    m_Key: Aether
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1396677873664
+    m_Key: New Entry 2
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 8864326685844308183
+  references:
+    version: 2
+    RefIds:
+    - rid: 8864326685844308183
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1778163698523

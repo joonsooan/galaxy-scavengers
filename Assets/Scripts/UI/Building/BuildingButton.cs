@@ -106,7 +106,7 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         }
 
         if (btnName != null) {
-            btnName.text = buildingData.displayName;
+            btnName.text = buildingData.GetDisplayName();
         }
     }
 
