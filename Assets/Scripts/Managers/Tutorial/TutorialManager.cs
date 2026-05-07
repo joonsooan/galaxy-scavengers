@@ -14,6 +14,7 @@ public enum TutorialStepType
     WASDInput = 2,
     MouseWheel = 3,
     SpacebarPress = 4,
+    MouseHold = 5,
     ResourceMined = 6,
     BulletFired = 8,
     BuildingPlaced = 9,
@@ -77,6 +78,8 @@ public class TutorialManager : MonoBehaviour
     [FormerlySerializedAs("alertPanel")]
     [SerializeField] private GameObject alertPanelParent;
     [SerializeField] private GameObject alertTooltipPanel;
+    [Header("UI Panels - Tutorial End")]
+    [SerializeField] private GameObject[] tutorialEndActivateUIObjects;
 
     [Header("Highlight Settings")]
     [SerializeField] private List<HighlightableUI> highlightableList = new List<HighlightableUI>();
@@ -102,6 +105,7 @@ public class TutorialManager : MonoBehaviour
     private float _lastMouseWheelValue;
     private bool _lastPausedState;
     private int _mouseWheelScrollCount;
+    private float _mouseHoldTime;
     private RectTransform _rect;
     private int _resourceMinedAmount;
     private int _rightClickCount;
@@ -362,6 +366,7 @@ public class TutorialManager : MonoBehaviour
     {
         _wasdInputTime = 0f;
         _mouseWheelScrollCount = 0;
+        _mouseHoldTime = 0f;
         _spacebarPressCount = 0;
         _resourceMinedAmount = 0;
         _bulletFireCount = 0;
@@ -442,6 +447,21 @@ public class TutorialManager : MonoBehaviour
                     }
                 }
                 _lastMouseWheelValue = currentWheelValue;
+                break;
+
+            case TutorialStepType.MouseHold:
+                if (step.count <= 0) {
+                    break;
+                }
+                if (Input.GetMouseButton(0) && IsClickingGameWorld()) {
+                    _mouseHoldTime += Time.deltaTime;
+                }
+                if (_tutorialUI != null && step.showProgressBar) {
+                    _tutorialUI.UpdateProgress(_mouseHoldTime / step.count);
+                }
+                if (_mouseHoldTime >= step.count) {
+                    conditionMet = true;
+                }
                 break;
 
             case TutorialStepType.SpacebarPress:
@@ -810,15 +830,12 @@ public class TutorialManager : MonoBehaviour
         EnableAllEnemyUnits();
         _unlockedFlashPanels.Clear();
         _unlockedInteractivePanels.Clear();
+        ActivateTutorialEndUIObjects();
         HideArrowUI();
         HideTargetBracket();
 
         if (_tutorialUI != null) {
             _tutorialUI.HideTutorial();
-        }
-
-        if (BgmManager.Instance != null) {
-            BgmManager.Instance.PlayGameBgm();
         }
 
         OnTutorialEnded?.Invoke();
@@ -838,6 +855,7 @@ public class TutorialManager : MonoBehaviour
         _unlockedFlashPanels.Clear();
         _unlockedInteractivePanels.Clear();
         ShowAllUIPanels(true);
+        ActivateTutorialEndUIObjects();
         HideArrowUI();
         HideTargetBracket();
 
@@ -863,6 +881,7 @@ public class TutorialManager : MonoBehaviour
             _unlockedFlashPanels.Clear();
             _unlockedInteractivePanels.Clear();
             ShowAllUIPanels(true);
+            ActivateTutorialEndUIObjects();
             HideArrowUI();
             HideTargetBracket();
 
@@ -1057,6 +1076,23 @@ public class TutorialManager : MonoBehaviour
             return true;
         default:
             return false;
+        }
+    }
+
+    private void ActivateTutorialEndUIObjects()
+    {
+        if (tutorialEndActivateUIObjects == null || tutorialEndActivateUIObjects.Length == 0)
+        {
+            return;
+        }
+
+        for (int i = 0; i < tutorialEndActivateUIObjects.Length; i++)
+        {
+            GameObject target = tutorialEndActivateUIObjects[i];
+            if (target != null)
+            {
+                target.SetActive(true);
+            }
         }
     }
 

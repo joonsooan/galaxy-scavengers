@@ -505,6 +505,35 @@ public class UnitInfoPanel : MonoBehaviour
         return unitBase != null ? unitBase.MaxHealth : 0;
     }
 
+    public void WarmupFirstUse()
+    {
+        bool wasActive = gameObject.activeSelf;
+        gameObject.SetActive(true);
+        WarmTouchTmp(unitNameText);
+        WarmTouchTmp(unitDescText);
+        WarmTouchTmp(unitHealthText);
+        WarmTouchTmp(unitBatteryAmountText);
+        WarmTouchTmp(unitBatteryStatusText);
+        RebuildLayout();
+        Canvas.ForceUpdateCanvases();
+        ClearAllInfo();
+        if (wasActive)
+        {
+            gameObject.SetActive(true);
+        }
+    }
+
+    private static void WarmTouchTmp(TMP_Text text)
+    {
+        if (text == null)
+        {
+            return;
+        }
+        text.text = " ";
+        text.ForceMeshUpdate(true);
+        text.text = string.Empty;
+    }
+
     private void OnDestroy()
     {
         if (Instance == this)

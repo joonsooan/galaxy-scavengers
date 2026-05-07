@@ -11,9 +11,16 @@ public enum ProceduralQuestState
     Completed
 }
 
+public enum ProceduralQuestRewardKind
+{
+    Resource,
+    Token
+}
+
 [Serializable]
 public class ProceduralQuestRewardSpec
 {
+    public ProceduralQuestRewardKind kind = ProceduralQuestRewardKind.Resource;
     public ResourceType resourceType = ResourceType.None;
     public int amount;
 }

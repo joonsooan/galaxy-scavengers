@@ -22,6 +22,7 @@ public class UnitManagementUIController : MonoBehaviour
     [SerializeField] private Button unitUpgradeTabButton;
     [SerializeField] private GameObject unitUpgradeSubPanel;
     [SerializeField] private UnitUpgradeUIController unitUpgradeUI;
+    [SerializeField] private TMP_Text upgradeTokenCountText;
 
     [Header("Charge Settings")]
     [SerializeField] private Button unitChargeTabButton;
@@ -32,6 +33,8 @@ public class UnitManagementUIController : MonoBehaviour
     {
         UnitManager.OnUnitCountChanged += OnUnitCountChanged;
         UnitUpgradeProgress.OnUpgradeStateChanged += OnUpgradeStateChanged;
+        GameplayTokenWallet.EnsureExists(this);
+        GameplayTokenWallet.OnBalanceChanged += OnTokenBalanceChanged;
         WireTabButtons(true);
         RefreshSummary();
         ShowTab(GetValidTabIndex(s_lastSelectedTabIndex));
@@ -41,12 +44,18 @@ public class UnitManagementUIController : MonoBehaviour
     {
         UnitManager.OnUnitCountChanged -= OnUnitCountChanged;
         UnitUpgradeProgress.OnUpgradeStateChanged -= OnUpgradeStateChanged;
+        GameplayTokenWallet.OnBalanceChanged -= OnTokenBalanceChanged;
         WireTabButtons(false);
     }
 
     private void OnUpgradeStateChanged()
     {
         RefreshSummary();
+    }
+
+    private void OnTokenBalanceChanged()
+    {
+        RefreshTokenCount();
     }
 
     private void WireTabButtons(bool add)
@@ -126,6 +135,8 @@ public class UnitManagementUIController : MonoBehaviour
         {
             minerTabCountText.text = miners.ToString();
         }
+
+        RefreshTokenCount();
     }
 
     private void ShowTab(int index)
@@ -167,5 +178,16 @@ public class UnitManagementUIController : MonoBehaviour
     private static int GetValidTabIndex(int index)
     {
         return Mathf.Clamp(index, 0, TabCount - 1);
+    }
+
+    private void RefreshTokenCount()
+    {
+        if (upgradeTokenCountText == null)
+        {
+            return;
+        }
+
+        int tokenBalance = GameplayTokenWallet.Instance != null ? GameplayTokenWallet.Instance.Balance : 0;
+        upgradeTokenCountText.text = tokenBalance.ToString();
     }
 }

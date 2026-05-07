@@ -17,6 +17,8 @@ public class ObjClickManager : MonoBehaviour
     {
         if (mainCamera == null) return;
 
+        if (GameManager.Instance != null && !GameManager.IsGameplayReady) return;
+
         if (IsLoadingScreenActive()) return;
 
         if (Input.GetMouseButtonDown(0)) {
@@ -40,6 +42,10 @@ public class ObjClickManager : MonoBehaviour
             return;
         }
 
+        if (UIUtils.IsPointerOverUI()) {
+            return;
+        }
+
         LaunchUIController launchUIController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
         if (launchUIController != null && launchUIController.IsLaunchInputLockActive())
         {
@@ -49,61 +55,17 @@ public class ObjClickManager : MonoBehaviour
         RaycastHit2D[] hits = Physics2D.RaycastAll(mainCamera.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
         Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
 
+        if (TryHandlePriorityPanelBuildingHits(hits)) {
+            return;
+        }
+
         if (IsProducePanelActive())
         {
-            BuildingDataHolder clickedBuilding = GetClickedBuildingHolder(hits);
+            BuildingDataHolder clickedBuilding = GetClickedBuildingHolderForProducePanelBuildingClick(hits);
             if (clickedBuilding != null)
             {
                 BuildingHoverManager.Instance?.HandleNormalBuildingClick(clickedBuilding);
                 return;
-            }
-        }
-
-        foreach (RaycastHit2D hit in hits)
-        {
-            if (hit.collider != null && hit.collider is CapsuleCollider2D)
-            {
-                MainStructure mainStructure = hit.collider.GetComponentInParent<MainStructure>();
-                if (mainStructure != null)
-                {
-                    BuildingHoverManager.Instance?.ClearHoverOnClick(false);
-                    if (BuildingInfoPanel.Instance != null)
-                    {
-                        BuildingInfoPanel.Instance.gameObject.SetActive(false);
-                    }
-
-                    mainStructure.OnClicked();
-                    return;
-                }
-
-                BuildingDataHolder smelterHolder = hit.collider.GetComponentInParent<BuildingDataHolder>();
-                if (smelterHolder != null && smelterHolder.buildingData != null &&
-                    smelterHolder.buildingData.buildingType == BuildingType.Smelter)
-                {
-                    Processor processor = hit.collider.GetComponentInParent<Processor>();
-                    if (processor != null)
-                    {
-                        BuildingHoverManager.Instance?.ClearHoverOnClick();
-                        if (BuildingInfoPanel.Instance != null)
-                        {
-                            BuildingInfoPanel.Instance.gameObject.SetActive(false);
-                        }
-                        processor.OnClicked();
-                        return;
-                    }
-                }
-
-                DataExtractor dataExtractor = hit.collider.GetComponentInParent<DataExtractor>();
-                if (dataExtractor != null)
-                {
-                    BuildingHoverManager.Instance?.ClearHoverOnClick();
-                    if (BuildingInfoPanel.Instance != null)
-                    {
-                        BuildingInfoPanel.Instance.gameObject.SetActive(false);
-                    }
-                    dataExtractor.OnClicked();
-                    return;
-                }
             }
         }
 
@@ -157,6 +119,61 @@ public class ObjClickManager : MonoBehaviour
         }
     }
 
+    private static bool TryHandlePriorityPanelBuildingHits(RaycastHit2D[] hits)
+    {
+        foreach (RaycastHit2D hit in hits)
+        {
+            if (hit.collider == null || hit.collider is not CapsuleCollider2D)
+            {
+                continue;
+            }
+
+            MainStructure mainStructure = hit.collider.GetComponentInParent<MainStructure>();
+            if (mainStructure != null)
+            {
+                BuildingHoverManager.Instance?.ClearHoverOnClick(false);
+                if (BuildingInfoPanel.Instance != null)
+                {
+                    BuildingInfoPanel.Instance.gameObject.SetActive(false);
+                }
+
+                mainStructure.OnClicked();
+                return true;
+            }
+
+            BuildingDataHolder smelterHolder = hit.collider.GetComponentInParent<BuildingDataHolder>();
+            if (smelterHolder != null && smelterHolder.buildingData != null &&
+                smelterHolder.buildingData.buildingType == BuildingType.Smelter)
+            {
+                Processor processor = hit.collider.GetComponentInParent<Processor>();
+                if (processor != null)
+                {
+                    BuildingHoverManager.Instance?.ClearHoverOnClick();
+                    if (BuildingInfoPanel.Instance != null)
+                    {
+                        BuildingInfoPanel.Instance.gameObject.SetActive(false);
+                    }
+                    processor.OnClicked();
+                    return true;
+                }
+            }
+
+            DataExtractor dataExtractor = hit.collider.GetComponentInParent<DataExtractor>();
+            if (dataExtractor != null)
+            {
+                BuildingHoverManager.Instance?.ClearHoverOnClick();
+                if (BuildingInfoPanel.Instance != null)
+                {
+                    BuildingInfoPanel.Instance.gameObject.SetActive(false);
+                }
+                dataExtractor.OnClicked();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private bool IsLoadingScreenActive()
     {
         if (LoadingUIManager.Instance == null)
@@ -184,7 +201,7 @@ public class ObjClickManager : MonoBehaviour
         return uiManager.IsProcessorPanelActive() || uiManager.IsDroneHubPanelActive();
     }
 
-    private static BuildingDataHolder GetClickedBuildingHolder(RaycastHit2D[] hits)
+    private static BuildingDataHolder GetClickedBuildingHolderForProducePanelBuildingClick(RaycastHit2D[] hits)
     {
         foreach (RaycastHit2D hit in hits)
         {
@@ -200,6 +217,11 @@ public class ObjClickManager : MonoBehaviour
             BuildingDataHolder buildingHolder = hit.collider.GetComponentInParent<BuildingDataHolder>();
             if (buildingHolder != null && buildingHolder.buildingData != null)
             {
+                BuildingType t = buildingHolder.buildingData.buildingType;
+                if (t == BuildingType.MainStructure || t == BuildingType.DataExtractor || t == BuildingType.Smelter)
+                {
+                    continue;
+                }
                 return buildingHolder;
             }
         }

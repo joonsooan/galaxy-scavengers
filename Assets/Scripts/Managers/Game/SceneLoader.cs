@@ -179,10 +179,14 @@ public class SceneLoader : MonoBehaviour
         {
             yield return GameManager.Instance.StartCoroutine(GameManager.Instance.RunGameSceneOpeningSequence());
             yield return _gameScenePostOpeningUiDelayWait;
+            yield return GameManager.Instance.StartCoroutine(GameManager.Instance.WarmUpGameplayUiCoroutine());
             GameManager.Instance.SetMainCanvasVisible(true);
         }
 
-        BgmManager.Instance?.PlayGameBgm();
+        if (isGameScene)
+        {
+            BgmManager.Instance?.PlayGameBgm();
+        }
         if (GameManager.Instance != null)
         {
             GameManager.Instance.EndGameSceneOpeningSequence();

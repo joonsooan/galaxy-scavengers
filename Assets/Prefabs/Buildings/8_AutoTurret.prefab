@@ -101,6 +101,7 @@ GameObject:
   - component: {fileID: -451309890684058212}
   - component: {fileID: -4233757743523594796}
   - component: {fileID: -1573844852069723458}
+  - component: {fileID: 8270090818548628787}
   m_Layer: 0
   m_Name: 8_AutoTurret
   m_TagString: Untagged
@@ -341,6 +342,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   buildingData: {fileID: 11400000, guid: 6a375b82248aff4438a80132fb46c2a5, type: 2}
+--- !u!114 &8270090818548628787
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1574451153020646121}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0be86342191a061498923b9951f879e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ElectricityConsumerStatusBillboard
+  iconHeightVsBuilding: 1
+  powerStatusIconWorldOffset: {x: 0.5, y: 0.5, z: 0}
 --- !u!1 &4211748386888662629
 GameObject:
   m_ObjectHideFlags: 0

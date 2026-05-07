@@ -13,7 +13,6 @@ public class RequestQuestAcceptPanel : MonoBehaviour
     [SerializeField] private GameObject rewardGridContainer;
     [SerializeField] private GameObject baseInventoryCellPrefab;
     [SerializeField] private GameObject moduleInventoryCellPrefab;
-    [SerializeField] private GameObject creditRewardCellPrefab;
     [SerializeField] private GameObject buildingRewardCellPrefab;
     [SerializeField] private GameObject unitRewardCellPrefab;
     [SerializeField] private GameObject requirementTextPrefab;
@@ -380,32 +379,6 @@ public class RequestQuestAcceptPanel : MonoBehaviour
                     {
                         Module module = new Module(moduleRecipe);
                         cell.SetModule(module);
-                    }
-                }
-            }
-
-            if (questData.questFinishReward.creditReward > 0)
-            {
-                if (creditRewardCellPrefab != null)
-                {
-                    GameObject cellObj = Instantiate(creditRewardCellPrefab, rewardGridContainer.transform);
-                    CreditRewardCell cell = cellObj.GetComponent<CreditRewardCell>();
-                    if (cell != null)
-                    {
-                        cell.SetCreditAmount(questData.questFinishReward.creditReward);
-                    }
-                }
-                else
-                {
-                    GameObject cellObj = Instantiate(baseInventoryCellPrefab, rewardGridContainer.transform);
-                    BaseInventoryCell cell = cellObj.GetComponent<BaseInventoryCell>();
-                    if (cell != null)
-                    {
-                        TMP_Text creditText = cellObj.GetComponentInChildren<TMP_Text>();
-                        if (creditText != null)
-                        {
-                            creditText.text = $"{questData.questFinishReward.creditReward} Credits";
-                        }
                     }
                 }
             }

@@ -2,7 +2,6 @@ using DG.Tweening;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
-using UnityEngine.Tilemaps;
 
 public class CameraTargetController : MonoBehaviour
 {
@@ -16,7 +15,6 @@ public class CameraTargetController : MonoBehaviour
     public float smoothTime = 0.1f;
 
     public Transform followTarget;
-    public MapGenerator mapGenerator;
     private readonly float[] _speedMultipliers = { 1f, 1.5f, 2.5f };
     private readonly float[] _zoomDivisors = { 0.75f, 1.25f, 2.5f };
 
@@ -25,13 +23,10 @@ public class CameraTargetController : MonoBehaviour
     private float _defaultPanSpeed;
     private int _defaultPpu;
     private Vector3 _direction;
-    private bool _hasBounds;
     private bool _isEdgePanEnable;
 
     private bool _isManualMode;
-    private Camera _mainCamera;
-    private Bounds _mapBounds;
-    private Grid _grid;
+    private Grid _layoutGrid;
     private MainControlPanel _mainControlPanel;
 
     private PixelPerfectCamera _pixelPerfCam;
@@ -43,7 +38,6 @@ public class CameraTargetController : MonoBehaviour
 
     private void Awake()
     {
-        _mainCamera = Camera.main;
         _mainControlPanel = FindFirstObjectByType<MainControlPanel>(FindObjectsInactive.Include);
     }
 
@@ -79,7 +73,6 @@ public class CameraTargetController : MonoBehaviour
             _zoomLevelInitialized[i] = false;
         }
 
-        InitializeMapBounds();
         UpdateActiveCamera();
     }
 
@@ -92,73 +85,6 @@ public class CameraTargetController : MonoBehaviour
     {
         HandleMovement();
         HandleZoom();
-
-        ClampTargetPosition();
-    }
-
-    private void InitializeMapBounds()
-    {
-        if (mapGenerator == null)
-        {
-            mapGenerator = FindFirstObjectByType<MapGenerator>();
-        }
-
-        if (mapGenerator != null && mapGenerator.GroundTilemap != null)
-        {
-            Tilemap groundTilemap = mapGenerator.GroundTilemap;
-            groundTilemap.CompressBounds();
-            BoundsInt cellBounds = groundTilemap.cellBounds;
-
-            if (_grid == null && groundTilemap.layoutGrid != null)
-            {
-                _grid = groundTilemap.layoutGrid;
-            }
-
-            if (cellBounds.size.x == 0 || cellBounds.size.y == 0)
-            {
-                _hasBounds = false;
-                return;
-            }
-
-            if (groundTilemap.layoutGrid != null)
-            {
-                Grid grid = groundTilemap.layoutGrid;
-                Vector3 cellSize = grid.cellSize;
-
-                Vector3 worldMin = grid.CellToWorld(new Vector3Int(cellBounds.xMin, cellBounds.yMin, 0));
-                worldMin.x -= cellSize.x * 0.5f;
-                worldMin.y -= cellSize.y * 0.5f;
-
-                Vector3 worldMax = grid.CellToWorld(new Vector3Int(cellBounds.xMax - 1, cellBounds.yMax - 1, 0));
-                worldMax.x += cellSize.x * 0.5f;
-                worldMax.y += cellSize.y * 0.5f;
-
-                _mapBounds = new Bounds
-                {
-                    min = worldMin,
-                    max = worldMax
-                };
-                _mapBounds.center = _mapBounds.min + (_mapBounds.max - _mapBounds.min) * 0.5f;
-                _hasBounds = true;
-            }
-        }
-    }
-
-    public void RefreshMapBounds()
-    {
-        InitializeMapBounds();
-    }
-
-    public Vector3 GetMapBoundsCenterWorld()
-    {
-        if (!_hasBounds)
-        {
-            return transform.position;
-        }
-
-        Vector3 c = _mapBounds.center;
-        c.z = transform.position.z;
-        return c;
     }
 
     public void BeginOpeningSequence()
@@ -203,8 +129,6 @@ public class CameraTargetController : MonoBehaviour
         {
             WarpCameras(delta);
         }
-
-        ClampTargetPosition();
     }
 
     public Tween TweenRigToWorldXY(Vector3 worldXY, float duration)
@@ -218,64 +142,19 @@ public class CameraTargetController : MonoBehaviour
 
     private Vector3 ConvertWorldFocusToRigPosition(Vector3 focusWorld)
     {
-        Vector3 offset = _grid != null ? _grid.cellSize * 0.5f : new Vector3(0.5f, 0.5f, 0f);
+        if (_layoutGrid == null)
+        {
+            MapGenerator mg = FindFirstObjectByType<MapGenerator>();
+            if (mg != null && mg.GroundTilemap != null)
+            {
+                _layoutGrid = mg.GroundTilemap.layoutGrid;
+            }
+        }
+
+        Vector3 offset = _layoutGrid != null ? _layoutGrid.cellSize * 0.5f : new Vector3(0.5f, 0.5f, 0f);
         focusWorld.x -= offset.x;
         focusWorld.y -= offset.y;
         return focusWorld;
-    }
-
-    private void ClampTargetPosition()
-    {
-        if (_openingSequenceActive)
-        {
-            if (!_hasBounds || _zoomLevelPositions == null || _zoomLevelPositions.Length == 0) return;
-
-            Vector3 p = transform.position;
-            GetBoundsForZoomLevel(_currentZoomIndex, out float openingMinX, out float openingMaxX, out float openingMinY, out float openingMaxY);
-            p.x = Mathf.Clamp(p.x, openingMinX, openingMaxX);
-            p.y = Mathf.Clamp(p.y, openingMinY, openingMaxY);
-            p.z = transform.position.z;
-            transform.position = p;
-            for (int i = 0; i < _zoomLevelPositions.Length; i++)
-            {
-                _zoomLevelPositions[i] = p;
-            }
-            return;
-        }
-
-        if (!_hasBounds) return;
-
-        GetBoundsForZoomLevel(_currentZoomIndex, out float minX, out float maxX, out float minY, out float maxY);
-
-        Vector3 pos = _zoomLevelPositions[_currentZoomIndex];
-        pos.x = Mathf.Clamp(pos.x, minX, maxX);
-        pos.y = Mathf.Clamp(pos.y, minY, maxY);
-
-        _zoomLevelPositions[_currentZoomIndex] = pos;
-        transform.position = pos;
-    }
-
-    private void GetBoundsForZoomLevel(int zoomIndex, out float minX, out float maxX, out float minY, out float maxY)
-    {
-        float currentDivisor = _zoomDivisors[zoomIndex];
-        float currentPPU = _defaultPpu / currentDivisor;
-
-        float vertExtent;
-        if (_pixelPerfCam != null)
-        {
-            vertExtent = _pixelPerfCam.refResolutionY * 0.5f / currentPPU;
-        }
-        else
-        {
-            vertExtent = Screen.height * 0.5f / currentPPU;
-        }
-
-        float horzExtent = vertExtent * _mainCamera.aspect;
-
-        minX = _mapBounds.min.x + horzExtent;
-        maxX = _mapBounds.max.x - horzExtent;
-        minY = _mapBounds.min.y + vertExtent;
-        maxY = _mapBounds.max.y - vertExtent;
     }
 
     private void HandlePlayerInput()
@@ -394,13 +273,7 @@ public class CameraTargetController : MonoBehaviour
             Vector3 movement = finalDirection * currentPanSpeed * Time.unscaledDeltaTime;
             for (int i = 0; i < _zoomLevelPositions.Length; i++)
             {
-                Vector3 newPos = _zoomLevelPositions[i] + movement;
-
-                GetBoundsForZoomLevel(i, out float minX, out float maxX, out float minY, out float maxY);
-                newPos.x = Mathf.Clamp(newPos.x, minX, maxX);
-                newPos.y = Mathf.Clamp(newPos.y, minY, maxY);
-
-                _zoomLevelPositions[i] = newPos;
+                _zoomLevelPositions[i] += movement;
             }
             transform.position = _zoomLevelPositions[_currentZoomIndex];
         }
@@ -482,11 +355,7 @@ public class CameraTargetController : MonoBehaviour
             }
             else
             {
-                GetBoundsForZoomLevel(newIndex, out float minX, out float maxX, out float minY, out float maxY);
-                Vector3 pos = transform.position;
-                pos.x = Mathf.Clamp(pos.x, minX, maxX);
-                pos.y = Mathf.Clamp(pos.y, minY, maxY);
-                newPosition = pos;
+                newPosition = transform.position;
             }
 
             transform.position = newPosition;
@@ -560,8 +429,6 @@ public class CameraTargetController : MonoBehaviour
             panSpeed = _defaultPanSpeed * multiplier;
             edgePanSpeed = _defaultEdgePanSpeed * multiplier;
         }
-
-        ClampTargetPosition();
     }
 
     public void SetFollowTarget(Transform target)
@@ -605,8 +472,6 @@ public class CameraTargetController : MonoBehaviour
         {
             WarpCameras(delta);
         }
-
-        ClampTargetPosition();
     }
 
     public void ResetFollowTargetToPlayer()

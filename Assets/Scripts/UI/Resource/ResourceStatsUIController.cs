@@ -29,6 +29,9 @@ public class ResourceStatsUIController : MonoBehaviour
     [SerializeField] private float movingAverageWindowMinutes = 5f;
     [SerializeField] private float refreshInterval = 0.5f;
 
+    [Header("Resource Filter")]
+    [SerializeField] private ResourceType maxVisibleResourceType = ResourceType.AlloyPlate;
+
     private float _nextRefresh;
     private readonly List<UnitProcessorActivityCellView> _spawnedCells = new List<UnitProcessorActivityCellView>();
     private readonly List<ResourceType> _produceTypes = new List<ResourceType>();
@@ -153,12 +156,12 @@ public class ResourceStatsUIController : MonoBehaviour
 
         foreach (ResourceType type in allTypes)
         {
-            if (type != ResourceType.Electricity)
+            if (IsVisibleResourceType(type))
             {
                 _spendTypes.Add(type);
             }
 
-            if (type != ResourceType.Electricity)
+            if (IsVisibleResourceType(type))
             {
                 _produceTypes.Add(type);
             }
@@ -239,7 +242,6 @@ public class ResourceStatsUIController : MonoBehaviour
     {
         Dictionary<BuildingType, ElectricityAggregate> aggregates = new Dictionary<BuildingType, ElectricityAggregate>();
         ResourceGenerator[] generators = FindObjectsByType<ResourceGenerator>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-        ElectricityConsumptionManager manager = ElectricityConsumptionManager.Instance;
 
         for (int i = 0; i < generators.Length; i++)
         {
@@ -258,8 +260,12 @@ public class ResourceStatsUIController : MonoBehaviour
             {
                 continue;
             }
+            if (type == BuildingType.MainStructure)
+            {
+                continue;
+            }
 
-            float perSecond = GetGeneratorProducePerSecond(generator, manager);
+            float perSecond = GetGeneratorProducePerSecond(generator);
             ElectricityAggregate current = aggregates.TryGetValue(type, out ElectricityAggregate existing)
                 ? existing
                 : new ElectricityAggregate { icon = icon };
@@ -300,6 +306,10 @@ public class ResourceStatsUIController : MonoBehaviour
             {
                 continue;
             }
+            if (type == BuildingType.MainStructure)
+            {
+                continue;
+            }
 
             float perSecond = Mathf.Max(0f, consumer.ElectricityConsumptionPerSecond);
             ElectricityAggregate current = aggregates.TryGetValue(type, out ElectricityAggregate existing)
@@ -315,19 +325,19 @@ public class ResourceStatsUIController : MonoBehaviour
         return aggregates;
     }
 
-    private static float GetGeneratorProducePerSecond(ResourceGenerator generator, ElectricityConsumptionManager manager)
+    private static float GetGeneratorProducePerSecond(ResourceGenerator generator)
     {
         if (generator == null)
         {
             return 0f;
         }
 
-        if (generator.GenerationInterval <= 0f || generator.ElectricityBufferCurrent >= generator.ElectricityBufferMax)
+        if (!generator.isActiveAndEnabled || !generator.gameObject.activeInHierarchy || !generator.IsConstructed)
         {
             return 0f;
         }
 
-        if (manager != null && manager.IsElectricityStorageFull)
+        if (generator.GenerationInterval <= 0f || generator.ElectricityBufferCurrent >= generator.ElectricityBufferMax)
         {
             return 0f;
         }
@@ -437,6 +447,13 @@ public class ResourceStatsUIController : MonoBehaviour
         type = dataHolder.buildingData.buildingType;
         icon = dataHolder.buildingData.icon;
         return true;
+    }
+
+    private bool IsVisibleResourceType(ResourceType type)
+    {
+        return type != ResourceType.None &&
+               type != ResourceType.Electricity &&
+               type <= maxVisibleResourceType;
     }
 
     private void WireTabButtons(bool add)

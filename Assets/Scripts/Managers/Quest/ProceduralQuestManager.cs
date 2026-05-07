@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class ProceduralQuestManager : MonoBehaviour
 {
@@ -27,8 +28,9 @@ public class ProceduralQuestManager : MonoBehaviour
     [SerializeField] private List<ResourceType> lateProcessedResourcePool = new();
     [SerializeField] private Vector2Int lateProcessedAmountRange = new(10, 30);
 
-    [Header("Reward")]
-    [SerializeField] private Vector2Int rewardAmountRange = new(5, 15);
+    [Header("Token reward")]
+    [FormerlySerializedAs("rewardAmountRange")]
+    [SerializeField] private Vector2Int tokenRewardAmountRange = new(5, 15);
 
     public static ProceduralQuestManager Instance { get; private set; }
 
@@ -59,6 +61,7 @@ public class ProceduralQuestManager : MonoBehaviour
         }
 
         Instance = this;
+        GameplayTokenWallet.EnsureExists(this);
         BuildGenerator();
         SetState(ProceduralQuestState.Waiting);
     }
@@ -99,8 +102,8 @@ public class ProceduralQuestManager : MonoBehaviour
             switchToLateRuleQuestIndex = Mathf.Max(1, switchToLateRuleQuestIndex),
             lateBasicWeight = lateBasicWeight,
             choicesPerCycle = Mathf.Max(1, choicesPerCycle),
-            rewardAmountMin = Mathf.Min(rewardAmountRange.x, rewardAmountRange.y),
-            rewardAmountMax = Mathf.Max(rewardAmountRange.x, rewardAmountRange.y),
+            tokenRewardAmountMin = Mathf.Min(tokenRewardAmountRange.x, tokenRewardAmountRange.y),
+            tokenRewardAmountMax = Mathf.Max(tokenRewardAmountRange.x, tokenRewardAmountRange.y),
             useDeterministicSeed = useDeterministicSeed,
             deterministicSeed = deterministicSeed
         };
@@ -169,30 +172,63 @@ public class ProceduralQuestManager : MonoBehaviour
 
     public bool CompleteActiveQuest()
     {
-        if (_activeQuest == null || _state != ProceduralQuestState.Completable)
+        if (_activeQuest == null)
         {
             return false;
         }
 
-        bool spent = ResourceManager.Instance != null &&
-                     ResourceManager.Instance.RemoveResource(_activeQuest.targetResourceType, _activeQuest.requiredAmount);
-        if (!spent)
+        if (_state != ProceduralQuestState.Completable)
         {
             EvaluateActiveQuest();
-            return false;
+            if (_state != ProceduralQuestState.Completable)
+            {
+                return false;
+            }
+        }
+
+        ResourceCost[] costs = new ResourceCost[1];
+        costs[0] = new ResourceCost
+        {
+            resourceType = _activeQuest.targetResourceType,
+            amount = _activeQuest.requiredAmount
+        };
+
+        bool spent = ResourceManager.Instance != null &&
+                     ResourceManager.Instance.SpendResources(costs);
+        if (!spent)
+        {
+            int currentAmount = ResourceManager.Instance != null
+                ? ResourceManager.Instance.GetResourceAmount(_activeQuest.targetResourceType)
+                : 0;
+            bool removedByCount = ResourceManager.Instance != null &&
+                                  currentAmount >= _activeQuest.requiredAmount &&
+                                  ResourceManager.Instance.RemoveResource(_activeQuest.targetResourceType, _activeQuest.requiredAmount);
+            if (!removedByCount)
+            {
+                EvaluateActiveQuest();
+                return false;
+            }
         }
 
         if (_activeQuest.rewardSpecs != null)
         {
+            GameplayTokenWallet.EnsureExists(this);
             for (int i = 0; i < _activeQuest.rewardSpecs.Count; i++)
             {
                 ProceduralQuestRewardSpec reward = _activeQuest.rewardSpecs[i];
-                if (reward == null || reward.resourceType == ResourceType.None || reward.amount <= 0)
+                if (reward == null || reward.amount <= 0)
                 {
                     continue;
                 }
 
-                ResourceManager.Instance?.AddResource(reward.resourceType, reward.amount);
+                if (reward.kind == ProceduralQuestRewardKind.Token)
+                {
+                    GameplayTokenWallet.Instance?.Add(reward.amount);
+                }
+                else if (reward.resourceType != ResourceType.None)
+                {
+                    ResourceManager.Instance?.AddResource(reward.resourceType, reward.amount);
+                }
             }
         }
 

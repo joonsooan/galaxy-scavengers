@@ -150,11 +150,6 @@ public class BaseInventoryDebugManager : MonoBehaviour
             coreCustomUIManager.RefreshModuleSelectionGrid();
         }
         
-        // Reset credits to 0
-        if (CreditManager.Instance != null)
-        {
-            CreditManager.Instance.ResetCredits();
-        }
     }
     
     private void TransferFromGameInventory()

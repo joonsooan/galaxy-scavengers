@@ -26,6 +26,7 @@ public class UnitUpgradeProgress : MonoBehaviour
         }
 
         Instance = this;
+        GameplayTokenWallet.EnsureExists(this);
         ResetProgress();
     }
 
@@ -111,9 +112,11 @@ public class UnitUpgradeProgress : MonoBehaviour
 
     public bool TryQueueUpgrade(UnitUpgradeLineData line)
     {
-        if (line == null || ResourceManager.Instance == null) {
+        if (line == null) {
             return false;
         }
+
+        GameplayTokenWallet.EnsureExists(this);
 
         if (_pendingType.HasValue) {
             return false;
@@ -129,12 +132,8 @@ public class UnitUpgradeProgress : MonoBehaviour
         }
 
         UnitUpgradeTier tier = line.tiers[level];
-        if (tier.costs != null && tier.costs.Length > 0) {
-            if (!ResourceManager.Instance.HasEnoughResources(tier.costs)) {
-                return false;
-            }
-
-            if (!ResourceManager.Instance.SpendResources(tier.costs)) {
+        if (tier.tokenCost > 0) {
+            if (GameplayTokenWallet.Instance == null || !GameplayTokenWallet.Instance.TrySpend(tier.tokenCost)) {
                 return false;
             }
         }
@@ -147,9 +146,11 @@ public class UnitUpgradeProgress : MonoBehaviour
 
     public bool CanAffordNextTier(UnitUpgradeLineData line)
     {
-        if (line == null || ResourceManager.Instance == null) {
+        if (line == null) {
             return false;
         }
+
+        GameplayTokenWallet.EnsureExists(this);
 
         if (line.tiers == null) {
             return false;
@@ -161,11 +162,11 @@ public class UnitUpgradeProgress : MonoBehaviour
         }
 
         UnitUpgradeTier tier = line.tiers[level];
-        if (tier.costs == null || tier.costs.Length == 0) {
+        if (tier.tokenCost <= 0) {
             return true;
         }
 
-        return ResourceManager.Instance.HasEnoughResources(tier.costs);
+        return GameplayTokenWallet.Instance != null && GameplayTokenWallet.Instance.CanAfford(tier.tokenCost);
     }
 
     private void IncrementLevel(UnitUpgradeStatType type)
@@ -195,6 +196,10 @@ public class UnitUpgradeProgress : MonoBehaviour
         foreach (UnitBase u in UnitManager.Instance.AllyUnits) {
             if (u is Unit_Miner miner) {
                 miner.ApplyMinerUpgradeModifiers();
+            }
+            else if (u is Unit_Construct construct)
+            {
+                construct.ApplyConstructUpgradeModifiers();
             }
         }
     }

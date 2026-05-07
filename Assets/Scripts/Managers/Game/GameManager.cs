@@ -6,6 +6,7 @@ using Systems.Jobs;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -22,11 +23,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private EventReference resumeSound;
 
     [Header("Game Scene Opening Sequence")]
-    [SerializeField] [Min(0f)] private float openingPanDuration = 0.35f;
-    [SerializeField] [Min(0f)] private float openingCenterDwellSeconds = 0.5f;
-    [SerializeField] [Min(0f)] private float openingRuinsDwellSeconds = 2.5f;
-    [SerializeField] private bool logOpeningSequence = true;
-
+    [SerializeField][Min(0f)] private float openingPanDuration = 0.35f;
+    [SerializeField][Min(0f)] private float openingCenterDwellSeconds = 0.5f;
+    [SerializeField][Min(0f)] private float openingRuinsDwellSeconds = 2.5f;
 
     [HideInInspector] public UnityEvent<DisplayableData> onStartDrag;
     [HideInInspector] public UnityEvent onEndDrag;
@@ -94,7 +93,9 @@ public class GameManager : MonoBehaviour
 
         if (IsLoadingScreenActive()) return;
 
+#if UNITY_EDITOR
         HandleDebugTimeScale();
+#endif
 
         if (GameMenuManager.Instance != null && GameMenuManager.Instance.IsMenuOpen())
         {
@@ -132,6 +133,7 @@ public class GameManager : MonoBehaviour
 #endif
     }
 
+#if UNITY_EDITOR
     private void HandleDebugTimeScale()
     {
         float targetScale = -1f;
@@ -163,6 +165,7 @@ public class GameManager : MonoBehaviour
             Time.timeScale = targetScale;
         }
     }
+#endif
 
     public void TogglePause()
     {
@@ -271,20 +274,13 @@ public class GameManager : MonoBehaviour
     public IEnumerator RunGameSceneOpeningSequence()
     {
         CameraTargetController ctc = FindFirstObjectByType<CameraTargetController>();
-        if (ctc == null)
-        {
-            LogOpening("CameraTargetController not found. Skip opening sequence.");
-            yield break;
-        }
 
         if (mapGenerator == null)
         {
             mapGenerator = FindFirstObjectByType<MapGenerator>();
         }
 
-        ctc.RefreshMapBounds();
         ctc.BeginOpeningSequence();
-        LogOpening("Opening sequence started.");
 
         Vector3 startFocus = ctc.transform.position;
         bool hasRuins = mapGenerator != null && mapGenerator.AncientRuinsCells != null && mapGenerator.AncientRuinsCells.Count > 0;
@@ -293,7 +289,6 @@ public class GameManager : MonoBehaviour
 
         if (openingCenterDwellSeconds > 0f)
         {
-            LogOpening($"Start dwell ({openingCenterDwellSeconds:F2}s).");
             yield return CoroutineCache.GetWaitForSecondsRealtime(openingCenterDwellSeconds);
         }
 
@@ -312,18 +307,10 @@ public class GameManager : MonoBehaviour
         Unit_Player mainUnit = FindFirstObjectByType<Unit_Player>(FindObjectsInactive.Include);
         if (mainUnit != null)
         {
-            LogOpening($"Move to main unit start ({openingPanDuration:F2}s).");
             Tween toMainUnit = ctc.TweenRigToWorldXY(mainUnit.transform.position, openingPanDuration);
             yield return toMainUnit.WaitForCompletion();
             ctc.SetFollowTargetImmediate(mainUnit.transform);
-            LogOpening("Move to main unit complete.");
         }
-        else
-        {
-            LogOpening("Main unit not found. Skipping move to main unit.");
-        }
-
-        LogOpening("Opening sequence finished.");
     }
 
     public void EndGameSceneOpeningSequence()
@@ -332,18 +319,26 @@ public class GameManager : MonoBehaviour
         if (ctc != null)
         {
             ctc.EndOpeningSequence();
-            LogOpening("Camera opening lock released.");
         }
     }
 
-    private void LogOpening(string message)
+    public IEnumerator WarmUpGameplayUiCoroutine()
     {
-        if (!logOpeningSequence)
+        yield return null;
+        if (BuildingInfoPanel.Instance != null)
         {
-            return;
+            BuildingInfoPanel.Instance.WarmupFirstUse();
         }
-
-        Debug.Log($"[GameOpening] {message}");
+        if (ResourceInfoPanel.Instance != null)
+        {
+            ResourceInfoPanel.Instance.WarmupFirstUse();
+        }
+        if (UnitInfoPanel.Instance != null)
+        {
+            UnitInfoPanel.Instance.WarmupFirstUse();
+        }
+        yield return null;
+        Canvas.ForceUpdateCanvases();
     }
 
     public void StartDrag(DisplayableData data)
@@ -468,12 +463,6 @@ public class GameManager : MonoBehaviour
         if (BuildingManager.Instance != null && mapGenerator != null)
         {
             BuildingManager.Instance.InitializeWalkableCellCache(mapGenerator.GetMapBounds());
-        }
-
-        CameraTargetController cameraController = FindFirstObjectByType<CameraTargetController>();
-        if (cameraController != null)
-        {
-            cameraController.RefreshMapBounds();
         }
 
         yield return StartCoroutine(InitializeSpawnersAndUnitsAsync(progress, skipProceduralGenerationWhenLoadingGameScene));

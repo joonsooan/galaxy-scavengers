@@ -20,6 +20,6 @@ MonoBehaviour:
   buildingTile: {fileID: 11400000, guid: a9879f8451c56c0429aa389e7db66acc, type: 2}
   buildingType: 12
   recipe:
-  - buildingPieceType: 1
+  - buildingPieceType: 5
     relativePosition: {x: 0, y: 0, z: 0}
   noiseCoefficient: 0.5

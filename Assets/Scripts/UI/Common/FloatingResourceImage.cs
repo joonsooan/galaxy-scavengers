@@ -42,7 +42,19 @@ public class FloatingResourceImage : MonoBehaviour
             return;
         }
 
-        Sprite resourceIcon = ResourceManager.Instance?.GetResourceIcon(resourceType);
+        Sprite resourceIcon = null;
+        if (resourceType == ResourceType.Electricity)
+        {
+            ElectricityConsumptionManager ecm = ElectricityConsumptionManager.Instance;
+            if (ecm != null)
+            {
+                resourceIcon = ecm.GetElectricityResourceIcon();
+            }
+        }
+        if (resourceIcon == null)
+        {
+            resourceIcon = ResourceManager.Instance?.GetResourceIcon(resourceType);
+        }
         if (resourceIcon != null)
         {
             resourceImage.sprite = resourceIcon;

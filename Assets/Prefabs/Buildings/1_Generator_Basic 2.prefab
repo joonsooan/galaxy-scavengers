@@ -17,6 +17,7 @@ GameObject:
   - component: {fileID: -8150741516445236441}
   - component: {fileID: 1624190025622244497}
   - component: {fileID: -4359105832664595340}
+  - component: {fileID: 1859014521780768586}
   m_Layer: 0
   m_Name: 1_Generator_Basic 2
   m_TagString: Untagged
@@ -199,11 +200,11 @@ MonoBehaviour:
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
   currentHealth: 0
-  generationInterval: 2
-  resourceAmount: 100
+  generationInterval: 1
+  resourceAmount: 20
   supplyRangeN: 8
   powerCoverageCellOffset: {x: -1, y: -1}
-  electricityBufferMax: 500
+  electricityBufferMax: 200
   electricityBufferCurrent: 0
   fuelCostsPerProduction:
   - resourceType: 1
@@ -265,6 +266,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   buildingData: {fileID: 11400000, guid: 11e719e49df1f8041a2512a4d0c060ce, type: 2}
+--- !u!114 &1859014521780768586
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1574451153020646121}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0be86342191a061498923b9951f879e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ElectricityConsumerStatusBillboard
+  iconHeightVsBuilding: 1
+  powerStatusIconWorldOffset: {x: 0.5, y: 0.5, z: 0}
 --- !u!1 &1892733280454570146
 GameObject:
   m_ObjectHideFlags: 0

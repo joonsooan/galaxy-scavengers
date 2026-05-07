@@ -117,13 +117,8 @@ public partial class BgmManager : MonoBehaviour
             _playGameBgmCoroutine = null;
         }
 
-        if (_hasInstance)
-        {
-            StopCurrent(false);
-        }
-
         _lastGameBgm = tutorialBgm;
-        _playGameBgmCoroutine = StartCoroutine(PlayGameBgmWithFade(tutorialBgm));
+        _playGameBgmCoroutine = StartCoroutine(PlayTutorialBgmWithFade(tutorialBgm));
     }
 
     public void PlayGameBgm()
@@ -194,6 +189,30 @@ public partial class BgmManager : MonoBehaviour
             _gameBgmEndFadeCoroutine = null;
         }
         _gameBgmEndFadeCoroutine = StartCoroutine(GameBgmEndFadeOut());
+        _gameBgmCooldownCoroutine = StartCoroutine(GameBgmCooldown());
+    }
+
+    private IEnumerator PlayTutorialBgmWithFade(EventReference bgm)
+    {
+        if (_hasInstance)
+        {
+            yield return StartCoroutine(FadeOutBgm(gameBgmFadeOutTime, false));
+        }
+
+        _currentBgm = bgm;
+        _currentInstance = RuntimeManager.CreateInstance(bgm);
+        _hasInstance = true;
+        _currentInstance.setVolume(0f);
+        _currentInstance.start();
+
+        yield return StartCoroutine(FadeInGameBgm(gameBgmFadeInTime));
+
+        _playGameBgmCoroutine = null;
+        if (_gameBgmCooldownCoroutine != null)
+        {
+            StopCoroutine(_gameBgmCooldownCoroutine);
+            _gameBgmCooldownCoroutine = null;
+        }
         _gameBgmCooldownCoroutine = StartCoroutine(GameBgmCooldown());
     }
 

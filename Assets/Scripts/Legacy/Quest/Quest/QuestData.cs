@@ -23,10 +23,7 @@ public class QuestReward
     
     [Header("Module Rewards")]
     public ModuleRecipe[] moduleRewards;
-    
-    [Header("Credit Reward")]
-    public int creditReward = 0;
-    
+
     [Header("Building Unlocks")]
     [Tooltip("Buildings unlocked when this quest is completed")]
     public BuildingData[] unlockedBuildings;

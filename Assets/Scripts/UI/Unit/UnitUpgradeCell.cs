@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class UnitUpgradeCell : MonoBehaviour
@@ -9,8 +10,11 @@ public class UnitUpgradeCell : MonoBehaviour
     [SerializeField] private Image iconImage;
     [SerializeField] private TMP_Text levelText;
     [SerializeField] private string maxLevelLabel = "최대 레벨";
-    [SerializeField] private Transform resourceContent;
-    [SerializeField] private GameObject resourceInfoCellPrefab;
+    [FormerlySerializedAs("resourceContent")]
+    [SerializeField] private Transform tokenCostContainer;
+    [FormerlySerializedAs("resourceInfoCellPrefab")]
+    [SerializeField] private GameObject tokenInfoCellPrefab;
+    [SerializeField] private Sprite gameplayTokenIcon;
     [SerializeField] private Button upgradeButton;
 
     private UnitUpgradeLineData _line;
@@ -69,7 +73,7 @@ public class UnitUpgradeCell : MonoBehaviour
                 continue;
             }
 
-            if (resourceContent != null && candidate.transform.IsChildOf(resourceContent))
+            if (tokenCostContainer != null && candidate.transform.IsChildOf(tokenCostContainer))
             {
                 continue;
             }
@@ -133,27 +137,24 @@ public class UnitUpgradeCell : MonoBehaviour
             descText.text = GetDescriptionTextForDisplay(level, maxed);
         }
 
-        ClearResourceCells();
+        ClearTokenCostCells();
         UnitUpgradeTier nextTier = GetNextTier(level);
 
-        if (nextTier != null && nextTier.costs != null && resourceContent != null && resourceInfoCellPrefab != null)
+        if (nextTier != null && nextTier.tokenCost > 0 && tokenCostContainer != null && tokenInfoCellPrefab != null)
         {
-            foreach (ResourceCost cost in nextTier.costs)
+            GameObject cellObj = Instantiate(tokenInfoCellPrefab, tokenCostContainer);
+            ResourceInfoCell cell = cellObj.GetComponent<ResourceInfoCell>();
+            if (cell != null)
             {
-                GameObject cellObj = Instantiate(resourceInfoCellPrefab, resourceContent);
-                ResourceInfoCell cell = cellObj.GetComponent<ResourceInfoCell>();
-                if (cell != null)
-                {
-                    cell.SetInfo(cost.resourceType, cost.amount, false);
-                }
+                cell.SetTokenCost(nextTier.tokenCost, gameplayTokenIcon, false, false);
             }
 
-            foreach (Transform child in resourceContent)
+            foreach (Transform child in tokenCostContainer)
             {
                 LayoutRebuilder.ForceRebuildLayoutImmediate(child as RectTransform);
             }
 
-            LayoutRebuilder.ForceRebuildLayoutImmediate(resourceContent as RectTransform);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(tokenCostContainer as RectTransform);
         }
 
         Button btn = GetUpgradeButton();
@@ -167,8 +168,8 @@ public class UnitUpgradeCell : MonoBehaviour
             {
                 bool blockedByOtherLine = progress.IsAnyUpgradeInProgress() &&
                     !progress.IsUpgradeInProgress(_line.statType);
-                bool canAffordResources = !maxed && TierResourceCostsSatisfied(nextTier);
-                btn.interactable = !maxed && !blockedByOtherLine && canAffordResources;
+                bool canAffordTokens = !maxed && TierTokenCostsSatisfied(nextTier);
+                btn.interactable = !maxed && !blockedByOtherLine && canAffordTokens;
             }
 
             ApplyUpgradeButtonLabel(btn, progress);
@@ -200,20 +201,20 @@ public class UnitUpgradeCell : MonoBehaviour
         }
     }
 
-    private static bool TierResourceCostsSatisfied(UnitUpgradeTier tier)
+    private static bool TierTokenCostsSatisfied(UnitUpgradeTier tier)
     {
         if (tier == null)
         {
             return false;
         }
 
-        if (tier.costs == null || tier.costs.Length == 0)
+        if (tier.tokenCost <= 0)
         {
             return true;
         }
 
-        return ResourceManager.Instance != null &&
-            ResourceManager.Instance.HasEnoughResources(tier.costs);
+        return GameplayTokenWallet.Instance != null &&
+            GameplayTokenWallet.Instance.CanAfford(tier.tokenCost);
     }
 
     private static UnitUpgradeProgress ResolveProgressReference()
@@ -258,16 +259,16 @@ public class UnitUpgradeCell : MonoBehaviour
         return _line.tiers[currentLevel];
     }
 
-    private void ClearResourceCells()
+    private void ClearTokenCostCells()
     {
-        if (resourceContent == null)
+        if (tokenCostContainer == null)
         {
             return;
         }
 
-        for (int i = resourceContent.childCount - 1; i >= 0; i--)
+        for (int i = tokenCostContainer.childCount - 1; i >= 0; i--)
         {
-            Destroy(resourceContent.GetChild(i).gameObject);
+            Destroy(tokenCostContainer.GetChild(i).gameObject);
         }
     }
 

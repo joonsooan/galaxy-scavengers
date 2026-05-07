@@ -150,8 +150,20 @@ public class PowerCoveragePreviewOverlay : MonoBehaviour
             PaintBounds(bounds, ground, bm, tile);
         }
 
+        ConstructionSite[] constructionSites = FindObjectsByType<ConstructionSite>(FindObjectsSortMode.None);
+        for (int i = 0; i < constructionSites.Length; i++) {
+            ConstructionSite site = constructionSites[i];
+            if (site == null || !site.isActiveAndEnabled) {
+                continue;
+            }
+
+            if (TryGetBuildingPowerBounds(site.buildingData, bm.grid, site.cellPosition, out BoundsInt siteBounds)) {
+                PaintBounds(siteBounds, ground, bm, tile);
+            }
+        }
+
         if (dragBuilding != null && grid != null &&
-            TryGetDragPreviewPowerBounds(dragBuilding, grid, anchorCell, out BoundsInt dragBounds)) {
+            TryGetBuildingPowerBounds(dragBuilding, grid, anchorCell, out BoundsInt dragBounds)) {
             PaintBounds(dragBounds, ground, bm, tile);
         }
 
@@ -173,7 +185,7 @@ public class PowerCoveragePreviewOverlay : MonoBehaviour
         }
     }
 
-    private static bool TryGetDragPreviewPowerBounds(BuildingData data, Grid grid, Vector3Int anchorCell, out BoundsInt bounds)
+    private static bool TryGetBuildingPowerBounds(BuildingData data, Grid grid, Vector3Int anchorCell, out BoundsInt bounds)
     {
         bounds = default;
         if (data == null || data.recipe == null || data.buildingPrefab == null || grid == null) {
@@ -225,6 +237,15 @@ public class PowerCoveragePreviewOverlay : MonoBehaviour
     {
         IsShowing = false;
         ClearInternal();
+    }
+
+    public void RefreshIfShowing()
+    {
+        if (!IsShowing)
+        {
+            return;
+        }
+        Show();
     }
 
     private void ClearInternal()

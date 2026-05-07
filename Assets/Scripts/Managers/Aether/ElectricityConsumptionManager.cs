@@ -45,6 +45,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
     [SerializeField] private Sprite powerDisconnectedSprite;
     [SerializeField] private Sprite powerInsufficientSprite;
     [SerializeField] private float powerIconWorldYOffset = 0.6f;
+    [SerializeField] private Sprite electricityResourceIcon;
 
     private static Texture2D _fallbackPowerIconTex;
     private static Sprite _fallbackPowerIconSprite;
@@ -52,6 +53,11 @@ public class ElectricityConsumptionManager : MonoBehaviour
     private const string PowerIconPoolDisconnected = "PowerIcon_Disconnected";
     private const string PowerIconPoolNeed = "PowerIcon_Need";
     private bool _powerIconPoolsEnsured;
+
+    public Sprite GetElectricityResourceIcon()
+    {
+        return electricityResourceIcon;
+    }
 
     public float GetTotalElectricityConsumptionPerSecond()
     {
@@ -71,12 +77,12 @@ public class ElectricityConsumptionManager : MonoBehaviour
         float total = 0f;
         foreach (ResourceGenerator generator in _resourceGenerators)
         {
-            if (generator == null || !generator.IsConstructed)
+            if (generator == null || !generator.IsConstructed || !generator.isActiveAndEnabled || !generator.gameObject.activeInHierarchy)
             {
                 continue;
             }
 
-            if (!generator.HasFuelAvailableInRange() || IsElectricityStorageFull)
+            if (!generator.HasFuelAvailableInRange())
             {
                 continue;
             }
@@ -375,6 +381,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
             _batteries.Remove(battery);
             _batteryVisualStates.Remove(battery);
         }
+        PowerCoveragePreviewOverlay.Instance?.RefreshIfShowing();
     }
 
     public void RegisterResourceGenerator(ResourceGenerator generator)
@@ -397,6 +404,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
             _resourceGenerators.Remove(generator);
             _resourceGeneratorVisualStates.Remove(generator);
         }
+        PowerCoveragePreviewOverlay.Instance?.RefreshIfShowing();
     }
 
     private void SanitizeDeadResourceGenerators()
@@ -441,6 +449,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
             _powerReceivers.Remove(receiver);
             _powerReceiverVisualStates.Remove(receiver);
         }
+        PowerCoveragePreviewOverlay.Instance?.RefreshIfShowing();
     }
 
     public void RegisterMainStructure(MainStructure mainStructure)
@@ -581,20 +590,14 @@ public class ElectricityConsumptionManager : MonoBehaviour
                 continue;
             }
 
-            bool constructedAndFueled = gen.IsConstructed && gen.HasFuelAvailableInRange();
-            int buffer = gen.ElectricityBufferCurrent;
             PowerFeedVisualState gvs;
-            if (constructedAndFueled)
-            {
-                gvs = PowerFeedVisualState.Ok;
-            }
-            else if (buffer > 0)
+            if (gen.IsConstructed && !gen.HasFuelAvailableInRange())
             {
                 gvs = PowerFeedVisualState.InsufficientPool;
             }
             else
             {
-                gvs = PowerFeedVisualState.Disconnected;
+                gvs = PowerFeedVisualState.Ok;
             }
             _resourceGeneratorVisualStates[gen] = gvs;
         }

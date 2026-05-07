@@ -14,6 +14,9 @@ public class AlertCameraClickHandler : MonoBehaviour
 
     private void Update()
     {
+        if (GameManager.Instance != null && !GameManager.IsGameplayReady)
+            return;
+
         if (!Input.GetMouseButtonDown(0))
             return;
         if (EventSystem.current == null)

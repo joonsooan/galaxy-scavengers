@@ -12,19 +12,29 @@ public class ResourceInfoCell : MonoBehaviour
     private int _requiredAmount;
     private Color _originalTextColor;
     private bool _isTrackingResources;
-    
+    private bool _tracksToken;
+    private bool _tokenCostLabelShowsBalanceFraction = true;
+
     private void OnEnable()
     {
+        if (_tracksToken)
+        {
+            GameplayTokenWallet.OnBalanceChanged += OnTokenBalanceChanged;
+            RefreshTokenCostDisplay();
+            return;
+        }
+
         if (_isTrackingResources)
         {
             ResourceManager.OnResourceAmountChanged += OnResourceAmountChanged;
             UpdateColor();
         }
     }
-    
+
     private void OnDisable()
     {
         ResourceManager.OnResourceAmountChanged -= OnResourceAmountChanged;
+        GameplayTokenWallet.OnBalanceChanged -= OnTokenBalanceChanged;
     }
     
     public void SetInfo(ResourceType type, int amount)
@@ -34,6 +44,7 @@ public class ResourceInfoCell : MonoBehaviour
 
     public void SetInfoDisplayOnly(ResourceType type, int amount)
     {
+        _tracksToken = false;
         _resourceType = type;
         _requiredAmount = amount;
         _isTrackingResources = false;
@@ -43,7 +54,11 @@ public class ResourceInfoCell : MonoBehaviour
 
         resourceAmount.text = amount.ToString();
         Sprite resourceIcon = GetResourceIcon(type);
-        resourceImage.sprite = resourceIcon != null ? resourceIcon : null;
+        if (resourceImage != null)
+        {
+            resourceImage.enabled = true;
+            resourceImage.sprite = resourceIcon != null ? resourceIcon : null;
+        }
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
         if (resourceAmount != null)
@@ -52,6 +67,7 @@ public class ResourceInfoCell : MonoBehaviour
     
     public void SetInfo(ResourceType type, int amount, bool rebuildImmediately)
     {
+        _tracksToken = false;
         _resourceType = type;
         _requiredAmount = amount;
         _isTrackingResources = true;
@@ -64,15 +80,19 @@ public class ResourceInfoCell : MonoBehaviour
         resourceAmount.text = amount.ToString();
         
         Sprite resourceIcon = GetResourceIcon(type);
-        if (resourceIcon != null)
+        if (resourceImage != null)
         {
-            resourceImage.sprite = resourceIcon;
+            resourceImage.enabled = true;
+            if (resourceIcon != null)
+            {
+                resourceImage.sprite = resourceIcon;
+            }
+            else
+            {
+                resourceImage.sprite = null;
+            }
         }
-        else
-        {
-            resourceImage.sprite = null; 
-        }
-        
+
         UpdateColor();
         
         if (rebuildImmediately)
@@ -84,30 +104,113 @@ public class ResourceInfoCell : MonoBehaviour
             ResourceManager.OnResourceAmountChanged += OnResourceAmountChanged;
         }
     }
-    
+
+    public void SetTokenCost(int tokenCost, bool rebuildImmediately)
+    {
+        SetTokenCost(tokenCost, null, rebuildImmediately, true);
+    }
+
+    public void SetTokenCost(int tokenCost, Sprite tokenIcon, bool rebuildImmediately)
+    {
+        SetTokenCost(tokenCost, tokenIcon, rebuildImmediately, true);
+    }
+
+    public void SetTokenCost(int tokenCost, Sprite tokenIcon, bool rebuildImmediately, bool labelShowsBalanceFraction)
+    {
+        _tracksToken = true;
+        _isTrackingResources = true;
+        _tokenCostLabelShowsBalanceFraction = labelShowsBalanceFraction;
+        _requiredAmount = tokenCost;
+        _resourceType = ResourceType.None;
+
+        if (resourceAmount != null && _originalTextColor == Color.clear)
+        {
+            _originalTextColor = resourceAmount.color;
+        }
+
+        if (resourceImage != null)
+        {
+            if (tokenIcon != null)
+            {
+                resourceImage.sprite = tokenIcon;
+                resourceImage.enabled = true;
+            }
+            else
+            {
+                resourceImage.sprite = null;
+                resourceImage.enabled = false;
+            }
+        }
+
+        RefreshTokenCostDisplay();
+
+        if (rebuildImmediately)
+        {
+            LayoutRebuilder.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
+        }
+
+        if (gameObject.activeInHierarchy)
+        {
+            GameplayTokenWallet.OnBalanceChanged -= OnTokenBalanceChanged;
+            GameplayTokenWallet.OnBalanceChanged += OnTokenBalanceChanged;
+        }
+    }
+
+    private void OnTokenBalanceChanged()
+    {
+        RefreshTokenCostDisplay();
+    }
+
+    private void RefreshTokenCostDisplay()
+    {
+        if (resourceAmount == null || !_tracksToken)
+        {
+            return;
+        }
+
+        int current = GameplayTokenWallet.Instance != null ? GameplayTokenWallet.Instance.Balance : 0;
+        resourceAmount.text = _tokenCostLabelShowsBalanceFraction
+            ? $"{current}/{_requiredAmount}"
+            : _requiredAmount.ToString();
+
+        if (current < _requiredAmount)
+        {
+            resourceAmount.color = Color.red;
+        }
+        else
+        {
+            resourceAmount.color = _originalTextColor;
+        }
+    }
+
     private void OnResourceAmountChanged(ResourceType type, int amount)
     {
+        if (_tracksToken)
+        {
+            return;
+        }
+
         if (type == _resourceType)
         {
             UpdateColor();
         }
     }
-    
+
     private void UpdateColor()
     {
-        if (resourceAmount == null || !_isTrackingResources)
+        if (resourceAmount == null || !_isTrackingResources || _tracksToken)
         {
             return;
         }
-        
+
         if (ResourceManager.Instance == null)
         {
             resourceAmount.color = _originalTextColor;
             return;
         }
-        
+
         int currentAmount = ResourceManager.Instance.GetResourceAmount(_resourceType);
-        
+
         if (currentAmount < _requiredAmount)
         {
             resourceAmount.color = Color.red;

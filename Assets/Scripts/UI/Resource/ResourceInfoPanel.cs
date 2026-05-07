@@ -159,4 +159,35 @@ public class ResourceInfoPanel : MonoBehaviour
         }
         return null;
     }
+
+    public void WarmupFirstUse()
+    {
+        bool wasActive = gameObject.activeSelf;
+        gameObject.SetActive(true);
+        WarmTouchTmp(resourceNameText);
+        WarmTouchTmp(resourceAmountText);
+        WarmTouchTmp(resourceDescText);
+        if (resourceIconImage != null)
+        {
+            resourceIconImage.enabled = true;
+        }
+        RebuildLayout();
+        Canvas.ForceUpdateCanvases();
+        ClearAllInfo();
+        if (wasActive)
+        {
+            gameObject.SetActive(true);
+        }
+    }
+
+    private static void WarmTouchTmp(TMP_Text text)
+    {
+        if (text == null)
+        {
+            return;
+        }
+        text.text = " ";
+        text.ForceMeshUpdate(true);
+        text.text = string.Empty;
+    }
 }
