@@ -1,6 +1,9 @@
 using System.Collections;
 using FMODUnity;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class BtnManager_Base : MonoBehaviour
@@ -13,6 +16,22 @@ public class BtnManager_Base : MonoBehaviour
     [SerializeField] private float fadeDuration = 1f;
 
     private bool _isLaunching;
+
+    private void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
+    }
+
+    private void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
+    }
+
+    private void OnSelectedLocaleChanged(Locale _)
+    {
+        ApplyLocalizedLaunchBarLabels();
+        ApplyCoreLaunchHangarTitle();
+    }
 
     private void Awake()
     {
@@ -37,6 +56,8 @@ public class BtnManager_Base : MonoBehaviour
         if (fadeCanvasGroup != null) {
             fadeCanvasGroup.alpha = 0f;
         }
+
+        ApplyCoreLaunchHangarTitle();
     }
 
     private void Start()
@@ -48,6 +69,68 @@ public class BtnManager_Base : MonoBehaviour
             fadeCanvasGroup.alpha = 0f;
         }
         _isLaunching = false;
+        ApplyLocalizedLaunchBarLabels();
+        ApplyCoreLaunchHangarTitle();
+    }
+
+    private void ApplyLocalizedLaunchBarLabels()
+    {
+        SetButtonLabelText(titleButton, "base.titleScreen", "\uD0C0\uC774\uD2C0 \uD654\uBA74");
+        SetButtonLabelText(coreLaunchButton, "base.coreLaunch", "\uCF54\uC5B4 \uBC1C\uC0AC");
+        SetButtonLabelText(tutorialLaunchButton, "base.tutorial", "\uD29C\uD1A0\uB9AC\uC5BC");
+    }
+
+    private void ApplyCoreLaunchHangarTitle()
+    {
+        Transform panel = FindChildRecursive(transform, "Core Launch Panel");
+        if (panel == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < panel.childCount; i++)
+        {
+            TMP_Text label = panel.GetChild(i).GetComponentInChildren<TMP_Text>(true);
+            if (label != null)
+            {
+                label.text = GameLocalization.GetOrDefault("UI_Common", "base.coreHangar",
+                    "\uCF54\uC5B4 \uACA9\uB0A9\uACE0");
+                return;
+            }
+        }
+    }
+
+    private static Transform FindChildRecursive(Transform root, string objectName)
+    {
+        if (root.name == objectName)
+        {
+            return root;
+        }
+
+        for (int i = 0; i < root.childCount; i++)
+        {
+            Transform found = FindChildRecursive(root.GetChild(i), objectName);
+            if (found != null)
+            {
+                return found;
+            }
+        }
+
+        return null;
+    }
+
+    private static void SetButtonLabelText(Button button, string key, string fallback)
+    {
+        if (button == null)
+        {
+            return;
+        }
+
+        TMP_Text label = button.GetComponentInChildren<TMP_Text>(true);
+        if (label != null)
+        {
+            label.text = GameLocalization.GetOrDefault("UI_Common", key, fallback);
+        }
     }
 
     private void OnDestroy()

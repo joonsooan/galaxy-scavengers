@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class PlanetSelectionController : MonoBehaviour
@@ -28,11 +30,28 @@ public class PlanetSelectionController : MonoBehaviour
     private List<PlanetData> _unlockedPlanets = new();
     private TabType _currentTab = TabType.CoreManage;
 
+    private void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
+    }
+
+    private void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
+    }
+
+    private void OnSelectedLocaleChanged(Locale _)
+    {
+        ApplyTabButtonLabels();
+        ApplyCoreManageStaticChrome();
+    }
+
     private void Awake()
     {
         EnsureTabButtons();
         EnsurePanels();
-        RenameMapTabLabel();
+        ApplyTabButtonLabels();
+        ApplyCoreManageStaticChrome();
         BindTabEvents();
         BindPlanetButtons();
         SelectDefaultPlanet();
@@ -105,6 +124,82 @@ public class PlanetSelectionController : MonoBehaviour
         }
     }
 
+    private void ApplyTabButtonLabels()
+    {
+        RenameCoreManageTabLabel();
+        RenameMapTabLabel();
+        LocalizeModuleCraftTabButton();
+    }
+
+    private void ApplyCoreManageStaticChrome()
+    {
+        foreach (TMP_Text tmp in GetComponentsInChildren<TMP_Text>(true))
+        {
+            if (tmp == null)
+            {
+                continue;
+            }
+
+            if (tmp.gameObject.name == "Core Desc Text")
+            {
+                tmp.text = GameLocalization.GetOrDefault("UI_Common", "base.coreManageDescription",
+                    "\uC2DC\uB4DC \uCF54\uC5B4\uB97C \uAD00\uB9AC\uD558\uACE0, \uBC1C\uC0AC \uC900\uBE44\uB97C \uD558\uB294 \uC7A5\uC18C\uC785\uB2C8\uB2E4.");
+                continue;
+            }
+
+            if (tmp.gameObject.name == "Title Text" && tmp.transform.parent != null
+                && tmp.transform.parent.name == "Module Inventory Panel")
+            {
+                tmp.text = GameLocalization.GetOrDefault("UI_Common", "base.modulesOwned",
+                    "\uBCF4\uC720 \uC911\uC778 \uBAA8\uB4C8");
+                continue;
+            }
+
+            if (tmp.gameObject.name == "Core Name Text" && tmp.transform.parent != null
+                && tmp.transform.parent.name == "Core Name")
+            {
+                tmp.text = GameLocalization.GetOrDefault("UI_Common", "base.moduleEffects",
+                    "\uBAA8\uB4C8 \uD6A8\uACFC");
+            }
+        }
+    }
+
+    private void LocalizeModuleCraftTabButton()
+    {
+        foreach (Button button in GetComponentsInChildren<Button>(true))
+        {
+            if (button == mapSelectTabButton || button == coreManageTabButton)
+            {
+                continue;
+            }
+
+            if (!button.gameObject.name.Contains("Button_Shop"))
+            {
+                continue;
+            }
+
+            TMP_Text text = button.GetComponentInChildren<TMP_Text>(true);
+            if (text != null)
+            {
+                text.text = GameLocalization.GetOrDefault("UI_Common", "base.moduleCraft", "\uBAA8\uB4C8 \uC81C\uC791");
+            }
+        }
+    }
+
+    private void RenameCoreManageTabLabel()
+    {
+        if (coreManageTabButton == null)
+        {
+            return;
+        }
+
+        TMP_Text text = coreManageTabButton.GetComponentInChildren<TMP_Text>(true);
+        if (text != null)
+        {
+            text.text = GameLocalization.GetOrDefault("UI_Common", "base.coreManage", "\uCF54\uC5B4 \uAD00\uB9AC");
+        }
+    }
+
     private void RenameMapTabLabel()
     {
         if (mapSelectTabButton == null)
@@ -115,7 +210,7 @@ public class PlanetSelectionController : MonoBehaviour
         TMP_Text text = mapSelectTabButton.GetComponentInChildren<TMP_Text>(true);
         if (text != null)
         {
-            text.text = GameLocalization.GetOrDefault("UI_Common", "title.mapSelection", "맵 선택");
+            text.text = GameLocalization.GetOrDefault("UI_Common", "title.mapSelection", "\uB9F5 \uC120\uD0DD");
         }
     }
 

@@ -142,6 +142,111 @@ MonoBehaviour:
     m_Localized: Main unit
     m_Metadata:
       m_Items: []
+  - m_Id: 26494277324830
+    m_Localized: Reset Progress
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324831
+    m_Localized: Continue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324832
+    m_Localized: Master Volume
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324833
+    m_Localized: SFX Volume
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324834
+    m_Localized: Music Volume
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324835
+    m_Localized: Back to Title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324836
+    m_Localized: Quit Game
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324837
+    m_Localized: 'Title '
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324838
+    m_Localized: 'Inventory [Tab]'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324839
+    m_Localized: Module Station
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324840
+    m_Localized: Craft Module
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324841
+    m_Localized: Quest
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324842
+    m_Localized: Launch Core
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324843
+    m_Localized: 'Tutorial '
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324844
+    m_Localized: A station used to craft modules that can be installed in the Seed
+      Core.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324845
+    m_Localized: Craftable Modules
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324846
+    m_Localized: Core Hangar
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324847
+    m_Localized: Manage Core
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324848
+    m_Localized: A facility for managing the Seed Core and preparing it for launch.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324849
+    m_Localized: Owned Modules
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324850
+    m_Localized: Module Effects
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324851
+    m_Localized: Required Resources
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324852
+    m_Localized: Craft
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324853
+    m_Localized: Cannot Craft
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324854
+    m_Localized: No modules equippable!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324855
+    m_Localized: 
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

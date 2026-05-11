@@ -22,6 +22,32 @@ public class ModuleDetailPanel : MonoBehaviour
     
     private ModuleRecipe _currentRecipe;
     private ModuleStation _station;
+
+    private void Awake()
+    {
+        RefreshCraftButtonLocalizedStrings();
+    }
+
+    public void ApplyLocalizationRefresh()
+    {
+        RefreshCraftButtonLocalizedStrings();
+        if (requiredResourceText != null && requiredResourceText.gameObject.activeSelf)
+        {
+            requiredResourceText.text = GameLocalization.GetOrDefault("UI_Common", "base.requiredResources",
+                "\uD544\uC694\uD55C \uC790\uC6D0");
+        }
+
+        if (_station != null && _currentRecipe != null)
+        {
+            UpdateProduceButton();
+        }
+    }
+
+    private void RefreshCraftButtonLocalizedStrings()
+    {
+        produceText = GameLocalization.GetOrDefault("UI_Common", "module.buttonCraft", "\uC81C\uC791");
+        notProducableText = GameLocalization.GetOrDefault("UI_Common", "module.notCraftable", "\uC81C\uC791 \uBD88\uAC00\uB2A5");
+    }
     
     public void Initialize()
     {
@@ -38,12 +64,22 @@ public class ModuleDetailPanel : MonoBehaviour
     {
         _currentRecipe = recipe;
         _station = station;
+
+        if (requiredResourceText != null)
+        {
+            requiredResourceText.text = GameLocalization.GetOrDefault("UI_Common", "base.requiredResources",
+                "\uD544\uC694\uD55C \uC790\uC6D0");
+        }
         
         SetupIngredients();
         StartCoroutine(UpdateUI());
         UpdateProduceButton();
-        
-        requiredResourceText.gameObject.SetActive(true);
+
+        if (requiredResourceText != null)
+        {
+            requiredResourceText.gameObject.SetActive(true);
+        }
+
         gameObject.SetActive(true);
     }
     

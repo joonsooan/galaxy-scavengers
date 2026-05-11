@@ -139,6 +139,110 @@ MonoBehaviour:
     m_Key: label.mainUnit
     m_Metadata:
       m_Items: []
+  - m_Id: 26494277324830
+    m_Key: menu.resetProgress
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324831
+    m_Key: menu.continue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324832
+    m_Key: menu.volume.master
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324833
+    m_Key: menu.volume.sfx
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324834
+    m_Key: menu.volume.music
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324835
+    m_Key: menu.returnToTitle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324836
+    m_Key: menu.quitGame
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324837
+    m_Key: base.titleScreen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324838
+    m_Key: base.inventoryTab
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324839
+    m_Key: base.moduleStation
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324840
+    m_Key: base.moduleCraft
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324841
+    m_Key: base.quest
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324842
+    m_Key: base.coreLaunch
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324843
+    m_Key: base.tutorial
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324844
+    m_Key: base.moduleStationDescription
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324845
+    m_Key: base.craftableModules
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324846
+    m_Key: base.coreHangar
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324847
+    m_Key: base.coreManage
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324848
+    m_Key: base.coreManageDescription
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324849
+    m_Key: base.modulesOwned
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324850
+    m_Key: base.moduleEffects
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324851
+    m_Key: base.requiredResources
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324852
+    m_Key: module.buttonCraft
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324853
+    m_Key: module.notCraftable
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324854
+    m_Key: placeholder.moduleDataAsset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324855
+    m_Key: placeholder.planetDataAsset
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

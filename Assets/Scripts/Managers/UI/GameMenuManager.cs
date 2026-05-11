@@ -1,5 +1,7 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using FMODUnity;
@@ -64,11 +66,18 @@ public class GameMenuManager : MonoBehaviour
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
     }
 
     private void OnDisable()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
+    }
+
+    private void OnSelectedLocaleChanged(Locale _)
+    {
+        ApplyLocalizedMenuTexts();
     }
 
     private void Start()
@@ -130,6 +139,7 @@ public class GameMenuManager : MonoBehaviour
 
         SetupButtons();
         SetupSliders();
+        ApplyLocalizedMenuTexts();
     }
 
     public void SetMenuUI(MenuUIProvider provider)
@@ -190,6 +200,62 @@ public class GameMenuManager : MonoBehaviour
             _currentMusicVolumeText = provider.musicVolumeText;
         else
             _currentMusicVolumeText = musicVolumeText;
+    }
+
+    private void ApplyLocalizedMenuTexts()
+    {
+        SetButtonLabelText(_currentContinueButton, "menu.continue", "\uACC4\uC18D\uD558\uAE30");
+        SetButtonLabelText(_currentReturnToTitleButton, "menu.returnToTitle", "\uD0C0\uC774\uD2C0 \uD654\uBA74\uC73C\uB85C");
+        SetButtonLabelText(_currentQuitGameButton, "menu.quitGame", "\uAC8C\uC784 \uC885\uB8CC");
+
+        SetVolumeRowLabel(_currentMasterVolumeSlider, _currentMasterVolumeText, "menu.volume.master", "\uC8FC \uBCFC\uB968");
+        SetVolumeRowLabel(_currentSFXVolumeSlider, _currentSFXVolumeText, "menu.volume.sfx", "SFX \uBCFC\uB968");
+        SetVolumeRowLabel(_currentMusicVolumeSlider, _currentMusicVolumeText, "menu.volume.music", "\uC74C\uC545 \uBCFC\uB968");
+    }
+
+    private static void SetButtonLabelText(Button button, string key, string fallback)
+    {
+        if (button == null)
+        {
+            return;
+        }
+
+        TMP_Text label = button.GetComponentInChildren<TMP_Text>(true);
+        if (label != null)
+        {
+            label.text = GameLocalization.GetOrDefault("UI_Common", key, fallback);
+        }
+    }
+
+    private static void SetVolumeRowLabel(Slider slider, TMP_Text valueText, string key, string fallback)
+    {
+        if (slider == null)
+        {
+            return;
+        }
+
+        Transform row = slider.transform.parent;
+        if (row == null)
+        {
+            return;
+        }
+
+        TMP_Text labelTmp = null;
+        foreach (TMP_Text t in row.GetComponentsInChildren<TMP_Text>(true))
+        {
+            if (t == valueText)
+            {
+                continue;
+            }
+
+            labelTmp = t;
+            break;
+        }
+
+        if (labelTmp != null)
+        {
+            labelTmp.text = GameLocalization.GetOrDefault("UI_Common", key, fallback);
+        }
     }
 
     public void SetMenuOpenButton(Button button)

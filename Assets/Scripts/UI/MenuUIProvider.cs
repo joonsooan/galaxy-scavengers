@@ -21,6 +21,8 @@ public class MenuUIProvider : MonoBehaviour
     [SerializeField] public TMP_Text sfxVolumeText;
     [SerializeField] public TMP_Text musicVolumeText;
 
+    [SerializeField] public Button resetQuestButton;
+
     private void Awake()
     {
         if (GameMenuManager.Instance != null)
