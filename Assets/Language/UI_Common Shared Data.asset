@@ -327,6 +327,38 @@ MonoBehaviour:
     m_Key: unitCharge.status
     m_Metadata:
       m_Items: []
+  - m_Id: 1353279619198980
+    m_Key: unitManage.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198981
+    m_Key: resourceStats.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198982
+    m_Key: resourceStats.resourceTab
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198983
+    m_Key: resourceStats.electricityTab
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198984
+    m_Key: resourceStats.resourceProduce
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198985
+    m_Key: resourceStats.resourceSpend
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198986
+    m_Key: resourceStats.electricityProduce
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198987
+    m_Key: resourceStats.electricitySpend
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

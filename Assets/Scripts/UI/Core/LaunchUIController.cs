@@ -3,6 +3,8 @@ using System.Collections;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 using FMODUnity;
 
@@ -63,6 +65,8 @@ public class LaunchUIController : MonoBehaviour
 
     private void OnEnable()
     {
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
+        UpdateLaunchAvailability();
     }
 
     private void Start()
@@ -72,7 +76,13 @@ public class LaunchUIController : MonoBehaviour
 
     private void OnDisable()
     {
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
         SetLaunchPausePanelLock(false);
+    }
+
+    private void OnSelectedLocaleChanged(Locale _)
+    {
+        UpdateLaunchAvailability();
     }
 
     private void UpdateCachedWaits()
@@ -415,7 +425,7 @@ public class LaunchUIController : MonoBehaviour
         {
             launchButton.interactable = true;
 
-            TMP_Text buttonText = launchButton.GetComponentInChildren<TMP_Text>();
+            TMP_Text buttonText = launchButton.GetComponentInChildren<TMP_Text>(true);
             if (buttonText != null)
             {
                 buttonText.text = GameLocalization.GetOrDefault("UI_Common", "button.launch", "탈출");

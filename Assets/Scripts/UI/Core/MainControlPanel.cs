@@ -115,6 +115,10 @@ public class MainControlPanel : MonoBehaviour
                     text.text = GameLocalization.GetOrDefault("UI_Common", "game.noise", "소음");
                 }
             }
+
+            SetTextIfUnderNamedHierarchy(text, "Base Building Btn", "game.baseBuilding", "기지 건설");
+            SetTextIfUnderNamedHierarchy(text, "Unit Manage Btn", "game.unitManage", "유닛 관리");
+            SetTextIfUnderNamedHierarchy(text, "Resource Stats Btn", "game.resourceStats", "자원 통계");
         }
     }
 
@@ -129,6 +133,14 @@ public class MainControlPanel : MonoBehaviour
         if (label != null)
         {
             label.text = GameLocalization.GetOrDefault("UI_Common", key, fallback);
+        }
+    }
+
+    private static void SetTextIfUnderNamedHierarchy(TMP_Text text, string ancestorName, string key, string fallback)
+    {
+        if (text != null && HasAncestorNamed(text.transform, ancestorName))
+        {
+            text.text = GameLocalization.GetOrDefault("UI_Common", key, fallback);
         }
     }
 

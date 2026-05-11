@@ -107,7 +107,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 26494277324821
-    m_Localized: In progress...
+    m_Localized: Entering planet...
     m_Metadata:
       m_Items: []
   - m_Id: 26494277324822
@@ -251,31 +251,63 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 26494277324859
-    m_Localized: Locking landing coordinates...
+    m_Localized: Locking coordinates...
     m_Metadata:
       m_Items: []
   - m_Id: 26494277324860
-    m_Localized: Synchronizing terrain height data...
+    m_Localized: Synchronizing terrain data...
     m_Metadata:
       m_Items: []
   - m_Id: 26494277324861
-    m_Localized: Detecting rare mineral reactions...
+    m_Localized: Detecting mineral reactions...
     m_Metadata:
       m_Items: []
   - m_Id: 26494277324862
-    m_Localized: Analyzing atmosphere and visibility...
+    m_Localized: Analyzing atmosphere...
     m_Metadata:
       m_Items: []
   - m_Id: 26494277324863
-    m_Localized: Base Building
+    m_Localized: 'Buildings [E]'
     m_Metadata:
       m_Items: []
   - m_Id: 26494277324864
+    m_Localized: 'Unit Manage [R]'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198980
     m_Localized: Unit Manage
     m_Metadata:
       m_Items: []
   - m_Id: 26494277324865
+    m_Localized: 'Stats [F]'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198981
+    m_Localized: Stats
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198982
     m_Localized: Resource Stats
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198983
+    m_Localized: Electricity Stats
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198984
+    m_Localized: Resource Production
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198985
+    m_Localized: Resource Consumption
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198986
+    m_Localized: Electricity Production
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198987
+    m_Localized: Electricity Consumption
     m_Metadata:
       m_Items: []
   - m_Id: 26494277324866
@@ -295,7 +327,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 26494277324871
-    m_Localized: Miner Manage
+    m_Localized: Manage Miners
     m_Metadata:
       m_Items: []
   - m_Id: 26494277324872
@@ -324,7 +356,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1353279619198978
-    m_Localized: Assigned Units
+    m_Localized: Unit Num
     m_Metadata:
       m_Items: []
   - m_Id: 1353279619198979

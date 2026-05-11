@@ -103,10 +103,10 @@ public class UnitManagementUIController : MonoBehaviour
 
     private void ApplyLocalizedStaticTexts()
     {
-        SetTextByName("Title Text", "game.unitManage", "유닛 관리");
-        SetButtonLabel(minerTabButton, "unitManage.minerInfo", "채굴 정보");
-        SetButtonLabel(unitChargeTabButton, "unitManage.charge", "충전");
-        SetButtonLabel(unitUpgradeTabButton, "unitManage.upgrade", "업그레이드");
+        SetTextByName("Title Text", "unitManage.title", "유닛 관리");
+        SetTextByName("unit_manage_minerinfo_text", "unitManage.minerInfo", "채굴 정보");
+        SetTextByName("unit_manage_charge_text", "unitManage.charge", "충전");
+        SetTextByName("unit_manage_upgrade_text", "unitManage.upgrade", "업그레이드");
 
         TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
         foreach (TMP_Text text in texts)
