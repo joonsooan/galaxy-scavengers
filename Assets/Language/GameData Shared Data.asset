@@ -207,6 +207,50 @@ MonoBehaviour:
     m_Key: planet.2.desc
     m_Metadata:
       m_Items: []
+  - m_Id: 9655828680735
+    m_Key: unitUpgrade.moveSpeed.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680736
+    m_Key: unitUpgrade.moveSpeed.tier1.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680737
+    m_Key: unitUpgrade.moveSpeed.tier2.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680738
+    m_Key: unitUpgrade.workSpeed.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680739
+    m_Key: unitUpgrade.workSpeed.tier1.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680740
+    m_Key: unitUpgrade.workSpeed.tier2.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680741
+    m_Key: unitUpgrade.storage.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680742
+    m_Key: unitUpgrade.storage.tier1.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680743
+    m_Key: unitUpgrade.storage.tier2.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680744
+    m_Key: unitUpgrade.maxPop.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680745
+    m_Key: unitUpgrade.maxPop.tier1.desc
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

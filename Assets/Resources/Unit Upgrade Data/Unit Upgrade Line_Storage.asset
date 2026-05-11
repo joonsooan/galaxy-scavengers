@@ -19,10 +19,14 @@ MonoBehaviour:
   - tokenCost: 100
     upgradeTime: 10
     description: "\uC790\uC6D0 \uC6B4\uBC18\uB7C9 +10"
+    descriptionKey: unitUpgrade.storage.tier1.desc
     floatStatBonus: 0
     intStatBonus: 10
   - tokenCost: 200
     upgradeTime: 30
     description: "\uC790\uC6D0 \uC6B4\uBC18\uB7C9 +20"
+    descriptionKey: unitUpgrade.storage.tier2.desc
     floatStatBonus: 0
     intStatBonus: 20
+  localizationTable: GameData
+  displayNameKey: unitUpgrade.storage.name

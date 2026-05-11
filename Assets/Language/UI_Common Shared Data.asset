@@ -175,7 +175,7 @@ MonoBehaviour:
     m_Key: base.inventoryTab
     m_Metadata:
       m_Items: []
-  - m_Id: 26494277324839
+  - m_Id: 1353279547895808
     m_Key: base.moduleStation
     m_Metadata:
       m_Items: []
@@ -195,7 +195,7 @@ MonoBehaviour:
     m_Key: base.tutorial
     m_Metadata:
       m_Items: []
-  - m_Id: 26494277324844
+  - m_Id: 1353279619198976
     m_Key: base.moduleStationDescription
     m_Metadata:
       m_Items: []
@@ -249,6 +249,82 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 26494277324857
     m_Key: base.extractableData
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324858
+    m_Key: menu.languageToggle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324859
+    m_Key: loading.stage.lockLandingCoordinates
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324860
+    m_Key: loading.stage.syncTerrainHeight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324861
+    m_Key: loading.stage.detectRareMinerals
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324862
+    m_Key: loading.stage.analyzeAtmosphere
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324863
+    m_Key: game.baseBuilding
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324864
+    m_Key: game.unitManage
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324865
+    m_Key: game.resourceStats
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324866
+    m_Key: game.leftTime
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324867
+    m_Key: game.noise
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324868
+    m_Key: game.storageInfoTitle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324869
+    m_Key: game.pause
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324871
+    m_Key: unitManage.minerInfo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324872
+    m_Key: unitManage.charge
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324873
+    m_Key: unitManage.upgrade
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198977
+    m_Key: unitManage.text1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198978
+    m_Key: unitManage.text2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198979
+    m_Key: unitManage.text3
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324878
+    m_Key: unitCharge.status
     m_Metadata:
       m_Items: []
   m_Metadata:

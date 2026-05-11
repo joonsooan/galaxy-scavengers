@@ -4,6 +4,8 @@ using FMODUnity;
 using Systems.Jobs;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class LoadingScreen : MonoBehaviour, IInitializationProgress
@@ -63,6 +65,7 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
     
     private float _currentProgress;
     private string _currentStage = "";
+    private string _currentStageKey;
     private Vector3 _initialImagePosition;
     private Vector3 _centerImagePosition;
     private bool _isInitializationComplete;
@@ -88,6 +91,7 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
 
     private void OnEnable()
     {
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
         _hasStartedEntryAnimation = false;
         StartCoroutine(StartEntryAnimationAfterSceneLoad());
     }
@@ -107,7 +111,19 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
 
     private void OnDisable()
     {
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
         StopEffects();
+    }
+
+    private void OnSelectedLocaleChanged(Locale _)
+    {
+        loadingTextString = GameLocalization.GetOrDefault("UI_Common", "loading.inProgress", "로딩 중...");
+        if (!string.IsNullOrEmpty(_currentStageKey))
+        {
+            _currentStage = GameLocalization.GetOrDefault("UI_Common", _currentStageKey, _currentStage);
+        }
+
+        UpdateProgressUI();
     }
 
     private void InitializeUI()
@@ -142,6 +158,7 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
         
         _currentProgress = 0f;
         _currentStage = "";
+        _currentStageKey = null;
         UpdateProgressUI();
 
         LoadingStagePanelAnimator stageAnimator = GetComponentInChildren<LoadingStagePanelAnimator>(true);
@@ -459,10 +476,13 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
         _isInitializationComplete = true;
     }
     
-    public void UpdateProgress(float progress, string stage)
+    public void UpdateProgress(float progress, string stage, string stageKey = null)
     {
         _currentProgress = Mathf.Clamp01(progress);
-        _currentStage = stage;
+        _currentStageKey = stageKey;
+        _currentStage = !string.IsNullOrEmpty(stageKey)
+            ? GameLocalization.GetOrDefault("UI_Common", stageKey, stage)
+            : stage;
         
         if (!string.IsNullOrEmpty(_currentStage))
         {
@@ -491,9 +511,9 @@ public class LoadingScreen : MonoBehaviour, IInitializationProgress
             progressBarFill.fillAmount = _currentProgress;
         }
         
-        if (loadingText != null && !string.IsNullOrEmpty(_currentStage))
+        if (loadingText != null)
         {
-            loadingText.text = _currentStage;
+            loadingText.text = !string.IsNullOrEmpty(_currentStage) ? _currentStage : loadingTextString;
         }
     }
 }

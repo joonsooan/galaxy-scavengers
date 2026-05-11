@@ -521,7 +521,10 @@ public class GameManager : MonoBehaviour
 
         if (progress != null)
         {
-            progress.UpdateProgress(0.0f, "착륙 좌표 고정 중...");
+            progress.UpdateProgress(
+                0.0f,
+                GameLocalization.GetOrDefault("UI_Common", "loading.stage.lockLandingCoordinates", "착륙 좌표 고정 중..."),
+                "loading.stage.lockLandingCoordinates");
             yield return _wait05;
         }
 

@@ -178,10 +178,6 @@ MonoBehaviour:
     m_Localized: 'Inventory [Tab]'
     m_Metadata:
       m_Items: []
-  - m_Id: 26494277324839
-    m_Localized: Module Station
-    m_Metadata:
-      m_Items: []
   - m_Id: 26494277324840
     m_Localized: Craft Module
     m_Metadata:
@@ -196,11 +192,6 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 26494277324843
     m_Localized: 'Tutorial '
-    m_Metadata:
-      m_Items: []
-  - m_Id: 26494277324844
-    m_Localized: A station used to craft modules that can be installed in the Seed
-      Core.
     m_Metadata:
       m_Items: []
   - m_Id: 26494277324845
@@ -253,6 +244,91 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 26494277324857
     m_Localized: Extractable Data
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324858
+    m_Localized: "\uC5B8\uC5B4 : \uD55C\uAD6D\uC5B4"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324859
+    m_Localized: Locking landing coordinates...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324860
+    m_Localized: Synchronizing terrain height data...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324861
+    m_Localized: Detecting rare mineral reactions...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324862
+    m_Localized: Analyzing atmosphere and visibility...
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324863
+    m_Localized: Base Building
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324864
+    m_Localized: Unit Manage
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324865
+    m_Localized: Resource Stats
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324866
+    m_Localized: Time Left
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324867
+    m_Localized: Noise
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324868
+    m_Localized: Storage
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324869
+    m_Localized: Press [SPACE]\nto continue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324871
+    m_Localized: Miner Manage
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324872
+    m_Localized: Unit Charge
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324873
+    m_Localized: Unit Upgrade
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324878
+    m_Localized: Status
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279547895808
+    m_Localized: Module Station
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198976
+    m_Localized: A station used to craft modules that can be installed in the Seed
+      Core.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198977
+    m_Localized: Resource
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198978
+    m_Localized: Assigned Units
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198979
+    m_Localized: Unit Ratio
     m_Metadata:
       m_Items: []
   references:

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using FMODUnity;
 
 [DefaultExecutionOrder(-100)]
@@ -78,6 +80,8 @@ public class UIManager : MonoBehaviour
         {
             inventorySystem = GetComponent<InventorySystem>();
         }
+
+        ApplyLocalizedStaticTexts();
     }
 
     private void Update()
@@ -107,6 +111,7 @@ public class UIManager : MonoBehaviour
         Processor.OnProcessorClicked += HandleProcessorClicked;
         MainStructure.OnDroneProducePanelClicked += HandleMainStructureDroneClicked;
         DataExtractor.OnDataExtractorClicked += HandleDataExtractorClicked;
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
     }
 
     private void OnDisable()
@@ -114,6 +119,41 @@ public class UIManager : MonoBehaviour
         Processor.OnProcessorClicked -= HandleProcessorClicked;
         MainStructure.OnDroneProducePanelClicked -= HandleMainStructureDroneClicked;
         DataExtractor.OnDataExtractorClicked -= HandleDataExtractorClicked;
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
+    }
+
+    private void OnSelectedLocaleChanged(Locale _)
+    {
+        ApplyLocalizedStaticTexts();
+
+        if (storageInfoPanel != null && storageInfoPanel.activeSelf && _trackedStorage != null)
+        {
+            RefreshStorageInfoUI();
+        }
+    }
+
+    private void ApplyLocalizedStaticTexts()
+    {
+        SetLocalizedChildText(storageInfoPanel, "Title Text", "game.storageInfoTitle", "저장량");
+        SetLocalizedChildText(pausePanel, "txt", "game.pause", "일시정지");
+    }
+
+    private static void SetLocalizedChildText(GameObject root, string childName, string key, string fallback)
+    {
+        if (root == null)
+        {
+            return;
+        }
+
+        TMP_Text[] texts = root.GetComponentsInChildren<TMP_Text>(true);
+        foreach (TMP_Text text in texts)
+        {
+            if (text != null && text.gameObject.name == childName)
+            {
+                text.text = GameLocalization.GetOrDefault("UI_Common", key, fallback);
+                return;
+            }
+        }
     }
 
     private void HandleProcessorClicked(Processor processor)

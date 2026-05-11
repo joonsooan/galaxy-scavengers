@@ -1,5 +1,7 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
@@ -24,6 +26,16 @@ public class UnitUpgradeCell : MonoBehaviour
     private string _cachedUpgradeButtonLabel;
     private const string UpgradeInProgressLabelFallback = "업그레이드 중…";
 
+    private void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
+    }
+
+    private void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
+    }
+
     private void OnDestroy()
     {
         Button btn = GetUpgradeButton();
@@ -31,6 +43,12 @@ public class UnitUpgradeCell : MonoBehaviour
         {
             btn.onClick.RemoveListener(OnUpgradeClicked);
         }
+    }
+
+    private void OnSelectedLocaleChanged(Locale _)
+    {
+        maxLevelLabel = GameLocalization.GetOrDefault("UI_Common", "status.maxLevel", maxLevelLabel);
+        RefreshDisplay();
     }
 
     public void Initialize(UnitUpgradeLineData line, UnitUpgradeProgress progress)
@@ -116,7 +134,7 @@ public class UnitUpgradeCell : MonoBehaviour
 
         if (titleText != null)
         {
-            titleText.text = _line.displayName;
+            titleText.text = _line.GetDisplayName();
         }
 
         if (iconImage != null)
@@ -198,7 +216,11 @@ public class UnitUpgradeCell : MonoBehaviour
         }
         else if (_hasCachedUpgradeButtonLabel)
         {
-            label.text = _cachedUpgradeButtonLabel;
+            label.text = GameLocalization.GetOrDefault("UI_Common", "unitManage.upgrade", _cachedUpgradeButtonLabel);
+        }
+        else
+        {
+            label.text = GameLocalization.GetOrDefault("UI_Common", "unitManage.upgrade", "업그레이드");
         }
     }
 
@@ -238,11 +260,11 @@ public class UnitUpgradeCell : MonoBehaviour
         if (isMaxed)
         {
             UnitUpgradeTier last = _line.tiers[_line.tiers.Length - 1];
-            return last != null && last.description != null ? last.description : string.Empty;
+            return last != null ? last.GetDescription(_line.LocalizationTable, last.description) : string.Empty;
         }
 
         UnitUpgradeTier next = _line.tiers[currentLevel];
-        return next != null && next.description != null ? next.description : string.Empty;
+        return next != null ? next.GetDescription(_line.LocalizationTable, next.description) : string.Empty;
     }
 
     private UnitUpgradeTier GetNextTier(int currentLevel)

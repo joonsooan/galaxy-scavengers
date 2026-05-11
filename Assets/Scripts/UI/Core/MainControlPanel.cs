@@ -1,4 +1,7 @@
+using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
@@ -27,6 +30,8 @@ public class MainControlPanel : MonoBehaviour
         MainStructure.OnDroneProducePanelClicked += HideBuildingInfoPanelMainStructure;
         Processor.OnProcessorClicked += HideBuildingInfoPanel;
         DataExtractor.OnDataExtractorClicked += HideBuildingInfoPanelExtractor;
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
+        ApplyLocalizedStaticTexts();
     }
 
     private void OnDisable()
@@ -34,6 +39,7 @@ public class MainControlPanel : MonoBehaviour
         MainStructure.OnDroneProducePanelClicked -= HideBuildingInfoPanelMainStructure;
         Processor.OnProcessorClicked -= HideBuildingInfoPanel;
         DataExtractor.OnDataExtractorClicked -= HideBuildingInfoPanelExtractor;
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
     }
     
     
@@ -73,8 +79,73 @@ public class MainControlPanel : MonoBehaviour
         {
             resourceStatsUIController = resourceStatPanel.GetComponentInChildren<ResourceStatsUIController>(true);
         }
+
+        ApplyLocalizedStaticTexts();
         
         HideAllPanels();
+    }
+
+    private void OnSelectedLocaleChanged(Locale _)
+    {
+        ApplyLocalizedStaticTexts();
+    }
+
+    private void ApplyLocalizedStaticTexts()
+    {
+        SetButtonLabel(baseBuildingBtn, "game.baseBuilding", "기지 건설");
+        SetButtonLabel(unitManagementBtn, "game.unitManage", "유닛 관리");
+        SetButtonLabel(resourceStatBtn, "game.resourceStats", "자원 통계");
+
+        TMP_Text[] texts = FindObjectsByType<TMP_Text>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        foreach (TMP_Text text in texts)
+        {
+            if (text == null)
+            {
+                continue;
+            }
+
+            if (text.gameObject.name == "Zone Text")
+            {
+                if (HasAncestorNamed(text.transform, "Left Time Panel"))
+                {
+                    text.text = GameLocalization.GetOrDefault("UI_Common", "game.leftTime", "남은 시간");
+                }
+                else if (HasAncestorNamed(text.transform, "Noise Panel"))
+                {
+                    text.text = GameLocalization.GetOrDefault("UI_Common", "game.noise", "소음");
+                }
+            }
+        }
+    }
+
+    private static void SetButtonLabel(Button button, string key, string fallback)
+    {
+        if (button == null)
+        {
+            return;
+        }
+
+        TMP_Text label = button.GetComponentInChildren<TMP_Text>(true);
+        if (label != null)
+        {
+            label.text = GameLocalization.GetOrDefault("UI_Common", key, fallback);
+        }
+    }
+
+    private static bool HasAncestorNamed(Transform transform, string ancestorName)
+    {
+        Transform current = transform;
+        while (current != null)
+        {
+            if (current.name == ancestorName)
+            {
+                return true;
+            }
+
+            current = current.parent;
+        }
+
+        return false;
     }
     
     private void Update()

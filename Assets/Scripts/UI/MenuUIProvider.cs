@@ -21,6 +21,9 @@ public class MenuUIProvider : MonoBehaviour
     [SerializeField] public TMP_Text sfxVolumeText;
     [SerializeField] public TMP_Text musicVolumeText;
 
+    [Header("Language")]
+    [SerializeField] public Button languageButton;
+
     [SerializeField] public Button resetQuestButton;
 
     private void Awake()

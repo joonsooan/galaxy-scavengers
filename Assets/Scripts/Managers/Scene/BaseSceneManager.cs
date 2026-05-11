@@ -113,12 +113,17 @@ public class BaseSceneManager : MonoBehaviour
     {
         SetButtonLabelText(titleButton, "base.titleScreen", "\uD0C0\uC774\uD2C0 \uD654\uBA74");
         SetButtonLabelText(inventoryButton, "base.inventoryTab", "\uC778\uBCA4\uD1A0\uB9AC [Tab]");
-        SetButtonLabelText(moduleButton, "base.moduleStation", "\uBAA8\uB4C8 \uC2A4\uD14C\uC774\uC158");
+        SetButtonLabelText(moduleButton, "GameData", "moduleStation.default.name", "\uBAA8\uB4C8 \uC2A4\uD14C\uC774\uC158");
         SetButtonLabelText(mapButton, "title.mapSelection", "\uB9F5 \uC120\uD0DD");
         SetButtonLabelText(coreLaunchButton, "base.coreLaunch", "\uCF54\uC5B4 \uBC1C\uC0AC");
     }
 
     private static void SetButtonLabelText(Button button, string key, string fallback)
+    {
+        SetButtonLabelText(button, "UI_Common", key, fallback);
+    }
+
+    private static void SetButtonLabelText(Button button, string table, string key, string fallback)
     {
         if (button == null)
         {
@@ -128,7 +133,7 @@ public class BaseSceneManager : MonoBehaviour
         TMP_Text label = button.GetComponentInChildren<TMP_Text>(true);
         if (label != null)
         {
-            label.text = GameLocalization.GetOrDefault("UI_Common", key, fallback);
+            label.text = GameLocalization.GetOrDefault(table, key, fallback);
         }
     }
 

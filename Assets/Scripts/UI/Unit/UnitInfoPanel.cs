@@ -50,15 +50,20 @@ public class UnitInfoPanel : MonoBehaviour
             return;
         }
         Instance = this;
+        RefreshBatteryStatusStrings();
+        EnsureLayoutDefaultsInitialized();
+
+        ClearAllInfo();
+    }
+
+    private void RefreshBatteryStatusStrings()
+    {
         unitBatteryTextPowerEmpty = GameLocalization.GetOrDefault("UI_Common", "status.powerInsufficient", unitBatteryTextPowerEmpty);
         unitBatteryTextNeedCharge = GameLocalization.GetOrDefault("UI_Common", "status.needCharge", unitBatteryTextNeedCharge);
         unitBatteryTextGoingToCharge = GameLocalization.GetOrDefault("UI_Common", "status.movingToChargingStation", unitBatteryTextGoingToCharge);
         unitBatteryTextQueued = GameLocalization.GetOrDefault("UI_Common", "status.queued", unitBatteryTextQueued);
         unitBatteryTextCharging = GameLocalization.GetOrDefault("UI_Common", "status.charging", unitBatteryTextCharging);
         unitBatteryTextOk = GameLocalization.GetOrDefault("UI_Common", "status.normal", unitBatteryTextOk);
-        EnsureLayoutDefaultsInitialized();
-
-        ClearAllInfo();
     }
 
     private void OnEnable()
@@ -554,6 +559,7 @@ public class UnitInfoPanel : MonoBehaviour
 
     private void HandleLocaleChanged(Locale _)
     {
+        RefreshBatteryStatusStrings();
         if (!gameObject.activeInHierarchy)
         {
             return;

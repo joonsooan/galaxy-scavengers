@@ -111,7 +111,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680709
-    m_Localized: Building Reinforcement Module 1
+    m_Localized: Building Reinforce 1
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680710
@@ -119,7 +119,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680711
-    m_Localized: Building Reinforcement Module 2
+    m_Localized: Building Reinforce 2
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680712
@@ -127,7 +127,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680713
-    m_Localized: Production Boost Module 1
+    m_Localized: Production Boost 1
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680714
@@ -135,7 +135,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680715
-    m_Localized: Production Boost Module 2
+    m_Localized: Production Boost 2
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680716
@@ -143,7 +143,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680717
-    m_Localized: Storage Expansion Module 1
+    m_Localized: Storage Expand 1
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680718
@@ -151,7 +151,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680719
-    m_Localized: Storage Expansion Module 2
+    m_Localized: Storage Expand 2
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680720
@@ -159,7 +159,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680721
-    m_Localized: Turret Reinforcement Module 1
+    m_Localized: Turret Reinforce 1
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680722
@@ -167,7 +167,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680723
-    m_Localized: Turret Reinforcement Module 2
+    m_Localized: Turret Reinforce 2
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680724
@@ -175,7 +175,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680725
-    m_Localized: Unit Enhancement Module 1
+    m_Localized: Unit Enhance 1
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680726
@@ -183,7 +183,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680727
-    m_Localized: Unit Enhancement Module 2
+    m_Localized: Unit Enhance 2
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680728
@@ -212,6 +212,50 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 9655828680734
     m_Localized: Third planet
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680735
+    m_Localized: Move Speed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680736
+    m_Localized: Unit move speed +10%
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680737
+    m_Localized: Unit move speed +15%
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680738
+    m_Localized: Work Speed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680739
+    m_Localized: Unit work speed +20%
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680740
+    m_Localized: Unit work speed +30%
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680741
+    m_Localized: Storage
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680742
+    m_Localized: Resource carrying capacity +10
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680743
+    m_Localized: Resource carrying capacity +20
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680744
+    m_Localized: Unit Count
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680745
+    m_Localized: Max units +5
     m_Metadata:
       m_Items: []
   references:

@@ -167,7 +167,10 @@ public class MapObjectSpawner : MonoBehaviour
         
         if (progress != null)
         {
-            progress.UpdateProgress(0.0f, "희귀 광물 반응 탐지 중...");
+            progress.UpdateProgress(
+                0.0f,
+                GameLocalization.GetOrDefault("UI_Common", "loading.stage.detectRareMinerals", "희귀 광물 반응 탐지 중..."),
+                "loading.stage.detectRareMinerals");
             yield return CoroutineCache.GetWaitForSeconds(0.5f);
         }
         

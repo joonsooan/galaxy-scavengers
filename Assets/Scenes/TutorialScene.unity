@@ -113991,6 +113991,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 5835993742544602562}
     - target: {fileID: 2729765904339481487, guid: f505413d92765e540a5da63a1ec5bfe3, type: 3}
+      propertyPath: languageButton
+      value: 
+      objectReference: {fileID: 5835993742544602563}
+    - target: {fileID: 2729765904339481487, guid: f505413d92765e540a5da63a1ec5bfe3, type: 3}
       propertyPath: quitGameButton
       value: 
       objectReference: {fileID: 5835993742544602560}
@@ -114072,7 +114076,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5916442446122323977, guid: f505413d92765e540a5da63a1ec5bfe3, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 194
+      value: 220
       objectReference: {fileID: 0}
     - target: {fileID: 6171397086961657348, guid: f505413d92765e540a5da63a1ec5bfe3, type: 3}
       propertyPath: m_SpriteState.m_HighlightedSprite
@@ -114264,6 +114268,17 @@ MonoBehaviour:
 --- !u!114 &5835993742544602562 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 781298000667123773, guid: f505413d92765e540a5da63a1ec5bfe3, type: 3}
+  m_PrefabInstance: {fileID: 5835993742544602559}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7c3e9d2f1b8405e8a6c4d3e2f1098ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButtonReliableHighlight
+--- !u!114 &5835993742544602563 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8846120412550453706, guid: f505413d92765e540a5da63a1ec5bfe3, type: 3}
   m_PrefabInstance: {fileID: 5835993742544602559}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}

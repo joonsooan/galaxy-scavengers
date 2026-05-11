@@ -163,7 +163,7 @@ public class PlanetSelectionController : MonoBehaviour
 
             if (tmp.gameObject.name == "Module Title Text")
             {
-                tmp.text = GameLocalization.GetOrDefault("UI_Common", "base.moduleStation",
+                tmp.text = GameLocalization.GetOrDefault("GameData", "moduleStation.default.name",
                     "\uBAA8\uB4C8 \uC2A4\uD14C\uC774\uC158");
                 continue;
             }

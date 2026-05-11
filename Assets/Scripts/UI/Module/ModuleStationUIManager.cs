@@ -69,7 +69,7 @@ public class ModuleStationUIManager : MonoBehaviour
 
         if (stationInfoText != null && (moduleStationPanel == null || !moduleStationPanel.activeSelf))
         {
-            stationInfoText.text = GameLocalization.GetOrDefault("UI_Common", "base.moduleStationDescription",
+            stationInfoText.text = GameLocalization.GetOrDefault("GameData", "moduleStation.default.desc",
                 "\uC2DC\uB4DC\uCF54\uC5B4\uC5D0 \uC124\uCE58\uD560 \uC218 \uC788\uB294 \uBAA8\uB4C8\uC744 \uC81C\uC791\uD558\uB294 \uC2A4\uD14C\uC774\uC158\uC785\uB2C8\uB2E4.");
         }
     }
