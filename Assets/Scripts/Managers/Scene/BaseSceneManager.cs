@@ -46,6 +46,8 @@ public class BaseSceneManager : MonoBehaviour
     private void OnSelectedLocaleChanged(Locale _)
     {
         ApplyLocalizedSidebarButtonLabels();
+        LocalizeQuestSidebarButton();
+        LocalizeModuleCraftButtons();
     }
 
     private void Awake()
@@ -103,6 +105,7 @@ public class BaseSceneManager : MonoBehaviour
         _baseInventorySystem = FindFirstObjectByType<BaseInventorySystem>();
         ApplyLocalizedSidebarButtonLabels();
         LocalizeQuestSidebarButton();
+        LocalizeModuleCraftButtons();
         StartCoroutine(HandleSceneEntryFade());
     }
 
@@ -144,6 +147,28 @@ public class BaseSceneManager : MonoBehaviour
                 tmp.text = GameLocalization.GetOrDefault("UI_Common", "base.quest", "\uD018\uC2A4\uD2B8");
             }
         }
+    }
+
+    private void LocalizeModuleCraftButtons()
+    {
+        foreach (Button btn in FindObjectsByType<Button>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (!IsModuleCraftButton(btn.gameObject.name))
+            {
+                continue;
+            }
+
+            TMP_Text tmp = btn.GetComponentInChildren<TMP_Text>(true);
+            if (tmp != null)
+            {
+                tmp.text = GameLocalization.GetOrDefault("UI_Common", "base.moduleCraft", "\uBAA8\uB4C8 \uC81C\uC791");
+            }
+        }
+    }
+
+    private static bool IsModuleCraftButton(string objectName)
+    {
+        return objectName.Contains("Button_Shop") || objectName.Contains("Button Shop");
     }
 
 

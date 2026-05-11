@@ -39,6 +39,7 @@ public class ModuleDetailPanel : MonoBehaviour
 
         if (_station != null && _currentRecipe != null)
         {
+            StartCoroutine(UpdateUI());
             UpdateProduceButton();
         }
     }
@@ -121,8 +122,8 @@ public class ModuleDetailPanel : MonoBehaviour
     
     private IEnumerator UpdateUI()
     {
-        moduleNameText.text = _currentRecipe.moduleName;
-        moduleDescriptionText.text = _currentRecipe.moduleDescription;
+        moduleNameText.text = _currentRecipe.GetDisplayName();
+        moduleDescriptionText.text = _currentRecipe.GetDescription();
         string localizedType = GameLocalization.GetModuleType(_currentRecipe.moduleType);
         moduleTypeText.text = GameLocalization.GetOrDefault("UI_Common", "label.typeFormat", "타입 : {0}", localizedType);
 

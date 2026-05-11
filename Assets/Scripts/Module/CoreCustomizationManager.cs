@@ -123,21 +123,28 @@ public class CoreCustomizationManager : MonoBehaviour
     private void SaveSelectedModules()
     {
         List<ModuleSlotData> slotDataList = new List<ModuleSlotData>();
+        List<string> moduleNames = new List<string>();
         foreach (Module module in _selectedModules) {
             if (module != null) {
+                moduleNames.Add(module.moduleName);
                 slotDataList.Add(new ModuleSlotData {
                     moduleName = module.moduleName,
                     moduleId = module.moduleId,
                     moduleType = module.moduleType,
                     moduleTier = module.moduleTier,
-                    moduleIconPath = module.moduleIconPath
+                    moduleIconPath = module.moduleIconPath,
+                    recipeAssetName = module.recipeAssetName,
+                    localizationTable = module.localizationTable,
+                    moduleNameKey = module.moduleNameKey,
+                    moduleDescriptionKey = module.moduleDescriptionKey
                 });
             } else {
+                moduleNames.Add("");
                 slotDataList.Add(new ModuleSlotData { moduleName = "" });
             }
         }
 
-        string json = JsonUtility.ToJson(new SelectedModulesData { slotDataList = slotDataList });
+        string json = JsonUtility.ToJson(new SelectedModulesData { moduleNames = moduleNames, slotDataList = slotDataList });
         PlayerPrefs.SetString(SelectedModulesKey, json);
         PlayerPrefs.Save();
     }
@@ -191,13 +198,41 @@ public class CoreCustomizationManager : MonoBehaviour
 
             if (existingModule != null) {
                 _selectedModules[i] = existingModule;
-            } else if (recipeMap.TryGetValue(slotData.moduleName, out ModuleRecipe recipe)) {
+            } else if (TryFindRecipeForSlot(slotData, recipeMap, out ModuleRecipe recipe)) {
                 Module recreatedModule = new Module(recipe);
+                RestoreSavedModuleIdentity(recreatedModule, slotData);
                 _selectedModules[i] = recreatedModule;
             } else {
                 _selectedModules[i] = null;
                 Debug.LogWarning($"CoreCustomizationManager: Could not find recipe for module '{slotData.moduleName}' in slot {i}");
             }
+        }
+    }
+
+    private static bool TryFindRecipeForSlot(ModuleSlotData slotData, Dictionary<string, ModuleRecipe> recipeMap,
+        out ModuleRecipe recipe)
+    {
+        recipe = null;
+        if (slotData == null)
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(slotData.recipeAssetName)
+            && recipeMap.TryGetValue(slotData.recipeAssetName, out recipe))
+        {
+            return true;
+        }
+
+        return !string.IsNullOrWhiteSpace(slotData.moduleName)
+               && recipeMap.TryGetValue(slotData.moduleName, out recipe);
+    }
+
+    private static void RestoreSavedModuleIdentity(Module module, ModuleSlotData slotData)
+    {
+        if (!string.IsNullOrWhiteSpace(slotData.moduleId))
+        {
+            module.moduleId = slotData.moduleId;
         }
     }
 
@@ -242,18 +277,14 @@ public class CoreCustomizationManager : MonoBehaviour
 
         ModuleRecipe[] allRecipes = Resources.LoadAll<ModuleRecipe>("");
         foreach (ModuleRecipe recipe in allRecipes) {
-            if (recipe != null && !string.IsNullOrEmpty(recipe.moduleName) && !recipeMap.ContainsKey(recipe.moduleName)) {
-                recipeMap[recipe.moduleName] = recipe;
-            }
+            AddRecipeLookup(recipeMap, recipe);
         }
 
         ModuleData[] allModuleData = Resources.LoadAll<ModuleData>("");
         foreach (ModuleData moduleData in allModuleData) {
             if (moduleData.Recipes != null) {
                 foreach (ModuleRecipe recipe in moduleData.Recipes) {
-                    if (recipe != null && !string.IsNullOrEmpty(recipe.moduleName) && !recipeMap.ContainsKey(recipe.moduleName)) {
-                        recipeMap[recipe.moduleName] = recipe;
-                    }
+                    AddRecipeLookup(recipeMap, recipe);
                 }
             }
         }
@@ -262,14 +293,30 @@ public class CoreCustomizationManager : MonoBehaviour
         foreach (ModuleStation station in moduleStations) {
             if (station.ModuleData != null && station.ModuleData.Recipes != null) {
                 foreach (ModuleRecipe recipe in station.ModuleData.Recipes) {
-                    if (recipe != null && !string.IsNullOrEmpty(recipe.moduleName) && !recipeMap.ContainsKey(recipe.moduleName)) {
-                        recipeMap[recipe.moduleName] = recipe;
-                    }
+                    AddRecipeLookup(recipeMap, recipe);
                 }
             }
         }
 
         return recipeMap;
+    }
+
+    private static void AddRecipeLookup(Dictionary<string, ModuleRecipe> recipeMap, ModuleRecipe recipe)
+    {
+        if (recipe == null)
+        {
+            return;
+        }
+
+        if (!string.IsNullOrEmpty(recipe.name) && !recipeMap.ContainsKey(recipe.name))
+        {
+            recipeMap[recipe.name] = recipe;
+        }
+
+        if (!string.IsNullOrEmpty(recipe.moduleName) && !recipeMap.ContainsKey(recipe.moduleName))
+        {
+            recipeMap[recipe.moduleName] = recipe;
+        }
     }
 
     public void DeleteCurrentCoreModules()
@@ -303,5 +350,9 @@ public class CoreCustomizationManager : MonoBehaviour
         public ModuleType moduleType;
         public int moduleTier;
         public string moduleIconPath;
+        public string recipeAssetName;
+        public string localizationTable;
+        public string moduleNameKey;
+        public string moduleDescriptionKey;
     }
 }

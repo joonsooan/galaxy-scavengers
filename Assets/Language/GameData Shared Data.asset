@@ -87,6 +87,126 @@ MonoBehaviour:
     m_Key: building.mainStructure.desc
     m_Metadata:
       m_Items: []
+  - m_Id: 9655828680705
+    m_Key: moduleStation.default.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680706
+    m_Key: moduleStation.default.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680707
+    m_Key: module.free.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680708
+    m_Key: module.free.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680709
+    m_Key: module.buildingHp1.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680710
+    m_Key: module.buildingHp1.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680711
+    m_Key: module.buildingHp2.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680712
+    m_Key: module.buildingHp2.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680713
+    m_Key: module.resourceGeneration1.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680714
+    m_Key: module.resourceGeneration1.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680715
+    m_Key: module.resourceGeneration2.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680716
+    m_Key: module.resourceGeneration2.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680717
+    m_Key: module.storage1.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680718
+    m_Key: module.storage1.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680719
+    m_Key: module.storage2.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680720
+    m_Key: module.storage2.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680721
+    m_Key: module.turretDamage1.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680722
+    m_Key: module.turretDamage1.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680723
+    m_Key: module.turretDamage2.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680724
+    m_Key: module.turretDamage2.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680725
+    m_Key: module.unitBuff1.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680726
+    m_Key: module.unitBuff1.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680727
+    m_Key: module.unitBuff2.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680728
+    m_Key: module.unitBuff2.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680729
+    m_Key: planet.0.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680730
+    m_Key: planet.0.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680731
+    m_Key: planet.1.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680732
+    m_Key: planet.1.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680733
+    m_Key: planet.2.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680734
+    m_Key: planet.2.desc
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

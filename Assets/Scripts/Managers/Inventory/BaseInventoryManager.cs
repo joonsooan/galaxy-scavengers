@@ -167,7 +167,8 @@ public class BaseInventoryManager : MonoBehaviour
     {
         string modulesKey = BaseInventoryPrefix + "Modules";
         List<string> moduleNames = _baseModules.Select(m => m.moduleName).ToList();
-        string json = JsonUtility.ToJson(new ModuleNameList { moduleNames = moduleNames });
+        List<ModuleSaveData> modules = _baseModules.Select(ModuleSaveData.FromModule).ToList();
+        string json = JsonUtility.ToJson(new ModuleNameList { moduleNames = moduleNames, modules = modules });
         PlayerPrefs.SetString(modulesKey, json);
         PlayerPrefs.Save();
     }
@@ -184,7 +185,7 @@ public class BaseInventoryManager : MonoBehaviour
         string json = PlayerPrefs.GetString(modulesKey);
         ModuleNameList moduleNameList = JsonUtility.FromJson<ModuleNameList>(json);
         
-        if (moduleNameList == null || moduleNameList.moduleNames == null)
+        if (moduleNameList == null)
         {
             Debug.LogWarning("BaseInventoryManager: 모듈 리스트를 파싱할 수 없습니다.");
             return;
@@ -192,15 +193,67 @@ public class BaseInventoryManager : MonoBehaviour
         
         Dictionary<string, ModuleRecipe> recipeMap = GetAllModuleRecipes();
         
-        int loadedCount = 0;
+        if (moduleNameList.modules != null && moduleNameList.modules.Count > 0)
+        {
+            foreach (ModuleSaveData savedModule in moduleNameList.modules)
+            {
+                if (TryCreateModuleFromSaveData(savedModule, recipeMap, out Module module))
+                {
+                    _baseModules.Add(module);
+                }
+            }
+
+            return;
+        }
+
+        if (moduleNameList.moduleNames == null)
+        {
+            return;
+        }
+
         foreach (string moduleName in moduleNameList.moduleNames)
         {
             if (recipeMap.TryGetValue(moduleName, out ModuleRecipe recipe))
             {
                 Module module = new Module(recipe);
                 _baseModules.Add(module);
-                loadedCount++;
             }
+        }
+    }
+
+    private static bool TryCreateModuleFromSaveData(ModuleSaveData savedModule, Dictionary<string, ModuleRecipe> recipeMap,
+        out Module module)
+    {
+        module = null;
+        if (savedModule == null)
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(savedModule.recipeAssetName)
+            && recipeMap.TryGetValue(savedModule.recipeAssetName, out ModuleRecipe recipe))
+        {
+            module = new Module(recipe);
+            RestoreSavedModuleIdentity(module, savedModule);
+            return true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(savedModule.moduleName)
+            && recipeMap.TryGetValue(savedModule.moduleName, out recipe))
+        {
+            module = new Module(recipe);
+            RestoreSavedModuleIdentity(module, savedModule);
+            return true;
+        }
+
+        return false;
+    }
+
+    private static void RestoreSavedModuleIdentity(Module module, ModuleSaveData savedModule)
+    {
+        if (!string.IsNullOrWhiteSpace(savedModule.moduleId))
+        {
+            module.moduleId = savedModule.moduleId;
         }
     }
     
@@ -212,10 +265,12 @@ public class BaseInventoryManager : MonoBehaviour
         ModuleRecipe[] allRecipes = Resources.LoadAll<ModuleRecipe>("");
         foreach (ModuleRecipe recipe in allRecipes)
         {
-            if (recipe != null && !string.IsNullOrEmpty(recipe.moduleName) && !recipeMap.ContainsKey(recipe.moduleName))
+            if (recipe == null)
             {
-                recipeMap[recipe.moduleName] = recipe;
+                continue;
             }
+
+            AddRecipeLookup(recipeMap, recipe);
         }
         
         // Also load from ModuleData (for backward compatibility and module stations)
@@ -226,10 +281,7 @@ public class BaseInventoryManager : MonoBehaviour
             {
                 foreach (ModuleRecipe recipe in moduleData.Recipes)
                 {
-                    if (recipe != null && !string.IsNullOrEmpty(recipe.moduleName) && !recipeMap.ContainsKey(recipe.moduleName))
-                    {
-                        recipeMap[recipe.moduleName] = recipe;
-                    }
+                    AddRecipeLookup(recipeMap, recipe);
                 }
             }
         }
@@ -242,21 +294,55 @@ public class BaseInventoryManager : MonoBehaviour
             {
                 foreach (ModuleRecipe recipe in station.ModuleData.Recipes)
                 {
-                    if (recipe != null && !string.IsNullOrEmpty(recipe.moduleName) && !recipeMap.ContainsKey(recipe.moduleName))
-                    {
-                        recipeMap[recipe.moduleName] = recipe;
-                    }
+                    AddRecipeLookup(recipeMap, recipe);
                 }
             }
         }
         
         return recipeMap;
     }
+
+    private static void AddRecipeLookup(Dictionary<string, ModuleRecipe> recipeMap, ModuleRecipe recipe)
+    {
+        if (recipe == null)
+        {
+            return;
+        }
+
+        if (!string.IsNullOrEmpty(recipe.name) && !recipeMap.ContainsKey(recipe.name))
+        {
+            recipeMap[recipe.name] = recipe;
+        }
+
+        if (!string.IsNullOrEmpty(recipe.moduleName) && !recipeMap.ContainsKey(recipe.moduleName))
+        {
+            recipeMap[recipe.moduleName] = recipe;
+        }
+    }
     
     [System.Serializable]
     private class ModuleNameList
     {
         public List<string> moduleNames;
+        public List<ModuleSaveData> modules;
+    }
+
+    [System.Serializable]
+    private class ModuleSaveData
+    {
+        public string recipeAssetName;
+        public string moduleName;
+        public string moduleId;
+
+        public static ModuleSaveData FromModule(Module module)
+        {
+            return new ModuleSaveData
+            {
+                recipeAssetName = module.recipeAssetName,
+                moduleName = module.moduleName,
+                moduleId = module.moduleId
+            };
+        }
     }
 }
 

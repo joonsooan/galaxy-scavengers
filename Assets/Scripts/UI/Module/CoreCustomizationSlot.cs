@@ -65,10 +65,11 @@ public class CoreCustomizationSlot : MonoBehaviour
         }
 
         if (moduleNameText != null) {
-            moduleNameText.text = hasModule && CurrentModule != null ? CurrentModule.moduleName : "";
+            moduleNameText.text = hasModule && CurrentModule != null ? CurrentModule.GetDisplayName() : "";
         }
 
         if (emptySlotIndicator != null) {
+            ApplyEmptySlotLabel();
             emptySlotIndicator.SetActive(!hasModule);
         }
 
@@ -81,6 +82,16 @@ public class CoreCustomizationSlot : MonoBehaviour
     {
         if (CurrentModule != null && _customizationManager != null) {
             _customizationManager.RemoveModuleFromSlot(SlotIndex);
+        }
+    }
+
+    private void ApplyEmptySlotLabel()
+    {
+        TMP_Text emptyText = emptySlotIndicator.GetComponentInChildren<TMP_Text>(true);
+        if (emptyText != null)
+        {
+            emptyText.text = GameLocalization.GetOrDefault("UI_Common", "base.moduleSlotFormat",
+                "\uBAA8\uB4C8 \uC2AC\uB86F {0}", SlotIndex + 1);
         }
     }
 

@@ -44,6 +44,13 @@ public class PlanetSelectionController : MonoBehaviour
     {
         ApplyTabButtonLabels();
         ApplyCoreManageStaticChrome();
+        ApplyPlanetButtonLabels();
+
+        PlanetData selectedPlanet = PlanetSelectionState.SelectedPlanet;
+        if (selectedPlanet != null && detailPanel != null)
+        {
+            detailPanel.Bind(selectedPlanet);
+        }
     }
 
     private void Awake()
@@ -147,6 +154,20 @@ public class PlanetSelectionController : MonoBehaviour
                 continue;
             }
 
+            if (tmp.gameObject.name == "Core Title Text")
+            {
+                tmp.text = GameLocalization.GetOrDefault("UI_Common", "base.coreHangar",
+                    "\uCF54\uC5B4 \uACA9\uB0A9\uACE0");
+                continue;
+            }
+
+            if (tmp.gameObject.name == "Module Title Text")
+            {
+                tmp.text = GameLocalization.GetOrDefault("UI_Common", "base.moduleStation",
+                    "\uBAA8\uB4C8 \uC2A4\uD14C\uC774\uC158");
+                continue;
+            }
+
             if (tmp.gameObject.name == "Title Text" && tmp.transform.parent != null
                 && tmp.transform.parent.name == "Module Inventory Panel")
             {
@@ -173,7 +194,7 @@ public class PlanetSelectionController : MonoBehaviour
                 continue;
             }
 
-            if (!button.gameObject.name.Contains("Button_Shop"))
+            if (!IsModuleCraftButton(button.gameObject.name))
             {
                 continue;
             }
@@ -184,6 +205,11 @@ public class PlanetSelectionController : MonoBehaviour
                 text.text = GameLocalization.GetOrDefault("UI_Common", "base.moduleCraft", "\uBAA8\uB4C8 \uC81C\uC791");
             }
         }
+    }
+
+    private static bool IsModuleCraftButton(string objectName)
+    {
+        return objectName.Contains("Button_Shop") || objectName.Contains("Button Shop");
     }
 
     private void RenameCoreManageTabLabel()
@@ -255,9 +281,33 @@ public class PlanetSelectionController : MonoBehaviour
             _boundButtons.Add(button);
             button.onClick.AddListener(() => OnPlanetClicked(button));
             button.interactable = true;
+            SetPlanetButtonLabel(button, planetData);
         }
 
         ToggleLaunchButton(_unlockedPlanets.Count > 0);
+    }
+
+    private void ApplyPlanetButtonLabels()
+    {
+        for (int i = 0; i < _boundButtons.Count; i++)
+        {
+            Button button = _boundButtons[i];
+            if (button == null || !_buttonToPlanet.TryGetValue(button, out PlanetData planet))
+            {
+                continue;
+            }
+
+            SetPlanetButtonLabel(button, planet);
+        }
+    }
+
+    private static void SetPlanetButtonLabel(Button button, PlanetData planet)
+    {
+        TMP_Text text = button.GetComponentInChildren<TMP_Text>(true);
+        if (text != null)
+        {
+            text.text = planet.PlanetName;
+        }
     }
 
     private PlanetData FindPlanetByButtonName(string buttonName)

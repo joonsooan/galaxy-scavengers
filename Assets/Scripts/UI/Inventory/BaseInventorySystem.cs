@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class BaseInventorySystem : MonoBehaviour
@@ -63,12 +65,26 @@ public class BaseInventorySystem : MonoBehaviour
 
     private void OnEnable()
     {
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
         SubscribeToModuleEvents();
     }
 
     private void OnDisable()
     {
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
         UnsubscribeFromModuleEvents();
+    }
+
+    private void OnSelectedLocaleChanged(Locale _)
+    {
+        if (inventoryPanel != null && inventoryPanel.activeSelf)
+        {
+            RefreshInventoryGrid();
+        }
+        else
+        {
+            UpdateInventoryInfoText();
+        }
     }
 
     private IEnumerator RefreshInventoryAfterInitialization()

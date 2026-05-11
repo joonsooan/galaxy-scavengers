@@ -51,6 +51,11 @@ public class CoreDetailPanel : MonoBehaviour
             _customizationManager = FindFirstObjectByType<CoreCustomizationManager>();
         }
 
+        if (_customizationManager == null) {
+            ClearInfo();
+            return;
+        }
+
         List<Module> activeModules = _customizationManager.GetActiveModules();
 
         if (activeModules == null || activeModules.Count == 0) {
@@ -63,8 +68,8 @@ public class CoreDetailPanel : MonoBehaviour
         foreach (Module module in activeModules) {
             if (module == null) continue;
             if (module.effectData != null) {
-                moduleNameText.text = module.moduleName;
-                moduleEffectText.text = module.moduleDescription;
+                moduleNameText.text = module.GetDisplayName();
+                moduleEffectText.text = module.GetDescription();
             }
         }
 

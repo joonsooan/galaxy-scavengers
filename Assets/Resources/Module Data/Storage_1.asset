@@ -16,6 +16,9 @@ MonoBehaviour:
   moduleDescription: "\uC2DC\uB4DC \uCF54\uC5B4\uC758 \uC800\uC7A5 \uACF5\uAC04\uC744
     \uC870\uAE08 \uD655\uC7A5\uD569\uB2C8\uB2E4."
   moduleIcon: {fileID: 1493692167465492477, guid: 72f3e83ef786bd946829eb12203b2d3e, type: 3}
+  localizationTable: GameData
+  moduleNameKey: module.storage1.name
+  moduleDescriptionKey: module.storage1.desc
   ingredients:
   - resourceType: 5
     amount: 100

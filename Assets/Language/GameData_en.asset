@@ -93,6 +93,127 @@ MonoBehaviour:
       to the Mother Ship.
     m_Metadata:
       m_Items: []
+  - m_Id: 9655828680705
+    m_Localized: Module Station
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680706
+    m_Localized: A station used to craft modules that can be installed in the Seed
+      Core.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680707
+    m_Localized: Basic Module
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680708
+    m_Localized: Slightly increases the Seed Core's storage space.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680709
+    m_Localized: Building Reinforcement Module 1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680710
+    m_Localized: Slightly increases the health of all buildings.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680711
+    m_Localized: Building Reinforcement Module 2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680712
+    m_Localized: Further increases the health of all buildings.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680713
+    m_Localized: Production Boost Module 1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680714
+    m_Localized: Slightly increases resource production speed.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680715
+    m_Localized: Production Boost Module 2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680716
+    m_Localized: Further increases resource production speed.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680717
+    m_Localized: Storage Expansion Module 1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680718
+    m_Localized: Slightly expands the Seed Core's storage space.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680719
+    m_Localized: Storage Expansion Module 2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680720
+    m_Localized: Further expands the Seed Core's storage space.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680721
+    m_Localized: Turret Reinforcement Module 1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680722
+    m_Localized: Slightly increases turret attack power.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680723
+    m_Localized: Turret Reinforcement Module 2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680724
+    m_Localized: Further increases turret attack power.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680725
+    m_Localized: Unit Enhancement Module 1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680726
+    m_Localized: Slightly increases movement and work speed for all units.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680727
+    m_Localized: Unit Enhancement Module 2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680728
+    m_Localized: Further increases movement and work speed for all units.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680729
+    m_Localized: Planet 0
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680730
+    m_Localized: This is the first planet
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680731
+    m_Localized: Planet 1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680732
+    m_Localized: Second planet
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680733
+    m_Localized: Planet 2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680734
+    m_Localized: Third planet
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

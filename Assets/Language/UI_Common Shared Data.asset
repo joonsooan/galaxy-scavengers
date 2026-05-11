@@ -243,6 +243,14 @@ MonoBehaviour:
     m_Key: placeholder.planetDataAsset
     m_Metadata:
       m_Items: []
+  - m_Id: 26494277324856
+    m_Key: base.moduleSlotFormat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324857
+    m_Key: base.extractableData
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

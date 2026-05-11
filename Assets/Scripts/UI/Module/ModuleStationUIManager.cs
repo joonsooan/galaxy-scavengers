@@ -50,6 +50,7 @@ public class ModuleStationUIManager : MonoBehaviour
         if (moduleStationPanel != null && moduleStationPanel.activeSelf && _currentData != null)
         {
             UpdateStationInfo();
+            LoadAllRecipes();
         }
 
         if (moduleDetailPanel != null)

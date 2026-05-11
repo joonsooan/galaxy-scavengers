@@ -94,6 +94,8 @@ public class CoreCustomUIManager : MonoBehaviour
     private void OnSelectedLocaleChanged(Locale _)
     {
         ApplyEmptyModulePlaceholderText();
+        RefreshSlots();
+        RefreshModuleSelectionGrid();
         if (coreDetailPanel != null)
         {
             coreDetailPanel.UpdateModuleEffects();
@@ -198,6 +200,11 @@ public class CoreCustomUIManager : MonoBehaviour
             FindManagers();
         }
 
+        if (_inventoryManager == null || _customizationManager == null) {
+            UpdateEmptyModuleTextVisibility();
+            return;
+        }
+
         List<Module> allModules = _inventoryManager.GetAllModules();
         if (allModules == null) {
             allModules = new List<Module>();
@@ -297,7 +304,10 @@ public class CoreCustomUIManager : MonoBehaviour
         }
 
         coreDetailPanel.UpdateModuleEffects();
-        _baseInventorySystem.ForceRefreshInventory();
+        if (_baseInventorySystem != null)
+        {
+            _baseInventorySystem.ForceRefreshInventory();
+        }
     }
 
     private void OnModuleInventoryChanged(Module module)
