@@ -363,6 +363,14 @@ MonoBehaviour:
     m_Localized: Unit Ratio
     m_Metadata:
       m_Items: []
+  - m_Id: 1353279619198988
+    m_Localized: Seed Core
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198989
+    m_Localized: Can produce various units.
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

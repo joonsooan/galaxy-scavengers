@@ -359,6 +359,14 @@ MonoBehaviour:
     m_Key: resourceStats.electricitySpend
     m_Metadata:
       m_Items: []
+  - m_Id: 1353279619198988
+    m_Key: base.droneHub
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198989
+    m_Key: base.droneHubDescription
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
