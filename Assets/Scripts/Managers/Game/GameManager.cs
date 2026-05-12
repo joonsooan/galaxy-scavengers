@@ -274,6 +274,10 @@ public class GameManager : MonoBehaviour
     public IEnumerator RunGameSceneOpeningSequence()
     {
         CameraTargetController ctc = FindFirstObjectByType<CameraTargetController>();
+        if (ctc == null)
+        {
+            yield break;
+        }
 
         if (mapGenerator == null)
         {
@@ -281,6 +285,7 @@ public class GameManager : MonoBehaviour
         }
 
         ctc.BeginOpeningSequence();
+        bool skipRequested = false;
 
         Vector3 startFocus = ctc.transform.position;
         bool hasRuins = mapGenerator != null && mapGenerator.AncientRuinsCells != null && mapGenerator.AncientRuinsCells.Count > 0;
@@ -289,26 +294,72 @@ public class GameManager : MonoBehaviour
 
         if (openingCenterDwellSeconds > 0f)
         {
-            yield return CoroutineCache.GetWaitForSecondsRealtime(openingCenterDwellSeconds);
+            float elapsed = 0f;
+            while (elapsed < openingCenterDwellSeconds)
+            {
+                if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    skipRequested = true;
+                    break;
+                }
+                elapsed += Time.unscaledDeltaTime;
+                yield return null;
+            }
         }
 
         bool shouldMoveToRuins = hasRuins && distanceToRuins > 0.05f;
-        if (shouldMoveToRuins)
+        if (!skipRequested && shouldMoveToRuins)
         {
             Tween toRuins = ctc.TweenRigToWorldXY(ruins, openingPanDuration);
-            yield return toRuins.WaitForCompletion();
+            while (toRuins.IsActive() && toRuins.IsPlaying())
+            {
+                if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    skipRequested = true;
+                    toRuins.Kill();
+                    break;
+                }
+                yield return null;
+            }
         }
 
-        if (openingRuinsDwellSeconds > 0f)
+        if (!skipRequested && openingRuinsDwellSeconds > 0f)
         {
-            yield return CoroutineCache.GetWaitForSecondsRealtime(openingRuinsDwellSeconds);
+            float elapsed = 0f;
+            while (elapsed < openingRuinsDwellSeconds)
+            {
+                if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    skipRequested = true;
+                    break;
+                }
+                elapsed += Time.unscaledDeltaTime;
+                yield return null;
+            }
         }
 
         Unit_Player mainUnit = FindFirstObjectByType<Unit_Player>(FindObjectsInactive.Include);
         if (mainUnit != null)
         {
-            Tween toMainUnit = ctc.TweenRigToWorldXY(mainUnit.transform.position, openingPanDuration);
-            yield return toMainUnit.WaitForCompletion();
+            if (skipRequested)
+            {
+                ctc.SnapRigToWorldXY(mainUnit.transform.position);
+            }
+            else
+            {
+                Tween toMainUnit = ctc.TweenRigToWorldXY(mainUnit.transform.position, openingPanDuration);
+                while (toMainUnit.IsActive() && toMainUnit.IsPlaying())
+                {
+                    if (Input.GetKeyDown(KeyCode.Space))
+                    {
+                        skipRequested = true;
+                        toMainUnit.Kill();
+                        ctc.SnapRigToWorldXY(mainUnit.transform.position);
+                        break;
+                    }
+                    yield return null;
+                }
+            }
             ctc.SetFollowTargetImmediate(mainUnit.transform);
         }
     }
@@ -470,7 +521,10 @@ public class GameManager : MonoBehaviour
 
         if (progress != null)
         {
-            progress.UpdateProgress(0.0f, "착륙 좌표 고정 중...");
+            progress.UpdateProgress(
+                0.0f,
+                GameLocalization.GetOrDefault("UI_Common", "loading.stage.lockLandingCoordinates", "착륙 좌표 고정 중..."),
+                "loading.stage.lockLandingCoordinates");
             yield return _wait05;
         }
 

@@ -19,10 +19,14 @@ MonoBehaviour:
   - tokenCost: 100
     upgradeTime: 10
     description: "\uCD5C\uB300 \uC720\uB2DB +5"
+    descriptionKey: unitUpgrade.maxPop.tier1.desc
     floatStatBonus: 0
     intStatBonus: 5
   - tokenCost: 200
     upgradeTime: 30
     description: "\uCD5C\uB300 \uC720\uB2DB +5"
+    descriptionKey: unitUpgrade.maxPop.tier1.desc
     floatStatBonus: 0
     intStatBonus: 5
+  localizationTable: GameData
+  displayNameKey: unitUpgrade.maxPop.name

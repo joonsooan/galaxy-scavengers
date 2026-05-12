@@ -48,7 +48,7 @@ public class ProcessorRecipeCell : MonoBehaviour
         _activeRecipe = activeRecipe;
         _recipeData = _activeRecipe.recipeData;
 
-        recipeName.text = $"{GetKoreanResourceType(_recipeData.resourceType)}";
+        recipeName.text = GameLocalization.GetResourceType(_recipeData.resourceType);
         recipeIcon.sprite = _recipeData.recipeIcon;
         _ingredients = _recipeData.ingredients;
         _produceMaxAmount = _activeRecipe.maxProductionLimit;
@@ -73,37 +73,6 @@ public class ProcessorRecipeCell : MonoBehaviour
         }
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(contentParent);
-    }
-
-    private string GetKoreanResourceType(ResourceType resourceType)
-    {
-        return resourceType switch {
-            ResourceType.Ferrite => "복합 철재",
-            ResourceType.Aether => "에테르 가스",
-            ResourceType.Biomass => "바이오매스",
-            ResourceType.CryoCrystal => "극저온 결정",
-            ResourceType.AlloyPlate => "합금 판",
-            ResourceType.CompositeFrame => "복합 골조",
-            ResourceType.EChip => "전자 칩",
-            ResourceType.BioCable => "바이오 케이블",
-            ResourceType.PowerCube => "동력 큐브",
-            ResourceType.BioFuel => "바이오 연료",
-            ResourceType.CryoGel => "극저온 용액",
-            ResourceType.Solana => "솔라나 정수",
-            ResourceType.Core => "코어 프로세서",
-            ResourceType.Ammunition => "표준 탄약",
-            ResourceType.HeavyPlating => "중장갑 판",
-            ResourceType.Actuator => "액추에이터",
-            ResourceType.GenomeChip => "유전자 데이터 칩",
-            ResourceType.PatchKit => "수리 키트",
-            ResourceType.SensorUnit => "센서 유닛",
-            ResourceType.PlasmaCube => "플라즈마 큐브",
-            ResourceType.CryoConduit => "초전도 도관",
-            ResourceType.SeekerMissile => "추적 탄두",
-            ResourceType.NexusData => "넥서스 데이터",
-            ResourceType.NeuralMatrix => "신경 매트릭스",
-            _ => resourceType.ToString()
-        };
     }
 
     private void HandleResourceChange(ResourceType type, int newAmount)

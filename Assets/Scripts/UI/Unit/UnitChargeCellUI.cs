@@ -1,5 +1,7 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class UnitChargeCellUI : MonoBehaviour
@@ -34,6 +36,16 @@ public class UnitChargeCellUI : MonoBehaviour
     private UnitBase _unit;
     private UnitBattery _battery;
 
+    private void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
+    }
+
+    private void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
+    }
+
     private void OnDestroy()
     {
         UnbindBattery();
@@ -44,6 +56,7 @@ public class UnitChargeCellUI : MonoBehaviour
         UnbindBattery();
         _unit = unit;
         _battery = unit != null ? unit.GetComponent<UnitBattery>() : null;
+        RefreshLocalizedStatusStrings();
 
         if (_battery != null)
         {
@@ -52,6 +65,23 @@ public class UnitChargeCellUI : MonoBehaviour
 
         WireFocusButton(true);
 
+        RefreshStaticVisuals();
+        RefreshDynamicVisuals();
+    }
+
+    private void RefreshLocalizedStatusStrings()
+    {
+        textPowerEmpty = GameLocalization.GetOrDefault("UI_Common", "status.powerInsufficient", textPowerEmpty);
+        textNeedCharge = GameLocalization.GetOrDefault("UI_Common", "status.needCharge", textNeedCharge);
+        textGoingToCharge = GameLocalization.GetOrDefault("UI_Common", "status.movingToChargingStation", textGoingToCharge);
+        textQueued = GameLocalization.GetOrDefault("UI_Common", "status.queued", textQueued);
+        textCharging = GameLocalization.GetOrDefault("UI_Common", "status.charging", textCharging);
+        textOk = GameLocalization.GetOrDefault("UI_Common", "status.normal", textOk);
+    }
+
+    private void OnSelectedLocaleChanged(Locale _)
+    {
+        RefreshLocalizedStatusStrings();
         RefreshStaticVisuals();
         RefreshDynamicVisuals();
     }
@@ -123,7 +153,7 @@ public class UnitChargeCellUI : MonoBehaviour
     {
         if (unitNameText != null)
         {
-            unitNameText.text = _unit != null && _unit.unitData != null ? _unit.unitData.unitName : string.Empty;
+            unitNameText.text = _unit != null && _unit.unitData != null ? _unit.unitData.GetDisplayName() : string.Empty;
         }
 
         if (unitIconImage != null)

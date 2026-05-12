@@ -40,7 +40,10 @@ public class FogOfWarInitializer
     {
         if (progress != null)
         {
-            progress.UpdateProgress(0.0f, "대기 농도 및 가시거리 분석 중...");
+            progress.UpdateProgress(
+                0.0f,
+                GameLocalization.GetOrDefault("UI_Common", "loading.stage.analyzeAtmosphere", "대기 농도 및 가시거리 분석 중..."),
+                "loading.stage.analyzeAtmosphere");
             yield return _wait05;
         }
         

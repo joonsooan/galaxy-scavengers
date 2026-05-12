@@ -16,6 +16,9 @@ MonoBehaviour:
   moduleDescription: "\uBAA8\uB4E0 \uAC74\uBB3C\uC758 \uCCB4\uB825\uC774 \uB354\uC6B1
     \uC99D\uAC00\uD569\uB2C8\uB2E4."
   moduleIcon: {fileID: 7901670489268753837, guid: 5953256e67055b645a80974bbcc7bedb, type: 3}
+  localizationTable: GameData
+  moduleNameKey: module.buildingHp2.name
+  moduleDescriptionKey: module.buildingHp2.desc
   ingredients:
   - resourceType: 4
     amount: 150

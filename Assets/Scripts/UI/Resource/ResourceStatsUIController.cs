@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class ResourceStatsUIController : MonoBehaviour
@@ -51,17 +54,49 @@ public class ResourceStatsUIController : MonoBehaviour
 
     protected virtual void OnEnable()
     {
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
         _nextRefresh = 0f;
         BuildResourceCellListsIfNeeded();
         WireTabButtons(true);
+        ApplyLocalizedStaticTexts();
         ShowTab(GetValidTabIndex(s_lastSelectedTabIndex));
     }
 
     protected virtual void OnDisable()
     {
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
         WireTabButtons(false);
         ClearSpawnedCells();
         ClearSpawnedElectricityCells();
+    }
+
+    private void OnSelectedLocaleChanged(Locale _)
+    {
+        ApplyLocalizedStaticTexts();
+    }
+
+    private void ApplyLocalizedStaticTexts()
+    {
+        SetTextByName("stats_title_text", "resourceStats.title", "자원 통계");
+        SetTextByName("resource_stats_text", "resourceStats.resourceTab", "자원");
+        SetTextByName("elec_stats_text", "resourceStats.electricityTab", "전력");
+        SetTextByName("resource_produce_text", "resourceStats.resourceProduce", "자원 생산량");
+        SetTextByName("resource_spend_text", "resourceStats.resourceSpend", "자원 소비량");
+        SetTextByName("elec_produce_text", "resourceStats.electricityProduce", "전력 생산량");
+        SetTextByName("elec_spend_text", "resourceStats.electricitySpend", "전력 소비량");
+    }
+
+    private void SetTextByName(string objectName, string key, string fallback)
+    {
+        TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
+        foreach (TMP_Text text in texts)
+        {
+            if (text != null && text.gameObject.name == objectName)
+            {
+                text.text = GameLocalization.GetOrDefault("UI_Common", key, fallback);
+                return;
+            }
+        }
     }
 
     private void Update()

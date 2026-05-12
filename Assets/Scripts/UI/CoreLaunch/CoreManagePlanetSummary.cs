@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class CoreManagePlanetSummary : MonoBehaviour
@@ -20,13 +22,20 @@ public class CoreManagePlanetSummary : MonoBehaviour
     private void OnEnable()
     {
         PlanetSelectionState.SelectedPlanetChanged += OnSelectedPlanetChanged;
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
         Refresh();
     }
 
     private void OnDisable()
     {
         PlanetSelectionState.SelectedPlanetChanged -= OnSelectedPlanetChanged;
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
         PlanetResourceCellsRenderer.ClearSpawnedCells(_spawnedCells);
+    }
+
+    private void OnSelectedLocaleChanged(Locale _)
+    {
+        Refresh();
     }
 
     private void OnSelectedPlanetChanged(PlanetData _)
@@ -111,7 +120,8 @@ public class CoreManagePlanetSummary : MonoBehaviour
 
             if (planetNameText != null)
             {
-                planetNameText.text = string.Empty;
+                planetNameText.text = GameLocalization.GetOrDefault("UI_Common", "placeholder.planetDataAsset",
+                    "Planet Data Scriptable object");
             }
 
             PlanetResourceCellsRenderer.ClearSpawnedCells(_spawnedCells);

@@ -34,7 +34,7 @@ public class ModuleGridCell : MonoBehaviour, IPointerClickHandler
         
         if (moduleNameText != null)
         {
-            moduleNameText.text = _recipe.moduleName;
+            moduleNameText.text = _recipe.GetDisplayName();
         }
     }
     

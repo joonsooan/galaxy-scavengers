@@ -1,6 +1,8 @@
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class UnitManagementUIController : MonoBehaviour
@@ -36,6 +38,8 @@ public class UnitManagementUIController : MonoBehaviour
         GameplayTokenWallet.EnsureExists(this);
         GameplayTokenWallet.OnBalanceChanged += OnTokenBalanceChanged;
         WireTabButtons(true);
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
+        ApplyLocalizedStaticTexts();
         RefreshSummary();
         ShowTab(GetValidTabIndex(s_lastSelectedTabIndex));
     }
@@ -45,7 +49,15 @@ public class UnitManagementUIController : MonoBehaviour
         UnitManager.OnUnitCountChanged -= OnUnitCountChanged;
         UnitUpgradeProgress.OnUpgradeStateChanged -= OnUpgradeStateChanged;
         GameplayTokenWallet.OnBalanceChanged -= OnTokenBalanceChanged;
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
         WireTabButtons(false);
+    }
+
+    private void OnSelectedLocaleChanged(Locale _)
+    {
+        ApplyLocalizedStaticTexts();
+        RefreshSummary();
+        ShowTab(GetValidTabIndex(s_lastSelectedTabIndex));
     }
 
     private void OnUpgradeStateChanged()
@@ -87,6 +99,84 @@ public class UnitManagementUIController : MonoBehaviour
             }
         }
 
+    }
+
+    private void ApplyLocalizedStaticTexts()
+    {
+        SetTextByName("Title Text", "unitManage.title", "유닛 관리");
+        SetTextByName("unit_manage_minerinfo_text", "unitManage.minerInfo", "채굴 정보");
+        SetTextByName("unit_manage_charge_text", "unitManage.charge", "충전");
+        SetTextByName("unit_manage_upgrade_text", "unitManage.upgrade", "업그레이드");
+
+        TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
+        foreach (TMP_Text text in texts)
+        {
+            if (text == null)
+            {
+                continue;
+            }
+
+            if (!IsInNamedHierarchy(text.transform, "Resource Text Panel"))
+            {
+                continue;
+            }
+
+            if (text.gameObject.name == "text_1")
+            {
+                text.text = GameLocalization.GetOrDefault("UI_Common", "unitManage.text1", "자원 아이콘을 클릭하여\n유닛이 채굴 가능한 자원을\n지정해줄 수 있습니다");
+            }
+            else if (text.gameObject.name == "text_2")
+            {
+                text.text = GameLocalization.GetOrDefault("UI_Common", "unitManage.text2", "투입 가능한 자원");
+            }
+            else if (text.gameObject.name == "text_3")
+            {
+                text.text = GameLocalization.GetOrDefault("UI_Common", "unitManage.text3", "필요한 자원");
+            }
+        }
+    }
+
+    private void SetTextByName(string objectName, string key, string fallback)
+    {
+        TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
+        foreach (TMP_Text text in texts)
+        {
+            if (text != null && text.gameObject.name == objectName)
+            {
+                text.text = GameLocalization.GetOrDefault("UI_Common", key, fallback);
+                return;
+            }
+        }
+    }
+
+    private static void SetButtonLabel(Button button, string key, string fallback)
+    {
+        if (button == null)
+        {
+            return;
+        }
+
+        TMP_Text label = button.GetComponentInChildren<TMP_Text>(true);
+        if (label != null)
+        {
+            label.text = GameLocalization.GetOrDefault("UI_Common", key, fallback);
+        }
+    }
+
+    private static bool IsInNamedHierarchy(Transform transform, string objectName)
+    {
+        Transform current = transform;
+        while (current != null)
+        {
+            if (current.name == objectName)
+            {
+                return true;
+            }
+
+            current = current.parent;
+        }
+
+        return false;
     }
 
     private void OnMinerTabClicked()

@@ -683,7 +683,10 @@ public class MapGenerator : MonoBehaviour
         ClearEnemyTerritoryTilemaps();
 
         if (progress != null) {
-            progress.UpdateProgress(0.0f, "지표면 고도 데이터 동기화 중...");
+            progress.UpdateProgress(
+                0.0f,
+                GameLocalization.GetOrDefault("UI_Common", "loading.stage.syncTerrainHeight", "지표면 고도 데이터 동기화 중..."),
+                "loading.stage.syncTerrainHeight");
             yield return CoroutineCache.GetWaitForSeconds(0.5f);
         }
 

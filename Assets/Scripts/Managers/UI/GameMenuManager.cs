@@ -1,5 +1,7 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using FMODUnity;
@@ -34,6 +36,7 @@ public class GameMenuManager : MonoBehaviour
     private TMP_Text _currentMasterVolumeText;
     private TMP_Text _currentSFXVolumeText;
     private TMP_Text _currentMusicVolumeText;
+    private Button _currentLanguageButton;
 
     [Header("Audio")]
     [SerializeField] private EventReference menuOpenSound;
@@ -44,6 +47,8 @@ public class GameMenuManager : MonoBehaviour
     private Button _currentMenuOpenButton;
     private bool _isMenuOpen;
     private MainControlPanel _mainControlPanel;
+    private const string KoreanLocaleCode = "ko";
+    private const string EnglishLocaleCode = "en";
 
     public static GameMenuManager Instance { get; private set; }
 
@@ -64,11 +69,18 @@ public class GameMenuManager : MonoBehaviour
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
     }
 
     private void OnDisable()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
+    }
+
+    private void OnSelectedLocaleChanged(Locale _)
+    {
+        ApplyLocalizedMenuTexts();
     }
 
     private void Start()
@@ -130,6 +142,7 @@ public class GameMenuManager : MonoBehaviour
 
         SetupButtons();
         SetupSliders();
+        ApplyLocalizedMenuTexts();
     }
 
     public void SetMenuUI(MenuUIProvider provider)
@@ -190,6 +203,65 @@ public class GameMenuManager : MonoBehaviour
             _currentMusicVolumeText = provider.musicVolumeText;
         else
             _currentMusicVolumeText = musicVolumeText;
+
+        _currentLanguageButton = provider.languageButton != null ? provider.languageButton : FindLanguageButton();
+    }
+
+    private void ApplyLocalizedMenuTexts()
+    {
+        SetButtonLabelText(_currentContinueButton, "menu.continue", "\uACC4\uC18D\uD558\uAE30");
+        SetButtonLabelText(_currentReturnToTitleButton, "menu.returnToTitle", "\uD0C0\uC774\uD2C0 \uD654\uBA74\uC73C\uB85C");
+        SetButtonLabelText(_currentQuitGameButton, "menu.quitGame", "\uAC8C\uC784 \uC885\uB8CC");
+        SetButtonLabelText(_currentLanguageButton, "menu.languageToggle", "\uC5B8\uC5B4");
+
+        SetVolumeRowLabel(_currentMasterVolumeSlider, _currentMasterVolumeText, "menu.volume.master", "\uC8FC \uBCFC\uB968");
+        SetVolumeRowLabel(_currentSFXVolumeSlider, _currentSFXVolumeText, "menu.volume.sfx", "SFX \uBCFC\uB968");
+        SetVolumeRowLabel(_currentMusicVolumeSlider, _currentMusicVolumeText, "menu.volume.music", "\uC74C\uC545 \uBCFC\uB968");
+    }
+
+    private static void SetButtonLabelText(Button button, string key, string fallback)
+    {
+        if (button == null)
+        {
+            return;
+        }
+
+        TMP_Text label = button.GetComponentInChildren<TMP_Text>(true);
+        if (label != null)
+        {
+            label.text = GameLocalization.GetOrDefault("UI_Common", key, fallback);
+        }
+    }
+
+    private static void SetVolumeRowLabel(Slider slider, TMP_Text valueText, string key, string fallback)
+    {
+        if (slider == null)
+        {
+            return;
+        }
+
+        Transform row = slider.transform.parent;
+        if (row == null)
+        {
+            return;
+        }
+
+        TMP_Text labelTmp = null;
+        foreach (TMP_Text t in row.GetComponentsInChildren<TMP_Text>(true))
+        {
+            if (t == valueText)
+            {
+                continue;
+            }
+
+            labelTmp = t;
+            break;
+        }
+
+        if (labelTmp != null)
+        {
+            labelTmp.text = GameLocalization.GetOrDefault("UI_Common", key, fallback);
+        }
     }
 
     public void SetMenuOpenButton(Button button)
@@ -236,6 +308,55 @@ public class GameMenuManager : MonoBehaviour
             _currentQuitGameButton.onClick.RemoveAllListeners();
             _currentQuitGameButton.onClick.AddListener(QuitGame);
         }
+
+        if (_currentLanguageButton == null)
+        {
+            _currentLanguageButton = FindLanguageButton();
+        }
+
+        if (_currentLanguageButton != null)
+        {
+            _currentLanguageButton.onClick.RemoveListener(ToggleLanguage);
+            _currentLanguageButton.onClick.AddListener(ToggleLanguage);
+        }
+    }
+
+    private Button FindLanguageButton()
+    {
+        Button[] buttons = _currentMainPanel != null
+            ? _currentMainPanel.GetComponentsInChildren<Button>(true)
+            : FindObjectsByType<Button>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+        foreach (Button button in buttons)
+        {
+            if (button == null)
+            {
+                continue;
+            }
+
+            string name = button.gameObject.name;
+            if (name == "Language Button" || name == "LanguageButton" || name == "Locale Button" || name == "LocaleButton")
+            {
+                return button;
+            }
+        }
+
+        return null;
+    }
+
+    private void ToggleLanguage()
+    {
+        string currentCode = LocalizationSettings.SelectedLocale != null
+            ? LocalizationSettings.SelectedLocale.Identifier.Code
+            : KoreanLocaleCode;
+        string targetCode = currentCode == KoreanLocaleCode ? EnglishLocaleCode : KoreanLocaleCode;
+        Locale targetLocale = LocalizationSettings.AvailableLocales.GetLocale(new LocaleIdentifier(targetCode));
+        if (targetLocale != null)
+        {
+            LocalizationSettings.SelectedLocale = targetLocale;
+        }
+
+        ApplyLocalizedMenuTexts();
     }
 
     private void SetupSliders()
@@ -534,6 +655,11 @@ public class GameMenuManager : MonoBehaviour
         if (_currentQuitGameButton != null)
         {
             _currentQuitGameButton.onClick.RemoveAllListeners();
+        }
+
+        if (_currentLanguageButton != null)
+        {
+            _currentLanguageButton.onClick.RemoveListener(ToggleLanguage);
         }
 
         if (_currentMasterVolumeSlider != null)

@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class PlanetSelectionController : MonoBehaviour
@@ -28,11 +30,35 @@ public class PlanetSelectionController : MonoBehaviour
     private List<PlanetData> _unlockedPlanets = new();
     private TabType _currentTab = TabType.CoreManage;
 
+    private void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
+    }
+
+    private void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
+    }
+
+    private void OnSelectedLocaleChanged(Locale _)
+    {
+        ApplyTabButtonLabels();
+        ApplyCoreManageStaticChrome();
+        ApplyPlanetButtonLabels();
+
+        PlanetData selectedPlanet = PlanetSelectionState.SelectedPlanet;
+        if (selectedPlanet != null && detailPanel != null)
+        {
+            detailPanel.Bind(selectedPlanet);
+        }
+    }
+
     private void Awake()
     {
         EnsureTabButtons();
         EnsurePanels();
-        RenameMapTabLabel();
+        ApplyTabButtonLabels();
+        ApplyCoreManageStaticChrome();
         BindTabEvents();
         BindPlanetButtons();
         SelectDefaultPlanet();
@@ -105,6 +131,101 @@ public class PlanetSelectionController : MonoBehaviour
         }
     }
 
+    private void ApplyTabButtonLabels()
+    {
+        RenameCoreManageTabLabel();
+        RenameMapTabLabel();
+        LocalizeModuleCraftTabButton();
+    }
+
+    private void ApplyCoreManageStaticChrome()
+    {
+        foreach (TMP_Text tmp in GetComponentsInChildren<TMP_Text>(true))
+        {
+            if (tmp == null)
+            {
+                continue;
+            }
+
+            if (tmp.gameObject.name == "Core Desc Text")
+            {
+                tmp.text = GameLocalization.GetOrDefault("UI_Common", "base.coreManageDescription",
+                    "\uC2DC\uB4DC \uCF54\uC5B4\uB97C \uAD00\uB9AC\uD558\uACE0, \uBC1C\uC0AC \uC900\uBE44\uB97C \uD558\uB294 \uC7A5\uC18C\uC785\uB2C8\uB2E4.");
+                continue;
+            }
+
+            if (tmp.gameObject.name == "Core Title Text")
+            {
+                tmp.text = GameLocalization.GetOrDefault("UI_Common", "base.coreHangar",
+                    "\uCF54\uC5B4 \uACA9\uB0A9\uACE0");
+                continue;
+            }
+
+            if (tmp.gameObject.name == "Module Title Text")
+            {
+                tmp.text = GameLocalization.GetOrDefault("GameData", "moduleStation.default.name",
+                    "\uBAA8\uB4C8 \uC2A4\uD14C\uC774\uC158");
+                continue;
+            }
+
+            if (tmp.gameObject.name == "Title Text" && tmp.transform.parent != null
+                && tmp.transform.parent.name == "Module Inventory Panel")
+            {
+                tmp.text = GameLocalization.GetOrDefault("UI_Common", "base.modulesOwned",
+                    "\uBCF4\uC720 \uC911\uC778 \uBAA8\uB4C8");
+                continue;
+            }
+
+            if (tmp.gameObject.name == "Core Name Text" && tmp.transform.parent != null
+                && tmp.transform.parent.name == "Core Name")
+            {
+                tmp.text = GameLocalization.GetOrDefault("UI_Common", "base.moduleEffects",
+                    "\uBAA8\uB4C8 \uD6A8\uACFC");
+            }
+        }
+    }
+
+    private void LocalizeModuleCraftTabButton()
+    {
+        foreach (Button button in GetComponentsInChildren<Button>(true))
+        {
+            if (button == mapSelectTabButton || button == coreManageTabButton)
+            {
+                continue;
+            }
+
+            if (!IsModuleCraftButton(button.gameObject.name))
+            {
+                continue;
+            }
+
+            TMP_Text text = button.GetComponentInChildren<TMP_Text>(true);
+            if (text != null)
+            {
+                text.text = GameLocalization.GetOrDefault("UI_Common", "base.moduleCraft", "\uBAA8\uB4C8 \uC81C\uC791");
+            }
+        }
+    }
+
+    private static bool IsModuleCraftButton(string objectName)
+    {
+        return objectName.Contains("Button_Shop") || objectName.Contains("Button Shop");
+    }
+
+    private void RenameCoreManageTabLabel()
+    {
+        if (coreManageTabButton == null)
+        {
+            return;
+        }
+
+        TMP_Text text = coreManageTabButton.GetComponentInChildren<TMP_Text>(true);
+        if (text != null)
+        {
+            text.text = GameLocalization.GetOrDefault("UI_Common", "base.coreManage", "\uCF54\uC5B4 \uAD00\uB9AC");
+        }
+    }
+
     private void RenameMapTabLabel()
     {
         if (mapSelectTabButton == null)
@@ -115,7 +236,7 @@ public class PlanetSelectionController : MonoBehaviour
         TMP_Text text = mapSelectTabButton.GetComponentInChildren<TMP_Text>(true);
         if (text != null)
         {
-            text.text = "맵 선택";
+            text.text = GameLocalization.GetOrDefault("UI_Common", "title.mapSelection", "\uB9F5 \uC120\uD0DD");
         }
     }
 
@@ -160,9 +281,33 @@ public class PlanetSelectionController : MonoBehaviour
             _boundButtons.Add(button);
             button.onClick.AddListener(() => OnPlanetClicked(button));
             button.interactable = true;
+            SetPlanetButtonLabel(button, planetData);
         }
 
         ToggleLaunchButton(_unlockedPlanets.Count > 0);
+    }
+
+    private void ApplyPlanetButtonLabels()
+    {
+        for (int i = 0; i < _boundButtons.Count; i++)
+        {
+            Button button = _boundButtons[i];
+            if (button == null || !_buttonToPlanet.TryGetValue(button, out PlanetData planet))
+            {
+                continue;
+            }
+
+            SetPlanetButtonLabel(button, planet);
+        }
+    }
+
+    private static void SetPlanetButtonLabel(Button button, PlanetData planet)
+    {
+        TMP_Text text = button.GetComponentInChildren<TMP_Text>(true);
+        if (text != null)
+        {
+            text.text = planet.PlanetName;
+        }
     }
 
     private PlanetData FindPlanetByButtonName(string buttonName)

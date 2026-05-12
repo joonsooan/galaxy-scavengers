@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class ResourceInfoPanel : MonoBehaviour
@@ -23,6 +24,16 @@ public class ResourceInfoPanel : MonoBehaviour
         }
         Instance = this;
         ClearAllInfo();
+    }
+
+    private void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += HandleLocaleChanged;
+    }
+
+    private void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= HandleLocaleChanged;
     }
 
     public void PreviewInfo(ResourceNode node)
@@ -91,6 +102,15 @@ public class ResourceInfoPanel : MonoBehaviour
         }
         RefreshAmountText();
         RebuildLayout();
+    }
+
+    private void HandleLocaleChanged(UnityEngine.Localization.Locale _)
+    {
+        if (_currentResourceNode == null || !gameObject.activeSelf)
+        {
+            return;
+        }
+        RefreshUI();
     }
 
     private void RefreshAmountText()

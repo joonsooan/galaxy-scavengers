@@ -15,6 +15,9 @@ MonoBehaviour:
   moduleName: "\uD3EC\uD0D1 \uAC15\uD654 \uBAA8\uB4C8 2"
   moduleDescription: "\uD3EC\uD0D1\uC758 \uACF5\uACA9\uB825\uC774 \uB354 \uC99D\uAC00\uD569\uB2C8\uB2E4."
   moduleIcon: {fileID: -2613736575101996164, guid: 53fb6835ab357fe4483e4f561078cd71, type: 3}
+  localizationTable: GameData
+  moduleNameKey: module.turretDamage2.name
+  moduleDescriptionKey: module.turretDamage2.desc
   ingredients:
   - resourceType: 11
     amount: 200

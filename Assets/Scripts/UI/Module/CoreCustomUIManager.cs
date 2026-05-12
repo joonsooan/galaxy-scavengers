@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class CoreCustomUIManager : MonoBehaviour
@@ -31,6 +34,7 @@ public class CoreCustomUIManager : MonoBehaviour
         InitializeUI();
         SubscribeToEvents();
         InitializeSlots();
+        ApplyEmptyModulePlaceholderText();
         StartCoroutine(WaitForModulesAndRefreshSlots());
     }
 
@@ -55,6 +59,7 @@ public class CoreCustomUIManager : MonoBehaviour
 
     private void OnEnable()
     {
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
         SubscribeToEvents();
     }
 
@@ -75,6 +80,7 @@ public class CoreCustomUIManager : MonoBehaviour
 
     private void OnDisable()
     {
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
         if (_customizationManager != null) {
             _customizationManager.OnModuleSlotChanged -= OnModuleSlotChanged;
         }
@@ -82,6 +88,32 @@ public class CoreCustomUIManager : MonoBehaviour
         if (_inventoryManager != null) {
             _inventoryManager.OnModuleAdded -= OnModuleInventoryChanged;
             _inventoryManager.OnModuleRemoved -= OnModuleInventoryChanged;
+        }
+    }
+
+    private void OnSelectedLocaleChanged(Locale _)
+    {
+        ApplyEmptyModulePlaceholderText();
+        RefreshSlots();
+        RefreshModuleSelectionGrid();
+        if (coreDetailPanel != null)
+        {
+            coreDetailPanel.UpdateModuleEffects();
+        }
+    }
+
+    private void ApplyEmptyModulePlaceholderText()
+    {
+        if (emptyModuleText == null)
+        {
+            return;
+        }
+
+        TMP_Text tmp = emptyModuleText.GetComponentInChildren<TMP_Text>(true);
+        if (tmp != null)
+        {
+            tmp.text = GameLocalization.GetOrDefault("UI_Common", "placeholder.moduleDataAsset",
+                "Module Data Scriptable object");
         }
     }
 
@@ -166,6 +198,11 @@ public class CoreCustomUIManager : MonoBehaviour
 
         if (_inventoryManager == null || _customizationManager == null) {
             FindManagers();
+        }
+
+        if (_inventoryManager == null || _customizationManager == null) {
+            UpdateEmptyModuleTextVisibility();
+            return;
         }
 
         List<Module> allModules = _inventoryManager.GetAllModules();
@@ -267,7 +304,10 @@ public class CoreCustomUIManager : MonoBehaviour
         }
 
         coreDetailPanel.UpdateModuleEffects();
-        _baseInventorySystem.ForceRefreshInventory();
+        if (_baseInventorySystem != null)
+        {
+            _baseInventorySystem.ForceRefreshInventory();
+        }
     }
 
     private void OnModuleInventoryChanged(Module module)

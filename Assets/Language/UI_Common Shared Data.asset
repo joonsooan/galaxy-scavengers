@@ -1,0 +1,380 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: UI_Common Shared Data
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.SharedTableData
+  m_TableCollectionName: UI_Common
+  m_TableCollectionNameGuidString: 7df6e1ed9eab24a4eaa459166388c266
+  m_Entries:
+  - m_Id: 26494256353280
+    m_Key: label.typeFormat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324800
+    m_Key: label.healthFormat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324801
+    m_Key: label.populationFormat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324802
+    m_Key: label.baseStorageFormat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324803
+    m_Key: label.netElectricityPerSecondFormat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324804
+    m_Key: label.timeSecondsFormat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324805
+    m_Key: button.launch
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324806
+    m_Key: title.mapSelection
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324807
+    m_Key: status.maxLevel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324808
+    m_Key: status.upgradeInProgress
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324809
+    m_Key: status.powerInsufficient
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324810
+    m_Key: status.needCharge
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324811
+    m_Key: status.movingToChargingStation
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324812
+    m_Key: status.queued
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324813
+    m_Key: status.charging
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324814
+    m_Key: status.normal
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324815
+    m_Key: status.powerProducing
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324816
+    m_Key: status.powerSufficient
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324817
+    m_Key: status.resourceInsufficient
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324818
+    m_Key: status.extracting
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324819
+    m_Key: title.connectedStorageAndResource
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324820
+    m_Key: title.availableInputResources
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324821
+    m_Key: loading.inProgress
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324822
+    m_Key: loading.success
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324823
+    m_Key: loading.gameOver
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324824
+    m_Key: launchComplete.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324825
+    m_Key: launchComplete.message
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324826
+    m_Key: module.noneEquipped
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324827
+    m_Key: module.noActiveEffects
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324828
+    m_Key: label.effectFormat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324829
+    m_Key: label.mainUnit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324830
+    m_Key: menu.resetProgress
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324831
+    m_Key: menu.continue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324832
+    m_Key: menu.volume.master
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324833
+    m_Key: menu.volume.sfx
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324834
+    m_Key: menu.volume.music
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324835
+    m_Key: menu.returnToTitle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324836
+    m_Key: menu.quitGame
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324837
+    m_Key: base.titleScreen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324838
+    m_Key: base.inventoryTab
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279547895808
+    m_Key: base.moduleStation
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324840
+    m_Key: base.moduleCraft
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324841
+    m_Key: base.quest
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324842
+    m_Key: base.coreLaunch
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324843
+    m_Key: base.tutorial
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198976
+    m_Key: base.moduleStationDescription
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324845
+    m_Key: base.craftableModules
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324846
+    m_Key: base.coreHangar
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324847
+    m_Key: base.coreManage
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324848
+    m_Key: base.coreManageDescription
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324849
+    m_Key: base.modulesOwned
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324850
+    m_Key: base.moduleEffects
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324851
+    m_Key: base.requiredResources
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324852
+    m_Key: module.buttonCraft
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324853
+    m_Key: module.notCraftable
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324854
+    m_Key: placeholder.moduleDataAsset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324855
+    m_Key: placeholder.planetDataAsset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324856
+    m_Key: base.moduleSlotFormat
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324857
+    m_Key: base.extractableData
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324858
+    m_Key: menu.languageToggle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324859
+    m_Key: loading.stage.lockLandingCoordinates
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324860
+    m_Key: loading.stage.syncTerrainHeight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324861
+    m_Key: loading.stage.detectRareMinerals
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324862
+    m_Key: loading.stage.analyzeAtmosphere
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324863
+    m_Key: game.baseBuilding
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324864
+    m_Key: game.unitManage
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324865
+    m_Key: game.resourceStats
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324866
+    m_Key: game.leftTime
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324867
+    m_Key: game.noise
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324868
+    m_Key: game.storageInfoTitle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324869
+    m_Key: game.pause
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324871
+    m_Key: unitManage.minerInfo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324872
+    m_Key: unitManage.charge
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324873
+    m_Key: unitManage.upgrade
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198977
+    m_Key: unitManage.text1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198978
+    m_Key: unitManage.text2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198979
+    m_Key: unitManage.text3
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26494277324878
+    m_Key: unitCharge.status
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198980
+    m_Key: unitManage.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198981
+    m_Key: resourceStats.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198982
+    m_Key: resourceStats.resourceTab
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198983
+    m_Key: resourceStats.electricityTab
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198984
+    m_Key: resourceStats.resourceProduce
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198985
+    m_Key: resourceStats.resourceSpend
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198986
+    m_Key: resourceStats.electricityProduce
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198987
+    m_Key: resourceStats.electricitySpend
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198988
+    m_Key: base.droneHub
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198989
+    m_Key: base.droneHubDescription
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 8864326685844308185
+  references:
+    version: 2
+    RefIds:
+    - rid: 8864326685844308185
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1778163772848

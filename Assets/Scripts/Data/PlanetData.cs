@@ -16,9 +16,14 @@ public class PlanetData : ScriptableObject
     [SerializeField] private int displayOrder;
     [SerializeField] private string mapButtonName;
 
+    [Header("Localization")]
+    [SerializeField] private string localizationTable = "GameData";
+    [SerializeField] private string planetNameKey;
+    [SerializeField] private string descriptionKey;
+
     public string PlanetId => planetId;
-    public string PlanetName => planetName;
-    public string DescriptionText => descriptionText;
+    public string PlanetName => GetDisplayName();
+    public string DescriptionText => GetDescription();
     public Sprite PlanetImage => planetImage;
     public Sprite PlanetThumbnail => planetThumbnail;
     public IReadOnlyList<ResourceType> ObtainableDataTypes => obtainableDataTypes;
@@ -27,6 +32,28 @@ public class PlanetData : ScriptableObject
     public bool IsUnlockedByDefault => isUnlockedByDefault;
     public int DisplayOrder => displayOrder;
     public string MapButtonName => mapButtonName;
+
+    public string GetDisplayName()
+    {
+        string fallback = string.IsNullOrEmpty(planetName) ? name : planetName;
+        if (string.IsNullOrWhiteSpace(planetNameKey))
+        {
+            return fallback;
+        }
+
+        return GameLocalization.GetOrDefault(localizationTable, planetNameKey, fallback);
+    }
+
+    public string GetDescription()
+    {
+        string fallback = descriptionText ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(descriptionKey))
+        {
+            return fallback;
+        }
+
+        return GameLocalization.GetOrDefault(localizationTable, descriptionKey, fallback);
+    }
 
     public string GetDataTypeDisplayText()
     {

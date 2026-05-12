@@ -1,7 +1,10 @@
 using System.Collections;
 using DG.Tweening;
 using FMODUnity;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class BaseSceneManager : MonoBehaviour
@@ -29,6 +32,23 @@ public class BaseSceneManager : MonoBehaviour
     [SerializeField] private float fadeInDuration = 1f;
     private BaseInventorySystem _baseInventorySystem;
     private int _currentPanelIndex = -1;
+
+    private void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
+    }
+
+    private void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
+    }
+
+    private void OnSelectedLocaleChanged(Locale _)
+    {
+        ApplyLocalizedSidebarButtonLabels();
+        LocalizeQuestSidebarButton();
+        LocalizeModuleCraftButtons();
+    }
 
     private void Awake()
     {
@@ -83,7 +103,77 @@ public class BaseSceneManager : MonoBehaviour
     private void Start()
     {
         _baseInventorySystem = FindFirstObjectByType<BaseInventorySystem>();
+        ApplyLocalizedSidebarButtonLabels();
+        LocalizeQuestSidebarButton();
+        LocalizeModuleCraftButtons();
         StartCoroutine(HandleSceneEntryFade());
+    }
+
+    private void ApplyLocalizedSidebarButtonLabels()
+    {
+        SetButtonLabelText(titleButton, "base.titleScreen", "\uD0C0\uC774\uD2C0 \uD654\uBA74");
+        SetButtonLabelText(inventoryButton, "base.inventoryTab", "\uC778\uBCA4\uD1A0\uB9AC [Tab]");
+        SetButtonLabelText(moduleButton, "GameData", "moduleStation.default.name", "\uBAA8\uB4C8 \uC2A4\uD14C\uC774\uC158");
+        SetButtonLabelText(mapButton, "title.mapSelection", "\uB9F5 \uC120\uD0DD");
+        SetButtonLabelText(coreLaunchButton, "base.coreLaunch", "\uCF54\uC5B4 \uBC1C\uC0AC");
+    }
+
+    private static void SetButtonLabelText(Button button, string key, string fallback)
+    {
+        SetButtonLabelText(button, "UI_Common", key, fallback);
+    }
+
+    private static void SetButtonLabelText(Button button, string table, string key, string fallback)
+    {
+        if (button == null)
+        {
+            return;
+        }
+
+        TMP_Text label = button.GetComponentInChildren<TMP_Text>(true);
+        if (label != null)
+        {
+            label.text = GameLocalization.GetOrDefault(table, key, fallback);
+        }
+    }
+
+    private void LocalizeQuestSidebarButton()
+    {
+        foreach (Button btn in FindObjectsByType<Button>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (!btn.gameObject.name.Contains("Button_Quest"))
+            {
+                continue;
+            }
+
+            TMP_Text tmp = btn.GetComponentInChildren<TMP_Text>(true);
+            if (tmp != null)
+            {
+                tmp.text = GameLocalization.GetOrDefault("UI_Common", "base.quest", "\uD018\uC2A4\uD2B8");
+            }
+        }
+    }
+
+    private void LocalizeModuleCraftButtons()
+    {
+        foreach (Button btn in FindObjectsByType<Button>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (!IsModuleCraftButton(btn.gameObject.name))
+            {
+                continue;
+            }
+
+            TMP_Text tmp = btn.GetComponentInChildren<TMP_Text>(true);
+            if (tmp != null)
+            {
+                tmp.text = GameLocalization.GetOrDefault("UI_Common", "base.moduleCraft", "\uBAA8\uB4C8 \uC81C\uC791");
+            }
+        }
+    }
+
+    private static bool IsModuleCraftButton(string objectName)
+    {
+        return objectName.Contains("Button_Shop") || objectName.Contains("Button Shop");
     }
 
 

@@ -16,6 +16,9 @@ MonoBehaviour:
   description: "\uC5D0\uD14C\uB974\uB97C \uC18C\uBAA8\uD574 \uC804\uB825\uC744 \uC0DD\uC0B0\uD558\uB294
     \uAC74\uBB3C\uC785\uB2C8\uB2E4."
   icon: {fileID: -4550992031882759542, guid: 357de6c3f6d090946984b9be89ddb355, type: 3}
+  localizationTable: GameData
+  displayNameKey: building.generator.name
+  descriptionKey: building.generator.desc
   buildingPrefab: {fileID: 1574451153020646121, guid: 43bdc8a16cc30dd46af48ab6d3d7ec78, type: 3}
   buildingTile: {fileID: 11400000, guid: a9879f8451c56c0429aa389e7db66acc, type: 2}
   buildingType: 1

@@ -1,0 +1,264 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: GameData Shared Data
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.SharedTableData
+  m_TableCollectionName: GameData
+  m_TableCollectionNameGuidString: 45bfd075af41d444398d0bcd56727079
+  m_Entries:
+  - m_Id: 236655022080
+    m_Key: building.storage.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 714168143872
+    m_Key: building.storage.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9262927253504
+    m_Key: building.generator.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9295831568384
+    m_Key: building.generator.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9309643411456
+    m_Key: building.smelter.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9312180965376
+    m_Key: building.smelter.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9313510559744
+    m_Key: building.battery.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9314135511040
+    m_Key: building.battery.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9314676576256
+    m_Key: building.chargingStation.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9315234418688
+    m_Key: building.chargingStation.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9315746123776
+    m_Key: building.turret.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9316333326336
+    m_Key: building.turret.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9316853420032
+    m_Key: building.extractor.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9317344153600
+    m_Key: building.extractor.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9317893607424
+    m_Key: building.receiver.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9318392729600
+    m_Key: building.receiver.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9319030263808
+    m_Key: building.mainStructure.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680704
+    m_Key: building.mainStructure.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680705
+    m_Key: moduleStation.default.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680706
+    m_Key: moduleStation.default.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680707
+    m_Key: module.free.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680708
+    m_Key: module.free.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680709
+    m_Key: module.buildingHp1.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680710
+    m_Key: module.buildingHp1.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680711
+    m_Key: module.buildingHp2.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680712
+    m_Key: module.buildingHp2.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680713
+    m_Key: module.resourceGeneration1.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680714
+    m_Key: module.resourceGeneration1.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680715
+    m_Key: module.resourceGeneration2.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680716
+    m_Key: module.resourceGeneration2.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680717
+    m_Key: module.storage1.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680718
+    m_Key: module.storage1.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680719
+    m_Key: module.storage2.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680720
+    m_Key: module.storage2.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680721
+    m_Key: module.turretDamage1.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680722
+    m_Key: module.turretDamage1.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680723
+    m_Key: module.turretDamage2.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680724
+    m_Key: module.turretDamage2.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680725
+    m_Key: module.unitBuff1.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680726
+    m_Key: module.unitBuff1.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680727
+    m_Key: module.unitBuff2.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680728
+    m_Key: module.unitBuff2.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680729
+    m_Key: planet.0.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680730
+    m_Key: planet.0.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680731
+    m_Key: planet.1.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680732
+    m_Key: planet.1.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680733
+    m_Key: planet.2.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680734
+    m_Key: planet.2.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680735
+    m_Key: unitUpgrade.moveSpeed.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680736
+    m_Key: unitUpgrade.moveSpeed.tier1.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680737
+    m_Key: unitUpgrade.moveSpeed.tier2.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680738
+    m_Key: unitUpgrade.workSpeed.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680739
+    m_Key: unitUpgrade.workSpeed.tier1.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680740
+    m_Key: unitUpgrade.workSpeed.tier2.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680741
+    m_Key: unitUpgrade.storage.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680742
+    m_Key: unitUpgrade.storage.tier1.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680743
+    m_Key: unitUpgrade.storage.tier2.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680744
+    m_Key: unitUpgrade.maxPop.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680745
+    m_Key: unitUpgrade.maxPop.tier1.desc
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 8864326685844308186
+  references:
+    version: 2
+    RefIds:
+    - rid: 8864326685844308186
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1778164240122

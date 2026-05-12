@@ -15,6 +15,9 @@ MonoBehaviour:
   moduleName: "\uC0DD\uC0B0 \uAC15\uD654 \uBAA8\uB4C8 2"
   moduleDescription: "\uC790\uC6D0 \uC0DD\uC0B0 \uC18D\uB3C4\uAC00 \uB354\uC6B1 \uC99D\uAC00\uD569\uB2C8\uB2E4."
   moduleIcon: {fileID: -7275754688302940475, guid: 94ecebacd1cc8d049872676f2c13d580, type: 3}
+  localizationTable: GameData
+  moduleNameKey: module.resourceGeneration2.name
+  moduleDescriptionKey: module.resourceGeneration2.desc
   ingredients:
   - resourceType: 7
     amount: 150

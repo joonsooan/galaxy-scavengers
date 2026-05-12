@@ -14,7 +14,7 @@ public class BuildingRewardCell : MonoBehaviour
         
         if (buildingNameText != null)
         {
-            buildingNameText.text = buildingData.displayName;
+            buildingNameText.text = buildingData.GetDisplayName();
         }
         
         if (buildingIcon != null)

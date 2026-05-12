@@ -22,6 +22,33 @@ public class ModuleDetailPanel : MonoBehaviour
     
     private ModuleRecipe _currentRecipe;
     private ModuleStation _station;
+
+    private void Awake()
+    {
+        RefreshCraftButtonLocalizedStrings();
+    }
+
+    public void ApplyLocalizationRefresh()
+    {
+        RefreshCraftButtonLocalizedStrings();
+        if (requiredResourceText != null && requiredResourceText.gameObject.activeSelf)
+        {
+            requiredResourceText.text = GameLocalization.GetOrDefault("UI_Common", "base.requiredResources",
+                "\uD544\uC694\uD55C \uC790\uC6D0");
+        }
+
+        if (_station != null && _currentRecipe != null)
+        {
+            StartCoroutine(UpdateUI());
+            UpdateProduceButton();
+        }
+    }
+
+    private void RefreshCraftButtonLocalizedStrings()
+    {
+        produceText = GameLocalization.GetOrDefault("UI_Common", "module.buttonCraft", "\uC81C\uC791");
+        notProducableText = GameLocalization.GetOrDefault("UI_Common", "module.notCraftable", "\uC81C\uC791 \uBD88\uAC00\uB2A5");
+    }
     
     public void Initialize()
     {
@@ -38,12 +65,22 @@ public class ModuleDetailPanel : MonoBehaviour
     {
         _currentRecipe = recipe;
         _station = station;
+
+        if (requiredResourceText != null)
+        {
+            requiredResourceText.text = GameLocalization.GetOrDefault("UI_Common", "base.requiredResources",
+                "\uD544\uC694\uD55C \uC790\uC6D0");
+        }
         
         SetupIngredients();
         StartCoroutine(UpdateUI());
         UpdateProduceButton();
-        
-        requiredResourceText.gameObject.SetActive(true);
+
+        if (requiredResourceText != null)
+        {
+            requiredResourceText.gameObject.SetActive(true);
+        }
+
         gameObject.SetActive(true);
     }
     
@@ -85,28 +122,13 @@ public class ModuleDetailPanel : MonoBehaviour
     
     private IEnumerator UpdateUI()
     {
-        moduleNameText.text = _currentRecipe.moduleName;
-        moduleDescriptionText.text = _currentRecipe.moduleDescription;
-        string koreanType = GetKoreanModuleType(_currentRecipe.moduleType);
-        moduleTypeText.text = $"타입 : {koreanType}";
+        moduleNameText.text = _currentRecipe.GetDisplayName();
+        moduleDescriptionText.text = _currentRecipe.GetDescription();
+        string localizedType = GameLocalization.GetModuleType(_currentRecipe.moduleType);
+        moduleTypeText.text = GameLocalization.GetOrDefault("UI_Common", "label.typeFormat", "타입 : {0}", localizedType);
 
         yield return new WaitForEndOfFrame();
         LayoutRebuilder.ForceRebuildLayoutImmediate(resourcePanel);
-    }
-    
-    private string GetKoreanModuleType(ModuleType moduleType)
-    {
-        return moduleType switch
-        {
-            ModuleType.Default => "기본",
-            ModuleType.Power => "전력",
-            ModuleType.Defense => "방어",
-            ModuleType.Offense => "공격",
-            ModuleType.Utility => "유틸리티",
-            ModuleType.Production => "생산",
-            ModuleType.Research => "연구",
-            _ => moduleType.ToString()
-        };
     }
     
     private void SetupIngredients()

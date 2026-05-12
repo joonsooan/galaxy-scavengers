@@ -19,10 +19,14 @@ MonoBehaviour:
   - tokenCost: 100
     upgradeTime: 10
     description: "\uC720\uB2DB \uC791\uC5C5\uC18D\uB3C4 +20%"
+    descriptionKey: unitUpgrade.workSpeed.tier1.desc
     floatStatBonus: 0.2
     intStatBonus: 0
   - tokenCost: 200
     upgradeTime: 30
     description: "\uC720\uB2DB \uC791\uC5C5\uC18D\uB3C4 +30%"
+    descriptionKey: unitUpgrade.workSpeed.tier2.desc
     floatStatBonus: 0.3
     intStatBonus: 0
+  localizationTable: GameData
+  displayNameKey: unitUpgrade.workSpeed.name

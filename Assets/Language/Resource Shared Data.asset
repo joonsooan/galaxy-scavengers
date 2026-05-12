@@ -1,0 +1,228 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: Resource Shared Data
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.SharedTableData
+  m_TableCollectionName: Resource
+  m_TableCollectionNameGuidString: 4028475228bbd574b9ffc2e599745be7
+  m_Entries:
+  - m_Id: 22396362625024
+    m_Key: resourceType.Ferrite.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396404568064
+    m_Key: resourceType.Ferrite.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396404568065
+    m_Key: resourceType.Aether.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396404568066
+    m_Key: resourceType.Aether.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396404568067
+    m_Key: resourceType.Biomass.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396404568068
+    m_Key: resourceType.Biomass.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396404568069
+    m_Key: resourceType.CryoCrystal.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396404568070
+    m_Key: resourceType.CryoCrystal.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396404568071
+    m_Key: resourceType.AlloyPlate.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396404568072
+    m_Key: resourceType.AlloyPlate.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762368
+    m_Key: resourceType.CompositeFrame.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762369
+    m_Key: resourceType.CompositeFrame.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762370
+    m_Key: resourceType.EChip.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762371
+    m_Key: resourceType.EChip.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762372
+    m_Key: resourceType.BioCable.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762373
+    m_Key: resourceType.BioCable.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762374
+    m_Key: resourceType.PowerCube.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762375
+    m_Key: resourceType.PowerCube.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762376
+    m_Key: resourceType.BioFuel.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762377
+    m_Key: resourceType.BioFuel.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762378
+    m_Key: resourceType.CryoGel.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762379
+    m_Key: resourceType.CryoGel.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762380
+    m_Key: resourceType.Solana.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762381
+    m_Key: resourceType.Solana.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762382
+    m_Key: resourceType.Core.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762383
+    m_Key: resourceType.Core.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762384
+    m_Key: resourceType.Ammunition.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762385
+    m_Key: resourceType.Ammunition.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762386
+    m_Key: resourceType.HeavyPlating.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762387
+    m_Key: resourceType.HeavyPlating.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762388
+    m_Key: resourceType.Actuator.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762389
+    m_Key: resourceType.Actuator.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762390
+    m_Key: resourceType.GenomeChip.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762391
+    m_Key: resourceType.GenomeChip.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762392
+    m_Key: resourceType.PatchKit.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762393
+    m_Key: resourceType.PatchKit.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762394
+    m_Key: resourceType.SensorUnit.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762395
+    m_Key: resourceType.SensorUnit.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762396
+    m_Key: resourceType.PlasmaCube.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762397
+    m_Key: resourceType.PlasmaCube.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762398
+    m_Key: resourceType.CryoConduit.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762399
+    m_Key: resourceType.CryoConduit.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762400
+    m_Key: resourceType.SeekerMissile.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762401
+    m_Key: resourceType.SeekerMissile.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762402
+    m_Key: resourceType.NexusData.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762403
+    m_Key: resourceType.NexusData.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762404
+    m_Key: resourceType.NeuralMatrix.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762405
+    m_Key: resourceType.NeuralMatrix.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762406
+    m_Key: resourceType.Electricity.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762407
+    m_Key: resourceType.Electricity.desc
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 8864326685844308183
+  references:
+    version: 2
+    RefIds:
+    - rid: 8864326685844308183
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1778163698523

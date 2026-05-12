@@ -51,10 +51,16 @@ public class CoreDetailPanel : MonoBehaviour
             _customizationManager = FindFirstObjectByType<CoreCustomizationManager>();
         }
 
+        if (_customizationManager == null) {
+            ClearInfo();
+            return;
+        }
+
         List<Module> activeModules = _customizationManager.GetActiveModules();
 
         if (activeModules == null || activeModules.Count == 0) {
-            moduleNameText.text = "장착된 모듈이 없습니다.";
+            moduleNameText.text = GameLocalization.GetOrDefault("UI_Common", "module.noneEquipped",
+                "\uC7A5\uCC29 \uAC00\uB2A5\uD55C \uBAA8\uB4C8\uC774 \uC5C6\uC2B5\uB2C8\uB2E4!");
             moduleEffectText.text = "";
             return;
         }
@@ -62,13 +68,13 @@ public class CoreDetailPanel : MonoBehaviour
         foreach (Module module in activeModules) {
             if (module == null) continue;
             if (module.effectData != null) {
-                moduleNameText.text = module.moduleName;
-                moduleEffectText.text = module.moduleDescription;
+                moduleNameText.text = module.GetDisplayName();
+                moduleEffectText.text = module.GetDescription();
             }
         }
 
         if (moduleEffectText.text.Length == 0) {
-            moduleEffectText.text = "활성화된 모듈 효과가 없습니다.";
+            moduleEffectText.text = GameLocalization.GetOrDefault("UI_Common", "module.noActiveEffects", "활성화된 모듈 효과가 없습니다.");
         }
     }
     
@@ -76,7 +82,8 @@ public class CoreDetailPanel : MonoBehaviour
     {
         if (moduleNameText != null)
         {
-            moduleNameText.text = "장착된 모듈이 없습니다.";
+            moduleNameText.text = GameLocalization.GetOrDefault("UI_Common", "module.noneEquipped",
+                "\uC7A5\uCC29 \uAC00\uB2A5\uD55C \uBAA8\uB4C8\uC774 \uC5C6\uC2B5\uB2C8\uB2E4!");
         }
         if (moduleEffectText != null)
         {

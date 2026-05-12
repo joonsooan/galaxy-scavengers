@@ -41,7 +41,7 @@ public class UnitPopulationUI : MonoBehaviour
         int current = UnitManager.Instance.AllyUnits.Count;
         int max = UnitManager.Instance.GetMaxPopulation();
 
-        populationText.text = $"현재 유닛 수 : {current.ToString()} / {max.ToString()}";
+        populationText.text = GameLocalization.GetOrDefault("UI_Common", "label.populationFormat", "현재 유닛 수 : {0} / {1}", current, max);
     }
 }
 

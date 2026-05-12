@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 public class DroneProduceUIManager : MonoBehaviour
 {
@@ -20,6 +22,8 @@ public class DroneProduceUIManager : MonoBehaviour
 
     private List<UnitData> _allProducibleUnits;
     private MainStructure _currentMainStructure;
+    private const string DroneHubNameKey = "base.droneHub";
+    private const string DroneHubInfoKey = "base.droneHubDescription";
 
     public static DroneProduceUIManager Instance { get; private set; }
 
@@ -55,11 +59,13 @@ public class DroneProduceUIManager : MonoBehaviour
         }
 
         if (droneHubName != null) {
-            droneHubName.text = mainStructure.DroneProduceDisplayName;
+            droneHubName.text = GameLocalization.GetOrDefault("UI_Common", DroneHubNameKey,
+                mainStructure.DroneProduceDisplayName);
         }
 
         if (droneHubInfo != null) {
-            droneHubInfo.text = mainStructure.DroneProduceDescription;
+            droneHubInfo.text = GameLocalization.GetOrDefault("UI_Common", DroneHubInfoKey,
+                mainStructure.DroneProduceDescription);
         }
     }
 
@@ -87,16 +93,23 @@ public class DroneProduceUIManager : MonoBehaviour
         ResolveUnitInfoPanel();
         UnitManager.OnUnitCountChanged += OnUnitCountChanged;
         UnitUpgradeProgress.OnUpgradeStateChanged += OnUpgradeProgressStateChanged;
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
     }
 
     private void OnDisable()
     {
         UnitManager.OnUnitCountChanged -= OnUnitCountChanged;
         UnitUpgradeProgress.OnUpgradeStateChanged -= OnUpgradeProgressStateChanged;
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
         ClearUnitInfo();
         if (unitInfoPanel != null) {
             unitInfoPanel.RestoreDefaultLayout();
         }
+    }
+
+    private void OnSelectedLocaleChanged(Locale _)
+    {
+        SetPanelTexts(_currentMainStructure);
     }
 
     private void OnUnitCountChanged(UnitBase unit)

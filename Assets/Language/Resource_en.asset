@@ -1,0 +1,225 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: Resource_en
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.StringTable
+  m_LocaleId:
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: 4028475228bbd574b9ffc2e599745be7, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 22396362625024
+    m_Localized: Ferrite
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396404568064
+    m_Localized: The most fundamental metallic resource, widely distributed across
+      the entire planet.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396404568065
+    m_Localized: Aether
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396404568066
+    m_Localized: A crystal infused with highly concentrated energy.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396404568067
+    m_Localized: Biomass
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396404568068
+    m_Localized: Substances extracted from the planet's indigenous flora or organic
+      lifeforms.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396404568069
+    m_Localized: Cryo Crystal
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396404568070
+    m_Localized: A rare crystalline mineral that maintains an extremely low temperature.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396404568071
+    m_Localized: AlloyPlate
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396404568072
+    m_Localized: AlloyPlate
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762368
+    m_Localized: CompositeFrame
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762369
+    m_Localized: CompositeFrame
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762370
+    m_Localized: EChip
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762371
+    m_Localized: EChip
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762372
+    m_Localized: BioCable
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762373
+    m_Localized: BioCable
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762374
+    m_Localized: PowerCube
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762375
+    m_Localized: PowerCube
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762376
+    m_Localized: BioFuel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762377
+    m_Localized: BioFuel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762378
+    m_Localized: CryoGel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762379
+    m_Localized: CryoGel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762380
+    m_Localized: Solana
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762381
+    m_Localized: Solana
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762382
+    m_Localized: Core
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762383
+    m_Localized: Core
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762384
+    m_Localized: Ammunition
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762385
+    m_Localized: Ammunition
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762386
+    m_Localized: HeavyPlating
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762387
+    m_Localized: HeavyPlating
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762388
+    m_Localized: Actuator
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762389
+    m_Localized: Actuator
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762390
+    m_Localized: GenomeChip
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762391
+    m_Localized: GenomeChip
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762392
+    m_Localized: PatchKit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762393
+    m_Localized: PatchKit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762394
+    m_Localized: SensorUnit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762395
+    m_Localized: SensorUnit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762396
+    m_Localized: PlasmaCube
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762397
+    m_Localized: PlasmaCube
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762398
+    m_Localized: CryoConduit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762399
+    m_Localized: CryoConduit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762400
+    m_Localized: SeekerMissile
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762401
+    m_Localized: SeekerMissile
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762402
+    m_Localized: NexusData
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762403
+    m_Localized: NexusData
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762404
+    m_Localized: NeuralMatrix
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762405
+    m_Localized: NeuralMatrix
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762406
+    m_Localized: Electricity
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22396408762407
+    m_Localized: Electricity
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

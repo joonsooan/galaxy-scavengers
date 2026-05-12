@@ -77,6 +77,11 @@ public class ExtractorUIManager : MonoBehaviour
         }
 
         Instance = this;
+        statusTextPowerShortage = GameLocalization.GetOrDefault("UI_Common", "status.powerInsufficient", statusTextPowerShortage);
+        statusTextResourceShortage = GameLocalization.GetOrDefault("UI_Common", "status.resourceInsufficient", statusTextResourceShortage);
+        statusTextExtracting = GameLocalization.GetOrDefault("UI_Common", "status.extracting", statusTextExtracting);
+        connectedStorageTitle = GameLocalization.GetOrDefault("UI_Common", "title.connectedStorageAndResource", connectedStorageTitle);
+        inputResourcesTitle = GameLocalization.GetOrDefault("UI_Common", "title.availableInputResources", inputResourcesTitle);
         if (buffSectionRoot != null) {
             buffSectionRoot.SetActive(false);
         }
@@ -199,7 +204,7 @@ public class ExtractorUIManager : MonoBehaviour
     {
         ExtractorData data = _currentExtractor.ExtractorDataAsset;
         if (extractorTitleText != null) {
-            extractorTitleText.text = data != null ? data.displayName : string.Empty;
+            extractorTitleText.text = data != null ? data.GetDisplayName() : string.Empty;
         }
 
         CellPool.Clear(connectedStorageContent, _storageCells);

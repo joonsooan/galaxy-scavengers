@@ -26,3 +26,6 @@ MonoBehaviour:
   isUnlockedByDefault: 1
   displayOrder: 0
   mapButtonName: btn_planet_2
+  localizationTable: GameData
+  planetNameKey: planet.2.name
+  descriptionKey: planet.2.desc

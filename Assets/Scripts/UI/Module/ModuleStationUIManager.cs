@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class ModuleStationUIManager : MonoBehaviour
@@ -26,16 +28,50 @@ public class ModuleStationUIManager : MonoBehaviour
 
         closeButton.onClick.RemoveAllListeners();
         closeButton.onClick.AddListener(OnCloseButtonClicked);
+        ApplyLocalizedModuleStationChrome();
     }
 
     private void OnEnable()
     {
         ModuleStation.OnModuleStationClicked += ShowModuleStationUI;
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
+        ApplyLocalizedModuleStationChrome();
     }
 
     private void OnDisable()
     {
         ModuleStation.OnModuleStationClicked -= ShowModuleStationUI;
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
+    }
+
+    private void OnSelectedLocaleChanged(Locale _)
+    {
+        ApplyLocalizedModuleStationChrome();
+        if (moduleStationPanel != null && moduleStationPanel.activeSelf && _currentData != null)
+        {
+            UpdateStationInfo();
+            LoadAllRecipes();
+        }
+
+        if (moduleDetailPanel != null)
+        {
+            moduleDetailPanel.ApplyLocalizationRefresh();
+        }
+    }
+
+    private void ApplyLocalizedModuleStationChrome()
+    {
+        if (moduleCraftingModeText != null)
+        {
+            moduleCraftingModeText.text = GameLocalization.GetOrDefault("UI_Common", "base.craftableModules",
+                "\uC81C\uC791 \uAC00\uB2A5\uD55C \uBAA8\uB4C8");
+        }
+
+        if (stationInfoText != null && (moduleStationPanel == null || !moduleStationPanel.activeSelf))
+        {
+            stationInfoText.text = GameLocalization.GetOrDefault("GameData", "moduleStation.default.desc",
+                "\uC2DC\uB4DC\uCF54\uC5B4\uC5D0 \uC124\uCE58\uD560 \uC218 \uC788\uB294 \uBAA8\uB4C8\uC744 \uC81C\uC791\uD558\uB294 \uC2A4\uD14C\uC774\uC158\uC785\uB2C8\uB2E4.");
+        }
     }
 
     private void ShowModuleStationUI(ModuleStation station)

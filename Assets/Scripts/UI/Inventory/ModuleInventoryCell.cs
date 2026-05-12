@@ -67,7 +67,7 @@ public class ModuleInventoryCell : MonoBehaviour, IPointerClickHandler, IBaseInv
         
         if (moduleNameText != null)
         {
-            moduleNameText.text = _module.moduleName;
+            moduleNameText.text = _module.GetDisplayName();
         }
     }
     

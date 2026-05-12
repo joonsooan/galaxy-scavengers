@@ -39,6 +39,7 @@ public class GameOverLoadingScreen : MonoBehaviour
     
     private void Awake()
     {
+        gameOverTextString = GameLocalization.GetOrDefault("UI_Common", "loading.gameOver", gameOverTextString);
         InitializeUI();
         _fadeInStartDelayWait = CoroutineCache.GetWaitForSecondsRealtime(fadeInStartDelay);
         _particleStartDelayWait = CoroutineCache.GetWaitForSecondsRealtime(particleStartDelay);

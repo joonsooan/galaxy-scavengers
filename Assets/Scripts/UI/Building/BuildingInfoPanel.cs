@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class BuildingInfoPanel : MonoBehaviour
@@ -50,6 +52,9 @@ public class BuildingInfoPanel : MonoBehaviour
         }
 
         Instance = this;
+        generatorStatusTextProducing = GameLocalization.GetOrDefault("UI_Common", "status.powerProducing", generatorStatusTextProducing);
+        generatorStatusTextBufferFull = GameLocalization.GetOrDefault("UI_Common", "status.powerSufficient", generatorStatusTextBufferFull);
+        generatorStatusTextNoFuel = GameLocalization.GetOrDefault("UI_Common", "status.resourceInsufficient", generatorStatusTextNoFuel);
         ClearAllInfo();
     }
 
@@ -67,8 +72,14 @@ public class BuildingInfoPanel : MonoBehaviour
         RefreshGeneratorBatteryPanel(_generatorForBatteryPanel);
     }
 
+    private void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += HandleLocaleChanged;
+    }
+
     private void OnDisable()
     {
+        LocalizationSettings.SelectedLocaleChanged -= HandleLocaleChanged;
         ClearGeneratorBatteryPanel();
         SetCurrentDamageable(null, false);
     }
@@ -145,8 +156,8 @@ public class BuildingInfoPanel : MonoBehaviour
     {
         if (data == null) return;
 
-        if (buildingName != null) buildingName.text = data.displayName;
-        if (buildingDesc != null) buildingDesc.text = data.description;
+        if (buildingName != null) buildingName.text = data.GetDisplayName();
+        if (buildingDesc != null) buildingDesc.text = data.GetDescription();
         gameObject.SetActive(true);
 
         bool shouldShowPostConstructInfo = showPostConstructInfo && data.buildingType != BuildingType.MainStructure;
@@ -215,7 +226,7 @@ public class BuildingInfoPanel : MonoBehaviour
 
         if (showMaxHealth)
         {
-            healthText.text = $"체력 : {damageable.MaxHealth}";
+            healthText.text = GameLocalization.GetOrDefault("UI_Common", "label.healthFormat", "체력 : {0}", damageable.MaxHealth);
         }
         else
         {
@@ -609,6 +620,30 @@ public class BuildingInfoPanel : MonoBehaviour
         text.text = " ";
         text.ForceMeshUpdate(true);
         text.text = string.Empty;
+    }
+
+    private void HandleLocaleChanged(Locale _)
+    {
+        if (!gameObject.activeInHierarchy)
+        {
+            return;
+        }
+
+        if (_selectedData != null)
+        {
+            Damageable damageable = _selectedData.buildingPrefab != null ? _selectedData.buildingPrefab.GetComponent<Damageable>() : null;
+            UpdateUI(_selectedData, false, null, damageable);
+            return;
+        }
+
+        if (_currentDamageable != null)
+        {
+            BuildingDataHolder holder = _currentDamageable.GetComponent<BuildingDataHolder>();
+            if (holder != null && holder.buildingData != null)
+            {
+                UpdateUI(holder.buildingData, false, null, _currentDamageable);
+            }
+        }
     }
 
 }
