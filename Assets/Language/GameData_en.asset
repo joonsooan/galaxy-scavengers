@@ -258,6 +258,14 @@ MonoBehaviour:
     m_Localized: Max units +5
     m_Metadata:
       m_Items: []
+  - m_Id: 9655828680746
+    m_Localized: Smelter
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680747
+    m_Localized: Melts down basic resources to process them into higher-tier materials.
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

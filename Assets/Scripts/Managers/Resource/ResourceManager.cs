@@ -50,7 +50,7 @@ public class ResourceManager : MonoBehaviour
     [SerializeField] private int aetherInitialAmount;
     [SerializeField] private int biomassInitialAmount;
     [SerializeField] private int cryoCrystalInitialAmount;
-    
+
     [Header("Tutorial Base Resource Start Values")]
     [SerializeField] private int tutorialFerriteInitialAmount;
     [SerializeField] private int tutorialAetherInitialAmount;
@@ -127,33 +127,37 @@ public class ResourceManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance == null) {
+        if (Instance == null)
+        {
             Instance = this;
             DontDestroyOnLoad(gameObject);
             Initialize();
         }
-        else {
+        else
+        {
             Destroy(gameObject);
         }
     }
 
     private void Update()
     {
-        if (IsLoadingScreenActive()) {
+        if (IsLoadingScreenActive())
+        {
             return;
         }
 
-#if UNITY_EDITOR
-        if (Input.GetKeyDown(KeyCode.F1)) {
+        // #if UNITY_EDITOR
+        if (Input.GetKeyDown(KeyCode.F1))
+        {
             AddCheatResources();
         }
-#endif
+        // #endif
     }
 
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
-        
+
         // Forward events from ResourceDataManager for backward compatibility
         ResourceDataManager.OnNewStorageAdded += ForwardOnNewStorageAdded;
         ResourceDataManager.OnStorageRemoved += ForwardOnStorageRemoved;
@@ -177,12 +181,14 @@ public class ResourceManager : MonoBehaviour
 
     private bool IsLoadingScreenActive()
     {
-        if (LoadingUIManager.Instance == null) {
+        if (LoadingUIManager.Instance == null)
+        {
             return false;
         }
 
         LoadingScreen loadingScreen = LoadingUIManager.Instance.GetLoadingScreenComponent();
-        if (loadingScreen == null) {
+        if (loadingScreen == null)
+        {
             return false;
         }
 
@@ -206,36 +212,41 @@ public class ResourceManager : MonoBehaviour
 
     private void Initialize()
     {
-        if (ResourceDataManager.Instance == null) {
+        if (ResourceDataManager.Instance == null)
+        {
             Debug.LogError("ResourceDataManager not found! Please ensure ResourceDataManager is in the scene.");
             return;
         }
 
         // Initialize resource stats in ResourceDataManager
-        if (resourceStatsList != null && resourceStatsList.Count > 0) {
+        if (resourceStatsList != null && resourceStatsList.Count > 0)
+        {
             ResourceDataManager.Instance.InitializeResourceStats(resourceStatsList);
         }
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == "GameScene") {
+        if (scene.name == "GameScene")
+        {
             StartCoroutine(DelayedSceneInitialization());
         }
     }
-    
+
     private IEnumerator DelayedSceneInitialization()
     {
         yield return null;
-        
+
         // Wait for ResourceDataManager to initialize
-        while (ResourceDataManager.Instance == null) {
+        while (ResourceDataManager.Instance == null)
+        {
             yield return null;
         }
-        
+
         // Initialize main structure if registered
         MainStructure mainStructure = ResourceDataManager.Instance.GetMainStructure();
-        if (mainStructure != null) {
+        if (mainStructure != null)
+        {
             InitializeMainStructureStorage(mainStructure);
         }
     }
@@ -393,23 +404,28 @@ public class ResourceManager : MonoBehaviour
 
     public int TryWithdrawElectricityFromStoragesInOrder(int amount, List<IStorage> storagesOrdered)
     {
-        if (amount <= 0 || storagesOrdered == null || storagesOrdered.Count == 0) {
+        if (amount <= 0 || storagesOrdered == null || storagesOrdered.Count == 0)
+        {
             return 0;
         }
 
         int remaining = amount;
         int totalWithdrawn = 0;
-        for (int i = 0; i < storagesOrdered.Count; i++) {
-            if (remaining <= 0) {
+        for (int i = 0; i < storagesOrdered.Count; i++)
+        {
+            if (remaining <= 0)
+            {
                 break;
             }
 
             IStorage storage = storagesOrdered[i];
-            if (storage == null) {
+            if (storage == null)
+            {
                 continue;
             }
 
-            if (storage.TryWithdrawResource(ResourceType.Electricity, remaining, out int withdrawn) && withdrawn > 0) {
+            if (storage.TryWithdrawResource(ResourceType.Electricity, remaining, out int withdrawn) && withdrawn > 0)
+            {
                 totalWithdrawn += withdrawn;
                 remaining -= withdrawn;
             }
@@ -475,7 +491,8 @@ public class ResourceManager : MonoBehaviour
 
     public void RegisterMainStructure(MainStructure mainStructure)
     {
-        if (ResourceDataManager.Instance != null) {
+        if (ResourceDataManager.Instance != null)
+        {
             ResourceDataManager.Instance.RegisterMainStructure(mainStructure);
             InitializeMainStructureStorage(mainStructure);
         }
@@ -556,15 +573,18 @@ public class ResourceManager : MonoBehaviour
 
         Debug.Log("<color=orange>CHEAT ACTIVATED:</color> Applied inspector-configured cheat resources.");
 
-        foreach (ResourceType type in Enum.GetValues(typeof(ResourceType))) {
+        foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
+        {
             int cheatAmount = GetCheatAmount(type);
-            if (cheatAmount == 0) {
+            if (cheatAmount == 0)
+            {
                 continue;
             }
 
             ResourceDataManager.Instance.AddResource(type, cheatAmount);
             MainStructure mainStructure = ResourceDataManager.Instance.GetMainStructure();
-            if (mainStructure != null) {
+            if (mainStructure != null)
+            {
                 int current = mainStructure.GetCurrentResourceAmount(type);
                 mainStructure.InitializeStorage(type, current + cheatAmount);
             }

@@ -8380,7 +8380,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 313771324}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c1b6965b69088843b0d523477f7dc1b, type: 3}
   m_Name: 
@@ -8501,7 +8501,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   unitParent: {fileID: 1774035406}
-  baseMaxPopulation: 5
+  baseMaxPopulation: 40
 --- !u!1 &318614855
 GameObject:
   m_ObjectHideFlags: 0

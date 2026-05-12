@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class ProcessorUIManager : MonoBehaviour
@@ -46,6 +48,25 @@ public class ProcessorUIManager : MonoBehaviour
     {
         if (changeResourceButton != null) {
             changeResourceButton.onClick.RemoveListener(OnChangeResourceButtonClicked);
+        }
+    }
+
+    private void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
+    }
+
+    private void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
+    }
+
+    private void OnSelectedLocaleChanged(Locale _)
+    {
+        SetProcessorInfo(_currentData);
+        if (_currentProcessor != null) {
+            RefreshRecipeDisplay();
+            InstantiateUnitAssignCells();
         }
     }
 
@@ -276,6 +297,8 @@ public class ProcessorUIManager : MonoBehaviour
 
     private void InstantiateUnitAssignCells()
     {
+        if (unitAssignContentParent == null) return;
+
         foreach (Transform child in unitAssignContentParent) {
             Destroy(child.gameObject);
         }

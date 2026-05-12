@@ -371,6 +371,127 @@ MonoBehaviour:
     m_Localized: Can produce various units.
     m_Metadata:
       m_Items: []
+  - m_Id: 1353279619198990
+    m_Localized: Destroying these elements.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198991
+    m_Localized: Returned Resources
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198992
+    m_Localized: Yes
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198993
+    m_Localized: No
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198994
+    m_Localized: Miner Idle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198995
+    m_Localized: Cannot Carry Resources
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198996
+    m_Localized: Unit Under Attack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198997
+    m_Localized: Building Under Attack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198998
+    m_Localized: Processor Drone Needed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198999
+    m_Localized: Processing Material Low
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199000
+    m_Localized: Construction Material Low
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199001
+    m_Localized: Storage Full
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199002
+    m_Localized: Power Low
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199003
+    m_Localized: 'Noise Level: Caution'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199004
+    m_Localized: 'Noise Level: Warning'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199005
+    m_Localized: 'Noise Level: Danger'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199006
+    m_Localized: Mining units have no resources to mine.\nFind a new resource block!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199007
+    m_Localized: Mining units have no space to store resources.\nBuild more storage!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199008
+    m_Localized: Unit is under attack!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199009
+    m_Localized: Building is under attack!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199010
+    m_Localized: Processing unit is not assigned to a production building.\nAssign
+      it to a production building!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199011
+    m_Localized: Processing unit does not have enough resources to process.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199012
+    m_Localized: Construction unit does not have enough resources to build.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199013
+    m_Localized: All storage space is full!\nBuild more storage.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199014
+    m_Localized: Power is low!\nBuild more generators.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199015
+    m_Localized: 'Noise level: Caution\nPrepare for enemy raids at night!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199016
+    m_Localized: 'Noise level: Warning\nPrepare for enemy raids at night!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199017
+    m_Localized: 'Noise level: Danger\nPrepare for enemy raids at night!'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199018
+    m_Localized: (Click to move to the unit)
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199019
+    m_Localized: (Click to move to the building)
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []
