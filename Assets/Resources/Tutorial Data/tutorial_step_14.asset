@@ -38,8 +38,8 @@ MonoBehaviour:
     Path: event:/SFX_UI/SFX_UIClick
   enableMaterialHighlight: 1
   highlightTargetIDs:
-  - mainControl_processor
-  - processor_smelter
+  - mainControl_baseBuilding
+  - building_smelter
   showArrowUI: 0
   arrowID: 
   showTargetBracket: 0

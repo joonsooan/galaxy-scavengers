@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs grep -l \"highlightTargetIDs\\\\|enableMaterialHighlight\")",
+      "Bash(xargs grep -l \"TutorialHighlightRegisterer\")",
+      "Bash(grep -oE \"m_Script: \\\\{fileID: [0-9]+, guid: [a-f0-9]+\" \"Assets/Prefabs/UI/Panels/Resource Recipe Cell.prefab\")",
+      "Bash(grep -oE \"m_Script: \\\\{fileID: [0-9]+, guid: [a-f0-9]+\" \"Assets/Prefabs/UI/Panels/Producable Resource Img.prefab\")"
+    ]
+  }
+}

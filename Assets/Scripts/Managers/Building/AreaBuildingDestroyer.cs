@@ -484,10 +484,6 @@ public class AreaBuildingDestroyer : MonoBehaviour
         {
             AddUnit(unit);
         }
-        foreach (UnitBase unit in UnitManager.Instance.EnemyUnits)
-        {
-            AddUnit(unit);
-        }
     }
 
     private static Dictionary<ResourceType, int> GetUnitProductionCost(UnitData unitData)
@@ -655,19 +651,6 @@ public class AreaBuildingDestroyer : MonoBehaviour
                 continue;
             }
             if (unit is Unit_Construct construct && construct.IsInvulnerable)
-            {
-                continue;
-            }
-            Vector3Int unitCell = _grid.WorldToCell(unit.transform.position);
-            if (cells.Contains(unitCell))
-            {
-                unitsToDestroy.Add(unit);
-            }
-        }
-
-        foreach (UnitBase unit in UnitManager.Instance.EnemyUnits)
-        {
-            if (unit == null)
             {
                 continue;
             }

@@ -263,7 +263,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680747
-    m_Localized: Melts down basic resources to process them into higher-tier materials.
+    m_Localized: Processes resources into higher-tier materials.
     m_Metadata:
       m_Items: []
   references:

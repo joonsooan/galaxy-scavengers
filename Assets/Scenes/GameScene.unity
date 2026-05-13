@@ -8922,11 +8922,11 @@ RectTransform:
   m_Children:
   - {fileID: 1676293402}
   - {fileID: 1615531724}
+  - {fileID: 482066711}
   - {fileID: 1110589741}
   - {fileID: 424609975}
   - {fileID: 792256376}
   - {fileID: 1734363911}
-  - {fileID: 482066711}
   - {fileID: 1880828581}
   m_Father: {fileID: 1490465122}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -26189,7 +26189,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0.5, z: -20}
+  m_LocalPosition: {x: 0.5, y: 0.5, z: -5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -56412,6 +56412,10 @@ MonoBehaviour:
   resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: 87d776b852749c2428050baaea9b40b1, type: 3}
   confirmButton: {fileID: 444196842}
   cancelButton: {fileID: 926184901}
+  titleText: {fileID: 0}
+  returnResourceText: {fileID: 0}
+  confirmButtonText: {fileID: 0}
+  cancelButtonText: {fileID: 0}
 --- !u!1001 &1273969979
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -57375,6 +57379,7 @@ MonoBehaviour:
   processorInfo: {fileID: 1898005839}
   unitAssignCellPrefab: {fileID: 5644447303132800839, guid: a83bbad170a4b2a4fac5415dc5affe94, type: 3}
   unitAssignContentParent: {fileID: 788684146}
+  glowMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
 --- !u!1 &1314214104
 GameObject:
   m_ObjectHideFlags: 0

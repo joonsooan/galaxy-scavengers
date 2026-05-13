@@ -24,6 +24,9 @@ public class ProcessorUIManager : MonoBehaviour
     public GameObject unitAssignCellPrefab;
     public Transform unitAssignContentParent;
 
+    [Header("Tutorial Settings")]
+    [SerializeField] private Material glowMaterial;
+
     private ProcessorData _currentData;
     private Processor _currentProcessor;
     private bool _showResourcePicker;
@@ -230,6 +233,11 @@ public class ProcessorUIManager : MonoBehaviour
             btn.onClick.RemoveAllListeners();
             ResourceType typeCopy = type;
             btn.onClick.AddListener(() => OnResourceTypePicked(typeCopy));
+
+            string tutorialID = "processor_picker_" + type.ToString();
+            if (glowMaterial != null) {
+                TutorialManager.Instance?.RegisterRuntimeUI(tutorialID, iconObj, glowMaterial);
+            }
         }
     }
 

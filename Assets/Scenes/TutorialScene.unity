@@ -8895,11 +8895,11 @@ RectTransform:
   m_Children:
   - {fileID: 1676293402}
   - {fileID: 1615531724}
+  - {fileID: 482066711}
   - {fileID: 1110589741}
   - {fileID: 424609975}
   - {fileID: 792256376}
   - {fileID: 1734363911}
-  - {fileID: 482066711}
   - {fileID: 1880828581}
   m_Father: {fileID: 1490465122}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -42712,24 +42712,15 @@ MonoBehaviour:
   - id: mainControl_baseBuilding
     uiObject: {fileID: 664278389}
     highlightMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
-  - id: mainControl_processor
-    uiObject: {fileID: 1581555304}
-    highlightMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
   - id: baseBuilding_storage
     uiObject: {fileID: 4282902000147823475}
     highlightMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
-  - id: processor_smelter
+  - id: building_generator
+    uiObject: {fileID: 1615531725}
+    highlightMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
+  - id: building_smelter
     uiObject: {fileID: 482066712}
     highlightMaterial: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
-  - id: unit_miner
-    uiObject: {fileID: 0}
-    highlightMaterial: {fileID: 0}
-  - id: unit_processor
-    uiObject: {fileID: 0}
-    highlightMaterial: {fileID: 0}
-  - id: processor_AlloyPlate
-    uiObject: {fileID: 0}
-    highlightMaterial: {fileID: 0}
   arrowUIObjects:
   - {fileID: 518974348}
   - {fileID: 1075880215}
@@ -56353,6 +56344,10 @@ MonoBehaviour:
   resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: 87d776b852749c2428050baaea9b40b1, type: 3}
   confirmButton: {fileID: 444196842}
   cancelButton: {fileID: 926184901}
+  titleText: {fileID: 0}
+  returnResourceText: {fileID: 0}
+  confirmButtonText: {fileID: 0}
+  cancelButtonText: {fileID: 0}
 --- !u!1001 &1273969979
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -64485,6 +64480,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 327025570}
     m_Modifications:
     - target: {fileID: 819041302710811902, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
+      propertyPath: tutorialKey
+      value: building_generator
+      objectReference: {fileID: 0}
+    - target: {fileID: 819041302710811902, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: buildingData
       value: 
       objectReference: {fileID: 11400000, guid: 11e719e49df1f8041a2512a4d0c060ce, type: 2}
@@ -64492,6 +64491,10 @@ PrefabInstance:
       propertyPath: controlPanel
       value: 
       objectReference: {fileID: 152035980}
+    - target: {fileID: 819041302710811902, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
+      propertyPath: glowMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: b74bdff41668b9e4e87ba53fcff72911, type: 2}
     - target: {fileID: 819041302710811902, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
       propertyPath: comboCardData
       value: 
@@ -64612,6 +64615,11 @@ PrefabInstance:
 --- !u!224 &1615531724 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 4448073754042335789, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
+  m_PrefabInstance: {fileID: 1615531723}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1615531725 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7908266427385395844, guid: 2ad5e1274cc06a94dbc25e4adff84a6a, type: 3}
   m_PrefabInstance: {fileID: 1615531723}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1618251044

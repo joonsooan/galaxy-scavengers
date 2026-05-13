@@ -42,6 +42,7 @@ MonoBehaviour:
     Path: event:/SFX_UI/SFX_UIClick
   enableMaterialHighlight: 1
   highlightTargetIDs:
+  - mainControl_baseBuilding
   - building_generator
   showArrowUI: 0
   arrowID: 

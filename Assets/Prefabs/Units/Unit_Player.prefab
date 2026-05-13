@@ -432,8 +432,8 @@ MonoBehaviour:
   currentState: 0
   interactionRange: 5
   mineAmountPerAction: 2
-  fireInterval: 0.35
-  attackDamage: 10
+  fireInterval: 0.2
+  attackDamage: 5
   bulletPrefab: {fileID: 3852804536807886205, guid: 933f41a701d217545b74b41d4962a20a, type: 3}
   playerMovement: {fileID: -7343223670657477598}
   cameraController: {fileID: 0}
@@ -467,7 +467,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d034f5ba11219d742984a949de4abd7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 6.5
+  moveSpeed: 8
 --- !u!114 &6911189482688880012
 MonoBehaviour:
   m_ObjectHideFlags: 0
