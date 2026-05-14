@@ -14,6 +14,7 @@ public class TutorialUI : MonoBehaviour
     [SerializeField] private float flashFadeOutTime = 0.5f;
 
     private Coroutine _flashRoutine;
+    private TutorialStepData _currentTutorialStepForText;
 
     private void Awake()
     {
@@ -26,8 +27,23 @@ public class TutorialUI : MonoBehaviour
         }
     }
 
+    public void ApplyPassiveLocaleRefresh()
+    {
+        if (_currentTutorialStepForText == null || tutorialText == null) {
+            return;
+        }
+
+        ApplyTutorialStepBody(_currentTutorialStepForText);
+    }
+
     public void ShowTutorialStep(TutorialStepData step)
     {
+        if (step == null) {
+            return;
+        }
+
+        _currentTutorialStepForText = step;
+
         if (!gameObject.activeSelf) {
             gameObject.SetActive(true);
         }
@@ -51,8 +67,7 @@ public class TutorialUI : MonoBehaviour
         }
 
         if (tutorialText != null) {
-            tutorialText.text = step.text;
-            LayoutRebuilder.ForceRebuildLayoutImmediate(tutorialText.rectTransform);
+            ApplyTutorialStepBody(step);
         }
 
         if (progressBarContainer != null) {
@@ -67,6 +82,16 @@ public class TutorialUI : MonoBehaviour
         }
     }
 
+    private void ApplyTutorialStepBody(TutorialStepData step)
+    {
+        if (tutorialText == null || step == null) {
+            return;
+        }
+
+        tutorialText.text = step.GetResolvedTutorialBody();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(tutorialText.rectTransform);
+    }
+
     public void UpdateProgress(float progress)
     {
         if (progressSlider != null) {
@@ -76,6 +101,8 @@ public class TutorialUI : MonoBehaviour
 
     public void HideTutorial()
     {
+        _currentTutorialStepForText = null;
+
         if (_flashRoutine != null) {
             StopCoroutine(_flashRoutine);
             _flashRoutine = null;

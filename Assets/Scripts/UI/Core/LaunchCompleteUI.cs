@@ -21,9 +21,48 @@ public class LaunchCompleteUI : MonoBehaviour
 
     private void Awake()
     {
+        LoadStringsFromLocalization();
+        if (backgroundImage != null)
+        {
+            backgroundImage.color = backgroundColor;
+        }
+
+        ApplyTextsToTmp();
+
+        if (continueButton != null)
+        {
+            continueButton.onClick.AddListener(OnContinueClicked);
+        }
+
+        if (autoHideDelay > 0f)
+        {
+            Invoke(nameof(OnContinueClicked), autoHideDelay);
+        }
+    }
+
+    public void ApplyPassiveLocaleRefresh()
+    {
+        LoadStringsFromLocalization();
+        ApplyTextsToTmp();
+    }
+
+    private void LoadStringsFromLocalization()
+    {
         titleString = GameLocalization.GetOrDefault("UI_Common", "launchComplete.title", titleString);
         messageString = GameLocalization.GetOrDefault("UI_Common", "launchComplete.message", messageString);
-        InitializeUI();
+    }
+
+    private void ApplyTextsToTmp()
+    {
+        if (titleText != null)
+        {
+            titleText.text = titleString;
+        }
+
+        if (messageText != null)
+        {
+            messageText.text = messageString;
+        }
     }
 
     private void Start()
@@ -34,34 +73,6 @@ public class LaunchCompleteUI : MonoBehaviour
             rectTransform.anchorMin = Vector2.zero;
             rectTransform.anchorMax = Vector2.one;
             rectTransform.sizeDelta = Vector2.zero;
-        }
-    }
-
-    private void InitializeUI()
-    {
-        if (backgroundImage != null)
-        {
-            backgroundImage.color = backgroundColor;
-        }
-
-        if (titleText != null)
-        {
-            titleText.text = titleString;
-        }
-
-        if (messageText != null)
-        {
-            messageText.text = messageString;
-        }
-
-        if (continueButton != null)
-        {
-            continueButton.onClick.AddListener(OnContinueClicked);
-        }
-
-        if (autoHideDelay > 0f)
-        {
-            Invoke(nameof(OnContinueClicked), autoHideDelay);
         }
     }
 
@@ -78,7 +89,7 @@ public class LaunchCompleteUI : MonoBehaviour
     public void Show()
     {
         gameObject.SetActive(true);
-        
+
         Canvas canvas = GetComponentInParent<Canvas>();
         if (canvas != null)
         {

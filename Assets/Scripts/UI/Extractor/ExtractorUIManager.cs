@@ -77,14 +77,32 @@ public class ExtractorUIManager : MonoBehaviour
         }
 
         Instance = this;
+        LoadLocalizedStaticStrings();
+        if (buffSectionRoot != null) {
+            buffSectionRoot.SetActive(false);
+        }
+    }
+
+    public void ApplyPassiveLocaleRefresh()
+    {
+        LoadLocalizedStaticStrings();
+        if (_currentExtractor != null && gameObject.activeSelf)
+        {
+            RebuildStaticUi();
+            RefreshTierSelectionVisuals();
+            RefreshOutputCell();
+            RefreshOverallUi();
+            RefreshCycleUi();
+        }
+    }
+
+    private void LoadLocalizedStaticStrings()
+    {
         statusTextPowerShortage = GameLocalization.GetOrDefault("UI_Common", "status.powerInsufficient", statusTextPowerShortage);
         statusTextResourceShortage = GameLocalization.GetOrDefault("UI_Common", "status.resourceInsufficient", statusTextResourceShortage);
         statusTextExtracting = GameLocalization.GetOrDefault("UI_Common", "status.extracting", statusTextExtracting);
         connectedStorageTitle = GameLocalization.GetOrDefault("UI_Common", "title.connectedStorageAndResource", connectedStorageTitle);
         inputResourcesTitle = GameLocalization.GetOrDefault("UI_Common", "title.availableInputResources", inputResourcesTitle);
-        if (buffSectionRoot != null) {
-            buffSectionRoot.SetActive(false);
-        }
 
         if (connectedStorageTitleText != null && !string.IsNullOrEmpty(connectedStorageTitle)) {
             connectedStorageTitleText.text = connectedStorageTitle;

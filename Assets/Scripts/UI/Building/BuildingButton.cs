@@ -49,6 +49,11 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         }
     }
 
+    public void ApplyPassiveLocaleRefresh()
+    {
+        InitializeBtn();
+    }
+
     private void OnEnable()
     {
         if (BuildingUnlockManager.Instance != null) {

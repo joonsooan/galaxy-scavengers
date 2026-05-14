@@ -443,7 +443,8 @@ public class BuildingHoverManager : MonoBehaviour
             return;
         }
         if (FogOfWarManager.Instance != null && FogOfWarManager.Instance.IsInitialized &&
-            !FogOfWarManager.Instance.CanSeeResources(node.cellPosition))
+            !FogOfWarManager.Instance.CanSeeResources(node.cellPosition) &&
+            !ShouldBypassTutorialResourceFogForHover())
         {
             return;
         }
@@ -491,7 +492,7 @@ public class BuildingHoverManager : MonoBehaviour
         {
             return;
         }
-        if (GameManager.Instance != null && GameManager.Instance.uiManager != null && GameManager.Instance.uiManager.IsProcessorPanelActive())
+        if (IsProcessorOrDroneHubPanelActive())
         {
             return;
         }
@@ -638,6 +639,17 @@ public class BuildingHoverManager : MonoBehaviour
     {
         _panelsJustClosed = true;
         _panelsClosedTime = 0f;
+    }
+
+    private static bool ShouldBypassTutorialResourceFogForHover()
+    {
+        TutorialManager mgr = TutorialManager.Instance;
+        if (mgr == null || !mgr.IsTutorialActive())
+        {
+            return false;
+        }
+
+        return mgr.IsUIPanelEnabledForCurrentStep(TutorialUIPanel.ResourceInfoPanel);
     }
 
     private void OnDisable()

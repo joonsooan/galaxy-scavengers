@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Localization;
@@ -47,6 +48,7 @@ public class GameMenuManager : MonoBehaviour
     private Button _currentMenuOpenButton;
     private bool _isMenuOpen;
     private MainControlPanel _mainControlPanel;
+    private Coroutine _deferredLocaleCoroutine;
     private const string KoreanLocaleCode = "ko";
     private const string EnglishLocaleCode = "en";
 
@@ -76,11 +78,31 @@ public class GameMenuManager : MonoBehaviour
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
         LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
+        if (_deferredLocaleCoroutine != null)
+        {
+            StopCoroutine(_deferredLocaleCoroutine);
+            _deferredLocaleCoroutine = null;
+        }
     }
 
     private void OnSelectedLocaleChanged(Locale _)
     {
         ApplyLocalizedMenuTexts();
+        GameLocalization.NotifyPassiveIncludingInactiveInstances();
+        if (_deferredLocaleCoroutine != null)
+        {
+            StopCoroutine(_deferredLocaleCoroutine);
+        }
+
+        _deferredLocaleCoroutine = StartCoroutine(CoDeferRaiseLocaleApplied());
+    }
+
+    private IEnumerator CoDeferRaiseLocaleApplied()
+    {
+        yield return null;
+        yield return null;
+        GameLocalization.RaiseLocaleAppliedDeferred();
+        _deferredLocaleCoroutine = null;
     }
 
     private void Start()

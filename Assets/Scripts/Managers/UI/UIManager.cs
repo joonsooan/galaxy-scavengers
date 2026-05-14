@@ -124,6 +124,11 @@ public class UIManager : MonoBehaviour
 
     private void OnSelectedLocaleChanged(Locale _)
     {
+        ApplyPassiveLocaleRefresh();
+    }
+
+    public void ApplyPassiveLocaleRefresh()
+    {
         ApplyLocalizedStaticTexts();
 
         if (storageInfoPanel != null && storageInfoPanel.activeSelf && _trackedStorage != null)
