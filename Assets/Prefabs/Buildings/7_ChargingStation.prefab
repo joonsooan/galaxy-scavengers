@@ -363,7 +363,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ddb969e9790c9dd4d857b186c492db83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ChargingStation
-  maxHealth: 100
+  maxHealth: 200
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
   currentHealth: 0

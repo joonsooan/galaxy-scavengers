@@ -20,7 +20,7 @@ MonoBehaviour:
   tutorialKey: unit_scout
   unitIcon: {fileID: -6290779443186176248, guid: 39c30738099c3424c80736d4163d9dbc, type: 3}
   unitPrefab: {fileID: 6649466925040614564, guid: 5244335d034f9eb4aa9a1298502258db, type: 3}
-  productionTime: 2
+  productionTime: 1
   productionCosts:
   - resourceType: 0
     amount: 100

@@ -193,7 +193,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6ffbd9240354a444b48481c809a958d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PowerReceiver
-  maxHealth: 1000
+  maxHealth: 100
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
   currentHealth: 0

@@ -4,7 +4,14 @@
       "Bash(xargs grep -l \"highlightTargetIDs\\\\|enableMaterialHighlight\")",
       "Bash(xargs grep -l \"TutorialHighlightRegisterer\")",
       "Bash(grep -oE \"m_Script: \\\\{fileID: [0-9]+, guid: [a-f0-9]+\" \"Assets/Prefabs/UI/Panels/Resource Recipe Cell.prefab\")",
-      "Bash(grep -oE \"m_Script: \\\\{fileID: [0-9]+, guid: [a-f0-9]+\" \"Assets/Prefabs/UI/Panels/Producable Resource Img.prefab\")"
+      "Bash(grep -oE \"m_Script: \\\\{fileID: [0-9]+, guid: [a-f0-9]+\" \"Assets/Prefabs/UI/Panels/Producable Resource Img.prefab\")",
+      "Bash(sed -n '97130,97145p' \"C:/Unity Projects/galaxy-scavengers/Assets/Scenes/TutorialScene.unity\")",
+      "Bash(sed -n '45905,45920p' \"C:/Unity Projects/galaxy-scavengers/Assets/Scenes/TutorialScene.unity\")",
+      "Bash(sed -n '60892,60910p' \"C:/Unity Projects/galaxy-scavengers/Assets/Scenes/TutorialScene.unity\")",
+      "Bash(sed -n '60974,60985p' \"C:/Unity Projects/galaxy-scavengers/Assets/Scenes/TutorialScene.unity\")",
+      "Bash(sed -n '45795,45825p' \"C:/Unity Projects/galaxy-scavengers/Assets/Scenes/TutorialScene.unity\")",
+      "Bash(sed -n '97023,97055p' \"C:/Unity Projects/galaxy-scavengers/Assets/Scenes/TutorialScene.unity\")",
+      "PowerShell(\"Deleted\")"
     ]
   }
 }

@@ -50,7 +50,6 @@ public class TutorialManager : MonoBehaviour
 
     [Header("UI Panels - Tutorial")]
     [SerializeField] private GameObject tutorialPanel;
-    [SerializeField] private GameObject tutorialArrows;
 
     [Header("UI Panels - Contextual Info")]
     [SerializeField] private GameObject storageResourceInfoPanel;
@@ -83,12 +82,8 @@ public class TutorialManager : MonoBehaviour
 
     [Header("Highlight Settings")]
     [SerializeField] private List<HighlightableUI> highlightableList = new List<HighlightableUI>();
-    [Header("Arrow UI Settings")]
-    [SerializeField] private List<GameObject> arrowUIObjects = new List<GameObject>();
     private readonly List<GameObject> _activeHighlights = new List<GameObject>();
-    private readonly List<GameObject> _currentHighlightTargets = new List<GameObject>();
     private readonly Dictionary<string, HighlightableUI> _highlightLookup = new Dictionary<string, HighlightableUI>();
-    private readonly Dictionary<string, GameObject> _arrowUILookup = new Dictionary<string, GameObject>();
     private readonly Dictionary<GameObject, Material> _originalMaterials = new Dictionary<GameObject, Material>();
     private readonly List<UnitBase> _spawnedEnemyUnits = new List<UnitBase>();
     private readonly Dictionary<TutorialUIPanel, GameObject> _uiPanels = new Dictionary<TutorialUIPanel, GameObject>();
@@ -114,7 +109,6 @@ public class TutorialManager : MonoBehaviour
     private List<TutorialStepData> _tutorialSteps = new List<TutorialStepData>();
     private TutorialUI _tutorialUI;
     private int _unitProducedCount;
-    private GameObject _currentArrowUI;
     private Transform _currentTargetBracketTransform;
 
     private float _wasdInputTime;
@@ -134,16 +128,6 @@ public class TutorialManager : MonoBehaviour
         foreach (HighlightableUI item in highlightableList) {
             if (!string.IsNullOrEmpty(item.id))
                 _highlightLookup[item.id] = item;
-        }
-
-        foreach (GameObject arrowUI in arrowUIObjects) {
-            if (arrowUI != null) {
-                TutorialArrowUI arrowComponent = arrowUI.GetComponent<TutorialArrowUI>();
-                if (arrowComponent != null && !string.IsNullOrEmpty(arrowComponent.ArrowID)) {
-                    _arrowUILookup[arrowComponent.ArrowID] = arrowUI;
-                    arrowUI.SetActive(false);
-                }
-            }
         }
 
         _rect = tutorialUI.GetComponent<RectTransform>();
@@ -307,7 +291,6 @@ public class TutorialManager : MonoBehaviour
         ProcessStepStartActions(currentStep);
         EnableUIPanelsForStep(currentStep);
         EnableMaterialHighlights(currentStep);
-        ShowArrowUI(currentStep);
         ShowTargetBracket(currentStep);
 
         _isWaitingForCondition = true;
@@ -557,7 +540,6 @@ public class TutorialManager : MonoBehaviour
                 _isWaitingForCondition = false;
                 PlayCompletionSound(step);
                 DisableCurrentHighlights();
-                HideArrowUI();
                 HideTargetBracket();
                 _currentStepIndex++;
                 NextStep();
@@ -820,79 +802,54 @@ public class TutorialManager : MonoBehaviour
 
     private void EndTutorial()
     {
-        _isTutorialActive = false;
-        _isWaitingForCondition = false;
-
-        if (DayNightCycleManager.Instance != null) {
-            DayNightCycleManager.Instance.SetAutoAdvanceTime(true);
-        }
-
-        EnableAllEnemyUnits();
-        _unlockedFlashPanels.Clear();
-        _unlockedInteractivePanels.Clear();
-        ActivateTutorialEndUIObjects();
-        HideArrowUI();
-        HideTargetBracket();
-
-        if (_tutorialUI != null) {
-            _tutorialUI.HideTutorial();
-        }
-
+        FinalizeTutorial(stopCoroutines: false, showAllPanels: false);
         OnTutorialEnded?.Invoke();
     }
 
     public void SkipAllTutorials()
     {
-        _isTutorialActive = false;
-        _isWaitingForCondition = false;
-        StopAllCoroutines();
-
-        if (DayNightCycleManager.Instance != null) {
-            DayNightCycleManager.Instance.SetAutoAdvanceTime(true);
-        }
-
-        EnableAllEnemyUnits();
-        _unlockedFlashPanels.Clear();
-        _unlockedInteractivePanels.Clear();
-        ShowAllUIPanels(true);
-        ActivateTutorialEndUIObjects();
-        HideArrowUI();
-        HideTargetBracket();
-
-        if (_tutorialUI != null) {
-            _tutorialUI.HideTutorial();
-        }
-
+        FinalizeTutorial(stopCoroutines: true, showAllPanels: true);
         OnTutorialEnded?.Invoke();
     }
 
     public void OnQuestProgressReset()
     {
         if (_isTutorialActive) {
-            _isTutorialActive = false;
-            _isWaitingForCondition = false;
-            StopAllCoroutines();
-
-            if (DayNightCycleManager.Instance != null) {
-                DayNightCycleManager.Instance.SetAutoAdvanceTime(true);
-            }
-
-            EnableAllEnemyUnits();
-            _unlockedFlashPanels.Clear();
-            _unlockedInteractivePanels.Clear();
-            ShowAllUIPanels(true);
-            ActivateTutorialEndUIObjects();
-            HideArrowUI();
-            HideTargetBracket();
-
-            if (_tutorialUI != null) {
-                _tutorialUI.HideTutorial();
-            }
+            FinalizeTutorial(stopCoroutines: true, showAllPanels: true);
         }
 
         if (ShouldStartTutorial()) {
             InitializeTutorialSteps();
             StartCoroutine(WaitForGameInitialization());
+        }
+    }
+
+    private void FinalizeTutorial(bool stopCoroutines, bool showAllPanels)
+    {
+        _isTutorialActive = false;
+        _isWaitingForCondition = false;
+
+        if (stopCoroutines) {
+            StopAllCoroutines();
+        }
+
+        if (DayNightCycleManager.Instance != null) {
+            DayNightCycleManager.Instance.SetAutoAdvanceTime(true);
+        }
+
+        EnableAllEnemyUnits();
+        _unlockedFlashPanels.Clear();
+        _unlockedInteractivePanels.Clear();
+
+        if (showAllPanels) {
+            ShowAllUIPanels(true);
+        }
+
+        ActivateTutorialEndUIObjects();
+        HideTargetBracket();
+
+        if (_tutorialUI != null) {
+            _tutorialUI.HideTutorial();
         }
     }
 
@@ -944,7 +901,6 @@ public class TutorialManager : MonoBehaviour
         _uiPanels[TutorialUIPanel.TutorialPanel] = tutorialPanel;
         _uiPanels[TutorialUIPanel.PausePanel] = pausePanel;
 
-        _uiPanels[TutorialUIPanel.TutorialArrows] = tutorialArrows;
         _uiPanels[TutorialUIPanel.StorageResourceInfoPanel] = storageResourceInfoPanel;
         _uiPanels[TutorialUIPanel.ProcessorInfoPanel] = processorInfoPanel;
         _uiPanels[TutorialUIPanel.DroneProduceInfoPanel] = droneProduceInfoPanel;
@@ -1086,9 +1042,8 @@ public class TutorialManager : MonoBehaviour
             return;
         }
 
-        for (int i = 0; i < tutorialEndActivateUIObjects.Length; i++)
+        foreach (GameObject target in tutorialEndActivateUIObjects)
         {
-            GameObject target = tutorialEndActivateUIObjects[i];
             if (target != null)
             {
                 target.SetActive(true);
@@ -1231,58 +1186,11 @@ public class TutorialManager : MonoBehaviour
         if (target == null) return;
 
         Image image = target.GetComponent<Image>();
-        if (image != null) {
-            image.material = null;
+        if (image != null && _originalMaterials.TryGetValue(target, out Material original)) {
+            image.material = original;
         }
 
-        if (_currentHighlightTargets.Contains(target)) {
-            _currentHighlightTargets.Remove(target);
-        }
-    }
-
-    private void ShowArrowUI(TutorialStepData step)
-    {
-        HideArrowUI();
-
-        if (step == null || !step.showArrowUI || string.IsNullOrEmpty(step.arrowID))
-        {
-            return;
-        }
-
-        if (_arrowUILookup.TryGetValue(step.arrowID, out GameObject arrowUI))
-        {
-            _currentArrowUI = arrowUI;
-            if (_currentArrowUI != null)
-            {
-                _currentArrowUI.SetActive(true);
-            }
-        }
-        else
-        {
-            foreach (GameObject arrowObj in arrowUIObjects)
-            {
-                if (arrowObj != null)
-                {
-                    TutorialArrowUI arrowComponent = arrowObj.GetComponent<TutorialArrowUI>();
-                    if (arrowComponent != null && arrowComponent.ArrowID == step.arrowID)
-                    {
-                        _arrowUILookup[step.arrowID] = arrowObj;
-                        _currentArrowUI = arrowObj;
-                        _currentArrowUI.SetActive(true);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    private void HideArrowUI()
-    {
-        if (_currentArrowUI != null)
-        {
-            _currentArrowUI.SetActive(false);
-            _currentArrowUI = null;
-        }
+        _activeHighlights.Remove(target);
     }
 
     private void ShowTargetBracket(TutorialStepData step)

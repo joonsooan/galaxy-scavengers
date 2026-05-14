@@ -196,12 +196,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f15dd6f94274153a5c6db3082f67734, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 1000
+  maxHealth: 200
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
   currentHealth: 0
   generationInterval: 1
-  resourceAmount: 20
+  resourceAmount: 25
   supplyRangeN: 8
   powerCoverageCellOffset: {x: -1, y: -1}
   electricityBufferMax: 200

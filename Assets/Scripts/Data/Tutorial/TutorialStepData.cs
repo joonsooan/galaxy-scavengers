@@ -11,7 +11,6 @@ public enum TutorialUIPanel
     NoisePanel = 4,
     TutorialPanel = 5,
     PausePanel = 6,
-    TutorialArrows = 7,
     StorageResourceInfoPanel = 8,
     ProcessorInfoPanel = 9,
     DroneProduceInfoPanel = 10,
@@ -70,10 +69,6 @@ public class TutorialStepData : ScriptableObject
     [Header("Highlight")]
     public bool enableMaterialHighlight;
     public List<string> highlightTargetIDs = new List<string>();
-
-    [Header("Arrow")]
-    public bool showArrowUI;
-    public string arrowID;
 
     [Header("Target Bracket")]
     public bool showTargetBracket;
