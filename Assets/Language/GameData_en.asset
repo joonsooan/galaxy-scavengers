@@ -243,11 +243,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680742
-    m_Localized: Resource carrying capacity +10
+    m_Localized: Carry capacity +10
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680743
-    m_Localized: Resource carrying capacity +20
+    m_Localized: Carry capacity +20
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680744

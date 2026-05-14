@@ -37,8 +37,6 @@ MonoBehaviour:
     Path: event:/SFX_UI/SFX_UIClick
   enableMaterialHighlight: 0
   highlightTargetIDs: []
-  showArrowUI: 0
-  arrowID: 
   showTargetBracket: 0
   targetBracketBuildingType: 
   includeConstructionSiteForTargetBracket: 1
