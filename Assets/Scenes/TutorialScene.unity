@@ -71923,11 +71923,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1920756605636251256, guid: 2782dcd7da630bf4ba4a013537284836, type: 3}
       propertyPath: m_fontSize
-      value: 9
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 1920756605636251256, guid: 2782dcd7da630bf4ba4a013537284836, type: 3}
       propertyPath: m_fontSizeBase
-      value: 9
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 2835796674967443092, guid: 2782dcd7da630bf4ba4a013537284836, type: 3}
       propertyPath: m_Name
