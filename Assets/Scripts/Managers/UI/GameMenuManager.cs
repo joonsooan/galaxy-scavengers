@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Localization;
@@ -231,14 +231,14 @@ public class GameMenuManager : MonoBehaviour
 
     private void ApplyLocalizedMenuTexts()
     {
-        SetButtonLabelText(_currentContinueButton, "menu.continue", "\uACC4\uC18D\uD558\uAE30");
-        SetButtonLabelText(_currentReturnToTitleButton, "menu.returnToTitle", "\uD0C0\uC774\uD2C0 \uD654\uBA74\uC73C\uB85C");
-        SetButtonLabelText(_currentQuitGameButton, "menu.quitGame", "\uAC8C\uC784 \uC885\uB8CC");
-        SetButtonLabelText(_currentLanguageButton, "menu.languageToggle", "\uC5B8\uC5B4");
+        SetButtonLabelText(_currentContinueButton, "menu.continue", "계속하기");
+        SetButtonLabelText(_currentReturnToTitleButton, "menu.returnToTitle", "타이틀 화면으로");
+        SetButtonLabelText(_currentQuitGameButton, "menu.quitGame", "게임 종료");
+        SetButtonLabelText(_currentLanguageButton, "menu.languageToggle", "언어");
 
-        SetVolumeRowLabel(_currentMasterVolumeSlider, _currentMasterVolumeText, "menu.volume.master", "\uC8FC \uBCFC\uB968");
-        SetVolumeRowLabel(_currentSFXVolumeSlider, _currentSFXVolumeText, "menu.volume.sfx", "SFX \uBCFC\uB968");
-        SetVolumeRowLabel(_currentMusicVolumeSlider, _currentMusicVolumeText, "menu.volume.music", "\uC74C\uC545 \uBCFC\uB968");
+        SetVolumeRowLabel(_currentMasterVolumeSlider, _currentMasterVolumeText, "menu.volume.master", "주 볼륨");
+        SetVolumeRowLabel(_currentSFXVolumeSlider, _currentSFXVolumeText, "menu.volume.sfx", "SFX 볼륨");
+        SetVolumeRowLabel(_currentMusicVolumeSlider, _currentMusicVolumeText, "menu.volume.music", "음악 볼륨");
     }
 
     private static void SetButtonLabelText(Button button, string key, string fallback)

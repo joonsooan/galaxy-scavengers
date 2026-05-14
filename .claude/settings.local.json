@@ -12,7 +12,9 @@
       "Bash(sed -n '45795,45825p' \"C:/Unity Projects/galaxy-scavengers/Assets/Scenes/TutorialScene.unity\")",
       "Bash(sed -n '97023,97055p' \"C:/Unity Projects/galaxy-scavengers/Assets/Scenes/TutorialScene.unity\")",
       "PowerShell(\"Deleted\")",
-      "PowerShell(Get-ChildItem -Path \"C:\\\\Unity Projects\\\\galaxy-scavengers\" -Recurse -Directory | Select-Object -First 20 | ForEach-Object { Write-Host $_.FullName })"
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Unity Projects\\\\galaxy-scavengers\" -Recurse -Directory | Select-Object -First 20 | ForEach-Object { Write-Host $_.FullName })",
+      "Bash(grep -c '\\\\\\\\u[0-9A-Fa-f]\\\\{4\\\\}' \"C:\\\\Unity Projects\\\\galaxy-scavengers\\\\Assets\\\\Scripts\\\\Managers\\\\UI\\\\GameMenuManager.cs\")",
+      "Bash(grep -rn '\\\\\\\\u[0-9A-Fa-f]\\\\{4\\\\}' \"C:\\\\Unity Projects\\\\galaxy-scavengers\\\\Assets\\\\Scripts\\\\Managers\\\\UI\\\\GameMenuManager.cs\" \"C:\\\\Unity Projects\\\\galaxy-scavengers\\\\Assets\\\\Scripts\\\\Managers\\\\Scene\\\\BaseSceneManager.cs\" \"C:\\\\Unity Projects\\\\galaxy-scavengers\\\\Assets\\\\Scripts\\\\UI\\\\Module\\\\CoreDetailPanel.cs\")"
     ]
   }
 }

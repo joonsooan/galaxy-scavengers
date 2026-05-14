@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Localization;
@@ -150,21 +150,21 @@ public class PlanetSelectionController : MonoBehaviour
             if (tmp.gameObject.name == "Core Desc Text")
             {
                 tmp.text = GameLocalization.GetOrDefault("UI_Common", "base.coreManageDescription",
-                    "\uC2DC\uB4DC \uCF54\uC5B4\uB97C \uAD00\uB9AC\uD558\uACE0, \uBC1C\uC0AC \uC900\uBE44\uB97C \uD558\uB294 \uC7A5\uC18C\uC785\uB2C8\uB2E4.");
+                    "시드 코어를 관리하고, 발사 준비를 하는 장소입니다.");
                 continue;
             }
 
             if (tmp.gameObject.name == "Core Title Text")
             {
                 tmp.text = GameLocalization.GetOrDefault("UI_Common", "base.coreHangar",
-                    "\uCF54\uC5B4 \uACA9\uB0A9\uACE0");
+                    "코어 격납고");
                 continue;
             }
 
             if (tmp.gameObject.name == "Module Title Text")
             {
                 tmp.text = GameLocalization.GetOrDefault("GameData", "moduleStation.default.name",
-                    "\uBAA8\uB4C8 \uC2A4\uD14C\uC774\uC158");
+                    "모듈 스테이션");
                 continue;
             }
 
@@ -172,7 +172,7 @@ public class PlanetSelectionController : MonoBehaviour
                 && tmp.transform.parent.name == "Module Inventory Panel")
             {
                 tmp.text = GameLocalization.GetOrDefault("UI_Common", "base.modulesOwned",
-                    "\uBCF4\uC720 \uC911\uC778 \uBAA8\uB4C8");
+                    "보유 중인 모듈");
                 continue;
             }
 
@@ -180,7 +180,7 @@ public class PlanetSelectionController : MonoBehaviour
                 && tmp.transform.parent.name == "Core Name")
             {
                 tmp.text = GameLocalization.GetOrDefault("UI_Common", "base.moduleEffects",
-                    "\uBAA8\uB4C8 \uD6A8\uACFC");
+                    "모듈 효과");
             }
         }
     }
@@ -202,7 +202,7 @@ public class PlanetSelectionController : MonoBehaviour
             TMP_Text text = button.GetComponentInChildren<TMP_Text>(true);
             if (text != null)
             {
-                text.text = GameLocalization.GetOrDefault("UI_Common", "base.moduleCraft", "\uBAA8\uB4C8 \uC81C\uC791");
+                text.text = GameLocalization.GetOrDefault("UI_Common", "base.moduleCraft", "모듈 제작");
             }
         }
     }
@@ -222,7 +222,7 @@ public class PlanetSelectionController : MonoBehaviour
         TMP_Text text = coreManageTabButton.GetComponentInChildren<TMP_Text>(true);
         if (text != null)
         {
-            text.text = GameLocalization.GetOrDefault("UI_Common", "base.coreManage", "\uCF54\uC5B4 \uAD00\uB9AC");
+            text.text = GameLocalization.GetOrDefault("UI_Common", "base.coreManage", "코어 관리");
         }
     }
 
@@ -236,7 +236,7 @@ public class PlanetSelectionController : MonoBehaviour
         TMP_Text text = mapSelectTabButton.GetComponentInChildren<TMP_Text>(true);
         if (text != null)
         {
-            text.text = GameLocalization.GetOrDefault("UI_Common", "title.mapSelection", "\uB9F5 \uC120\uD0DD");
+            text.text = GameLocalization.GetOrDefault("UI_Common", "title.mapSelection", "맵 선택");
         }
     }
 

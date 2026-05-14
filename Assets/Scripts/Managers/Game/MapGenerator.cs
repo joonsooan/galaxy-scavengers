@@ -228,11 +228,11 @@ public class MapGenerator : MonoBehaviour
 
     public void SpawnAncientRuins()
     {
-        _ancientRuinsCells.Clear();
-
         if (ancientRuinsTile == null || decorationTilemap == null || ancientRuinsSiteCount <= 0) {
             return;
         }
+
+        _ancientRuinsCells.Clear();
 
         foreach (Vector2Int holeCenter in _ancientRuinsHolePositions) {
             PaintAncientRuins3x3(holeCenter);
@@ -1141,6 +1141,7 @@ public class MapGenerator : MonoBehaviour
         decorationTilemap.SetTilesBlock(mapBounds, clearTiles);
 
         GenerateNaturalDecorations();
+        SpawnAncientRuins();
     }
 
     private IEnumerator GenerateNaturalDecorationsAsync(IInitializationProgress progress = null)

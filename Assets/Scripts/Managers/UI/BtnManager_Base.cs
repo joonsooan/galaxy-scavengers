@@ -35,25 +35,20 @@ public class BtnManager_Base : MonoBehaviour
 
     private void Awake()
     {
-        if (tutorialLaunchButton == null) {
-            GameObject tutorialButtonObject = GameObject.Find("Tutorial Btn");
-            if (tutorialButtonObject != null) {
-                tutorialLaunchButton = tutorialButtonObject.GetComponent<Button>();
-            }
-        }
-
-        if (coreLaunchButton != null) {
+        if (coreLaunchButton != null)
+        {
             coreLaunchButton.onClick.AddListener(OnCoreLaunchClicked);
         }
-        if (tutorialLaunchButton != null) {
+        if (tutorialLaunchButton != null)
+        {
             tutorialLaunchButton.onClick.AddListener(OnTutorialLaunchClicked);
         }
-
-        if (titleButton != null) {
+        if (titleButton != null)
+        {
             titleButton.onClick.AddListener(BackToTitle);
         }
-
-        if (fadeCanvasGroup != null) {
+        if (fadeCanvasGroup != null)
+        {
             fadeCanvasGroup.alpha = 0f;
         }
 
@@ -62,22 +57,25 @@ public class BtnManager_Base : MonoBehaviour
 
     private void Start()
     {
-        if (fadeCanvasGroup != null) {
-            if (fadeCanvasGroup.gameObject != null) {
+        if (fadeCanvasGroup != null)
+        {
+            if (fadeCanvasGroup.gameObject != null)
+            {
                 fadeCanvasGroup.gameObject.SetActive(true);
             }
             fadeCanvasGroup.alpha = 0f;
         }
         _isLaunching = false;
+
         ApplyLocalizedLaunchBarLabels();
         ApplyCoreLaunchHangarTitle();
     }
 
     private void ApplyLocalizedLaunchBarLabels()
     {
-        SetButtonLabelText(titleButton, "base.titleScreen", "\uD0C0\uC774\uD2C0 \uD654\uBA74");
-        SetButtonLabelText(coreLaunchButton, "base.coreLaunch", "\uCF54\uC5B4 \uBC1C\uC0AC");
-        SetButtonLabelText(tutorialLaunchButton, "base.tutorial", "\uD29C\uD1A0\uB9AC\uC5BC");
+        SetButtonLabelText(titleButton, "base.titleScreen", "Title Screen");
+        SetButtonLabelText(coreLaunchButton, "base.coreLaunch", "Core Launch");
+        SetButtonLabelText(tutorialLaunchButton, "base.tutorial", "Tutorial");
     }
 
     private void ApplyCoreLaunchHangarTitle()
@@ -94,7 +92,7 @@ public class BtnManager_Base : MonoBehaviour
             if (label != null)
             {
                 label.text = GameLocalization.GetOrDefault("UI_Common", "base.coreHangar",
-                    "\uCF54\uC5B4 \uACA9\uB0A9\uACE0");
+                    "Core Hangar");
                 return;
             }
         }
@@ -127,6 +125,7 @@ public class BtnManager_Base : MonoBehaviour
         }
 
         TMP_Text label = button.GetComponentInChildren<TMP_Text>(true);
+
         if (label != null)
         {
             label.text = GameLocalization.GetOrDefault("UI_Common", key, fallback);
@@ -135,21 +134,26 @@ public class BtnManager_Base : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (coreLaunchButton != null) {
+        if (coreLaunchButton != null)
+        {
             coreLaunchButton.onClick.RemoveListener(OnCoreLaunchClicked);
         }
-        if (tutorialLaunchButton != null) {
+        if (tutorialLaunchButton != null)
+        {
             tutorialLaunchButton.onClick.RemoveListener(OnTutorialLaunchClicked);
         }
-        if (titleButton != null) {
+        if (titleButton != null)
+        {
             titleButton.onClick.RemoveListener(BackToTitle);
         }
     }
 
     public void ResetFadeCanvasGroup()
     {
-        if (fadeCanvasGroup != null) {
-            if (fadeCanvasGroup.gameObject != null) {
+        if (fadeCanvasGroup != null)
+        {
+            if (fadeCanvasGroup.gameObject != null)
+            {
                 fadeCanvasGroup.gameObject.SetActive(true);
             }
             fadeCanvasGroup.alpha = 0f;
@@ -159,17 +163,20 @@ public class BtnManager_Base : MonoBehaviour
 
     private void OnCoreLaunchClicked()
     {
-        if (_isLaunching) {
+        if (_isLaunching)
+        {
             return;
         }
 
         _isLaunching = true;
 
-        if (!coreLaunchSound.IsNull) {
+        if (!coreLaunchSound.IsNull)
+        {
             RuntimeManager.PlayOneShot(coreLaunchSound);
         }
 
-        if (BgmManager.Instance != null) {
+        if (BgmManager.Instance != null)
+        {
             BgmManager.Instance.StopBgm(fadeDuration);
         }
 
@@ -178,14 +185,18 @@ public class BtnManager_Base : MonoBehaviour
 
     private IEnumerator CoreLaunchSequence()
     {
-        if (fadeCanvasGroup != null) {
-            if (fadeCanvasGroup.gameObject != null) {
+        if (fadeCanvasGroup != null)
+        {
+            if (fadeCanvasGroup.gameObject != null)
+            {
                 fadeCanvasGroup.gameObject.SetActive(true);
             }
-            
-            if (fadeDuration > 0f) {
+
+            if (fadeDuration > 0f)
+            {
                 float elapsed = 0f;
-                while (elapsed < fadeDuration) {
+                while (elapsed < fadeDuration)
+                {
                     elapsed += Time.deltaTime;
                     float t = Mathf.Clamp01(elapsed / fadeDuration);
                     fadeCanvasGroup.alpha = t;
@@ -193,7 +204,8 @@ public class BtnManager_Base : MonoBehaviour
                 }
                 fadeCanvasGroup.alpha = 1f;
             }
-            else {
+            else
+            {
                 fadeCanvasGroup.alpha = 1f;
             }
         }
@@ -203,17 +215,20 @@ public class BtnManager_Base : MonoBehaviour
 
     private void OnTutorialLaunchClicked()
     {
-        if (_isLaunching) {
+        if (_isLaunching)
+        {
             return;
         }
 
         _isLaunching = true;
 
-        if (!coreLaunchSound.IsNull) {
+        if (!coreLaunchSound.IsNull)
+        {
             RuntimeManager.PlayOneShot(coreLaunchSound);
         }
 
-        if (BgmManager.Instance != null) {
+        if (BgmManager.Instance != null)
+        {
             BgmManager.Instance.StopBgm(fadeDuration);
         }
 
@@ -222,14 +237,18 @@ public class BtnManager_Base : MonoBehaviour
 
     private IEnumerator TutorialLaunchSequence()
     {
-        if (fadeCanvasGroup != null) {
-            if (fadeCanvasGroup.gameObject != null) {
+        if (fadeCanvasGroup != null)
+        {
+            if (fadeCanvasGroup.gameObject != null)
+            {
                 fadeCanvasGroup.gameObject.SetActive(true);
             }
 
-            if (fadeDuration > 0f) {
+            if (fadeDuration > 0f)
+            {
                 float elapsed = 0f;
-                while (elapsed < fadeDuration) {
+                while (elapsed < fadeDuration)
+                {
                     elapsed += Time.deltaTime;
                     float t = Mathf.Clamp01(elapsed / fadeDuration);
                     fadeCanvasGroup.alpha = t;
@@ -237,7 +256,8 @@ public class BtnManager_Base : MonoBehaviour
                 }
                 fadeCanvasGroup.alpha = 1f;
             }
-            else {
+            else
+            {
                 fadeCanvasGroup.alpha = 1f;
             }
         }

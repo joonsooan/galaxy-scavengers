@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Localization;
@@ -64,13 +64,13 @@ public class ModuleStationUIManager : MonoBehaviour
         if (moduleCraftingModeText != null)
         {
             moduleCraftingModeText.text = GameLocalization.GetOrDefault("UI_Common", "base.craftableModules",
-                "\uC81C\uC791 \uAC00\uB2A5\uD55C \uBAA8\uB4C8");
+                "제작 가능한 모듈");
         }
 
         if (stationInfoText != null && (moduleStationPanel == null || !moduleStationPanel.activeSelf))
         {
             stationInfoText.text = GameLocalization.GetOrDefault("GameData", "moduleStation.default.desc",
-                "\uC2DC\uB4DC\uCF54\uC5B4\uC5D0 \uC124\uCE58\uD560 \uC218 \uC788\uB294 \uBAA8\uB4C8\uC744 \uC81C\uC791\uD558\uB294 \uC2A4\uD14C\uC774\uC158\uC785\uB2C8\uB2E4.");
+                "시드코어에 설치할 수 있는 모듈을 제작하는 스테이션입니다.");
         }
     }
 

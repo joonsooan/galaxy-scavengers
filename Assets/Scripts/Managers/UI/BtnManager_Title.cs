@@ -17,7 +17,7 @@ public class BtnManager_Title : MonoBehaviour
         {
             startButton.onClick.AddListener(BaseScene);
         }
-        
+
         if (quitButton != null)
         {
             quitButton.onClick.AddListener(QuitGame);
@@ -66,7 +66,7 @@ public class BtnManager_Title : MonoBehaviour
             return;
         }
 
-        _resetProgressLabel.text = GameLocalization.GetOrDefault("UI_Common", "menu.resetProgress", "\uC9C4\uD589\uC0C1\uD669 \uCD08\uAE30\uD654");
+        _resetProgressLabel.text = GameLocalization.GetOrDefault("UI_Common", "menu.resetProgress", "Reset Progress");
     }
 
     private void Start()

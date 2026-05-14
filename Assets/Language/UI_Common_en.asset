@@ -187,7 +187,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 26494277324842
-    m_Localized: Core Hangar
+    m_Localized: Launch Core
     m_Metadata:
       m_Items: []
   - m_Id: 26494277324843
@@ -509,6 +509,107 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 2423698476494851
     m_Localized: Accept
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875840
+    m_Localized: Welcome to Galaxy Scavengers!\nClick on the screen.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875841
+    m_Localized: Use <color=#FFC107>WASD keys</color> to move the main unit.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875842
+    m_Localized: Great!\nUse the <color=#FFC107>mouse wheel</color> to zoom in and
+      out.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875843
+    m_Localized: Press the <color=#FFC107>Space key</color> or <color=#FFC107>click
+      the icon</color> to pause time.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875844
+    m_Localized: Move the main unit near a resource block, then <color=#FFC107>click
+      a resource block</color> to start mining.\nTry mining 10 units of gray <color=#DBD1C7>Ferrite</color>.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875845
+    m_Localized: Resource blocks are scattered across the map - keep exploring so
+      you never run short of materials to mine.\n<color=#DBD1C7>(Click the screen
+      to continue)</color>
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875846
+    m_Localized: <color=#FFC107>Click the screen</color> to fire an energy shot.\nHold
+      the button to fire continuously.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875847
+    m_Localized: Good.\nNow click the <color=#FFC107>Seed Core</color> at the center
+      and produce one <color=#FFC107>Miner Unit</color>.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875848
+    m_Localized: A <color=#FFC107>Miner Unit</color> automatically mines the nearest
+      resource and hauls it to the closest storage.\n<color=#DBD1C7>(Click the screen
+      to continue)</color>
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875849
+    m_Localized: Click the Seed Core again and produce 2 <color=#FFC107>Construct
+      Units</color>.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875850
+    m_Localized: Great.\nClick the <color=#FFC107>Buildings button</color>, select
+      a <color=#FFC107>Storage</color>, and place it near the base.\nOnce placed,
+      <color=#FFC107>Construct Units</color> will automatically haul resources and
+      begin building.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875851
+    m_Localized: <color=#FFC107>Right-clicking</color> the screen deselects the current
+      building or UI, and <color=#FF7043>right-click-dragging</color> removes any
+      buildings or units within the area.\n<color=#DBD1C7>(Click the screen to continue)</color>
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875852
+    m_Localized: Now let's process the resources you've mined into higher-tier materials.\nProcessing
+      requires power.\nSelect a <color=#FFC107>Generator</color> and place it so
+      that a Storage or the Seed Core falls within its light-blue range.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875853
+    m_Localized: Next, select a <color=#FFC107>Smelter</color> and place it within
+      the Generator's range.\nA Generator supplies power to all buildings inside
+      its range.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875854
+    m_Localized: Finally, click the Seed Core and produce 1 <color=#FFC107>Process
+      Unit</color>.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875855
+    m_Localized: Production buildings like the <color=#FFC107>Smelter</color> require
+      an assigned <color=#FFC107>Process Unit</color> before they can process resources.\nProcess
+      Units are automatically assigned to empty production buildings.\n<color=#DBD1C7>(Click
+      the screen to continue)</color>
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875856
+    m_Localized: Process Units will fetch resources from a nearby storage and begin
+      processing.\nClick the <color=#FFC107>Smelter</color> you just built and queue
+      <color=#DBD1C7>5 Alloy Plates</color>.\nCtrl-click to adjust in increments
+      of 10, Shift-click for 100.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875857
+    m_Localized: Excellent! You've mastered the basics of Galaxy Scavengers.\nAll
+      that's left is to place Extractors on the cyan tiles, extract as much data
+      as possible, and escape the planet.\nGood luck.\n<color=#DBD1C7>(Click the
+      screen to close)</color>
     m_Metadata:
       m_Items: []
   references:

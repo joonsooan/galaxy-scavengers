@@ -18,9 +18,9 @@ public class ExtractorUIManager : MonoBehaviour
     [SerializeField] private TMP_Text extractorStatusText;
     [SerializeField] private GameObject extractorStatusProblemIcon;
     [SerializeField] private GameObject extractorStatusOkIcon;
-    [SerializeField] private string statusTextPowerShortage = "\uC804\uB825 \uBD80\uC871";
-    [SerializeField] private string statusTextResourceShortage = "\uC790\uC6D0 \uBD80\uC871";
-    [SerializeField] private string statusTextExtracting = "\uCD94\uCD9C \uC911";
+    [SerializeField] private string statusTextPowerShortage = "전력 부족";
+    [SerializeField] private string statusTextResourceShortage = "자원 부족";
+    [SerializeField] private string statusTextExtracting = "추출 중";
 
     [Header("Extractor Stats Storage")]
     [SerializeField] private TMP_Text connectedStorageTitleText;
@@ -36,8 +36,8 @@ public class ExtractorUIManager : MonoBehaviour
     [SerializeField] private GameObject buffSectionRoot;
 
     [Header("Copy (optional overrides)")]
-    [SerializeField] private string connectedStorageTitle = "\uC5F0\uACB0\uB41C \uC800\uC7A5\uACE0 / \uC790\uC6D0";
-    [SerializeField] private string inputResourcesTitle = "\uD22C\uC785 \uAC00\uB2A5\uD55C \uC790\uC6D0";
+    [SerializeField] private string connectedStorageTitle = "연결된 저장고 / 자원";
+    [SerializeField] private string inputResourcesTitle = "투입 가능한 자원";
 
     [Header("Toggle visuals")]
     [SerializeField] private Color selectedTierColor = new Color(0.4f, 0.75f, 1f, 1f);

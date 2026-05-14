@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using DG.Tweening;
 using FMODUnity;
 using TMPro;
@@ -111,11 +111,11 @@ public class BaseSceneManager : MonoBehaviour
 
     private void ApplyLocalizedSidebarButtonLabels()
     {
-        SetButtonLabelText(titleButton, "base.titleScreen", "\uD0C0\uC774\uD2C0 \uD654\uBA74");
-        SetButtonLabelText(inventoryButton, "base.inventoryTab", "\uC778\uBCA4\uD1A0\uB9AC [Tab]");
-        SetButtonLabelText(moduleButton, "GameData", "moduleStation.default.name", "\uBAA8\uB4C8 \uC2A4\uD14C\uC774\uC158");
-        SetButtonLabelText(mapButton, "title.mapSelection", "\uB9F5 \uC120\uD0DD");
-        SetButtonLabelText(coreLaunchButton, "base.coreLaunch", "\uCF54\uC5B4 \uBC1C\uC0AC");
+        SetButtonLabelText(titleButton, "base.titleScreen", "타이틀 화면");
+        SetButtonLabelText(inventoryButton, "base.inventoryTab", "인벤토리 [Tab]");
+        SetButtonLabelText(moduleButton, "GameData", "moduleStation.default.name", "모듈 스테이션");
+        SetButtonLabelText(mapButton, "title.mapSelection", "맵 선택");
+        SetButtonLabelText(coreLaunchButton, "base.coreLaunch", "코어 발사");
     }
 
     private static void SetButtonLabelText(Button button, string key, string fallback)
@@ -149,7 +149,7 @@ public class BaseSceneManager : MonoBehaviour
             TMP_Text tmp = btn.GetComponentInChildren<TMP_Text>(true);
             if (tmp != null)
             {
-                tmp.text = GameLocalization.GetOrDefault("UI_Common", "base.quest", "\uD018\uC2A4\uD2B8");
+                tmp.text = GameLocalization.GetOrDefault("UI_Common", "base.quest", "퀘스트");
             }
         }
     }
@@ -166,7 +166,7 @@ public class BaseSceneManager : MonoBehaviour
             TMP_Text tmp = btn.GetComponentInChildren<TMP_Text>(true);
             if (tmp != null)
             {
-                tmp.text = GameLocalization.GetOrDefault("UI_Common", "base.moduleCraft", "\uBAA8\uB4C8 \uC81C\uC791");
+                tmp.text = GameLocalization.GetOrDefault("UI_Common", "base.moduleCraft", "모듈 제작");
             }
         }
     }
