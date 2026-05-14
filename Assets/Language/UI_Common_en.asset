@@ -187,7 +187,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 26494277324842
-    m_Localized: Launch Core
+    m_Localized: Core Hangar
     m_Metadata:
       m_Items: []
   - m_Id: 26494277324843
@@ -489,6 +489,26 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 1353279619199019
     m_Localized: (Click to move to building)
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2423698455523328
+    m_Localized: In progress
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2423698476494848
+    m_Localized: Quest completable
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2423698476494849
+    m_Localized: In progress
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2423698476494850
+    m_Localized: Complete
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2423698476494851
+    m_Localized: Accept
     m_Metadata:
       m_Items: []
   references:

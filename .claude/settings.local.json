@@ -11,7 +11,8 @@
       "Bash(sed -n '60974,60985p' \"C:/Unity Projects/galaxy-scavengers/Assets/Scenes/TutorialScene.unity\")",
       "Bash(sed -n '45795,45825p' \"C:/Unity Projects/galaxy-scavengers/Assets/Scenes/TutorialScene.unity\")",
       "Bash(sed -n '97023,97055p' \"C:/Unity Projects/galaxy-scavengers/Assets/Scenes/TutorialScene.unity\")",
-      "PowerShell(\"Deleted\")"
+      "PowerShell(\"Deleted\")",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Unity Projects\\\\galaxy-scavengers\" -Recurse -Directory | Select-Object -First 20 | ForEach-Object { Write-Host $_.FullName })"
     ]
   }
 }

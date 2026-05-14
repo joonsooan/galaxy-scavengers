@@ -19,6 +19,12 @@ public class ProceduralQuestPanelController : MonoBehaviour
     [SerializeField] private string progressActionInProgressLabel = "진행 중";
     [SerializeField] private string progressActionCompletableLabel = "완료";
 
+    private const string LocalizationTable = "UI_Common";
+    private const string KeyProgressInProgress = "quest.progress.inProgress";
+    private const string KeyProgressCompletable = "quest.progress.completable";
+    private const string KeyActionInProgress = "quest.action.inProgress";
+    private const string KeyActionCompletable = "quest.action.completable";
+
     [Header("Quest entry")]
     [SerializeField] private Button questButton;
     [SerializeField] private GameObject notifierIcon;
@@ -31,6 +37,11 @@ public class ProceduralQuestPanelController : MonoBehaviour
     [SerializeField] private Button completeButton;
 
     private readonly List<QuestChoiceCellController> _spawnedChoices = new();
+
+    public void ApplyPassiveLocaleRefresh()
+    {
+        RefreshView();
+    }
 
     private void Awake()
     {
@@ -318,8 +329,8 @@ public class ProceduralQuestPanelController : MonoBehaviour
         }
 
         string progressLine = state == ProceduralQuestState.Completable
-            ? progressCompletableLabel
-            : progressInProgressLabel;
+            ? GameLocalization.GetOrDefault(LocalizationTable, KeyProgressCompletable, progressCompletableLabel)
+            : GameLocalization.GetOrDefault(LocalizationTable, KeyProgressInProgress, progressInProgressLabel);
         if (progressSectionStatusText != null)
         {
             progressSectionStatusText.text = progressLine;
@@ -338,8 +349,8 @@ public class ProceduralQuestPanelController : MonoBehaviour
         if (progressActionButtonText != null)
         {
             progressActionButtonText.text = state == ProceduralQuestState.Completable
-                ? progressActionCompletableLabel
-                : progressActionInProgressLabel;
+                ? GameLocalization.GetOrDefault(LocalizationTable, KeyActionCompletable, progressActionCompletableLabel)
+                : GameLocalization.GetOrDefault(LocalizationTable, KeyActionInProgress, progressActionInProgressLabel);
         }
     }
 

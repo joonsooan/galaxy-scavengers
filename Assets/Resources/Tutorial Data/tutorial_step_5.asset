@@ -21,6 +21,8 @@ MonoBehaviour:
   stepType: 6
   duration: 0
   count: 10
+  localizedTextTable: UI_Common
+  localizedTextKey: tutorial.step.5
   resourceType: 0
   buildingType: -1
   unitType: 0

@@ -146,12 +146,12 @@ public class ResourceManager : MonoBehaviour
             return;
         }
 
-        // #if UNITY_EDITOR
+#if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.F1))
         {
             AddCheatResources();
         }
-        // #endif
+#endif
     }
 
     private void OnEnable()

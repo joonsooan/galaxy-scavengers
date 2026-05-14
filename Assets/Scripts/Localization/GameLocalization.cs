@@ -20,6 +20,8 @@ public static class GameLocalization
         SweepPassiveInclusive<ExtractorUIManager>(e => e.ApplyPassiveLocaleRefresh());
         SweepPassiveInclusive<MainControlPanel>(m => m.ApplyPassiveLocaleRefresh());
         SweepPassiveInclusive<UIManager>(u => u.ApplyPassiveLocaleRefresh());
+        SweepPassiveInclusive<ProceduralQuestPanelController>(q => q.ApplyPassiveLocaleRefresh());
+        SweepPassiveInclusive<QuestChoiceCellController>(c => c.ApplyPassiveLocaleRefresh());
     }
 
     private static void SweepPassiveInclusive<TComponent>(System.Action<TComponent> apply)

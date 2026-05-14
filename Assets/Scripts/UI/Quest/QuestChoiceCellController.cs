@@ -12,6 +12,10 @@ public class QuestChoiceCellController : MonoBehaviour
     [SerializeField] private TMP_Text tokenRewardText;
     [SerializeField] private Sprite questTokenIconSprite;
     [SerializeField] private Button acceptButton;
+    [SerializeField] private TMP_Text acceptButtonLabel;
+
+    private const string LocalizationTable = "UI_Common";
+    private const string KeyAccept = "quest.choice.accept";
 
     private int _questId;
     private Action<int> _onAccept;
@@ -22,6 +26,16 @@ public class QuestChoiceCellController : MonoBehaviour
         {
             acceptButton.onClick.RemoveAllListeners();
             acceptButton.onClick.AddListener(HandleAcceptClicked);
+        }
+
+        ApplyPassiveLocaleRefresh();
+    }
+
+    public void ApplyPassiveLocaleRefresh()
+    {
+        if (acceptButtonLabel != null)
+        {
+            acceptButtonLabel.text = GameLocalization.Get(LocalizationTable, KeyAccept);
         }
     }
 

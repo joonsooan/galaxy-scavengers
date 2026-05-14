@@ -487,6 +487,26 @@ MonoBehaviour:
     m_Key: alert.tooltip.extra.building
     m_Metadata:
       m_Items: []
+  - m_Id: 2423698455523328
+    m_Key: quest.progress.inProgress
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2423698476494848
+    m_Key: quest.progress.completable
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2423698476494849
+    m_Key: quest.action.inProgress
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2423698476494850
+    m_Key: quest.action.completable
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2423698476494851
+    m_Key: quest.choice.accept
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
