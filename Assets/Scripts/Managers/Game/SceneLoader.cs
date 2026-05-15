@@ -128,7 +128,7 @@ public class SceneLoader : MonoBehaviour
             return;
         }
 
-        if (currentScene == gameSceneName) {
+        if (currentScene == gameSceneName || currentScene == tutorialSceneName) {
             _returnState = returnState;
             StartCoroutine(LoadBaseSceneFromGameAsync());
         }

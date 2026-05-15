@@ -23947,7 +23947,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 11.25
+  orthographic size: 662.501
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -55760,7 +55760,7 @@ MonoBehaviour:
   droneHubInfoPanel: {fileID: 1666371508}
   extractorInfoPanel: {fileID: 1539508033}
   pausePanel: {fileID: 1386177986}
-  inventorySystem: {fileID: 0}
+  inventorySystem: {fileID: 1538527386}
   storageInfoPanel: {fileID: 1063455837}
   storageResourceListParent: {fileID: 1063455837}
   storageAmountText: {fileID: 1709021869}

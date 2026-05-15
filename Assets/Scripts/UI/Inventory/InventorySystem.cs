@@ -102,6 +102,12 @@ public class InventorySystem : MonoBehaviour
         }
 
         SubscribeToResourceEvents();
+
+        if (_isInitialized && currentResourcePanel != null && currentResourcePanel.activeInHierarchy)
+        {
+            RefreshAllResourceCells();
+        }
+
         MainStructure.OnDroneProducePanelClicked += HideInventoryPanelFromMainStructure;
         Processor.OnProcessorClicked += HideInventoryPanel;
         DataExtractor.OnDataExtractorClicked += HideInventoryPanelFromExtractor;
@@ -109,10 +115,8 @@ public class InventorySystem : MonoBehaviour
 
     private void SubscribeToResourceEvents()
     {
-        if (ResourceManager.Instance != null)
-        {
-            ResourceManager.OnResourceAmountChanged += UpdateResourceInfoCells;
-        }
+        ResourceManager.OnResourceAmountChanged -= UpdateResourceInfoCells;
+        ResourceManager.OnResourceAmountChanged += UpdateResourceInfoCells;
     }
 
     private void OnDisable()
