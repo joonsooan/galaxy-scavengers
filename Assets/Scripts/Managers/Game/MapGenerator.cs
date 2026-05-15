@@ -960,6 +960,7 @@ public class MapGenerator : MonoBehaviour
         yield return StartCoroutine(ConnectWallsToBordersAsync());
         yield return StartCoroutine(RemoveIsolatedLowWallsAsync());
         yield return StartCoroutine(GenerateNaturalDecorationsAsync(progress));
+        SpawnAncientRuins();
     }
 
     public void GenerateMap()
@@ -1079,6 +1080,7 @@ public class MapGenerator : MonoBehaviour
         ConnectWallsToBorders();
         RemoveIsolatedLowWalls();
         GenerateNaturalDecorations();
+        SpawnAncientRuins();
     }
 
     private void GenerateNaturalDecorations()

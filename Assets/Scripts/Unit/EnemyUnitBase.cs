@@ -140,7 +140,28 @@ public abstract class EnemyUnitBase : UnitBase
         if (!_isInInfiniteAttackState)
         {
             _isInInfiniteAttackState = true;
+            TrySetAttackerAsTarget(context);
             EnterAttackState();
+        }
+    }
+
+    private void TrySetAttackerAsTarget(DamageContext context)
+    {
+        if (context.AttackerFaction != DamageAttackerFaction.Ally || context.Attacker == null) return;
+
+        UnitBase attackerUnit = context.Attacker.GetComponent<UnitBase>();
+        if (attackerUnit != null)
+        {
+            _targetUnit = attackerUnit;
+            _targetDamageable = null;
+            return;
+        }
+
+        Damageable attackerDamageable = context.Attacker.GetComponent<Damageable>();
+        if (attackerDamageable != null)
+        {
+            _targetDamageable = attackerDamageable;
+            _targetUnit = null;
         }
     }
 

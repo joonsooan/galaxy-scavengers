@@ -7005,7 +7005,7 @@ MonoBehaviour:
   spawnRadiusOffset: 3
   initialBudgetPerZone: 15
   noiseSpawnBudgetPerPercent: 1
-  enemyDeathRespawnDelaySeconds: 45
+  enemyDeathRespawnDelaySeconds: 90
   attackActivationIntervalSeconds: 30
   noiseCautionBudgetMultiplierPercent: 20
   noiseWarningBudgetMultiplierPercent: 30

@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 13312, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: ancients-ruins-tile
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: 137817773, guid: 4b4d97bc9df3e3244a75d745e708e8e5, type: 3}
-  m_Color: {r: 0, g: 0.05939436, b: 1, a: 1}
+  m_Sprite: {fileID: -9211487210531450170, guid: 2deabe0ff9e9b9b42aeafcfcf9e191e3, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1
     e01: 0
