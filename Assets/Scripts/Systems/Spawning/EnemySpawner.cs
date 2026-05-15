@@ -46,8 +46,8 @@ public class EnemySpawner : MonoBehaviour
     private float _pendingNoiseBudget = 0f;
 
     private readonly Dictionary<Vector2Int, int> _holeCurrentCount = new Dictionary<Vector2Int, int>();
-    private readonly List<(Vector2Int hole, int cost, float respawnAt)> _deathRespawnQueue =
-        new List<(Vector2Int, int, float)>();
+    private readonly List<(Vector2Int hole, float respawnAt)> _deathRespawnQueue =
+        new List<(Vector2Int, float)>();
     private Coroutine _deathRespawnCoroutine;
 
     private Coroutine _attackActivationCoroutine;
@@ -207,16 +207,17 @@ public class EnemySpawner : MonoBehaviour
 
         if (availableHoles.Count == 0) return;
 
+        int maxCost = GetMaxEnemyCost();
         foreach (Vector2Int hole in availableHoles)
-            SpawnInZone(hole, totalBudget, costCeiling);
+            SpawnInZone(hole, maxCost, costCeiling, maxSpawns: 1);
     }
 
-    private int SpawnInZone(Vector2Int holeKey, float budget, int costCeiling)
+    private int SpawnInZone(Vector2Int holeKey, float budget, int costCeiling, int maxSpawns = int.MaxValue)
     {
         if (ShouldBlockSpawnsForTutorial()) return 0;
 
         int currentCount = _holeCurrentCount.TryGetValue(holeKey, out int c) ? c : 0;
-        int slotsAvailable = maxEnemiesPerHole - currentCount;
+        int slotsAvailable = Mathf.Min(maxEnemiesPerHole - currentCount, maxSpawns);
 
         List<EnemySpawnData> validEnemies = enemyPrefabs
             .Where(e => e != null && e.enemyPrefab != null && e.cost > 0)
@@ -315,7 +316,7 @@ public class EnemySpawner : MonoBehaviour
             _holeCurrentCount[holeKey] = Mathf.Max(0, _holeCurrentCount[holeKey] - 1);
 
         if (!ShouldBlockSpawnsForTutorial())
-            _deathRespawnQueue.Add((holeKey, enemy.SpawnBudgetCost, Time.time + enemyDeathRespawnDelaySeconds));
+            _deathRespawnQueue.Add((holeKey, Time.time + enemyDeathRespawnDelaySeconds));
     }
 
     private IEnumerator DeathRespawnRoutine()
@@ -335,7 +336,7 @@ public class EnemySpawner : MonoBehaviour
         float now = Time.time;
         for (int i = _deathRespawnQueue.Count - 1; i >= 0; i--)
         {
-            (Vector2Int hole, int cost, float respawnAt) = _deathRespawnQueue[i];
+            (Vector2Int hole, float respawnAt) = _deathRespawnQueue[i];
             if (now < respawnAt) continue;
 
             _deathRespawnQueue.RemoveAt(i);
@@ -347,7 +348,7 @@ public class EnemySpawner : MonoBehaviour
 
             float noisePct = NoiseManager.Instance != null ? NoiseManager.Instance.NoisePercentage : 0f;
             int costCeiling = GetCostCeilingForNoise(noisePct);
-            SpawnInZone(hole, cost, costCeiling);
+            SpawnInZone(hole, costCeiling, costCeiling);
         }
     }
 

@@ -136,11 +136,17 @@ public abstract class EnemyUnitBase : UnitBase
     public override void TakeDamage(int damage, DamageContext context)
     {
         base.TakeDamage(damage, context);
+        if (currentHealth <= 0) return;
         if (!_isInInfiniteAttackState)
         {
             _isInInfiniteAttackState = true;
             EnterAttackState();
         }
+    }
+
+    protected override void Die()
+    {
+        gameObject.SetActive(false);
     }
 
     public void ActivateInfiniteAttackState()

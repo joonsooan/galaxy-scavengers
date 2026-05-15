@@ -47,6 +47,7 @@ public abstract class Damageable : MonoBehaviour, ICombo
     protected virtual void OnEnable()
     {
         currentHealth = maxHealth;
+        if (_sr != null) _sr.color = _originalColor;
         TargetManager.Instance?.RegisterTarget(this);
         
         if (this is UnitBase == false && ShouldRegisterBuildingSystems())
@@ -71,6 +72,7 @@ public abstract class Damageable : MonoBehaviour, ICombo
 
     protected virtual void OnDisable()
     {
+        _flashCoroutine = null;
         TargetManager.Instance?.UnregisterTarget(this);
         
         if (_isNoiseBuildingRegistered && NoiseManager.Instance != null)
@@ -112,25 +114,24 @@ public abstract class Damageable : MonoBehaviour, ICombo
 
     public virtual void TakeDamage(int damage, DamageContext context)
     {
+        if (currentHealth <= 0) return;
+
         currentHealth -= damage;
         HitAudioRouter.PlayHit(this, context);
         OnDamageTaken(damage);
         OnAnyDamageTaken?.Invoke(this);
         OnHealthChanged();
 
-        if (_flashCoroutine != null) {
-            StopCoroutine(_flashCoroutine);
-        }
-        _flashCoroutine = StartCoroutine(FlashEffect());
-        
         if (currentHealth > 0)
         {
+            if (_flashCoroutine != null) StopCoroutine(_flashCoroutine);
+            _flashCoroutine = StartCoroutine(FlashEffect());
             RegisterAttackAlert();
         }
-
-        if (currentHealth <= 0) {
+        else
+        {
             UnregisterAttackAlert();
-            Destroy(gameObject);
+            Die();
         }
     }
     
@@ -214,6 +215,11 @@ public abstract class Damageable : MonoBehaviour, ICombo
         _isAttackAlertRegistered = false;
     }
     
+    protected virtual void Die()
+    {
+        Destroy(gameObject);
+    }
+
     protected virtual void OnDestroy()
     {
         UnregisterAttackAlert();
