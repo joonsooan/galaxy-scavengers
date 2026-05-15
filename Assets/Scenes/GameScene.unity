@@ -7006,9 +7006,9 @@ MonoBehaviour:
   initialBudgetPerZone: 15
   noiseSpawnBudgetPerPercent: 1
   enemyDeathRespawnDelaySeconds: 45
-  attackActivationIntervalSeconds: 6
+  attackActivationIntervalSeconds: 30
   noiseCautionBudgetMultiplierPercent: 20
-  noiseWarningBudgetMultiplierPercent: 40
+  noiseWarningBudgetMultiplierPercent: 30
 --- !u!114 &313771330
 MonoBehaviour:
   m_ObjectHideFlags: 0
