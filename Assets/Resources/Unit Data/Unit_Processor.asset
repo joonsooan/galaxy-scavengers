@@ -21,7 +21,7 @@ MonoBehaviour:
   tutorialKey: unit_processor
   unitIcon: {fileID: 7260633080061073943, guid: ce2426aeab4bce14c87c148ad9dafe5b, type: 3}
   unitPrefab: {fileID: 6649466925040614564, guid: ad58a73b9aa5be94a8091fe8e942c31c, type: 3}
-  productionTime: 2
+  productionTime: 1
   productionCosts:
   - resourceType: 0
     amount: 100

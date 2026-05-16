@@ -14,6 +14,10 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     [SerializeField] private bool closePanelOnClick;
     [SerializeField] private MainControlPanel controlPanel;
 
+    [Header("Tutorial Settings")]
+    [SerializeField] private string tutorialKey;
+    [SerializeField] private Material glowMaterial;
+
     private Button _button;
 
     private void Awake()
@@ -39,6 +43,15 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         if (BuildingUnlockManager.Instance != null) {
             BuildingUnlockManager.Instance.OnBuildingUnlocked += OnBuildingUnlocked;
         }
+
+        if (!string.IsNullOrEmpty(tutorialKey) && glowMaterial != null) {
+            TutorialManager.Instance?.RegisterRuntimeUI(tutorialKey, gameObject, glowMaterial);
+        }
+    }
+
+    public void ApplyPassiveLocaleRefresh()
+    {
+        InitializeBtn();
     }
 
     private void OnEnable()

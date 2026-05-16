@@ -1,4 +1,4 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -91,7 +91,7 @@ public class CoreCustomizationSlot : MonoBehaviour
         if (emptyText != null)
         {
             emptyText.text = GameLocalization.GetOrDefault("UI_Common", "base.moduleSlotFormat",
-                "\uBAA8\uB4C8 \uC2AC\uB86F {0}", SlotIndex + 1);
+                "모듈 슬롯 {0}", SlotIndex + 1);
         }
     }
 

@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -34,7 +34,7 @@ public class ModuleDetailPanel : MonoBehaviour
         if (requiredResourceText != null && requiredResourceText.gameObject.activeSelf)
         {
             requiredResourceText.text = GameLocalization.GetOrDefault("UI_Common", "base.requiredResources",
-                "\uD544\uC694\uD55C \uC790\uC6D0");
+                "필요한 자원");
         }
 
         if (_station != null && _currentRecipe != null)
@@ -46,8 +46,8 @@ public class ModuleDetailPanel : MonoBehaviour
 
     private void RefreshCraftButtonLocalizedStrings()
     {
-        produceText = GameLocalization.GetOrDefault("UI_Common", "module.buttonCraft", "\uC81C\uC791");
-        notProducableText = GameLocalization.GetOrDefault("UI_Common", "module.notCraftable", "\uC81C\uC791 \uBD88\uAC00\uB2A5");
+        produceText = GameLocalization.GetOrDefault("UI_Common", "module.buttonCraft", "제작");
+        notProducableText = GameLocalization.GetOrDefault("UI_Common", "module.notCraftable", "제작 불가능");
     }
     
     public void Initialize()
@@ -69,7 +69,7 @@ public class ModuleDetailPanel : MonoBehaviour
         if (requiredResourceText != null)
         {
             requiredResourceText.text = GameLocalization.GetOrDefault("UI_Common", "base.requiredResources",
-                "\uD544\uC694\uD55C \uC790\uC6D0");
+                "필요한 자원");
         }
         
         SetupIngredients();

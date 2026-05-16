@@ -1,4 +1,4 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
@@ -18,12 +18,12 @@ public class UnitInfoPanel : MonoBehaviour
     [SerializeField] private TMP_Text unitBatteryStatusText;
     [SerializeField] private GameObject unitBatteryStatusProblemIcon;
     [SerializeField] private GameObject unitBatteryStatusOkIcon;
-    [SerializeField] private string unitBatteryTextPowerEmpty = "\uC804\uB825 \uBD80\uC871";
-    [SerializeField] private string unitBatteryTextNeedCharge = "\uCDA9\uC804 \uD544\uC694";
-    [SerializeField] private string unitBatteryTextGoingToCharge = "\uCDA9\uC804\uC18C \uC774\uB3D9 \uC911";
-    [SerializeField] private string unitBatteryTextQueued = "\uB300\uAE30 \uC911";
-    [SerializeField] private string unitBatteryTextCharging = "\uCDA9\uC804 \uC911";
-    [SerializeField] private string unitBatteryTextOk = "\uC815\uC0C1";
+    [SerializeField] private string unitBatteryTextPowerEmpty = "전력 부족";
+    [SerializeField] private string unitBatteryTextNeedCharge = "충전 필요";
+    [SerializeField] private string unitBatteryTextGoingToCharge = "충전소 이동 중";
+    [SerializeField] private string unitBatteryTextQueued = "대기 중";
+    [SerializeField] private string unitBatteryTextCharging = "충전 중";
+    [SerializeField] private string unitBatteryTextOk = "정상";
     [Header("Battery slider fill")]
     [SerializeField] private Color unitBatterySliderColorEmpty = new Color(0.92f, 0.22f, 0.22f, 1f);
     [SerializeField] private Color unitBatterySliderColorNeedCharge = new Color(1f, 0.75f, 0.2f, 1f);

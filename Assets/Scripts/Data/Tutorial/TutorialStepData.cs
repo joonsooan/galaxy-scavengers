@@ -11,7 +11,6 @@ public enum TutorialUIPanel
     NoisePanel = 4,
     TutorialPanel = 5,
     PausePanel = 6,
-    TutorialArrows = 7,
     StorageResourceInfoPanel = 8,
     ProcessorInfoPanel = 9,
     DroneProduceInfoPanel = 10,
@@ -51,6 +50,10 @@ public class TutorialStepData : ScriptableObject
     public float duration;
     public int count;
 
+    [Header("Localization")]
+    public string localizedTextTable = "UI_Common";
+    public string localizedTextKey;
+
     [Header("Targets")]
     public ResourceType resourceType;
     public BuildingType buildingType;
@@ -71,12 +74,19 @@ public class TutorialStepData : ScriptableObject
     public bool enableMaterialHighlight;
     public List<string> highlightTargetIDs = new List<string>();
 
-    [Header("Arrow")]
-    public bool showArrowUI;
-    public string arrowID;
-
     [Header("Target Bracket")]
     public bool showTargetBracket;
     public string targetBracketBuildingType;
     public bool includeConstructionSiteForTargetBracket = true;
+
+    public string GetResolvedTutorialBody()
+    {
+        if (string.IsNullOrWhiteSpace(localizedTextKey))
+        {
+            return text ?? string.Empty;
+        }
+
+        string table = string.IsNullOrWhiteSpace(localizedTextTable) ? "UI_Common" : localizedTextTable.Trim();
+        return GameLocalization.GetOrDefault(table, localizedTextKey.Trim(), text ?? string.Empty);
+    }
 }

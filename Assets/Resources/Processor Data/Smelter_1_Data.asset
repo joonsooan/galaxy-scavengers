@@ -15,6 +15,9 @@ MonoBehaviour:
   processorName: "\uC81C\uB828\uC18C"
   processorInfo: "\uAE30\uCD08 \uC790\uC6D0\uC744 \uB179\uC5EC\uC11C \uC0C1\uC704
     \uC790\uC6D0\uC73C\uB85C \uAC00\uACF5\uD558\uB294 \uC2DC\uC124\uC785\uB2C8\uB2E4."
+  localizationTable: GameData
+  processorNameKey: processor.smelter.name
+  processorInfoKey: processor.smelter.desc
   maxIngredientStorage: 100
   maxAssignedDrones: 1
   recipes:

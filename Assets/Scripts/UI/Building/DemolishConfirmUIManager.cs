@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
 public class DemolishTarget
@@ -26,6 +28,10 @@ public class DemolishConfirmUIManager : MonoBehaviour
     [SerializeField] private GameObject resourceInfoCellPrefab;
     [SerializeField] private Button confirmButton;
     [SerializeField] private Button cancelButton;
+    [SerializeField] private TMP_Text titleText;
+    [SerializeField] private TMP_Text returnResourceText;
+    [SerializeField] private TMP_Text confirmButtonText;
+    [SerializeField] private TMP_Text cancelButtonText;
 
     private AreaBuildingDestroyer _areaBuildingDestroyer;
     private HashSet<Vector3Int> _pendingCells;
@@ -36,6 +42,9 @@ public class DemolishConfirmUIManager : MonoBehaviour
     {
         if (panel != null)
             panel.SetActive(false);
+
+        ResolveStaticTextReferences();
+        ApplyLocalizedStaticTexts();
 
         if (confirmButton != null)
         {
@@ -55,6 +64,66 @@ public class DemolishConfirmUIManager : MonoBehaviour
         _areaBuildingDestroyer = FindFirstObjectByType<AreaBuildingDestroyer>();
     }
 
+    private void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
+        ResolveStaticTextReferences();
+        ApplyLocalizedStaticTexts();
+    }
+
+    private void OnDisable()
+    {
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
+    }
+
+    private void OnSelectedLocaleChanged(Locale _)
+    {
+        ApplyLocalizedStaticTexts();
+    }
+
+    private void ResolveStaticTextReferences()
+    {
+        if (titleText == null)
+            titleText = FindTextByName("Title Text");
+        if (returnResourceText == null)
+            returnResourceText = FindTextByName("Return Resource Text");
+        if (confirmButtonText == null)
+            confirmButtonText = FindTextByName("Yes Button Text");
+        if (cancelButtonText == null)
+            cancelButtonText = FindTextByName("No Button Text");
+        if (confirmButtonText == null && confirmButton != null)
+            confirmButtonText = confirmButton.GetComponentInChildren<TMP_Text>(true);
+        if (cancelButtonText == null && cancelButton != null)
+            cancelButtonText = cancelButton.GetComponentInChildren<TMP_Text>(true);
+    }
+
+    private TMP_Text FindTextByName(string objectName)
+    {
+        if (panel == null)
+            return null;
+
+        TMP_Text[] texts = panel.GetComponentsInChildren<TMP_Text>(true);
+        for (int i = 0; i < texts.Length; i++)
+        {
+            if (texts[i].gameObject.name == objectName)
+                return texts[i];
+        }
+
+        return null;
+    }
+
+    private void ApplyLocalizedStaticTexts()
+    {
+        if (titleText != null)
+            titleText.text = GameLocalization.GetOrDefault("UI_Common", "buildingDestroy.title", "철거 확인");
+        if (returnResourceText != null)
+            returnResourceText.text = GameLocalization.GetOrDefault("UI_Common", "buildingDestroy.returnResource", "반환 자원");
+        if (confirmButtonText != null)
+            confirmButtonText.text = GameLocalization.GetOrDefault("UI_Common", "buildingDestroy.yes", "예");
+        if (cancelButtonText != null)
+            cancelButtonText.text = GameLocalization.GetOrDefault("UI_Common", "buildingDestroy.no", "아니오");
+    }
+
     public void Show(HashSet<Vector3Int> selectedCells, List<DemolishTarget> targets)
     {
         if (targets == null || targets.Count == 0) return;
@@ -63,6 +132,7 @@ public class DemolishConfirmUIManager : MonoBehaviour
         _pendingCells = selectedCells;
         _pendingTargets = targets;
         _pendingRefund = CalculateTotalRefund(targets);
+        ApplyLocalizedStaticTexts();
 
         if (buildingListText != null)
         {

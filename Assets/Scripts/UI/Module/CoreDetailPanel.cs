@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -60,7 +60,7 @@ public class CoreDetailPanel : MonoBehaviour
 
         if (activeModules == null || activeModules.Count == 0) {
             moduleNameText.text = GameLocalization.GetOrDefault("UI_Common", "module.noneEquipped",
-                "\uC7A5\uCC29 \uAC00\uB2A5\uD55C \uBAA8\uB4C8\uC774 \uC5C6\uC2B5\uB2C8\uB2E4!");
+                "장착 가능한 모듈이 없습니다!");
             moduleEffectText.text = "";
             return;
         }
@@ -83,7 +83,7 @@ public class CoreDetailPanel : MonoBehaviour
         if (moduleNameText != null)
         {
             moduleNameText.text = GameLocalization.GetOrDefault("UI_Common", "module.noneEquipped",
-                "\uC7A5\uCC29 \uAC00\uB2A5\uD55C \uBAA8\uB4C8\uC774 \uC5C6\uC2B5\uB2C8\uB2E4!");
+                "장착 가능한 모듈이 없습니다!");
         }
         if (moduleEffectText != null)
         {

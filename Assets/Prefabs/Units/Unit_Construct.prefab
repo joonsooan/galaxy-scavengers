@@ -267,7 +267,7 @@ MonoBehaviour:
   currentState: 0
   carryCapacity: 1000
   loadingTime: 1
-  unloadingTime: 2
+  unloadingTime: 1
   movement: {fileID: 4483249089817793867}
   constructingParticleSystem: {fileID: 2654175848666590096}
   particleOffsetDistance: 0.75
@@ -289,7 +289,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 330c45daea6434b46bc02141d339b613, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
+  moveSpeed: 6
   waypointTolerance: 0.1
 --- !u!114 &150192344788057646
 MonoBehaviour:

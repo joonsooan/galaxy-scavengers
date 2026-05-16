@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
@@ -31,9 +31,9 @@ public class BuildingInfoPanel : MonoBehaviour
     [SerializeField] private GameObject generatorPowerStatusProblemIcon;
     [SerializeField] private Color generatorBatterySliderColorOk = new Color(0.25f, 0.78f, 0.35f, 1f);
     [SerializeField] private Color generatorBatterySliderColorWarn = new Color(1f, 0.75f, 0.2f, 1f);
-    [SerializeField] private string generatorStatusTextProducing = "\uC804\uB825 \uC0DD\uC0B0 \uC911";
-    [SerializeField] private string generatorStatusTextBufferFull = "\uC804\uB825 \uCDA9\uBD84";
-    [SerializeField] private string generatorStatusTextNoFuel = "\uC790\uC6D0 \uBD80\uC871";
+    [SerializeField] private string generatorStatusTextProducing = "전력 생산 중";
+    [SerializeField] private string generatorStatusTextBufferFull = "전력 충분";
+    [SerializeField] private string generatorStatusTextNoFuel = "자원 부족";
 
     private BuildingData _selectedData;
     private Damageable _currentDamageable;

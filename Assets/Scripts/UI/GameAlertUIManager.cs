@@ -4,6 +4,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using FMODUnity;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 public enum GameAlertType
 {
@@ -106,12 +108,15 @@ public class GameAlertUIManager : MonoBehaviour
     private void Awake()
     {
         SetAllInactive();
+        ApplyLocalizedAlertCellTexts();
     }
 
     private void OnEnable()
     {
         LaunchUIController.OnLaunchSequenceStarted += OnLaunchSequenceStarted;
         LaunchUIController.OnLaunchSequenceFinished += OnLaunchSequenceFinished;
+        LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
+        ApplyLocalizedAlertCellTexts();
         _isStorageFullByTracker = false;
         _isElecInsufficientByTracker = false;
         if (_bindStorageTrackerCoroutine != null)
@@ -147,7 +152,15 @@ public class GameAlertUIManager : MonoBehaviour
         }
         LaunchUIController.OnLaunchSequenceStarted -= OnLaunchSequenceStarted;
         LaunchUIController.OnLaunchSequenceFinished -= OnLaunchSequenceFinished;
+        LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
         HideTooltip();
+    }
+
+    private void OnSelectedLocaleChanged(Locale _)
+    {
+        ApplyLocalizedAlertCellTexts();
+        if (_currentTooltipType.HasValue)
+            RefreshTooltipText(_currentTooltipType.Value);
     }
 
     private void OnNoiseChanged(float noisePercentage)
@@ -576,6 +589,65 @@ public class GameAlertUIManager : MonoBehaviour
         _buildingUnderAttackAlertActive = false;
     }
 
+    private void ApplyLocalizedAlertCellTexts()
+    {
+        SetAlertCellText(minerNoResourceCell, GameAlertType.MinerNoResource);
+        SetAlertCellText(minerIsFullCell, GameAlertType.MinerIsFull);
+        SetAlertCellText(unitUnderAttackCell, GameAlertType.UnitUnderAttack);
+        SetAlertCellText(buildingUnderAttackCell, GameAlertType.BuildingUnderAttack);
+        SetAlertCellText(droneIsNotAssignedCell, GameAlertType.DroneIsNotAssigned);
+        SetAlertCellText(droneNoResourceCell, GameAlertType.DroneNoResource);
+        SetAlertCellText(constructNoResourceCell, GameAlertType.ConstructNoResource);
+        SetAlertCellText(storageFullCell, GameAlertType.StorageFull);
+        SetAlertCellText(elecInsufficientCell, GameAlertType.ElecInsufficient);
+        SetAlertCellText(noiseCautionCell, GameAlertType.NoiseCaution);
+        SetAlertCellText(noiseWarningCell, GameAlertType.NoiseWarning);
+        SetAlertCellText(noiseDangerCell, GameAlertType.NoiseDanger);
+    }
+
+    private void SetAlertCellText(GameObject cell, GameAlertType type)
+    {
+        if (cell == null)
+            return;
+
+        TMP_Text text = cell.GetComponentInChildren<TMP_Text>(true);
+        if (text != null)
+            text.text = GetAlertCellMessage(type);
+    }
+
+    private string GetAlertCellMessage(GameAlertType type)
+    {
+        switch (type)
+        {
+            case GameAlertType.MinerNoResource:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.minerNoResource", "채굴 유닛 떠도는 중");
+            case GameAlertType.MinerIsFull:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.minerIsFull", "자원 적재 불가");
+            case GameAlertType.UnitUnderAttack:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.unitUnderAttack", "유닛이 공격받는 중");
+            case GameAlertType.BuildingUnderAttack:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.buildingUnderAttack", "건물이 공격받는 중");
+            case GameAlertType.DroneIsNotAssigned:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.droneIsNotAssigned", "가공 유닛 배정 필요");
+            case GameAlertType.DroneNoResource:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.droneNoResource", "가공 재료 부족");
+            case GameAlertType.ConstructNoResource:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.constructNoResource", "건설 재료 부족");
+            case GameAlertType.StorageFull:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.storageFull", "저장 공간 부족");
+            case GameAlertType.ElecInsufficient:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.elecInsufficient", "전력 부족");
+            case GameAlertType.NoiseCaution:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.noiseCaution", "소음 단계 : 주의");
+            case GameAlertType.NoiseWarning:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.noiseWarning", "소음 단계 : 경고");
+            case GameAlertType.NoiseDanger:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.noiseDanger", "소음 단계 : 위험");
+            default:
+                return string.Empty;
+        }
+    }
+
     public void ShowTooltip(GameAlertType type)
     {
         if (tooltipPanel == null || tooltipText == null) return;
@@ -621,18 +693,30 @@ public class GameAlertUIManager : MonoBehaviour
     {
         switch (type)
         {
-            case GameAlertType.MinerNoResource: return tooltipMinerNoResource;
-            case GameAlertType.MinerIsFull: return tooltipMinerIsFull;
-            case GameAlertType.UnitUnderAttack: return tooltipUnitUnderAttack;
-            case GameAlertType.BuildingUnderAttack: return tooltipBuildingUnderAttack;
-            case GameAlertType.DroneIsNotAssigned: return tooltipDroneIsNotAssigned;
-            case GameAlertType.DroneNoResource: return tooltipDroneNoResource;
-            case GameAlertType.ConstructNoResource: return tooltipConstructNoResource;
-            case GameAlertType.StorageFull: return tooltipStorageFull;
-            case GameAlertType.ElecInsufficient: return tooltipElecInsufficient;
-            case GameAlertType.NoiseCaution: return tooltipNoiseCaution;
-            case GameAlertType.NoiseWarning: return tooltipNoiseWarning;
-            case GameAlertType.NoiseDanger: return tooltipNoiseDanger;
+            case GameAlertType.MinerNoResource:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.tooltip.minerNoResource", tooltipMinerNoResource);
+            case GameAlertType.MinerIsFull:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.tooltip.minerIsFull", tooltipMinerIsFull);
+            case GameAlertType.UnitUnderAttack:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.tooltip.unitUnderAttack", tooltipUnitUnderAttack);
+            case GameAlertType.BuildingUnderAttack:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.tooltip.buildingUnderAttack", tooltipBuildingUnderAttack);
+            case GameAlertType.DroneIsNotAssigned:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.tooltip.droneIsNotAssigned", tooltipDroneIsNotAssigned);
+            case GameAlertType.DroneNoResource:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.tooltip.droneNoResource", tooltipDroneNoResource);
+            case GameAlertType.ConstructNoResource:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.tooltip.constructNoResource", tooltipConstructNoResource);
+            case GameAlertType.StorageFull:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.tooltip.storageFull", tooltipStorageFull);
+            case GameAlertType.ElecInsufficient:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.tooltip.elecInsufficient", tooltipElecInsufficient);
+            case GameAlertType.NoiseCaution:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.tooltip.noiseCaution", tooltipNoiseCaution);
+            case GameAlertType.NoiseWarning:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.tooltip.noiseWarning", tooltipNoiseWarning);
+            case GameAlertType.NoiseDanger:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.tooltip.noiseDanger", tooltipNoiseDanger);
             default: return string.Empty;
         }
     }
@@ -641,13 +725,15 @@ public class GameAlertUIManager : MonoBehaviour
     {
         switch (type)
         {
-            case GameAlertType.MinerNoResource: return toolTipExtraTextUnit;
-            case GameAlertType.MinerIsFull: return toolTipExtraTextUnit;
-            case GameAlertType.UnitUnderAttack: return toolTipExtraTextUnit;
-            case GameAlertType.DroneIsNotAssigned: return toolTipExtraTextUnit;
-            case GameAlertType.DroneNoResource: return toolTipExtraTextUnit;
-            case GameAlertType.ConstructNoResource: return toolTipExtraTextUnit;
-            case GameAlertType.BuildingUnderAttack: return toolTipExtraTextBuilding;
+            case GameAlertType.MinerNoResource:
+            case GameAlertType.MinerIsFull:
+            case GameAlertType.UnitUnderAttack:
+            case GameAlertType.DroneIsNotAssigned:
+            case GameAlertType.DroneNoResource:
+            case GameAlertType.ConstructNoResource:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.tooltip.extra.unit", toolTipExtraTextUnit);
+            case GameAlertType.BuildingUnderAttack:
+                return GameLocalization.GetOrDefault("UI_Common", "alert.tooltip.extra.building", toolTipExtraTextBuilding);
             default: return string.Empty;
         }
     }

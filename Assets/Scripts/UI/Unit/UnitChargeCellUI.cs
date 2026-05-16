@@ -1,4 +1,4 @@
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
@@ -14,12 +14,12 @@ public class UnitChargeCellUI : MonoBehaviour
     [SerializeField] private TMP_Text statusText;
     [SerializeField] private GameObject statusProblemIcon;
     [SerializeField] private GameObject statusOkIcon;
-    [SerializeField] private string textPowerEmpty = "\uC804\uB825 \uBD80\uC871";
-    [SerializeField] private string textNeedCharge = "\uCDA9\uC804 \uD544\uC694";
-    [SerializeField] private string textGoingToCharge = "\uCDA9\uC804\uC18C \uC774\uB3D9 \uC911";
-    [SerializeField] private string textQueued = "\uB300\uAE30 \uC911";
-    [SerializeField] private string textCharging = "\uCDA9\uC804 \uC911";
-    [SerializeField] private string textOk = "\uC815\uC0C1";
+    [SerializeField] private string textPowerEmpty = "전력 부족";
+    [SerializeField] private string textNeedCharge = "충전 필요";
+    [SerializeField] private string textGoingToCharge = "충전소 이동 중";
+    [SerializeField] private string textQueued = "대기 중";
+    [SerializeField] private string textCharging = "충전 중";
+    [SerializeField] private string textOk = "정상";
 
     [Header("Charge display")]
     [SerializeField] private Slider chargeRatioSlider;

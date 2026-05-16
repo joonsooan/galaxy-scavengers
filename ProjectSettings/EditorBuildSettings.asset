@@ -12,11 +12,11 @@ EditorBuildSettings:
     path: Assets/Scenes/BaseScene.unity
     guid: 2b498da6907400842b637299475137b0
   - enabled: 1
-    path: Assets/Scenes/GameScene.unity
-    guid: 8c9cfa26abfee488c85f1582747f6a02
-  - enabled: 1
     path: Assets/Scenes/TutorialScene.unity
-    guid: 5b3ec7807eacd7a418aa6e1dd9fa8b05
+    guid: 98f575ce3f5cbfc46843d6ac5be59410
+  - enabled: 1
+    path: Assets/Scenes/GameScene.unity
+    guid: 8018307a0c625d14495880908d52ac96
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: bf3b6d3ce3532b84f9bbd7a0e8407672, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

@@ -367,6 +367,218 @@ MonoBehaviour:
     m_Key: base.droneHubDescription
     m_Metadata:
       m_Items: []
+  - m_Id: 1353279619198990
+    m_Key: buildingDestroy.title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198991
+    m_Key: buildingDestroy.returnResource
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198992
+    m_Key: buildingDestroy.yes
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198993
+    m_Key: buildingDestroy.no
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198994
+    m_Key: alert.minerNoResource
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198995
+    m_Key: alert.minerIsFull
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198996
+    m_Key: alert.unitUnderAttack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198997
+    m_Key: alert.buildingUnderAttack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198998
+    m_Key: alert.droneIsNotAssigned
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619198999
+    m_Key: alert.droneNoResource
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199000
+    m_Key: alert.constructNoResource
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199001
+    m_Key: alert.storageFull
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199002
+    m_Key: alert.elecInsufficient
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199003
+    m_Key: alert.noiseCaution
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199004
+    m_Key: alert.noiseWarning
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199005
+    m_Key: alert.noiseDanger
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199006
+    m_Key: alert.tooltip.minerNoResource
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199007
+    m_Key: alert.tooltip.minerIsFull
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199008
+    m_Key: alert.tooltip.unitUnderAttack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199009
+    m_Key: alert.tooltip.buildingUnderAttack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199010
+    m_Key: alert.tooltip.droneIsNotAssigned
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199011
+    m_Key: alert.tooltip.droneNoResource
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199012
+    m_Key: alert.tooltip.constructNoResource
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199013
+    m_Key: alert.tooltip.storageFull
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199014
+    m_Key: alert.tooltip.elecInsufficient
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199015
+    m_Key: alert.tooltip.noiseCaution
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199016
+    m_Key: alert.tooltip.noiseWarning
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199017
+    m_Key: alert.tooltip.noiseDanger
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199018
+    m_Key: alert.tooltip.extra.unit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1353279619199019
+    m_Key: alert.tooltip.extra.building
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2423698455523328
+    m_Key: quest.progress.inProgress
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2423698476494848
+    m_Key: quest.progress.completable
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2423698476494849
+    m_Key: quest.action.inProgress
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2423698476494850
+    m_Key: quest.action.completable
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2423698476494851
+    m_Key: quest.choice.accept
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875840
+    m_Key: tutorial.step.1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875841
+    m_Key: tutorial.step.2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875842
+    m_Key: tutorial.step.3
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875843
+    m_Key: tutorial.step.4
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875844
+    m_Key: tutorial.step.5
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875845
+    m_Key: tutorial.step.6
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875846
+    m_Key: tutorial.step.7
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875847
+    m_Key: tutorial.step.8
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875848
+    m_Key: tutorial.step.9
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875849
+    m_Key: tutorial.step.10
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875850
+    m_Key: tutorial.step.11
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875851
+    m_Key: tutorial.step.12
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875852
+    m_Key: tutorial.step.13
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875853
+    m_Key: tutorial.step.14
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875854
+    m_Key: tutorial.step.15
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875855
+    m_Key: tutorial.step.16
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875856
+    m_Key: tutorial.step.17
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2424432051875857
+    m_Key: tutorial.step.18
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

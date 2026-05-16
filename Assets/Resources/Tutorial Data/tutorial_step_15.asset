@@ -18,6 +18,8 @@ MonoBehaviour:
   stepType: 11
   duration: 0
   count: 1
+  localizedTextTable: UI_Common
+  localizedTextKey: tutorial.step.15
   resourceType: -1
   buildingType: -1
   unitType: 4
@@ -39,8 +41,6 @@ MonoBehaviour:
   enableMaterialHighlight: 1
   highlightTargetIDs:
   - unit_processor
-  showArrowUI: 0
-  arrowID: 
   showTargetBracket: 1
   targetBracketBuildingType: MainStructure
   includeConstructionSiteForTargetBracket: 1

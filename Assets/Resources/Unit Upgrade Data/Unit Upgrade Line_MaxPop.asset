@@ -16,16 +16,16 @@ MonoBehaviour:
   displayName: "\uC720\uB2DB \uC22B\uC790"
   icon: {fileID: -1289070501367566007, guid: a4eebf007e7d79649baac3ab7d16b7c4, type: 3}
   tiers:
-  - tokenCost: 100
+  - tokenCost: 50
     upgradeTime: 10
     description: "\uCD5C\uB300 \uC720\uB2DB +5"
     descriptionKey: unitUpgrade.maxPop.tier1.desc
     floatStatBonus: 0
     intStatBonus: 5
-  - tokenCost: 200
+  - tokenCost: 100
     upgradeTime: 30
-    description: "\uCD5C\uB300 \uC720\uB2DB +5"
-    descriptionKey: unitUpgrade.maxPop.tier1.desc
+    description: "\uCD5C\uB300 \uC720\uB2DB +10"
+    descriptionKey: unitUpgrade.maxPop.tier2.desc
     floatStatBonus: 0
     intStatBonus: 5
   localizationTable: GameData

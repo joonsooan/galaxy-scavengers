@@ -22,6 +22,8 @@ MonoBehaviour:
   stepType: 12
   duration: 0
   count: 5
+  localizedTextTable: UI_Common
+  localizedTextKey: tutorial.step.17
   resourceType: 4
   buildingType: -1
   unitType: 0
@@ -43,8 +45,7 @@ MonoBehaviour:
   enableMaterialHighlight: 1
   highlightTargetIDs:
   - processor_AlloyPlate
-  showArrowUI: 0
-  arrowID: 
+  - processor_picker_AlloyPlate
   showTargetBracket: 1
   targetBracketBuildingType: Smelter
   includeConstructionSiteForTargetBracket: 0

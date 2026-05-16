@@ -34,6 +34,11 @@ public class ResourceInfoCellClickable : MonoBehaviour, IPointerClickHandler
                 resourceImage.sprite = resourceIcon;
                 resourceImage.enabled = true;
             }
+            else
+            {
+                resourceImage.sprite = null;
+                resourceImage.enabled = false;
+            }
         }
         else
         {

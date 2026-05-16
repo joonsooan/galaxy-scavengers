@@ -90,6 +90,11 @@ public class MainControlPanel : MonoBehaviour
         ApplyLocalizedStaticTexts();
     }
 
+    public void ApplyPassiveLocaleRefresh()
+    {
+        ApplyLocalizedStaticTexts();
+    }
+
     private void ApplyLocalizedStaticTexts()
     {
         SetButtonLabel(baseBuildingBtn, "game.baseBuilding", "기지 건설");

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Localization;
@@ -99,7 +99,7 @@ public class PlanetDetailPanel : MonoBehaviour
         if (extractableDataText != null)
         {
             extractableDataText.text = GameLocalization.GetOrDefault("UI_Common", "base.extractableData",
-                "\uCD94\uCD9C \uAC00\uB2A5\uD55C \uB370\uC774\uD130");
+                "추출 가능한 데이터");
         }
     }
 

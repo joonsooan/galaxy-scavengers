@@ -251,6 +251,18 @@ MonoBehaviour:
     m_Key: unitUpgrade.maxPop.tier1.desc
     m_Metadata:
       m_Items: []
+  - m_Id: 2416123601219584
+    m_Key: unitUpgrade.maxPop.tier2.desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680746
+    m_Key: processor.smelter.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680747
+    m_Key: processor.smelter.desc
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

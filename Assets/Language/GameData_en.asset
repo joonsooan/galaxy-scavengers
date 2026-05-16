@@ -243,11 +243,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680742
-    m_Localized: Resource carrying capacity +10
+    m_Localized: Carry capacity +10
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680743
-    m_Localized: Resource carrying capacity +20
+    m_Localized: Carry capacity +20
     m_Metadata:
       m_Items: []
   - m_Id: 9655828680744
@@ -256,6 +256,18 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 9655828680745
     m_Localized: Max units +5
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680746
+    m_Localized: Smelter
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9655828680747
+    m_Localized: Processes resources into higher-tier materials.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2416123601219584
+    m_Localized: Max units +10
     m_Metadata:
       m_Items: []
   references:

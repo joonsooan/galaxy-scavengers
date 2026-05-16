@@ -18,6 +18,8 @@ MonoBehaviour:
   stepType: 2
   duration: 2
   count: 0
+  localizedTextTable: UI_Common
+  localizedTextKey: tutorial.step.2
   resourceType: -1
   buildingType: -1
   unitType: 0
@@ -34,8 +36,6 @@ MonoBehaviour:
     Path: event:/SFX_UI/SFX_UIClick
   enableMaterialHighlight: 0
   highlightTargetIDs: []
-  showArrowUI: 0
-  arrowID: 
   showTargetBracket: 0
   targetBracketBuildingType: 
   includeConstructionSiteForTargetBracket: 1

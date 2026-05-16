@@ -167,8 +167,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 8
-  m_fontSizeBase: 8
+  m_fontSize: 6
+  m_fontSizeBase: 6
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -353,7 +353,6 @@ MonoBehaviour:
   moduleNameText: {fileID: 2046387540765036755}
   emptySlotIndicator: {fileID: 6523902298405072614}
   slotButton: {fileID: 4404008066578529726}
-  lockIndicator: {fileID: 4833090974256682312}
 --- !u!1 &3009454364036581097
 GameObject:
   m_ObjectHideFlags: 0
@@ -446,8 +445,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 6
-  m_fontSizeBase: 6
+  m_fontSize: 5
+  m_fontSizeBase: 5
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
