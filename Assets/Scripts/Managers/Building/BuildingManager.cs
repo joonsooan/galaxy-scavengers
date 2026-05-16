@@ -542,49 +542,7 @@ public class BuildingManager : MonoBehaviour
 
     public void CreateBuildingFromConstruction(Vector3Int originPos, BuildingData data)
     {
-        List<Vector3Int> recipePositions = new List<Vector3Int>();
-
-        int minX = int.MaxValue, minY = int.MaxValue;
-        int maxX = int.MinValue, maxY = int.MinValue;
-
-        foreach (BuildingData.BuildingPiece piece in data.recipe) {
-            Vector3Int relativePos = piece.relativePosition;
-            recipePositions.Add(originPos + relativePos);
-
-            minX = Mathf.Min(minX, relativePos.x);
-            minY = Mathf.Min(minY, relativePos.y);
-            maxX = Mathf.Max(maxX, relativePos.x);
-            maxY = Mathf.Max(maxY, relativePos.y);
-        }
-
-        Vector2Int size = new Vector2Int(maxX - minX + 1, maxY - minY + 1);
-
-        BuildingStructure structure = new BuildingStructure {
-            anchor = originPos,
-            size = size
-        };
-
-        foreach (Vector3Int targetPos in recipePositions) {
-            RemoveBuildingPieceAtPosition(targetPos);
-            structure.occupiedCells.Add(targetPos);
-        }
-
-        RegisterBuildingStructure(structure);
-
-        Vector3 worldPos = grid.GetCellCenterWorld(originPos);
-        GameObject newPieceObject = Instantiate(data.buildingPrefab, worldPos, Quaternion.identity, buildingParentTransform);
-        newPieceObject.SetActive(false);
-
-        BuildingPiece builtMainPiece = newPieceObject.GetComponent<BuildingPiece>();
-        if (builtMainPiece == null) {
-            builtMainPiece = newPieceObject.AddComponent<BuildingPiece>();
-        }
-
-        builtMainPiece.cellPosition = originPos;
-
-        foreach (Vector3Int targetPos in recipePositions) {
-            _placedPieces[targetPos] = builtMainPiece;
-        }
+        InstantiateAndRegisterBuilding(originPos, data, out List<Vector3Int> recipePositions, out GameObject newPieceObject);
 
         newPieceObject.SetActive(true);
 
@@ -640,9 +598,9 @@ public class BuildingManager : MonoBehaviour
         return true;
     }
 
-    private void CreateBuilding(Vector3Int originPos, BuildingData data)
+    private void InstantiateAndRegisterBuilding(Vector3Int originPos, BuildingData data, out List<Vector3Int> recipePositions, out GameObject pieceObject)
     {
-        List<Vector3Int> recipePositions = new List<Vector3Int>();
+        recipePositions = new List<Vector3Int>();
 
         int minX = int.MaxValue, minY = int.MaxValue;
         int maxX = int.MinValue, maxY = int.MinValue;
@@ -660,7 +618,7 @@ public class BuildingManager : MonoBehaviour
         Vector2Int size = new Vector2Int(maxX - minX + 1, maxY - minY + 1);
 
         BuildingStructure structure = new BuildingStructure {
-            anchor = originPos, // originPos : 좌하단 기준점
+            anchor = originPos,
             size = size
         };
 
@@ -672,7 +630,7 @@ public class BuildingManager : MonoBehaviour
         RegisterBuildingStructure(structure);
 
         Vector3 worldPos = grid.GetCellCenterWorld(originPos);
-        GameObject pieceObject = Instantiate(data.buildingPrefab, worldPos, Quaternion.identity, buildingParentTransform);
+        pieceObject = Instantiate(data.buildingPrefab, worldPos, Quaternion.identity, buildingParentTransform);
         pieceObject.SetActive(false);
 
         BuildingPiece mainPiece = pieceObject.GetComponent<BuildingPiece>();
@@ -685,6 +643,11 @@ public class BuildingManager : MonoBehaviour
         foreach (Vector3Int targetPos in recipePositions) {
             _placedPieces[targetPos] = mainPiece;
         }
+    }
+
+    private void CreateBuilding(Vector3Int originPos, BuildingData data)
+    {
+        InstantiateAndRegisterBuilding(originPos, data, out List<Vector3Int> recipePositions, out GameObject pieceObject);
 
         foreach (Vector3Int targetPos in recipePositions) {
             if (data.buildingTile != null) {

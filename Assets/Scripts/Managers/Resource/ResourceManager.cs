@@ -251,39 +251,47 @@ public class ResourceManager : MonoBehaviour
         }
     }
 
+    private int GetInitialAmount(ResourceType type)
+    {
+        return type switch
+        {
+            ResourceType.Ferrite => ferriteInitialAmount,
+            ResourceType.Aether => aetherInitialAmount,
+            ResourceType.Biomass => biomassInitialAmount,
+            ResourceType.CryoCrystal => cryoCrystalInitialAmount,
+            ResourceType.AlloyPlate => alloyPlateInitialAmount,
+            ResourceType.CompositeFrame => compositeFrameInitialAmount,
+            ResourceType.EChip => eChipInitialAmount,
+            ResourceType.BioCable => bioCableInitialAmount,
+            ResourceType.PowerCube => powerCubeInitialAmount,
+            ResourceType.BioFuel => bioFuelInitialAmount,
+            ResourceType.CryoGel => cryoGelInitialAmount,
+            ResourceType.Solana => solanaInitialAmount,
+            ResourceType.Core => coreInitialAmount,
+            ResourceType.Ammunition => ammunitionInitialAmount,
+            ResourceType.HeavyPlating => heavyPlatingInitialAmount,
+            ResourceType.Actuator => actuatorInitialAmount,
+            ResourceType.GenomeChip => genomeChipInitialAmount,
+            ResourceType.PatchKit => patchKitInitialAmount,
+            ResourceType.SensorUnit => sensorUnitInitialAmount,
+            ResourceType.PlasmaCube => plasmaCubeInitialAmount,
+            ResourceType.CryoConduit => cryoConduitInitialAmount,
+            ResourceType.SeekerMissile => seekerMissileInitialAmount,
+            ResourceType.NexusData => nexusDataInitialAmount,
+            ResourceType.NeuralMatrix => neuralMatrixInitialAmount,
+            _ => 0
+        };
+    }
+
     private void InitializeMainStructureStorage(MainStructure mainStructure)
     {
         if (mainStructure == null) return;
 
-        // 기본 자원
-        mainStructure.InitializeStorage(ResourceType.Ferrite, ferriteInitialAmount);
-        mainStructure.InitializeStorage(ResourceType.Aether, aetherInitialAmount);
-        mainStructure.InitializeStorage(ResourceType.Biomass, biomassInitialAmount);
-        mainStructure.InitializeStorage(ResourceType.CryoCrystal, cryoCrystalInitialAmount);
-
-        // 1차 자원
-        mainStructure.InitializeStorage(ResourceType.AlloyPlate, alloyPlateInitialAmount);
-        mainStructure.InitializeStorage(ResourceType.CompositeFrame, compositeFrameInitialAmount);
-        mainStructure.InitializeStorage(ResourceType.EChip, eChipInitialAmount);
-        mainStructure.InitializeStorage(ResourceType.BioCable, bioCableInitialAmount);
-        mainStructure.InitializeStorage(ResourceType.PowerCube, powerCubeInitialAmount);
-        mainStructure.InitializeStorage(ResourceType.BioFuel, bioFuelInitialAmount);
-        mainStructure.InitializeStorage(ResourceType.CryoGel, cryoGelInitialAmount);
-        mainStructure.InitializeStorage(ResourceType.Solana, solanaInitialAmount);
-        mainStructure.InitializeStorage(ResourceType.Core, coreInitialAmount);
-        mainStructure.InitializeStorage(ResourceType.Ammunition, ammunitionInitialAmount);
-
-        // 2차 자원
-        mainStructure.InitializeStorage(ResourceType.HeavyPlating, heavyPlatingInitialAmount);
-        mainStructure.InitializeStorage(ResourceType.Actuator, actuatorInitialAmount);
-        mainStructure.InitializeStorage(ResourceType.GenomeChip, genomeChipInitialAmount);
-        mainStructure.InitializeStorage(ResourceType.PatchKit, patchKitInitialAmount);
-        mainStructure.InitializeStorage(ResourceType.SensorUnit, sensorUnitInitialAmount);
-        mainStructure.InitializeStorage(ResourceType.PlasmaCube, plasmaCubeInitialAmount);
-        mainStructure.InitializeStorage(ResourceType.CryoConduit, cryoConduitInitialAmount);
-        mainStructure.InitializeStorage(ResourceType.SeekerMissile, seekerMissileInitialAmount);
-        mainStructure.InitializeStorage(ResourceType.NexusData, nexusDataInitialAmount);
-        mainStructure.InitializeStorage(ResourceType.NeuralMatrix, neuralMatrixInitialAmount);
+        foreach (ResourceType type in Enum.GetValues(typeof(ResourceType)))
+        {
+            if (type == ResourceType.None || type == ResourceType.Electricity) continue;
+            mainStructure.InitializeStorage(type, GetInitialAmount(type));
+        }
 
         if (ResourceDataManager.Instance != null)
         {

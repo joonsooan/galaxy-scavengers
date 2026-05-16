@@ -704,39 +704,21 @@ public class ElectricityConsumptionManager : MonoBehaviour
     private void BuildPowerNodeList(List<IPowerGridNode> buffer)
     {
         buffer.Clear();
+        AddActiveNodesToBuffer(_resourceGenerators, buffer);
+        AddActiveNodesToBuffer(_batteries, buffer);
+        AddActiveNodesToBuffer(_powerReceivers, buffer);
+    }
 
-        foreach (ResourceGenerator generator in _resourceGenerators)
+    private void AddActiveNodesToBuffer<T>(IEnumerable<T> nodes, List<IPowerGridNode> buffer) where T : Behaviour, IPowerGridNode
+    {
+        foreach (T node in nodes)
         {
-            if (generator != null && generator.isActiveAndEnabled)
+            if (node != null && node.isActiveAndEnabled)
             {
-                BoundsInt b = generator.GetPowerCoverageBounds();
+                BoundsInt b = node.GetPowerCoverageBounds();
                 if (b.size.x > 0 && b.size.y > 0)
                 {
-                    buffer.Add(generator);
-                }
-            }
-        }
-
-        foreach (Battery battery in _batteries)
-        {
-            if (battery != null && battery.isActiveAndEnabled)
-            {
-                BoundsInt b = battery.GetPowerCoverageBounds();
-                if (b.size.x > 0 && b.size.y > 0)
-                {
-                    buffer.Add(battery);
-                }
-            }
-        }
-
-        foreach (PowerReceiver receiver in _powerReceivers)
-        {
-            if (receiver != null && receiver.isActiveAndEnabled)
-            {
-                BoundsInt b = receiver.GetPowerCoverageBounds();
-                if (b.size.x > 0 && b.size.y > 0)
-                {
-                    buffer.Add(receiver);
+                    buffer.Add(node);
                 }
             }
         }

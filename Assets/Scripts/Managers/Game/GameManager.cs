@@ -541,23 +541,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private IEnumerator DelayedInitialization()
-    {
-        yield return null;
-
-        yield return StartCoroutine(InitializeSpawnersAndUnits());
-
-        yield return StartCoroutine(WaitForFogOfWarInitialization());
-
-        if (FogOfWarManager.Instance != null)
-        {
-            FogOfWarManager.Instance.RefreshFogOfWar();
-        }
-
-        IsGameSceneInitialized = true;
-        OnGameSceneInitialized?.Invoke();
-    }
-
     private IEnumerator WaitForFogOfWarInitializationAsync(IInitializationProgress progress = null)
     {
         if (FogOfWarManager.Instance != null)
@@ -566,16 +549,6 @@ public class GameManager : MonoBehaviour
             FogOfWarManager.Instance.StartFogInitializationWithProgress(fogProgress);
         }
 
-        while (FogOfWarManager.Instance == null || !FogOfWarManager.Instance.IsInitialized)
-        {
-            yield return null;
-        }
-
-        yield return null;
-    }
-
-    private IEnumerator WaitForFogOfWarInitialization()
-    {
         while (FogOfWarManager.Instance == null || !FogOfWarManager.Instance.IsInitialized)
         {
             yield return null;
@@ -599,38 +572,6 @@ public class GameManager : MonoBehaviour
         if (proceduralSpawner != null && !skipProceduralResourceSpawn)
         {
             yield return StartCoroutine(proceduralSpawner.SpawnResourcesAsync(progress));
-        }
-
-        yield return null;
-        yield return null;
-
-        if (mapGenerator != null)
-        {
-            mapGenerator.GenerateEnemyTerritoryRadiusValues();
-        }
-
-        if (mapGenerator != null)
-        {
-            mapGenerator.DrawEnemyTerritoryTiles();
-            mapGenerator.SpawnAncientRuins();
-        }
-    }
-
-    private IEnumerator InitializeSpawnersAndUnits()
-    {
-        foreach (BuildingSpawner spawner in FindObjectsByType<BuildingSpawner>(FindObjectsSortMode.None))
-        {
-            spawner.SpawnBuildings();
-            if (spawner.BuildingTilemap != null) spawner.BuildingTilemap.gameObject.SetActive(false);
-        }
-
-        RegisterPrePlacedMainStructure();
-        RegisterPrePlacedBuildings();
-
-        MapObjectSpawner proceduralSpawner = FindFirstObjectByType<MapObjectSpawner>();
-        if (proceduralSpawner != null)
-        {
-            proceduralSpawner.SpawnResources();
         }
 
         yield return null;
