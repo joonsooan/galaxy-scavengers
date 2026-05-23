@@ -50,6 +50,7 @@ public class LaunchUIController : MonoBehaviour
     private GameObject _fadeOverlay;
     private bool _isLaunchPausePanelLockActive;
     private bool _isLaunchSequenceRunning;
+    private bool _isPrepareLaunchActive;
 
     private void Update()
     {
@@ -60,10 +61,19 @@ public class LaunchUIController : MonoBehaviour
                 OnCancelLaunch();
             }
         }
+        else if (_isPrepareLaunchActive && !_isLaunchSequenceRunning)
+        {
+            if (Input.GetMouseButtonUp(1))
+            {
+                OnCancelLaunchPrepare();
+            }
+        }
     }
 
     private void Awake()
     {
+        _isPrepareLaunchActive = false;
+
         if (launchPanel != null)
         {
             launchPanel.SetActive(false);
@@ -198,6 +208,7 @@ public class LaunchUIController : MonoBehaviour
             GameManager.Instance.TogglePause();
         }
         SetLaunchPausePanelLock(false);
+        _isPrepareLaunchActive = false;
     }
 
     public void OnConfirmLaunch()
@@ -228,7 +239,29 @@ public class LaunchUIController : MonoBehaviour
             GameManager.Instance.TogglePause();
         }
         SetLaunchPausePanelLock(true);
+        _isPrepareLaunchActive = true;
         inventorySystem.ToggleInventory();
+    }
+
+    public void OnCancelLaunchPrepare()
+    {
+        if (!FMODUIButton.HasPlayedClickSoundThisFrame && !buttonClickSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(buttonClickSound);
+        }
+
+        InventorySystem inventorySystem = GetLaunchInventorySystem();
+        if (inventorySystem != null)
+        {
+            GameObject inventoryPanelObj = inventorySystem.GetInventoryPanel();
+            if (inventoryPanelObj != null && inventoryPanelObj.activeSelf)
+            {
+                inventorySystem.ToggleInventory();
+            }
+        }
+
+        _isPrepareLaunchActive = false;
+        ShowLaunchPanel();
     }
 
     public void StartLaunchSequence()
@@ -243,6 +276,7 @@ public class LaunchUIController : MonoBehaviour
             GameManager.Instance.TogglePause();
         }
         SetLaunchPausePanelLock(false);
+        _isPrepareLaunchActive = false;
 
         InventorySystem inventorySystem = GetLaunchInventorySystem();
         if (inventorySystem == null)

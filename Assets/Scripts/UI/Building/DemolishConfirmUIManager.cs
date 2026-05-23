@@ -184,10 +184,20 @@ public class DemolishConfirmUIManager : MonoBehaviour
         {
             if (_pendingRefund != null && ResourceManager.Instance != null)
             {
+                Vector3 referencePos = Vector3.zero;
+                if (_pendingCells.Count > 0)
+                {
+                    Vector3Int firstCell = _pendingCells.First();
+                    if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null)
+                    {
+                        referencePos = BuildingManager.Instance.grid.CellToWorld(firstCell);
+                    }
+                }
+
                 foreach (var kvp in _pendingRefund)
                 {
                     if (kvp.Value > 0)
-                        ResourceManager.Instance.AddResource(kvp.Key, kvp.Value);
+                        ResourceManager.Instance.DistributeRefundedResource(kvp.Key, kvp.Value, referencePos);
                 }
             }
             HashSet<Vector3Int> cellsToDestroy = new HashSet<Vector3Int>(_pendingCells);

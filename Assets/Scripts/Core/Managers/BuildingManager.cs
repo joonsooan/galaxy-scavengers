@@ -708,6 +708,9 @@ public class BuildingManager : MonoBehaviour
             break;
         case BuildingType.Generator:
             ResourceGenerator generator = obj.GetComponent<ResourceGenerator>();
+            if (generator == null) {
+                generator = obj.GetComponentInChildren<ResourceGenerator>(true);
+            }
             if (generator != null) {
                 generator.SetConstructed();
             }

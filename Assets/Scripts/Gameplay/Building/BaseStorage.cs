@@ -51,6 +51,13 @@ public class BaseStorage : Damageable, IStorage
         return canAddAmount > 0;
     }
 
+    public virtual void ForceAddResource(ResourceType type, int amount)
+    {
+        if (amount <= 0) return;
+        currentResources[type] += amount;
+        NotifyResourceChange(type, amount);
+    }
+
     public virtual bool TryWithdrawResource(ResourceType type, int amountToWithdraw, out int amountWithdrawn)
     {
         int availableAmount = GetCurrentResourceAmount(type);

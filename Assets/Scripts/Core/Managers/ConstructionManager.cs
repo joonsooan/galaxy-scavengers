@@ -188,7 +188,7 @@ public class ConstructionManager : MonoBehaviour
             {
                 BuildingManager.Instance.CreateBuildingFromConstruction(site.cellPosition, site.buildingData);
                 TutorialManager.Instance?.OnBuildingCompleted(site.buildingData.buildingType);
-                site.OnDestroy();
+                Destroy(site.gameObject);
             }
         }
         else

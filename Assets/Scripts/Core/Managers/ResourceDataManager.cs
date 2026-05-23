@@ -95,7 +95,7 @@ public class ResourceDataManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == "GameScene")
+        if (scene.name == "GameScene" || scene.name == "TutorialScene")
         {
             _mainStructure = null;
             _allStorages.Clear();

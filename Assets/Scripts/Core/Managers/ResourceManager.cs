@@ -227,7 +227,7 @@ public class ResourceManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == "GameScene")
+        if (scene.name == "GameScene" || scene.name == "TutorialScene")
         {
             StartCoroutine(DelayedSceneInitialization());
         }
@@ -322,6 +322,70 @@ public class ResourceManager : MonoBehaviour
     public void AddResource(ResourceType type, int amount)
     {
         ResourceDataManager.Instance?.AddResource(type, amount);
+    }
+
+    public void DistributeRefundedResource(ResourceType type, int amount, Vector3 sourcePosition)
+    {
+        if (amount <= 0) return;
+        if (ResourceDataManager.Instance == null) return;
+
+        int remaining = amount;
+        List<IStorage> storages = GetAllStorages();
+        if (storages == null || storages.Count == 0)
+        {
+            AddResource(type, amount);
+            return;
+        }
+
+        List<IStorage> mainAndStoragePriority = new List<IStorage>();
+        List<IStorage> otherPriority = new List<IStorage>();
+
+        for (int i = 0; i < storages.Count; i++)
+        {
+            IStorage storage = storages[i];
+            if (storage == null) continue;
+
+            Component component = storage as Component;
+            if (component == null || component.gameObject == null || !component.gameObject.activeInHierarchy) continue;
+
+            if (storage is MainStructure || storage is Storage)
+            {
+                mainAndStoragePriority.Add(storage);
+            }
+            else
+            {
+                otherPriority.Add(storage);
+            }
+        }
+
+        StoreResourceInPriority(type, sourcePosition, mainAndStoragePriority, ref remaining);
+        StoreResourceInPriority(type, sourcePosition, otherPriority, ref remaining);
+
+        if (remaining > 0)
+        {
+            MainStructure main = ResourceDataManager.Instance.GetMainStructure();
+            if (main != null)
+            {
+                main.ForceAddResource(type, remaining);
+            }
+            else
+            {
+                bool forceAdded = false;
+                foreach (IStorage storage in storages)
+                {
+                    if (storage is BaseStorage baseStorage && !(storage is Battery))
+                    {
+                        baseStorage.ForceAddResource(type, remaining);
+                        forceAdded = true;
+                        break;
+                    }
+                }
+                if (!forceAdded)
+                {
+                    AddResource(type, remaining);
+                }
+            }
+        }
     }
 
     public int AddGeneratedResource(ResourceType type, int amount, Vector3 sourcePosition)

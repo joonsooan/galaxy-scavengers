@@ -10,6 +10,12 @@ public class Storage : BaseStorage
         return base.TryAddResource(type, amount);
     }
 
+    public override void ForceAddResource(ResourceType type, int amount)
+    {
+        if (type == ResourceType.Electricity) return;
+        base.ForceAddResource(type, amount);
+    }
+
     protected override void Start()
     {
         base.Start();

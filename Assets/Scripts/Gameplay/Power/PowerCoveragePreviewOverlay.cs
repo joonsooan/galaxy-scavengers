@@ -13,6 +13,7 @@ public class PowerCoveragePreviewOverlay : MonoBehaviour
     private readonly HashSet<Vector3Int> _paintedCells = new HashSet<Vector3Int>();
     private readonly List<IPowerGridNode> _nodeBuffer = new List<IPowerGridNode>();
     private static Tile _runtimeWhiteTile;
+    private Coroutine _refreshCoroutine;
 
     public bool IsShowing { get; private set; }
 
@@ -35,6 +36,11 @@ public class PowerCoveragePreviewOverlay : MonoBehaviour
     {
         BuildingManager.OnBuildingConstructed -= OnAnyBuildingConstructed;
         AreaBuildingDestroyer.OnDemolishComplete -= RefreshIfShowing;
+        if (_refreshCoroutine != null)
+        {
+            StopCoroutine(_refreshCoroutine);
+            _refreshCoroutine = null;
+        }
     }
 
     private void OnAnyBuildingConstructed(BuildingData data)
@@ -239,6 +245,11 @@ public class PowerCoveragePreviewOverlay : MonoBehaviour
     {
         IsShowing = false;
         ClearInternal();
+        if (_refreshCoroutine != null)
+        {
+            StopCoroutine(_refreshCoroutine);
+            _refreshCoroutine = null;
+        }
     }
 
     public void RefreshIfShowing()
@@ -247,7 +258,21 @@ public class PowerCoveragePreviewOverlay : MonoBehaviour
         {
             return;
         }
-        Show();
+        if (_refreshCoroutine != null)
+        {
+            StopCoroutine(_refreshCoroutine);
+        }
+        _refreshCoroutine = StartCoroutine(RefreshNextFrame());
+    }
+
+    private System.Collections.IEnumerator RefreshNextFrame()
+    {
+        yield return null;
+        _refreshCoroutine = null;
+        if (IsShowing)
+        {
+            Show();
+        }
     }
 
     private void ClearInternal()

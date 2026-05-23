@@ -58,6 +58,12 @@ public class Battery : BaseStorage, IPowerGridNode
         return base.TryAddResource(type, amount);
     }
 
+    public override void ForceAddResource(ResourceType type, int amount)
+    {
+        if (type != ResourceType.Electricity) return;
+        base.ForceAddResource(type, amount);
+    }
+
     public override bool TryWithdrawResource(ResourceType type, int amountToWithdraw, out int amountWithdrawn)
     {
         if (type != ResourceType.Electricity)

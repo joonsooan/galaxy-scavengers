@@ -9,13 +9,13 @@ public class StatModifierReceiver_ResourceGeneration : MonoBehaviour
 
     private void Awake()
     {
-        _generator = GetComponent<ResourceGenerator>();
+        _generator = GetComponent<ResourceGenerator>() ?? GetComponentInChildren<ResourceGenerator>(true);
     }
 
     private void Start()
     {
         if (_generator == null) {
-            _generator = GetComponent<ResourceGenerator>();
+            _generator = GetComponent<ResourceGenerator>() ?? GetComponentInChildren<ResourceGenerator>(true);
         }
         
         if (_generator != null) {
@@ -34,7 +34,7 @@ public class StatModifierReceiver_ResourceGeneration : MonoBehaviour
     public void ApplyModifiers()
     {
         if (_generator == null) {
-            _generator = GetComponent<ResourceGenerator>();
+            _generator = GetComponent<ResourceGenerator>() ?? GetComponentInChildren<ResourceGenerator>(true);
         }
         
         if (_generator == null || ModuleEffectManager.Instance == null) return;

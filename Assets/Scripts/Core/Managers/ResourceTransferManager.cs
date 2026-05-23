@@ -86,7 +86,7 @@ public class ResourceTransferManager : MonoBehaviour
         }
         foreach (IStorage s in storages)
         {
-            if (s != null && (MainStructure)s != mainStructure)
+            if (s != null && s != (IStorage)mainStructure)
             {
                 orderedStorages.Add(s);
             }

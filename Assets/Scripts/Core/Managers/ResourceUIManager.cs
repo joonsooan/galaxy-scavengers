@@ -46,7 +46,7 @@ public class ResourceUIManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == "GameScene") {
+        if (scene.name == "GameScene" || scene.name == "TutorialScene") {
             StartCoroutine(DelayedSceneInitialization());
         }
     }

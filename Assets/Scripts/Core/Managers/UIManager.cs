@@ -87,7 +87,6 @@ public class UIManager : MonoBehaviour
     private void Update()
     {
         if (Input.GetMouseButtonUp(1)) {
-            if (UIUtils.IsPointerOverUI()) return;
             if (GameManager.Instance != null && GameManager.Instance.IsDragging()) return;
 
             if (_areaBuildingDestroyer != null && _areaBuildingDestroyer.HasMoved) {
@@ -97,6 +96,21 @@ public class UIManager : MonoBehaviour
             if (_areaBuildingDestroyer != null && _areaBuildingDestroyer.JustFinishedAreaDrag) {
                 return;
             }
+
+            InventorySystem inv = GetInventorySystem();
+            if (inv != null && inv.GetInventoryPanel() != null && inv.GetInventoryPanel().activeSelf) {
+                LaunchUIController launchUI = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
+                bool isLaunchActive = launchUI != null && launchUI.IsLaunchInputLockActive();
+                if (!isLaunchActive) {
+                    inv.ToggleInventory();
+                    if (_activeUIPanel == ActiveUIPanel.MainStructure) {
+                        _activeUIPanel = ActiveUIPanel.None;
+                    }
+                    return;
+                }
+            }
+
+            if (UIUtils.IsPointerOverUI()) return;
 
             UnpinAndHideAllPanels();
         }

@@ -330,9 +330,7 @@ public class AreaBuildingDestroyer : MonoBehaviour
                 if (data != null && data.buildingType == BuildingType.MainStructure)
                     continue;
 
-                bool isSingleCellStructure = occupiedCells != null && occupiedCells.Count == 1;
-
-                if (data != null && !isSingleCellStructure)
+                if (data != null)
                 {
                     string name = data.GetDisplayName();
                     targets.Add(new DemolishTarget

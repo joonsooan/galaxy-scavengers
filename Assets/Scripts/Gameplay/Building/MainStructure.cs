@@ -643,6 +643,12 @@ public class MainStructure : BaseStorage, IClickable, IElectricityConsumer
         return base.TryAddResource(type, amount);
     }
 
+    public override void ForceAddResource(ResourceType type, int amount)
+    {
+        if (type == ResourceType.Electricity) return;
+        base.ForceAddResource(type, amount);
+    }
+
     public void AddResourceToStorageOnly(ResourceType type, int amount)
     {
         int totalAmount = GetTotalCurrentAmount();

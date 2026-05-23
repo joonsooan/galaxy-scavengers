@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Localization;
@@ -531,7 +531,8 @@ public class GameMenuManager : MonoBehaviour
 
     private bool IsGameScene()
     {
-        return SceneManager.GetActiveScene().name == "GameScene";
+        string sceneName = SceneManager.GetActiveScene().name;
+        return sceneName == "GameScene" || sceneName == "TutorialScene";
     }
 
     private void OnMasterVolumeChanged(float value)

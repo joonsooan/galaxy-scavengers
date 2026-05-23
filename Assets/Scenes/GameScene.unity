@@ -36260,7 +36260,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uC218\uB77D \uAC00\uB2A5\uD55C \uD018\uC2A4\uD2B8"
+  m_text: "\uAC15\uD654 \uD3EC\uC778\uD2B8 \uD68D\uB4DD \uD018\uC2A4\uD2B8"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 1f55a221e169b4b41adc70f72323c1d6, type: 2}
   m_sharedMaterial: {fileID: -731586743875455862, guid: 1f55a221e169b4b41adc70f72323c1d6, type: 2}
@@ -48769,7 +48769,7 @@ MonoBehaviour:
   neededAetherText: {fileID: 0}
   launchButton: {fileID: 1774833542}
   launchCompleteUI: {fileID: 0}
-  launchDelayAfterTransferSeconds: 3
+  launchDelayAfterTransferSeconds: 1.5
   useUnscaledLaunchDelay: 1
   launchCompleteDisplayDuration: 0
   fadeToBlackDuration: 1
@@ -62910,7 +62910,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1654250758
 RectTransform:
   m_ObjectHideFlags: 0

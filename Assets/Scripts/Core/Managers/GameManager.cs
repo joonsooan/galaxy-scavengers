@@ -600,7 +600,7 @@ public class GameManager : MonoBehaviour
                 bool alreadyRegistered = false;
                 foreach (IStorage storage in ResourceManager.Instance.GetAllStorages())
                 {
-                    if ((MainStructure)storage == mainStructure)
+                    if (storage == (IStorage)mainStructure)
                     {
                         alreadyRegistered = true;
                         break;

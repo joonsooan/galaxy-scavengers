@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +23,7 @@ public class InventorySystem : MonoBehaviour
     // [SerializeField] private int inventoryHeight = 5;
     [SerializeField] private int baseCellCount = 25;
     [SerializeField] private int defaultMaxStackAmount = 100;
-    [SerializeField] private List<ResourceStackData> customMaxStackAmounts = new ();
+    [SerializeField] private List<ResourceStackData> customMaxStackAmounts = new();
 
     [Serializable]
     public class ResourceStackData
@@ -32,10 +32,10 @@ public class InventorySystem : MonoBehaviour
         public int maxStackAmount;
     }
 
-    private readonly Dictionary<ResourceType, int> _maxStackAmounts = new ();
+    private readonly Dictionary<ResourceType, int> _maxStackAmounts = new();
 
-    private readonly List<InventoryCell> _inventoryCells = new ();
-    private readonly List<ResourceInfoCellClickable> _resourceInfoCells = new ();
+    private readonly List<InventoryCell> _inventoryCells = new();
+    private readonly List<ResourceInfoCellClickable> _resourceInfoCells = new();
     private GridLayoutGroup _inventoryGrid;
     private RectTransform _resourcePanelContent;
     private bool _isTransferDisabled;
@@ -55,7 +55,7 @@ public class InventorySystem : MonoBehaviour
 
         InitializeInventory();
         InitializeResourcePanel();
-        
+
         if (launchStartButton != null)
         {
             launchStartButton.onClick.AddListener(OnLaunchStartButtonClicked);
@@ -88,7 +88,7 @@ public class InventorySystem : MonoBehaviour
     {
         inventoryPanel.SetActive(false);
     }
-    
+
     private void HideInventoryPanel(Damageable _)
     {
         inventoryPanel.SetActive(false);
@@ -217,7 +217,7 @@ public class InventorySystem : MonoBehaviour
             {
                 cell.Initialize(type, this);
                 _resourceInfoCells.Add(cell);
-                
+
                 if (ResourceManager.Instance != null)
                 {
                     int currentAmount = ResourceManager.Instance.GetResourceAmount(type);
@@ -230,16 +230,16 @@ public class InventorySystem : MonoBehaviour
     public void ToggleInventory()
     {
         bool isActive = inventoryPanel != null && inventoryPanel.activeSelf;
-        
+
         if (inventoryPanel != null)
         {
             inventoryPanel.SetActive(!isActive);
         }
-        
+
         if (currentResourcePanel != null)
         {
             currentResourcePanel.SetActive(!isActive);
-            
+
             if (!isActive)
             {
                 RefreshAllResourceCells();
@@ -251,11 +251,11 @@ public class InventorySystem : MonoBehaviour
     {
         return inventoryPanel;
     }
-    
+
     private void RefreshAllResourceCells()
     {
         if (ResourceManager.Instance == null) return;
-        
+
         foreach (ResourceInfoCellClickable cell in _resourceInfoCells)
         {
             if (cell != null)
@@ -366,7 +366,7 @@ public class InventorySystem : MonoBehaviour
         }
         foreach (IStorage s in storages)
         {
-            if (s != null && (MainStructure)s != mainStructure)
+            if (s != null && s != (IStorage)mainStructure)
             {
                 orderedStorages.Add(s);
             }
@@ -415,7 +415,7 @@ public class InventorySystem : MonoBehaviour
         if (totalAmount > 0)
         {
             ReturnResourceToStorages(type, totalAmount);
-            
+
             foreach (InventoryCell cell in cellsToClear)
             {
                 cell.Clear();
@@ -483,7 +483,7 @@ public class InventorySystem : MonoBehaviour
     public void SortInventory()
     {
         List<InventoryCell> filledCells = _inventoryCells.Where(cell => !cell.IsEmpty()).ToList();
-        
+
         filledCells.Sort((a, b) =>
         {
             int typeComparison = a.ResourceType.CompareTo(b.ResourceType);
@@ -586,7 +586,7 @@ public class InventorySystem : MonoBehaviour
 
     private void OnLaunchStartButtonClicked()
     {
-        if (inventoryPanel != null && inventoryPanel.activeSelf)
+        if (inventoryPanel != null)
         {
             ToggleInventory();
         }
