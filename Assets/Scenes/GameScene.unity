@@ -5401,7 +5401,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   unitParent: {fileID: 1774035406}
-  baseMaxPopulation: 5
+  baseMaxPopulation: 20
 --- !u!1 &318614855
 GameObject:
   m_ObjectHideFlags: 0

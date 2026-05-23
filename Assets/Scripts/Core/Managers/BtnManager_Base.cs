@@ -74,7 +74,7 @@ public class BtnManager_Base : MonoBehaviour
     private void ApplyLocalizedLaunchBarLabels()
     {
         SetButtonLabelText(titleButton, "base.titleScreen", "Title Screen");
-        SetButtonLabelText(coreLaunchButton, "base.coreLaunch", "Core Launch");
+        // SetButtonLabelText(coreLaunchButton, "base.coreLaunch", "Core Launch");
         SetButtonLabelText(tutorialLaunchButton, "base.tutorial", "Tutorial");
     }
 

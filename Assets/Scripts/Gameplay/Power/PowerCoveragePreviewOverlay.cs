@@ -28,11 +28,13 @@ public class PowerCoveragePreviewOverlay : MonoBehaviour
     private void OnEnable()
     {
         BuildingManager.OnBuildingConstructed += OnAnyBuildingConstructed;
+        AreaBuildingDestroyer.OnDemolishComplete += RefreshIfShowing;
     }
 
     private void OnDisable()
     {
         BuildingManager.OnBuildingConstructed -= OnAnyBuildingConstructed;
+        AreaBuildingDestroyer.OnDemolishComplete -= RefreshIfShowing;
     }
 
     private void OnAnyBuildingConstructed(BuildingData data)

@@ -51,6 +51,17 @@ public class LaunchUIController : MonoBehaviour
     private bool _isLaunchPausePanelLockActive;
     private bool _isLaunchSequenceRunning;
 
+    private void Update()
+    {
+        if (launchPanel != null && launchPanel.activeSelf && !_isLaunchSequenceRunning)
+        {
+            if (Input.GetMouseButtonUp(1))
+            {
+                OnCancelLaunch();
+            }
+        }
+    }
+
     private void Awake()
     {
         if (launchPanel != null)
@@ -308,6 +319,11 @@ public class LaunchUIController : MonoBehaviour
     {
         _isLaunchSequenceRunning = true;
         UpdateCachedWaits();
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.SetMainCanvasVisible(false);
+        }
 
         if (BgmManager.Instance != null)
         {

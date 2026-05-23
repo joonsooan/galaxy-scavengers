@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using DG.Tweening;
 using FMODUnity;
 using TMPro;
@@ -115,7 +115,7 @@ public class BaseSceneManager : MonoBehaviour
         SetButtonLabelText(inventoryButton, "base.inventoryTab", "인벤토리 [Tab]");
         SetButtonLabelText(moduleButton, "GameData", "moduleStation.default.name", "모듈 스테이션");
         SetButtonLabelText(mapButton, "title.mapSelection", "맵 선택");
-        SetButtonLabelText(coreLaunchButton, "base.coreLaunch", "코어 발사");
+        // SetButtonLabelText(coreLaunchButton, "base.coreLaunch", "코어 발사");
     }
 
     private static void SetButtonLabelText(Button button, string key, string fallback)

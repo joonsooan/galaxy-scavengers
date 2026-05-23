@@ -577,7 +577,7 @@ MonoBehaviour:
   - m_Id: 2424432051875852
     m_Localized: Now let's process the resources you've mined into higher-tier materials.\nProcessing
       requires power.\nSelect a <color=#FFC107>Generator</color> and place it so
-      that a Storage or the Seed Core falls within its light-blue range.
+      that the Seed Core falls within the light-blue range.
     m_Metadata:
       m_Items: []
   - m_Id: 2424432051875853
