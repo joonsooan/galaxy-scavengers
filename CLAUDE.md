@@ -34,7 +34,7 @@ Unity Test Runner can be run from the command line:
 
 All code must conform to the project guidelines defined in [CODING_STANDARD.md](file:///c:/Unity Projects/galaxy-scavengers/Assets/Scripts/CODING_STANDARD.md).
 
-### Core Summary:
+### Core Summary
 
 - **Style**: PascalCase for types/methods/public fields, camelCase for parameters/local variables, `_` prefix for private static/readonly variables.
 - **Cache**: Cache `GetComponent` in `Awake`/`Start`. Never call it in `Update` or loops.
