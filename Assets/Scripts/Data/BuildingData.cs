@@ -19,7 +19,8 @@ public enum BuildingType
     MainStructure,
     PowerReceiver,
     DataExtractor,
-    ChargingStation
+    ChargingStation,
+    Platform
 }
 
 [CreateAssetMenu(fileName = "New Building Data", menuName = "Building/Building Data")]

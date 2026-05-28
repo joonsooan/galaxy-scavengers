@@ -5237,8 +5237,8 @@ MonoBehaviour:
   wallTile: {fileID: 11400000, guid: 45ac393d882c3784a95c4c965fdebacb, type: 2}
   enemyHomeTile: {fileID: 11400000, guid: 348f5bc6f36c8024883e0096b9432311, type: 2}
   enemyTerritoryTile: {fileID: 11400000, guid: b12fd5aa50a0e98408c4617860e0ba38, type: 2}
-  width: 128
-  height: 128
+  width: 192
+  height: 192
   useProceduralTerrain: 1
   seed: 0
   randomSeed: 1
@@ -48928,7 +48928,7 @@ MonoBehaviour:
   currentResourcePanel: {fileID: 471620567}
   launchStartButton: {fileID: 1044308504}
   inventoryCellPrefab: {fileID: 3842191235755297668, guid: 8498ec9675c94044fb15b7a2df1b1878, type: 3}
-  resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: 3bcedb5ddd3f4124da52d7ef7cd2bd2e, type: 3}
+  resourceInfoCellPrefab: {fileID: 6155155196410172978, guid: 87d776b852749c2428050baaea9b40b1, type: 3}
   baseCellCount: 20
   defaultMaxStackAmount: 100
   customMaxStackAmounts:

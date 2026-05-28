@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9e7aa4ffe54aa64cb07513ab38fd7c3, type: 3}
+  m_Name: 11_Platform
+  m_EditorClassIdentifier: 
+  displayName: "\uD50C\uB7AB\uD3FC \uD310"
+  description: "\uBC1C\uC0AC \uC2DC \uD50C\uB7AB\uD3FC \uC704\uC758 \uAC74\uBB3C,
+    \uC720\uB2DB\uC774 \uC6B4\uBC18\uB429\uB2C8\uB2E4."
+  icon: {fileID: -9211487210531450170, guid: 2deabe0ff9e9b9b42aeafcfcf9e191e3, type: 3}
+  localizationTable: GameData
+  displayNameKey: building.receiver.name
+  descriptionKey: building.receiver.desc
+  buildingPrefab: {fileID: 1574451153020646121, guid: d8842f463c44719478aa57a621762ea1, type: 3}
+  buildingTile: {fileID: 11400000, guid: a9879f8451c56c0429aa389e7db66acc, type: 2}
+  buildingType: 15
+  recipe:
+  - buildingPieceType: 5
+    relativePosition: {x: 0, y: 0, z: 0}
+  noiseCoefficient: 0
