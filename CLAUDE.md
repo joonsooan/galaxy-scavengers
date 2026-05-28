@@ -32,28 +32,14 @@ Unity Test Runner can be run from the command line:
 
 ## Code Conventions (C# / Unity)
 
-### Naming Styles
+All code must conform to the project guidelines defined in [CODING_STANDARD.md](file:///c:/Unity Projects/galaxy-scavengers/Assets/Scripts/CODING_STANDARD.md).
 
-- **PascalCase**: Classes, Structs, Enums, Methods, Properties, Public fields, Events (`GameManager`, `SpawnUnits()`).
-- **camelCase**: Method parameters, local variables (`unitData`, `count`).
-- **Private Fields**: Prefix with camelCase (or prefix with `_` for static/readonly variables, e.g. `_tickWait`).
+### Core Summary:
 
-### Unity Best Practices & Optimization
-
-- **`GetComponent` Caching**: Cache `GetComponent` references in `Awake()` or `Start()`. NEVER call `GetComponent`, `FindObjectOfType`, or camera reference properties (like `Camera.main`) in `Update()`, `FixedUpdate()`, `LateUpdate()`, or inside performance-critical loops.
-- **Coroutine Yield Instruction Caching**: Use the utility `CoroutineCache` instead of instantiating `new WaitForSeconds(...)` to avoid GC allocation:
-  - Use `CoroutineCache.GetWaitForSeconds(1f)`
-  - Use `CoroutineCache.GetWaitForSecondsRealtime(1f)`
-  - Use `CoroutineCache.GetWaitForEndOfFrame()`
-  - Use `CoroutineCache.GetWaitForFixedUpdate()`
-- **CompareTag**: Use `other.CompareTag("Player")` instead of `other.tag == "Player"` (reduces GC allocation).
-- **String reference alternatives**: Avoid string-based APIs like `Invoke`, `InvokeRepeating`, or `SendMessage`. Use Coroutines or standard C# events/actions.
-
-### ⚠️ CRITICAL Gotcha: Unity Object Null Checks
-
-- **NEVER use null-coalescing (`??`) or null-conditional (`?.`) operators** on variables inheriting from `UnityEngine.Object` (such as `MonoBehaviour`, `GameObject`, `Transform`, `Component`, `ScriptableObject`).
-- **Why**: Unity overrides the `==` and `!=` operators for these objects to check if the underlying native C++ object is destroyed. The `?.` and `??` operators bypass this custom C++ lifetime check, which can lead to bugs where a destroyed Unity object is incorrectly treated as active.
-- **Rule**: Always check for null using standard `if (obj == null)` or `if (obj != null)`.
+- **Style**: PascalCase for types/methods/public fields, camelCase for parameters/local variables, `_` prefix for private static/readonly variables.
+- **Cache**: Cache `GetComponent` in `Awake`/`Start`. Never call it in `Update` or loops.
+- **GC/Memory**: Use `CoroutineCache` instead of `new WaitForSeconds`. Avoid LINQ/lambda expressions in `Update()` or hot paths. Use `CompareTag` instead of `tag ==`.
+- **⚠️ Null Checks**: Do NOT use `?.`, `??`, or `ReferenceEquals(obj, null)` on variables inheriting from `UnityEngine.Object`. Use standard `== null` or `!= null` instead.
 
 ---
 
@@ -71,16 +57,16 @@ Unity Test Runner can be run from the command line:
 
 The project is structured with specialized subagents located in `.claude/agents/` to handle specific domains:
 
-- `unity-core-architect`: Manages singleton manager scripts, scene loading, saving/loading, and overall framework structure (`Assets/Scripts/Core/`).
-- `unity-gameplay-coder`: Manages gameplay mechanics, units, buildings, resources, energy grids (`Assets/Scripts/Gameplay/`).
+- `unity-core-architect`: Manages singleton manager scripts, scene loading, saving/loading, and overall framework structure (`Assets/Scripts/Core/`). Also manages system-level ScriptableObject data definitions (`Assets/Scripts/Data/`).
+- `unity-gameplay-coder`: Manages gameplay mechanics, units, buildings, resources, energy grids (`Assets/Scripts/Gameplay/`). Also manages gameplay-specific ScriptableObject configurations (`Assets/Scripts/Data/`).
 - `unity-ui-specialist`: Manages UI HUD panels, quest logs, alerts, localized text, and UI animations (`Assets/Scripts/UI/`).
 - `unity-audio-fmod`: Manages audio event playbacks, FMOD parameters, and sound integration (`Assets/FMOD/`, `Assets/Scripts/Audio/`).
 - `unity-perf-auditor`: A read-only auditor that scans code for Unity-specific performance problems and bad patterns.
 
 ### Orchestration Guidelines
 
-- **Gameplay code changes**: Delegate script updates inside `Assets/Scripts/Gameplay/` to `unity-gameplay-coder`.
+- **Gameplay code changes**: Delegate script updates inside `Assets/Scripts/Gameplay/` and gameplay-related definitions in `Assets/Scripts/Data/` to `unity-gameplay-coder`.
 - **UI changes**: Delegate script updates inside `Assets/Scripts/UI/` to `unity-ui-specialist`.
-- **Core system changes**: Delegate changes in `Assets/Scripts/Core/` to `unity-core-architect`.
+- **Core system changes**: Delegate changes in `Assets/Scripts/Core/` and system data configurations in `Assets/Scripts/Data/` to `unity-core-architect`.
 - **Performance audits**: Run `unity-perf-auditor` to check files for potential bugs or optimizations.
 - **Audio triggers**: Delegate FMOD bindings and audio management to `unity-audio-fmod`.
