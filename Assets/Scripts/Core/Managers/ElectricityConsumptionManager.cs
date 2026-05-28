@@ -27,6 +27,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
     private readonly List<MainStructure> _mainStructures = new List<MainStructure>();
     private readonly List<IStorage> _electricityWithdrawOrderBuffer = new List<IStorage>();
     private readonly List<PoweredConsumerWork> _poweredConsumerSortBuffer = new List<PoweredConsumerWork>();
+    private readonly HashSet<long> _poweredCellsXYKeys = new HashSet<long>();
     private readonly Dictionary<ResourceGenerator, PowerFeedVisualState> _resourceGeneratorVisualStates = new Dictionary<ResourceGenerator, PowerFeedVisualState>();
 
     private struct PoweredConsumerWork
@@ -488,7 +489,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
         PowerGridConnectivity.AnalyzePowerGrid(_powerNodesBuffer, out HashSet<Vector3Int> poweredCells,
             out bool[] nodeConnected, out int[] nodeSourcedComponentId, out List<BoundsInt> nodeBounds);
 
-        HashSet<long> poweredCellsXY = BuildPoweredCellsXYKeys(poweredCells);
+        BuildPoweredCellsXYKeys(poweredCells, _poweredCellsXYKeys);
 
         _poweredConsumerSortBuffer.Clear();
         for (int i = _electricityConsumers.Count - 1; i >= 0; i--)
@@ -507,7 +508,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
                 continue;
             }
 
-            bool powered = IsConsumerFullyPowered(consumer, poweredCellsXY);
+            bool powered = IsConsumerFullyPowered(consumer, _poweredCellsXYKeys);
             bool wasOperational = _consumerStates.ContainsKey(consumer) && _consumerStates[consumer];
 
             if (!powered)
@@ -521,7 +522,7 @@ public class ElectricityConsumptionManager : MonoBehaviour
                 continue;
             }
 
-            if (!TryFindConsumerPowerComponentId(consumer, _powerNodesBuffer, nodeBounds, nodeSourcedComponentId, poweredCellsXY, out int compId))
+            if (!TryFindConsumerPowerComponentId(consumer, _powerNodesBuffer, nodeBounds, nodeSourcedComponentId, _poweredCellsXYKeys, out int compId))
             {
                 _consumerVisualStates[consumer] = PowerFeedVisualState.Disconnected;
                 if (wasOperational)
@@ -674,18 +675,17 @@ public class ElectricityConsumptionManager : MonoBehaviour
         OnAfterElectricityConsumersResolved?.Invoke();
     }
 
-    private static HashSet<long> BuildPoweredCellsXYKeys(HashSet<Vector3Int> poweredCells)
+    private static void BuildPoweredCellsXYKeys(HashSet<Vector3Int> poweredCells, HashSet<long> outKeys)
     {
-        HashSet<long> keys = new HashSet<long>();
+        outKeys.Clear();
         if (poweredCells == null || poweredCells.Count == 0)
         {
-            return keys;
+            return;
         }
         foreach (Vector3Int p in poweredCells)
         {
-            keys.Add(PackCellXY(p.x, p.y));
+            outKeys.Add(PackCellXY(p.x, p.y));
         }
-        return keys;
     }
 
     private static long PackCellXY(int x, int y)

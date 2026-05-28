@@ -535,8 +535,13 @@ public class Unit_Construct : UnitBase
             return false;
         }
 
-        Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
-        Vector3 targetPosition = _currentRequest.site.AssignDeliveryInteractionCell(this, targetPieceCell);
+        Vector3 targetPosition = movement.FinalTargetPosition;
+        if (targetPosition == default)
+        {
+            Vector3Int targetPieceCell = _currentRequest.targetPieceCell ?? _currentRequest.site.cellPosition;
+            targetPosition = _currentRequest.site.AssignDeliveryInteractionCell(this, targetPieceCell);
+        }
+
         float sqrDistanceToTarget = (transform.position - targetPosition).sqrMagnitude;
         float arrivalTolerance = movement.waypointTolerance + 0.2f;
 

@@ -234,7 +234,15 @@ public class UnitMovement : MonoBehaviour
         Vector3Int targetCellPos = _grid.WorldToCell(targetPosition);
         Vector3Int targetCellForPathfinding = targetCellPos;
 
-        if (BuildingManager.Instance != null && BuildingManager.Instance.GetBuildingAt(targetCellPos, out List<Vector3Int> cells))
+        bool isPlatformOnly = false;
+        if (PlatformRegistry.GetPlatformAtCell(targetCellPos) != null && BuildingManager.Instance != null && !BuildingManager.Instance.HasNonPlatformBuildingAt(targetCellPos)) {
+            isPlatformOnly = true;
+        }
+
+        if (isPlatformOnly) {
+            targetCellForPathfinding = targetCellPos;
+        }
+        else if (BuildingManager.Instance != null && BuildingManager.Instance.GetBuildingAt(targetCellPos, out List<Vector3Int> cells))
         {
             targetCellForPathfinding = FindBestInteractionCell(cells, transform.position);
 

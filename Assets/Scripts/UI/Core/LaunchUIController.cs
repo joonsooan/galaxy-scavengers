@@ -223,24 +223,12 @@ public class LaunchUIController : MonoBehaviour
             RuntimeManager.PlayOneShot(buttonClickSound);
         }
 
-        InventorySystem inventorySystem = GetLaunchInventorySystem();
-        if (inventorySystem == null)
-        {
-            return;
-        }
-
         if (launchPanel != null)
         {
             launchPanel.SetActive(false);
         }
-        
-        if (GameManager.Instance != null && !GameManager.Instance.IsPaused)
-        {
-            GameManager.Instance.TogglePause();
-        }
-        SetLaunchPausePanelLock(true);
-        _isPrepareLaunchActive = true;
-        inventorySystem.ToggleInventory();
+
+        StartLaunchSequence();
     }
 
     public void OnCancelLaunchPrepare()
@@ -364,11 +352,7 @@ public class LaunchUIController : MonoBehaviour
             BgmManager.Instance.StopBgm(bgmFadeOutTime);
         }
 
-        InventorySystem inventorySystem = GetLaunchInventorySystem();
-        if (inventorySystem != null)
-        {
-            inventorySystem.TransferAllToBaseInventory();
-        }
+
 
         OnLaunchSequenceStarted?.Invoke();
 
@@ -409,7 +393,8 @@ public class LaunchUIController : MonoBehaviour
         _launchSequenceCoroutine = null;
         OnLaunchSequenceFinished?.Invoke();
 
-        SceneLoader.Instance.LoadBaseScene(SceneLoader.ReturnFromGameState.Success);
+        BaseCarryOverManager.SaveBaseState();
+        SceneLoader.Instance.LoadGameScene();
     }
 
     private IEnumerator FadeToBlack()
