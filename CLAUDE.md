@@ -70,6 +70,7 @@ Unity Test Runner can be run from the command line:
 ## Claude Subagents & Orchestration
 
 The project is structured with specialized subagents located in `.claude/agents/` to handle specific domains:
+
 - `unity-core-architect`: Manages singleton manager scripts, scene loading, saving/loading, and overall framework structure (`Assets/Scripts/Core/`).
 - `unity-gameplay-coder`: Manages gameplay mechanics, units, buildings, resources, energy grids (`Assets/Scripts/Gameplay/`).
 - `unity-ui-specialist`: Manages UI HUD panels, quest logs, alerts, localized text, and UI animations (`Assets/Scripts/UI/`).
@@ -77,9 +78,9 @@ The project is structured with specialized subagents located in `.claude/agents/
 - `unity-perf-auditor`: A read-only auditor that scans code for Unity-specific performance problems and bad patterns.
 
 ### Orchestration Guidelines
+
 - **Gameplay code changes**: Delegate script updates inside `Assets/Scripts/Gameplay/` to `unity-gameplay-coder`.
 - **UI changes**: Delegate script updates inside `Assets/Scripts/UI/` to `unity-ui-specialist`.
 - **Core system changes**: Delegate changes in `Assets/Scripts/Core/` to `unity-core-architect`.
 - **Performance audits**: Run `unity-perf-auditor` to check files for potential bugs or optimizations.
 - **Audio triggers**: Delegate FMOD bindings and audio management to `unity-audio-fmod`.
-
