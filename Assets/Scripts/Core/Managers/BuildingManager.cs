@@ -51,6 +51,14 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
+    public Tilemap BuildingTilemap
+    {
+        get
+        {
+            return buildingTilemap;
+        }
+    }
+
     public static BuildingManager Instance { get; private set; }
 
     private void Awake()
@@ -787,13 +795,22 @@ public class BuildingManager : MonoBehaviour
             size = size
         };
 
+        bool isPlacingPlatform = data != null && data.buildingType == BuildingType.Platform;
+        bool isUnderMainStructure = isPlacingPlatform && IsMainStructureCell(originPos);
+
         foreach (Vector3Int targetPos in recipePositions)
         {
-            RemoveBuildingPieceAtPosition(targetPos);
+            if (!isUnderMainStructure)
+            {
+                RemoveBuildingPieceAtPosition(targetPos, isPlacingPlatform);
+            }
             structure.occupiedCells.Add(targetPos);
         }
 
-        RegisterBuildingStructure(structure);
+        if (!isUnderMainStructure)
+        {
+            RegisterBuildingStructure(structure);
+        }
 
         Vector3 worldPos = grid.GetCellCenterWorld(originPos);
         pieceObject = Instantiate(data.buildingPrefab, worldPos, Quaternion.identity, buildingParentTransform);
@@ -813,7 +830,7 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
-    private void CreateBuilding(Vector3Int originPos, BuildingData data)
+    public void CreateBuilding(Vector3Int originPos, BuildingData data)
     {
         InstantiateAndRegisterBuilding(originPos, data, out List<Vector3Int> recipePositions, out GameObject pieceObject);
 
@@ -842,8 +859,6 @@ public class BuildingManager : MonoBehaviour
         {
             OnTilemapChanged?.Invoke(targetPos);
         }
-
-        Debug.Log($"Building '{data.displayName}' Created");
 
         OnBuildingConstructed?.Invoke(data);
     }
@@ -1003,15 +1018,39 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
-    private void RemoveBuildingPieceAtPosition(Vector3Int cellPos)
+    private void RemoveBuildingPieceAtPosition(Vector3Int cellPos, bool isPlacingPlatform = false)
     {
-        UnregisterBuildingStructure(cellPos);
+        if (isPlacingPlatform)
+        {
+            if (_placedPieces.TryGetValue(cellPos, out BuildingPiece existingPiece) && existingPiece != null)
+            {
+                if (existingPiece.buildingPieceType != BuildingPieceType.None)
+                {
+                    if (!IsMainStructureCell(cellPos))
+                    {
+                        UnregisterBuildingStructure(cellPos);
+                    }
+                    _placedPieces.Remove(cellPos);
+                    Destroy(existingPiece.gameObject);
+                    buildingTilemap.SetTile(cellPos, null);
+                }
+            }
+            return;
+        }
+
+        if (!IsMainStructureCell(cellPos))
+        {
+            UnregisterBuildingStructure(cellPos);
+        }
 
         if (_placedPieces.Remove(cellPos, out BuildingPiece piece))
         {
             if (piece != null)
             {
-                Destroy(piece.gameObject);
+                if (!IsPlatformPiece(piece))
+                {
+                    Destroy(piece.gameObject);
+                }
             }
         }
         buildingTilemap.SetTile(cellPos, null);
@@ -1301,6 +1340,16 @@ public class BuildingManager : MonoBehaviour
         }
 
         Debug.Log($"[BuildingManager] Registered pre-placed building at {cellPosition} (Type: {buildingPiece.buildingPieceType})");
+    }
+
+    public BuildingData GetBuildingDataByType(BuildingType type)
+    {
+        if (_buildingDataList == null) return null;
+        for (int i = 0; i < _buildingDataList.Count; i++)
+        {
+            if (_buildingDataList[i].buildingType == type) return _buildingDataList[i];
+        }
+        return null;
     }
 
     private class BuildingStructure

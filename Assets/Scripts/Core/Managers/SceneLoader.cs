@@ -148,6 +148,10 @@ public class SceneLoader : MonoBehaviour
 
     private IEnumerator LoadGameplaySceneAsync(string targetSceneName)
     {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ResetInitializationState();
+        }
         _isLoading = true;
         UpdateCachedWaits();
         

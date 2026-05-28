@@ -432,6 +432,12 @@ public class GameManager : MonoBehaviour
         return _activeCardData;
     }
 
+    public void ResetInitializationState()
+    {
+        IsGameSceneInitialized = false;
+        IsGameplayReady = false;
+    }
+
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         if (scene.name == "GameScene" || scene.name == "TutorialScene")
@@ -517,6 +523,10 @@ public class GameManager : MonoBehaviour
         }
 
         yield return StartCoroutine(InitializeSpawnersAndUnitsAsync(progress, skipProceduralGenerationWhenLoadingGameScene));
+        if (BaseCarryOverManager.HasCarriedOverData)
+        {
+            BaseCarryOverManager.RestoreBaseState();
+        }
         yield return StartCoroutine(WaitForFogOfWarInitializationAsync(progress));
 
         if (progress != null)
@@ -562,7 +572,13 @@ public class GameManager : MonoBehaviour
         foreach (BuildingSpawner spawner in FindObjectsByType<BuildingSpawner>(FindObjectsSortMode.None))
         {
             spawner.SpawnBuildings();
-            if (spawner.BuildingTilemap != null) spawner.BuildingTilemap.gameObject.SetActive(false);
+            if (spawner.BuildingTilemap != null)
+            {
+                if (BuildingManager.Instance == null || spawner.BuildingTilemap != BuildingManager.Instance.BuildingTilemap)
+                {
+                    spawner.BuildingTilemap.gameObject.SetActive(false);
+                }
+            }
         }
 
         RegisterPrePlacedMainStructure();
@@ -619,6 +635,22 @@ public class GameManager : MonoBehaviour
                 Vector3Int cellPos = BuildingManager.Instance.grid.WorldToCell(mainStructure.transform.position);
                 Vector3Int anchorCell = cellPos - new Vector3Int(1, 1, 0);
                 BuildingManager.Instance.RegisterMainStructure(anchorCell, new Vector2Int(3, 3), mainStructure);
+
+                BuildingData platformData = BuildingManager.Instance.GetBuildingDataByType(BuildingType.Platform);
+                if (platformData != null)
+                {
+                    for (int x = 0; x < 3; x++)
+                    {
+                        for (int y = 0; y < 3; y++)
+                        {
+                            Vector3Int targetPos = anchorCell + new Vector3Int(x, y, 0);
+                            if (PlatformRegistry.GetPlatformAtCell(targetPos) == null)
+                            {
+                                BuildingManager.Instance.CreateBuilding(targetPos, platformData);
+                            }
+                        }
+                    }
+                }
             }
 
             if (TargetManager.Instance != null)

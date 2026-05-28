@@ -11,6 +11,12 @@ public class ResourceTransferManager : MonoBehaviour
 
     private Dictionary<ResourceType, int> _pendingResources = null;
 
+    public Dictionary<ResourceType, int> PendingResources
+    {
+        get { return _pendingResources; }
+        set { _pendingResources = value; }
+    }
+
     private void Awake()
     {
         if (Instance == null)

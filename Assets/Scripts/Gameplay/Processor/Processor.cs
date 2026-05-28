@@ -316,6 +316,20 @@ public class Processor : Damageable, IClickable, IElectricityConsumer
         _recipes.Sort((a, b) => a.priority.CompareTo(b.priority));
     }
 
+    public IReadOnlyDictionary<ResourceType, int> GetCurrentIngredients()
+    {
+        return _currentIngredients;
+    }
+
+    public void RestoreIngredients(Dictionary<ResourceType, int> ingredients)
+    {
+        if (ingredients == null) return;
+        foreach (var kvp in ingredients)
+        {
+            _currentIngredients[kvp.Key] = kvp.Value;
+        }
+    }
+
     public void AssignDrone(Unit_Processor drone)
     {
         if (!_assignedDrones.Contains(drone) && !IsFull)
