@@ -24,6 +24,7 @@ public class NoiseManager : MonoBehaviour
 #endif
 
     private readonly HashSet<Damageable> _registeredBuildings = new HashSet<Damageable>();
+    private readonly Dictionary<Damageable, float> _buildingNoiseCache = new Dictionary<Damageable, float>();
     private readonly HashSet<UnitBase> _registeredUnits = new HashSet<UnitBase>();
     private float _barrierNoiseCoefficient;
     private float _totalNoise;
@@ -110,6 +111,15 @@ public class NoiseManager : MonoBehaviour
     {
         if (building == null) return;
         _registeredBuildings.Add(building);
+
+        float coef = 0f;
+        BuildingDataHolder dataHolder = building.GetComponent<BuildingDataHolder>();
+        if (dataHolder != null && dataHolder.buildingData != null)
+        {
+            coef = dataHolder.buildingData.noiseCoefficient;
+        }
+        _buildingNoiseCache[building] = coef;
+
         RecalculateNoise();
     }
 
@@ -117,6 +127,7 @@ public class NoiseManager : MonoBehaviour
     {
         if (building == null) return;
         _registeredBuildings.Remove(building);
+        _buildingNoiseCache.Remove(building);
         RecalculateNoise();
     }
 
@@ -147,10 +158,19 @@ public class NoiseManager : MonoBehaviour
         {
             if (building == null) continue;
 
-            BuildingDataHolder dataHolder = building.GetComponent<BuildingDataHolder>();
-            if (dataHolder != null && dataHolder.buildingData != null)
+            if (_buildingNoiseCache.TryGetValue(building, out float coef))
             {
-                buildingNoise += dataHolder.buildingData.noiseCoefficient;
+                buildingNoise += coef;
+            }
+            else
+            {
+                BuildingDataHolder dataHolder = building.GetComponent<BuildingDataHolder>();
+                if (dataHolder != null && dataHolder.buildingData != null)
+                {
+                    coef = dataHolder.buildingData.noiseCoefficient;
+                }
+                _buildingNoiseCache[building] = coef;
+                buildingNoise += coef;
             }
         }
 

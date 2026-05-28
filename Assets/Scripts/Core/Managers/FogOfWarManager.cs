@@ -287,21 +287,22 @@ public class FogOfWarManager : MonoBehaviour
         if (grid == null || tilesToCheck == null || tilesToCheck.Count == 0) return;
 
         Dictionary<Vector3Int, FogOfWarState> newVisibility = new Dictionary<Vector3Int, FogOfWarState>(tilesToCheck.Count);
-        HashSet<Vector3Int> allVisibleTiles = new HashSet<Vector3Int>();
-
-        foreach (KeyValuePair<IVisionProvider, HashSet<Vector3Int>> kvp in _providerAffectedTiles)
-        {
-            if (kvp.Key != null && kvp.Value != null)
-            {
-                allVisibleTiles.UnionWith(kvp.Value);
-            }
-        }
 
         foreach (Vector3Int tile in tilesToCheck)
         {
             FogOfWarState state = _exploredTiles.Contains(tile) ? FogOfWarState.PartlyVisible : FogOfWarState.Invisible;
 
-            if (allVisibleTiles.Contains(tile))
+            bool isTileVisible = false;
+            foreach (KeyValuePair<IVisionProvider, HashSet<Vector3Int>> kvp in _providerAffectedTiles)
+            {
+                if (kvp.Key != null && kvp.Value != null && kvp.Value.Contains(tile))
+                {
+                    isTileVisible = true;
+                    break;
+                }
+            }
+
+            if (isTileVisible)
             {
                 state = FogOfWarState.FullyVisible;
 
@@ -416,8 +417,6 @@ public class FogOfWarManager : MonoBehaviour
             tilesToCheck.Add(exploredTile);
         }
 
-        HashSet<Vector3Int> allVisibleTiles = new HashSet<Vector3Int>();
-
         foreach (KeyValuePair<IVisionProvider, HashSet<Vector3Int>> kvp in _providerAffectedTiles)
         {
             if (kvp.Key != null && kvp.Value != null)
@@ -426,7 +425,6 @@ public class FogOfWarManager : MonoBehaviour
                 {
                     tilesToCheck.Add(tile);
                 }
-                allVisibleTiles.UnionWith(kvp.Value);
             }
         }
 
@@ -445,7 +443,17 @@ public class FogOfWarManager : MonoBehaviour
         {
             FogOfWarState state = _exploredTiles.Contains(tile) ? FogOfWarState.PartlyVisible : FogOfWarState.Invisible;
 
-            if (allVisibleTiles.Contains(tile))
+            bool isTileVisible = false;
+            foreach (KeyValuePair<IVisionProvider, HashSet<Vector3Int>> kvp in _providerAffectedTiles)
+            {
+                if (kvp.Key != null && kvp.Value != null && kvp.Value.Contains(tile))
+                {
+                    isTileVisible = true;
+                    break;
+                }
+            }
+
+            if (isTileVisible)
             {
                 state = FogOfWarState.FullyVisible;
 

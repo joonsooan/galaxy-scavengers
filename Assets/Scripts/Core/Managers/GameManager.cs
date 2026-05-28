@@ -33,6 +33,7 @@ public class GameManager : MonoBehaviour
     private DisplayableData _activeCardData;
     private float _lastDragEndUnscaledTime = -999f;
 
+    private LaunchUIController _cachedLaunchUIController;
     private float _savedTimeScale = 1f;
     private static readonly WaitForSeconds _wait05 = CoroutineCache.GetWaitForSeconds(0.5f);
     public static GameManager Instance { get; private set; }
@@ -102,10 +103,13 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        LaunchUIController launchUIController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
-        bool isPauseInputLocked = launchUIController != null && launchUIController.IsPauseInputLocked();
-        bool isLaunchMenuInputBlocked = launchUIController != null && launchUIController.IsMenuInputBlocked();
-        bool isCountdownSequenceActive = launchUIController != null && launchUIController.IsCountdownSequenceActive();
+        if (_cachedLaunchUIController == null)
+        {
+            _cachedLaunchUIController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
+        }
+        bool isPauseInputLocked = _cachedLaunchUIController != null && _cachedLaunchUIController.IsPauseInputLocked();
+        bool isLaunchMenuInputBlocked = _cachedLaunchUIController != null && _cachedLaunchUIController.IsMenuInputBlocked();
+        bool isCountdownSequenceActive = _cachedLaunchUIController != null && _cachedLaunchUIController.IsCountdownSequenceActive();
 
         if (!isPauseInputLocked && !isCountdownSequenceActive && Input.GetKeyDown(KeyCode.Space))
         {
@@ -442,6 +446,7 @@ public class GameManager : MonoBehaviour
     {
         if (scene.name == "GameScene" || scene.name == "TutorialScene")
         {
+            _cachedLaunchUIController = null;
             UnitProcessResourceStatTracker.ResetAllStats();
             _isGameOverProcessing = false;
             IsPaused = false;
@@ -463,6 +468,7 @@ public class GameManager : MonoBehaviour
         mapGenerator = FindFirstObjectByType<MapGenerator>();
         uiManager = FindFirstObjectByType<UIManager>();
         cardDragger = FindFirstObjectByType<CardDragger>();
+        _cachedLaunchUIController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
 
         StartCoroutine(WaitForEntryAnimationAndInitialize());
     }

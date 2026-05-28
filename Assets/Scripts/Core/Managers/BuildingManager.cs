@@ -29,6 +29,7 @@ public class BuildingManager : MonoBehaviour
 
     private readonly HashSet<Vector3Int> _walkableCells = new HashSet<Vector3Int>();
     private readonly HashSet<Vector3Int> _terrainCells = new HashSet<Vector3Int>();
+    private readonly Dictionary<Transform, (Vector3Int anchor, List<Vector3Int> occupiedCells)> _transformToFootprintCache = new Dictionary<Transform, (Vector3Int, List<Vector3Int>)>();
 
     [Header("Buildings")]
     private List<BuildingData> _buildingDataList;
@@ -444,12 +445,14 @@ public class BuildingManager : MonoBehaviour
     {
         _walkableCells.Clear();
         _terrainCells.Clear();
+        _transformToFootprintCache.Clear();
     }
 
     public void InitializeWalkableCellCache(BoundsInt mapBounds)
     {
         _walkableCells.Clear();
         _terrainCells.Clear();
+        _transformToFootprintCache.Clear();
 
         MapGenerator mapGenerator = GetMapGenerator();
         if (mapGenerator == null || groundTilemap == null) return;
@@ -1088,63 +1091,85 @@ public class BuildingManager : MonoBehaviour
             return false;
         }
 
+        if (_transformToFootprintCache.TryGetValue(buildingTransform, out var cached))
+        {
+            anchor = cached.anchor;
+            occupiedCells = cached.occupiedCells;
+            return true;
+        }
+
+        bool found = false;
         MainStructure mainStructure = buildingTransform.GetComponent<MainStructure>() ??
                                       buildingTransform.GetComponentInParent<MainStructure>(true);
         if (mainStructure != null && TryGetFootprintForRegisteredMainStructure(mainStructure, out anchor, out occupiedCells))
         {
-            return true;
-        }
-
-        BuildingPiece piece = buildingTransform.GetComponent<BuildingPiece>();
-        if (piece == null)
-        {
-            piece = buildingTransform.GetComponentInParent<BuildingPiece>(true);
-        }
-
-        Vector3Int lookupCell;
-        if (piece != null)
-        {
-            lookupCell = piece.cellPosition;
-            if (_cellToStructureMap.TryGetValue(lookupCell, out BuildingStructure structure))
-            {
-                anchor = structure.anchor;
-                occupiedCells = structure.occupiedCells;
-                return true;
-            }
-            foreach (KeyValuePair<Vector3Int, BuildingPiece> kvp in _placedPieces)
-            {
-                if (kvp.Value != piece)
-                {
-                    continue;
-                }
-                if (_cellToStructureMap.TryGetValue(kvp.Key, out structure))
-                {
-                    anchor = structure.anchor;
-                    occupiedCells = structure.occupiedCells;
-                    return true;
-                }
-            }
+            found = true;
         }
         else
         {
-            lookupCell = grid.WorldToCell(buildingTransform.position);
-            if (_cellToStructureMap.TryGetValue(lookupCell, out BuildingStructure structure))
+            BuildingPiece piece = buildingTransform.GetComponent<BuildingPiece>();
+            if (piece == null)
             {
-                anchor = structure.anchor;
-                occupiedCells = structure.occupiedCells;
-                return true;
+                piece = buildingTransform.GetComponentInParent<BuildingPiece>(true);
+            }
+
+            Vector3Int lookupCell;
+            if (piece != null)
+            {
+                lookupCell = piece.cellPosition;
+                if (_cellToStructureMap.TryGetValue(lookupCell, out BuildingStructure structure))
+                {
+                    anchor = structure.anchor;
+                    occupiedCells = structure.occupiedCells;
+                    found = true;
+                }
+                else
+                {
+                    foreach (KeyValuePair<Vector3Int, BuildingPiece> kvp in _placedPieces)
+                    {
+                        if (kvp.Value != piece)
+                        {
+                            continue;
+                        }
+                        if (_cellToStructureMap.TryGetValue(kvp.Key, out structure))
+                        {
+                            anchor = structure.anchor;
+                            occupiedCells = structure.occupiedCells;
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                lookupCell = grid.WorldToCell(buildingTransform.position);
+                if (_cellToStructureMap.TryGetValue(lookupCell, out BuildingStructure structure))
+                {
+                    anchor = structure.anchor;
+                    occupiedCells = structure.occupiedCells;
+                    found = true;
+                }
+            }
+
+            if (!found)
+            {
+                Vector3Int worldCell = grid.WorldToCell(buildingTransform.position);
+                if (worldCell != lookupCell && _cellToStructureMap.TryGetValue(worldCell, out BuildingStructure structureWorld))
+                {
+                    anchor = structureWorld.anchor;
+                    occupiedCells = structureWorld.occupiedCells;
+                    found = true;
+                }
             }
         }
 
-        Vector3Int worldCell = grid.WorldToCell(buildingTransform.position);
-        if (worldCell != lookupCell && _cellToStructureMap.TryGetValue(worldCell, out BuildingStructure structureWorld))
+        if (found)
         {
-            anchor = structureWorld.anchor;
-            occupiedCells = structureWorld.occupiedCells;
-            return true;
+            _transformToFootprintCache[buildingTransform] = (anchor, occupiedCells);
         }
 
-        return false;
+        return found;
     }
 
     private bool TryGetFootprintForRegisteredMainStructure(MainStructure mainStructure, out Vector3Int anchor,
@@ -1210,6 +1235,7 @@ public class BuildingManager : MonoBehaviour
 
     private void RegisterBuildingStructure(BuildingStructure structure)
     {
+        _transformToFootprintCache.Clear();
         if (_buildingStructuresByAnchor.ContainsKey(structure.anchor))
         {
             UnregisterBuildingStructure(structure.anchor);
@@ -1225,6 +1251,7 @@ public class BuildingManager : MonoBehaviour
 
     public void RegisterMainStructure(Vector3Int anchorCell, Vector2Int size, MainStructure mainStructureInstance = null)
     {
+        _transformToFootprintCache.Clear();
         BuildingStructure structure = new BuildingStructure
         {
             anchor = anchorCell,
@@ -1266,6 +1293,7 @@ public class BuildingManager : MonoBehaviour
 
     private void UnregisterBuildingStructure(Vector3Int anchor)
     {
+        _transformToFootprintCache.Clear();
         _mainStructureInstanceByAnchor.Remove(anchor);
         if (_buildingStructuresByAnchor.Remove(anchor, out BuildingStructure structure))
         {

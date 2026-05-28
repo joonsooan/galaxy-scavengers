@@ -85,7 +85,6 @@ public class BaseInventoryManager : MonoBehaviour
     {
         string key = BaseInventoryPrefix + type;
         PlayerPrefs.SetInt(key, _baseInventory[type]);
-        PlayerPrefs.Save();
     }
 
     private void LoadInventory()
@@ -108,6 +107,7 @@ public class BaseInventoryManager : MonoBehaviour
         {
             SaveResource(type);
         }
+        PlayerPrefs.Save();
     }
 
     public void ClearAllInventory()

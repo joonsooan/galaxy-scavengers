@@ -35,12 +35,20 @@ public class BuildingUnlockManager : MonoBehaviour
     private void UnlockAllBuildings()
     {
         BuildingData[] allBuildings = Resources.LoadAll<BuildingData>("Building Data");
+        bool anyUnlocked = false;
         foreach (BuildingData building in allBuildings)
         {
-            if (building != null)
+            if (building != null && !_unlockedBuildings.Contains(building))
             {
-                UnlockBuilding(building);
+                _unlockedBuildings.Add(building);
+                OnBuildingUnlocked?.Invoke(building);
+                anyUnlocked = true;
             }
+        }
+        if (anyUnlocked)
+        {
+            UpdateUnlockedBuildingsList();
+            SaveUnlockedBuildings(true);
         }
     }
     
@@ -48,7 +56,7 @@ public class BuildingUnlockManager : MonoBehaviour
     {
         if (pauseStatus)
         {
-            SaveUnlockedBuildings();
+            SaveUnlockedBuildings(true);
         }
     }
     
@@ -56,13 +64,13 @@ public class BuildingUnlockManager : MonoBehaviour
     {
         if (!hasFocus)
         {
-            SaveUnlockedBuildings();
+            SaveUnlockedBuildings(true);
         }
     }
     
     private void OnDestroy()
     {
-        SaveUnlockedBuildings();
+        SaveUnlockedBuildings(true);
     }
     
     private void OnValidate()
@@ -85,7 +93,7 @@ public class BuildingUnlockManager : MonoBehaviour
             _unlockedBuildings.Add(building);
             UpdateUnlockedBuildingsList();
             OnBuildingUnlocked?.Invoke(building);
-            SaveUnlockedBuildings();
+            SaveUnlockedBuildings(false);
             // Debug.Log($"BuildingUnlockManager: Unlocked building '{building.displayName}'");
         }
     }
@@ -94,9 +102,20 @@ public class BuildingUnlockManager : MonoBehaviour
     {
         if (buildings == null) return;
         
+        bool anyUnlocked = false;
         foreach (BuildingData building in buildings)
         {
-            UnlockBuilding(building);
+            if (building != null && !_unlockedBuildings.Contains(building))
+            {
+                _unlockedBuildings.Add(building);
+                OnBuildingUnlocked?.Invoke(building);
+                anyUnlocked = true;
+            }
+        }
+        if (anyUnlocked)
+        {
+            UpdateUnlockedBuildingsList();
+            SaveUnlockedBuildings(true);
         }
     }
     
@@ -140,6 +159,7 @@ public class BuildingUnlockManager : MonoBehaviour
         {
             UnlockBuilding(building);
         }
+        PlayerPrefs.Save();
         Debug.Log($"BuildingUnlockManager: Unlocked all {allBuildings.Length} buildings (Debug mode)");
     }
     
@@ -151,7 +171,7 @@ public class BuildingUnlockManager : MonoBehaviour
         Debug.Log("BuildingUnlockManager: All buildings have been locked.");
     }
     
-    private void SaveUnlockedBuildings()
+    private void SaveUnlockedBuildings(bool saveToDisk = false)
     {
         List<string> unlockedBuildingNames = new List<string>();
         foreach (BuildingData building in _unlockedBuildings)
@@ -165,7 +185,10 @@ public class BuildingUnlockManager : MonoBehaviour
         
         string savedData = string.Join(",", unlockedBuildingNames);
         PlayerPrefs.SetString("UnlockedBuildings", savedData);
-        PlayerPrefs.Save();
+        if (saveToDisk)
+        {
+            PlayerPrefs.Save();
+        }
     }
     
     private void LoadUnlockedBuildings()
