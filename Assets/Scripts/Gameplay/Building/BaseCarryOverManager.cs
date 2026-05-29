@@ -60,8 +60,6 @@ public static class BaseCarryOverManager
                 isConnected = PlatformRegistry.IsBuildingOnConnectedPlatform(piece);
             }
 
-            Debug.Log("[SaveBaseState] Piece: " + piece.name + ", isPlatform: " + isPlatform + ", isConnected: " + isConnected + ", cellPos: " + piece.cellPosition);
-
             if (!isConnected)
             {
                 continue;

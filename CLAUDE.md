@@ -70,3 +70,9 @@ The project is structured with specialized subagents located in `.claude/agents/
 - **Core system changes**: Delegate changes in `Assets/Scripts/Core/` and system data configurations in `Assets/Scripts/Data/` to `unity-core-architect`.
 - **Performance audits**: Run `unity-perf-auditor` to check files for potential bugs or optimizations.
 - **Audio triggers**: Delegate FMOD bindings and audio management to `unity-audio-fmod`.
+
+## Debugging Rules
+
+- NEVER run full project rebuilds during debugging loops.
+- ALWAYS ask for user permission if a debugging/fixing loop takes more than 3 iterations.
+- NEVER read large asset or meta files when searching for code bugs.
