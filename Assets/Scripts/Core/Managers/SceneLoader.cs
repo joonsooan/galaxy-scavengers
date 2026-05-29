@@ -113,6 +113,13 @@ public class SceneLoader : MonoBehaviour
         StartCoroutine(LoadGameplaySceneAsync(sceneName));
     }
 
+    public void LoadNextGameScene(string sceneName)
+    {
+        if (_isLoading) return;
+        BaseCarryOverManager.SaveGameState();
+        StartCoroutine(LoadGameplaySceneAsync(string.IsNullOrWhiteSpace(sceneName) ? gameSceneName : sceneName));
+    }
+
     public void LoadTutorialScene()
     {
         if (_isLoading) return;

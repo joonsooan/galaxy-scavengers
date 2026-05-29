@@ -245,7 +245,7 @@ public class ResourceManager : MonoBehaviour
 
         // Initialize main structure if registered
         MainStructure mainStructure = ResourceDataManager.Instance.GetMainStructure();
-        if (mainStructure != null)
+        if (mainStructure != null && !BaseCarryOverManager.HasCarriedOverData)
         {
             InitializeMainStructureStorage(mainStructure);
         }
@@ -566,7 +566,10 @@ public class ResourceManager : MonoBehaviour
         if (ResourceDataManager.Instance != null)
         {
             ResourceDataManager.Instance.RegisterMainStructure(mainStructure);
-            InitializeMainStructureStorage(mainStructure);
+            if (!BaseCarryOverManager.HasCarriedOverData)
+            {
+                InitializeMainStructureStorage(mainStructure);
+            }
         }
     }
 

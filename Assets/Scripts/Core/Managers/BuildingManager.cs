@@ -259,8 +259,13 @@ public class BuildingManager : MonoBehaviour
         {
             if (ResourceManager.Instance != null)
             {
-                ResourceManager.Instance.RegisterMainStructure(mainStructure);
-                ResourceManager.Instance.AddStorage(mainStructure);
+                bool alreadyRegistered = ResourceDataManager.Instance != null &&
+                                         ResourceDataManager.Instance.GetMainStructure() == mainStructure;
+                if (!alreadyRegistered)
+                {
+                    ResourceManager.Instance.RegisterMainStructure(mainStructure);
+                    ResourceManager.Instance.AddStorage(mainStructure);
+                }
             }
 
             Vector3Int centerCell = grid.WorldToCell(mainStructure.transform.position);

@@ -7,6 +7,7 @@ public static class BaseCarryOverManager
     private static bool _hasCarriedOverData = false;
     private static List<SavedBuildingData> _savedBuildings = new List<SavedBuildingData>();
     private static Dictionary<ResourceType, int> _savedPendingResources = null;
+    private static Dictionary<ResourceType, int> _savedMainStructureResources = null;
 
     public static bool HasCarriedOverData => _hasCarriedOverData;
 
@@ -14,6 +15,7 @@ public static class BaseCarryOverManager
     {
         _savedBuildings.Clear();
         _savedPendingResources = null;
+        _savedMainStructureResources = null;
         _hasCarriedOverData = false;
     }
 
@@ -37,8 +39,45 @@ public static class BaseCarryOverManager
             _savedPendingResources = new Dictionary<ResourceType, int>(ResourceTransferManager.Instance.PendingResources);
         }
 
+        ScanConnectedBuildings(mainAnchor);
+    }
+
+    public static void SaveGameState()
+    {
+        Clear();
+
+        MainStructure mainStructure = Object.FindFirstObjectByType<MainStructure>();
+        if (mainStructure == null || BuildingManager.Instance == null || BuildingManager.Instance.grid == null)
+        {
+            return;
+        }
+
+        if (!BuildingManager.Instance.TryGetBuildingAnchorCells(mainStructure.transform, out Vector3Int mainAnchor, out _))
+        {
+            return;
+        }
+
+        var mainResources = new Dictionary<ResourceType, int>(mainStructure.GetStoredResources());
+        if (ResourceTransferManager.Instance != null && ResourceTransferManager.Instance.PendingResources != null)
+        {
+            foreach (var kvp in ResourceTransferManager.Instance.PendingResources)
+            {
+                if (kvp.Value > 0)
+                {
+                    mainResources[kvp.Key] = mainResources.GetValueOrDefault(kvp.Key, 0) + kvp.Value;
+                }
+            }
+        }
+        _savedMainStructureResources = mainResources;
+
+        ScanConnectedBuildings(mainAnchor);
+        _hasCarriedOverData = _hasCarriedOverData || _savedMainStructureResources != null;
+    }
+
+    private static void ScanConnectedBuildings(Vector3Int mainAnchor)
+    {
         BuildingPiece[] pieces = Object.FindObjectsByType<BuildingPiece>(FindObjectsSortMode.None);
-        Debug.Log("[SaveBaseState] Found pieces total in scene: " + pieces.Length + ", mainAnchor: " + mainAnchor);
+        Debug.Log("[BaseCarryOverManager] Found pieces total in scene: " + pieces.Length + ", mainAnchor: " + mainAnchor);
 
         foreach (BuildingPiece piece in pieces)
         {
@@ -75,7 +114,7 @@ public static class BaseCarryOverManager
             BuildingDataHolder holder = piece.GetComponent<BuildingDataHolder>();
             if (holder == null || holder.buildingData == null)
             {
-                Debug.Log("[SaveBaseState] Holder or buildingData null for piece: " + piece.name);
+                Debug.Log("[BaseCarryOverManager] Holder or buildingData null for piece: " + piece.name);
                 continue;
             }
 
@@ -118,11 +157,11 @@ public static class BaseCarryOverManager
             }
 
             _savedBuildings.Add(saved);
-            Debug.Log("[SaveBaseState] Saved building: " + saved.buildingType + ", relativeAnchor: " + saved.relativeAnchor);
+            Debug.Log("[BaseCarryOverManager] Saved building: " + saved.buildingType + ", relativeAnchor: " + saved.relativeAnchor);
         }
 
         _hasCarriedOverData = _savedBuildings.Count > 0 || _savedPendingResources != null;
-        Debug.Log("[SaveBaseState] Finished. Saved buildings count: " + _savedBuildings.Count + ", hasCarriedOverData: " + _hasCarriedOverData);
+        Debug.Log("[BaseCarryOverManager] Finished. Saved buildings count: " + _savedBuildings.Count + ", hasCarriedOverData: " + _hasCarriedOverData);
     }
 
     public static void RestoreBaseState()
@@ -267,6 +306,26 @@ public static class BaseCarryOverManager
                     }
                 }
             }
+        }
+
+        if (_savedMainStructureResources != null)
+        {
+            foreach (ResourceType type in System.Enum.GetValues(typeof(ResourceType)))
+            {
+                if (type != ResourceType.Electricity && type != ResourceType.None)
+                {
+                    mainStructure.InitializeStorage(type, 0);
+                }
+            }
+            foreach (var kvp in _savedMainStructureResources)
+            {
+                if (kvp.Value > 0 && kvp.Key != ResourceType.Electricity && kvp.Key != ResourceType.None)
+                {
+                    mainStructure.InitializeStorage(kvp.Key, kvp.Value);
+                }
+            }
+            ResourceDataManager.Instance.RecalculateResourceCountsFromStorages();
+            mainStructure.UpdateStorageUI();
         }
 
         if (_savedPendingResources != null)
