@@ -59,6 +59,7 @@ public class Enemy_Bullet : MonoBehaviour
         Damageable damageable = other.GetComponent<Damageable>();
         if (damageable != null)
         {
+            if (damageable is Platform) return;
             bool shouldDamage = false;
             
             UnitBase unit = damageable as UnitBase;

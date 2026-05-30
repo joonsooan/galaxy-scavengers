@@ -87,6 +87,7 @@ public class Player_Bullet : MonoBehaviour
         Damageable building = other.GetComponentInParent<Damageable>();
         if (building != null && building.GetComponent<UnitBase>() == null)
         {
+            if (building is Platform) return;
             Deactivate();
         }
     }
