@@ -1016,6 +1016,13 @@ public class BuildingManager : MonoBehaviour
 
             if (_placedPieces.TryGetValue(cellPos, out BuildingPiece pieceObj))
             {
+                bool siteIsForPlatform = buildingData.buildingType == BuildingType.Platform;
+                bool pieceIsPlatform = IsPlatformPiece(pieceObj);
+                if (siteIsForPlatform != pieceIsPlatform)
+                {
+                    continue;
+                }
+
                 if (_cellToStructureMap.TryGetValue(cellPos, out BuildingStructure structure))
                 {
                     if (!structuresDestroyed.Contains(structure.anchor))

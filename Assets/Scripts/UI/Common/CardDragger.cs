@@ -27,6 +27,7 @@ public class CardDragger : MonoBehaviour
     [Header("Drag Placement")]
     [SerializeField] private Tilemap platformPreviewTilemap;
     [SerializeField] private TileBase platformPreviewTile;
+    [SerializeField] private Tilemap wallPreviewTilemap;
     [SerializeField] private TileBase wallPreviewTile;
 
     private GameObject _ghostBuildingInstance;
@@ -130,6 +131,7 @@ public class CardDragger : MonoBehaviour
         bool wasDraggingBuildingCard = IsDraggingBuildingCard;
 
         ClearPlatformPreview();
+        ClearWallPreview();
         _isDragPlacing = false;
 
         if (_ghostBuildingInstance != null)
@@ -373,7 +375,7 @@ public class CardDragger : MonoBehaviour
                 return;
             }
 
-            ClearPlatformPreview();
+            ClearWallPreview();
             _isDragPlacing = false;
             GameManager.Instance.EndDrag();
             return;
@@ -403,7 +405,7 @@ public class CardDragger : MonoBehaviour
         {
             if (UIUtils.IsPointerOverUI())
             {
-                ClearPlatformPreview();
+                ClearWallPreview();
                 _isDragPlacing = false;
                 return;
             }
@@ -412,7 +414,7 @@ public class CardDragger : MonoBehaviour
             mouseWorldPos.z = 0;
             Vector3Int releaseCell = grid.WorldToCell(mouseWorldPos);
 
-            ClearPlatformPreview();
+            ClearWallPreview();
             _isDragPlacing = false;
 
             PlaceWallLine(_dragStartCell, releaseCell);
@@ -477,12 +479,12 @@ public class CardDragger : MonoBehaviour
 
     private void UpdateLinePreview(Vector3Int startCell, Vector3Int endCell)
     {
-        if (platformPreviewTilemap == null || wallPreviewTile == null)
+        if (wallPreviewTilemap == null || wallPreviewTile == null)
         {
             return;
         }
 
-        platformPreviewTilemap.ClearAllTiles();
+        wallPreviewTilemap.ClearAllTiles();
 
         if (_bresenhamScratch == null)
         {
@@ -493,7 +495,10 @@ public class CardDragger : MonoBehaviour
 
         for (int i = 0; i < _bresenhamScratch.Count; i++)
         {
-            platformPreviewTilemap.SetTile(_bresenhamScratch[i], wallPreviewTile);
+            if (CanPlaceComboPattern(_bresenhamScratch[i]))
+            {
+                wallPreviewTilemap.SetTile(_bresenhamScratch[i], wallPreviewTile);
+            }
         }
     }
 
@@ -552,6 +557,16 @@ public class CardDragger : MonoBehaviour
         }
 
         platformPreviewTilemap.ClearAllTiles();
+    }
+
+    private void ClearWallPreview()
+    {
+        if (wallPreviewTilemap == null)
+        {
+            return;
+        }
+
+        wallPreviewTilemap.ClearAllTiles();
     }
 
     private void PlacePlatformRectangle(Vector3Int startCell, Vector3Int endCell)

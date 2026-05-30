@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: platform-preview-tile
   m_EditorClassIdentifier: 
   m_Sprite: {fileID: -9211487210531450170, guid: 2deabe0ff9e9b9b42aeafcfcf9e191e3, type: 3}
-  m_Color: {r: 0.49728212, g: 1, b: 0.33018857, a: 1}
+  m_Color: {r: 0.49728212, g: 1, b: 0.33018857, a: 0.78431374}
   m_Transform:
     e00: 1
     e01: 0
