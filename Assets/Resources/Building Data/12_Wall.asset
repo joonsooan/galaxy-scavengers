@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   displayName: "\uBCBD"
   description: "\uAE30\uC9C0\uB97C \uC9C0\uD0A4\uB294 \uBC29\uC5B4\uC6A9 \uBCBD\uC785\uB2C8\uB2E4."
-  icon: {fileID: 2868539044483428322, guid: 2d52920e0b061b94899b645ec0bf38ba, type: 3}
+  icon: {fileID: -834855069730132087, guid: e7342a1b2c60fe843a458fdabbdc2997, type: 3}
   localizationTable: 
   displayNameKey: 
   descriptionKey: 

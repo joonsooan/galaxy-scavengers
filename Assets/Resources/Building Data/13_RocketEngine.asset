@@ -10,18 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b9e7aa4ffe54aa64cb07513ab38fd7c3, type: 3}
-  m_Name: 11_Platform
+  m_Name: 13_RocketEngine
   m_EditorClassIdentifier: 
-  displayName: "\uD50C\uB7AB\uD3FC \uD310"
-  description: "\uBC1C\uC0AC \uC2DC \uD50C\uB7AB\uD3FC \uC704\uC758 \uAC74\uBB3C,
-    \uC720\uB2DB\uC774 \uC6B4\uBC18\uB429\uB2C8\uB2E4."
-  icon: {fileID: 8200471642327922413, guid: 9a973e3ad8dee0a47817f78add735e86, type: 3}
+  displayName: "\uB85C\uCF13 \uC5D4\uC9C4"
+  description: "\uAE30\uC9C0\uB97C \uC9C0\uD0A4\uB294 \uBC29\uC5B4\uC6A9 \uBCBD\uC785\uB2C8\uB2E4."
+  icon: {fileID: 3775248978533728207, guid: 4d9da96fd4195d34aa7297dbe0be8e41, type: 3}
   localizationTable: 
   displayNameKey: 
   descriptionKey: 
-  buildingPrefab: {fileID: 1574451153020646121, guid: d8842f463c44719478aa57a621762ea1, type: 3}
+  buildingPrefab: {fileID: 1574451153020646121, guid: 77e687df7f286bd49827729bafcb7781, type: 3}
   buildingTile: {fileID: 11400000, guid: a9879f8451c56c0429aa389e7db66acc, type: 2}
-  buildingType: 15
+  buildingType: 16
   recipe:
   - buildingPieceType: 5
     relativePosition: {x: 0, y: 0, z: 0}
