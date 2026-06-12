@@ -20,8 +20,10 @@ MonoBehaviour:
   descriptionKey: 
   buildingPrefab: {fileID: 1574451153020646121, guid: 77e687df7f286bd49827729bafcb7781, type: 3}
   buildingTile: {fileID: 11400000, guid: a9879f8451c56c0429aa389e7db66acc, type: 2}
-  buildingType: 16
+  buildingType: 17
   recipe:
   - buildingPieceType: 5
     relativePosition: {x: 0, y: 0, z: 0}
-  noiseCoefficient: 0
+  - buildingPieceType: 6
+    relativePosition: {x: 0, y: 1, z: 0}
+  noiseCoefficient: 1

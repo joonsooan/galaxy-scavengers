@@ -21815,7 +21815,7 @@ Camera:
   far clip plane: 5000
   field of view: 40
   orthographic: 1
-  orthographic size: 662.501
+  orthographic size: 11.25
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -67463,15 +67463,15 @@ MonoBehaviour:
   cheatBiomassAmount: 200
   cheatCryoCrystalAmount: 200
   cheatAlloyPlateAmount: 200
-  cheatCompositeFrameAmount: 0
-  cheatEChipAmount: 0
-  cheatBioCableAmount: 0
-  cheatPowerCubeAmount: 0
-  cheatBioFuelAmount: 0
-  cheatCryoGelAmount: 0
-  cheatSolanaAmount: 0
-  cheatCoreAmount: 0
-  cheatAmmunitionAmount: 0
+  cheatCompositeFrameAmount: 200
+  cheatEChipAmount: 200
+  cheatBioCableAmount: 200
+  cheatPowerCubeAmount: 200
+  cheatBioFuelAmount: 200
+  cheatCryoGelAmount: 200
+  cheatSolanaAmount: 200
+  cheatCoreAmount: 200
+  cheatAmmunitionAmount: 200
   cheatHeavyPlatingAmount: 0
   cheatActuatorAmount: 0
   cheatGenomeChipAmount: 0

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: wall-preview-tile
   m_EditorClassIdentifier: 
   m_Sprite: {fileID: -834855069730132087, guid: e7342a1b2c60fe843a458fdabbdc2997, type: 3}
-  m_Color: {r: 0.49728212, g: 1, b: 0.33018857, a: 0.78431374}
+  m_Color: {r: 0, g: 1, b: 0, a: 0.89411765}
   m_Transform:
     e00: 1
     e01: 0

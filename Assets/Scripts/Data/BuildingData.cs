@@ -22,6 +22,7 @@ public enum BuildingType
     ChargingStation,
     Platform,
     Wall,
+    RocketEngine
 }
 
 [CreateAssetMenu(fileName = "New Building Data", menuName = "Building/Building Data")]
