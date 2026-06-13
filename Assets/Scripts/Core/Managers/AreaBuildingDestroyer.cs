@@ -531,7 +531,7 @@ public class AreaBuildingDestroyer : MonoBehaviour
                 }
             }
 
-            if (overlap && site.HasAnyConstructedPieces())
+            if (overlap)
             {
                 result.Add(site.cellPosition);
                 if (site.buildingData != null && site.buildingData.recipe != null)
@@ -594,9 +594,14 @@ public class AreaBuildingDestroyer : MonoBehaviour
             {
                 continue;
             }
-            
+
             if (HasBuildingAt(cell))
             {
+                if (_buildingManager.IsTemporaryTile(cell))
+                {
+                    continue;
+                }
+
                 BuildingPiece piece = _buildingManager.GetPieceAt(cell);
                 if (piece != null && piece.gameObject != null)
                 {
@@ -606,7 +611,7 @@ public class AreaBuildingDestroyer : MonoBehaviour
                         storagesToClear.Add(storageMono.gameObject);
                     }
                 }
-                
+
                 buildingsToDestroy.Add(cell);
             }
         }

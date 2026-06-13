@@ -259,8 +259,13 @@ public class BuildingManager : MonoBehaviour
         {
             if (ResourceManager.Instance != null)
             {
-                ResourceManager.Instance.RegisterMainStructure(mainStructure);
-                ResourceManager.Instance.AddStorage(mainStructure);
+                bool alreadyRegistered = ResourceDataManager.Instance != null &&
+                                         ResourceDataManager.Instance.GetMainStructure() == mainStructure;
+                if (!alreadyRegistered)
+                {
+                    ResourceManager.Instance.RegisterMainStructure(mainStructure);
+                    ResourceManager.Instance.AddStorage(mainStructure);
+                }
             }
 
             Vector3Int centerCell = grid.WorldToCell(mainStructure.transform.position);
@@ -534,6 +539,21 @@ public class BuildingManager : MonoBehaviour
             }
         }
 
+        if (_cellToStructureMap.TryGetValue(cell, out BuildingStructure structure))
+        {
+            if (_placedPieces.TryGetValue(structure.anchor, out BuildingPiece anchorPiece) && anchorPiece != null)
+            {
+                if (!IsPlatformPiece(anchorPiece))
+                {
+                    return true;
+                }
+            }
+            else if (PlatformRegistry.GetPlatformAtCell(structure.anchor) == null)
+            {
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -723,6 +743,11 @@ public class BuildingManager : MonoBehaviour
             {
                 NoiseManager.Instance.RegisterBuilding(damageable);
             }
+        }
+
+        foreach (Vector3Int targetPos in recipePositions)
+        {
+            OnTilemapChanged?.Invoke(targetPos);
         }
 
         OnBuildingConstructed?.Invoke(data);
@@ -930,6 +955,7 @@ public class BuildingManager : MonoBehaviour
     public void ClearBuildingDataAt(Vector3Int cellPosition)
     {
         if (buildingTilemap == null) return;
+        if (IsMainStructureCell(cellPosition)) return;
 
         if (_cellToStructureMap.TryGetValue(cellPosition, out BuildingStructure structure))
         {
@@ -990,6 +1016,13 @@ public class BuildingManager : MonoBehaviour
 
             if (_placedPieces.TryGetValue(cellPos, out BuildingPiece pieceObj))
             {
+                bool siteIsForPlatform = buildingData.buildingType == BuildingType.Platform;
+                bool pieceIsPlatform = IsPlatformPiece(pieceObj);
+                if (siteIsForPlatform != pieceIsPlatform)
+                {
+                    continue;
+                }
+
                 if (_cellToStructureMap.TryGetValue(cellPos, out BuildingStructure structure))
                 {
                     if (!structuresDestroyed.Contains(structure.anchor))
@@ -1099,67 +1132,81 @@ public class BuildingManager : MonoBehaviour
         }
 
         bool found = false;
-        MainStructure mainStructure = buildingTransform.GetComponent<MainStructure>() ??
-                                      buildingTransform.GetComponentInParent<MainStructure>(true);
-        if (mainStructure != null && TryGetFootprintForRegisteredMainStructure(mainStructure, out anchor, out occupiedCells))
+        Platform platform = buildingTransform.GetComponent<Platform>() ??
+                            buildingTransform.GetComponentInParent<Platform>(true);
+        if (platform != null)
         {
+            BuildingPiece piece = buildingTransform.GetComponent<BuildingPiece>() ??
+                                  buildingTransform.GetComponentInParent<BuildingPiece>(true);
+            anchor = piece != null ? piece.cellPosition : grid.WorldToCell(buildingTransform.position);
+            occupiedCells = new List<Vector3Int> { anchor };
             found = true;
         }
-        else
-        {
-            BuildingPiece piece = buildingTransform.GetComponent<BuildingPiece>();
-            if (piece == null)
-            {
-                piece = buildingTransform.GetComponentInParent<BuildingPiece>(true);
-            }
 
-            Vector3Int lookupCell;
-            if (piece != null)
+        if (!found)
+        {
+            MainStructure mainStructure = buildingTransform.GetComponent<MainStructure>() ??
+                                          buildingTransform.GetComponentInParent<MainStructure>(true);
+            if (mainStructure != null && TryGetFootprintForRegisteredMainStructure(mainStructure, out anchor, out occupiedCells))
             {
-                lookupCell = piece.cellPosition;
-                if (_cellToStructureMap.TryGetValue(lookupCell, out BuildingStructure structure))
-                {
-                    anchor = structure.anchor;
-                    occupiedCells = structure.occupiedCells;
-                    found = true;
-                }
-                else
-                {
-                    foreach (KeyValuePair<Vector3Int, BuildingPiece> kvp in _placedPieces)
-                    {
-                        if (kvp.Value != piece)
-                        {
-                            continue;
-                        }
-                        if (_cellToStructureMap.TryGetValue(kvp.Key, out structure))
-                        {
-                            anchor = structure.anchor;
-                            occupiedCells = structure.occupiedCells;
-                            found = true;
-                            break;
-                        }
-                    }
-                }
+                found = true;
             }
             else
             {
-                lookupCell = grid.WorldToCell(buildingTransform.position);
-                if (_cellToStructureMap.TryGetValue(lookupCell, out BuildingStructure structure))
+                BuildingPiece piece = buildingTransform.GetComponent<BuildingPiece>();
+                if (piece == null)
                 {
-                    anchor = structure.anchor;
-                    occupiedCells = structure.occupiedCells;
-                    found = true;
+                    piece = buildingTransform.GetComponentInParent<BuildingPiece>(true);
                 }
-            }
 
-            if (!found)
-            {
-                Vector3Int worldCell = grid.WorldToCell(buildingTransform.position);
-                if (worldCell != lookupCell && _cellToStructureMap.TryGetValue(worldCell, out BuildingStructure structureWorld))
+                Vector3Int lookupCell;
+                if (piece != null)
                 {
-                    anchor = structureWorld.anchor;
-                    occupiedCells = structureWorld.occupiedCells;
-                    found = true;
+                    lookupCell = piece.cellPosition;
+                    if (_cellToStructureMap.TryGetValue(lookupCell, out BuildingStructure structure))
+                    {
+                        anchor = structure.anchor;
+                        occupiedCells = structure.occupiedCells;
+                        found = true;
+                    }
+                    else
+                    {
+                        foreach (KeyValuePair<Vector3Int, BuildingPiece> kvp in _placedPieces)
+                        {
+                            if (kvp.Value != piece)
+                            {
+                                continue;
+                            }
+                            if (_cellToStructureMap.TryGetValue(kvp.Key, out structure))
+                            {
+                                anchor = structure.anchor;
+                                occupiedCells = structure.occupiedCells;
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    lookupCell = grid.WorldToCell(buildingTransform.position);
+                    if (_cellToStructureMap.TryGetValue(lookupCell, out BuildingStructure structure))
+                    {
+                        anchor = structure.anchor;
+                        occupiedCells = structure.occupiedCells;
+                        found = true;
+                    }
+                }
+
+                if (!found)
+                {
+                    Vector3Int worldCell = grid.WorldToCell(buildingTransform.position);
+                    if (worldCell != lookupCell && _cellToStructureMap.TryGetValue(worldCell, out BuildingStructure structureWorld))
+                    {
+                        anchor = structureWorld.anchor;
+                        occupiedCells = structureWorld.occupiedCells;
+                        found = true;
+                    }
                 }
             }
         }
@@ -1264,11 +1311,17 @@ public class BuildingManager : MonoBehaviour
             {
                 Vector3Int cell = anchorCell + new Vector3Int(x, y, 0);
                 structure.occupiedCells.Add(cell);
-                _mainStructureCells.Add(cell);
             }
         }
 
         RegisterBuildingStructure(structure);
+
+        // Add to _mainStructureCells after calling RegisterBuildingStructure
+        // to ensure it isn't cleared if RegisterBuildingStructure internally unregisters a previous version
+        foreach (Vector3Int cell in structure.occupiedCells)
+        {
+            _mainStructureCells.Add(cell);
+        }
 
         if (mainStructureInstance != null)
         {
@@ -1342,12 +1395,22 @@ public class BuildingManager : MonoBehaviour
             buildingPiece.cellPosition = cellPosition;
         }
 
-        if (_placedPieces.ContainsKey(cellPosition))
+        if (_placedPieces.TryGetValue(cellPosition, out BuildingPiece existingPiece))
         {
+            if (IsPlatformPiece(existingPiece) && !IsPlatformPiece(buildingPiece))
+            {
+                _placedPieces[cellPosition] = buildingPiece;
+            }
             return;
         }
 
         _placedPieces[cellPosition] = buildingPiece;
+
+        // If this cell is part of the main structure, we must not overwrite its building structure mapping
+        if (IsMainStructureCell(cellPosition))
+        {
+            return;
+        }
 
         BuildingStructure structure = new BuildingStructure
         {
@@ -1366,8 +1429,6 @@ public class BuildingManager : MonoBehaviour
                 OnTilemapChanged?.Invoke(cellPosition);
             }
         }
-
-        Debug.Log($"[BuildingManager] Registered pre-placed building at {cellPosition} (Type: {buildingPiece.buildingPieceType})");
     }
 
     public BuildingData GetBuildingDataByType(BuildingType type)

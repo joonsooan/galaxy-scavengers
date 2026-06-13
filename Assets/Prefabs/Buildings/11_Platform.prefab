@@ -86,7 +86,7 @@ SpriteRenderer:
   m_SortingLayer: 3
   m_SortingOrder: -2
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -9211487210531450170, guid: 2deabe0ff9e9b9b42aeafcfcf9e191e3, type: 3}
+  m_Sprite: {fileID: -6404110877166823957, guid: fda42a6186db1a442884edee466a54c7, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -103,7 +103,7 @@ CapsuleCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1574451153020646121}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 0}

@@ -15,7 +15,7 @@ MonoBehaviour:
   displayName: "\uD50C\uB7AB\uD3FC \uD310"
   description: "\uBC1C\uC0AC \uC2DC \uD50C\uB7AB\uD3FC \uC704\uC758 \uAC74\uBB3C,
     \uC720\uB2DB\uC774 \uC6B4\uBC18\uB429\uB2C8\uB2E4."
-  icon: {fileID: -9211487210531450170, guid: 2deabe0ff9e9b9b42aeafcfcf9e191e3, type: 3}
+  icon: {fileID: -6404110877166823957, guid: fda42a6186db1a442884edee466a54c7, type: 3}
   localizationTable: 
   displayNameKey: 
   descriptionKey: 
