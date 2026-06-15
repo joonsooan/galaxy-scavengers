@@ -9,4 +9,5 @@
   <Project Path="FMODUnityResonance.csproj" />
   <Project Path="Assembly-CSharp-Editor-firstpass.csproj" />
   <Project Path="Coffee.UIParticle.Editor.csproj" />
+  <Project Path="Assembly-CSharp-Editor.csproj" />
 </Solution>
