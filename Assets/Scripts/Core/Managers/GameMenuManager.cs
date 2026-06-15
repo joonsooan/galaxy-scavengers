@@ -48,6 +48,7 @@ public class GameMenuManager : MonoBehaviour
     private Button _currentMenuOpenButton;
     private bool _isMenuOpen;
     private MainControlPanel _mainControlPanel;
+    private LaunchUIController _cachedLaunchUIController;
     private Coroutine _deferredLocaleCoroutine;
     private const string KoreanLocaleCode = "ko";
     private const string EnglishLocaleCode = "en";
@@ -116,6 +117,7 @@ public class GameMenuManager : MonoBehaviour
     {
         FindAndSetupMenuUI();
         _mainControlPanel = null;
+        _cachedLaunchUIController = null;
         TryCacheMainControlPanel();
     }
 
@@ -654,8 +656,9 @@ public class GameMenuManager : MonoBehaviour
 
     private bool IsLaunchMenuInputBlocked()
     {
-        LaunchUIController launchUIController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
-        return launchUIController != null && launchUIController.IsMenuInputBlocked();
+        if (_cachedLaunchUIController == null)
+            _cachedLaunchUIController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
+        return _cachedLaunchUIController != null && _cachedLaunchUIController.IsMenuInputBlocked();
     }
 
     private void OnDestroy()

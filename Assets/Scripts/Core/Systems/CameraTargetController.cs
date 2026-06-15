@@ -35,6 +35,8 @@ public class CameraTargetController : MonoBehaviour
     private Vector3 _currentVelocity;
     private Transform _defaultFollowTarget;
     private bool _openingSequenceActive;
+    private LaunchUIController _cachedLaunchUIController;
+    private Unit_Player _cachedPlayerUnit;
 
     private void Awake()
     {
@@ -171,7 +173,7 @@ public class CameraTargetController : MonoBehaviour
             return;
         }
 
-        bool hasPlayerUnit = followTarget != null && followTarget.GetComponent<Unit_Player>() != null;
+        bool hasPlayerUnit = _cachedPlayerUnit != null;
 
         if (!hasPlayerUnit)
         {
@@ -181,7 +183,7 @@ public class CameraTargetController : MonoBehaviour
             if (moveX != 0f || moveY != 0f)
             {
                 ResetFollowTargetToPlayer();
-                hasPlayerUnit = followTarget != null && followTarget.GetComponent<Unit_Player>() != null;
+                hasPlayerUnit = _cachedPlayerUnit != null;
                 if (hasPlayerUnit)
                 {
                     _direction = Vector3.zero;
@@ -234,7 +236,7 @@ public class CameraTargetController : MonoBehaviour
             mousePanDirection.Normalize();
         }
 
-        bool hasPlayerUnit = followTarget != null && followTarget.GetComponent<Unit_Player>() != null;
+        bool hasPlayerUnit = _cachedPlayerUnit != null;
 
         Vector3 finalDirection = Vector3.zero;
         float currentPanSpeed = 0f;
@@ -376,8 +378,9 @@ public class CameraTargetController : MonoBehaviour
 
     private bool IsLaunchInputLocked()
     {
-        LaunchUIController launchUIController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
-        return launchUIController != null && launchUIController.IsLaunchInputLockActive();
+        if (_cachedLaunchUIController == null)
+            _cachedLaunchUIController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
+        return _cachedLaunchUIController != null && _cachedLaunchUIController.IsLaunchInputLockActive();
     }
 
     private bool IsPanelZoomBlocked()
@@ -434,13 +437,14 @@ public class CameraTargetController : MonoBehaviour
     public void SetFollowTarget(Transform target)
     {
         followTarget = target;
+        _cachedPlayerUnit = target != null ? target.GetComponent<Unit_Player>() : null;
         if (target != null)
         {
-            if (_defaultFollowTarget == null && target.GetComponent<Unit_Player>() != null)
+            if (_defaultFollowTarget == null && _cachedPlayerUnit != null)
                 _defaultFollowTarget = target;
             _isManualMode = false;
 
-            if (target.GetComponent<Unit_Player>() != null)
+            if (_cachedPlayerUnit != null)
             {
                 TargetBracketEffect.Hide();
                 DismissLockedUnitInfoAfterFollowPlayer();
@@ -485,6 +489,7 @@ public class CameraTargetController : MonoBehaviour
         if (_defaultFollowTarget == null)
             return;
         followTarget = _defaultFollowTarget;
+        _cachedPlayerUnit = _defaultFollowTarget.GetComponent<Unit_Player>();
         _isManualMode = false;
         TargetBracketEffect.Hide();
         DismissLockedUnitInfoAfterFollowPlayer();

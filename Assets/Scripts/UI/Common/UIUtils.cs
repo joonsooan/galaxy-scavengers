@@ -5,6 +5,9 @@ using UnityEngine.UI;
 
 public static class UIUtils
 {
+    private static PointerEventData _cachedPointerEventData;
+    private static readonly List<RaycastResult> _cachedRaycastResults = new List<RaycastResult>();
+
     public static bool IsPointerOverUI()
     {
         if (EventSystem.current == null)
@@ -12,13 +15,16 @@ public static class UIUtils
             return false;
         }
 
-        PointerEventData pointerEventData = new PointerEventData(EventSystem.current);
-        pointerEventData.position = Input.mousePosition;
+        if (_cachedPointerEventData == null)
+        {
+            _cachedPointerEventData = new PointerEventData(EventSystem.current);
+        }
+        _cachedPointerEventData.position = Input.mousePosition;
 
-        List<RaycastResult> results = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(pointerEventData, results);
+        _cachedRaycastResults.Clear();
+        EventSystem.current.RaycastAll(_cachedPointerEventData, _cachedRaycastResults);
 
-        foreach (RaycastResult result in results)
+        foreach (RaycastResult result in _cachedRaycastResults)
         {
             if (result.module != null && result.module is GraphicRaycaster)
             {
