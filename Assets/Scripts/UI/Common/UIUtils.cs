@@ -12,11 +12,6 @@ public static class UIUtils
             return false;
         }
 
-        if (EventSystem.current.IsPointerOverGameObject())
-        {
-            return true;
-        }
-
         PointerEventData pointerEventData = new PointerEventData(EventSystem.current);
         pointerEventData.position = Input.mousePosition;
 

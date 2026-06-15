@@ -17,12 +17,22 @@ public class ObjClickManager : MonoBehaviour
     {
         if (mainCamera == null) return;
 
-        if (GameManager.Instance != null && !GameManager.IsGameplayReady) return;
-
         if (IsLoadingScreenActive()) return;
 
-        if (Input.GetMouseButtonUp(0)) {
-            HandleClick();
+        string sceneName = SceneManager.GetActiveScene().name;
+        bool isBaseScene = sceneName == "BaseScene";
+
+        if (isBaseScene)
+        {
+            if (Input.GetMouseButtonUp(0))
+                HandleBaseSceneClick();
+        }
+        else
+        {
+            if (GameManager.Instance != null && !GameManager.IsGameplayReady) return;
+
+            if (Input.GetMouseButtonDown(0))
+                HandleGameSceneClick();
         }
     }
 
@@ -36,7 +46,30 @@ public class ObjClickManager : MonoBehaviour
         mainCamera = Camera.main;
     }
 
-    private void HandleClick()
+    private void HandleBaseSceneClick()
+    {
+        if (UIUtils.IsPointerOverUI()) return;
+
+        RaycastHit2D[] hits = Physics2D.RaycastAll(
+            mainCamera.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+
+        foreach (RaycastHit2D hit in hits)
+        {
+            if (hit.collider == null || hit.collider.isTrigger) continue;
+
+            IClickable clickable = hit.collider.GetComponent<IClickable>();
+            if (clickable == null)
+                clickable = hit.collider.GetComponentInParent<IClickable>();
+
+            if (clickable != null)
+            {
+                clickable.OnClicked();
+                return;
+            }
+        }
+    }
+
+    private void HandleGameSceneClick()
     {
         if (GameManager.Instance != null && GameManager.Instance.IsDragging()) {
             return;
