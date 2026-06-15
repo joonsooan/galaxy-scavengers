@@ -129,6 +129,7 @@ public class BuildingHoverManager : MonoBehaviour
 
         _currentHoveredBuilding = buildingDataHolder;
         _keepPanelVisible = false;
+        TargetBracketEffect.Show(buildingDataHolder.transform);
         ShowBuildingInfo(buildingDataHolder);
         TryShowPowerCoveragePreview(buildingDataHolder);
     }
@@ -246,6 +247,10 @@ public class BuildingHoverManager : MonoBehaviour
     {
         if (!keepPowerCoveragePreview) {
             ClearPowerCoveragePreview();
+        }
+        if (_currentHoveredBuilding != null)
+        {
+            TargetBracketEffect.Hide();
         }
         _currentHoveredBuilding = null;
         _currentHoveredStorage = null;
@@ -386,6 +391,7 @@ public class BuildingHoverManager : MonoBehaviour
         ClearPowerCoveragePreview();
         if (_currentHoveredBuilding != null)
         {
+            TargetBracketEffect.Hide();
             if (BuildingInfoPanel.Instance != null)
             {
                 BuildingInfoPanel.Instance.CancelPreview();
@@ -400,6 +406,7 @@ public class BuildingHoverManager : MonoBehaviour
         ClearPowerCoveragePreview();
         if (_currentHoveredBuilding != null)
         {
+            TargetBracketEffect.Hide();
             if (BuildingInfoPanel.Instance != null)
             {
                 BuildingInfoPanel.Instance.CancelPreview();
