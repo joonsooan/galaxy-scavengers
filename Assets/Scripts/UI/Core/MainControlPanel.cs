@@ -20,6 +20,7 @@ public class MainControlPanel : MonoBehaviour
     [SerializeField] private GameObject baseBuildingPanel;
     [SerializeField] private GameObject resourceStatPanel;
     [SerializeField] private GameObject unitManagementPanelRoot;
+    [SerializeField] private GameObject researchPanel;
     [SerializeField] private ResourceStatsUIController resourceStatsUIController;
     
     private GameObject _currentlyActivePanel;
@@ -454,6 +455,11 @@ public class MainControlPanel : MonoBehaviour
     public bool IsUnitManagementPanelActive()
     {
         return unitManagementPanelRoot != null && unitManagementPanelRoot.activeSelf;
+    }
+
+    public bool IsResearchPanelActive()
+    {
+        return researchPanel != null && researchPanel.activeSelf;
     }
 
     private bool IsLoadingScreenActive()

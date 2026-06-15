@@ -394,7 +394,7 @@ public class CameraTargetController : MonoBehaviour
             }
         }
 
-        return _mainControlPanel.IsUnitManagementPanelActive() || _mainControlPanel.IsResourceStatPanelActive();
+        return _mainControlPanel.IsUnitManagementPanelActive() || _mainControlPanel.IsResourceStatPanelActive() || _mainControlPanel.IsResearchPanelActive();
     }
 
     private void WarpCameras(Vector3 deltaPos)

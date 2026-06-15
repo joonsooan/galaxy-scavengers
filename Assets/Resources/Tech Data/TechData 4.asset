@@ -10,16 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ceeace5e3ddf138488abd43ac61f82c5, type: 3}
-  m_Name: New Tech Data
+  m_Name: TechData 4
   m_EditorClassIdentifier: Assembly-CSharp::TechData
-  techIndex: 0
+  techIndex: 4
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: 
-  manualDescription: 
-  manualIcon: {fileID: 0}
-  researchCosts: []
-  researchDuration: 0
-  prerequisiteTechIndices: 
+  manualName: Test Data 4
+  manualDescription: 44444444444444444444
+  manualIcon: {fileID: 8999891839495180843, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
+  researchCosts:
+  - resourceType: 9
+    amount: 1000
+  researchDuration: 60
+  prerequisiteTechIndices: 02000000
   successorTechIndices: 

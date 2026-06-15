@@ -104,7 +104,7 @@ public class ResearchPanelUI : MonoBehaviour
                     }
 
                     GameObject iconObj = Instantiate(producableResourceImgPrefab, costPanel);
-                    Image iconImage = iconObj.GetComponent<Image>();
+                    Image iconImage = GetChildImage(iconObj);
                     if (iconImage != null && ResourceManager.Instance != null)
                     {
                         iconImage.sprite = ResourceManager.Instance.GetResourceIcon(cost.resourceType);
@@ -159,7 +159,7 @@ public class ResearchPanelUI : MonoBehaviour
                     }
 
                     GameObject iconObj = Instantiate(producableResourceImgPrefab, rewardTechPanel);
-                    Image iconImage = iconObj.GetComponent<Image>();
+                    Image iconImage = GetChildImage(iconObj);
                     if (iconImage != null)
                     {
                         iconImage.sprite = successorTech.GetTechIcon();
@@ -323,6 +323,19 @@ public class ResearchPanelUI : MonoBehaviour
         {
             statusBtn.interactable = false;
         }
+    }
+
+    private static Image GetChildImage(GameObject obj)
+    {
+        for (int i = 0; i < obj.transform.childCount; i++)
+        {
+            Image img = obj.transform.GetChild(i).GetComponent<Image>();
+            if (img != null)
+            {
+                return img;
+            }
+        }
+        return null;
     }
 
     private void ClearCurrentResearchPanel()

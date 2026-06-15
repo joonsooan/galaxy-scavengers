@@ -12,4 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81cb864c76daad24181466b7999a80ef, type: 3}
   m_Name: Tech Research Catalog
   m_EditorClassIdentifier: Assembly-CSharp::TechResearchCatalog
-  techs: []
+  techs:
+  - {fileID: 11400000, guid: fea00b7bb16f02a4086f654b368c7f79, type: 2}
+  - {fileID: 11400000, guid: 37db79ba1865a9b46a09661ca159b6de, type: 2}
