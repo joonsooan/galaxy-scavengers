@@ -22,7 +22,7 @@ public class CoreCustomUIManager : MonoBehaviour
     [Header("Core Detail Panel")]
     [SerializeField] private CoreDetailPanel coreDetailPanel;
 
-    [SerializeField] private List<ModuleInventoryCell> moduleSelectionCells = new ();
+    [SerializeField] private List<ModuleInventoryCell> moduleSelectionCells = new();
 
     private CoreCustomizationManager _customizationManager;
     private BaseInventoryManager _inventoryManager;
@@ -47,11 +47,13 @@ public class CoreCustomUIManager : MonoBehaviour
 
     private void InitializeUI()
     {
-        if (coreCustomPanel != null) {
+        if (coreCustomPanel != null)
+        {
             coreCustomPanel.SetActive(false);
         }
 
-        if (closeButton != null) {
+        if (closeButton != null)
+        {
             closeButton.onClick.RemoveAllListeners();
             closeButton.onClick.AddListener(OnCloseButtonClicked);
         }
@@ -60,17 +62,20 @@ public class CoreCustomUIManager : MonoBehaviour
     private void OnEnable()
     {
         LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
+        SeedCore.OnSeedCoreClicked += OnSeedCoreClicked;
         SubscribeToEvents();
     }
 
     private void SubscribeToEvents()
     {
-        if (_customizationManager != null) {
+        if (_customizationManager != null)
+        {
             _customizationManager.OnModuleSlotChanged -= OnModuleSlotChanged;
             _customizationManager.OnModuleSlotChanged += OnModuleSlotChanged;
         }
 
-        if (_inventoryManager != null) {
+        if (_inventoryManager != null)
+        {
             _inventoryManager.OnModuleAdded -= OnModuleInventoryChanged;
             _inventoryManager.OnModuleRemoved -= OnModuleInventoryChanged;
             _inventoryManager.OnModuleAdded += OnModuleInventoryChanged;
@@ -81,11 +86,14 @@ public class CoreCustomUIManager : MonoBehaviour
     private void OnDisable()
     {
         LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
-        if (_customizationManager != null) {
+        SeedCore.OnSeedCoreClicked -= OnSeedCoreClicked;
+        if (_customizationManager != null)
+        {
             _customizationManager.OnModuleSlotChanged -= OnModuleSlotChanged;
         }
 
-        if (_inventoryManager != null) {
+        if (_inventoryManager != null)
+        {
             _inventoryManager.OnModuleAdded -= OnModuleInventoryChanged;
             _inventoryManager.OnModuleRemoved -= OnModuleInventoryChanged;
         }
@@ -121,13 +129,15 @@ public class CoreCustomUIManager : MonoBehaviour
 
     private IEnumerator WaitForModulesAndRefreshSlots()
     {
-        if (_customizationManager == null) {
+        if (_customizationManager == null)
+        {
             yield break;
         }
 
         yield return _wait01;
 
-        yield return new WaitUntil(() => {
+        yield return new WaitUntil(() =>
+        {
             BaseInventoryManager inventoryManager = FindFirstObjectByType<BaseInventoryManager>();
             return inventoryManager != null;
         });
@@ -142,16 +152,24 @@ public class CoreCustomUIManager : MonoBehaviour
     {
         if (slotComponents == null || _customizationManager == null) return;
 
-        for (int i = 0; i < slotComponents.Length; i++) {
-            if (slotComponents[i] != null) {
+        for (int i = 0; i < slotComponents.Length; i++)
+        {
+            if (slotComponents[i] != null)
+            {
                 slotComponents[i].Initialize(i, _customizationManager, this);
             }
         }
     }
 
+    private void OnSeedCoreClicked(SeedCore seedCore)
+    {
+        ShowPanel();
+    }
+
     public void ShowPanel()
     {
-        if (coreCustomPanel != null) {
+        if (coreCustomPanel != null)
+        {
             coreCustomPanel.SetActive(true);
             StartCoroutine(RefreshOnPanelShown());
         }
@@ -162,15 +180,17 @@ public class CoreCustomUIManager : MonoBehaviour
     private IEnumerator RefreshOnPanelShown()
     {
         yield return null;
-        
-        if (_inventoryManager == null || _customizationManager == null) {
+
+        if (_inventoryManager == null || _customizationManager == null)
+        {
             FindManagers();
         }
-        
+
         RefreshModuleSelectionGrid();
         RefreshSlots();
-        
-        if (coreDetailPanel != null) {
+
+        if (coreDetailPanel != null)
+        {
             coreDetailPanel.UpdateModuleEffects();
         }
     }
@@ -182,7 +202,8 @@ public class CoreCustomUIManager : MonoBehaviour
 
     private void HidePanel()
     {
-        if (coreCustomPanel != null) {
+        if (coreCustomPanel != null)
+        {
             coreCustomPanel.SetActive(false);
         }
     }
@@ -196,33 +217,40 @@ public class CoreCustomUIManager : MonoBehaviour
     {
         ClearModuleSelectionGrid();
 
-        if (_inventoryManager == null || _customizationManager == null) {
+        if (_inventoryManager == null || _customizationManager == null)
+        {
             FindManagers();
         }
 
-        if (_inventoryManager == null || _customizationManager == null) {
+        if (_inventoryManager == null || _customizationManager == null)
+        {
             UpdateEmptyModuleTextVisibility();
             return;
         }
 
         List<Module> allModules = _inventoryManager.GetAllModules();
-        if (allModules == null) {
+        if (allModules == null)
+        {
             allModules = new List<Module>();
         }
 
         HashSet<string> moduleIdsInSlots = new HashSet<string>();
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 3; i++)
+        {
             Module slotModule = _customizationManager.GetModuleInSlot(i);
-            if (slotModule != null && !string.IsNullOrEmpty(slotModule.moduleId)) {
+            if (slotModule != null && !string.IsNullOrEmpty(slotModule.moduleId))
+            {
                 moduleIdsInSlots.Add(slotModule.moduleId);
             }
         }
 
-        foreach (Module module in allModules) {
+        foreach (Module module in allModules)
+        {
             if (module == null) continue;
 
             bool isInSlot = !string.IsNullOrEmpty(module.moduleId) && moduleIdsInSlots.Contains(module.moduleId);
-            if (isInSlot) {
+            if (isInSlot)
+            {
                 continue;
             }
 
@@ -234,13 +262,15 @@ public class CoreCustomUIManager : MonoBehaviour
 
     private void CreateModuleCell(Module module)
     {
-        if (moduleSelectionGridContainer == null || moduleSelectionCellPrefab == null) {
+        if (moduleSelectionGridContainer == null || moduleSelectionCellPrefab == null)
+        {
             return;
         }
 
         GameObject cellObj = Instantiate(moduleSelectionCellPrefab, moduleSelectionGridContainer);
         ModuleInventoryCell cell = cellObj.GetComponent<ModuleInventoryCell>();
-        if (cell != null) {
+        if (cell != null)
+        {
             cell.Initialize(this);
             cell.SetModule(module);
             moduleSelectionCells.Add(cell);
@@ -251,7 +281,8 @@ public class CoreCustomUIManager : MonoBehaviour
     {
         if (moduleSelectionGridContainer == null) return;
 
-        foreach (Transform child in moduleSelectionGridContainer) {
+        foreach (Transform child in moduleSelectionGridContainer)
+        {
             Destroy(child.gameObject);
         }
 
@@ -260,24 +291,28 @@ public class CoreCustomUIManager : MonoBehaviour
 
     public void OnModuleCellClicked(Module module)
     {
-        if (_customizationManager == null || _inventoryManager == null) {
+        if (_customizationManager == null || _inventoryManager == null)
+        {
             FindManagers();
         }
-        
+
         int targetSlotIndex = FindEmptySlot();
-        if (targetSlotIndex < 0) {
+        if (targetSlotIndex < 0)
+        {
             Debug.LogWarning("CoreCustomUIManager: No empty slot available for module placement");
             return;
         }
 
-        if (!_inventoryManager.RemoveModule(module)) {
+        if (!_inventoryManager.RemoveModule(module))
+        {
             Debug.LogWarning($"CoreCustomUIManager: 인벤토리에서 모듈 '{module.moduleName}'을 제거할 수 없습니다.");
             return;
         }
 
         _customizationManager.SetModuleInSlot(targetSlotIndex, module);
-        
-        if (_baseInventorySystem != null) {
+
+        if (_baseInventorySystem != null)
+        {
             _baseInventorySystem.ForceRefreshInventory();
         }
 
@@ -287,8 +322,10 @@ public class CoreCustomUIManager : MonoBehaviour
 
     private int FindEmptySlot()
     {
-        for (int i = 0; i < 3; i++) {
-            if (_customizationManager.GetModuleInSlot(i) == null) {
+        for (int i = 0; i < 3; i++)
+        {
+            if (_customizationManager.GetModuleInSlot(i) == null)
+            {
                 return i;
             }
         }
@@ -299,7 +336,8 @@ public class CoreCustomUIManager : MonoBehaviour
     {
         RefreshSlots();
 
-        if (IsPanelOpen()) {
+        if (IsPanelOpen())
+        {
             StartCoroutine(RefreshModuleSelectionGridDelayed());
         }
 
@@ -312,7 +350,8 @@ public class CoreCustomUIManager : MonoBehaviour
 
     private void OnModuleInventoryChanged(Module module)
     {
-        if (IsPanelOpen()) {
+        if (IsPanelOpen())
+        {
             StartCoroutine(RefreshModuleSelectionGridDelayed());
         }
 
@@ -329,13 +368,15 @@ public class CoreCustomUIManager : MonoBehaviour
     {
         if (slotComponents == null) return;
 
-        foreach (CoreCustomizationSlot slot in slotComponents) {
-            if (slot != null) {
+        foreach (CoreCustomizationSlot slot in slotComponents)
+        {
+            if (slot != null)
+            {
                 slot.RefreshSlot();
             }
         }
     }
-    
+
     public void ShowShopUI()
     {
         if (moduleSelectionPanel != null)
@@ -345,7 +386,7 @@ public class CoreCustomUIManager : MonoBehaviour
         RefreshModuleSelectionGrid();
         UpdateEmptyModuleTextVisibility();
     }
-    
+
     public void HideShopUI()
     {
         if (moduleSelectionPanel != null)
@@ -381,7 +422,7 @@ public class CoreCustomUIManager : MonoBehaviour
 
         emptyModuleText.SetActive(isModulePanelVisible && moduleCount == 0);
     }
-    
+
     public void ClearDetailPanel()
     {
         if (coreDetailPanel != null)

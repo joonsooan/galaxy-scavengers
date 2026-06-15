@@ -21,7 +21,7 @@ public class ObjClickManager : MonoBehaviour
 
         if (IsLoadingScreenActive()) return;
 
-        if (Input.GetMouseButtonDown(0)) {
+        if (Input.GetMouseButtonUp(0)) {
             HandleClick();
         }
     }

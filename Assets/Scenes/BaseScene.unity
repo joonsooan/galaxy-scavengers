@@ -951,7 +951,6 @@ GameObject:
   - component: {fileID: 116708595}
   - component: {fileID: 116708594}
   - component: {fileID: 116708598}
-  - component: {fileID: 116708597}
   - component: {fileID: 116708596}
   m_Layer: 5
   m_Name: launcher
@@ -1045,30 +1044,6 @@ MonoBehaviour:
       Data4: 1624008095
     Path: event:/SFX_UI/SFX_UIClick
   clickType: Default
---- !u!114 &116708597
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 116708592}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 29b85e031e6fec74db57fa09caf8e0dd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  coreCustomPanel: {fileID: 131004605}
-  slotComponents:
-  - {fileID: 1635418049}
-  - {fileID: 122020680}
-  - {fileID: 432384942}
-  closeButton: {fileID: 451678560}
-  moduleSelectionPanel: {fileID: 16787288}
-  moduleSelectionGridContainer: {fileID: 2102936598}
-  moduleSelectionCellPrefab: {fileID: 3842191235755297668, guid: a995a3330f05eb34d97459368bfa0e79, type: 3}
-  emptyModuleText: {fileID: 1221845376}
-  coreDetailPanel: {fileID: 2013095396}
-  moduleSelectionCells: []
 --- !u!114 &116708598
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1112,19 +1087,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 116708594}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 116708597}
-        m_TargetAssemblyTypeName: CoreCustomUIManager, Assembly-CSharp
-        m_MethodName: ShowPanel
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!1 &120975143
 GameObject:
   m_ObjectHideFlags: 0
@@ -1712,7 +1675,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 0, g: 0, b: 1, a: 1}
@@ -2565,7 +2528,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -4685,6 +4648,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1029047579}
   - component: {fileID: 1029047580}
+  - component: {fileID: 1029047581}
+  - component: {fileID: 1029047582}
+  - component: {fileID: 1029047583}
   m_Layer: 0
   m_Name: launcher
   m_TagString: Untagged
@@ -4766,6 +4732,95 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!70 &1029047581
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1029047578}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: -0.4}
+  m_Size: {x: 10, y: 9}
+  m_Direction: 1
+--- !u!114 &1029047582
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1029047578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab0ead895cd580242bf90501a722cc3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SeedCore
+  spriteRenderer: {fileID: 1029047580}
+  hoverTint: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  clickSound:
+    Guid:
+      Data1: -345895807
+      Data2: 1210214295
+      Data3: -73339495
+      Data4: 1624008095
+    Path: event:/SFX_UI/SFX_UIClick
+  hoverSound:
+    Guid:
+      Data1: 199913248
+      Data2: 1202326804
+      Data3: -537020530
+      Data4: 1684792045
+    Path: event:/SFX_UI/SFX_UIHover
+--- !u!114 &1029047583
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1029047578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29b85e031e6fec74db57fa09caf8e0dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  coreCustomPanel: {fileID: 131004605}
+  slotComponents:
+  - {fileID: 1635418049}
+  - {fileID: 122020680}
+  - {fileID: 432384942}
+  closeButton: {fileID: 451678560}
+  moduleSelectionPanel: {fileID: 16787288}
+  moduleSelectionGridContainer: {fileID: 2102936598}
+  moduleSelectionCellPrefab: {fileID: 3842191235755297668, guid: a995a3330f05eb34d97459368bfa0e79, type: 3}
+  emptyModuleText: {fileID: 1221845376}
+  coreDetailPanel: {fileID: 2013095396}
+  moduleSelectionCells: []
 --- !u!1 &1034130775
 GameObject:
   m_ObjectHideFlags: 0
@@ -4903,7 +4958,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1506701308361564524, guid: f505413d92765e540a5da63a1ec5bfe3, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -68
+      value: -96
       objectReference: {fileID: 0}
     - target: {fileID: 1790778841898912121, guid: f505413d92765e540a5da63a1ec5bfe3, type: 3}
       propertyPath: m_Name
@@ -5043,7 +5098,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5463932265467098282, guid: f505413d92765e540a5da63a1ec5bfe3, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -96
+      value: -40
       objectReference: {fileID: 0}
     - target: {fileID: 5916442446122323977, guid: f505413d92765e540a5da63a1ec5bfe3, type: 3}
       propertyPath: m_SizeDelta.y
@@ -5171,7 +5226,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7276938601665632411, guid: f505413d92765e540a5da63a1ec5bfe3, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -40
+      value: -68
       objectReference: {fileID: 0}
     - target: {fileID: 7661550316516897769, guid: f505413d92765e540a5da63a1ec5bfe3, type: 3}
       propertyPath: m_Padding.m_Top
@@ -8557,7 +8612,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -10085,7 +10140,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
