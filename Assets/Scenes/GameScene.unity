@@ -3262,8 +3262,8 @@ MonoBehaviour:
   baseBuildingBtn: {fileID: 664278395}
   processorBtn: {fileID: 1581555310}
   resourceStatBtn: {fileID: 1495220791}
-  resourceStatCloseBtn: {fileID: 0}
   unitManagementBtn: {fileID: 1581555310}
+  researchBtn: {fileID: 844493219}
   buildingInfoPanel: {fileID: 886580898}
   baseBuildingPanel: {fileID: 327025569}
   resourceStatPanel: {fileID: 1890566047}
@@ -6216,6 +6216,8 @@ MonoBehaviour:
   lineColor: {r: 0.25490198, g: 0.25490198, b: 0.25490198, a: 1}
   selectedLineColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   selectedLineThickness: 1
+  focusOnSelected: 1
+  dimmedAlpha: 0.1
 --- !u!1 &318614855
 GameObject:
   m_ObjectHideFlags: 0
@@ -23320,10 +23322,11 @@ MonoBehaviour:
   iconImg: {fileID: 2227600205747675735}
   nameText: {fileID: 2227600205747675736}
   costPanel: {fileID: 2227600205747675734}
-  producableResourceImgPrefab: {fileID: 7022382646786988485, guid: e292883c45736a746b99e473fef03d8f, type: 3}
+  costResourceImgPrefab: {fileID: 7022382646786988485, guid: e292883c45736a746b99e473fef03d8f, type: 3}
   requiredAmountText: {fileID: 1863893302}
   descText: {fileID: 2227600205747675733}
   rewardTechPanel: {fileID: 2089832045}
+  rewardTechImgPrefab: {fileID: 7022382646786988485, guid: 006afc22d51ae9e45a164b6c6f5c176c, type: 3}
   statusBtn: {fileID: 1041627403}
   statusBtnText: {fileID: 1041627402}
   statusResearchBtn: {fileID: 1041627406}
@@ -38064,11 +38067,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 343383063176940936, guid: e71f7d997ede12d409929b58349b62a5, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 0.411
       objectReference: {fileID: 0}
     - target: {fileID: 343383063176940936, guid: e71f7d997ede12d409929b58349b62a5, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1543790714308267645, guid: e71f7d997ede12d409929b58349b62a5, type: 3}
       propertyPath: m_text
@@ -38161,6 +38164,10 @@ PrefabInstance:
     - target: {fileID: 7935622888678679490, guid: e71f7d997ede12d409929b58349b62a5, type: 3}
       propertyPath: m_Name
       value: Pretty Slider
+      objectReference: {fileID: 0}
+    - target: {fileID: 7935622888678679490, guid: e71f7d997ede12d409929b58349b62a5, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -74930,7 +74937,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1956806316
 RectTransform:
   m_ObjectHideFlags: 0
@@ -89355,7 +89362,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 3, y: -20}
-  m_SizeDelta: {x: -6, y: 16}
+  m_SizeDelta: {x: -6, y: 32}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &2089832046
 MonoBehaviour:
@@ -102291,7 +102298,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7376646509431804367, guid: 79f3fb0ca0899454586397da39608478, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 13.35
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7376646509431804367, guid: 79f3fb0ca0899454586397da39608478, type: 3}
       propertyPath: m_AnchoredPosition.x

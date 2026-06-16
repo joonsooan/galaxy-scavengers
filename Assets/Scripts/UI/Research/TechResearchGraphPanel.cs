@@ -2,8 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class TechResearchGraphPanel : MonoBehaviour
+public class TechResearchGraphPanel : MonoBehaviour, IPointerClickHandler
 {
     [Header("References")]
     [SerializeField] private ResearchPanelUI researchPanelUI;
@@ -17,8 +18,14 @@ public class TechResearchGraphPanel : MonoBehaviour
     [SerializeField] private Color selectedLineColor = Color.yellow;
     [SerializeField] private float selectedLineThickness = 4f;
 
+    [Header("Focus Mode")]
+    [SerializeField] private bool focusOnSelected;
+    [SerializeField] private float dimmedAlpha = 0.3f;
+
     private readonly Dictionary<int, TechDataCell> _cellsByIndex = new Dictionary<int, TechDataCell>();
+    private readonly Dictionary<int, CanvasGroup> _cellCanvasGroups = new Dictionary<int, CanvasGroup>();
     private readonly Dictionary<(int from, int to), Image> _lineImages = new Dictionary<(int, int), Image>();
+    private int _selectedTechIndex = -1;
 
     private void Awake()
     {
@@ -28,11 +35,20 @@ public class TechResearchGraphPanel : MonoBehaviour
     private void OnEnable()
     {
         TechDataCell.OnCellSelected += OnCellSelectedHandler;
+        ResearchPanelUI.OnSelectionCleared += RestoreAllVisibility;
     }
 
     private void OnDisable()
     {
         TechDataCell.OnCellSelected -= OnCellSelectedHandler;
+        ResearchPanelUI.OnSelectionCleared -= RestoreAllVisibility;
+        RestoreAllVisibility();
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (researchPanelUI != null)
+            researchPanelUI.ClearSelection();
     }
 
     private void Start()
@@ -62,7 +78,12 @@ public class TechResearchGraphPanel : MonoBehaviour
             {
                 continue;
             }
-            _cellsByIndex[cell.TechData.techIndex] = cell;
+            int idx = cell.TechData.techIndex;
+            _cellsByIndex[idx] = cell;
+            CanvasGroup cg = cell.GetComponent<CanvasGroup>();
+            if (cg == null)
+                cg = cell.gameObject.AddComponent<CanvasGroup>();
+            _cellCanvasGroups[idx] = cg;
         }
     }
 
@@ -163,6 +184,73 @@ public class TechResearchGraphPanel : MonoBehaviour
             img.color = selectedLineColor;
             RectTransform rt = img.GetComponent<RectTransform>();
             rt.sizeDelta = new Vector2(rt.sizeDelta.x, selectedLineThickness);
+        }
+
+        if (focusOnSelected)
+        {
+            _selectedTechIndex = techIndex;
+            ApplyFocusVisibility(techIndex);
+        }
+    }
+
+    private void ApplyFocusVisibility(int techIndex)
+    {
+        System.Collections.Generic.HashSet<int> visible = new System.Collections.Generic.HashSet<int>();
+        visible.Add(techIndex);
+
+        TechDataCell selectedCell;
+        if (_cellsByIndex.TryGetValue(techIndex, out selectedCell))
+        {
+            int[] successors = selectedCell.TechData.successorTechIndices;
+            if (successors != null)
+            {
+                for (int i = 0; i < successors.Length; i++)
+                    visible.Add(successors[i]);
+            }
+        }
+
+        foreach (KeyValuePair<int, TechDataCell> pair in _cellsByIndex)
+        {
+            int[] successors = pair.Value.TechData.successorTechIndices;
+            if (successors == null)
+                continue;
+            for (int i = 0; i < successors.Length; i++)
+            {
+                if (successors[i] == techIndex)
+                {
+                    visible.Add(pair.Key);
+                    break;
+                }
+            }
+        }
+
+        foreach (KeyValuePair<int, CanvasGroup> pair in _cellCanvasGroups)
+            pair.Value.alpha = visible.Contains(pair.Key) ? 1f : dimmedAlpha;
+
+        foreach (KeyValuePair<(int from, int to), Image> pair in _lineImages)
+        {
+            if (pair.Value == null)
+                continue;
+            bool connected = pair.Key.from == techIndex || pair.Key.to == techIndex;
+            Color c = pair.Value.color;
+            pair.Value.color = new Color(c.r, c.g, c.b, connected ? c.a : dimmedAlpha);
+        }
+    }
+
+    private void RestoreAllVisibility()
+    {
+        _selectedTechIndex = -1;
+
+        foreach (KeyValuePair<int, CanvasGroup> pair in _cellCanvasGroups)
+            pair.Value.alpha = 1f;
+
+        foreach (KeyValuePair<(int from, int to), Image> pair in _lineImages)
+        {
+            if (pair.Value == null)
+                continue;
+            pair.Value.color = lineColor;
+            RectTransform rt = pair.Value.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(rt.sizeDelta.x, lineThickness);
         }
     }
 

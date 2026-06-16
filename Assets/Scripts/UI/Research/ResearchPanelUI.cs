@@ -9,12 +9,13 @@ public class ResearchPanelUI : MonoBehaviour
     [SerializeField] private Image iconImg;
     [SerializeField] private TMP_Text nameText;
     [SerializeField] private Transform costPanel;
-    [SerializeField] private GameObject producableResourceImgPrefab;
+    [SerializeField] private GameObject costResourceImgPrefab;
     [SerializeField] private TMP_Text requiredAmountText;
     [SerializeField] private TMP_Text descText;
 
     [Header("Research Reward Panel")]
     [SerializeField] private Transform rewardTechPanel;
+    [SerializeField] private GameObject rewardTechImgPrefab;
     [SerializeField] private Button statusBtn;
     [SerializeField] private TMP_Text statusBtnText;
     [SerializeField] private ResearchStatusButton statusResearchBtn;
@@ -24,6 +25,8 @@ public class ResearchPanelUI : MonoBehaviour
     [SerializeField] private Slider progressSlider;
     [SerializeField] private TMP_Text progressSliderText;
 
+    public static event System.Action OnSelectionCleared;
+
     private TechData _selectedTech;
     private Vector2 _iconContainerSize;
     private static readonly string[] StatusTexts = { "연구 잠김", "연구 진행 전", "연구 진행 중", "연구 진행 완료" };
@@ -32,6 +35,11 @@ public class ResearchPanelUI : MonoBehaviour
     {
         if (iconImg != null)
             _iconContainerSize = iconImg.rectTransform.sizeDelta;
+    }
+
+    private void Start()
+    {
+        ClearCurrentResearchPanel();
     }
 
     private void OnEnable()
@@ -63,6 +71,7 @@ public class ResearchPanelUI : MonoBehaviour
         ClearRewardPanel();
         ClearStatusBtn();
         RefreshCurrentResearchPanel();
+        if (OnSelectionCleared != null) OnSelectionCleared();
     }
 
     private void RefreshInfoPanel()
@@ -108,12 +117,12 @@ public class ResearchPanelUI : MonoBehaviour
                 for (int i = 0; i < costs.Length; i++)
                 {
                     ResourceCost cost = costs[i];
-                    if (producableResourceImgPrefab == null)
+                    if (costResourceImgPrefab == null)
                     {
                         continue;
                     }
 
-                    GameObject iconObj = Instantiate(producableResourceImgPrefab, costPanel);
+                    GameObject iconObj = Instantiate(costResourceImgPrefab, costPanel);
                     Image iconImage = GetChildImage(iconObj);
                     if (iconImage != null && ResourceManager.Instance != null)
                     {
@@ -164,16 +173,19 @@ public class ResearchPanelUI : MonoBehaviour
                         continue;
                     }
 
-                    if (producableResourceImgPrefab == null)
+                    if (rewardTechImgPrefab == null)
                     {
                         continue;
                     }
 
-                    GameObject iconObj = Instantiate(producableResourceImgPrefab, rewardTechPanel);
+                    GameObject iconObj = Instantiate(rewardTechImgPrefab, rewardTechPanel);
                     Image iconImage = GetChildImage(iconObj);
                     if (iconImage != null)
                     {
+                        Vector2 containerSize = iconImage.rectTransform.sizeDelta;
                         iconImage.sprite = successorTech.GetTechIcon();
+                        if (iconImage.sprite != null)
+                            ApplyFitSize(iconImage.rectTransform, iconImage.sprite, containerSize);
                     }
                 }
             }
@@ -344,11 +356,16 @@ public class ResearchPanelUI : MonoBehaviour
 
     private void ApplyFitSize(RectTransform iconRt, Sprite sprite)
     {
+        ApplyFitSize(iconRt, sprite, _iconContainerSize);
+    }
+
+    private static void ApplyFitSize(RectTransform iconRt, Sprite sprite, Vector2 containerSize)
+    {
         float w = sprite.rect.width;
         float h = sprite.rect.height;
-        float containerW = _iconContainerSize.x > 0 ? _iconContainerSize.x : w;
-        float containerH = _iconContainerSize.y > 0 ? _iconContainerSize.y : h;
-        float scale = Mathf.Min(containerW / w, containerH / h);
+        float containerW = containerSize.x > 0 ? containerSize.x : w;
+        float containerH = containerSize.y > 0 ? containerSize.y : h;
+        float scale = Mathf.Min(1f, Mathf.Min(containerW / w, containerH / h));
         iconRt.sizeDelta = new Vector2(w * scale, h * scale);
     }
 
