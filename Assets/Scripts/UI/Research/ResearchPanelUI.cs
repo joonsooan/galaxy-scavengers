@@ -17,6 +17,7 @@ public class ResearchPanelUI : MonoBehaviour
     [SerializeField] private Transform rewardTechPanel;
     [SerializeField] private Button statusBtn;
     [SerializeField] private TMP_Text statusBtnText;
+    [SerializeField] private ResearchStatusButton statusResearchBtn;
 
     [Header("Research Current Panel")]
     [SerializeField] private Image currentResearchImg;
@@ -24,7 +25,14 @@ public class ResearchPanelUI : MonoBehaviour
     [SerializeField] private TMP_Text progressSliderText;
 
     private TechData _selectedTech;
+    private Vector2 _iconContainerSize;
     private static readonly string[] StatusTexts = { "연구 잠김", "연구 진행 전", "연구 진행 중", "연구 진행 완료" };
+
+    private void Awake()
+    {
+        if (iconImg != null)
+            _iconContainerSize = iconImg.rectTransform.sizeDelta;
+    }
 
     private void OnEnable()
     {
@@ -68,6 +76,8 @@ public class ResearchPanelUI : MonoBehaviour
         if (iconImg != null)
         {
             iconImg.sprite = _selectedTech.GetTechIcon();
+            if (iconImg.sprite != null)
+                ApplyFitSize(iconImg.rectTransform, iconImg.sprite);
         }
 
         if (nameText != null)
@@ -123,6 +133,7 @@ public class ResearchPanelUI : MonoBehaviour
                 {
                     requiredAmountText.text = "0";
                 }
+                LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)costPanel);
             }
         }
     }
@@ -191,6 +202,11 @@ public class ResearchPanelUI : MonoBehaviour
         {
             statusBtn.interactable = state == TechResearchState.Available;
         }
+
+        if (statusResearchBtn != null)
+        {
+            statusResearchBtn.SetState(state);
+        }
     }
 
     private void RefreshCurrentResearchPanel()
@@ -207,12 +223,12 @@ public class ResearchPanelUI : MonoBehaviour
             if (currentResearchImg != null)
             {
                 currentResearchImg.sprite = null;
-                currentResearchImg.enabled = false;
+                currentResearchImg.gameObject.SetActive(false);
             }
 
             if (progressSlider != null)
             {
-                progressSlider.value = 0;
+                progressSlider.gameObject.SetActive(false);
             }
 
             if (progressSliderText != null)
@@ -225,8 +241,8 @@ public class ResearchPanelUI : MonoBehaviour
 
         if (currentResearchImg != null)
         {
+            currentResearchImg.gameObject.SetActive(true);
             currentResearchImg.sprite = current.GetTechIcon();
-            currentResearchImg.enabled = true;
         }
 
         int prog = TechResearchManager.Instance.GetCurrentProgress();
@@ -234,6 +250,7 @@ public class ResearchPanelUI : MonoBehaviour
 
         if (progressSlider != null)
         {
+            progressSlider.gameObject.SetActive(true);
             progressSlider.minValue = 0;
             progressSlider.maxValue = max;
             progressSlider.value = prog;
@@ -325,6 +342,16 @@ public class ResearchPanelUI : MonoBehaviour
         }
     }
 
+    private void ApplyFitSize(RectTransform iconRt, Sprite sprite)
+    {
+        float w = sprite.rect.width;
+        float h = sprite.rect.height;
+        float containerW = _iconContainerSize.x > 0 ? _iconContainerSize.x : w;
+        float containerH = _iconContainerSize.y > 0 ? _iconContainerSize.y : h;
+        float scale = Mathf.Min(containerW / w, containerH / h);
+        iconRt.sizeDelta = new Vector2(w * scale, h * scale);
+    }
+
     private static Image GetChildImage(GameObject obj)
     {
         for (int i = 0; i < obj.transform.childCount; i++)
@@ -343,12 +370,12 @@ public class ResearchPanelUI : MonoBehaviour
         if (currentResearchImg != null)
         {
             currentResearchImg.sprite = null;
-            currentResearchImg.enabled = false;
+            currentResearchImg.gameObject.SetActive(false);
         }
 
         if (progressSlider != null)
         {
-            progressSlider.value = 0;
+            progressSlider.gameObject.SetActive(false);
         }
 
         if (progressSliderText != null)

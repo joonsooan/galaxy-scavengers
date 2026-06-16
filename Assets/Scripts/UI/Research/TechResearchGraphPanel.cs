@@ -13,11 +13,26 @@ public class TechResearchGraphPanel : MonoBehaviour
     [SerializeField] private float lineThickness = 2f;
     [SerializeField] private Color lineColor = Color.white;
 
+    [Header("Selected Line")]
+    [SerializeField] private Color selectedLineColor = Color.yellow;
+    [SerializeField] private float selectedLineThickness = 4f;
+
     private readonly Dictionary<int, TechDataCell> _cellsByIndex = new Dictionary<int, TechDataCell>();
+    private readonly Dictionary<(int from, int to), Image> _lineImages = new Dictionary<(int, int), Image>();
 
     private void Awake()
     {
         BuildCellRegistry();
+    }
+
+    private void OnEnable()
+    {
+        TechDataCell.OnCellSelected += OnCellSelectedHandler;
+    }
+
+    private void OnDisable()
+    {
+        TechDataCell.OnCellSelected -= OnCellSelectedHandler;
     }
 
     private void Start()
@@ -58,9 +73,12 @@ public class TechResearchGraphPanel : MonoBehaviour
             return;
         }
 
+        _lineImages.Clear();
+
         foreach (KeyValuePair<int, TechDataCell> pair in _cellsByIndex)
         {
             TechDataCell cell = pair.Value;
+            int fromIndex = pair.Key;
             int[] successorIndices = cell.TechData.successorTechIndices;
             if (successorIndices == null)
             {
@@ -69,22 +87,24 @@ public class TechResearchGraphPanel : MonoBehaviour
 
             for (int i = 0; i < successorIndices.Length; i++)
             {
+                int toIndex = successorIndices[i];
                 TechDataCell successor;
-                if (_cellsByIndex.TryGetValue(successorIndices[i], out successor))
+                if (_cellsByIndex.TryGetValue(toIndex, out successor))
                 {
                     Vector3 start = cell.GetRightCenterWorld();
                     Vector3 end = successor.GetLeftCenterWorld();
-                    DrawLine(start, end);
+                    Image lineImg = DrawLine(start, end);
+                    _lineImages[(fromIndex, toIndex)] = lineImg;
                 }
             }
         }
     }
 
-    private void DrawLine(Vector3 startWorld, Vector3 endWorld)
+    private Image DrawLine(Vector3 startWorld, Vector3 endWorld)
     {
         if (lineContainer == null)
         {
-            return;
+            return null;
         }
 
         Vector3 startLocal = lineContainer.InverseTransformPoint(startWorld);
@@ -108,6 +128,42 @@ public class TechResearchGraphPanel : MonoBehaviour
         rt.sizeDelta = new Vector2(distance, lineThickness);
         rt.localRotation = Quaternion.Euler(0f, 0f, angle);
         rt.localPosition = new Vector3(midLocal.x, midLocal.y, 0f);
+
+        return img;
+    }
+
+    private void OnCellSelectedHandler(int techIndex)
+    {
+        foreach (KeyValuePair<(int from, int to), Image> pair in _lineImages)
+        {
+            Image img = pair.Value;
+            if (img == null)
+            {
+                continue;
+            }
+
+            img.color = lineColor;
+            RectTransform rt = img.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(rt.sizeDelta.x, lineThickness);
+        }
+
+        foreach (KeyValuePair<(int from, int to), Image> pair in _lineImages)
+        {
+            if (pair.Key.from != techIndex && pair.Key.to != techIndex)
+            {
+                continue;
+            }
+
+            Image img = pair.Value;
+            if (img == null)
+            {
+                continue;
+            }
+
+            img.color = selectedLineColor;
+            RectTransform rt = img.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(rt.sizeDelta.x, selectedLineThickness);
+        }
     }
 
 #if UNITY_EDITOR

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -8,24 +9,51 @@ public class TechDataCell : MonoBehaviour, IPointerClickHandler
     [SerializeField] private TechData techData;
 
     [Header("UI References")]
+    [SerializeField] private Image cellImg;
     [SerializeField] private Image iconImg;
     [SerializeField] private Transform costPanel;
     [SerializeField] private GameObject producableResourceImgPrefab;
+    [SerializeField] private Sprite completedSprite;
+
+    public static event Action<int> OnCellSelected;
 
     private ResearchPanelUI _researchPanelUI;
     private RectTransform _rectTransform;
+    private Vector2 _iconContainerSize;
+    private Sprite _originalIconSprite;
 
     public TechData TechData => techData;
 
     private void Awake()
     {
+        _originalIconSprite = gameObject.GetComponent<Image>()?.sprite;
         _rectTransform = GetComponent<RectTransform>();
+        if (iconImg != null)
+            _iconContainerSize = iconImg.rectTransform.sizeDelta;
+    }
+
+    private void OnEnable()
+    {
+        TechResearchManager.OnResearchStateChanged += RefreshCompletionVisual;
+        TechResearchManager.OnResearchCompleted += OnResearchCompleted;
+    }
+
+    private void OnDisable()
+    {
+        TechResearchManager.OnResearchStateChanged -= RefreshCompletionVisual;
+        TechResearchManager.OnResearchCompleted -= OnResearchCompleted;
+    }
+
+    private void OnResearchCompleted(int techIndex)
+    {
+        RefreshCompletionVisual();
     }
 
     public void Setup(ResearchPanelUI researchPanelUI)
     {
         _researchPanelUI = researchPanelUI;
         InitializeDisplay();
+        RefreshCompletionVisual();
     }
 
     private void InitializeDisplay()
@@ -38,6 +66,8 @@ public class TechDataCell : MonoBehaviour, IPointerClickHandler
         if (iconImg != null)
         {
             iconImg.sprite = techData.GetTechIcon();
+            if (iconImg.sprite != null)
+                ApplyFitSize(iconImg.rectTransform, iconImg.sprite);
         }
 
         if (costPanel != null)
@@ -69,6 +99,27 @@ public class TechDataCell : MonoBehaviour, IPointerClickHandler
         }
     }
 
+    private void RefreshCompletionVisual()
+    {
+        if (TechResearchManager.Instance == null || techData == null || cellImg == null)
+        {
+            return;
+        }
+
+        TechResearchState state = TechResearchManager.Instance.GetTechState(techData.techIndex);
+        cellImg.sprite = state == TechResearchState.Completed ? completedSprite : _originalIconSprite;
+    }
+
+    private void ApplyFitSize(RectTransform iconRt, Sprite sprite)
+    {
+        float w = sprite.rect.width;
+        float h = sprite.rect.height;
+        float containerW = _iconContainerSize.x > 0 ? _iconContainerSize.x : w;
+        float containerH = _iconContainerSize.y > 0 ? _iconContainerSize.y : h;
+        float scale = Mathf.Min(containerW / w, containerH / h);
+        iconRt.sizeDelta = new Vector2(w * scale, h * scale);
+    }
+
     private static Image GetChildImage(GameObject obj)
     {
         for (int i = 0; i < obj.transform.childCount; i++)
@@ -88,10 +139,13 @@ public class TechDataCell : MonoBehaviour, IPointerClickHandler
         {
             _researchPanelUI.SelectTech(techData);
         }
+
+        if (techData != null)
+        {
+            if (OnCellSelected != null) OnCellSelected(techData.techIndex);
+        }
     }
 
-    // Returns the world-space midpoint of the left edge of this cell's RectTransform.
-    // corners layout from GetWorldCorners: [0]=bottom-left, [1]=top-left, [2]=top-right, [3]=bottom-right
     public Vector3 GetLeftCenterWorld()
     {
         if (_rectTransform == null)
@@ -101,7 +155,6 @@ public class TechDataCell : MonoBehaviour, IPointerClickHandler
         return (corners[0] + corners[1]) * 0.5f;
     }
 
-    // Returns the world-space midpoint of the right edge of this cell's RectTransform.
     public Vector3 GetRightCenterWorld()
     {
         if (_rectTransform == null)

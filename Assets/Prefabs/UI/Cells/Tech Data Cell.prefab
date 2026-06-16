@@ -269,10 +269,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf69505124635d14781ae180406a6795, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TechDataCell
-  techData: {fileID: 11400000, guid: fea00b7bb16f02a4086f654b368c7f79, type: 2}
+  techData: {fileID: 0}
+  cellImg: {fileID: 1041431013080198386}
   iconImg: {fileID: 9169287995371940599}
   costPanel: {fileID: 3119951475711351718}
   producableResourceImgPrefab: {fileID: 7022382646786988485, guid: d045e0413dcce8b45b3db74e3d887711, type: 3}
+  completedSprite: {fileID: -829692872795631221, guid: fe95ee2ebe85ca345962c63d1d8c0323, type: 3}
 --- !u!114 &5798202263494419261
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -304,7 +306,7 @@ MonoBehaviour:
   m_SpriteState:
     m_HighlightedSprite: {fileID: -4239486290848219248, guid: 92b7981e41463a94ab348ae08507a7ec, type: 3}
     m_PressedSprite: {fileID: 8508079644404475916, guid: f243b32f5f223af468ab44a596d5592a, type: 3}
-    m_SelectedSprite: {fileID: -1899253260378458392, guid: 1fd5403476e2e2e41b3bcb15ae427786, type: 3}
+    m_SelectedSprite: {fileID: -4239486290848219248, guid: 92b7981e41463a94ab348ae08507a7ec, type: 3}
     m_DisabledSprite: {fileID: -1899253260378458392, guid: 1fd5403476e2e2e41b3bcb15ae427786, type: 3}
   m_AnimationTriggers:
     m_NormalTrigger: Normal
