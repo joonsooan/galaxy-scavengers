@@ -94,6 +94,8 @@ public class TechDataCell : MonoBehaviour, IPointerClickHandler
     // corners layout from GetWorldCorners: [0]=bottom-left, [1]=top-left, [2]=top-right, [3]=bottom-right
     public Vector3 GetLeftCenterWorld()
     {
+        if (_rectTransform == null)
+            _rectTransform = GetComponent<RectTransform>();
         Vector3[] corners = new Vector3[4];
         _rectTransform.GetWorldCorners(corners);
         return (corners[0] + corners[1]) * 0.5f;
@@ -102,6 +104,8 @@ public class TechDataCell : MonoBehaviour, IPointerClickHandler
     // Returns the world-space midpoint of the right edge of this cell's RectTransform.
     public Vector3 GetRightCenterWorld()
     {
+        if (_rectTransform == null)
+            _rectTransform = GetComponent<RectTransform>();
         Vector3[] corners = new Vector3[4];
         _rectTransform.GetWorldCorners(corners);
         return (corners[2] + corners[3]) * 0.5f;

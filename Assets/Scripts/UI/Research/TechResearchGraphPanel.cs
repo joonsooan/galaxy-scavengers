@@ -109,4 +109,34 @@ public class TechResearchGraphPanel : MonoBehaviour
         rt.localRotation = Quaternion.Euler(0f, 0f, angle);
         rt.localPosition = new Vector3(midLocal.x, midLocal.y, 0f);
     }
+
+#if UNITY_EDITOR
+    private void OnDrawGizmos()
+    {
+        TechDataCell[] cells = GetComponentsInChildren<TechDataCell>(true);
+        Dictionary<int, TechDataCell> cellMap = new Dictionary<int, TechDataCell>();
+        for (int i = 0; i < cells.Length; i++)
+        {
+            TechDataCell cell = cells[i];
+            if (cell.TechData != null)
+                cellMap[cell.TechData.techIndex] = cell;
+        }
+
+        Gizmos.color = lineColor;
+        foreach (KeyValuePair<int, TechDataCell> pair in cellMap)
+        {
+            int[] successors = pair.Value.TechData.successorTechIndices;
+            if (successors == null)
+                continue;
+            for (int i = 0; i < successors.Length; i++)
+            {
+                TechDataCell successor;
+                if (cellMap.TryGetValue(successors[i], out successor))
+                {
+                    Gizmos.DrawLine(pair.Value.GetRightCenterWorld(), successor.GetLeftCenterWorld());
+                }
+            }
+        }
+    }
+#endif
 }

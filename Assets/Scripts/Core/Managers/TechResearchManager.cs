@@ -47,6 +47,32 @@ public class TechResearchManager : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        if (catalog == null)
+        {
+            return;
+        }
+
+        IReadOnlyList<TechData> techs = catalog.Techs;
+        if (techs == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < techs.Count; i++)
+        {
+            TechData tech = techs[i];
+            if (tech == null || !tech.isUnlockedByDefault)
+            {
+                continue;
+            }
+
+            ApplyTechUnlockEffects(tech);
+            UnlockSuccessors(tech.techIndex);
+        }
+    }
+
     private void InitializeTechStates()
     {
         _techStates.Clear();
@@ -70,8 +96,15 @@ public class TechResearchManager : MonoBehaviour
                 continue;
             }
 
-            bool hasPrerequisites = tech.prerequisiteTechIndices != null && tech.prerequisiteTechIndices.Length > 0;
-            _techStates[tech.techIndex] = hasPrerequisites ? TechResearchState.Locked : TechResearchState.Available;
+            if (tech.isUnlockedByDefault)
+            {
+                _techStates[tech.techIndex] = TechResearchState.Completed;
+            }
+            else
+            {
+                bool hasPrerequisites = tech.prerequisiteTechIndices != null && tech.prerequisiteTechIndices.Length > 0;
+                _techStates[tech.techIndex] = hasPrerequisites ? TechResearchState.Locked : TechResearchState.Available;
+            }
         }
     }
 
@@ -201,6 +234,13 @@ public class TechResearchManager : MonoBehaviour
     private void CompleteResearch()
     {
         _techStates[_currentResearchIndex] = TechResearchState.Completed;
+
+        TechData completedTech = GetTechData(_currentResearchIndex);
+        if (completedTech != null)
+        {
+            ApplyTechUnlockEffects(completedTech);
+        }
+
         UnlockSuccessors(_currentResearchIndex);
 
         int completedIndex = _currentResearchIndex;
@@ -228,6 +268,54 @@ public class TechResearchManager : MonoBehaviour
         for (int i = 0; i < techData.successorTechIndices.Length; i++)
         {
             CheckAndUnlock(techData.successorTechIndices[i]);
+        }
+    }
+
+    private void ApplyTechUnlockEffects(TechData tech)
+    {
+        if (tech.unlocksBuildings != null)
+        {
+            for (int i = 0; i < tech.unlocksBuildings.Length; i++)
+            {
+                if (tech.unlocksBuildings[i] != null && BuildingUnlockManager.Instance != null)
+                {
+                    BuildingUnlockManager.Instance.UnlockBuilding(tech.unlocksBuildings[i]);
+                }
+            }
+        }
+
+        if (tech.unlocksUnits != null)
+        {
+            for (int i = 0; i < tech.unlocksUnits.Length; i++)
+            {
+                if (tech.unlocksUnits[i] != null && UnitUnlockManager.Instance != null)
+                {
+                    UnitUnlockManager.Instance.UnlockUnit(tech.unlocksUnits[i]);
+                }
+            }
+        }
+
+        if (tech.unlocksResources != null)
+        {
+            for (int i = 0; i < tech.unlocksResources.Length; i++)
+            {
+                if (ResourceUnlockManager.Instance != null)
+                {
+                    ResourceUnlockManager.Instance.UnlockResource(tech.unlocksResources[i]);
+                }
+            }
+        }
+
+        if (tech.grantStatTypes != null && tech.grantStatValues != null)
+        {
+            int statCount = Mathf.Min(tech.grantStatTypes.Length, tech.grantStatValues.Length);
+            for (int i = 0; i < statCount; i++)
+            {
+                if (ModuleEffectManager.Instance != null)
+                {
+                    ModuleEffectManager.Instance.GrantTechBonus(tech.grantStatTypes[i], tech.grantStatValues[i]);
+                }
+            }
         }
     }
 

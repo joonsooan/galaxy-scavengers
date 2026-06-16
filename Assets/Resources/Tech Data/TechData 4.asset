@@ -13,15 +13,22 @@ MonoBehaviour:
   m_Name: TechData 4
   m_EditorClassIdentifier: Assembly-CSharp::TechData
   techIndex: 4
-  useExistingData: 0
-  existingDisplayableData: {fileID: 0}
+  useExistingData: 1
+  existingDisplayableData: {fileID: 11400000, guid: 11e719e49df1f8041a2512a4d0c060ce, type: 2}
   existingUnitData: {fileID: 0}
-  manualName: Test Data 4
-  manualDescription: 44444444444444444444
-  manualIcon: {fileID: 8999891839495180843, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
+  manualName: Power Generation
+  manualDescription: 
+  manualIcon: {fileID: 0}
   researchCosts:
-  - resourceType: 9
-    amount: 1000
-  researchDuration: 60
-  prerequisiteTechIndices: 02000000
-  successorTechIndices: 
+  - resourceType: 0
+    amount: 100
+  - resourceType: 1
+    amount: 50
+  researchDuration: 45
+  prerequisiteTechIndices: 00000000
+  successorTechIndices: 0800000009000000
+  isUnlockedByDefault: 0
+  unlocksBuildings:
+  - {fileID: 11400000, guid: 11e719e49df1f8041a2512a4d0c060ce, type: 2}
+  unlocksUnits: []
+  unlocksResources: 

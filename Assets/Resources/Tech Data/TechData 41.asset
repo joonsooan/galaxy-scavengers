@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceeace5e3ddf138488abd43ac61f82c5, type: 3}
+  m_Name: TechData 41
+  m_EditorClassIdentifier: Assembly-CSharp::TechData
+  techIndex: 41
+  useExistingData: 0
+  existingDisplayableData: {fileID: 0}
+  existingUnitData: {fileID: 0}
+  manualName: Move Speed II
+  manualDescription:
+  manualIcon: {fileID: 0}
+  researchCosts:
+  - resourceType: 4
+    amount: 80
+  - resourceType: 7
+    amount: 40
+  researchDuration: 120
+  prerequisiteTechIndices: 280000000f000000
+  successorTechIndices: 2a000000
+  isUnlockedByDefault: 0
+  unlocksBuildings: []
+  unlocksUnits: []
+  unlocksResources:
+  grantStatTypes: 02000000
+  grantStatValues: cdcc4c3d

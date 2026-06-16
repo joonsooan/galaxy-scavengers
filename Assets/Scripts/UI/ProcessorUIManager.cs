@@ -57,11 +57,24 @@ public class ProcessorUIManager : MonoBehaviour
     private void OnEnable()
     {
         LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
+        if (ResourceUnlockManager.Instance != null) {
+            ResourceUnlockManager.Instance.OnResourceUnlocked += OnResourceUnlocked_Handler;
+        }
     }
 
     private void OnDisable()
     {
         LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
+        if (ResourceUnlockManager.Instance != null) {
+            ResourceUnlockManager.Instance.OnResourceUnlocked -= OnResourceUnlocked_Handler;
+        }
+    }
+
+    private void OnResourceUnlocked_Handler(ResourceType _)
+    {
+        if (_currentProcessor != null) {
+            RefreshRecipeDisplay();
+        }
     }
 
     private void OnSelectedLocaleChanged(Locale _)
@@ -205,6 +218,10 @@ public class ProcessorUIManager : MonoBehaviour
             }
 
             if (!seen.Add(recipe.resourceType)) {
+                continue;
+            }
+
+            if (ResourceUnlockManager.Instance != null && !ResourceUnlockManager.Instance.IsResourceUnlocked(recipe.resourceType)) {
                 continue;
             }
 

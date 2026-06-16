@@ -26,6 +26,16 @@ public class TechData : ScriptableObject
     public int[] prerequisiteTechIndices;
     public int[] successorTechIndices;
 
+    [Header("Unlock on Completion")]
+    public bool isUnlockedByDefault;
+    public BuildingData[] unlocksBuildings;
+    public UnitData[] unlocksUnits;
+    public ResourceType[] unlocksResources;
+
+    [Header("Stat Bonuses on Completion")]
+    public ModuleStatType[] grantStatTypes;
+    public float[] grantStatValues;
+
     public string GetTechName()
     {
         if (useExistingData)

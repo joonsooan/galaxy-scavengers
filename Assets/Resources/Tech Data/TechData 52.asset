@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceeace5e3ddf138488abd43ac61f82c5, type: 3}
+  m_Name: TechData 52
+  m_EditorClassIdentifier: Assembly-CSharp::TechData
+  techIndex: 52
+  useExistingData: 0
+  existingDisplayableData: {fileID: 0}
+  existingUnitData: {fileID: 0}
+  manualName: Building HP I
+  manualDescription:
+  manualIcon: {fileID: 0}
+  researchCosts:
+  - resourceType: 4
+    amount: 100
+  - resourceType: 5
+    amount: 50
+  researchDuration: 90
+  prerequisiteTechIndices: 06000000
+  successorTechIndices: 35000000
+  isUnlockedByDefault: 0
+  unlocksBuildings: []
+  unlocksUnits: []
+  unlocksResources:
+  grantStatTypes: 04000000
+  grantStatValues: cdcccc3d

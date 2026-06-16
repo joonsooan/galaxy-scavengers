@@ -228,6 +228,12 @@ public class ModuleEffectManager : MonoBehaviour
         }
     }
 
+    public void GrantTechBonus(ModuleStatType statType, float value)
+    {
+        AddStatModifier(statType, value);
+        ApplyModifiersToExistingObjects();
+    }
+
     public void RefreshModuleEffects()
     {
         if (SceneManager.GetActiveScene().name == "GameScene") {

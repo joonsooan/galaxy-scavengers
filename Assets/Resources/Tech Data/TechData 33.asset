@@ -1,0 +1,35 @@
+﻿%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceeace5e3ddf138488abd43ac61f82c5, type: 3}
+  m_Name: TechData 33
+  m_EditorClassIdentifier: Assembly-CSharp::TechData
+  techIndex: 33
+  useExistingData: 0
+  existingDisplayableData: {fileID: 0}
+  existingUnitData: {fileID: 0}
+  manualName: Neural Matrix
+  manualDescription: 
+  manualIcon: {fileID: 0}
+  researchCosts:
+  - resourceType: 7
+    amount: 60
+  - resourceType: 12
+    amount: 40
+  researchDuration: 180
+  prerequisiteTechIndices: 1b0000001f000000
+  successorTechIndices: 240000002f000000
+  isUnlockedByDefault: 0
+  unlocksBuildings: []
+  unlocksUnits: []
+  unlocksResources:
+  grantStatTypes:
+  grantStatValues:

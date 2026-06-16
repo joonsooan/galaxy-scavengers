@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -14,14 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TechData
   techIndex: 0
   useExistingData: 1
-  existingDisplayableData: {fileID: 0}
+  existingDisplayableData: {fileID: 11400000, guid: 3ed9fe33af7f6a14991abdbd3238ac98, type: 2}
   existingUnitData: {fileID: 0}
-  manualName: Test Data
-  manualDescription: Testing
-  manualIcon: {fileID: -6245384556211576076, guid: 28bc5b3aa7130d049b30680ca552bafc, type: 3}
-  researchCosts:
-  - resourceType: 0
-    amount: 100
-  researchDuration: 30
+  manualName: 
+  manualDescription: 
+  manualIcon: {fileID: 0}
+  researchCosts: []
+  researchDuration: 0
   prerequisiteTechIndices: 
-  successorTechIndices: 01000000
+  successorTechIndices: 0400000006000000
+  isUnlockedByDefault: 1
+  unlocksBuildings:
+  - {fileID: 11400000, guid: 3ed9fe33af7f6a14991abdbd3238ac98, type: 2}
+  unlocksUnits: []
+  unlocksResources: 

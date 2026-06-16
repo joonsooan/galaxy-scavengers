@@ -1,0 +1,36 @@
+﻿%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceeace5e3ddf138488abd43ac61f82c5, type: 3}
+  m_Name: TechData 13
+  m_EditorClassIdentifier: Assembly-CSharp::TechData
+  techIndex: 13
+  useExistingData: 1
+  existingDisplayableData: {fileID: 11400000, guid: 6a375b82248aff4438a80132fb46c2a5, type: 2}
+  existingUnitData: {fileID: 0}
+  manualName: Defense Turret
+  manualDescription: 
+  manualIcon: {fileID: 0}
+  researchCosts:
+  - resourceType: 0
+    amount: 200
+  - resourceType: 1
+    amount: 100
+  - resourceType: 3
+    amount: 50
+  researchDuration: 90
+  prerequisiteTechIndices: 06000000
+  successorTechIndices: 16000000
+  isUnlockedByDefault: 0
+  unlocksBuildings:
+  - {fileID: 11400000, guid: 6a375b82248aff4438a80132fb46c2a5, type: 2}
+  unlocksUnits: []
+  unlocksResources: 
