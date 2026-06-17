@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -11,16 +12,21 @@ public class TechDataCell : MonoBehaviour, IPointerClickHandler
     [Header("UI References")]
     [SerializeField] private Image cellImg;
     [SerializeField] private Image iconImg;
+    [SerializeField] private TMP_Text nameText;
+    [SerializeField] private GameObject outlineObj;
     [SerializeField] private Transform costPanel;
     [SerializeField] private GameObject producableResourceImgPrefab;
     [SerializeField] private Sprite completedSprite;
 
     public static event Action<int> OnCellSelected;
 
+    private static TechDataCell _selectedCell;
+
     private ResearchPanelUI _researchPanelUI;
     private RectTransform _rectTransform;
     private Vector2 _iconContainerSize;
     private Sprite _originalIconSprite;
+    private readonly Vector3[] _corners = new Vector3[4];
 
     public TechData TechData => techData;
 
@@ -30,18 +36,36 @@ public class TechDataCell : MonoBehaviour, IPointerClickHandler
         _rectTransform = GetComponent<RectTransform>();
         if (iconImg != null)
             _iconContainerSize = iconImg.rectTransform.sizeDelta;
+        if (outlineObj != null)
+            outlineObj.SetActive(false);
     }
 
     private void OnEnable()
     {
         TechResearchManager.OnResearchStateChanged += RefreshCompletionVisual;
         TechResearchManager.OnResearchCompleted += OnResearchCompleted;
+        ResearchPanelUI.OnSelectionCleared += OnSelectionCleared;
     }
 
     private void OnDisable()
     {
         TechResearchManager.OnResearchStateChanged -= RefreshCompletionVisual;
         TechResearchManager.OnResearchCompleted -= OnResearchCompleted;
+        ResearchPanelUI.OnSelectionCleared -= OnSelectionCleared;
+        if (_selectedCell == this)
+        {
+            SetSelected(false);
+            _selectedCell = null;
+        }
+    }
+
+    private void OnSelectionCleared()
+    {
+        if (_selectedCell == this)
+        {
+            SetSelected(false);
+            _selectedCell = null;
+        }
     }
 
     private void OnResearchCompleted(int techIndex)
@@ -69,6 +93,9 @@ public class TechDataCell : MonoBehaviour, IPointerClickHandler
             if (iconImg.sprite != null)
                 ApplyFitSize(iconImg.rectTransform, iconImg.sprite);
         }
+
+        if (nameText != null)
+            nameText.text = techData.GetTechName();
 
         if (costPanel != null)
         {
@@ -133,8 +160,19 @@ public class TechDataCell : MonoBehaviour, IPointerClickHandler
         return null;
     }
 
+    public void SetSelected(bool selected)
+    {
+        if (outlineObj != null)
+            outlineObj.SetActive(selected);
+    }
+
     public void OnPointerClick(PointerEventData eventData)
     {
+        if (_selectedCell != null && _selectedCell != this)
+            _selectedCell.SetSelected(false);
+        _selectedCell = this;
+        SetSelected(true);
+
         if (_researchPanelUI != null)
         {
             _researchPanelUI.SelectTech(techData);
@@ -150,17 +188,15 @@ public class TechDataCell : MonoBehaviour, IPointerClickHandler
     {
         if (_rectTransform == null)
             _rectTransform = GetComponent<RectTransform>();
-        Vector3[] corners = new Vector3[4];
-        _rectTransform.GetWorldCorners(corners);
-        return (corners[0] + corners[1]) * 0.5f;
+        _rectTransform.GetWorldCorners(_corners);
+        return (_corners[0] + _corners[1]) * 0.5f;
     }
 
     public Vector3 GetRightCenterWorld()
     {
         if (_rectTransform == null)
             _rectTransform = GetComponent<RectTransform>();
-        Vector3[] corners = new Vector3[4];
-        _rectTransform.GetWorldCorners(corners);
-        return (corners[2] + corners[3]) * 0.5f;
+        _rectTransform.GetWorldCorners(_corners);
+        return (_corners[2] + _corners[3]) * 0.5f;
     }
 }

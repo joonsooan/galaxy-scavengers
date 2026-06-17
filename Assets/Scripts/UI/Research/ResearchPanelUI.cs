@@ -25,11 +25,11 @@ public class ResearchPanelUI : MonoBehaviour
     [SerializeField] private Slider progressSlider;
     [SerializeField] private TMP_Text progressSliderText;
 
-    public static event System.Action OnSelectionCleared;
+    public static event Action OnSelectionCleared;
 
     private TechData _selectedTech;
     private Vector2 _iconContainerSize;
-    private static readonly string[] StatusTexts = { "연구 잠김", "연구 진행 전", "연구 진행 중", "연구 진행 완료" };
+    private static readonly string[] StatusTexts = { "연구 잠김", "연구", "연구 진행 중", "연구 완료" };
 
     private void Awake()
     {
@@ -133,14 +133,15 @@ public class ResearchPanelUI : MonoBehaviour
 
             if (requiredAmountText != null)
             {
+                string defaultText = " x ";
                 requiredAmountText.transform.SetAsLastSibling();
                 if (costs != null && costs.Length > 0)
                 {
-                    requiredAmountText.text = costs[0].amount.ToString();
+                    requiredAmountText.text = defaultText + costs[0].amount.ToString();
                 }
                 else
                 {
-                    requiredAmountText.text = "0";
+                    requiredAmountText.text = "";
                 }
                 LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)costPanel);
             }
