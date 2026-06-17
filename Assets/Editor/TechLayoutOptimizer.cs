@@ -574,11 +574,9 @@ public class TechLayoutOptimizer : EditorWindow
         // Split overloaded columns so no column exceeds maxRows
         EnforceMaxRowsPerColumn(nodeCols, successorsMap, activeNodeIndices);
 
-        // Pull non-root nodes left to minimise edge column-span
-        CompressColumns(nodeCols, prerequisitesMap, activeNodeIndices);
-
-        // Push root nodes (no predecessors) right to sit directly before their earliest successor
-        PositionRootNodes(nodeCols, prerequisitesMap, successorsMap, activeNodeIndices);
+        // Bidirectionally compress until stable (pull left + push right for all nodes),
+        // then insert columns wherever gaps > 1 remain and repeat.
+        EliminateGaps(nodeCols, prerequisitesMap, successorsMap, activeNodeIndices);
 
         foreach (KeyValuePair<int, int> pair in nodeCols)
         {
@@ -594,57 +592,78 @@ public class TechLayoutOptimizer : EditorWindow
         }
     }
 
-    private void PositionRootNodes(Dictionary<int, int> nodeCols, Dictionary<int, HashSet<int>> predecessorsMap, Dictionary<int, HashSet<int>> successorsMap, HashSet<int> activeNodeIndices)
+    private Dictionary<int, int> BuildColCounts(Dictionary<int, int> nodeCols, HashSet<int> activeNodeIndices)
     {
-        // Root nodes have no active predecessors, so CompressColumns skips them.
-        // Push each root right to sit exactly 1 column before its closest successor,
-        // eliminating large gaps between column 0 and where successors actually land.
-        bool anyMoved = true;
-        while (anyMoved)
+        Dictionary<int, int> counts = new Dictionary<int, int>();
+        foreach (int idx in activeNodeIndices)
         {
-            anyMoved = false;
+            int c = nodeCols[idx];
+            counts[c] = counts.ContainsKey(c) ? counts[c] + 1 : 1;
+        }
+        return counts;
+    }
 
-            Dictionary<int, int> colCounts = new Dictionary<int, int>();
-            foreach (int idx in activeNodeIndices)
-            {
-                int c = nodeCols[idx];
-                colCounts[c] = colCounts.ContainsKey(c) ? colCounts[c] + 1 : 1;
-            }
+    private void EliminateGaps(Dictionary<int, int> nodeCols, Dictionary<int, HashSet<int>> prerequisitesMap, Dictionary<int, HashSet<int>> successorsMap, HashSet<int> activeNodeIndices)
+    {
+        // Alternate pull-left and push-right passes until no node moves.
+        // This handles both roots (push-right) and mid-chain nodes (both directions).
+        int maxPasses = activeNodeIndices.Count * 4;
+        for (int pass = 0; pass < maxPasses; pass++)
+        {
+            bool anyMoved = false;
+            Dictionary<int, int> colCounts = BuildColCounts(nodeCols, activeNodeIndices);
 
+            // Pull-left: each node tries to sit directly right of its rightmost predecessor.
             foreach (int v in activeNodeIndices.OrderBy(n => nodeCols[n]))
             {
-                // Only root nodes (no active predecessors)
-                bool isRoot = true;
-                if (predecessorsMap.ContainsKey(v))
-                {
-                    foreach (int u in predecessorsMap[v])
-                    {
-                        if (nodeCols.ContainsKey(u)) { isRoot = false; break; }
-                    }
-                }
-                if (!isRoot) continue;
-                if (!successorsMap.ContainsKey(v) || successorsMap[v].Count == 0) continue;
+                if (prerequisitesMap[v].Count == 0) continue;
+                int maxPredCol = -1;
+                foreach (int p in prerequisitesMap[v])
+                    if (nodeCols.ContainsKey(p) && nodeCols[p] > maxPredCol)
+                        maxPredCol = nodeCols[p];
+                if (maxPredCol < 0) continue;
 
-                // Target: directly left of the closest successor
+                int ideal = maxPredCol + 1;
+                int cur   = nodeCols[v];
+                if (ideal >= cur) continue;
+                int cnt = colCounts.ContainsKey(ideal) ? colCounts[ideal] : 0;
+                if (cnt >= maxRows) continue;
+
+                colCounts[cur]--;
+                colCounts[ideal] = cnt + 1;
+                nodeCols[v] = ideal;
+                anyMoved = true;
+            }
+
+            // Push-right: each node tries to sit directly left of its closest successor.
+            colCounts = BuildColCounts(nodeCols, activeNodeIndices);
+            foreach (int v in activeNodeIndices.OrderByDescending(n => nodeCols[n]))
+            {
+                if (successorsMap[v].Count == 0) continue;
                 int minSuccCol = int.MaxValue;
                 foreach (int s in successorsMap[v])
-                {
                     if (nodeCols.ContainsKey(s) && nodeCols[s] < minSuccCol)
                         minSuccCol = nodeCols[s];
-                }
                 if (minSuccCol == int.MaxValue) continue;
 
-                int idealCol  = minSuccCol - 1;
-                int currentCol = nodeCols[v];
-                if (idealCol <= currentCol) continue; // already adjacent or at 0
+                int ideal = minSuccCol - 1;
+                int cur   = nodeCols[v];
+                if (ideal <= cur) continue;
 
-                // Find the rightmost column with room in [currentCol+1, idealCol]
-                for (int c = idealCol; c > currentCol; c--)
+                // Must not violate predecessor constraint
+                int maxPredCol = -1;
+                foreach (int p in prerequisitesMap[v])
+                    if (nodeCols.ContainsKey(p) && nodeCols[p] > maxPredCol)
+                        maxPredCol = nodeCols[p];
+
+                // Search from ideal leftward for the closest slot with room that still beats maxPredCol
+                for (int c = ideal; c > cur; c--)
                 {
+                    if (c <= maxPredCol) break;
                     int cnt = colCounts.ContainsKey(c) ? colCounts[c] : 0;
                     if (cnt < maxRows)
                     {
-                        colCounts[currentCol]--;
+                        colCounts[cur]--;
                         colCounts[c] = cnt + 1;
                         nodeCols[v] = c;
                         anyMoved = true;
@@ -652,52 +671,95 @@ public class TechLayoutOptimizer : EditorWindow
                     }
                 }
             }
-        }
-    }
-
-    private void CompressColumns(Dictionary<int, int> nodeCols, Dictionary<int, HashSet<int>> predecessorsMap, HashSet<int> activeNodeIndices)
-    {
-        // Iteratively pull each node left to max(predecessors.col)+1 while column has room.
-        // Multiple passes cascade compression through the DAG.
-        int maxPasses = activeNodeIndices.Count;
-        for (int pass = 0; pass < maxPasses; pass++)
-        {
-            // Rebuild column counts each pass (nodes may have moved)
-            Dictionary<int, int> colCounts = new Dictionary<int, int>();
-            foreach (int idx in activeNodeIndices)
-            {
-                int c = nodeCols[idx];
-                colCounts[c] = colCounts.ContainsKey(c) ? colCounts[c] + 1 : 1;
-            }
-
-            bool anyMoved = false;
-            foreach (int v in activeNodeIndices.OrderBy(n => nodeCols[n]).ThenBy(n => n))
-            {
-                if (!predecessorsMap.ContainsKey(v) || predecessorsMap[v].Count == 0) continue;
-
-                int maxPredCol = -1;
-                foreach (int u in predecessorsMap[v])
-                {
-                    if (nodeCols.ContainsKey(u) && nodeCols[u] > maxPredCol)
-                        maxPredCol = nodeCols[u];
-                }
-                if (maxPredCol < 0) continue;
-
-                int idealCol  = maxPredCol + 1;
-                int currentCol = nodeCols[v];
-                if (idealCol >= currentCol) continue; // already optimal or can't go left
-
-                int targetCount = colCounts.ContainsKey(idealCol) ? colCounts[idealCol] : 0;
-                if (targetCount >= maxRows) continue; // target column is full
-
-                // Move v left
-                colCounts[currentCol]--;
-                colCounts[idealCol] = targetCount + 1;
-                nodeCols[v] = idealCol;
-                anyMoved = true;
-            }
 
             if (!anyMoved) break;
+        }
+
+        // If any edge still spans > 1 column (all intermediate slots were full),
+        // insert a new empty column to force adjacency, then re-compress.
+        int safetyLimit = activeNodeIndices.Count;
+        for (int ins = 0; ins < safetyLimit; ins++)
+        {
+            // Find the worst gap
+            int worstU = -1, worstV = -1, worstGap = 1;
+            foreach (int u in activeNodeIndices)
+            {
+                foreach (int sv in successorsMap[u])
+                {
+                    if (!nodeCols.ContainsKey(sv)) continue;
+                    int gap = nodeCols[sv] - nodeCols[u];
+                    if (gap > worstGap) { worstGap = gap; worstU = u; worstV = sv; }
+                }
+            }
+            if (worstU < 0) break; // No gap > 1 remains
+
+            // Insert a column directly after worstU: shift all nodes at col > nodeCols[worstU] right by 1
+            int insertAfter = nodeCols[worstU];
+            foreach (int idx in activeNodeIndices)
+            {
+                if (nodeCols[idx] > insertAfter)
+                    nodeCols[idx]++;
+            }
+
+            // Re-run bidirectional compression to fill in the new empty column
+            int innerPasses = activeNodeIndices.Count * 2;
+            for (int pass = 0; pass < innerPasses; pass++)
+            {
+                bool anyMoved = false;
+                Dictionary<int, int> colCounts = BuildColCounts(nodeCols, activeNodeIndices);
+
+                foreach (int v in activeNodeIndices.OrderBy(n => nodeCols[n]))
+                {
+                    if (prerequisitesMap[v].Count == 0) continue;
+                    int maxPredCol = -1;
+                    foreach (int p in prerequisitesMap[v])
+                        if (nodeCols.ContainsKey(p) && nodeCols[p] > maxPredCol)
+                            maxPredCol = nodeCols[p];
+                    if (maxPredCol < 0) continue;
+                    int ideal = maxPredCol + 1;
+                    int cur   = nodeCols[v];
+                    if (ideal >= cur) continue;
+                    int cnt = colCounts.ContainsKey(ideal) ? colCounts[ideal] : 0;
+                    if (cnt >= maxRows) continue;
+                    colCounts[cur]--;
+                    colCounts[ideal] = cnt + 1;
+                    nodeCols[v] = ideal;
+                    anyMoved = true;
+                }
+
+                colCounts = BuildColCounts(nodeCols, activeNodeIndices);
+                foreach (int v in activeNodeIndices.OrderByDescending(n => nodeCols[n]))
+                {
+                    if (successorsMap[v].Count == 0) continue;
+                    int minSuccCol = int.MaxValue;
+                    foreach (int s in successorsMap[v])
+                        if (nodeCols.ContainsKey(s) && nodeCols[s] < minSuccCol)
+                            minSuccCol = nodeCols[s];
+                    if (minSuccCol == int.MaxValue) continue;
+                    int ideal = minSuccCol - 1;
+                    int cur   = nodeCols[v];
+                    if (ideal <= cur) continue;
+                    int maxPredCol = -1;
+                    foreach (int p in prerequisitesMap[v])
+                        if (nodeCols.ContainsKey(p) && nodeCols[p] > maxPredCol)
+                            maxPredCol = nodeCols[p];
+                    for (int c = ideal; c > cur; c--)
+                    {
+                        if (c <= maxPredCol) break;
+                        int cnt = colCounts.ContainsKey(c) ? colCounts[c] : 0;
+                        if (cnt < maxRows)
+                        {
+                            colCounts[cur]--;
+                            colCounts[c] = cnt + 1;
+                            nodeCols[v] = c;
+                            anyMoved = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!anyMoved) break;
+            }
         }
     }
 
