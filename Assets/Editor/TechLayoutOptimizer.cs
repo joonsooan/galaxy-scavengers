@@ -578,7 +578,7 @@ public class TechLayoutOptimizer : EditorWindow
         CompressColumns(nodeCols, prerequisitesMap, activeNodeIndices);
 
         // Push root nodes (no predecessors) right to sit directly before their earliest successor
-        PositionRootNodes(nodeCols, predecessorsMap, successorsMap, activeNodeIndices);
+        PositionRootNodes(nodeCols, prerequisitesMap, successorsMap, activeNodeIndices);
 
         foreach (KeyValuePair<int, int> pair in nodeCols)
         {
