@@ -571,6 +571,9 @@ public class TechLayoutOptimizer : EditorWindow
             }
         }
 
+        // Split overloaded columns so no column exceeds maxRows
+        EnforceMaxRowsPerColumn(nodeCols, successorsMap, activeNodeIndices);
+
         foreach (KeyValuePair<int, int> pair in nodeCols)
         {
             int idx = pair.Key;
@@ -585,6 +588,68 @@ public class TechLayoutOptimizer : EditorWindow
         }
     }
 
+    private void EnforceMaxRowsPerColumn(Dictionary<int, int> nodeCols, Dictionary<int, HashSet<int>> successorsMap, HashSet<int> activeNodeIndices)
+    {
+        int maxPasses = activeNodeIndices.Count + 1;
+        for (int pass = 0; pass < maxPasses; pass++)
+        {
+            // Group nodes by current column
+            Dictionary<int, List<int>> byCol = new Dictionary<int, List<int>>();
+            foreach (int idx in activeNodeIndices)
+            {
+                int c = nodeCols[idx];
+                if (!byCol.ContainsKey(c)) byCol[c] = new List<int>();
+                byCol[c].Add(idx);
+            }
+
+            // Find the leftmost column that exceeds maxRows
+            int overloadedCol = -1;
+            foreach (int c in byCol.Keys.OrderBy(x => x))
+            {
+                if (byCol[c].Count > maxRows)
+                {
+                    overloadedCol = c;
+                    break;
+                }
+            }
+            if (overloadedCol < 0) return; // All columns are within the limit
+
+            // Shift every node at columns > overloadedCol one step right to make room
+            foreach (int idx in activeNodeIndices)
+            {
+                if (nodeCols[idx] > overloadedCol)
+                    nodeCols[idx]++;
+            }
+
+            // Move overflow nodes (beyond maxRows) from the overloaded column into the new slot
+            List<int> colNodes = byCol[overloadedCol].OrderBy(n => n).ToList();
+            for (int i = maxRows; i < colNodes.Count; i++)
+                nodeCols[colNodes[i]] = overloadedCol + 1;
+
+            // Re-enforce topological constraint: every successor must be strictly right of its predecessor
+            bool changed = true;
+            int innerPasses = 0;
+            while (changed && innerPasses++ < activeNodeIndices.Count)
+            {
+                changed = false;
+                foreach (int u in activeNodeIndices)
+                {
+                    if (!successorsMap.ContainsKey(u)) continue;
+                    foreach (int v in successorsMap[u])
+                    {
+                        if (!nodeCols.ContainsKey(v)) continue;
+                        int required = nodeCols[u] + 1;
+                        if (nodeCols[v] < required)
+                        {
+                            nodeCols[v] = required;
+                            changed = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private OptimizerState InitializeState()
     {
         OptimizerState state = new OptimizerState();
@@ -593,9 +658,8 @@ public class TechLayoutOptimizer : EditorWindow
             int col = pair.Key;
             List<int> nodes = pair.Value;
 
-            int effectiveRows = Math.Max(maxRows, nodes.Count);
             List<int> availableRows = new List<int>();
-            for (int r = 0; r < effectiveRows; r++)
+            for (int r = 0; r < maxRows; r++)
             {
                 availableRows.Add(r);
             }
@@ -611,7 +675,7 @@ public class TechLayoutOptimizer : EditorWindow
             for (int i = 0; i < nodes.Count; i++)
             {
                 int nodeIdx = nodes[i];
-                state.nodeRows[nodeIdx] = availableRows[i];
+                state.nodeRows[nodeIdx] = availableRows[i % availableRows.Count];
             }
         }
         return state;
