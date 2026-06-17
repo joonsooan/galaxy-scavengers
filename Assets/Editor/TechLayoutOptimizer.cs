@@ -574,8 +574,11 @@ public class TechLayoutOptimizer : EditorWindow
         // Split overloaded columns so no column exceeds maxRows
         EnforceMaxRowsPerColumn(nodeCols, successorsMap, activeNodeIndices);
 
-        // Pull nodes left to minimise edge column-span (ideally 1 column apart)
+        // Pull non-root nodes left to minimise edge column-span
         CompressColumns(nodeCols, prerequisitesMap, activeNodeIndices);
+
+        // Push root nodes (no predecessors) right to sit directly before their earliest successor
+        PositionRootNodes(nodeCols, predecessorsMap, successorsMap, activeNodeIndices);
 
         foreach (KeyValuePair<int, int> pair in nodeCols)
         {
@@ -588,6 +591,67 @@ public class TechLayoutOptimizer : EditorWindow
                 _nodesByColumn[col] = new List<int>();
             }
             _nodesByColumn[col].Add(idx);
+        }
+    }
+
+    private void PositionRootNodes(Dictionary<int, int> nodeCols, Dictionary<int, HashSet<int>> predecessorsMap, Dictionary<int, HashSet<int>> successorsMap, HashSet<int> activeNodeIndices)
+    {
+        // Root nodes have no active predecessors, so CompressColumns skips them.
+        // Push each root right to sit exactly 1 column before its closest successor,
+        // eliminating large gaps between column 0 and where successors actually land.
+        bool anyMoved = true;
+        while (anyMoved)
+        {
+            anyMoved = false;
+
+            Dictionary<int, int> colCounts = new Dictionary<int, int>();
+            foreach (int idx in activeNodeIndices)
+            {
+                int c = nodeCols[idx];
+                colCounts[c] = colCounts.ContainsKey(c) ? colCounts[c] + 1 : 1;
+            }
+
+            foreach (int v in activeNodeIndices.OrderBy(n => nodeCols[n]))
+            {
+                // Only root nodes (no active predecessors)
+                bool isRoot = true;
+                if (predecessorsMap.ContainsKey(v))
+                {
+                    foreach (int u in predecessorsMap[v])
+                    {
+                        if (nodeCols.ContainsKey(u)) { isRoot = false; break; }
+                    }
+                }
+                if (!isRoot) continue;
+                if (!successorsMap.ContainsKey(v) || successorsMap[v].Count == 0) continue;
+
+                // Target: directly left of the closest successor
+                int minSuccCol = int.MaxValue;
+                foreach (int s in successorsMap[v])
+                {
+                    if (nodeCols.ContainsKey(s) && nodeCols[s] < minSuccCol)
+                        minSuccCol = nodeCols[s];
+                }
+                if (minSuccCol == int.MaxValue) continue;
+
+                int idealCol  = minSuccCol - 1;
+                int currentCol = nodeCols[v];
+                if (idealCol <= currentCol) continue; // already adjacent or at 0
+
+                // Find the rightmost column with room in [currentCol+1, idealCol]
+                for (int c = idealCol; c > currentCol; c--)
+                {
+                    int cnt = colCounts.ContainsKey(c) ? colCounts[c] : 0;
+                    if (cnt < maxRows)
+                    {
+                        colCounts[currentCol]--;
+                        colCounts[c] = cnt + 1;
+                        nodeCols[v] = c;
+                        anyMoved = true;
+                        break;
+                    }
+                }
+            }
         }
     }
 

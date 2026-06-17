@@ -66,8 +66,34 @@ public class TechTreeRebuilder : EditorWindow
     private bool _showTiersFoldout = false;
     private int _redundantConnectionsCount = 0;
 
+    private const string PrefKeyPrefix = "TechTreeRebuilder_";
+
+    private void SaveSettings()
+    {
+        EditorPrefs.SetInt(PrefKeyPrefix + "structureMode", (int)structureMode);
+        EditorPrefs.SetInt(PrefKeyPrefix + "maxRows", maxRows);
+        EditorPrefs.SetInt(PrefKeyPrefix + "maxPrereqsPerNode", maxPrereqsPerNode);
+        EditorPrefs.SetBool(PrefKeyPrefix + "matchCategories", matchCategories);
+        EditorPrefs.SetBool(PrefKeyPrefix + "applyTransitiveReduction", applyTransitiveReduction);
+        EditorPrefs.SetBool(PrefKeyPrefix + "useProcessorGate", useProcessorGate);
+        EditorPrefs.SetInt(PrefKeyPrefix + "processorGateTechIndex", processorGateTechIndex);
+    }
+
+    private void LoadSettings()
+    {
+        if (EditorPrefs.HasKey(PrefKeyPrefix + "structureMode"))
+            structureMode = (StructureMode)EditorPrefs.GetInt(PrefKeyPrefix + "structureMode", (int)structureMode);
+        maxRows = EditorPrefs.GetInt(PrefKeyPrefix + "maxRows", maxRows);
+        maxPrereqsPerNode = EditorPrefs.GetInt(PrefKeyPrefix + "maxPrereqsPerNode", maxPrereqsPerNode);
+        matchCategories = EditorPrefs.GetBool(PrefKeyPrefix + "matchCategories", matchCategories);
+        applyTransitiveReduction = EditorPrefs.GetBool(PrefKeyPrefix + "applyTransitiveReduction", applyTransitiveReduction);
+        useProcessorGate = EditorPrefs.GetBool(PrefKeyPrefix + "useProcessorGate", useProcessorGate);
+        processorGateTechIndex = EditorPrefs.GetInt(PrefKeyPrefix + "processorGateTechIndex", processorGateTechIndex);
+    }
+
     private void OnEnable()
     {
+        LoadSettings();
         InitializeDefaultResourceTiers();
         // Auto-detect catalog in project
         if (catalog == null)
@@ -79,6 +105,11 @@ public class TechTreeRebuilder : EditorWindow
                 catalog = AssetDatabase.LoadAssetAtPath<TechResearchCatalog>(path);
             }
         }
+    }
+
+    private void OnDisable()
+    {
+        SaveSettings();
     }
 
     private void OnGUI()
@@ -126,6 +157,7 @@ public class TechTreeRebuilder : EditorWindow
 
         // 3. Structure Settings
         EditorGUILayout.LabelField("Rebuilder Options", EditorStyles.boldLabel);
+        EditorGUI.BeginChangeCheck();
         structureMode = (StructureMode)EditorGUILayout.EnumPopup("Structuring Mode", structureMode);
         maxRows = EditorGUILayout.IntSlider("Max Rows Limit", maxRows, 1, 10);
         if (structureMode == StructureMode.LayeredTree)
@@ -148,6 +180,7 @@ public class TechTreeRebuilder : EditorWindow
                 "This ensures the Processor unit is available before any Tier 2 resource can be researched.",
                 MessageType.Info);
         }
+        if (EditorGUI.EndChangeCheck()) SaveSettings();
 
         EditorGUILayout.Space();
 
