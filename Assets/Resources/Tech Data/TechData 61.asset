@@ -16,7 +16,7 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: 복합 프레임
+  manualName: "\uBCF5\uD569 \uD504\uB808\uC784"
   manualDescription: Enables production of Composite Frame using the Processor unit.
   manualIcon: {fileID: 0}
   researchCosts:

@@ -16,7 +16,7 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: 탄약
+  manualName: "\uD0C4\uC57D"
   manualDescription: Enables production of Ammunition using the Processor unit.
   manualIcon: {fileID: 0}
   researchCosts:

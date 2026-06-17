@@ -16,7 +16,7 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: 파워 큐브
+  manualName: "\uD30C\uC6CC \uD050\uBE0C"
   manualDescription: Enables production of Power Cube using the Processor unit.
   manualIcon: {fileID: 0}
   researchCosts:

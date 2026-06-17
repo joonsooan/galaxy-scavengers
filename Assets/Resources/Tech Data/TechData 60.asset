@@ -16,7 +16,7 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: 합금판
+  manualName: "\uD569\uAE08\uD310"
   manualDescription: Enables production of Alloy Plate using the Processor unit.
   manualIcon: {fileID: 0}
   researchCosts:

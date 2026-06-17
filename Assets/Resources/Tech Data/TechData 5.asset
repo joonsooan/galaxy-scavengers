@@ -25,8 +25,8 @@ MonoBehaviour:
   - resourceType: 1
     amount: 80
   researchDuration: 60
-  prerequisiteTechIndices: 03000000
-  successorTechIndices: 
+  prerequisiteTechIndices: 0300000007000000
+  successorTechIndices: 3c000000
   isUnlockedByDefault: 0
   unlocksBuildings:
   - {fileID: 11400000, guid: 5e1cf93942651ed4d8f12d600b58973f, type: 2}

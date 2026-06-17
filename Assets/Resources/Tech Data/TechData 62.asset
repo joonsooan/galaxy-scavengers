@@ -16,7 +16,7 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: 전자 칩
+  manualName: "\uC804\uC790 \uCE69"
   manualDescription: Enables production of E-Chip using the Processor unit.
   manualIcon: {fileID: 0}
   researchCosts:

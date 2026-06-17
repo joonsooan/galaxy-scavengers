@@ -16,7 +16,7 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: 크라이오 젤
+  manualName: "\uD06C\uB77C\uC774\uC624 \uC824"
   manualDescription: Enables production of CryoGel using the Processor unit.
   manualIcon: {fileID: 0}
   researchCosts:

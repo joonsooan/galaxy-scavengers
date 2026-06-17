@@ -28,7 +28,7 @@ MonoBehaviour:
     amount: 40
   researchDuration: 60
   prerequisiteTechIndices: 
-  successorTechIndices: 06000000
+  successorTechIndices: 06000000050000003e0000003f0000004000000041000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits:
