@@ -2,10 +2,29 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class BuildingUnlockManager : MonoBehaviour
 {
-    public static BuildingUnlockManager Instance { get; private set; }
+    private static BuildingUnlockManager _instance;
+    public static BuildingUnlockManager Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = FindFirstObjectByType<BuildingUnlockManager>();
+                if (_instance == null)
+                {
+                    GameObject go = new GameObject("BuildingUnlockManager");
+                    _instance = go.AddComponent<BuildingUnlockManager>();
+                }
+            }
+            return _instance;
+        }
+    }
+
+    public static bool HasInstance => _instance != null;
 
     private readonly HashSet<BuildingData> _unlockedBuildings = new HashSet<BuildingData>();
 
@@ -16,20 +35,39 @@ public class BuildingUnlockManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (_instance != null && _instance != this)
         {
             Destroy(gameObject);
             return;
         }
 
-        Instance = this;
+        _instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
+
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     private void OnDestroy()
     {
-        if (Instance == this)
+        if (_instance == this)
         {
-            Instance = null;
+            _instance = null;
+        }
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "GameScene" || scene.name == "TutorialScene")
+        {
+            LockAllBuildings();
         }
     }
 

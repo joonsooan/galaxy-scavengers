@@ -1,10 +1,29 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class UnitUnlockManager : MonoBehaviour
 {
-    public static UnitUnlockManager Instance { get; private set; }
+    private static UnitUnlockManager _instance;
+    public static UnitUnlockManager Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = FindFirstObjectByType<UnitUnlockManager>();
+                if (_instance == null)
+                {
+                    GameObject go = new GameObject("UnitUnlockManager");
+                    _instance = go.AddComponent<UnitUnlockManager>();
+                }
+            }
+            return _instance;
+        }
+    }
+
+    public static bool HasInstance => _instance != null;
 
     private readonly HashSet<UnitData> _unlockedUnits = new HashSet<UnitData>();
 
@@ -12,20 +31,39 @@ public class UnitUnlockManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (_instance != null && _instance != this)
         {
             Destroy(gameObject);
             return;
         }
 
-        Instance = this;
+        _instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
+
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     private void OnDestroy()
     {
-        if (Instance == this)
+        if (_instance == this)
         {
-            Instance = null;
+            _instance = null;
+        }
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "GameScene" || scene.name == "TutorialScene")
+        {
+            _unlockedUnits.Clear();
         }
     }
 

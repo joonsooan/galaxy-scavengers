@@ -15,6 +15,12 @@ public class TechDataEditor : Editor
     private SerializedProperty _researchDuration;
     private SerializedProperty _prerequisiteTechIndices;
     private SerializedProperty _successorTechIndices;
+    private SerializedProperty _isUnlockedByDefault;
+    private SerializedProperty _unlocksBuildings;
+    private SerializedProperty _unlocksUnits;
+    private SerializedProperty _unlocksResources;
+    private SerializedProperty _grantStatTypes;
+    private SerializedProperty _grantStatValues;
 
     private void OnEnable()
     {
@@ -29,6 +35,12 @@ public class TechDataEditor : Editor
         _researchDuration = serializedObject.FindProperty("researchDuration");
         _prerequisiteTechIndices = serializedObject.FindProperty("prerequisiteTechIndices");
         _successorTechIndices = serializedObject.FindProperty("successorTechIndices");
+        _isUnlockedByDefault = serializedObject.FindProperty("isUnlockedByDefault");
+        _unlocksBuildings = serializedObject.FindProperty("unlocksBuildings");
+        _unlocksUnits = serializedObject.FindProperty("unlocksUnits");
+        _unlocksResources = serializedObject.FindProperty("unlocksResources");
+        _grantStatTypes = serializedObject.FindProperty("grantStatTypes");
+        _grantStatValues = serializedObject.FindProperty("grantStatValues");
     }
 
     public override void OnInspectorGUI()
@@ -65,6 +77,18 @@ public class TechDataEditor : Editor
         EditorGUILayout.LabelField("Tech Tree", EditorStyles.boldLabel);
         EditorGUILayout.PropertyField(_prerequisiteTechIndices, true);
         EditorGUILayout.PropertyField(_successorTechIndices, true);
+
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Unlock on Completion", EditorStyles.boldLabel);
+        EditorGUILayout.PropertyField(_isUnlockedByDefault);
+        EditorGUILayout.PropertyField(_unlocksBuildings, true);
+        EditorGUILayout.PropertyField(_unlocksUnits, true);
+        EditorGUILayout.PropertyField(_unlocksResources, true);
+
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Stat Bonuses on Completion", EditorStyles.boldLabel);
+        EditorGUILayout.PropertyField(_grantStatTypes, true);
+        EditorGUILayout.PropertyField(_grantStatValues, true);
 
         serializedObject.ApplyModifiedProperties();
     }
