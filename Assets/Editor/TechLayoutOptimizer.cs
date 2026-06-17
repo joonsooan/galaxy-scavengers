@@ -81,6 +81,7 @@ public class TechLayoutOptimizer : EditorWindow
     private void OnEnable()
     {
         EditorApplication.update += UpdateOptimization;
+        LoadSettings();
         // Auto-detect target panel in the scene if null
         if (targetPanel == null)
         {
@@ -91,10 +92,13 @@ public class TechLayoutOptimizer : EditorWindow
     private void OnDisable()
     {
         EditorApplication.update -= UpdateOptimization;
+        SaveSettings();
     }
 
     private void OnGUI()
     {
+        EditorGUI.BeginChangeCheck();
+
         _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
 
         GUILayout.Label("Tech UI Layout Optimizer Agent", EditorStyles.boldLabel);
@@ -198,6 +202,11 @@ public class TechLayoutOptimizer : EditorWindow
         DrawFitnessGraph();
 
         EditorGUILayout.EndScrollView();
+
+        if (EditorGUI.EndChangeCheck())
+        {
+            SaveSettings();
+        }
     }
 
     private void StartOptimization()
@@ -428,6 +437,24 @@ public class TechLayoutOptimizer : EditorWindow
             cost += diff * diff * centeringWeight;
         }
 
+        // Hard Overlap Penalty
+        foreach (KeyValuePair<int, List<int>> pair in _nodesByColumn)
+        {
+            List<int> colNodes = pair.Value;
+            HashSet<int> seenRows = new HashSet<int>();
+            foreach (int nodeIdx in colNodes)
+            {
+                if (state.nodeRows.TryGetValue(nodeIdx, out int row))
+                {
+                    if (seenRows.Contains(row))
+                    {
+                        cost += 100000f; // Extreme penalty for same column & same row overlap
+                    }
+                    seenRows.Add(row);
+                }
+            }
+        }
+
         return cost;
     }
 
@@ -454,10 +481,18 @@ public class TechLayoutOptimizer : EditorWindow
         if (targetPanel == null) return;
         _cells.Clear();
         TechDataCell[] foundCells = targetPanel.GetComponentsInChildren<TechDataCell>(true);
+        HashSet<int> seenIndices = new HashSet<int>();
         foreach (TechDataCell cell in foundCells)
         {
             if (cell != null && cell.TechData != null)
             {
+                int idx = cell.TechData.techIndex;
+                if (seenIndices.Contains(idx))
+                {
+                    Debug.LogWarning($"Duplicate TechDataCell found in hierarchy with techIndex: {idx}. Skipping to prevent overlap.");
+                    continue;
+                }
+                seenIndices.Add(idx);
                 _cells.Add(cell);
             }
         }
@@ -575,14 +610,7 @@ public class TechLayoutOptimizer : EditorWindow
             for (int i = 0; i < nodes.Count; i++)
             {
                 int nodeIdx = nodes[i];
-                if (i < availableRows.Count)
-                {
-                    state.nodeRows[nodeIdx] = availableRows[i];
-                }
-                else
-                {
-                    state.nodeRows[nodeIdx] = i % maxRows;
-                }
+                state.nodeRows[nodeIdx] = availableRows[i];
             }
         }
         return state;
@@ -730,5 +758,43 @@ public class TechLayoutOptimizer : EditorWindow
         GUI.color = Color.white;
         GUI.Label(new Rect(rect.x + 5, rect.y + 2, 120, 20), $"Max Cost: {maxF:F1}", EditorStyles.miniLabel);
         GUI.Label(new Rect(rect.x + 5, rect.yMax - 18, 120, 20), $"Min Cost: {minF:F1}", EditorStyles.miniLabel);
+    }
+
+    private void SaveSettings()
+    {
+        string prefix = "TechLayoutOptimizer.";
+        EditorPrefs.SetFloat(prefix + "spacingX", spacingX);
+        EditorPrefs.SetFloat(prefix + "spacingY", spacingY);
+        EditorPrefs.SetInt(prefix + "maxRows", maxRows);
+        EditorPrefs.SetBool(prefix + "centerLayout", centerLayout);
+        EditorPrefs.SetFloat(prefix + "offsetX", offsetX);
+        EditorPrefs.SetFloat(prefix + "offsetY", offsetY);
+        EditorPrefs.SetFloat(prefix + "crossingWeight", crossingWeight);
+        EditorPrefs.SetFloat(prefix + "lengthWeight", lengthWeight);
+        EditorPrefs.SetFloat(prefix + "slopeWeight", slopeWeight);
+        EditorPrefs.SetFloat(prefix + "occlusionWeight", occlusionWeight);
+        EditorPrefs.SetFloat(prefix + "centeringWeight", centeringWeight);
+        EditorPrefs.SetFloat(prefix + "initialTemperature", initialTemperature);
+        EditorPrefs.SetFloat(prefix + "coolingRate", coolingRate);
+        EditorPrefs.SetBool(prefix + "livePreview", livePreview);
+    }
+
+    private void LoadSettings()
+    {
+        string prefix = "TechLayoutOptimizer.";
+        if (EditorPrefs.HasKey(prefix + "spacingX")) spacingX = EditorPrefs.GetFloat(prefix + "spacingX");
+        if (EditorPrefs.HasKey(prefix + "spacingY")) spacingY = EditorPrefs.GetFloat(prefix + "spacingY");
+        if (EditorPrefs.HasKey(prefix + "maxRows")) maxRows = EditorPrefs.GetInt(prefix + "maxRows");
+        if (EditorPrefs.HasKey(prefix + "centerLayout")) centerLayout = EditorPrefs.GetBool(prefix + "centerLayout");
+        if (EditorPrefs.HasKey(prefix + "offsetX")) offsetX = EditorPrefs.GetFloat(prefix + "offsetX");
+        if (EditorPrefs.HasKey(prefix + "offsetY")) offsetY = EditorPrefs.GetFloat(prefix + "offsetY");
+        if (EditorPrefs.HasKey(prefix + "crossingWeight")) crossingWeight = EditorPrefs.GetFloat(prefix + "crossingWeight");
+        if (EditorPrefs.HasKey(prefix + "lengthWeight")) lengthWeight = EditorPrefs.GetFloat(prefix + "lengthWeight");
+        if (EditorPrefs.HasKey(prefix + "slopeWeight")) slopeWeight = EditorPrefs.GetFloat(prefix + "slopeWeight");
+        if (EditorPrefs.HasKey(prefix + "occlusionWeight")) occlusionWeight = EditorPrefs.GetFloat(prefix + "occlusionWeight");
+        if (EditorPrefs.HasKey(prefix + "centeringWeight")) centeringWeight = EditorPrefs.GetFloat(prefix + "centeringWeight");
+        if (EditorPrefs.HasKey(prefix + "initialTemperature")) initialTemperature = EditorPrefs.GetFloat(prefix + "initialTemperature");
+        if (EditorPrefs.HasKey(prefix + "coolingRate")) coolingRate = EditorPrefs.GetFloat(prefix + "coolingRate");
+        if (EditorPrefs.HasKey(prefix + "livePreview")) livePreview = EditorPrefs.GetBool(prefix + "livePreview");
     }
 }
