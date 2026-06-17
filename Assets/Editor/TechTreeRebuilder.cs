@@ -53,6 +53,10 @@ public class TechTreeRebuilder : EditorWindow
     [SerializeField] private bool matchCategories = true;
     [SerializeField] private bool applyTransitiveReduction = true;
 
+    [Header("Processor Gate")]
+    [SerializeField] private bool useProcessorGate = true;
+    [SerializeField] private int processorGateTechIndex = 7;
+
     // Resource Tier configuration map
     private readonly Dictionary<ResourceType, ResourceTier> _resourceTiers = new Dictionary<ResourceType, ResourceTier>();
     
@@ -130,6 +134,20 @@ public class TechTreeRebuilder : EditorWindow
             matchCategories = EditorGUILayout.Toggle("Category Matching", matchCategories);
         }
         applyTransitiveReduction = EditorGUILayout.Toggle("Apply Transitive Reduction", applyTransitiveReduction);
+
+        EditorGUILayout.Space();
+
+        // 3b. Processor Gate
+        EditorGUILayout.LabelField("Processor Gate", EditorStyles.boldLabel);
+        useProcessorGate = EditorGUILayout.Toggle("Enable Processor Gate", useProcessorGate);
+        if (useProcessorGate)
+        {
+            processorGateTechIndex = EditorGUILayout.IntField("Gate Tech Index", processorGateTechIndex);
+            EditorGUILayout.HelpBox(
+                $"All techs that unlock Tier 2+ resources will be forced to require tech index {processorGateTechIndex} (Processor Drone) as a prerequisite.\n" +
+                "This ensures the Processor unit is available before any Tier 2 resource can be researched.",
+                MessageType.Info);
+        }
 
         EditorGUILayout.Space();
 
@@ -372,6 +390,84 @@ public class TechTreeRebuilder : EditorWindow
         {
             _previewLogs.Add("No tier progression violations found.");
         }
+
+        // Check Processor Gate integrity
+        if (useProcessorGate)
+        {
+            _previewLogs.Add("--- Processor Gate Analysis ---");
+            if (!nodeMap.TryGetValue(processorGateTechIndex, out TechNode gateNode))
+            {
+                _previewLogs.Add($"[Gate] WARNING: No tech with index {processorGateTechIndex} found.");
+            }
+            else
+            {
+                int gateViolations = 0;
+                foreach (TechNode node in nodes)
+                {
+                    if (node.index == processorGateTechIndex) continue;
+                    if (node.asset.unlocksResources == null || node.asset.unlocksResources.Length == 0) continue;
+
+                    bool unlocksT2 = false;
+                    foreach (ResourceType rt in node.asset.unlocksResources)
+                    {
+                        if (_resourceTiers.TryGetValue(rt, out ResourceTier tier) && tier >= ResourceTier.Tier2)
+                        {
+                            unlocksT2 = true;
+                            break;
+                        }
+                    }
+
+                    if (!unlocksT2) continue;
+
+                    bool hasGateAsPrereq = node.prerequisites.Contains(processorGateTechIndex);
+                    bool isReachable = false;
+                    if (!hasGateAsPrereq)
+                    {
+                        // Check if reachable transitively
+                        Dictionary<int, List<int>> adj = nodes.ToDictionary(n => n.index, n => new List<int>(n.prerequisites));
+                        isReachable = IsReachable(processorGateTechIndex, node.index, adj);
+                    }
+
+                    if (!hasGateAsPrereq && !isReachable)
+                    {
+                        gateViolations++;
+                        _previewLogs.Add($"[Gate] VIOLATION: '{node.name}' unlocks Tier 2 resources but does NOT require '{gateNode.name}' (directly or transitively).");
+                    }
+                }
+
+                if (gateViolations == 0)
+                {
+                    _previewLogs.Add($"[Gate] OK: All Tier 2 resource unlock techs properly require '{gateNode.name}'.");
+                }
+                else
+                {
+                    _previewLogs.Add($"[Gate] {gateViolations} violation(s) found. Run 'Redesign & Save Relationships' to fix.");
+                }
+
+                // Check that gate tech itself has no Tier 2 costs
+                bool gateHasT2Cost = false;
+                if (gateNode.asset.researchCosts != null)
+                {
+                    foreach (ResourceCost cost in gateNode.asset.researchCosts)
+                    {
+                        if (_resourceTiers.TryGetValue(cost.resourceType, out ResourceTier costTier) && costTier >= ResourceTier.Tier2)
+                        {
+                            gateHasT2Cost = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (gateHasT2Cost)
+                {
+                    _previewLogs.Add($"[Gate] WARNING: '{gateNode.name}' has Tier 2 resource costs — this creates a circular dependency!");
+                }
+                else
+                {
+                    _previewLogs.Add($"[Gate] OK: '{gateNode.name}' costs only Tier 1 resources.");
+                }
+            }
+        }
     }
 
     private void RebuildRelationships()
@@ -390,6 +486,12 @@ public class TechTreeRebuilder : EditorWindow
         else
         {
             BuildLayeredTree(nodes);
+        }
+
+        // 1.5 Apply Processor Gate: force all Tier 2 resource unlock techs to require the gate tech
+        if (useProcessorGate)
+        {
+            ApplyProcessorGate(nodes, nodeMap);
         }
 
         // 2. Apply Transitive Reduction if requested
@@ -427,6 +529,48 @@ public class TechTreeRebuilder : EditorWindow
         _previewLogs.Add("Successfully rebuilt and saved all tech tree connections!");
         Debug.Log("Tech Tree relationships rebuilt successfully.");
         AnalyzeCurrentTree();
+    }
+
+    private void ApplyProcessorGate(List<TechNode> nodes, Dictionary<int, TechNode> nodeMap)
+    {
+        if (!nodeMap.TryGetValue(processorGateTechIndex, out TechNode gateTech))
+        {
+            _previewLogs.Add($"[Processor Gate] WARNING: No tech found with index {processorGateTechIndex}. Gate not applied.");
+            return;
+        }
+
+        int connectedCount = 0;
+        foreach (TechNode node in nodes)
+        {
+            if (node.index == processorGateTechIndex) continue;
+            if (node.asset.unlocksResources == null || node.asset.unlocksResources.Length == 0) continue;
+
+            bool unlocksT2Resource = false;
+            foreach (ResourceType rt in node.asset.unlocksResources)
+            {
+                if (_resourceTiers.TryGetValue(rt, out ResourceTier tier) && tier >= ResourceTier.Tier2)
+                {
+                    unlocksT2Resource = true;
+                    break;
+                }
+            }
+
+            if (!unlocksT2Resource) continue;
+
+            if (!node.prerequisites.Contains(processorGateTechIndex))
+            {
+                node.prerequisites.Add(processorGateTechIndex);
+                connectedCount++;
+            }
+            if (!gateTech.successors.Contains(node.index))
+            {
+                gateTech.successors.Add(node.index);
+            }
+
+            _previewLogs.Add($"[Processor Gate] '{node.name}' (idx {node.index}) now requires '{gateTech.name}' (idx {processorGateTechIndex}).");
+        }
+
+        _previewLogs.Add($"[Processor Gate] Applied to {connectedCount} Tier 2+ resource unlock techs.");
     }
 
     private void BuildParallelChains(List<TechNode> nodes)
