@@ -16,7 +16,7 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: CryoGel Synthesis
+  manualName: 크라이오 젤
   manualDescription: Enables production of CryoGel using the Processor unit.
   manualIcon: {fileID: 0}
   researchCosts:
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 2
     amount: 80
   researchDuration: 75
-  prerequisiteTechIndices: 07000000
-  successorTechIndices:
+  prerequisiteTechIndices: 3c000000
+  successorTechIndices: 170000001d000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
   unlocksResources: 0a000000
-  grantStatTypes:
+  grantStatTypes: 
   grantStatValues: []

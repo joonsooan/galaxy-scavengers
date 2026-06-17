@@ -16,7 +16,7 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: Composite Frame Production
+  manualName: 복합 프레임
   manualDescription: Enables production of Composite Frame using the Processor unit.
   manualIcon: {fileID: 0}
   researchCosts:
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 2
     amount: 100
   researchDuration: 60
-  prerequisiteTechIndices: 07000000
-  successorTechIndices:
+  prerequisiteTechIndices: 06000000
+  successorTechIndices: 43000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
   unlocksResources: 05000000
-  grantStatTypes:
+  grantStatTypes: 
   grantStatValues: []

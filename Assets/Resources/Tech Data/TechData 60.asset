@@ -16,7 +16,7 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: Alloy Plate Production
+  manualName: 합금판
   manualDescription: Enables production of Alloy Plate using the Processor unit.
   manualIcon: {fileID: 0}
   researchCosts:
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 1
     amount: 80
   researchDuration: 60
-  prerequisiteTechIndices: 07000000
-  successorTechIndices:
+  prerequisiteTechIndices: 05000000
+  successorTechIndices: 42000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
   unlocksResources: 04000000
-  grantStatTypes:
+  grantStatTypes: 
   grantStatValues: []

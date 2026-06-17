@@ -16,7 +16,7 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: Ammunition Production
+  manualName: 탄약
   manualDescription: Enables production of Ammunition using the Processor unit.
   manualIcon: {fileID: 0}
   researchCosts:
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 1
     amount: 50
   researchDuration: 60
-  prerequisiteTechIndices: 07000000
-  successorTechIndices:
+  prerequisiteTechIndices: 3d000000
+  successorTechIndices: 1b00000020000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
   unlocksResources: 0d000000
-  grantStatTypes:
+  grantStatTypes: 
   grantStatValues: []

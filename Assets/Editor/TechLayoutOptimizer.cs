@@ -574,6 +574,9 @@ public class TechLayoutOptimizer : EditorWindow
         // Split overloaded columns so no column exceeds maxRows
         EnforceMaxRowsPerColumn(nodeCols, successorsMap, activeNodeIndices);
 
+        // Pull nodes left to minimise edge column-span (ideally 1 column apart)
+        CompressColumns(nodeCols, prerequisitesMap, activeNodeIndices);
+
         foreach (KeyValuePair<int, int> pair in nodeCols)
         {
             int idx = pair.Key;
@@ -585,6 +588,52 @@ public class TechLayoutOptimizer : EditorWindow
                 _nodesByColumn[col] = new List<int>();
             }
             _nodesByColumn[col].Add(idx);
+        }
+    }
+
+    private void CompressColumns(Dictionary<int, int> nodeCols, Dictionary<int, HashSet<int>> predecessorsMap, HashSet<int> activeNodeIndices)
+    {
+        // Iteratively pull each node left to max(predecessors.col)+1 while column has room.
+        // Multiple passes cascade compression through the DAG.
+        int maxPasses = activeNodeIndices.Count;
+        for (int pass = 0; pass < maxPasses; pass++)
+        {
+            // Rebuild column counts each pass (nodes may have moved)
+            Dictionary<int, int> colCounts = new Dictionary<int, int>();
+            foreach (int idx in activeNodeIndices)
+            {
+                int c = nodeCols[idx];
+                colCounts[c] = colCounts.ContainsKey(c) ? colCounts[c] + 1 : 1;
+            }
+
+            bool anyMoved = false;
+            foreach (int v in activeNodeIndices.OrderBy(n => nodeCols[n]).ThenBy(n => n))
+            {
+                if (!predecessorsMap.ContainsKey(v) || predecessorsMap[v].Count == 0) continue;
+
+                int maxPredCol = -1;
+                foreach (int u in predecessorsMap[v])
+                {
+                    if (nodeCols.ContainsKey(u) && nodeCols[u] > maxPredCol)
+                        maxPredCol = nodeCols[u];
+                }
+                if (maxPredCol < 0) continue;
+
+                int idealCol  = maxPredCol + 1;
+                int currentCol = nodeCols[v];
+                if (idealCol >= currentCol) continue; // already optimal or can't go left
+
+                int targetCount = colCounts.ContainsKey(idealCol) ? colCounts[idealCol] : 0;
+                if (targetCount >= maxRows) continue; // target column is full
+
+                // Move v left
+                colCounts[currentCol]--;
+                colCounts[idealCol] = targetCount + 1;
+                nodeCols[v] = idealCol;
+                anyMoved = true;
+            }
+
+            if (!anyMoved) break;
         }
     }
 

@@ -16,7 +16,7 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: Bio-Fuel Processing
+  manualName: 바이오 연료
   manualDescription: Enables production of Bio-Fuel using the Processor unit.
   manualIcon: {fileID: 0}
   researchCosts:
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 3
     amount: 60
   researchDuration: 60
-  prerequisiteTechIndices: 07000000
-  successorTechIndices:
+  prerequisiteTechIndices: 1000000007000000
+  successorTechIndices: 120000001c000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
   unlocksResources: 09000000
-  grantStatTypes:
+  grantStatTypes: 
   grantStatValues: []
