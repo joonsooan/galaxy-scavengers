@@ -593,8 +593,9 @@ public class TechLayoutOptimizer : EditorWindow
             int col = pair.Key;
             List<int> nodes = pair.Value;
 
+            int effectiveRows = Math.Max(maxRows, nodes.Count);
             List<int> availableRows = new List<int>();
-            for (int r = 0; r < maxRows; r++)
+            for (int r = 0; r < effectiveRows; r++)
             {
                 availableRows.Add(r);
             }
