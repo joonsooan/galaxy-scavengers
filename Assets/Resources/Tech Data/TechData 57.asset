@@ -17,7 +17,7 @@ MonoBehaviour:
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
   manualName: Production Speed II
-  manualDescription:
+  manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 4
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 6
     amount: 60
   researchDuration: 120
-  prerequisiteTechIndices: 3800000010000000
-  successorTechIndices: 3a000000
+  prerequisiteTechIndices: 2c000000
+  successorTechIndices: 13000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources:
+  unlocksResources: 
   grantStatTypes: 05000000
-  grantStatValues: cdcccc3d
+  grantStatValues: []

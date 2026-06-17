@@ -17,7 +17,7 @@ MonoBehaviour:
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
   manualName: Production Speed IV
-  manualDescription:
+  manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 12
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 11
     amount: 100
   researchDuration: 180
-  prerequisiteTechIndices: 3a0000001f000000
-  successorTechIndices:
+  prerequisiteTechIndices: 32000000
+  successorTechIndices: 
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources:
+  unlocksResources: 
   grantStatTypes: 05000000
-  grantStatValues: cdcccc3d
+  grantStatValues: []

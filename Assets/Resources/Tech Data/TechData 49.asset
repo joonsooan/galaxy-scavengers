@@ -17,7 +17,7 @@ MonoBehaviour:
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
   manualName: Battery Capacity II
-  manualDescription:
+  manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 6
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 8
     amount: 60
   researchDuration: 120
-  prerequisiteTechIndices: 3000000013000000
-  successorTechIndices: 32000000
+  prerequisiteTechIndices: 26000000
+  successorTechIndices: 0c000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources:
+  unlocksResources: 
   grantStatTypes: 01000000
-  grantStatValues: cdcc4c3d
+  grantStatValues: []

@@ -17,7 +17,7 @@ MonoBehaviour:
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
   manualName: Move Speed III
-  manualDescription:
+  manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 12
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 6
     amount: 60
   researchDuration: 150
-  prerequisiteTechIndices: 290000001a000000
-  successorTechIndices: 2b000000
+  prerequisiteTechIndices: 1e000000
+  successorTechIndices: 35000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources:
+  unlocksResources: 
   grantStatTypes: 02000000
-  grantStatValues: cdcc4c3d
+  grantStatValues: []

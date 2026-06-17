@@ -17,7 +17,7 @@ MonoBehaviour:
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
   manualName: Building HP III
-  manualDescription:
+  manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 12
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 4
     amount: 200
   researchDuration: 150
-  prerequisiteTechIndices: 3500000018000000
-  successorTechIndices: 37000000
+  prerequisiteTechIndices: 2b000000
+  successorTechIndices: 
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources:
+  unlocksResources: 
   grantStatTypes: 04000000
-  grantStatValues: cdcccc3d
+  grantStatValues: []

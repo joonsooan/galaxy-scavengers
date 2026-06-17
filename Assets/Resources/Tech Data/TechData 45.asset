@@ -17,7 +17,7 @@ MonoBehaviour:
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
   manualName: Work Efficiency II
-  manualDescription:
+  manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 7
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 9
     amount: 40
   researchDuration: 120
-  prerequisiteTechIndices: 2c00000015000000
-  successorTechIndices: 2e000000
+  prerequisiteTechIndices: 20000000
+  successorTechIndices: 0a000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources:
+  unlocksResources: 
   grantStatTypes: 03000000
-  grantStatValues: cdcc4c3d
+  grantStatValues: []

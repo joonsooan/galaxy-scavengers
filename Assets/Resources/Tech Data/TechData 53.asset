@@ -17,7 +17,7 @@ MonoBehaviour:
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
   manualName: Building HP II
-  manualDescription:
+  manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 4
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 12
     amount: 50
   researchDuration: 120
-  prerequisiteTechIndices: 3400000012000000
-  successorTechIndices: 36000000
+  prerequisiteTechIndices: 2a000000
+  successorTechIndices: 22000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources:
+  unlocksResources: 
   grantStatTypes: 04000000
-  grantStatValues: cdcccc3d
+  grantStatValues: []

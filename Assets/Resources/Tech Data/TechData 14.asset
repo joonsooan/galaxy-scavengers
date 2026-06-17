@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -27,10 +27,12 @@ MonoBehaviour:
   - resourceType: 2
     amount: 60
   researchDuration: 90
-  prerequisiteTechIndices: 07000000
-  successorTechIndices: 
+  prerequisiteTechIndices: 
+  successorTechIndices: 08000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits:
   - {fileID: 11400000, guid: 33e410bcf8e6ad44f99960dadd48b50b, type: 2}
   unlocksResources: 
+  grantStatTypes: 
+  grantStatValues: []

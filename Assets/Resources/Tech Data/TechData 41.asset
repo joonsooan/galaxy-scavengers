@@ -17,7 +17,7 @@ MonoBehaviour:
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
   manualName: Move Speed II
-  manualDescription:
+  manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 4
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 7
     amount: 40
   researchDuration: 120
-  prerequisiteTechIndices: 280000000f000000
-  successorTechIndices: 2a000000
+  prerequisiteTechIndices: 1c000000
+  successorTechIndices: 38000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources:
+  unlocksResources: 
   grantStatTypes: 02000000
-  grantStatValues: cdcc4c3d
+  grantStatValues: []
