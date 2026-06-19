@@ -65,7 +65,7 @@ public class ProcessorUIManager : MonoBehaviour
     private void OnDisable()
     {
         LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
-        if (ResourceUnlockManager.Instance != null) {
+        if (ResourceUnlockManager.HasInstance) {
             ResourceUnlockManager.Instance.OnResourceUnlocked -= OnResourceUnlocked_Handler;
         }
     }

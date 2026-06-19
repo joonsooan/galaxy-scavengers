@@ -104,7 +104,7 @@ public class DroneProduceUIManager : MonoBehaviour
         UnitManager.OnUnitCountChanged -= OnUnitCountChanged;
         UnitUpgradeProgress.OnUpgradeStateChanged -= OnUpgradeProgressStateChanged;
         LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
-        if (UnitUnlockManager.Instance != null) {
+        if (UnitUnlockManager.HasInstance) {
             UnitUnlockManager.Instance.OnUnitUnlocked -= OnUnitUnlocked_Handler;
         }
         ClearUnitInfo();
