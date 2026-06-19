@@ -129,7 +129,8 @@ public class BuildingHoverManager : MonoBehaviour
         {
             UIManager uiManager = GameManager.Instance != null ? GameManager.Instance.uiManager : null;
             bool overStoragePanel = uiManager != null && uiManager.IsPointerOverStorageInfoPanel();
-            if (!overStoragePanel && !IsPointerOverStorage(_currentHoveredStorage))
+            bool overStorage = IsPointerOverStorage(_currentHoveredStorage);
+            if (!overStoragePanel && !overStorage)
             {
                 ClearStorageHover();
             }
