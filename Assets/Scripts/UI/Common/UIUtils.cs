@@ -44,5 +44,21 @@ public static class UIUtils
 
         return false;
     }
+
+    public static bool IsPointerOverGameObject(GameObject go)
+    {
+        if (go == null || EventSystem.current == null) return false;
+        if (_cachedPointerEventData == null)
+            _cachedPointerEventData = new PointerEventData(EventSystem.current);
+        _cachedPointerEventData.position = Input.mousePosition;
+        _cachedRaycastResults.Clear();
+        EventSystem.current.RaycastAll(_cachedPointerEventData, _cachedRaycastResults);
+        foreach (RaycastResult result in _cachedRaycastResults)
+        {
+            if (result.gameObject != null && result.gameObject.transform.IsChildOf(go.transform))
+                return true;
+        }
+        return false;
+    }
 }
 

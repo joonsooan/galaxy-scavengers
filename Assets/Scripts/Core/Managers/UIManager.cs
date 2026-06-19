@@ -77,16 +77,9 @@ public class UIManager : MonoBehaviour
         SetActiveIfNotNull(droneHubInfoPanel, false);
         SetActiveIfNotNull(extractorInfoPanel, false);
         SetActiveIfNotNull(storageInfoPanel, false);
-        if (storageFilterPanel != null)
-            storageFilterPanel.gameObject.SetActive(false);
-        if (storageFilterButton != null)
-            storageFilterButton.onClick.AddListener(OnStorageFilterButtonClicked);
+        SetActiveIfNotNull(storageFilterPanel.gameObject, false);
 
         _areaBuildingDestroyer = FindFirstObjectByType<AreaBuildingDestroyer>();
-        if (inventorySystem == null)
-        {
-            inventorySystem = GetComponent<InventorySystem>();
-        }
 
         ApplyLocalizedStaticTexts();
     }
@@ -694,17 +687,10 @@ public class UIManager : MonoBehaviour
 
         Transform parent = storageResourceListParent != null ? storageResourceListParent.transform : storageInfoPanel.transform;
 
-        bool isFirstChild = true;
         foreach (Transform child in parent)
         {
-            if (isFirstChild)
-            {
-                isFirstChild = false;
-            }
-            else
-            {
+            if (child.GetComponent<ResourceInfoCell>() != null)
                 Destroy(child.gameObject);
-            }
         }
 
         Dictionary<ResourceType, int> resources = _trackedStorage.GetStoredResources();
@@ -757,7 +743,13 @@ public class UIManager : MonoBehaviour
         _trackedStorage = null;
     }
 
-    private void OnStorageFilterButtonClicked()
+    public bool IsPointerOverStorageInfoPanel()
+    {
+        if (storageInfoPanel == null || !storageInfoPanel.activeSelf) return false;
+        return UIUtils.IsPointerOverGameObject(storageInfoPanel);
+    }
+
+    public void OnStorageFilterButtonClicked()
     {
         if (storageFilterPanel == null || _trackedStorage == null) return;
 

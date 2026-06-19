@@ -54,6 +54,11 @@ public class StorageFilterPanel : MonoBehaviour
     {
         _targetStorage = storage;
 
+        if (_allowedResources == null)
+            _allowedResources = new Dictionary<ResourceType, bool>();
+        if (_resourceFilterImages == null)
+            _resourceFilterImages = new Dictionary<ResourceType, Image>();
+
         _allowedResources.Clear();
         Array resourceTypes = Enum.GetValues(typeof(ResourceType));
         foreach (ResourceType type in resourceTypes)

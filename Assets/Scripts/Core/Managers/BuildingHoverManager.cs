@@ -82,7 +82,18 @@ public class BuildingHoverManager : MonoBehaviour
 
         if (UIUtils.IsPointerOverUI())
         {
-            ClearAllHovers();
+            UIManager uiManager = GameManager.Instance != null ? GameManager.Instance.uiManager : null;
+            bool overStoragePanel = uiManager != null && uiManager.IsPointerOverStorageInfoPanel();
+            bool hasStorageActive = _pinnedStorage != null || (_currentHoveredStorage != null && overStoragePanel);
+
+            ClearHover();
+            ClearResourceHover();
+            ClearUnitHover();
+            if (!hasStorageActive)
+            {
+                ClearStorageHover();
+            }
+
             if (_mouseDetectorCollider != null)
             {
                 _mouseDetectorCollider.enabled = false;
@@ -178,6 +189,11 @@ public class BuildingHoverManager : MonoBehaviour
             if (_pinnedStorage == storage)
             {
                 _currentHoveredStorage = null;
+                return;
+            }
+            UIManager uiManager = GameManager.Instance != null ? GameManager.Instance.uiManager : null;
+            if (uiManager != null && uiManager.IsPointerOverStorageInfoPanel())
+            {
                 return;
             }
             ClearStorageHover();
@@ -469,12 +485,14 @@ public class BuildingHoverManager : MonoBehaviour
 
     private void ClearStorageHover()
     {
-        _pinnedStorage = null;
         if (_currentHoveredStorage != null)
         {
-            if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
+            if (_pinnedStorage == null)
             {
-                GameManager.Instance.uiManager.HideStorageInfo();
+                if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
+                {
+                    GameManager.Instance.uiManager.HideStorageInfo();
+                }
             }
             _currentHoveredStorage = null;
         }
