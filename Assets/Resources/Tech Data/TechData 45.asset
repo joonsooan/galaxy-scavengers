@@ -16,8 +16,8 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "작업 효율 II"
-  manualDescription:
+  manualName: "\uC791\uC5C5 \uD6A8\uC728 II"
+  manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 7
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 9
     amount: 40
   researchDuration: 120
-  prerequisiteTechIndices: 2c0000003f000000
-  successorTechIndices: 2e000000
+  prerequisiteTechIndices: 27000000
+  successorTechIndices: 33000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources:
+  unlocksResources: 
   grantStatTypes: 03000000
   grantStatValues: []

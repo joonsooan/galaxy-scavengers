@@ -16,8 +16,8 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "이동 속도 III"
-  manualDescription:
+  manualName: "\uC774\uB3D9 \uC18D\uB3C4 III"
+  manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 12
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 6
     amount: 60
   researchDuration: 150
-  prerequisiteTechIndices: 2900000019000000
-  successorTechIndices: 2b000000
+  prerequisiteTechIndices: 24000000
+  successorTechIndices: 30000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources:
+  unlocksResources: 
   grantStatTypes: 02000000
   grantStatValues: []

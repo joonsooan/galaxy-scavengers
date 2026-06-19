@@ -16,8 +16,8 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "건물 내구도 I"
-  manualDescription:
+  manualName: "\uAC74\uBB3C \uB0B4\uAD6C\uB3C4 I"
+  manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 4
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 5
     amount: 50
   researchDuration: 90
-  prerequisiteTechIndices: 41000000
-  successorTechIndices: 35000000
+  prerequisiteTechIndices: 2e000000
+  successorTechIndices: 3a000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources:
+  unlocksResources: 
   grantStatTypes: 04000000
   grantStatValues: []

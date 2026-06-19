@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,7 +16,7 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "넥서스 데이터 네트워크"
+  manualName: "\uB125\uC11C\uC2A4 \uB370\uC774\uD130 \uB124\uD2B8\uC6CC\uD06C"
   manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
@@ -25,8 +25,8 @@ MonoBehaviour:
   - resourceType: 6
     amount: 50
   researchDuration: 180
-  prerequisiteTechIndices: 16000000
-  successorTechIndices: 2b000000
+  prerequisiteTechIndices: 18000000
+  successorTechIndices: 26000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []

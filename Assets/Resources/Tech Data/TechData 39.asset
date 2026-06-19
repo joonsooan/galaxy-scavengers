@@ -16,8 +16,8 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "최종 합성"
-  manualDescription:
+  manualName: "\uCD5C\uC885 \uD569\uC131"
+  manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 12
@@ -30,10 +30,10 @@ MonoBehaviour:
     amount: 80
   researchDuration: 300
   prerequisiteTechIndices: 20000000
-  successorTechIndices:
+  successorTechIndices: 2d000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources:
-  grantStatTypes:
+  unlocksResources: 
+  grantStatTypes: 
   grantStatValues: []

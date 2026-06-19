@@ -16,7 +16,7 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "바이오 케이블"
+  manualName: "\uBC14\uC774\uC624 \uCF00\uC774\uBE14"
   manualDescription: Enables production of Bio-Cable using the Processor unit.
   manualIcon: {fileID: 0}
   researchCosts:
@@ -26,10 +26,10 @@ MonoBehaviour:
     amount: 80
   researchDuration: 75
   prerequisiteTechIndices: 0900000007000000
-  successorTechIndices: 2d000000
+  successorTechIndices: 
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
   unlocksResources: 07000000
-  grantStatTypes:
+  grantStatTypes: 
   grantStatValues: []

@@ -16,7 +16,7 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "동력 큐브"
+  manualName: "\uB3D9\uB825 \uD050\uBE0C"
   manualDescription: Enables production of Power Cube using the Processor unit.
   manualIcon: {fileID: 0}
   researchCosts:
@@ -26,10 +26,10 @@ MonoBehaviour:
     amount: 150
   researchDuration: 75
   prerequisiteTechIndices: 0d00000007000000
-  successorTechIndices: 1a000000 30000000
+  successorTechIndices: 
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
   unlocksResources: 08000000
-  grantStatTypes:
+  grantStatTypes: 
   grantStatValues: []

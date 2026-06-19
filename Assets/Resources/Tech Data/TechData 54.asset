@@ -16,8 +16,8 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "건물 내구도 III"
-  manualDescription:
+  manualName: "\uAC74\uBB3C \uB0B4\uAD6C\uB3C4 III"
+  manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 12
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 4
     amount: 200
   researchDuration: 150
-  prerequisiteTechIndices: 3500000012000000
-  successorTechIndices: 37000000
+  prerequisiteTechIndices: 30000000
+  successorTechIndices: 0f000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources:
+  unlocksResources: 
   grantStatTypes: 04000000
   grantStatValues: []

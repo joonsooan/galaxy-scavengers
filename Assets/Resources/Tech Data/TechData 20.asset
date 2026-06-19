@@ -16,8 +16,8 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "솔라나 정수"
-  manualDescription:
+  manualName: "\uC194\uB77C\uB098 \uC815\uC218"
+  manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 6
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 7
     amount: 30
   researchDuration: 120
-  prerequisiteTechIndices: 3e000000
-  successorTechIndices: 38000000
+  prerequisiteTechIndices: 38000000
+  successorTechIndices: 
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
   unlocksResources: 0b000000
-  grantStatTypes:
+  grantStatTypes: 
   grantStatValues: []

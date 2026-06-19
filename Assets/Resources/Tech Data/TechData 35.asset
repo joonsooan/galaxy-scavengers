@@ -16,8 +16,8 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "플라즈마 드라이브"
-  manualDescription:
+  manualName: "\uD50C\uB77C\uC988\uB9C8 \uB4DC\uB77C\uC774\uBE0C"
+  manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 8
@@ -26,10 +26,10 @@ MonoBehaviour:
     amount: 50
   researchDuration: 210
   prerequisiteTechIndices: 1c000000
-  successorTechIndices:
+  successorTechIndices: 29000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources:
-  grantStatTypes:
+  unlocksResources: 
+  grantStatTypes: 
   grantStatValues: []

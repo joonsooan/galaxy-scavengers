@@ -16,7 +16,7 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "복합 골조"
+  manualName: "\uBCF5\uD569 \uACE8\uC870"
   manualDescription: Enables production of Composite Frame using the Processor unit.
   manualIcon: {fileID: 0}
   researchCosts:
@@ -26,10 +26,10 @@ MonoBehaviour:
     amount: 100
   researchDuration: 60
   prerequisiteTechIndices: 06000000
-  successorTechIndices: 43000000 2c000000
+  successorTechIndices: 43000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
   unlocksResources: 05000000
-  grantStatTypes:
+  grantStatTypes: 
   grantStatValues: []

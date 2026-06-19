@@ -16,8 +16,8 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "생산 속도 II"
-  manualDescription:
+  manualName: "\uC0DD\uC0B0 \uC18D\uB3C4 II"
+  manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 4
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 6
     amount: 60
   researchDuration: 120
-  prerequisiteTechIndices: 380000001a000000
-  successorTechIndices: 3a000000
+  prerequisiteTechIndices: 33000000
+  successorTechIndices: 1a000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources:
+  unlocksResources: 
   grantStatTypes: 05000000
   grantStatValues: []

@@ -16,8 +16,8 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "궤도 공격"
-  manualDescription:
+  manualName: "\uADA4\uB3C4 \uACF5\uACA9"
+  manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 13
@@ -26,10 +26,10 @@ MonoBehaviour:
     amount: 60
   researchDuration: 210
   prerequisiteTechIndices: 1e000000
-  successorTechIndices:
+  successorTechIndices: 2b000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources:
-  grantStatTypes:
+  unlocksResources: 
+  grantStatTypes: 
   grantStatValues: []

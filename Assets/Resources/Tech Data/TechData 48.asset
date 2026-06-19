@@ -16,8 +16,8 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "배터리 용량 I"
-  manualDescription:
+  manualName: "\uBC30\uD130\uB9AC \uC6A9\uB7C9 I"
+  manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 6
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 8
     amount: 30
   researchDuration: 90
-  prerequisiteTechIndices: 40000000
-  successorTechIndices: 31000000
+  prerequisiteTechIndices: 2a000000
+  successorTechIndices: 36000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources:
+  unlocksResources: 
   grantStatTypes: 01000000
   grantStatValues: []

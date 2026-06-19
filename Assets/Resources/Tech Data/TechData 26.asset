@@ -16,8 +16,8 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "코어 프로세서"
-  manualDescription:
+  manualName: "\uCF54\uC5B4 \uD504\uB85C\uC138\uC11C"
+  manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 8
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 11
     amount: 30
   researchDuration: 150
-  prerequisiteTechIndices: 40000000
-  successorTechIndices:
+  prerequisiteTechIndices: 39000000
+  successorTechIndices: 
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
   unlocksResources: 0c000000
-  grantStatTypes:
+  grantStatTypes: 
   grantStatValues: []

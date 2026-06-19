@@ -16,7 +16,7 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "극저온 용액"
+  manualName: "\uADF9\uC800\uC628 \uC6A9\uC561"
   manualDescription: Enables production of CryoGel using the Processor unit.
   manualIcon: {fileID: 0}
   researchCosts:
@@ -26,10 +26,10 @@ MonoBehaviour:
     amount: 80
   researchDuration: 75
   prerequisiteTechIndices: 3c000000
-  successorTechIndices: 170000001b000000 31000000
+  successorTechIndices: 170000001b000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
   unlocksResources: 0a000000
-  grantStatTypes:
+  grantStatTypes: 
   grantStatValues: []

@@ -17,7 +17,7 @@ MonoBehaviour:
   existingDisplayableData: {fileID: 11400000, guid: 5e1cf93942651ed4d8f12d600b58973f, type: 2}
   existingUnitData: {fileID: 0}
   manualName: Alloy Smelting
-  manualDescription:
+  manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 0
@@ -26,11 +26,11 @@ MonoBehaviour:
     amount: 80
   researchDuration: 60
   prerequisiteTechIndices: 0300000007000000
-  successorTechIndices: 3c000000 3d000000 11000000
+  successorTechIndices: 3c000000
   isUnlockedByDefault: 0
   unlocksBuildings:
   - {fileID: 11400000, guid: 5e1cf93942651ed4d8f12d600b58973f, type: 2}
   unlocksUnits: []
   unlocksResources: 0400000005000000
-  grantStatTypes:
+  grantStatTypes: 
   grantStatValues: []

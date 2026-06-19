@@ -16,8 +16,8 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "넥서스 통합"
-  manualDescription:
+  manualName: "\uB125\uC11C\uC2A4 \uD1B5\uD569"
+  manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 12
@@ -26,10 +26,10 @@ MonoBehaviour:
     amount: 50
   researchDuration: 210
   prerequisiteTechIndices: 1d000000
-  successorTechIndices:
+  successorTechIndices: 2a000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources:
-  grantStatTypes:
+  unlocksResources: 
+  grantStatTypes: 
   grantStatValues: []
