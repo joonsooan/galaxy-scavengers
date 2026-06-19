@@ -5,15 +5,18 @@ using UnityEngine.SceneManagement;
 
 public class ResourceUnlockManager : MonoBehaviour
 {
+    private static bool _isQuitting = false;
     private static ResourceUnlockManager _instance;
     public static ResourceUnlockManager Instance
     {
         get
         {
+            if (_isQuitting) return null;
+
             if (_instance == null)
             {
                 _instance = FindFirstObjectByType<ResourceUnlockManager>();
-                if (_instance == null)
+                if (_instance == null && !_isQuitting)
                 {
                     GameObject go = new GameObject("ResourceUnlockManager");
                     _instance = go.AddComponent<ResourceUnlockManager>();
@@ -59,6 +62,11 @@ public class ResourceUnlockManager : MonoBehaviour
         {
             _instance = null;
         }
+    }
+
+    private void OnApplicationQuit()
+    {
+        _isQuitting = true;
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)

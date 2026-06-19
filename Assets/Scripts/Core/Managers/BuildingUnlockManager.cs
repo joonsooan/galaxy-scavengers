@@ -6,15 +6,18 @@ using UnityEngine.SceneManagement;
 
 public class BuildingUnlockManager : MonoBehaviour
 {
+    private static bool _isQuitting = false;
     private static BuildingUnlockManager _instance;
     public static BuildingUnlockManager Instance
     {
         get
         {
+            if (_isQuitting) return null;
+
             if (_instance == null)
             {
                 _instance = FindFirstObjectByType<BuildingUnlockManager>();
-                if (_instance == null)
+                if (_instance == null && !_isQuitting)
                 {
                     GameObject go = new GameObject("BuildingUnlockManager");
                     _instance = go.AddComponent<BuildingUnlockManager>();
@@ -61,6 +64,11 @@ public class BuildingUnlockManager : MonoBehaviour
         {
             _instance = null;
         }
+    }
+
+    private void OnApplicationQuit()
+    {
+        _isQuitting = true;
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
