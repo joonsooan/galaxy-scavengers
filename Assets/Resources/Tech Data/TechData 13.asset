@@ -17,7 +17,7 @@ MonoBehaviour:
   existingDisplayableData: {fileID: 11400000, guid: 6a375b82248aff4438a80132fb46c2a5, type: 2}
   existingUnitData: {fileID: 0}
   manualName: Defense Turret
-  manualDescription: 
+  manualDescription:
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 0
@@ -28,11 +28,11 @@ MonoBehaviour:
     amount: 50
   researchDuration: 90
   prerequisiteTechIndices: 01000000
-  successorTechIndices: 40000000
+  successorTechIndices:
   isUnlockedByDefault: 0
   unlocksBuildings:
   - {fileID: 11400000, guid: 6a375b82248aff4438a80132fb46c2a5, type: 2}
   unlocksUnits: []
-  unlocksResources: 
-  grantStatTypes: 
+  unlocksResources:
+  grantStatTypes:
   grantStatValues: []

@@ -16,7 +16,7 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "\uC804\uC790 \uCE69"
+  manualName: "전자 칩"
   manualDescription: Enables production of E-Chip using the Processor unit.
   manualIcon: {fileID: 0}
   researchCosts:
@@ -26,10 +26,10 @@ MonoBehaviour:
     amount: 100
   researchDuration: 75
   prerequisiteTechIndices: 0800000007000000
-  successorTechIndices: 
+  successorTechIndices: 14000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
   unlocksResources: 06000000
-  grantStatTypes: 
+  grantStatTypes:
   grantStatValues: []

@@ -17,7 +17,7 @@ MonoBehaviour:
   existingDisplayableData: {fileID: 11400000, guid: 0d2d400072726114d971ea9e56308971, type: 2}
   existingUnitData: {fileID: 0}
   manualName: Energy Battery
-  manualDescription: 
+  manualDescription:
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 0
@@ -26,11 +26,11 @@ MonoBehaviour:
     amount: 100
   researchDuration: 75
   prerequisiteTechIndices: 0e000000
-  successorTechIndices: 3e000000
+  successorTechIndices: 0f000000
   isUnlockedByDefault: 0
   unlocksBuildings:
   - {fileID: 11400000, guid: 0d2d400072726114d971ea9e56308971, type: 2}
   unlocksUnits: []
-  unlocksResources: 
-  grantStatTypes: 
+  unlocksResources:
+  grantStatTypes:
   grantStatValues: []

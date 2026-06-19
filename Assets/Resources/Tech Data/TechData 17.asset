@@ -17,7 +17,7 @@ MonoBehaviour:
   existingDisplayableData: {fileID: 11400000, guid: f08b408f128c48443926c6e62cb4cc67, type: 2}
   existingUnitData: {fileID: 0}
   manualName: Platform Eng.
-  manualDescription: 
+  manualDescription:
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 0
@@ -27,12 +27,12 @@ MonoBehaviour:
   - resourceType: 4
     amount: 30
   researchDuration: 90
-  prerequisiteTechIndices: 38000000
-  successorTechIndices: 
+  prerequisiteTechIndices: 05000000
+  successorTechIndices: 22000000
   isUnlockedByDefault: 0
   unlocksBuildings:
   - {fileID: 11400000, guid: f08b408f128c48443926c6e62cb4cc67, type: 2}
   unlocksUnits: []
-  unlocksResources: 
-  grantStatTypes: 
+  unlocksResources:
+  grantStatTypes:
   grantStatValues: []

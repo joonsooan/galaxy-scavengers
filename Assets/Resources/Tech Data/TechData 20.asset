@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -17,7 +17,7 @@ MonoBehaviour:
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
   manualName: "솔라나 정수"
-  manualDescription: 
+  manualDescription:
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 6
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 7
     amount: 30
   researchDuration: 120
-  prerequisiteTechIndices: 0a000000
-  successorTechIndices: 
+  prerequisiteTechIndices: 3e000000
+  successorTechIndices: 38000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
   unlocksResources: 0b000000
-  grantStatTypes: 
+  grantStatTypes:
   grantStatValues: []

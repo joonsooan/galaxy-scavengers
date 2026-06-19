@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -17,7 +17,7 @@ MonoBehaviour:
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
   manualName: "유전자 각성"
-  manualDescription: 
+  manualDescription:
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 7
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 9
     amount: 60
   researchDuration: 210
-  prerequisiteTechIndices: 17000000
-  successorTechIndices: 31000000
+  prerequisiteTechIndices: 1f000000
+  successorTechIndices:
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources: 
-  grantStatTypes: 
+  unlocksResources:
+  grantStatTypes:
   grantStatValues: []

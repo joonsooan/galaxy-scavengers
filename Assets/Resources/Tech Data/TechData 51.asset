@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -17,7 +17,7 @@ MonoBehaviour:
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
   manualName: "배터리 용량 IV"
-  manualDescription: 
+  manualDescription:
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 12
@@ -25,11 +25,11 @@ MonoBehaviour:
   - resourceType: 11
     amount: 60
   researchDuration: 180
-  prerequisiteTechIndices: 27000000
-  successorTechIndices: 1a000000
+  prerequisiteTechIndices: 3200000024000000
+  successorTechIndices:
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources: 
+  unlocksResources:
   grantStatTypes: 01000000
   grantStatValues: []

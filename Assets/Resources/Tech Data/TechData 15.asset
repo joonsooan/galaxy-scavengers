@@ -17,7 +17,7 @@ MonoBehaviour:
   existingDisplayableData: {fileID: 11400000, guid: 14e6430316af60b4aacd6fe6858b6931, type: 2}
   existingUnitData: {fileID: 0}
   manualName: Charging Station
-  manualDescription: 
+  manualDescription:
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 0
@@ -27,12 +27,12 @@ MonoBehaviour:
   - resourceType: 4
     amount: 50
   researchDuration: 120
-  prerequisiteTechIndices: 34000000
-  successorTechIndices: 
+  prerequisiteTechIndices: 08000000
+  successorTechIndices:
   isUnlockedByDefault: 0
   unlocksBuildings:
   - {fileID: 11400000, guid: 14e6430316af60b4aacd6fe6858b6931, type: 2}
   unlocksUnits: []
-  unlocksResources: 
-  grantStatTypes: 
+  unlocksResources:
+  grantStatTypes:
   grantStatValues: []
