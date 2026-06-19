@@ -1,0 +1,36 @@
+﻿%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceeace5e3ddf138488abd43ac61f82c5, type: 3}
+  m_Name: TechData 51
+  m_EditorClassIdentifier: Assembly-CSharp::TechData
+  techIndex: 51
+  useExistingData: 0
+  existingDisplayableData: {fileID: 0}
+  existingUnitData: {fileID: 0}
+  manualName: 자원 생산 강화 III
+  manualDescription: 
+  manualIcon: {fileID: 0}
+  researchCosts:
+  - resourceType: 22
+    amount: 15
+  - resourceType: 18
+    amount: 20
+  researchDuration: 100
+  prerequisiteTechIndices: 2c000000
+  successorTechIndices: 
+  isUnlockedByDefault: 0
+  unlocksBuildings: []
+  unlocksUnits: []
+  unlocksResources: 
+  grantStatTypes: 05000000
+  grantStatValues:
+  - 0.2

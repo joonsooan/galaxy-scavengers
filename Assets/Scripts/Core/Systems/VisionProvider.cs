@@ -28,11 +28,27 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
 
     private void Awake()
     {
-        _visionCollider = GetComponent<CircleCollider2D>();
-        if (_visionCollider == null) {
-            _visionCollider = gameObject.AddComponent<CircleCollider2D>();
+        CircleCollider2D existingCollider = GetComponent<CircleCollider2D>();
+        Vector2 originalOffset = Vector2.zero;
+        if (existingCollider != null)
+        {
+            originalOffset = existingCollider.offset;
+            existingCollider.enabled = false;
+            Destroy(existingCollider);
         }
 
+        GameObject childObj = new GameObject("VisionColliderHolder");
+        childObj.transform.SetParent(transform, false);
+        childObj.layer = gameObject.layer;
+
+        Vector3 finalLocalPos = Vector3.zero + (hasOffest ? offest : Vector3.zero) + (Vector3)originalOffset;
+        childObj.transform.localPosition = finalLocalPos;
+
+        Rigidbody2D rb = childObj.AddComponent<Rigidbody2D>();
+        rb.bodyType = RigidbodyType2D.Kinematic;
+        rb.simulated = true;
+
+        _visionCollider = childObj.AddComponent<CircleCollider2D>();
         _visionCollider.isTrigger = true;
         _visionCollider.radius = visionRange;
 
@@ -84,6 +100,10 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
 
     private void OnEnable()
     {
+        if (_visionCollider != null)
+        {
+            _visionCollider.enabled = true;
+        }
         RegisterWithFogOfWar();
         UpdateColliderRadius();
         _lastPosition = transform.position;
@@ -93,6 +113,10 @@ public class VisionProvider : MonoBehaviour, IVisionProvider
 
     private void OnDisable()
     {
+        if (_visionCollider != null)
+        {
+            _visionCollider.enabled = false;
+        }
         UnregisterFromFogOfWar();
     }
 

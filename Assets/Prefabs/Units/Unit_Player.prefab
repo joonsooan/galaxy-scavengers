@@ -305,10 +305,12 @@ GameObject:
   m_Component:
   - component: {fileID: 7440583273714450353}
   - component: {fileID: 2212686633856591532}
-  - component: {fileID: 7693465003369599496}
+  - component: {fileID: 4924348156642154400}
   - component: {fileID: 8678531985399376036}
   - component: {fileID: -7343223670657477598}
   - component: {fileID: 6911189482688880012}
+  - component: {fileID: -3119649802972936553}
+  - component: {fileID: 8958972778469347569}
   m_Layer: 7
   m_Name: Unit_Player
   m_TagString: Untagged
@@ -362,7 +364,7 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 4
---- !u!61 &7693465003369599496
+--- !u!61 &4924348156642154400
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -406,7 +408,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.9, y: 0.9}
+  m_Size: {x: 0.75, y: 0.72}
   m_EdgeRadius: 0
 --- !u!114 &8678531985399376036
 MonoBehaviour:
@@ -484,6 +486,30 @@ MonoBehaviour:
   isActive: 1
   hasOffest: 0
   offest: {x: 0.5, y: 0.5, z: 0}
+--- !u!114 &-3119649802972936553
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6152373858751447047}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f09c9c1e15e895449a2f772a77a1c1f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StatModifierReceiver_UnitHP
+--- !u!114 &8958972778469347569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6152373858751447047}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f24fb6c816cc06a458323d470112366d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StatModifierReceiver_UnitMovement
 --- !u!1001 &4120191156947106688
 PrefabInstance:
   m_ObjectHideFlags: 0

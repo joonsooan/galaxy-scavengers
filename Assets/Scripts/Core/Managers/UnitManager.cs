@@ -24,15 +24,24 @@ public class UnitManager : MonoBehaviour
     private readonly List<UnitBase> _allyUnits = new();
     
     public static event Action<UnitBase> OnUnitCountChanged;
+    public static event Action OnMaxPopulationBonusChanged;
 
     public int GetMaxPopulation()
     {
         int bonus = 0;
-        if (UnitUpgradeProgress.Instance != null) {
+        if (UnitUpgradeProgress.Instance != null)
             bonus = UnitUpgradeProgress.Instance.GetMaxPopulationBonus();
-        }
 
-        return baseMaxPopulation + bonus;
+        int techBonus = 0;
+        if (ModuleEffectManager.Instance != null)
+            techBonus = Mathf.RoundToInt(ModuleEffectManager.Instance.GetStatModifier(ModuleStatType.MaxPopulation));
+
+        return baseMaxPopulation + bonus + techBonus;
+    }
+
+    public static void NotifyMaxPopulationBonusChanged()
+    {
+        OnMaxPopulationBonusChanged?.Invoke();
     }
 
     public int GetPopulationCountedAllyCount()

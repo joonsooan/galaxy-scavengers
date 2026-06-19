@@ -19,6 +19,7 @@ public class GameSceneRoundTimer : MonoBehaviour
     private float _remainingSeconds;
     private float _durationTotal;
     private bool _gameOverTriggered;
+    private int _lastDisplayedTotalSeconds = -1;
 
     private void Start()
     {
@@ -85,7 +86,12 @@ public class GameSceneRoundTimer : MonoBehaviour
 
         if (timerText != null)
         {
-            timerText.text = FormatMmSs(_remainingSeconds);
+            int totalSeconds = Mathf.Max(0, Mathf.FloorToInt(_remainingSeconds));
+            if (totalSeconds != _lastDisplayedTotalSeconds)
+            {
+                _lastDisplayedTotalSeconds = totalSeconds;
+                timerText.text = FormatMmSs(_remainingSeconds);
+            }
         }
 
         ApplyUrgencyColors();

@@ -12,14 +12,15 @@ public class MainControlPanel : MonoBehaviour
     [SerializeField] private Button baseBuildingBtn;
     [SerializeField] private Button processorBtn;
     [SerializeField] private Button resourceStatBtn;
-    [SerializeField] private Button resourceStatCloseBtn;
     [SerializeField] private Button unitManagementBtn;
+    [SerializeField] private Button researchBtn;
 
     [Header("UI Panels")]
     [SerializeField] private GameObject buildingInfoPanel;
     [SerializeField] private GameObject baseBuildingPanel;
     [SerializeField] private GameObject resourceStatPanel;
     [SerializeField] private GameObject unitManagementPanelRoot;
+    [SerializeField] private GameObject researchPanel;
     [SerializeField] private ResourceStatsUIController resourceStatsUIController;
     
     private GameObject _currentlyActivePanel;
@@ -65,14 +66,14 @@ public class MainControlPanel : MonoBehaviour
             resourceStatBtn.onClick.AddListener(OnResourceStatBtnClicked);
         }
 
-        if (resourceStatCloseBtn != null)
-        {
-            resourceStatCloseBtn.onClick.AddListener(OnResourceStatCloseBtnClicked);
-        }
-
         if (unitManagementBtn != null)
         {
             unitManagementBtn.onClick.AddListener(OnUnitManagementBtnClicked);
+        }
+
+        if (researchBtn != null)
+        {
+            researchBtn.onClick.AddListener(OnResearchBtnClicked);
         }
 
         if (resourceStatsUIController == null && resourceStatPanel != null)
@@ -195,6 +196,10 @@ public class MainControlPanel : MonoBehaviour
             PlayShortcutClickSound(resourceStatBtn);
             OnResourceStatBtnClicked();
         }
+        else if (Input.GetKeyDown(KeyCode.T))
+        {
+            OnResearchBtnClicked();
+        }
 
         if (IsResourceStatPanelActive())
         {
@@ -245,6 +250,26 @@ public class MainControlPanel : MonoBehaviour
             HideAllPanels();
             _buildingInfoPanelComponent.ClearAllInfo();
         }
+    }
+
+    private void OnResearchBtnClicked()
+    {
+        if (IsResearchPanelActive())
+        {
+            researchPanel.SetActive(false);
+            if (_currentlyActivePanel == researchPanel)
+                _currentlyActivePanel = null;
+            return;
+        }
+
+        HideAllPanels();
+        if (_buildingInfoPanelComponent != null)
+            _buildingInfoPanelComponent.ClearAllInfo();
+        if (buildingInfoPanel != null)
+            buildingInfoPanel.SetActive(false);
+
+        researchPanel.SetActive(true);
+        _currentlyActivePanel = researchPanel;
     }
 
     private void OnBaseBuildingBtnClicked()
@@ -356,7 +381,7 @@ public class MainControlPanel : MonoBehaviour
         {
             baseBuildingPanel.SetActive(false);
         }
-        
+
         if (resourceStatPanel != null)
         {
             resourceStatPanel.SetActive(false);
@@ -366,7 +391,12 @@ public class MainControlPanel : MonoBehaviour
         {
             unitManagementPanelRoot.SetActive(false);
         }
-        
+
+        if (researchPanel != null)
+        {
+            researchPanel.SetActive(false);
+        }
+
         _currentlyActivePanel = null;
     }
 
@@ -381,11 +411,6 @@ public class MainControlPanel : MonoBehaviour
         {
             _currentlyActivePanel = null;
         }
-    }
-
-    private void OnResourceStatCloseBtnClicked()
-    {
-        CloseResourceStatPanel();
     }
 
     private void PlayShortcutClickSound(Button button)
@@ -456,6 +481,11 @@ public class MainControlPanel : MonoBehaviour
         return unitManagementPanelRoot != null && unitManagementPanelRoot.activeSelf;
     }
 
+    public bool IsResearchPanelActive()
+    {
+        return researchPanel != null && researchPanel.activeSelf;
+    }
+
     private bool IsLoadingScreenActive()
     {
         if (LoadingUIManager.Instance == null)
@@ -489,14 +519,14 @@ public class MainControlPanel : MonoBehaviour
             resourceStatBtn.onClick.RemoveListener(OnResourceStatBtnClicked);
         }
 
-        if (resourceStatCloseBtn != null)
-        {
-            resourceStatCloseBtn.onClick.RemoveListener(OnResourceStatCloseBtnClicked);
-        }
-
         if (unitManagementBtn != null)
         {
             unitManagementBtn.onClick.RemoveListener(OnUnitManagementBtnClicked);
+        }
+
+        if (researchBtn != null)
+        {
+            researchBtn.onClick.RemoveListener(OnResearchBtnClicked);
         }
     }
 }

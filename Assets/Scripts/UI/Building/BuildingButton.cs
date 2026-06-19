@@ -1,4 +1,4 @@
-﻿using TMPro;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -33,11 +33,6 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
     private void Start()
     {
-        if (BuildingUnlockManager.Instance == null) {
-            GameObject unlockManagerObj = new GameObject("BuildingUnlockManager");
-            unlockManagerObj.AddComponent<BuildingUnlockManager>();
-        }
-
         UpdateUnlockStatus();
 
         if (BuildingUnlockManager.Instance != null) {
@@ -56,24 +51,17 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
     private void OnEnable()
     {
-        if (BuildingUnlockManager.Instance != null) {
-            UpdateUnlockStatus();
-            BuildingUnlockManager.Instance.OnBuildingUnlocked += OnBuildingUnlocked;
-        }
-
-    }
-
-    private void OnDisable()
-    {
-        if (BuildingUnlockManager.Instance != null) {
-            BuildingUnlockManager.Instance.OnBuildingUnlocked -= OnBuildingUnlocked;
-        }
+        UpdateUnlockStatus();
     }
 
     private void OnDestroy()
     {
         if (_button != null) {
             _button.onClick.RemoveListener(OnButtonClicked);
+        }
+
+        if (BuildingUnlockManager.HasInstance) {
+            BuildingUnlockManager.Instance.OnBuildingUnlocked -= OnBuildingUnlocked;
         }
     }
 

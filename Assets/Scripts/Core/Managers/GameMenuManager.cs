@@ -48,6 +48,7 @@ public class GameMenuManager : MonoBehaviour
     private Button _currentMenuOpenButton;
     private bool _isMenuOpen;
     private MainControlPanel _mainControlPanel;
+    private LaunchUIController _cachedLaunchUIController;
     private Coroutine _deferredLocaleCoroutine;
     private const string KoreanLocaleCode = "ko";
     private const string EnglishLocaleCode = "en";
@@ -116,6 +117,7 @@ public class GameMenuManager : MonoBehaviour
     {
         FindAndSetupMenuUI();
         _mainControlPanel = null;
+        _cachedLaunchUIController = null;
         TryCacheMainControlPanel();
     }
 
@@ -447,6 +449,13 @@ public class GameMenuManager : MonoBehaviour
                 return;
             }
 
+            if (BuildingHoverManager.Instance != null && BuildingHoverManager.Instance.IsStoragePinned())
+            {
+                if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
+                    GameManager.Instance.uiManager.UnpinAndHideAllPanels();
+                return;
+            }
+
             MainControlPanel mainControlPanel = TryCacheMainControlPanel();
             if (mainControlPanel != null && mainControlPanel.IsResourceStatPanelActive())
             {
@@ -654,8 +663,9 @@ public class GameMenuManager : MonoBehaviour
 
     private bool IsLaunchMenuInputBlocked()
     {
-        LaunchUIController launchUIController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
-        return launchUIController != null && launchUIController.IsMenuInputBlocked();
+        if (_cachedLaunchUIController == null)
+            _cachedLaunchUIController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
+        return _cachedLaunchUIController != null && _cachedLaunchUIController.IsMenuInputBlocked();
     }
 
     private void OnDestroy()

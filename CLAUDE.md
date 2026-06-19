@@ -59,6 +59,7 @@ The project is structured with specialized subagents located in `.claude/agents/
 
 - `unity-core-architect`: Manages singleton manager scripts, scene loading, saving/loading, and overall framework structure (`Assets/Scripts/Core/`). Also manages system-level ScriptableObject data definitions (`Assets/Scripts/Data/`).
 - `unity-gameplay-coder`: Manages gameplay mechanics, units, buildings, resources, energy grids (`Assets/Scripts/Gameplay/`). Also manages gameplay-specific ScriptableObject configurations (`Assets/Scripts/Data/`).
+- `unity-gameplay-designer`: Designs and balances the technology trees, unlocks, and stat upgrades using existing game elements.
 - `unity-ui-specialist`: Manages UI HUD panels, quest logs, alerts, localized text, and UI animations (`Assets/Scripts/UI/`).
 - `unity-audio-fmod`: Manages audio event playbacks, FMOD parameters, and sound integration (`Assets/FMOD/`, `Assets/Scripts/Audio/`).
 - `unity-perf-auditor`: A read-only auditor that scans code for Unity-specific performance problems and bad patterns.
@@ -66,6 +67,7 @@ The project is structured with specialized subagents located in `.claude/agents/
 ### Orchestration Guidelines
 
 - **Gameplay code changes**: Delegate script updates inside `Assets/Scripts/Gameplay/` and gameplay-related definitions in `Assets/Scripts/Data/` to `unity-gameplay-coder`.
+- **Game Design & Tech Trees**: Delegate balance changes, tech progression, and unlock planning to `unity-gameplay-designer`.
 - **UI changes**: Delegate script updates inside `Assets/Scripts/UI/` to `unity-ui-specialist`.
 - **Core system changes**: Delegate changes in `Assets/Scripts/Core/` and system data configurations in `Assets/Scripts/Data/` to `unity-core-architect`.
 - **Performance audits**: Run `unity-perf-auditor` to check files for potential bugs or optimizations.

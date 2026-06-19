@@ -94,6 +94,9 @@ public class DroneProduceUIManager : MonoBehaviour
         UnitManager.OnUnitCountChanged += OnUnitCountChanged;
         UnitUpgradeProgress.OnUpgradeStateChanged += OnUpgradeProgressStateChanged;
         LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
+        if (UnitUnlockManager.Instance != null) {
+            UnitUnlockManager.Instance.OnUnitUnlocked += OnUnitUnlocked_Handler;
+        }
     }
 
     private void OnDisable()
@@ -101,6 +104,9 @@ public class DroneProduceUIManager : MonoBehaviour
         UnitManager.OnUnitCountChanged -= OnUnitCountChanged;
         UnitUpgradeProgress.OnUpgradeStateChanged -= OnUpgradeProgressStateChanged;
         LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
+        if (UnitUnlockManager.HasInstance) {
+            UnitUnlockManager.Instance.OnUnitUnlocked -= OnUnitUnlocked_Handler;
+        }
         ClearUnitInfo();
         if (unitInfoPanel != null) {
             unitInfoPanel.RestoreDefaultLayout();
@@ -123,6 +129,14 @@ public class DroneProduceUIManager : MonoBehaviour
     {
         if (_currentMainStructure != null) {
             UpdateUnitCountText();
+        }
+    }
+
+    private void OnUnitUnlocked_Handler(UnitData _)
+    {
+        if (_currentMainStructure != null) {
+            ClearAllUnits();
+            InstantiateUnitCells();
         }
     }
 
@@ -158,6 +172,10 @@ public class DroneProduceUIManager : MonoBehaviour
         for (int i = 0; i < _allProducibleUnits.Count; i++) {
             UnitData unitData = _allProducibleUnits[i];
             if (unitData == null) {
+                continue;
+            }
+
+            if (UnitUnlockManager.Instance != null && !UnitUnlockManager.Instance.IsUnitUnlocked(unitData)) {
                 continue;
             }
 

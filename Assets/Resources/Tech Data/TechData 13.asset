@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceeace5e3ddf138488abd43ac61f82c5, type: 3}
+  m_Name: TechData 13
+  m_EditorClassIdentifier: Assembly-CSharp::TechData
+  techIndex: 13
+  useExistingData: 0
+  existingDisplayableData: {fileID: 0}
+  existingUnitData: {fileID: 0}
+  manualName: "\uC804\uC790 \uCE69"
+  manualDescription: 
+  manualIcon: {fileID: -6843591316079228388, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
+  researchCosts:
+  - resourceType: 1
+    amount: 25
+  - resourceType: 0
+    amount: 20
+  researchDuration: 50
+  prerequisiteTechIndices: 0100000007000000
+  successorTechIndices: 2500000028000000
+  isUnlockedByDefault: 0
+  unlocksBuildings: []
+  unlocksUnits: []
+  unlocksResources: 06000000
+  grantStatTypes: 
+  grantStatValues: []
