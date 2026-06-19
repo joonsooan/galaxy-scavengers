@@ -5,18 +5,22 @@ using UnityEngine.EventSystems;
 
 public interface IStorage
 {
-    event Action<ResourceType, int, int> OnResourceChanged; 
-    
+    event Action<ResourceType, int, int> OnResourceChanged;
+    event Action OnFilterChanged;
+
     bool TryAddResource(ResourceType type, int amount);
     void ForceAddResource(ResourceType type, int amount);
     bool TryWithdrawResource(ResourceType type, int amountToWithdraw, out int amountWithdrawn);
     bool HasEnoughResources(ResourceCost[] costs);
-    
+
     int GetCurrentResourceAmount(ResourceType type);
     int GetMaxCapacity();
     int GetTotalCurrentAmount();
 
     Dictionary<ResourceType, int> GetStoredResources();
-    
+
     Vector3 GetPosition();
+
+    StorageFilter GetFilter();
+    void SetFilter(StorageFilter filter);
 }

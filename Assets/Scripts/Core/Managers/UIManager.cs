@@ -33,10 +33,9 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject storageInfoPanel;
     [SerializeField] private GameObject storageResourceListParent;
     [SerializeField] private TMP_Text storageAmountText;
-    [SerializeField] private float storageBatteryPanelOffsetX = 150f;
     [SerializeField] private Button storageFilterButton;
     [SerializeField] private StorageFilterPanel storageFilterPanel;
-    [SerializeField] private float mainStructurePanelOffsetX = 200f;
+    [SerializeField] private float storagePanelPixelGap = 15f;
     [SerializeField] private float storagePanelOffsetY = 0f;
 
     [Header("Audio")]
@@ -347,6 +346,15 @@ public class UIManager : MonoBehaviour
         {
             BuildingHoverManager.Instance.ClearPinnedStorage();
             BuildingHoverManager.Instance.NotifyPanelsClosed();
+        }
+    }
+
+    public void HideMainStructurePanelIfActive()
+    {
+        if (_activeUIPanel == ActiveUIPanel.MainStructure)
+        {
+            HideMainStructureInventory();
+            _activeUIPanel = ActiveUIPanel.None;
         }
     }
 
@@ -771,11 +779,19 @@ public class UIManager : MonoBehaviour
     {
         if (_trackedStorage == null || Camera.main == null) return;
 
-        Vector3 worldPos = _trackedStorage.GetPosition();
-        Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos);
+        Vector3 centerWorld = _trackedStorage.GetPosition();
+        float rightEdgeX = centerWorld.x;
 
-        float offsetX = _trackedStorage is MainStructure ? mainStructurePanelOffsetX : storageBatteryPanelOffsetX;
-        screenPos.x += offsetX;
+        Component storageComponent = _trackedStorage as Component;
+        if (storageComponent != null)
+        {
+            Collider2D col = storageComponent.GetComponent<Collider2D>();
+            if (col != null)
+                rightEdgeX = col.bounds.max.x;
+        }
+
+        Vector3 screenPos = Camera.main.WorldToScreenPoint(new Vector3(rightEdgeX, centerWorld.y, centerWorld.z));
+        screenPos.x += storagePanelPixelGap;
         screenPos.y += storagePanelOffsetY;
 
         storageInfoPanel.transform.position = screenPos;

@@ -218,6 +218,11 @@ public class BuildingHoverManager : MonoBehaviour
         {
             return;
         }
+
+        UIManager uiManager = GameManager.Instance != null ? GameManager.Instance.uiManager : null;
+        if (uiManager != null)
+            uiManager.HideMainStructurePanelIfActive();
+
         ClearPinnedStorage();
         _pinnedStorage = storage;
         _currentHoveredStorage = storage;
@@ -465,9 +470,9 @@ public class BuildingHoverManager : MonoBehaviour
         if (_currentHoveredBuilding != null)
         {
             if (_pinnedStorage == null)
-            {
                 TargetBracketEffect.Hide();
-            }
+            else
+                RestoreBracketToPinnedStorage();
             if (BuildingInfoPanel.Instance != null)
             {
                 BuildingInfoPanel.Instance.CancelPreview();
@@ -484,12 +489,22 @@ public class BuildingHoverManager : MonoBehaviour
         {
             if (_pinnedStorage == null)
                 TargetBracketEffect.Hide();
+            else
+                RestoreBracketToPinnedStorage();
             if (BuildingInfoPanel.Instance != null)
             {
                 BuildingInfoPanel.Instance.CancelPreview();
             }
             _currentHoveredBuilding = null;
         }
+    }
+
+    private void RestoreBracketToPinnedStorage()
+    {
+        Component pinnedComponent = _pinnedStorage as Component;
+        if (pinnedComponent == null) return;
+        BuildingDataHolder holder = pinnedComponent.GetComponentInParent<BuildingDataHolder>();
+        TargetBracketEffect.Show(holder != null ? holder.transform : pinnedComponent.transform);
     }
 
     private void ShowStorageInfo(IStorage storage)

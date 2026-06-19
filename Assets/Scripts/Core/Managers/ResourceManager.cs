@@ -701,7 +701,34 @@ public class ResourceManager : MonoBehaviour
 
     public IStorage FindClosestStorageWithResource(Vector3 position, ResourceType type, int minAmount)
     {
-        return ResourceDataManager.Instance?.FindClosestStorageWithResource(position, type, minAmount);
+        return ResourceDataManager.Instance != null ? ResourceDataManager.Instance.FindClosestStorageWithResource(position, type, minAmount) : null;
+    }
+
+    public IStorage GetBestDepositTarget(ResourceType type, Vector3 fromPosition, IStorage excludeStorage = null)
+    {
+        return ResourceDataManager.Instance != null ? ResourceDataManager.Instance.GetBestDepositTarget(type, fromPosition, excludeStorage) : null;
+    }
+
+    public bool TryClaimRedistributionTask(Vector3 fromPosition, out RedistributionTask task)
+    {
+        task = null;
+        return ResourceDataManager.Instance != null && ResourceDataManager.Instance.TryClaimRedistributionTask(fromPosition, out task);
+    }
+
+    public void CompleteRedistributionTask(RedistributionTask task)
+    {
+        if (ResourceDataManager.Instance != null)
+        {
+            ResourceDataManager.Instance.CompleteRedistributionTask(task);
+        }
+    }
+
+    public void CancelRedistributionTask(RedistributionTask task)
+    {
+        if (ResourceDataManager.Instance != null)
+        {
+            ResourceDataManager.Instance.CancelRedistributionTask(task);
+        }
     }
 
     private static void StoreResourceInPriority(ResourceType type, Vector3 sourcePosition, List<IStorage> targets, ref int remaining)

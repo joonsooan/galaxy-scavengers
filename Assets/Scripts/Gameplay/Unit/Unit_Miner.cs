@@ -71,6 +71,8 @@ public class Unit_Miner : UnitBase
     private bool _hasReservedMiningCell;
     private Vector3Int _reservedMiningCell;
     private int _reservedStorageAmount;
+    private RedistributionTask _activeRedistributionTask;
+    private Coroutine _redistributionCoroutine;
 
     private float _prefabMoveSpeed;
     private int _prefabMaxCarry;
@@ -129,6 +131,7 @@ public class Unit_Miner : UnitBase
         ReleaseMiningCellReservation();
         ReleaseStorageReservation();
         ClearMinerAlerts();
+        CancelActiveRedistributionOnDisable();
     }
 
     protected override void OnDestroy()
@@ -239,6 +242,24 @@ public class Unit_Miner : UnitBase
             return;
         }
 
+        // Mid-transit filter check: if the storage no longer accepts our dominant resource, re-route.
+        ResourceType dominantType = ResourceType.None;
+        int dominantAmount = 0;
+        foreach (KeyValuePair<ResourceType, int> pair in _currentCarryAmounts) {
+            if (pair.Value > dominantAmount) {
+                dominantAmount = pair.Value;
+                dominantType = pair.Key;
+            }
+        }
+
+        if (dominantType != ResourceType.None) {
+            StorageFilter currentFilter = _targetStorage.GetFilter();
+            if (currentFilter != null && !currentFilter.IsAllowed(dominantType)) {
+                HandleStorageLoss();
+                return;
+            }
+        }
+
         Vector3 targetPosition = BuildingManager.Instance.grid.GetCellCenterWorld(_targetUnloadCell);
         if (Vector3.Distance(transform.position, targetPosition) < 0.2f) {
             StartUnloadingAction();
@@ -326,12 +347,36 @@ public class Unit_Miner : UnitBase
                     yield break;
                 }
             }
+
+            // Q5 arrival filter check: verify the storage still accepts our dominant resource.
+            ResourceType arrivalDominantType = ResourceType.None;
+            int arrivalDominantAmount = 0;
+            foreach (KeyValuePair<ResourceType, int> checkPair in _currentCarryAmounts) {
+                if (checkPair.Value > arrivalDominantAmount) {
+                    arrivalDominantAmount = checkPair.Value;
+                    arrivalDominantType = checkPair.Key;
+                }
+            }
+
+            if (arrivalDominantType != ResourceType.None) {
+                StorageFilter arrivalFilter = _targetStorage.GetFilter();
+                if (arrivalFilter != null && !arrivalFilter.IsAllowed(arrivalDominantType)) {
+                    ReleaseStorageReservation();
+                    _targetStorage = null;
+                    GoToStorage();
+                    _unloadCoroutine = null;
+                    yield break;
+                }
+            }
+
             Dictionary<ResourceType, int> resourcesBefore = new Dictionary<ResourceType, int>();
             Dictionary<ResourceType, int> resourcesToUnload = new Dictionary<ResourceType, int>();
 
-            foreach (KeyValuePair<ResourceType, int> pair in _currentCarryAmounts.Where(p => p.Value > 0)) {
-                resourcesBefore[pair.Key] = _targetStorage.GetCurrentResourceAmount(pair.Key);
-                resourcesToUnload[pair.Key] = pair.Value;
+            foreach (KeyValuePair<ResourceType, int> pair in _currentCarryAmounts) {
+                if (pair.Value > 0) {
+                    resourcesBefore[pair.Key] = _targetStorage.GetCurrentResourceAmount(pair.Key);
+                    resourcesToUnload[pair.Key] = pair.Value;
+                }
             }
 
             List<ResourceType> resourceTypesToShow = resourcesToUnload.Keys.ToList();
@@ -444,6 +489,9 @@ public class Unit_Miner : UnitBase
             else {
                 SetMinerNoResourceAlert(true);
             }
+
+            // No mining target — try to claim a redistribution task while idle.
+            TryStartRedistribution();
         }
     }
 
@@ -558,7 +606,13 @@ public class Unit_Miner : UnitBase
 
         bool hasAether = _currentCarryAmounts.ContainsKey(ResourceType.Aether) &&
             _currentCarryAmounts[ResourceType.Aether] > 0;
-        bool hasNonAether = _currentCarryAmounts.Any(p => p.Key != ResourceType.Aether && p.Value > 0);
+        bool hasNonAether = false;
+        foreach (KeyValuePair<ResourceType, int> pair in _currentCarryAmounts) {
+            if (pair.Key != ResourceType.Aether && pair.Value > 0) {
+                hasNonAether = true;
+                break;
+            }
+        }
 
         if (hasAether && !hasNonAether) {
             ElectricityConsumptionManager powerManager = ElectricityConsumptionManager.Instance;
@@ -567,12 +621,29 @@ public class Unit_Miner : UnitBase
             }
         }
 
-        int carryAmount = _currentCarryAmounts.Values.Sum();
-        IEnumerable<IStorage> allStorages = ResourceManager.Instance.GetAllStorages()
-            .Where(s => s != null && ResourceManager.Instance.GetAvailableStorageCapacity(s) >= carryAmount)
-            .Where(s => !(s is Battery));
+        // Find the most abundant carried resource type to use as the routing key.
+        ResourceType dominantType = ResourceType.None;
+        int dominantAmount = 0;
+        foreach (KeyValuePair<ResourceType, int> pair in _currentCarryAmounts) {
+            if (pair.Value > dominantAmount) {
+                dominantAmount = pair.Value;
+                dominantType = pair.Key;
+            }
+        }
 
-        return FindClosestStorageInList(allStorages, grid);
+        if (dominantType == ResourceType.None || ResourceManager.Instance == null) {
+            return new UnloadTarget { distance = float.MaxValue };
+        }
+
+        IStorage bestStorage = ResourceManager.Instance.GetBestDepositTarget(dominantType, transform.position);
+
+        if (bestStorage == null) {
+            return new UnloadTarget { distance = float.MaxValue };
+        }
+
+        // Find an accessible interaction cell adjacent to the best storage.
+        List<IStorage> singleStorageList = new List<IStorage> { bestStorage };
+        return FindClosestStorageInList(singleStorageList, grid);
     }
 
     private UnloadTarget FindClosestStorageInList(IEnumerable<IStorage> storages, Grid grid)
@@ -1116,6 +1187,14 @@ public class Unit_Miner : UnitBase
             StopCoroutine(_findResourceCoroutine);
             _findResourceCoroutine = null;
         }
+        if (_redistributionCoroutine != null) {
+            StopCoroutine(_redistributionCoroutine);
+            _redistributionCoroutine = null;
+        }
+        if (_activeRedistributionTask != null && ResourceManager.Instance != null) {
+            ResourceManager.Instance.CancelRedistributionTask(_activeRedistributionTask);
+            _activeRedistributionTask = null;
+        }
         StopMiningVibration();
         StopMiningParticles();
         StopMiningSound();
@@ -1227,6 +1306,189 @@ public class Unit_Miner : UnitBase
         }
 
         return reservedMiner != null && reservedMiner != this;
+    }
+
+    private void CancelActiveRedistributionOnDisable()
+    {
+        if (_activeRedistributionTask != null && ResourceManager.Instance != null) {
+            ResourceManager.Instance.CancelRedistributionTask(_activeRedistributionTask);
+        }
+        _activeRedistributionTask = null;
+        _redistributionCoroutine = null;
+    }
+
+    private void TryStartRedistribution()
+    {
+        if (_redistributionCoroutine != null) return;
+        if (_activeRedistributionTask != null) return;
+        if (ResourceManager.Instance == null) return;
+
+        if (ResourceManager.Instance.TryClaimRedistributionTask(transform.position, out RedistributionTask task)) {
+            _activeRedistributionTask = task;
+            _redistributionCoroutine = StartCoroutine(ExecuteRedistributionCoroutine(task));
+        }
+    }
+
+    private IEnumerator ExecuteRedistributionCoroutine(RedistributionTask task)
+    {
+        // --- Leg 1: Go to source and withdraw ---
+        if (task.Source == null) {
+            CancelActiveRedistribution();
+            yield break;
+        }
+
+        UnloadTarget sourceTarget = FindClosestStorageInList(new List<IStorage> { task.Source }, BuildingManager.Instance.grid);
+        if (sourceTarget.storage == null) {
+            CancelActiveRedistribution();
+            yield break;
+        }
+
+        unitMovement.SetNewTarget(BuildingManager.Instance.grid.GetCellCenterWorld(sourceTarget.unloadCell));
+
+        while (true) {
+            // Abort if a real job arrived (cargo picked up externally, or mining started)
+            if (currentState == UnitState.Mining || currentState == UnitState.Moving && _targetResourceNode != null) {
+                CancelActiveRedistribution();
+                yield break;
+            }
+
+            if (task.Source == null) {
+                CancelActiveRedistribution();
+                yield break;
+            }
+
+            Vector3 sourceCell = BuildingManager.Instance.grid.GetCellCenterWorld(sourceTarget.unloadCell);
+            if (Vector3.Distance(transform.position, sourceCell) < 0.2f) {
+                break;
+            }
+            yield return null;
+        }
+
+        unitMovement.StopMovement();
+
+        if (task.Source == null) {
+            CancelActiveRedistribution();
+            yield break;
+        }
+
+        int withdrawn = 0;
+        task.Source.TryWithdrawResource(task.ResourceType, task.Amount, out withdrawn);
+
+        if (withdrawn <= 0) {
+            CancelActiveRedistribution();
+            yield break;
+        }
+
+        // --- Leg 2: Go to destination and deposit ---
+        IStorage destination = task.Destination;
+        if (destination == null) {
+            // Destination gone — find another.
+            destination = ResourceManager.Instance != null
+                ? ResourceManager.Instance.GetBestDepositTarget(task.ResourceType, transform.position)
+                : null;
+        }
+
+        if (destination == null) {
+            // No destination; return resource to source.
+            if (task.Source != null) {
+                task.Source.TryAddResource(task.ResourceType, withdrawn);
+            }
+            CancelActiveRedistribution();
+            yield break;
+        }
+
+        UnloadTarget destTarget = FindClosestStorageInList(new List<IStorage> { destination }, BuildingManager.Instance.grid);
+        if (destTarget.storage == null) {
+            if (task.Source != null) {
+                task.Source.TryAddResource(task.ResourceType, withdrawn);
+            }
+            CancelActiveRedistribution();
+            yield break;
+        }
+
+        unitMovement.SetNewTarget(BuildingManager.Instance.grid.GetCellCenterWorld(destTarget.unloadCell));
+
+        while (true) {
+            if (destination == null) {
+                // Destination destroyed mid-leg; try to find a new one.
+                IStorage fallback = ResourceManager.Instance != null
+                    ? ResourceManager.Instance.GetBestDepositTarget(task.ResourceType, transform.position)
+                    : null;
+                if (fallback == null) {
+                    if (task.Source != null) {
+                        task.Source.TryAddResource(task.ResourceType, withdrawn);
+                    }
+                    CancelActiveRedistribution();
+                    yield break;
+                }
+                destination = fallback;
+                destTarget = FindClosestStorageInList(new List<IStorage> { destination }, BuildingManager.Instance.grid);
+                if (destTarget.storage == null) {
+                    if (task.Source != null) {
+                        task.Source.TryAddResource(task.ResourceType, withdrawn);
+                    }
+                    CancelActiveRedistribution();
+                    yield break;
+                }
+                unitMovement.SetNewTarget(BuildingManager.Instance.grid.GetCellCenterWorld(destTarget.unloadCell));
+            }
+
+            Vector3 destCell = BuildingManager.Instance.grid.GetCellCenterWorld(destTarget.unloadCell);
+            if (Vector3.Distance(transform.position, destCell) < 0.2f) {
+                break;
+            }
+            yield return null;
+        }
+
+        unitMovement.StopMovement();
+
+        // Final filter check on arrival at destination.
+        if (destination == null) {
+            if (task.Source != null) {
+                task.Source.TryAddResource(task.ResourceType, withdrawn);
+            }
+            CancelActiveRedistribution();
+            yield break;
+        }
+
+        StorageFilter destFilter = destination.GetFilter();
+        if (destFilter != null && !destFilter.IsAllowed(task.ResourceType)) {
+            // Filter changed — try re-routing.
+            IStorage rerouted = ResourceManager.Instance != null
+                ? ResourceManager.Instance.GetBestDepositTarget(task.ResourceType, transform.position, destination)
+                : null;
+            if (rerouted != null) {
+                destination = rerouted;
+            }
+            else {
+                if (task.Source != null) {
+                    task.Source.TryAddResource(task.ResourceType, withdrawn);
+                }
+                CancelActiveRedistribution();
+                yield break;
+            }
+        }
+
+        destination.TryAddResource(task.ResourceType, withdrawn);
+
+        if (ResourceManager.Instance != null) {
+            ResourceManager.Instance.CompleteRedistributionTask(task);
+        }
+        _activeRedistributionTask = null;
+        _redistributionCoroutine = null;
+        currentState = UnitState.Idle;
+    }
+
+    private void CancelActiveRedistribution()
+    {
+        if (_activeRedistributionTask != null) {
+            if (ResourceManager.Instance != null) {
+                ResourceManager.Instance.CancelRedistributionTask(_activeRedistributionTask);
+            }
+            _activeRedistributionTask = null;
+        }
+        _redistributionCoroutine = null;
+        currentState = UnitState.Idle;
     }
 
     private struct MiningTarget

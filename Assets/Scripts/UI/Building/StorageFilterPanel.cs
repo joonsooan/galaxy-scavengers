@@ -62,10 +62,16 @@ public class StorageFilterPanel : MonoBehaviour
 
         _allowedResources.Clear();
         Array resourceTypes = Enum.GetValues(typeof(ResourceType));
+
+        StorageFilter currentFilter = (_targetStorage != null) ? _targetStorage.GetFilter() : null;
+
+        _selectedPriority = (currentFilter != null) ? currentFilter.Priority : 0;
+
         foreach (ResourceType type in resourceTypes)
         {
             if (type == ResourceType.None) continue;
-            _allowedResources[type] = true;
+            bool isAllowed = (currentFilter != null) ? currentFilter.IsAllowed(type) : true;
+            _allowedResources[type] = isAllowed;
         }
 
         if (resourceFilterGrid != null)
@@ -129,6 +135,16 @@ public class StorageFilterPanel : MonoBehaviour
                 img.sprite = _allowedResources[type] ? allowedSprite : deniedSprite;
         }
 
+        if (_targetStorage != null)
+        {
+            StorageFilter filter = _targetStorage.GetFilter();
+            if (filter != null)
+            {
+                filter.SetAllowed(type, _allowedResources[type]);
+                _targetStorage.SetFilter(filter);
+            }
+        }
+
         EventSystem.current.SetSelectedGameObject(null);
     }
 
@@ -142,6 +158,7 @@ public class StorageFilterPanel : MonoBehaviour
                 _allowedResources[type] = true;
         }
         RefreshAllFilterSprites();
+        PushAllowedResourcesToStorage();
     }
 
     public void AllowNone()
@@ -154,6 +171,20 @@ public class StorageFilterPanel : MonoBehaviour
                 _allowedResources[type] = false;
         }
         RefreshAllFilterSprites();
+        PushAllowedResourcesToStorage();
+    }
+
+    private void PushAllowedResourcesToStorage()
+    {
+        if (_targetStorage == null) return;
+
+        StorageFilter filter = _targetStorage.GetFilter();
+        if (filter == null) return;
+
+        foreach (KeyValuePair<ResourceType, bool> kvp in _allowedResources)
+            filter.SetAllowed(kvp.Key, kvp.Value);
+
+        _targetStorage.SetFilter(filter);
     }
 
     private void RefreshAllFilterSprites()
@@ -177,6 +208,17 @@ public class StorageFilterPanel : MonoBehaviour
     public void OnPriorityLevelSelected(int level)
     {
         _selectedPriority = level;
+
+        if (_targetStorage != null)
+        {
+            StorageFilter filter = _targetStorage.GetFilter();
+            if (filter != null)
+            {
+                filter.SetPriority(level);
+                _targetStorage.SetFilter(filter);
+            }
+        }
+
         if (prioritySelectPanel != null)
             prioritySelectPanel.SetActive(false);
     }

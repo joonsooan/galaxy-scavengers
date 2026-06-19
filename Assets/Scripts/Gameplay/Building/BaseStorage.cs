@@ -10,6 +10,8 @@ public class BaseStorage : Damageable, IStorage
 
     protected readonly Dictionary<ResourceType, int> currentResources = new Dictionary<ResourceType, int>();
 
+    private StorageFilter _filter;
+
     protected override void Awake()
     {
         base.Awake();
@@ -17,6 +19,8 @@ public class BaseStorage : Damageable, IStorage
         foreach (ResourceType type in Enum.GetValues(typeof(ResourceType))) {
             currentResources[type] = 0;
         }
+
+        _filter = new StorageFilter(Enum.GetValues(typeof(ResourceType)) as ResourceType[]);
     }
 
     protected virtual void Start()
@@ -33,6 +37,18 @@ public class BaseStorage : Damageable, IStorage
     }
 
     public event Action<ResourceType, int, int> OnResourceChanged;
+    public event Action OnFilterChanged;
+
+    public StorageFilter GetFilter()
+    {
+        return _filter;
+    }
+
+    public void SetFilter(StorageFilter filter)
+    {
+        _filter = filter;
+        OnFilterChanged?.Invoke();
+    }
 
     public virtual bool TryAddResource(ResourceType type, int amount)
     {
