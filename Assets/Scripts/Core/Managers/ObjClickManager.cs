@@ -122,7 +122,11 @@ public class ObjClickManager : MonoBehaviour
                     continue;
                 }
 
-                IStorage clickedStorage = hit.collider.GetComponentInParent<IStorage>();
+                IStorage clickedStorage = hit.collider.GetComponentInParent<BaseStorage>();
+                if (clickedStorage == null)
+                {
+                    clickedStorage = hit.collider.GetComponentInParent<IStorage>();
+                }
                 if (clickedStorage != null)
                 {
                     BuildingHoverManager.Instance?.OnStorageClick(clickedStorage);
@@ -172,6 +176,7 @@ public class ObjClickManager : MonoBehaviour
             if (mainStructure != null)
             {
                 BuildingHoverManager.Instance?.ClearHoverOnClick(false);
+                BuildingHoverManager.Instance?.OnStorageClick(mainStructure);
                 if (BuildingInfoPanel.Instance != null)
                 {
                     BuildingInfoPanel.Instance.gameObject.SetActive(false);

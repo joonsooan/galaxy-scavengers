@@ -556,6 +556,7 @@ public class BuildingHoverManager : MonoBehaviour
         foreach (Collider2D col in colliders)
         {
             if (col == null || !col.enabled) continue;
+            if (col.gameObject.name == "VisionColliderHolder" || col is CircleCollider2D) continue;
 
             if (col.OverlapPoint(mouseWorldPos2D))
             {
