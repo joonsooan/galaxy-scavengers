@@ -47333,11 +47333,11 @@ RectTransform:
   - {fileID: 1926798322}
   m_Father: {fileID: 1490465122}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0, y: 1}
 --- !u!114 &1063455839
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -56666,11 +56666,10 @@ MonoBehaviour:
   storageInfoPanel: {fileID: 1063455837}
   storageResourceListParent: {fileID: 1063455837}
   storageAmountText: {fileID: 1709021869}
-  storageBatteryPanelOffsetX: 150
   storageFilterButton: {fileID: 1415156351}
   storageFilterPanel: {fileID: 1380808547}
-  mainStructurePanelOffsetX: 200
-  storagePanelOffsetY: 0
+  storagePanelPixelGap: 0
+  storagePanelOffsetY: 90
   buildingUIClickSound:
     Guid:
       Data1: -345895807
