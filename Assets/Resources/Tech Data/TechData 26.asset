@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,20 +16,20 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "\uCF54\uC5B4 \uD504\uB85C\uC138\uC11C"
+  manualName: 중장갑 판
   manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
-  - resourceType: 8
-    amount: 40
-  - resourceType: 11
-    amount: 30
-  researchDuration: 150
-  prerequisiteTechIndices: 39000000
-  successorTechIndices: 
+  - resourceType: 5
+    amount: 20
+  - resourceType: 12
+    amount: 15
+  researchDuration: 70
+  prerequisiteTechIndices: 13000000
+  successorTechIndices: 20000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources: 0c000000
+  unlocksResources: 0e000000
   grantStatTypes: 
   grantStatValues: []

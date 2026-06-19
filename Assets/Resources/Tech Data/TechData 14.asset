@@ -13,26 +13,23 @@ MonoBehaviour:
   m_Name: TechData 14
   m_EditorClassIdentifier: Assembly-CSharp::TechData
   techIndex: 14
-  useExistingData: 1
+  useExistingData: 0
   existingDisplayableData: {fileID: 0}
-  existingUnitData: {fileID: 11400000, guid: 33e410bcf8e6ad44f99960dadd48b50b, type: 2}
-  manualName: Scout Drone
+  existingUnitData: {fileID: 0}
+  manualName: "\uADF9\uC800\uC628 \uC6A9\uC561"
   manualDescription: 
-  manualIcon: {fileID: 0}
+  manualIcon: {fileID: -4396813597575786351, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
   researchCosts:
+  - resourceType: 3
+    amount: 30
   - resourceType: 0
-    amount: 150
-  - resourceType: 1
-    amount: 100
-  - resourceType: 2
-    amount: 60
-  researchDuration: 90
-  prerequisiteTechIndices: 
-  successorTechIndices: 08000000
+    amount: 15
+  researchDuration: 50
+  prerequisiteTechIndices: 0400000007000000
+  successorTechIndices: 2600000029000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
-  unlocksUnits:
-  - {fileID: 11400000, guid: 33e410bcf8e6ad44f99960dadd48b50b, type: 2}
-  unlocksResources: 
+  unlocksUnits: []
+  unlocksResources: 0a000000
   grantStatTypes: 
   grantStatValues: []

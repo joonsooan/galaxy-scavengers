@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -13,24 +13,23 @@ MonoBehaviour:
   m_Name: TechData 34
   m_EditorClassIdentifier: Assembly-CSharp::TechData
   techIndex: 34
-  useExistingData: 1
-  existingDisplayableData: {fileID: 11400000, guid: ce0808b3b37c1f240816c2e2adc944f7, type: 2}
+  useExistingData: 0
+  existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: Rocket Engineering
+  manualName: 넥서스 데이터
   manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
+  - resourceType: 18
+    amount: 15
   - resourceType: 12
-    amount: 50
-  - resourceType: 8
-    amount: 40
-  researchDuration: 180
-  prerequisiteTechIndices: 3a000000
+    amount: 20
+  researchDuration: 70
+  prerequisiteTechIndices: 31000000
   successorTechIndices: 
   isUnlockedByDefault: 0
-  unlocksBuildings:
-  - {fileID: 11400000, guid: ce0808b3b37c1f240816c2e2adc944f7, type: 2}
+  unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources: 
+  unlocksResources: 16000000
   grantStatTypes: 
   grantStatValues: []

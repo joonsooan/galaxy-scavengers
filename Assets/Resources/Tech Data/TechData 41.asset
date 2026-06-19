@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,20 +16,21 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "\uC774\uB3D9 \uC18D\uB3C4 II"
+  manualName: 유닛 내구도 강화 I
   manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
-  - resourceType: 4
-    amount: 80
   - resourceType: 7
-    amount: 40
-  researchDuration: 120
-  prerequisiteTechIndices: 23000000
-  successorTechIndices: 2f000000
+    amount: 15
+  - resourceType: 4
+    amount: 15
+  researchDuration: 60
+  prerequisiteTechIndices: 0e000000
+  successorTechIndices: 12000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
   unlocksResources: 
-  grantStatTypes: 02000000
-  grantStatValues: []
+  grantStatTypes: 07000000
+  grantStatValues:
+  - 0.1

@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -14,23 +14,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TechData
   techIndex: 6
   useExistingData: 1
-  existingDisplayableData: {fileID: 11400000, guid: 4a6a7d5005773b14e83ad879b62cc6fc, type: 2}
-  existingUnitData: {fileID: 0}
-  manualName: Barrier Systems
+  existingDisplayableData: {fileID: 0}
+  existingUnitData: {fileID: 11400000, guid: 33e410bcf8e6ad44f99960dadd48b50b, type: 2}
+  manualName: 
   manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
-  - resourceType: 0
-    amount: 0
-  - resourceType: 80
-    amount: 0
+  - resourceType: 1
+    amount: 15
+  - resourceType: 3
+    amount: 10
   researchDuration: 30
-  prerequisiteTechIndices: 07000000
-  successorTechIndices: 3d000000
+  prerequisiteTechIndices: 
+  successorTechIndices: 09000000
   isUnlockedByDefault: 0
-  unlocksBuildings:
-  - {fileID: 11400000, guid: 4a6a7d5005773b14e83ad879b62cc6fc, type: 2}
-  unlocksUnits: []
+  unlocksBuildings: []
+  unlocksUnits:
+  - {fileID: 11400000, guid: 33e410bcf8e6ad44f99960dadd48b50b, type: 2}
   unlocksResources: 
   grantStatTypes: 
   grantStatValues: []

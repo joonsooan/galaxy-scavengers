@@ -13,26 +13,23 @@ MonoBehaviour:
   m_Name: TechData 13
   m_EditorClassIdentifier: Assembly-CSharp::TechData
   techIndex: 13
-  useExistingData: 1
-  existingDisplayableData: {fileID: 11400000, guid: 6a375b82248aff4438a80132fb46c2a5, type: 2}
+  useExistingData: 0
+  existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: Defense Turret
+  manualName: "\uC804\uC790 \uCE69"
   manualDescription: 
-  manualIcon: {fileID: 0}
+  manualIcon: {fileID: -6843591316079228388, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
   researchCosts:
-  - resourceType: 0
-    amount: 200
   - resourceType: 1
-    amount: 100
-  - resourceType: 3
-    amount: 50
-  researchDuration: 90
-  prerequisiteTechIndices: 01000000
-  successorTechIndices: 40000000
+    amount: 25
+  - resourceType: 0
+    amount: 20
+  researchDuration: 50
+  prerequisiteTechIndices: 0100000007000000
+  successorTechIndices: 2500000028000000
   isUnlockedByDefault: 0
-  unlocksBuildings:
-  - {fileID: 11400000, guid: 6a375b82248aff4438a80132fb46c2a5, type: 2}
+  unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources: 
+  unlocksResources: 06000000
   grantStatTypes: 
   grantStatValues: []

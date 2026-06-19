@@ -10,23 +10,23 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ceeace5e3ddf138488abd43ac61f82c5, type: 3}
-  m_Name: TechData 61
+  m_Name: TechData 11
   m_EditorClassIdentifier: Assembly-CSharp::TechData
-  techIndex: 61
+  techIndex: 11
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
   manualName: "\uBCF5\uD569 \uACE8\uC870"
-  manualDescription: Enables production of Composite Frame using the Processor unit.
-  manualIcon: {fileID: 0}
+  manualDescription: 
+  manualIcon: {fileID: 359855223478723041, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
   researchCosts:
+  - resourceType: 4
+    amount: 15
   - resourceType: 0
-    amount: 150
-  - resourceType: 2
-    amount: 100
-  researchDuration: 60
-  prerequisiteTechIndices: 06000000
-  successorTechIndices: 43000000
+    amount: 20
+  researchDuration: 50
+  prerequisiteTechIndices: 26000000
+  successorTechIndices: 15000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []

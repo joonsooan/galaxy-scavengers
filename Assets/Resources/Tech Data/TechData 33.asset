@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,20 +16,20 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "\uC2E0\uACBD \uB9E4\uD2B8\uB9AD\uC2A4"
+  manualName: 신경 매트릭스
   manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
+  - resourceType: 16
+    amount: 20
   - resourceType: 7
-    amount: 60
-  - resourceType: 12
-    amount: 40
-  researchDuration: 180
-  prerequisiteTechIndices: 1b000000
-  successorTechIndices: 28000000
+    amount: 20
+  researchDuration: 70
+  prerequisiteTechIndices: 30000000
+  successorTechIndices: 
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources: 
+  unlocksResources: 17000000
   grantStatTypes: 
   grantStatValues: []

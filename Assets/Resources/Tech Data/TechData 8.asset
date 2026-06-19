@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -14,22 +14,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TechData
   techIndex: 8
   useExistingData: 1
-  existingDisplayableData: {fileID: 11400000, guid: 0d2d400072726114d971ea9e56308971, type: 2}
+  existingDisplayableData: {fileID: 11400000, guid: 170214b1b03686641b36f4b808a97b1c, type: 2}
   existingUnitData: {fileID: 0}
-  manualName: Energy Battery
+  manualName: 
   manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
   - resourceType: 0
-    amount: 150
+    amount: 20
   - resourceType: 1
-    amount: 100
-  researchDuration: 75
-  prerequisiteTechIndices: 0e000000
-  successorTechIndices: 3e000000
+    amount: 15
+  researchDuration: 40
+  prerequisiteTechIndices: 05000000
+  successorTechIndices: 
   isUnlockedByDefault: 0
   unlocksBuildings:
-  - {fileID: 11400000, guid: 0d2d400072726114d971ea9e56308971, type: 2}
+  - {fileID: 11400000, guid: 170214b1b03686641b36f4b808a97b1c, type: 2}
   unlocksUnits: []
   unlocksResources: 
   grantStatTypes: 

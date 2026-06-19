@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -10,26 +10,27 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ceeace5e3ddf138488abd43ac61f82c5, type: 3}
-  m_Name: TechData 65
+  m_Name: TechData 21
   m_EditorClassIdentifier: Assembly-CSharp::TechData
-  techIndex: 65
-  useExistingData: 0
-  existingDisplayableData: {fileID: 0}
+  techIndex: 21
+  useExistingData: 1
+  existingDisplayableData: {fileID: 11400000, guid: 0522e6509d7d14045b6d0e6372f812c9, type: 2}
   existingUnitData: {fileID: 0}
-  manualName: "\uBC14\uC774\uC624 \uC5F0\uB8CC"
-  manualDescription: Enables production of Bio-Fuel using the Processor unit.
+  manualName: 
+  manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
-  - resourceType: 2
-    amount: 200
-  - resourceType: 3
-    amount: 60
-  researchDuration: 60
-  prerequisiteTechIndices: 1000000007000000
-  successorTechIndices: 1200000019000000
+  - resourceType: 6
+    amount: 15
+  - resourceType: 1
+    amount: 20
+  researchDuration: 50
+  prerequisiteTechIndices: 0b000000
+  successorTechIndices: 1c000000
   isUnlockedByDefault: 0
-  unlocksBuildings: []
+  unlocksBuildings:
+  - {fileID: 11400000, guid: 0522e6509d7d14045b6d0e6372f812c9, type: 2}
   unlocksUnits: []
-  unlocksResources: 09000000
+  unlocksResources: 
   grantStatTypes: 
   grantStatValues: []

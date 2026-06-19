@@ -13,26 +13,23 @@ MonoBehaviour:
   m_Name: TechData 17
   m_EditorClassIdentifier: Assembly-CSharp::TechData
   techIndex: 17
-  useExistingData: 1
-  existingDisplayableData: {fileID: 11400000, guid: f08b408f128c48443926c6e62cb4cc67, type: 2}
+  useExistingData: 0
+  existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: Platform Eng.
+  manualName: "\uB3D9\uB825 \uD050\uBE0C"
   manualDescription: 
-  manualIcon: {fileID: 0}
+  manualIcon: {fileID: -3423204301100993705, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
   researchCosts:
-  - resourceType: 0
-    amount: 200
-  - resourceType: 1
-    amount: 100
+  - resourceType: 3
+    amount: 20
   - resourceType: 4
-    amount: 30
-  researchDuration: 90
-  prerequisiteTechIndices: 37000000
-  successorTechIndices: 
+    amount: 15
+  researchDuration: 60
+  prerequisiteTechIndices: 28000000
+  successorTechIndices: 17000000
   isUnlockedByDefault: 0
-  unlocksBuildings:
-  - {fileID: 11400000, guid: f08b408f128c48443926c6e62cb4cc67, type: 2}
+  unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources: 
+  unlocksResources: 08000000
   grantStatTypes: 
   grantStatValues: []

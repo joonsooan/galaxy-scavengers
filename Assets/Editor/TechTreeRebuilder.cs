@@ -59,7 +59,7 @@ public class TechTreeRebuilder : EditorWindow
 
     // Resource Tier configuration map
     private readonly Dictionary<ResourceType, ResourceTier> _resourceTiers = new Dictionary<ResourceType, ResourceTier>();
-    
+
     // UI state
     private Vector2 _scrollPos;
     private readonly List<string> _previewLogs = new List<string>();
@@ -195,7 +195,7 @@ public class TechTreeRebuilder : EditorWindow
 
             if (GUILayout.Button("Redesign & Save Relationships", GUILayout.Height(30)))
             {
-                if (EditorUtility.DisplayDialog("Redesign Tech Tree?", 
+                if (EditorUtility.DisplayDialog("Redesign Tech Tree?",
                     "This will modify prerequisite and successor connections in all TechData assets. Are you sure you want to proceed?", "Yes", "No"))
                 {
                     RebuildRelationships();
@@ -213,7 +213,7 @@ public class TechTreeRebuilder : EditorWindow
             {
                 EditorGUILayout.HelpBox($"Found {_redundantConnectionsCount} redundant connections (e.g. A->B->C and A->C). Transitive reduction will prune these.", MessageType.Info);
             }
-            
+
             using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
             {
                 foreach (string log in _previewLogs)
@@ -233,18 +233,17 @@ public class TechTreeRebuilder : EditorWindow
         {
             if (type == ResourceType.None) continue;
 
-            if (type == ResourceType.Ferrite || type == ResourceType.Aether || 
-                type == ResourceType.Biomass || type == ResourceType.CryoCrystal || 
+            if (type == ResourceType.Ferrite || type == ResourceType.Aether ||
+                type == ResourceType.Biomass || type == ResourceType.CryoCrystal ||
                 type == ResourceType.Electricity)
             {
                 _resourceTiers[type] = ResourceTier.Tier1;
             }
-            else if (type == ResourceType.Solana || type == ResourceType.Core || 
-                     type == ResourceType.HeavyPlating || type == ResourceType.Actuator || 
-                     type == ResourceType.GenomeChip || type == ResourceType.SensorUnit || 
-                     type == ResourceType.PlasmaCube || type == ResourceType.CryoConduit || 
-                     type == ResourceType.SeekerMissile || type == ResourceType.NexusData || 
-                     type == ResourceType.NeuralMatrix)
+            else if (type == ResourceType.HeavyPlating || type == ResourceType.Actuator ||
+                     type == ResourceType.GenomeChip || type == ResourceType.SensorUnit ||
+                     type == ResourceType.PlasmaCube || type == ResourceType.CryoConduit ||
+                     type == ResourceType.SeekerMissile || type == ResourceType.NexusData ||
+                     type == ResourceType.NeuralMatrix || type == ResourceType.PatchKit)
             {
                 _resourceTiers[type] = ResourceTier.Tier3;
             }
@@ -291,8 +290,8 @@ public class TechTreeRebuilder : EditorWindow
             foreach (ModuleStatType statType in tech.grantStatTypes)
             {
                 string statName = statType.ToString().ToLower();
-                if (statName.Contains("damage") || statName.Contains("health") || 
-                    statName.Contains("defense") || statName.Contains("shield") || 
+                if (statName.Contains("damage") || statName.Contains("health") ||
+                    statName.Contains("defense") || statName.Contains("shield") ||
                     statName.Contains("weapon") || statName.Contains("attack"))
                 {
                     hasCombatStats = true;
@@ -347,7 +346,7 @@ public class TechTreeRebuilder : EditorWindow
         }
 
         _previewLogs.Add($"--- Catalog Analysis ({nodes.Count} Nodes) ---");
-        
+
         // Count Tiers
         int t1Count = nodes.Count(n => n.tier == ResourceTier.Tier1);
         int t2Count = nodes.Count(n => n.tier == ResourceTier.Tier2);

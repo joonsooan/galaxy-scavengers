@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1883873838371771168}
   - component: {fileID: 5368151405506851205}
   - component: {fileID: 4993873073177924227}
+  - component: {fileID: 5460957944243363708}
   m_Layer: 0
   m_Name: _UnlockManager
   m_TagString: Untagged
@@ -57,3 +58,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36300486e935d6643a3ba3108a8acca8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ResourceUnlockManager
+--- !u!114 &5460957944243363708
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 189749746219817602}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49ac14c624831204eba8c9cfce4343d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  unlockedBuildingsList: []

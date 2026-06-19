@@ -13,24 +13,23 @@ MonoBehaviour:
   m_Name: TechData 9
   m_EditorClassIdentifier: Assembly-CSharp::TechData
   techIndex: 9
-  useExistingData: 1
-  existingDisplayableData: {fileID: 11400000, guid: 0522e6509d7d14045b6d0e6372f812c9, type: 2}
+  useExistingData: 0
+  existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: Power Relay
+  manualName: "\uD569\uAE08 \uD310"
   manualDescription: 
-  manualIcon: {fileID: 0}
+  manualIcon: {fileID: -6291453560396589059, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
   researchCosts:
   - resourceType: 0
-    amount: 120
-  - resourceType: 1
-    amount: 80
-  researchDuration: 60
-  prerequisiteTechIndices: 00000000
-  successorTechIndices: 3f000000
+    amount: 30
+  - resourceType: 2
+    amount: 15
+  researchDuration: 50
+  prerequisiteTechIndices: 0600000007000000
+  successorTechIndices: 
   isUnlockedByDefault: 0
-  unlocksBuildings:
-  - {fileID: 11400000, guid: 0522e6509d7d14045b6d0e6372f812c9, type: 2}
+  unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources: 
+  unlocksResources: 04000000
   grantStatTypes: 
   grantStatValues: []

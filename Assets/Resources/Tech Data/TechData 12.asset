@@ -10,22 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ceeace5e3ddf138488abd43ac61f82c5, type: 3}
-  m_Name: TechData 63
+  m_Name: TechData 12
   m_EditorClassIdentifier: Assembly-CSharp::TechData
-  techIndex: 63
+  techIndex: 12
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
   manualName: "\uBC14\uC774\uC624 \uCF00\uC774\uBE14"
-  manualDescription: Enables production of Bio-Cable using the Processor unit.
-  manualIcon: {fileID: 0}
+  manualDescription: 
+  manualIcon: {fileID: 9116947346429250140, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
   researchCosts:
   - resourceType: 2
-    amount: 200
+    amount: 25
   - resourceType: 1
-    amount: 80
-  researchDuration: 75
-  prerequisiteTechIndices: 0900000007000000
+    amount: 15
+  researchDuration: 50
+  prerequisiteTechIndices: 0000000007000000
   successorTechIndices: 
   isUnlockedByDefault: 0
   unlocksBuildings: []

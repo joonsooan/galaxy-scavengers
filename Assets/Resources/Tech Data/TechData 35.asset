@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,20 +16,20 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "\uD50C\uB77C\uC988\uB9C8 \uB4DC\uB77C\uC774\uBE0C"
+  manualName: 수리 키트
   manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
-  - resourceType: 8
-    amount: 80
-  - resourceType: 12
-    amount: 50
-  researchDuration: 210
-  prerequisiteTechIndices: 1c000000
-  successorTechIndices: 29000000
+  - resourceType: 9
+    amount: 15
+  - resourceType: 13
+    amount: 20
+  researchDuration: 70
+  prerequisiteTechIndices: 1b000000
+  successorTechIndices: 2a0000002b0000002c0000002d0000002e00000030000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
-  unlocksResources: 
+  unlocksResources: 11000000
   grantStatTypes: 
   grantStatValues: []

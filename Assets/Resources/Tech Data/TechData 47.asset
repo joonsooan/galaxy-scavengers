@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,20 +16,21 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "\uC791\uC5C5 \uD6A8\uC728 IV"
+  manualName: 인구 수용 증가 II
   manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
+  - resourceType: 7
+    amount: 20
   - resourceType: 12
-    amount: 100
-  - resourceType: 11
-    amount: 60
-  researchDuration: 180
-  prerequisiteTechIndices: 29000000
-  successorTechIndices: 35000000
+    amount: 15
+  researchDuration: 80
+  prerequisiteTechIndices: 0f000000
+  successorTechIndices: 13000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []
   unlocksResources: 
-  grantStatTypes: 03000000
-  grantStatValues: []
+  grantStatTypes: 08000000
+  grantStatValues:
+  - 3

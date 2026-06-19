@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -10,26 +10,27 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ceeace5e3ddf138488abd43ac61f82c5, type: 3}
-  m_Name: TechData 57
+  m_Name: TechData 22
   m_EditorClassIdentifier: Assembly-CSharp::TechData
-  techIndex: 57
-  useExistingData: 0
-  existingDisplayableData: {fileID: 0}
+  techIndex: 22
+  useExistingData: 1
+  existingDisplayableData: {fileID: 11400000, guid: 4a6a7d5005773b14e83ad879b62cc6fc, type: 2}
   existingUnitData: {fileID: 0}
-  manualName: "\uC0DD\uC0B0 \uC18D\uB3C4 II"
+  manualName: 
   manualDescription: 
   manualIcon: {fileID: 0}
   researchCosts:
+  - resourceType: 5
+    amount: 15
   - resourceType: 4
-    amount: 120
-  - resourceType: 6
-    amount: 60
-  researchDuration: 120
-  prerequisiteTechIndices: 33000000
-  successorTechIndices: 1a000000
+    amount: 20
+  researchDuration: 50
+  prerequisiteTechIndices: 10000000
+  successorTechIndices: 1d000000
   isUnlockedByDefault: 0
-  unlocksBuildings: []
+  unlocksBuildings:
+  - {fileID: 11400000, guid: 4a6a7d5005773b14e83ad879b62cc6fc, type: 2}
   unlocksUnits: []
   unlocksResources: 
-  grantStatTypes: 05000000
+  grantStatTypes: 
   grantStatValues: []
