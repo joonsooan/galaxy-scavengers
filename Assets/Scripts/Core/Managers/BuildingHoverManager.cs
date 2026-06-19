@@ -124,6 +124,16 @@ public class BuildingHoverManager : MonoBehaviour
                 _panelsClosedTime = 0f;
             }
         }
+
+        if (_currentHoveredStorage != null && _pinnedStorage == null)
+        {
+            UIManager uiManager = GameManager.Instance != null ? GameManager.Instance.uiManager : null;
+            bool overStoragePanel = uiManager != null && uiManager.IsPointerOverStorageInfoPanel();
+            if (!overStoragePanel && !IsPointerOverStorage(_currentHoveredStorage))
+            {
+                ClearStorageHover();
+            }
+        }
     }
 
 
@@ -171,9 +181,9 @@ public class BuildingHoverManager : MonoBehaviour
         if (UIUtils.IsPointerOverUI()) return;
         if (GameManager.Instance != null && GameManager.Instance.IsDragging()) return;
         if (storage == null) return;
-        if (storage == _currentHoveredStorage) return;
+        if (AreSameStorage(_currentHoveredStorage, storage)) return;
 
-        if (_currentHoveredStorage != null && _currentHoveredStorage != storage)
+        if (_currentHoveredStorage != null && !AreSameStorage(_currentHoveredStorage, storage))
         {
             ClearStorageHover();
         }
@@ -184,9 +194,9 @@ public class BuildingHoverManager : MonoBehaviour
 
     public void OnStorageExit(IStorage storage)
     {
-        if (storage == _currentHoveredStorage)
+        if (AreSameStorage(_currentHoveredStorage, storage))
         {
-            if (_pinnedStorage == storage)
+            if (AreSameStorage(_pinnedStorage, storage))
             {
                 _currentHoveredStorage = null;
                 return;
@@ -203,9 +213,8 @@ public class BuildingHoverManager : MonoBehaviour
     public void OnStorageClick(IStorage storage)
     {
         if (storage == null) return;
-        if (_pinnedStorage == storage)
+        if (AreSameStorage(_pinnedStorage, storage))
         {
-            ClearPinnedStorage();
             return;
         }
         ClearPinnedStorage();
@@ -451,7 +460,10 @@ public class BuildingHoverManager : MonoBehaviour
         ClearPowerCoveragePreview();
         if (_currentHoveredBuilding != null)
         {
-            TargetBracketEffect.Hide();
+            if (!IsPinnedStorageBuilding(_currentHoveredBuilding))
+            {
+                TargetBracketEffect.Hide();
+            }
             if (BuildingInfoPanel.Instance != null)
             {
                 BuildingInfoPanel.Instance.CancelPreview();
@@ -494,15 +506,68 @@ public class BuildingHoverManager : MonoBehaviour
                     GameManager.Instance.uiManager.HideStorageInfo();
                 }
             }
+            else
+            {
+                if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
+                {
+                    GameManager.Instance.uiManager.DisplayStorageInfo(_pinnedStorage);
+                }
+            }
             _currentHoveredStorage = null;
         }
     }
 
     private bool IsPinnedStorageBuilding(BuildingDataHolder holder)
     {
-        if (_pinnedStorage == null) return false;
+        if (holder == null || _pinnedStorage == null) return false;
         Component c = _pinnedStorage as Component;
         return c != null && c.gameObject == holder.gameObject;
+    }
+
+    private bool AreSameStorage(IStorage a, IStorage b)
+    {
+        Component compA = a as Component;
+        Component compB = b as Component;
+        
+        if (compA == null && compB == null) return true;
+        if (compA == null || compB == null) return false;
+        
+        return compA.gameObject == compB.gameObject;
+    }
+
+    private bool IsPointerOverStorage(IStorage storage)
+    {
+        if (UIUtils.IsPointerOverUI()) return false;
+        if (storage == null) return false;
+        Component storageComp = storage as Component;
+        if (storageComp == null) return false;
+
+        if (_mainCamera == null)
+        {
+            _mainCamera = Camera.main;
+            if (_mainCamera == null) return false;
+        }
+
+        Vector3 mouseWorldPos = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 mouseWorldPos2D = new Vector2(mouseWorldPos.x, mouseWorldPos.y);
+
+        Collider2D[] colliders = storageComp.GetComponentsInChildren<Collider2D>();
+        foreach (Collider2D col in colliders)
+        {
+            if (col == null || !col.enabled) continue;
+
+            if (col.OverlapPoint(mouseWorldPos2D))
+            {
+                return true;
+            }
+
+            if (_mouseDetectorCollider != null && _mouseDetectorCollider.enabled && col.IsTouching(_mouseDetectorCollider))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void ShowResourceInfo(ResourceNode node)
@@ -673,6 +738,7 @@ public class BuildingHoverManager : MonoBehaviour
 
     public void HandleNormalBuildingClick(BuildingDataHolder holder)
     {
+        ClearPinnedStorage();
         UnlockUnitInfo();
         ClearStorageHover();
         if (holder == null || holder.buildingData == null)
