@@ -8,6 +8,7 @@ public class UnitPopulationUI : MonoBehaviour
     private void OnEnable()
     {
         UnitManager.OnUnitCountChanged += HandleUnitCountChanged;
+        UnitManager.OnMaxPopulationBonusChanged += UpdateText;
         UnitUpgradeProgress.OnUpgradeStateChanged += OnUpgradeStateChanged;
         UpdateText();
     }
@@ -15,6 +16,7 @@ public class UnitPopulationUI : MonoBehaviour
     private void OnDisable()
     {
         UnitManager.OnUnitCountChanged -= HandleUnitCountChanged;
+        UnitManager.OnMaxPopulationBonusChanged -= UpdateText;
         UnitUpgradeProgress.OnUpgradeStateChanged -= OnUpgradeStateChanged;
     }
 

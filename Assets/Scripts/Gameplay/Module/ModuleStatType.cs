@@ -8,7 +8,9 @@ public enum ModuleStatType
     UnitWorkSpeed,
     BuildingHP,
     ResourceGenerationRate,
-    TurretAttackDamage
+    TurretAttackDamage,
+    UnitHP,
+    MaxPopulation
 }
 
 [System.Serializable]
