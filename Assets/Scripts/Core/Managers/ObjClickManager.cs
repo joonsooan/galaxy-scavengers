@@ -122,6 +122,13 @@ public class ObjClickManager : MonoBehaviour
                     continue;
                 }
 
+                IStorage clickedStorage = hit.collider.GetComponentInParent<IStorage>();
+                if (clickedStorage != null)
+                {
+                    BuildingHoverManager.Instance?.OnStorageClick(clickedStorage);
+                    return;
+                }
+
                 BuildingHoverManager.Instance?.HandleNormalBuildingClick(buildingHolder);
                 return;
             }

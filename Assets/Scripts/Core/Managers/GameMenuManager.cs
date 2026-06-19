@@ -449,6 +449,13 @@ public class GameMenuManager : MonoBehaviour
                 return;
             }
 
+            if (BuildingHoverManager.Instance != null && BuildingHoverManager.Instance.IsStoragePinned())
+            {
+                if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
+                    GameManager.Instance.uiManager.UnpinAndHideAllPanels();
+                return;
+            }
+
             MainControlPanel mainControlPanel = TryCacheMainControlPanel();
             if (mainControlPanel != null && mainControlPanel.IsResourceStatPanelActive())
             {
