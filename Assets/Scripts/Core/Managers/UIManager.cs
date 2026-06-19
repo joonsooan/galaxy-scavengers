@@ -756,6 +756,8 @@ public class UIManager : MonoBehaviour
         bool isActive = storageFilterPanel.gameObject.activeSelf;
         if (!isActive)
         {
+            if (BuildingHoverManager.Instance != null && !BuildingHoverManager.Instance.IsStoragePinned())
+                BuildingHoverManager.Instance.OnStorageClick(_trackedStorage);
             storageFilterPanel.Initialize(_trackedStorage);
             storageFilterPanel.gameObject.SetActive(true);
         }

@@ -491,7 +491,8 @@ public class CameraTargetController : MonoBehaviour
         followTarget = _defaultFollowTarget;
         _cachedPlayerUnit = _defaultFollowTarget.GetComponent<Unit_Player>();
         _isManualMode = false;
-        TargetBracketEffect.Hide();
+        if (BuildingHoverManager.Instance == null || !BuildingHoverManager.Instance.IsStoragePinned())
+            TargetBracketEffect.Hide();
         DismissLockedUnitInfoAfterFollowPlayer();
     }
 

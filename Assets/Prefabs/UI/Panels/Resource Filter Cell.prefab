@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2479483663155645655}
   - component: {fileID: 6192648520348678431}
   - component: {fileID: 1124043189165510471}
+  - component: {fileID: 4744937738235929140}
   m_Layer: 5
   m_Name: Resource Filter Cell
   m_TagString: Untagged
@@ -68,7 +69,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1899253260378458392, guid: 1fd5403476e2e2e41b3bcb15ae427786, type: 3}
+  m_Sprite: {fileID: 8508079644404475916, guid: f243b32f5f223af468ab44a596d5592a, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -107,9 +108,9 @@ MonoBehaviour:
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
-    m_HighlightedSprite: {fileID: -4239486290848219248, guid: 92b7981e41463a94ab348ae08507a7ec, type: 3}
-    m_PressedSprite: {fileID: 8508079644404475916, guid: f243b32f5f223af468ab44a596d5592a, type: 3}
-    m_SelectedSprite: {fileID: -2050269315440685635, guid: 694fcbd7ce53e0745b82b0ac9a2ff356, type: 3}
+    m_HighlightedSprite: {fileID: -2050269315440685635, guid: 694fcbd7ce53e0745b82b0ac9a2ff356, type: 3}
+    m_PressedSprite: {fileID: 3108826956411037258, guid: 3fb47392e257d814390cb03a90ff8d44, type: 3}
+    m_SelectedSprite: {fileID: -1899253260378458392, guid: 1fd5403476e2e2e41b3bcb15ae427786, type: 3}
     m_DisabledSprite: {fileID: -1899253260378458392, guid: 1fd5403476e2e2e41b3bcb15ae427786, type: 3}
   m_AnimationTriggers:
     m_NormalTrigger: Normal
@@ -149,6 +150,18 @@ MonoBehaviour:
       Data4: 1624008095
     Path: event:/SFX_UI/SFX_UIClick
   clickType: Default
+--- !u!114 &4744937738235929140
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7022382646786988485}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 766118fe4b2072b4e9c0a27a18a62d49, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ResourceFilterCellBehaviour
 --- !u!1 &8844556677889900111
 GameObject:
   m_ObjectHideFlags: 0

@@ -223,7 +223,10 @@ public class BuildingHoverManager : MonoBehaviour
         _currentHoveredStorage = storage;
         Component storageComponent = storage as Component;
         if (storageComponent != null)
-            TargetBracketEffect.Show(storageComponent.transform);
+        {
+            BuildingDataHolder holder = storageComponent.GetComponentInParent<BuildingDataHolder>();
+            TargetBracketEffect.Show(holder != null ? holder.transform : storageComponent.transform);
+        }
         ShowStorageInfo(storage);
     }
 
@@ -461,7 +464,7 @@ public class BuildingHoverManager : MonoBehaviour
         ClearPowerCoveragePreview();
         if (_currentHoveredBuilding != null)
         {
-            if (!IsPinnedStorageBuilding(_currentHoveredBuilding))
+            if (_pinnedStorage == null)
             {
                 TargetBracketEffect.Hide();
             }
@@ -479,7 +482,8 @@ public class BuildingHoverManager : MonoBehaviour
         ClearPowerCoveragePreview();
         if (_currentHoveredBuilding != null)
         {
-            TargetBracketEffect.Hide();
+            if (_pinnedStorage == null)
+                TargetBracketEffect.Hide();
             if (BuildingInfoPanel.Instance != null)
             {
                 BuildingInfoPanel.Instance.CancelPreview();
