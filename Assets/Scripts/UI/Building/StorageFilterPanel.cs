@@ -88,10 +88,20 @@ public class StorageFilterPanel : MonoBehaviour
 
                 if (cellImage != null)
                 {
-                    if (resourceDataManager != null)
-                        cellImage.sprite = resourceDataManager.GetResourceIcon(type);
-
                     _resourceFilterImages[type] = cellImage;
+                }
+
+                if (resourceDataManager != null)
+                {
+                    Image[] images = cellObj.GetComponentsInChildren<Image>();
+                    foreach (Image img in images)
+                    {
+                        if (img != null && img.gameObject != cellObj)
+                        {
+                            img.sprite = resourceDataManager.GetResourceIcon(type);
+                            break;
+                        }
+                    }
                 }
 
                 Button cellButton = cellObj.GetComponent<Button>();
