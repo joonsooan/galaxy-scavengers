@@ -27,7 +27,7 @@ public class BuildingUnlockManager : MonoBehaviour
         }
     }
 
-    public static bool HasInstance => _instance != null;
+    public static bool HasInstance => !_isQuitting && _instance != null;
 
     private readonly HashSet<BuildingData> _unlockedBuildings = new HashSet<BuildingData>();
 

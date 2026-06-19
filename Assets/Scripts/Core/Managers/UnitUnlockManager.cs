@@ -26,7 +26,7 @@ public class UnitUnlockManager : MonoBehaviour
         }
     }
 
-    public static bool HasInstance => _instance != null;
+    public static bool HasInstance => !_isQuitting && _instance != null;
 
     private readonly HashSet<UnitData> _unlockedUnits = new HashSet<UnitData>();
 

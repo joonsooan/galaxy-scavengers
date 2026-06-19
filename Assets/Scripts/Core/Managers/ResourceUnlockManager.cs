@@ -26,7 +26,7 @@ public class ResourceUnlockManager : MonoBehaviour
         }
     }
 
-    public static bool HasInstance => _instance != null;
+    public static bool HasInstance => !_isQuitting && _instance != null;
 
     private readonly HashSet<ResourceType> _unlockedResources = new HashSet<ResourceType>();
 

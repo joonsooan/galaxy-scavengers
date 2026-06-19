@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class StorageFilterPanel : MonoBehaviour
@@ -12,7 +13,7 @@ public class StorageFilterPanel : MonoBehaviour
 
     [Header("Resource Filter")]
     [SerializeField] private Transform resourceFilterGrid;
-    [SerializeField] private GameObject producableResourceImgPrefab;
+    [SerializeField] private GameObject filterCellPrefab;
     [SerializeField] private Sprite allowedSprite;
     [SerializeField] private Sprite deniedSprite;
 
@@ -75,30 +76,26 @@ public class StorageFilterPanel : MonoBehaviour
 
         _resourceFilterImages.Clear();
 
-        BaseResourceDataManager resourceDataManager = FindFirstObjectByType<BaseResourceDataManager>();
-
-        if (resourceFilterGrid != null && producableResourceImgPrefab != null)
+        if (resourceFilterGrid != null && filterCellPrefab != null)
         {
             foreach (ResourceType type in resourceTypes)
             {
                 if (type == ResourceType.None) continue;
 
-                GameObject cellObj = Instantiate(producableResourceImgPrefab, resourceFilterGrid);
+                GameObject cellObj = Instantiate(filterCellPrefab, resourceFilterGrid);
                 Image cellImage = cellObj.GetComponent<Image>();
 
                 if (cellImage != null)
-                {
                     _resourceFilterImages[type] = cellImage;
-                }
 
-                if (resourceDataManager != null)
+                if (ResourceManager.Instance != null)
                 {
                     Image[] images = cellObj.GetComponentsInChildren<Image>();
                     foreach (Image img in images)
                     {
                         if (img != null && img.gameObject != cellObj)
                         {
-                            img.sprite = resourceDataManager.GetResourceIcon(type);
+                            img.sprite = ResourceManager.Instance.GetResourceIcon(type);
                             break;
                         }
                     }
@@ -131,6 +128,8 @@ public class StorageFilterPanel : MonoBehaviour
             if (img != null)
                 img.sprite = _allowedResources[type] ? allowedSprite : deniedSprite;
         }
+
+        EventSystem.current.SetSelectedGameObject(null);
     }
 
     public void AllowAll()
