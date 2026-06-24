@@ -17,6 +17,7 @@ public class TechData : ScriptableObject
     public string manualName;
     [TextArea] public string manualDescription;
     public Sprite manualIcon;
+    public Sprite lockedIcon;
 
     [Header("Research Cost")]
     public ResourceCost[] researchCosts;
