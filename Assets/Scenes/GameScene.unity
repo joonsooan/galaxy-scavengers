@@ -38368,7 +38368,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3208875915134498566, guid: 4edd48dcf99ca974c853ccbc0040772e, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 132
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 3208875915134498566, guid: 4edd48dcf99ca974c853ccbc0040772e, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -53495,6 +53495,7 @@ MonoBehaviour:
   - {fileID: 135135122}
   - {fileID: 358138454}
   - {fileID: 659107973}
+  priorityText: {fileID: 1441157583}
   resourceFilterGrid: {fileID: 1649056948}
   filterCellPrefab: {fileID: 7022382646786988485, guid: 7f345f6b4b5f71f4c876914ff9b3b2de, type: 3}
   allowedSprite: {fileID: -1899253260378458392, guid: 1fd5403476e2e2e41b3bcb15ae427786, type: 3}
@@ -54502,6 +54503,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7c3e9d2f1b8405e8a6c4d3e2f1098ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ButtonReliableHighlight
+--- !u!114 &1441157583 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1995113295732896114, guid: 353761ea9901e67449f4d9beb6242690, type: 3}
+  m_PrefabInstance: {fileID: 1441157580}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1446259204
 GameObject:
   m_ObjectHideFlags: 0
@@ -75525,7 +75537,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3208875915134498566, guid: 4edd48dcf99ca974c853ccbc0040772e, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 12
+      value: 132
       objectReference: {fileID: 0}
     - target: {fileID: 3208875915134498566, guid: 4edd48dcf99ca974c853ccbc0040772e, type: 3}
       propertyPath: m_AnchoredPosition.y

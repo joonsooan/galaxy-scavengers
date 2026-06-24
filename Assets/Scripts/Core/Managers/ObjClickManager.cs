@@ -97,6 +97,18 @@ public class ObjClickManager : MonoBehaviour
             BuildingDataHolder clickedBuilding = GetClickedBuildingHolderForProducePanelBuildingClick(hits);
             if (clickedBuilding != null)
             {
+                IStorage clickedStorage = clickedBuilding.GetComponent<BaseStorage>();
+                if (clickedStorage == null)
+                    clickedStorage = clickedBuilding.GetComponent<IStorage>();
+
+                if (clickedStorage != null)
+                {
+                    if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
+                        GameManager.Instance.uiManager.HideProcessorAndDroneHubPanels();
+                    BuildingHoverManager.Instance?.OnStorageClick(clickedStorage);
+                    return;
+                }
+
                 BuildingHoverManager.Instance?.HandleNormalBuildingClick(clickedBuilding);
                 return;
             }

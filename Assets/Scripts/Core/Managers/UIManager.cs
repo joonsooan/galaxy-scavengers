@@ -797,6 +797,30 @@ public class UIManager : MonoBehaviour
         storageInfoPanel.transform.position = screenPos;
     }
 
+    public bool IsStorageFilterPanelActive()
+    {
+        return storageFilterPanel != null && storageFilterPanel.gameObject.activeSelf;
+    }
+
+    public void PreviewStorageFilter(IStorage storage)
+    {
+        if (storageFilterPanel == null || !storageFilterPanel.gameObject.activeSelf) return;
+        storageFilterPanel.PreviewStorage(storage);
+    }
+
+    public void RestoreStorageFilterFromPreview()
+    {
+        if (storageFilterPanel == null || !storageFilterPanel.gameObject.activeSelf) return;
+        storageFilterPanel.RestoreFromPreview();
+    }
+
+    public void ReopenStorageFilterPanel(IStorage storage)
+    {
+        if (storageFilterPanel == null || storage == null) return;
+        storageFilterPanel.Initialize(storage);
+        storageFilterPanel.gameObject.SetActive(true);
+    }
+
     private enum ActiveUIPanel
     {
         None,
