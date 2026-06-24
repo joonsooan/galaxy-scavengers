@@ -23,6 +23,8 @@ public class Unit_Processor : UnitBase
 
     private Coroutine _assignmentCoroutine;
     private Coroutine _autoAssignCoroutine;
+    private Coroutine _redistributionCoroutine;
+    private RedistributionTask _activeRedistributionTask;
     private Vector3 _baseHoverLocalPosition;
 
     private int _carriedAmount;
@@ -106,6 +108,14 @@ public class Unit_Processor : UnitBase
         if (_autoAssignCoroutine != null) {
             StopCoroutine(_autoAssignCoroutine);
             _autoAssignCoroutine = null;
+        }
+        if (_redistributionCoroutine != null) {
+            StopCoroutine(_redistributionCoroutine);
+            _redistributionCoroutine = null;
+        }
+        if (_activeRedistributionTask != null && ResourceManager.Instance != null) {
+            ResourceManager.Instance.CancelRedistributionTask(_activeRedistributionTask);
+            _activeRedistributionTask = null;
         }
         SetDroneIsNotAssignedAlert(false);
         SetDroneNoResourceAlert(false);
@@ -240,6 +250,14 @@ public class Unit_Processor : UnitBase
             StopCoroutine(_assignmentCoroutine);
             _assignmentCoroutine = null;
         }
+        if (_redistributionCoroutine != null) {
+            StopCoroutine(_redistributionCoroutine);
+            _redistributionCoroutine = null;
+        }
+        if (_activeRedistributionTask != null && ResourceManager.Instance != null) {
+            ResourceManager.Instance.CancelRedistributionTask(_activeRedistributionTask);
+            _activeRedistributionTask = null;
+        }
 
         if (_currentProcessor != null) {
             _currentProcessor.ReleaseDrone(this);
@@ -332,6 +350,18 @@ public class Unit_Processor : UnitBase
     private void UpdateIdle()
     {
         if (_currentProcessor == null) {
+            if (_redistributionCoroutine == null && _activeRedistributionTask == null && ResourceManager.Instance != null) {
+                if (ResourceManager.Instance.TryClaimRedistributionTask(transform.position, out RedistributionTask task)) {
+                    _activeRedistributionTask = task;
+                    _redistributionCoroutine = StartCoroutine(ExecuteRedistributionCoroutine(task));
+                    return;
+                }
+            }
+
+            if (_redistributionCoroutine != null) {
+                return;
+            }
+
             UpdateIdleRoam();
             return;
         }
@@ -944,6 +974,134 @@ public class Unit_Processor : UnitBase
         }
     }
 
+    private IEnumerator ExecuteRedistributionCoroutine(RedistributionTask task)
+    {
+        // --- Leg 1: Travel to source and withdraw ---
+        if (task.Source == null) {
+            CancelActiveRedistribution();
+            yield break;
+        }
+
+        movement.SetNewTarget(task.Source.GetPosition());
+
+        while (true) {
+            if (IsAssigned) {
+                CancelActiveRedistribution();
+                yield break;
+            }
+
+            if (task.Source == null) {
+                CancelActiveRedistribution();
+                yield break;
+            }
+
+            if (!movement.IsMoving) {
+                break;
+            }
+            yield return null;
+        }
+
+        if (task.Source == null) {
+            CancelActiveRedistribution();
+            yield break;
+        }
+
+        task.Source.TryWithdrawResource(task.ResourceType, task.Amount, out int withdrawn);
+
+        if (withdrawn <= 0) {
+            CancelActiveRedistribution();
+            yield break;
+        }
+
+        // --- Leg 2: Travel to destination and deposit ---
+        IStorage destination = task.Destination;
+        if (destination == null) {
+            destination = ResourceManager.Instance != null
+                ? ResourceManager.Instance.GetBestDepositTarget(task.ResourceType, transform.position)
+                : null;
+        }
+
+        if (destination == null) {
+            if (task.Source != null) {
+                task.Source.TryAddResource(task.ResourceType, withdrawn);
+            }
+            CancelActiveRedistribution();
+            yield break;
+        }
+
+        movement.SetNewTarget(destination.GetPosition());
+
+        while (true) {
+            if (IsAssigned) {
+                // Complete this leg before handing off.
+                break;
+            }
+
+            if (destination == null) {
+                IStorage fallback = ResourceManager.Instance != null
+                    ? ResourceManager.Instance.GetBestDepositTarget(task.ResourceType, transform.position)
+                    : null;
+                if (fallback == null) {
+                    if (task.Source != null) {
+                        task.Source.TryAddResource(task.ResourceType, withdrawn);
+                    }
+                    CancelActiveRedistribution();
+                    yield break;
+                }
+                destination = fallback;
+                movement.SetNewTarget(destination.GetPosition());
+            }
+
+            if (!movement.IsMoving) {
+                break;
+            }
+            yield return null;
+        }
+
+        // Arrival filter check.
+        if (destination == null) {
+            if (task.Source != null) {
+                task.Source.TryAddResource(task.ResourceType, withdrawn);
+            }
+            CancelActiveRedistribution();
+            yield break;
+        }
+
+        StorageFilter destFilter = destination.GetFilter();
+        if (destFilter != null && !destFilter.IsAllowed(task.ResourceType)) {
+            IStorage rerouted = ResourceManager.Instance != null
+                ? ResourceManager.Instance.GetBestDepositTarget(task.ResourceType, transform.position, destination)
+                : null;
+            if (rerouted != null) {
+                destination = rerouted;
+            }
+            else {
+                if (task.Source != null) {
+                    task.Source.TryAddResource(task.ResourceType, withdrawn);
+                }
+                CancelActiveRedistribution();
+                yield break;
+            }
+        }
+
+        destination.TryAddResource(task.ResourceType, withdrawn);
+
+        if (ResourceManager.Instance != null) {
+            ResourceManager.Instance.CompleteRedistributionTask(task);
+        }
+        _activeRedistributionTask = null;
+        _redistributionCoroutine = null;
+    }
+
+    private void CancelActiveRedistribution()
+    {
+        if (_activeRedistributionTask != null && ResourceManager.Instance != null) {
+            ResourceManager.Instance.CancelRedistributionTask(_activeRedistributionTask);
+        }
+        _activeRedistributionTask = null;
+        _redistributionCoroutine = null;
+    }
+
     private enum DroneState
     {
         Idle,
@@ -988,6 +1146,14 @@ public class Unit_Processor : UnitBase
         if (_assignmentCoroutine != null) {
             StopCoroutine(_assignmentCoroutine);
             _assignmentCoroutine = null;
+        }
+        if (_redistributionCoroutine != null) {
+            StopCoroutine(_redistributionCoroutine);
+            _redistributionCoroutine = null;
+        }
+        if (_activeRedistributionTask != null && ResourceManager.Instance != null) {
+            ResourceManager.Instance.CancelRedistributionTask(_activeRedistributionTask);
+            _activeRedistributionTask = null;
         }
         _carriedAmount = 0;
         _targetStorage = null;

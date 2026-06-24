@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -19,6 +20,7 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     [SerializeField] private Material glowMaterial;
 
     private Button _button;
+    private bool _hasStarted;
 
     private void Awake()
     {
@@ -33,7 +35,7 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
     private void Start()
     {
-        UpdateUnlockStatus();
+        _hasStarted = true;
 
         if (BuildingUnlockManager.Instance != null) {
             BuildingUnlockManager.Instance.OnBuildingUnlocked += OnBuildingUnlocked;
@@ -42,6 +44,14 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         if (!string.IsNullOrEmpty(tutorialKey) && glowMaterial != null) {
             TutorialManager.Instance?.RegisterRuntimeUI(tutorialKey, gameObject, glowMaterial);
         }
+
+        StartCoroutine(DelayedUnlockCheck());
+    }
+
+    private IEnumerator DelayedUnlockCheck()
+    {
+        yield return null;
+        UpdateUnlockStatus();
     }
 
     public void ApplyPassiveLocaleRefresh()
@@ -51,7 +61,8 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
     private void OnEnable()
     {
-        UpdateUnlockStatus();
+        if (_hasStarted)
+            UpdateUnlockStatus();
     }
 
     private void OnDestroy()

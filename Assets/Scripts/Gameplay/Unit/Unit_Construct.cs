@@ -31,6 +31,9 @@ public class Unit_Construct : UnitBase
     private ResourceType _carriedResourceType;
     private Vector3 _currentConstructionDirection;
 
+    private RedistributionTask _activeRedistributionTask;
+    private Coroutine _redistributionCoroutine;
+
     private ConstructionSite _currentConstructionSite;
     private ConstructionSite.ConstructionRequest _currentRequest;
     private ConstructState _currentState = ConstructState.Idle;
@@ -127,6 +130,14 @@ public class Unit_Construct : UnitBase
     protected override void OnDisable()
     {
         SetConstructNoResourceAlert(false);
+        if (_redistributionCoroutine != null) {
+            StopCoroutine(_redistributionCoroutine);
+            _redistributionCoroutine = null;
+        }
+        if (_activeRedistributionTask != null && ResourceManager.Instance != null) {
+            ResourceManager.Instance.CancelRedistributionTask(_activeRedistributionTask);
+            _activeRedistributionTask = null;
+        }
         base.OnDisable();
         UnitManager.Instance?.RemoveUnit(this);
         ConstructionManager.Instance?.UnregisterConstructDrone(this);
@@ -246,6 +257,18 @@ public class Unit_Construct : UnitBase
         }
 
         if (Time.time < _nextTaskRequestTime) {
+            if (_redistributionCoroutine == null && _activeRedistributionTask == null && ResourceManager.Instance != null) {
+                if (ResourceManager.Instance.TryClaimRedistributionTask(transform.position, out RedistributionTask redistTask)) {
+                    _activeRedistributionTask = redistTask;
+                    _redistributionCoroutine = StartCoroutine(ExecuteRedistributionCoroutine(redistTask));
+                    return;
+                }
+            }
+
+            if (_redistributionCoroutine != null) {
+                return;
+            }
+
             UpdateIdleRoam();
             return;
         }
@@ -254,6 +277,19 @@ public class Unit_Construct : UnitBase
 
         if (_currentState != ConstructState.Idle)
         {
+            return;
+        }
+
+        // No construction task found — try redistribution while idle.
+        if (_redistributionCoroutine == null && _activeRedistributionTask == null && ResourceManager.Instance != null) {
+            if (ResourceManager.Instance.TryClaimRedistributionTask(transform.position, out RedistributionTask task)) {
+                _activeRedistributionTask = task;
+                _redistributionCoroutine = StartCoroutine(ExecuteRedistributionCoroutine(task));
+                return;
+            }
+        }
+
+        if (_redistributionCoroutine != null) {
             return;
         }
 
@@ -753,6 +789,14 @@ public class Unit_Construct : UnitBase
         _carriedAmount = 0;
         _carriedResourceType = default;
 
+        // Cancel any active redistribution task before StopAllCoroutines so the
+        // reservation is released properly.
+        if (_activeRedistributionTask != null && ResourceManager.Instance != null) {
+            ResourceManager.Instance.CancelRedistributionTask(_activeRedistributionTask);
+            _activeRedistributionTask = null;
+        }
+        _redistributionCoroutine = null;
+
         StopAllCoroutines();
         _loadingCoroutine = null;
         _unloadingCoroutine = null;
@@ -967,6 +1011,134 @@ public class Unit_Construct : UnitBase
         _currentSiteAnimator = null;
     }
 
+    private IEnumerator ExecuteRedistributionCoroutine(RedistributionTask task)
+    {
+        // --- Leg 1: Travel to source and withdraw ---
+        if (task.Source == null) {
+            CancelActiveRedistribution();
+            yield break;
+        }
+
+        movement.SetNewTarget(task.Source.GetPosition());
+
+        while (true) {
+            if (_currentState != ConstructState.Idle) {
+                CancelActiveRedistribution();
+                yield break;
+            }
+
+            if (task.Source == null) {
+                CancelActiveRedistribution();
+                yield break;
+            }
+
+            if (!movement.IsMoving) {
+                break;
+            }
+            yield return null;
+        }
+
+        if (task.Source == null) {
+            CancelActiveRedistribution();
+            yield break;
+        }
+
+        task.Source.TryWithdrawResource(task.ResourceType, task.Amount, out int withdrawn);
+
+        if (withdrawn <= 0) {
+            CancelActiveRedistribution();
+            yield break;
+        }
+
+        // --- Leg 2: Travel to destination and deposit ---
+        IStorage destination = task.Destination;
+        if (destination == null) {
+            destination = ResourceManager.Instance != null
+                ? ResourceManager.Instance.GetBestDepositTarget(task.ResourceType, transform.position)
+                : null;
+        }
+
+        if (destination == null) {
+            if (task.Source != null) {
+                task.Source.TryAddResource(task.ResourceType, withdrawn);
+            }
+            CancelActiveRedistribution();
+            yield break;
+        }
+
+        movement.SetNewTarget(destination.GetPosition());
+
+        while (true) {
+            if (_currentState != ConstructState.Idle) {
+                // A construction task has been assigned — finish this deposit leg.
+                break;
+            }
+
+            if (destination == null) {
+                IStorage fallback = ResourceManager.Instance != null
+                    ? ResourceManager.Instance.GetBestDepositTarget(task.ResourceType, transform.position)
+                    : null;
+                if (fallback == null) {
+                    if (task.Source != null) {
+                        task.Source.TryAddResource(task.ResourceType, withdrawn);
+                    }
+                    CancelActiveRedistribution();
+                    yield break;
+                }
+                destination = fallback;
+                movement.SetNewTarget(destination.GetPosition());
+            }
+
+            if (!movement.IsMoving) {
+                break;
+            }
+            yield return null;
+        }
+
+        // Arrival filter check.
+        if (destination == null) {
+            if (task.Source != null) {
+                task.Source.TryAddResource(task.ResourceType, withdrawn);
+            }
+            CancelActiveRedistribution();
+            yield break;
+        }
+
+        StorageFilter destFilter = destination.GetFilter();
+        if (destFilter != null && !destFilter.IsAllowed(task.ResourceType)) {
+            IStorage rerouted = ResourceManager.Instance != null
+                ? ResourceManager.Instance.GetBestDepositTarget(task.ResourceType, transform.position, destination)
+                : null;
+            if (rerouted != null) {
+                destination = rerouted;
+            }
+            else {
+                if (task.Source != null) {
+                    task.Source.TryAddResource(task.ResourceType, withdrawn);
+                }
+                CancelActiveRedistribution();
+                yield break;
+            }
+        }
+
+        destination.TryAddResource(task.ResourceType, withdrawn);
+
+        if (ResourceManager.Instance != null) {
+            ResourceManager.Instance.CompleteRedistributionTask(task);
+        }
+        _activeRedistributionTask = null;
+        _redistributionCoroutine = null;
+    }
+
+    private void CancelActiveRedistribution()
+    {
+        if (_activeRedistributionTask != null && ResourceManager.Instance != null) {
+            ResourceManager.Instance.CancelRedistributionTask(_activeRedistributionTask);
+        }
+        _activeRedistributionTask = null;
+        _redistributionCoroutine = null;
+    }
+
     private enum ConstructState
     {
         Idle,
@@ -976,6 +1148,14 @@ public class Unit_Construct : UnitBase
 
     public void OnChargeStateEnter()
     {
+        if (_redistributionCoroutine != null) {
+            StopCoroutine(_redistributionCoroutine);
+            _redistributionCoroutine = null;
+        }
+        if (_activeRedistributionTask != null && ResourceManager.Instance != null) {
+            ResourceManager.Instance.CancelRedistributionTask(_activeRedistributionTask);
+            _activeRedistributionTask = null;
+        }
         ResetIdleRoam();
         ReleaseFromConstruction();
         _currentState = ConstructState.Idle;

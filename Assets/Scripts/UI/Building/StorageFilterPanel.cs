@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -10,6 +11,7 @@ public class StorageFilterPanel : MonoBehaviour
     [SerializeField] private Button priorityButton;
     [SerializeField] private GameObject prioritySelectPanel;
     [SerializeField] private Button[] priorityButtons;
+    [SerializeField] private TMP_Text priorityText;
 
     [Header("Resource Filter")]
     [SerializeField] private Transform resourceFilterGrid;
@@ -21,10 +23,13 @@ public class StorageFilterPanel : MonoBehaviour
     [SerializeField] private Button allowAllButton;
     [SerializeField] private Button allowNoneButton;
 
+    private static readonly string[] PriorityNames = { "낮음", "보통", "중요", "필수" };
+
     private IStorage _targetStorage;
     private Dictionary<ResourceType, bool> _allowedResources;
     private Dictionary<ResourceType, Image> _resourceFilterImages;
     private int _selectedPriority;
+    private bool _isPreviewMode;
 
     private void Awake()
     {
@@ -53,6 +58,7 @@ public class StorageFilterPanel : MonoBehaviour
 
     public void Initialize(IStorage storage)
     {
+        _isPreviewMode = false;
         _targetStorage = storage;
 
         if (_allowedResources == null)
@@ -62,10 +68,16 @@ public class StorageFilterPanel : MonoBehaviour
 
         _allowedResources.Clear();
         Array resourceTypes = Enum.GetValues(typeof(ResourceType));
+
+        StorageFilter currentFilter = (_targetStorage != null) ? _targetStorage.GetFilter() : null;
+
+        _selectedPriority = (currentFilter != null) ? currentFilter.Priority : 0;
+
         foreach (ResourceType type in resourceTypes)
         {
             if (type == ResourceType.None) continue;
-            _allowedResources[type] = true;
+            bool isAllowed = (currentFilter != null) ? currentFilter.IsAllowed(type) : true;
+            _allowedResources[type] = isAllowed;
         }
 
         if (resourceFilterGrid != null)
@@ -111,6 +123,7 @@ public class StorageFilterPanel : MonoBehaviour
         }
 
         RefreshAllFilterSprites();
+        UpdatePriorityText(_selectedPriority);
 
         if (prioritySelectPanel != null)
             prioritySelectPanel.SetActive(false);
@@ -129,6 +142,16 @@ public class StorageFilterPanel : MonoBehaviour
                 img.sprite = _allowedResources[type] ? allowedSprite : deniedSprite;
         }
 
+        if (_targetStorage != null)
+        {
+            StorageFilter filter = _targetStorage.GetFilter();
+            if (filter != null)
+            {
+                filter.SetAllowed(type, _allowedResources[type]);
+                _targetStorage.SetFilter(filter);
+            }
+        }
+
         EventSystem.current.SetSelectedGameObject(null);
     }
 
@@ -142,6 +165,7 @@ public class StorageFilterPanel : MonoBehaviour
                 _allowedResources[type] = true;
         }
         RefreshAllFilterSprites();
+        PushAllowedResourcesToStorage();
     }
 
     public void AllowNone()
@@ -154,6 +178,20 @@ public class StorageFilterPanel : MonoBehaviour
                 _allowedResources[type] = false;
         }
         RefreshAllFilterSprites();
+        PushAllowedResourcesToStorage();
+    }
+
+    private void PushAllowedResourcesToStorage()
+    {
+        if (_targetStorage == null) return;
+
+        StorageFilter filter = _targetStorage.GetFilter();
+        if (filter == null) return;
+
+        foreach (KeyValuePair<ResourceType, bool> kvp in _allowedResources)
+            filter.SetAllowed(kvp.Key, kvp.Value);
+
+        _targetStorage.SetFilter(filter);
     }
 
     private void RefreshAllFilterSprites()
@@ -177,8 +215,55 @@ public class StorageFilterPanel : MonoBehaviour
     public void OnPriorityLevelSelected(int level)
     {
         _selectedPriority = level;
+
+        if (_targetStorage != null)
+        {
+            StorageFilter filter = _targetStorage.GetFilter();
+            if (filter != null)
+            {
+                filter.SetPriority(level);
+                _targetStorage.SetFilter(filter);
+            }
+        }
+
+        UpdatePriorityText(_selectedPriority);
+
         if (prioritySelectPanel != null)
             prioritySelectPanel.SetActive(false);
+    }
+
+    public void PreviewStorage(IStorage storage)
+    {
+        if (storage == null) return;
+        _isPreviewMode = true;
+        DisplayFilterFromStorage(storage);
+    }
+
+    public void RestoreFromPreview()
+    {
+        if (!_isPreviewMode) return;
+        _isPreviewMode = false;
+        DisplayFilterFromStorage(_targetStorage);
+    }
+
+    private void DisplayFilterFromStorage(IStorage storage)
+    {
+        StorageFilter filter = (storage != null) ? storage.GetFilter() : null;
+        foreach (KeyValuePair<ResourceType, Image> kvp in _resourceFilterImages)
+        {
+            if (kvp.Value == null) continue;
+            bool isAllowed = (filter != null) ? filter.IsAllowed(kvp.Key) : true;
+            kvp.Value.sprite = isAllowed ? allowedSprite : deniedSprite;
+        }
+        int priority = (filter != null) ? filter.Priority : 0;
+        UpdatePriorityText(priority);
+    }
+
+    private void UpdatePriorityText(int priority)
+    {
+        if (priorityText == null) return;
+        int clamped = Mathf.Clamp(priority, 0, PriorityNames.Length - 1);
+        priorityText.text = "우선순위 : " + PriorityNames[clamped];
     }
 
     public Dictionary<ResourceType, bool> GetAllowedResources()

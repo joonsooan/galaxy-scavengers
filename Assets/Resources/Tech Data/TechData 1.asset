@@ -21,8 +21,8 @@ MonoBehaviour:
   manualIcon: {fileID: 0}
   researchCosts: []
   researchDuration: 0
-  prerequisiteTechIndices: 19000000
-  successorTechIndices: 0d000000
+  prerequisiteTechIndices:
+  successorTechIndices: 19000000
   isUnlockedByDefault: 1
   unlocksBuildings:
   - {fileID: 11400000, guid: cc2ff3c9faf0e9142800037ebb18e402, type: 2}

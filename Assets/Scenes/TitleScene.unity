@@ -3116,7 +3116,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3129693049031710433, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
       propertyPath: skipProceduralGenerationWhenLoadingGameScene
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8256486884244902839, guid: f3509717e38db064592f8924c8dc7dd8, type: 3}
       propertyPath: m_LocalPosition.x
