@@ -126,6 +126,13 @@ public class GameManager : MonoBehaviour
                 FogOfWarManager.Instance.ToggleFogVisibility();
             }
         }
+        if (Input.GetKeyDown(KeyCode.F3))
+        {
+            if (BuildingUnlockManager.Instance != null)
+            {
+                BuildingUnlockManager.Instance.UnlockAllBuildingsDebug();
+            }
+        }
         if (Input.GetKeyDown(KeyCode.G))
         {
             UnitData constructUnit = Resources.Load<UnitData>("Unit Data/Unit_Construct");
