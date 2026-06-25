@@ -35,7 +35,7 @@ public abstract class UnitBase : Damageable
     private bool _isRegisteredToNoiseManager;
     private Light2D[] _unitLights2D;
     private float[] _unitLightBaseAlphas;
-    private const float UnitLightAlphaLerpSpeed = 2f;
+    private float[] _unitLightBaseIntensities;
 
     private UnitMovement _idleRoamMovement;
     private UnitSpriteController _idleRoamSpriteController;
@@ -56,12 +56,14 @@ public abstract class UnitBase : Damageable
 
     private void Update()
     {
-        if (unitType == UnitType.Ally && !_isRegisteredToNoiseManager && unitData != null && NoiseManager.Instance != null) {
+        if (unitType == UnitType.Ally && !_isRegisteredToNoiseManager && unitData != null && NoiseManager.Instance != null)
+        {
             NoiseManager.Instance.RegisterUnit(this);
             _isRegisteredToNoiseManager = true;
         }
 
-        if (currentState == UnitState.Idle && progressBar != null) {
+        if (currentState == UnitState.Idle && progressBar != null)
+        {
             HideProgressBar();
         }
     }
@@ -70,26 +72,33 @@ public abstract class UnitBase : Damageable
     {
         if (DayNightCycleManager.Instance == null) return;
 
-        if (_unitLights2D == null) {
+        if (_unitLights2D == null)
+        {
             _unitLights2D = GetComponentsInChildren<Light2D>(true);
             if (_unitLights2D == null || _unitLights2D.Length == 0) return;
             _unitLightBaseAlphas = new float[_unitLights2D.Length];
-            for (int i = 0; i < _unitLights2D.Length; i++) {
+            _unitLightBaseIntensities = new float[_unitLights2D.Length];
+            for (int i = 0; i < _unitLights2D.Length; i++)
+            {
                 Light2D light2D = _unitLights2D[i];
                 _unitLightBaseAlphas[i] = light2D != null ? light2D.color.a : 0f;
+                _unitLightBaseIntensities[i] = light2D != null ? light2D.intensity : 0f;
             }
         }
 
-        float targetMultiplier = DayNightCycleManager.Instance.IsDay() ? 0f : 1f;
-        for (int i = 0; i < _unitLights2D.Length; i++) {
+        float targetMultiplier = DayNightCycleManager.Instance.GetGlobalLightMultiplier();
+        for (int i = 0; i < _unitLights2D.Length; i++)
+        {
             Light2D light2D = _unitLights2D[i];
             if (light2D == null) continue;
 
             float baseAlpha = _unitLightBaseAlphas[i];
             float targetAlpha = baseAlpha * targetMultiplier;
             Color currentColor = light2D.color;
-            float nextAlpha = Mathf.Lerp(currentColor.a, targetAlpha, UnitLightAlphaLerpSpeed * Time.deltaTime);
-            light2D.color = new Color(currentColor.r, currentColor.g, currentColor.b, nextAlpha);
+            light2D.color = new Color(currentColor.r, currentColor.g, currentColor.b, targetAlpha);
+
+            float baseIntensity = _unitLightBaseIntensities[i];
+            light2D.intensity = baseIntensity * targetMultiplier;
         }
     }
 
@@ -97,28 +106,33 @@ public abstract class UnitBase : Damageable
     {
         if (BuildingManager.Instance == null || BuildingManager.Instance.grid == null) return;
 
-        if (_idleRoamMovement == null) {
+        if (_idleRoamMovement == null)
+        {
             _idleRoamMovement = GetComponent<UnitMovement>();
             if (_idleRoamMovement == null) return;
             _currentIdleRoamInterval = Random.Range(IdleRoamMinInterval, IdleRoamMaxInterval);
         }
 
-        if (_idleRoamSpriteController == null) {
+        if (_idleRoamSpriteController == null)
+        {
             _idleRoamSpriteController = GetComponentInChildren<UnitSpriteController>();
         }
 
-        if (!_idleRoamOriginSet) {
+        if (!_idleRoamOriginSet)
+        {
             _idleRoamOrigin = transform.position;
             _idleRoamOriginSet = true;
         }
 
-        if (!_idleRoamSpeedReduced) {
+        if (!_idleRoamSpeedReduced)
+        {
             _idleRoamOriginalSpeed = _idleRoamMovement.moveSpeed;
             _idleRoamMovement.moveSpeed = _idleRoamOriginalSpeed * 0.5f;
             _idleRoamSpeedReduced = true;
         }
 
-        if (_idleRoamMovement.IsMoving && _idleRoamSpriteController != null) {
+        if (_idleRoamMovement.IsMoving && _idleRoamSpriteController != null)
+        {
             Vector3 moveDir = _idleRoamMovement.GetMoveDirection();
             _idleRoamSpriteController.UpdateSpriteDirection(moveDir);
         }
@@ -129,21 +143,27 @@ public abstract class UnitBase : Damageable
         _idleRoamTimer = 0f;
         _currentIdleRoamInterval = Random.Range(IdleRoamMinInterval, IdleRoamMaxInterval);
 
-        if (!_lastIdleActionWasMove) {
+        if (!_lastIdleActionWasMove)
+        {
             Vector3 destination = FindWalkableIdleDestination();
-            if (destination != Vector3.zero) {
+            if (destination != Vector3.zero)
+            {
                 _idleRoamMovement.SetNewTargetDirect(destination, _idleRoamMovement.waypointTolerance);
             }
             _lastIdleActionWasMove = true;
         }
-        else {
-            if (Random.value < 0.5f) {
+        else
+        {
+            if (Random.value < 0.5f)
+            {
                 _idleRoamMovement.StopMovement();
                 _lastIdleActionWasMove = false;
             }
-            else {
+            else
+            {
                 Vector3 destination = FindWalkableIdleDestination();
-                if (destination != Vector3.zero) {
+                if (destination != Vector3.zero)
+                {
                     _idleRoamMovement.SetNewTargetDirect(destination, _idleRoamMovement.waypointTolerance);
                 }
                 _lastIdleActionWasMove = true;
@@ -157,7 +177,8 @@ public abstract class UnitBase : Damageable
         _lastIdleActionWasMove = false;
         _idleRoamOriginSet = false;
 
-        if (_idleRoamSpeedReduced && _idleRoamMovement != null) {
+        if (_idleRoamSpeedReduced && _idleRoamMovement != null)
+        {
             _idleRoamMovement.moveSpeed = _idleRoamOriginalSpeed;
             _idleRoamSpeedReduced = false;
         }
@@ -165,20 +186,24 @@ public abstract class UnitBase : Damageable
 
     protected void ApplyUpgradeMoveSpeed(float prefabBaseMoveSpeed, float multiplier)
     {
-        if (_idleRoamMovement == null) {
+        if (_idleRoamMovement == null)
+        {
             _idleRoamMovement = GetComponent<UnitMovement>();
         }
 
-        if (_idleRoamMovement == null) {
+        if (_idleRoamMovement == null)
+        {
             return;
         }
 
         float fullSpeed = prefabBaseMoveSpeed * multiplier;
-        if (_idleRoamSpeedReduced) {
+        if (_idleRoamSpeedReduced)
+        {
             _idleRoamOriginalSpeed = fullSpeed;
             _idleRoamMovement.moveSpeed = fullSpeed * 0.5f;
         }
-        else {
+        else
+        {
             _idleRoamMovement.moveSpeed = fullSpeed;
         }
     }
@@ -187,11 +212,13 @@ public abstract class UnitBase : Damageable
     {
         Grid grid = BuildingManager.Instance.grid;
 
-        for (int attempt = 0; attempt < 50; attempt++) {
+        for (int attempt = 0; attempt < 50; attempt++)
+        {
             Vector2 randomDir = Random.insideUnitCircle.normalized;
             Vector3 candidatePos = _idleRoamOrigin + (Vector3)randomDir * Random.Range(0.5f, IdleRoamRadius);
             Vector3Int candidateCell = grid.WorldToCell(candidatePos);
-            if (BuildingManager.Instance.IsCellWalkable(candidateCell)) {
+            if (BuildingManager.Instance.IsCellWalkable(candidateCell))
+            {
                 return grid.GetCellCenterWorld(candidateCell);
             }
         }
@@ -203,17 +230,20 @@ public abstract class UnitBase : Damageable
     {
         base.OnEnable();
 
-        if (UnitManager.Instance != null) {
+        if (UnitManager.Instance != null)
+        {
             UnitManager.Instance.AddUnit(this);
         }
 
-        if (unitType == UnitType.Ally && NoiseManager.Instance != null) {
+        if (unitType == UnitType.Ally && NoiseManager.Instance != null)
+        {
             NoiseManager.Instance.RegisterUnit(this);
             _isRegisteredToNoiseManager = true;
         }
 
         VisionProvider visionProvider = GetComponent<VisionProvider>();
-        if (visionProvider != null && FogOfWarManager.Instance != null && FogOfWarManager.Instance.IsInitialized) {
+        if (visionProvider != null && FogOfWarManager.Instance != null && FogOfWarManager.Instance.IsInitialized)
+        {
             visionProvider.ForceUpdateAffectedTiles();
         }
 
@@ -222,11 +252,13 @@ public abstract class UnitBase : Damageable
 
     protected override void OnDisable()
     {
-        if (UnitManager.Instance != null) {
+        if (UnitManager.Instance != null)
+        {
             UnitManager.Instance.RemoveUnit(this);
         }
 
-        if (unitType == UnitType.Ally && NoiseManager.Instance != null) {
+        if (unitType == UnitType.Ally && NoiseManager.Instance != null)
+        {
             NoiseManager.Instance.UnregisterUnit(this);
         }
 
@@ -253,7 +285,8 @@ public abstract class UnitBase : Damageable
 
     protected void HideProgressBar()
     {
-        if (progressBar != null) {
+        if (progressBar != null)
+        {
             progressBar.Destroy();
             progressBar = null;
         }
@@ -261,11 +294,13 @@ public abstract class UnitBase : Damageable
 
     protected void UpdateProgressBar(float progress)
     {
-        if (progressBar == null) {
+        if (progressBar == null)
+        {
             ShowProgressBar();
         }
 
-        if (progressBar != null) {
+        if (progressBar != null)
+        {
             progressBar.SetProgress(progress);
         }
     }
@@ -273,7 +308,7 @@ public abstract class UnitBase : Damageable
     protected override void OnHealthChanged()
     {
         base.OnHealthChanged();
-        
+
         if (_previousHealth != currentHealth)
         {
             if (currentHealth < maxHealth)
@@ -289,7 +324,7 @@ public abstract class UnitBase : Damageable
             {
                 HideHealthBar();
             }
-            
+
             _previousHealth = currentHealth;
         }
     }
@@ -312,7 +347,8 @@ public abstract class UnitBase : Damageable
 
     protected void HideHealthBar()
     {
-        if (healthBar != null) {
+        if (healthBar != null)
+        {
             healthBar.Destroy();
             healthBar = null;
         }

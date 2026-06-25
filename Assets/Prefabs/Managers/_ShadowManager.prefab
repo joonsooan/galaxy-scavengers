@@ -46,8 +46,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShadowManager
   maxShear: 0.4
   shadowLength: -1.1
-  dayShadowColor: {r: 0, g: 0, b: 0, a: 0.5882353}
   fadeExponent: 1
+  dayShadowStartPercent: 2.5
+  dayShadowEndPercent: 70
+  dayShadowColor: {r: 0, g: 0, b: 0, a: 0.5882353}
+  nightShadowStartPercent: 72.5
+  nightShadowEndPercent: 0
+  nightShadowColor: {r: 0, g: 0, b: 0, a: 0.39215687}
   lowWallTilemap: {fileID: 0}
   highWallTilemap: {fileID: 0}
   resourceTilemap: {fileID: 0}

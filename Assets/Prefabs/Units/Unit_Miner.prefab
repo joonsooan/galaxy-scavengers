@@ -143,7 +143,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &4163513067727484856
 Transform:
   m_ObjectHideFlags: 0
@@ -315,6 +315,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52d152b3c6c34a64a9de5e8e8dfa362a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitShadowController
+  useHeightOffset: 1
 --- !u!1 &6649466925040614564
 GameObject:
   m_ObjectHideFlags: 0

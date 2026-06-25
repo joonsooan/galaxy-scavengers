@@ -8,8 +8,17 @@ public class ShadowManager : MonoBehaviour
 
     [SerializeField] private float maxShear = 0.6f;
     [SerializeField] private float shadowLength = 0.5f;
-    [SerializeField] private Color dayShadowColor = new Color(0f, 0f, 0f, 0.35f);
     [SerializeField] [Range(0.1f, 5f)] private float fadeExponent = 1.0f;
+
+    [Header("Day Shadow settings")]
+    [Range(0f, 100f)] [SerializeField] private float dayShadowStartPercent = 15f;
+    [Range(0f, 100f)] [SerializeField] private float dayShadowEndPercent = 85f;
+    [SerializeField] private Color dayShadowColor = new Color(0f, 0f, 0f, 0.35f);
+
+    [Header("Night Shadow settings")]
+    [Range(0f, 100f)] [SerializeField] private float nightShadowStartPercent = 85f;
+    [Range(0f, 100f)] [SerializeField] private float nightShadowEndPercent = 15f;
+    [SerializeField] private Color nightShadowColor = new Color(0f, 0f, 0f, 0.20f);
 
     [Header("Tilemap Settings")]
     [SerializeField] private Tilemap lowWallTilemap;
@@ -51,27 +60,32 @@ public class ShadowManager : MonoBehaviour
     {
         if (DayNightCycleManager.Instance == null) return;
 
-        float currentTime = DayNightCycleManager.Instance.GetTime();
-        float dayStartHour = (DayNightCycleManager.Instance.DayStartPercent / 100f) * 24f;
-        float nightStartHour = (DayNightCycleManager.Instance.NightStartPercent / 100f) * 24f;
+        float timePercent = DayNightCycleManager.Instance.GetTimePercent();
+
+        float progress = -1f;
+        Color baseColor = Color.clear;
+
+        if (IsTimeInInterval(timePercent, dayShadowStartPercent, dayShadowEndPercent))
+        {
+            progress = GetIntervalProgress(timePercent, dayShadowStartPercent, dayShadowEndPercent);
+            baseColor = dayShadowColor;
+        }
+        else if (IsTimeInInterval(timePercent, nightShadowStartPercent, nightShadowEndPercent))
+        {
+            progress = GetIntervalProgress(timePercent, nightShadowStartPercent, nightShadowEndPercent);
+            baseColor = nightShadowColor;
+        }
 
         float shearX = 0f;
         float alpha = 0f;
         float flatOffsetX = 0f;
 
-        if (currentTime >= dayStartHour && currentTime < nightStartHour)
+        if (progress >= 0f)
         {
-            float dayProgress = (currentTime - dayStartHour) / (nightStartHour - dayStartHour);
-            shearX = Mathf.Lerp(maxShear, -maxShear, dayProgress);
-            flatOffsetX = Mathf.Lerp(maxFlatOffset, -maxFlatOffset, dayProgress);
-            float heightFactor = Mathf.Pow(Mathf.Sin(dayProgress * Mathf.PI), fadeExponent);
-            alpha = dayShadowColor.a * heightFactor;
-        }
-        else
-        {
-            shearX = 0f;
-            flatOffsetX = 0f;
-            alpha = 0f;
+            shearX = Mathf.Lerp(maxShear, -maxShear, progress);
+            flatOffsetX = Mathf.Lerp(maxFlatOffset, -maxFlatOffset, progress);
+            float heightFactor = Mathf.Pow(Mathf.Sin(progress * Mathf.PI), fadeExponent);
+            alpha = baseColor.a * heightFactor;
         }
 
         Shader.SetGlobalFloat("_GlobalShadowShearX", shearX);
@@ -90,6 +104,35 @@ public class ShadowManager : MonoBehaviour
         if (_resourceShadowTilemap != null)
         {
             _resourceShadowTilemap.transform.localPosition = flatOffset;
+        }
+    }
+
+    private bool IsTimeInInterval(float t, float start, float end)
+    {
+        if (start < end)
+        {
+            return t >= start && t < end;
+        }
+        else
+        {
+            return t >= start || t < end;
+        }
+    }
+
+    private float GetIntervalProgress(float t, float start, float end)
+    {
+        if (start < end)
+        {
+            float duration = end - start;
+            if (duration <= 0f) return 0f;
+            return Mathf.Clamp01((t - start) / duration);
+        }
+        else
+        {
+            float duration = (100f - start) + end;
+            if (duration <= 0f) return 0f;
+            float elapsed = (t >= start) ? (t - start) : ((100f - start) + t);
+            return Mathf.Clamp01(elapsed / duration);
         }
     }
 
