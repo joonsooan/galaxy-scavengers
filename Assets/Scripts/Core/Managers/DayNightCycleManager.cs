@@ -229,6 +229,9 @@ public class DayNightCycleManager : MonoBehaviour
         return currentTime;
     }
 
+    public float DayStartPercent => dayStartPercent;
+    public float NightStartPercent => nightStartPercent;
+
     public float GetTotalElapsedInGameHours()
     {
         return _totalElapsedInGameHours;
