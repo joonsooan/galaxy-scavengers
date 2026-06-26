@@ -23,7 +23,7 @@ MonoBehaviour:
   researchCosts: []
   researchDuration: 0
   prerequisiteTechIndices: 
-  successorTechIndices: 0c00000019000000
+  successorTechIndices: 0c000000
   isUnlockedByDefault: 1
   unlocksBuildings:
   - {fileID: 11400000, guid: 3ed9fe33af7f6a14991abdbd3238ac98, type: 2}

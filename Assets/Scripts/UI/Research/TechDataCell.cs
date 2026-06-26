@@ -184,6 +184,31 @@ public class TechDataCell : MonoBehaviour, IPointerClickHandler
         }
     }
 
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        if (techData == null) return;
+
+        if (iconImg != null)
+        {
+            iconImg.sprite = techData.GetTechIcon();
+            if (iconImg.sprite != null)
+            {
+                Vector2 containerSize = iconImg.rectTransform.sizeDelta;
+                float w = iconImg.sprite.rect.width;
+                float h = iconImg.sprite.rect.height;
+                float containerW = containerSize.x > 0 ? containerSize.x : w;
+                float containerH = containerSize.y > 0 ? containerSize.y : h;
+                float scale = Mathf.Min(containerW / w, containerH / h);
+                iconImg.rectTransform.sizeDelta = new Vector2(w * scale, h * scale);
+            }
+        }
+
+        if (nameText != null)
+            nameText.text = techData.GetTechName();
+    }
+#endif
+
     public Vector3 GetLeftCenterWorld()
     {
         if (_rectTransform == null)

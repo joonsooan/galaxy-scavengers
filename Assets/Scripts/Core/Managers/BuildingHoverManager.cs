@@ -101,6 +101,20 @@ public class BuildingHoverManager : MonoBehaviour
             return;
         }
 
+        if (_pinnedStorage != null)
+        {
+            UIManager uiManager = GameManager.Instance != null ? GameManager.Instance.uiManager : null;
+            if (uiManager != null && uiManager.IsPointerOverStorageInfoPanel())
+            {
+                ClearHover();
+                ClearResourceHover();
+                ClearUnitHover();
+                if (_mouseDetectorCollider != null)
+                    _mouseDetectorCollider.enabled = false;
+                return;
+            }
+        }
+
         if (_mouseDetectorCollider != null)
         {
             _mouseDetectorCollider.enabled = true;
@@ -836,6 +850,11 @@ public class BuildingHoverManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (Instance == this)
+        {
+            Instance = null;
+        }
+
         if (_mouseHoverDetector != null)
         {
             Destroy(_mouseHoverDetector);

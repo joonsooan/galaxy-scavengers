@@ -56,6 +56,18 @@ public class ShadowManager : MonoBehaviour
         GameManager.OnGameSceneInitialized -= InitializeTilemapShadows;
     }
 
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            Instance = null;
+        }
+
+        Shader.SetGlobalFloat("_GlobalShadowShearX", 0f);
+        Shader.SetGlobalFloat("_GlobalShadowLengthY", 0f);
+        Shader.SetGlobalColor("_GlobalShadowColor", Color.clear);
+    }
+
     private void Update()
     {
         if (DayNightCycleManager.Instance == null) return;
@@ -141,6 +153,18 @@ public class ShadowManager : MonoBehaviour
         _lowWallShadowTilemap = CreateTilemapShadow(lowWallTilemap, shadowMaterial);
         _highWallShadowTilemap = CreateTilemapShadow(highWallTilemap, shadowMaterial);
         _resourceShadowTilemap = CreateTilemapShadow(resourceTilemap, shadowMaterial);
+        RegisterShadowTilemapsWithFog();
+    }
+
+    private void RegisterShadowTilemapsWithFog()
+    {
+        if (FogOfWarManager.Instance == null) return;
+        if (_lowWallShadowTilemap != null)
+            FogOfWarManager.Instance.RegisterShadowTilemap(_lowWallShadowTilemap);
+        if (_highWallShadowTilemap != null)
+            FogOfWarManager.Instance.RegisterShadowTilemap(_highWallShadowTilemap);
+        if (_resourceShadowTilemap != null)
+            FogOfWarManager.Instance.RegisterShadowTilemap(_resourceShadowTilemap);
     }
 
     public Tilemap CreateTilemapShadow(Tilemap sourceTilemap, Material shadowMaterial)

@@ -47,6 +47,33 @@ public class TechDataEditor : Editor
     {
         serializedObject.Update();
 
+        TechData tech = (TechData)target;
+
+        // Live preview — visible without entering Play mode
+        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+        {
+            EditorGUILayout.LabelField("Preview", EditorStyles.boldLabel);
+
+            Sprite icon = tech.GetTechIcon();
+            if (icon != null)
+            {
+                Texture2D preview = AssetPreview.GetAssetPreview(icon);
+                if (preview != null)
+                {
+                    Rect iconRect = GUILayoutUtility.GetRect(64, 64, GUILayout.ExpandWidth(false));
+                    GUI.DrawTexture(iconRect, preview, ScaleMode.ScaleToFit);
+                }
+            }
+
+            string techName = tech.GetTechName();
+            EditorGUILayout.LabelField("Name", string.IsNullOrEmpty(techName) ? "(none)" : techName);
+
+            string techDesc = tech.GetTechDescription();
+            EditorGUILayout.LabelField("Description", string.IsNullOrEmpty(techDesc) ? "(none)" : techDesc, EditorStyles.wordWrappedLabel);
+        }
+
+        EditorGUILayout.Space();
+
         EditorGUILayout.PropertyField(_techIndex);
         EditorGUILayout.PropertyField(_useExistingData);
 

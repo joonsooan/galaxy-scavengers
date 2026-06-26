@@ -22,7 +22,7 @@ MonoBehaviour:
   lockedIcon: {fileID: 0}
   researchCosts: []
   researchDuration: 0
-  prerequisiteTechIndices: 17000000
+  prerequisiteTechIndices: 
   successorTechIndices: 0d000000
   isUnlockedByDefault: 1
   unlocksBuildings:

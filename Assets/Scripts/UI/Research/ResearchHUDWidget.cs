@@ -8,6 +8,8 @@ public class ResearchHUDWidget : MonoBehaviour
     [SerializeField] private Image techIconImage;
     [SerializeField] private Slider progressSlider;
     [SerializeField] private TMP_Text progressText;
+    [SerializeField] private Button sliderOverlayBtn;
+    [SerializeField] private TMP_Text defaultText;
     [SerializeField] private MainControlPanel mainControlPanel;
 
     private Vector2 _iconContainerSize;
@@ -16,6 +18,8 @@ public class ResearchHUDWidget : MonoBehaviour
     {
         if (techIconImage != null)
             _iconContainerSize = techIconImage.rectTransform.sizeDelta;
+        if (sliderOverlayBtn != null)
+            sliderOverlayBtn.onClick.AddListener(OnWidgetClicked);
         TechResearchManager.OnResearchStarted += OnResearchStarted;
         TechResearchManager.OnResearchProgressChanged += OnResearchProgressChanged;
         TechResearchManager.OnResearchCompleted += OnResearchCompleted;
@@ -29,6 +33,8 @@ public class ResearchHUDWidget : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (sliderOverlayBtn != null)
+            sliderOverlayBtn.onClick.RemoveListener(OnWidgetClicked);
         TechResearchManager.OnResearchStarted -= OnResearchStarted;
         TechResearchManager.OnResearchProgressChanged -= OnResearchProgressChanged;
         TechResearchManager.OnResearchCompleted -= OnResearchCompleted;
@@ -38,7 +44,7 @@ public class ResearchHUDWidget : MonoBehaviour
     public void OnWidgetClicked()
     {
         if (mainControlPanel != null)
-            mainControlPanel.OpenResearchPanel();
+            mainControlPanel.ToggleResearchPanel();
     }
 
     private void OnResearchStarted(int techIndex)
@@ -53,40 +59,68 @@ public class ResearchHUDWidget : MonoBehaviour
 
     private void OnResearchCompleted(int techIndex)
     {
-        gameObject.SetActive(false);
+        ShowIdleState();
     }
 
     private void OnResearchStateChanged()
     {
         if (TechResearchManager.Instance == null || !TechResearchManager.Instance.IsResearchInProgress())
-            gameObject.SetActive(false);
+            ShowIdleState();
     }
 
     private void RefreshFromCurrentState()
     {
         if (TechResearchManager.Instance == null || !TechResearchManager.Instance.IsResearchInProgress())
         {
-            gameObject.SetActive(false);
+            ShowIdleState();
             return;
         }
 
         TechData current = TechResearchManager.Instance.GetCurrentResearch();
         if (current == null)
         {
-            gameObject.SetActive(false);
+            ShowIdleState();
             return;
         }
 
-        gameObject.SetActive(true);
+        ShowResearchState(current);
+    }
 
+    private void ShowResearchState(TechData current)
+    {
         if (techIconImage != null)
         {
+            techIconImage.gameObject.SetActive(true);
             techIconImage.sprite = current.GetTechIcon();
             if (techIconImage.sprite != null)
                 ApplyFitSize(techIconImage.rectTransform, techIconImage.sprite);
         }
 
+        if (progressSlider != null)
+            progressSlider.gameObject.SetActive(true);
+
+        if (progressText != null)
+            progressText.gameObject.SetActive(true);
+
+        if (defaultText != null)
+            defaultText.gameObject.SetActive(false);
+
         UpdateProgress();
+    }
+
+    private void ShowIdleState()
+    {
+        if (techIconImage != null)
+            techIconImage.gameObject.SetActive(false);
+
+        if (progressSlider != null)
+            progressSlider.gameObject.SetActive(false);
+
+        if (progressText != null)
+            progressText.gameObject.SetActive(false);
+
+        if (defaultText != null)
+            defaultText.gameObject.SetActive(true);
     }
 
     private void ApplyFitSize(RectTransform iconRt, Sprite sprite)

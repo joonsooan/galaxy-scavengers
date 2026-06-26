@@ -68,6 +68,21 @@ public class TechResearchGraphPanel : MonoBehaviour, IPointerClickHandler
         DrawAllLines();
     }
 
+    public void RedrawLines()
+    {
+        if (lineContainer != null)
+        {
+            for (int i = lineContainer.childCount - 1; i >= 0; i--)
+                Destroy(lineContainer.GetChild(i).gameObject);
+        }
+
+        _lineImages.Clear();
+        _cellsByIndex.Clear();
+        _cellCanvasGroups.Clear();
+        BuildCellRegistry();
+        StartCoroutine(DrawLinesAfterLayout());
+    }
+
     private void BuildCellRegistry()
     {
         TechDataCell[] cells = GetComponentsInChildren<TechDataCell>(true);
@@ -136,8 +151,10 @@ public class TechResearchGraphPanel : MonoBehaviour, IPointerClickHandler
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
         Vector3 midLocal = (startLocal + endLocal) * 0.5f;
 
-        GameObject lineObj = new GameObject("Line", typeof(RectTransform), typeof(Image));
+        GameObject lineObj = new GameObject("Line", typeof(RectTransform), typeof(Image), typeof(LayoutElement));
         lineObj.transform.SetParent(lineContainer, false);
+
+        lineObj.GetComponent<LayoutElement>().ignoreLayout = true;
 
         Image img = lineObj.GetComponent<Image>();
         img.color = lineColor;

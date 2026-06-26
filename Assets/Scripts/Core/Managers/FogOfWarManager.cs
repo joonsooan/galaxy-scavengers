@@ -106,6 +106,7 @@ public class FogOfWarManager : MonoBehaviour
         if (Instance == this)
         {
             Instance = null;
+            suppressVisibilityEvents = false;
         }
     }
 
@@ -240,6 +241,22 @@ public class FogOfWarManager : MonoBehaviour
             if (affectedTiles != null && affectedTiles.Count > 0)
             {
                 UpdateSpecificTiles(affectedTiles);
+            }
+        }
+    }
+
+    public void RegisterShadowTilemap(Tilemap shadowTilemap)
+    {
+        if (shadowTilemap == null) return;
+        _visualUpdater?.RegisterShadowTilemap(shadowTilemap);
+
+        if (!IsInitialized) return;
+        foreach (KeyValuePair<Vector3Int, FogOfWarState> kvp in _tileVisibility)
+        {
+            Color shadowColor = kvp.Value == FogOfWarState.FullyVisible ? Color.white : Color.clear;
+            if (shadowTilemap.HasTile(kvp.Key))
+            {
+                shadowTilemap.SetColor(kvp.Key, shadowColor);
             }
         }
     }

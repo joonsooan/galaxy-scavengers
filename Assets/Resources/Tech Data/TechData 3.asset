@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ceeace5e3ddf138488abd43ac61f82c5, type: 3}
   m_Name: TechData 3
   m_EditorClassIdentifier: Assembly-CSharp::TechData
-  techIndex: 3
+  techIndex: 5
   useExistingData: 1
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 11400000, guid: 543df46f7aaa53f46be1a1b5736522f1, type: 2}
@@ -23,7 +23,7 @@ MonoBehaviour:
   researchCosts: []
   researchDuration: 0
   prerequisiteTechIndices: 
-  successorTechIndices: 07000000
+  successorTechIndices: 09000000
   isUnlockedByDefault: 1
   unlocksBuildings: []
   unlocksUnits:

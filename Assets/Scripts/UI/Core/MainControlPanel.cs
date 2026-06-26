@@ -272,6 +272,17 @@ public class MainControlPanel : MonoBehaviour
             OnResearchBtnClicked();
     }
 
+    public void CloseResearchPanel()
+    {
+        if (IsResearchPanelActive())
+            OnResearchBtnClicked();
+    }
+
+    public void ToggleResearchPanel()
+    {
+        OnResearchBtnClicked();
+    }
+
     private void OnResearchBtnClicked()
     {
         DisableResearchButtonHighlight();

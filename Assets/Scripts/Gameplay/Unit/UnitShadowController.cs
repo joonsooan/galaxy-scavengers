@@ -64,28 +64,32 @@ public class UnitShadowController : MonoBehaviour
     {
         if (_parentRenderer != null && _shadowRenderer != null)
         {
-            _shadowRenderer.sprite = _parentRenderer.sprite;
-            _shadowRenderer.flipX = _parentRenderer.flipX;
-            _shadowRenderer.flipY = _parentRenderer.flipY;
-
-            if (_hasInitialY)
+            _shadowRenderer.enabled = _parentRenderer.enabled;
+            if (_shadowRenderer.enabled)
             {
-                if (useHeightOffset)
-                {
-                    float heightOffset = _parentRenderer.transform.localPosition.y - _initialSpriteLocalY;
-                    float shearX = Shader.GetGlobalFloat("_GlobalShadowShearX");
-                    float lengthY = Shader.GetGlobalFloat("_GlobalShadowLengthY");
+                _shadowRenderer.sprite = _parentRenderer.sprite;
+                _shadowRenderer.flipX = _parentRenderer.flipX;
+                _shadowRenderer.flipY = _parentRenderer.flipY;
 
-                    transform.localPosition = new Vector3(heightOffset * shearX, _initialSpriteLocalY - heightOffset * lengthY, 0f);
+                if (_hasInitialY)
+                {
+                    if (useHeightOffset)
+                    {
+                        float heightOffset = _parentRenderer.transform.localPosition.y - _initialSpriteLocalY;
+                        float shearX = Shader.GetGlobalFloat("_GlobalShadowShearX");
+                        float lengthY = Shader.GetGlobalFloat("_GlobalShadowLengthY");
+
+                        transform.localPosition = new Vector3(heightOffset * shearX, _initialSpriteLocalY - heightOffset * lengthY, 0f);
+                    }
+                    else
+                    {
+                        transform.localPosition = new Vector3(0f, _initialSpriteLocalY, 0f);
+                    }
                 }
                 else
                 {
-                    transform.localPosition = new Vector3(0f, _initialSpriteLocalY, 0f);
+                    transform.localPosition = Vector3.zero;
                 }
-            }
-            else
-            {
-                transform.localPosition = Vector3.zero;
             }
         }
         else if (_parentRenderer == null)

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 public class TechTreeRebuilder : EditorWindow
@@ -46,6 +47,10 @@ public class TechTreeRebuilder : EditorWindow
     [Header("References")]
     [SerializeField] private TechResearchCatalog catalog;
 
+    [Header("Cell Rebuild")]
+    [SerializeField] private GameObject techDataCellPrefab;
+    [SerializeField] private Transform cellContent;
+
     [Header("Structure Configurations")]
     [SerializeField] private StructureMode structureMode = StructureMode.ParallelChains;
     [SerializeField] private int maxRows = 5;
@@ -65,6 +70,10 @@ public class TechTreeRebuilder : EditorWindow
     private readonly List<string> _previewLogs = new List<string>();
     private bool _showTiersFoldout = false;
     private int _redundantConnectionsCount = 0;
+
+    // Swap tool state
+    private int _swapIndexA = 0;
+    private int _swapIndexB = 1;
 
     private const string PrefKeyPrefix = "TechTreeRebuilder_";
 
@@ -105,6 +114,16 @@ public class TechTreeRebuilder : EditorWindow
                 catalog = AssetDatabase.LoadAssetAtPath<TechResearchCatalog>(path);
             }
         }
+
+        if (techDataCellPrefab == null)
+        {
+            string[] prefabGuids = AssetDatabase.FindAssets("Tech Data Cell t:Prefab");
+            if (prefabGuids.Length > 0)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(prefabGuids[0]);
+                techDataCellPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            }
+        }
     }
 
     private void OnDisable()
@@ -128,6 +147,34 @@ public class TechTreeRebuilder : EditorWindow
             EditorGUILayout.HelpBox("Please assign the Tech Research Catalog asset.", MessageType.Warning);
             EditorGUILayout.EndScrollView();
             return;
+        }
+
+        EditorGUILayout.Space();
+
+        // 1b. Cell Rebuild
+        EditorGUILayout.LabelField("Cell Rebuild", EditorStyles.boldLabel);
+        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+        {
+            techDataCellPrefab = EditorGUILayout.ObjectField("Cell Prefab", techDataCellPrefab, typeof(GameObject), false) as GameObject;
+            cellContent = EditorGUILayout.ObjectField("Content (Scene)", cellContent, typeof(Transform), true) as Transform;
+
+            EditorGUILayout.HelpBox(
+                "카탈로그의 Tech 순서대로 Cell Prefab을 Content 아래에 생성하고 TechData를 할당합니다.\n기존 TechDataCell 자식 오브젝트는 모두 삭제됩니다.",
+                MessageType.Info);
+
+            bool canRebuildCells = techDataCellPrefab != null && cellContent != null;
+            using (new EditorGUI.DisabledScope(!canRebuildCells))
+            {
+                if (GUILayout.Button("Rebuild Cells in Scene", GUILayout.Height(30)))
+                {
+                    if (EditorUtility.DisplayDialog("Rebuild Cells?",
+                        $"Content 하위의 기존 TechDataCell을 모두 삭제하고 카탈로그({catalog.Techs.Count}개) 기준으로 다시 생성합니다.",
+                        "Yes", "No"))
+                    {
+                        RebuildCellsInScene();
+                    }
+                }
+            }
         }
 
         EditorGUILayout.Space();
@@ -205,7 +252,38 @@ public class TechTreeRebuilder : EditorWindow
 
         EditorGUILayout.Space();
 
-        // 5. Preview / Logs
+        // 5. Swap Tool
+        EditorGUILayout.LabelField("Swap Tech Indices", EditorStyles.boldLabel);
+        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+        {
+            EditorGUILayout.HelpBox(
+                "두 tech index를 입력하면 해당 TechData 자산의 techIndex와 모든 선후행 관계(prerequisite/successor)를 서로 맞바꿉니다.",
+                MessageType.Info);
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                _swapIndexA = EditorGUILayout.IntField("Index A", _swapIndexA);
+                _swapIndexB = EditorGUILayout.IntField("Index B", _swapIndexB);
+            }
+
+            if (GUILayout.Button("Swap", GUILayout.Height(28)))
+            {
+                if (_swapIndexA == _swapIndexB)
+                {
+                    EditorUtility.DisplayDialog("Invalid Input", "두 인덱스가 같습니다.", "OK");
+                }
+                else if (EditorUtility.DisplayDialog("Swap Tech Indices?",
+                    $"Tech {_swapIndexA}와 Tech {_swapIndexB}의 위치 및 선후행 관계를 교환합니다. 계속하시겠습니까?",
+                    "Yes", "No"))
+                {
+                    SwapTechs(_swapIndexA, _swapIndexB);
+                }
+            }
+        }
+
+        EditorGUILayout.Space();
+
+        // 6. Preview / Logs
         if (_previewLogs.Count > 0)
         {
             EditorGUILayout.LabelField("Analysis & Rebuild Results Preview:", EditorStyles.boldLabel);
@@ -763,5 +841,213 @@ public class TechTreeRebuilder : EditorWindow
             }
         }
         return false;
+    }
+
+    private static int[] ReadIndexArray(TechData tech, string propName)
+    {
+        SerializedObject so = new SerializedObject(tech);
+        so.Update();
+        SerializedProperty arr = so.FindProperty(propName);
+        if (arr == null || !arr.isArray) return new int[0];
+        int[] result = new int[arr.arraySize];
+        for (int i = 0; i < arr.arraySize; i++)
+            result[i] = arr.GetArrayElementAtIndex(i).intValue;
+        return result;
+    }
+
+    private static void WriteIndexArray(SerializedObject so, string propName, int[] values)
+    {
+        SerializedProperty arr = so.FindProperty(propName);
+        if (arr == null || !arr.isArray) return;
+        arr.arraySize = values.Length;
+        for (int i = 0; i < values.Length; i++)
+            arr.GetArrayElementAtIndex(i).intValue = values[i];
+    }
+
+    private static void SwapIndexInArray(SerializedObject so, string arrayPropertyName, int indexA, int indexB)
+    {
+        SerializedProperty arrayProp = so.FindProperty(arrayPropertyName);
+        if (arrayProp == null || !arrayProp.isArray) return;
+
+        const int sentinel = -99999;
+
+        // Pass 1 (within same SO buffer): A→sentinel, B→A
+        for (int i = 0; i < arrayProp.arraySize; i++)
+        {
+            SerializedProperty elem = arrayProp.GetArrayElementAtIndex(i);
+            if (elem.intValue == indexA)
+                elem.intValue = sentinel;
+            else if (elem.intValue == indexB)
+                elem.intValue = indexA;
+        }
+
+        // Pass 2 (within same SO buffer): sentinel→B
+        for (int i = 0; i < arrayProp.arraySize; i++)
+        {
+            SerializedProperty elem = arrayProp.GetArrayElementAtIndex(i);
+            if (elem.intValue == sentinel)
+                elem.intValue = indexB;
+        }
+    }
+
+    private void RebuildCellsInScene()
+    {
+        if (techDataCellPrefab == null || cellContent == null || catalog == null) return;
+
+        Undo.RegisterFullObjectHierarchyUndo(cellContent.gameObject, "Rebuild Tech Data Cells");
+
+        // Remove existing TechDataCell children
+        for (int i = cellContent.childCount - 1; i >= 0; i--)
+        {
+            Transform child = cellContent.GetChild(i);
+            if (child.GetComponent<TechDataCell>() != null)
+                Undo.DestroyObjectImmediate(child.gameObject);
+        }
+
+        int created = 0;
+        foreach (TechData tech in catalog.Techs)
+        {
+            if (tech == null) continue;
+
+            GameObject cellObj = PrefabUtility.InstantiatePrefab(techDataCellPrefab, cellContent) as GameObject;
+            Undo.RegisterCreatedObjectUndo(cellObj, "Create Tech Cell");
+            cellObj.name = $"TechCell_{tech.techIndex}_{tech.GetTechName()}";
+
+            SerializedObject so = new SerializedObject(cellObj.GetComponent<TechDataCell>());
+            SerializedProperty techDataProp = so.FindProperty("techData");
+            techDataProp.objectReferenceValue = tech;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            created++;
+        }
+
+        EditorSceneManager.MarkSceneDirty(cellContent.gameObject.scene);
+
+        _previewLogs.Clear();
+        _previewLogs.Add($"Cell Rebuild 완료: {created}개 TechDataCell 생성됨 (Content: {cellContent.name})");
+        Debug.Log($"[TechTreeRebuilder] {created} TechDataCell(s) created under '{cellContent.name}'.");
+    }
+
+    private void SwapTechs(int indexA, int indexB)
+    {
+        if (catalog == null || catalog.Techs == null)
+        {
+            Debug.LogError("SwapTechs: catalog is not assigned.");
+            return;
+        }
+
+        TechData techA = catalog.GetTechByIndex(indexA);
+        TechData techB = catalog.GetTechByIndex(indexB);
+
+        if (techA == null)
+        {
+            EditorUtility.DisplayDialog("Not Found", $"Tech index {indexA}를 카탈로그에서 찾을 수 없습니다.", "OK");
+            return;
+        }
+        if (techB == null)
+        {
+            EditorUtility.DisplayDialog("Not Found", $"Tech index {indexB}를 카탈로그에서 찾을 수 없습니다.", "OK");
+            return;
+        }
+
+        List<TechData> allTechs = new List<TechData>();
+        foreach (TechData t in catalog.Techs)
+        {
+            if (t != null) allTechs.Add(t);
+        }
+
+        // Snapshot A and B's connection arrays before any writes
+        int[] aPrereqs = ReadIndexArray(techA, "prerequisiteTechIndices");
+        int[] aSuccs   = ReadIndexArray(techA, "successorTechIndices");
+        int[] bPrereqs = ReadIndexArray(techB, "prerequisiteTechIndices");
+        int[] bSuccs   = ReadIndexArray(techB, "successorTechIndices");
+
+        // Step 1: A takes B's connections, B takes A's connections (techIndex unchanged)
+        SerializedObject soA = new SerializedObject(techA);
+        soA.Update();
+        WriteIndexArray(soA, "prerequisiteTechIndices", bPrereqs);
+        WriteIndexArray(soA, "successorTechIndices", bSuccs);
+        soA.ApplyModifiedProperties();
+
+        SerializedObject soB = new SerializedObject(techB);
+        soB.Update();
+        WriteIndexArray(soB, "prerequisiteTechIndices", aPrereqs);
+        WriteIndexArray(soB, "successorTechIndices", aSuccs);
+        soB.ApplyModifiedProperties();
+
+        // Step 2: In every other tech, swap all references to A and B
+        foreach (TechData tech in allTechs)
+        {
+            if (tech == techA || tech == techB) continue;
+
+            SerializedObject so = new SerializedObject(tech);
+            so.Update();
+            SwapIndexInArray(so, "prerequisiteTechIndices", indexA, indexB);
+            SwapIndexInArray(so, "successorTechIndices", indexA, indexB);
+            so.ApplyModifiedProperties();
+        }
+
+        AssetDatabase.SaveAssets();
+
+        _previewLogs.Clear();
+        _previewLogs.Add($"Swap 완료: Tech {indexA}({techA.GetTechName()})과 Tech {indexB}({techB.GetTechName()})의 위치(선후행 관계)를 교환했습니다.");
+
+        // Swap cell positions in scene
+        if (cellContent != null)
+        {
+            TechDataCell cellA = null;
+            TechDataCell cellB = null;
+            TechDataCell[] sceneCells = cellContent.GetComponentsInChildren<TechDataCell>(true);
+            for (int i = 0; i < sceneCells.Length; i++)
+            {
+                if (sceneCells[i].TechData == techA) cellA = sceneCells[i];
+                else if (sceneCells[i].TechData == techB) cellB = sceneCells[i];
+            }
+
+            if (cellA != null && cellB != null)
+            {
+                Undo.RegisterFullObjectHierarchyUndo(cellContent.gameObject, $"Swap Cell Positions {indexA} <-> {indexB}");
+
+                int siblingA = cellA.transform.GetSiblingIndex();
+                int siblingB = cellB.transform.GetSiblingIndex();
+
+                // Move the lower-index sibling first to avoid index shifting issues
+                if (siblingA < siblingB)
+                {
+                    cellA.transform.SetSiblingIndex(siblingB);
+                    cellB.transform.SetSiblingIndex(siblingA);
+                }
+                else if (siblingA > siblingB)
+                {
+                    cellB.transform.SetSiblingIndex(siblingA);
+                    cellA.transform.SetSiblingIndex(siblingB);
+                }
+
+                cellA.gameObject.name = $"TechCell_{indexA}_{techA.GetTechName()}";
+                cellB.gameObject.name = $"TechCell_{indexB}_{techB.GetTechName()}";
+
+                EditorSceneManager.MarkSceneDirty(cellContent.gameObject.scene);
+                _previewLogs.Add($"씬 Cell 위치 교환 완료: {cellA.gameObject.name} <-> {cellB.gameObject.name}");
+
+                // Refresh gizmo lines in scene view
+                UnityEditor.SceneView.RepaintAll();
+
+                // Runtime: rebuild line Image objects
+                if (Application.isPlaying)
+                {
+                    TechResearchGraphPanel panel = cellContent.GetComponentInParent<TechResearchGraphPanel>();
+                    if (panel == null)
+                        panel = UnityEngine.Object.FindObjectOfType<TechResearchGraphPanel>();
+                    if (panel != null)
+                        panel.RedrawLines();
+                }
+            }
+            else
+            {
+                _previewLogs.Add("씬 Cell을 찾을 수 없어 위치 교환 생략 (Cell Rebuild 후 다시 시도하세요).");
+            }
+        }
+
+        Debug.Log($"[TechTreeRebuilder] Swapped tech indices {indexA} <-> {indexB}");
     }
 }
