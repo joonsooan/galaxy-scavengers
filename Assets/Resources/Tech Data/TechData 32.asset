@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,9 +16,10 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: 추적 탄두
+  manualName: "\uCD94\uC801 \uD0C4\uB450"
   manualDescription: 
   manualIcon: {fileID: 0}
+  lockedIcon: {fileID: 0}
   researchCosts:
   - resourceType: 13
     amount: 25

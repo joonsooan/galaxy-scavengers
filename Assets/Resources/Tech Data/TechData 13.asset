@@ -19,13 +19,14 @@ MonoBehaviour:
   manualName: "\uC804\uC790 \uCE69"
   manualDescription: 
   manualIcon: {fileID: -6843591316079228388, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
+  lockedIcon: {fileID: 0}
   researchCosts:
   - resourceType: 1
     amount: 25
   - resourceType: 0
     amount: 20
   researchDuration: 50
-  prerequisiteTechIndices: 1900000007000000
+  prerequisiteTechIndices: 0100000007000000
   successorTechIndices: 2500000028000000
   isUnlockedByDefault: 0
   unlocksBuildings: []

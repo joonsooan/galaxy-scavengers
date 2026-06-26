@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,9 +16,10 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: 인구 수용 증가 II
+  manualName: "\uC778\uAD6C \uC218\uC6A9 \uC99D\uAC00 II"
   manualDescription: 
   manualIcon: {fileID: 0}
+  lockedIcon: {fileID: 0}
   researchCosts:
   - resourceType: 7
     amount: 20

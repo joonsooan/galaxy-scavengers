@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,9 +16,10 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: 솔라나 정수
+  manualName: "\uC194\uB77C\uB098 \uC815\uC218"
   manualDescription: 
   manualIcon: {fileID: 0}
+  lockedIcon: {fileID: 0}
   researchCosts:
   - resourceType: 6
     amount: 15
