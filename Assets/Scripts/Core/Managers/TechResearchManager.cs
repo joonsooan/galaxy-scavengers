@@ -187,12 +187,42 @@ public class TechResearchManager : MonoBehaviour
             return;
         }
 
+        TechData techData = GetTechData(_currentResearchIndex);
+        if (techData != null && techData.researchDuration > 0 && ResourceDataManager.Instance != null)
+        {
+            float remainingRatio = 1f - Mathf.Clamp01((float)_currentProgress / techData.researchDuration);
+            RefundResearchCosts(techData.researchCosts, remainingRatio);
+        }
+
         _techStates[_currentResearchIndex] = TechResearchState.Available;
         _currentResearchIndex = -1;
         _currentProgress = 0;
         _tickTimer = 0f;
 
         OnResearchStateChanged?.Invoke();
+    }
+
+    private void RefundResearchCosts(ResourceCost[] costs, float ratio)
+    {
+        if (costs == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < costs.Length; i++)
+        {
+            ResourceCost cost = costs[i];
+            if (cost == null)
+            {
+                continue;
+            }
+
+            int refundAmount = Mathf.FloorToInt(cost.amount * ratio);
+            if (refundAmount > 0)
+            {
+                ResourceDataManager.Instance.AddResource(cost.resourceType, refundAmount);
+            }
+        }
     }
 
     public TechData GetCurrentResearch()

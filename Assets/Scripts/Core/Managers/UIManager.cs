@@ -723,6 +723,10 @@ public class UIManager : MonoBehaviour
         {
             storageAmountText.text = $"{totalAmount.ToString()} / {maxCapacity.ToString()}";
         }
+
+        RectTransform storageInfoRt = storageInfoPanel.GetComponent<RectTransform>();
+        if (storageInfoRt != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(storageInfoRt);
     }
 
     private void OnStorageResourceChanged(ResourceType type, int current, int max)

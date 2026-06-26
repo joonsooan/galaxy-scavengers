@@ -29,12 +29,18 @@ public class ResearchPanelUI : MonoBehaviour
 
     private TechData _selectedTech;
     private Vector2 _iconContainerSize;
-    private static readonly string[] StatusTexts = { "연구 잠김", "연구", "연구 진행 중", "연구 완료" };
+    private Vector2 _currentResearchImgContainerSize;
+    private Color _requiredAmountOriginalColor;
+    private static readonly string[] StatusTexts = { "연구 잠김", "연구", "연구 취소", "연구 완료" };
 
     private void Awake()
     {
         if (iconImg != null)
             _iconContainerSize = iconImg.rectTransform.sizeDelta;
+        if (currentResearchImg != null)
+            _currentResearchImgContainerSize = currentResearchImg.rectTransform.sizeDelta;
+        if (requiredAmountText != null)
+            _requiredAmountOriginalColor = requiredAmountText.color;
     }
 
     private void Start()
@@ -45,15 +51,20 @@ public class ResearchPanelUI : MonoBehaviour
     private void OnEnable()
     {
         TechResearchManager.OnResearchStateChanged += RefreshStatusBtn;
+        TechResearchManager.OnResearchStateChanged += RefreshCurrentResearchPanel;
         TechResearchManager.OnResearchProgressChanged += RefreshCurrentResearchPanel;
         TechResearchManager.OnResearchCompleted += OnResearchCompleted;
+        ResourceManager.OnResourceAmountChanged += OnResourceAmountChanged;
+        RefreshCurrentResearchPanel();
     }
 
     private void OnDisable()
     {
         TechResearchManager.OnResearchStateChanged -= RefreshStatusBtn;
+        TechResearchManager.OnResearchStateChanged -= RefreshCurrentResearchPanel;
         TechResearchManager.OnResearchProgressChanged -= RefreshCurrentResearchPanel;
         TechResearchManager.OnResearchCompleted -= OnResearchCompleted;
+        ResourceManager.OnResourceAmountChanged -= OnResourceAmountChanged;
     }
 
     public void SelectTech(TechData techData)
@@ -146,6 +157,8 @@ public class ResearchPanelUI : MonoBehaviour
                 LayoutRebuilder.ForceRebuildLayoutImmediate((RectTransform)costPanel);
             }
         }
+
+        RefreshCostAffordability();
     }
 
     private void RefreshRewardPanel()
@@ -213,7 +226,7 @@ public class ResearchPanelUI : MonoBehaviour
 
         if (statusBtn != null)
         {
-            statusBtn.interactable = state == TechResearchState.Available;
+            statusBtn.interactable = state == TechResearchState.Available || state == TechResearchState.InProgress;
         }
 
         if (statusResearchBtn != null)
@@ -256,6 +269,8 @@ public class ResearchPanelUI : MonoBehaviour
         {
             currentResearchImg.gameObject.SetActive(true);
             currentResearchImg.sprite = current.GetTechIcon();
+            if (currentResearchImg.sprite != null)
+                ApplyFitSize(currentResearchImg.rectTransform, currentResearchImg.sprite, _currentResearchImgContainerSize);
         }
 
         int prog = TechResearchManager.Instance.GetCurrentProgress();
@@ -281,6 +296,35 @@ public class ResearchPanelUI : MonoBehaviour
         RefreshStatusBtn();
     }
 
+    private void OnResourceAmountChanged(ResourceType type, int amount)
+    {
+        RefreshCostAffordability();
+    }
+
+    private void RefreshCostAffordability()
+    {
+        if (requiredAmountText == null) return;
+
+        if (_selectedTech == null || _selectedTech.researchCosts == null || _selectedTech.researchCosts.Length == 0 || ResourceManager.Instance == null)
+        {
+            requiredAmountText.color = _requiredAmountOriginalColor;
+            return;
+        }
+
+        bool canAfford = true;
+        for (int i = 0; i < _selectedTech.researchCosts.Length; i++)
+        {
+            ResourceCost cost = _selectedTech.researchCosts[i];
+            if (ResourceManager.Instance.GetResourceAmount(cost.resourceType) < cost.amount)
+            {
+                canAfford = false;
+                break;
+            }
+        }
+
+        requiredAmountText.color = canAfford ? _requiredAmountOriginalColor : Color.red;
+    }
+
     public void OnStatusBtnClick()
     {
         if (_selectedTech == null || TechResearchManager.Instance == null)
@@ -289,8 +333,14 @@ public class ResearchPanelUI : MonoBehaviour
         }
 
         TechResearchState state = TechResearchManager.Instance.GetTechState(_selectedTech.techIndex);
-        if (state == TechResearchState.Available)
+        if (state == TechResearchState.InProgress)
         {
+            TechResearchManager.Instance.CancelResearch();
+        }
+        else if (state == TechResearchState.Available)
+        {
+            if (TechResearchManager.Instance.IsResearchInProgress())
+                TechResearchManager.Instance.CancelResearch();
             TechResearchManager.Instance.StartResearch(_selectedTech.techIndex);
         }
     }
@@ -328,6 +378,7 @@ public class ResearchPanelUI : MonoBehaviour
         if (requiredAmountText != null)
         {
             requiredAmountText.text = string.Empty;
+            requiredAmountText.color = _requiredAmountOriginalColor;
         }
     }
 
