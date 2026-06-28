@@ -958,9 +958,9 @@ public class TechTreeRebuilder : EditorWindow
 
         // Snapshot A and B's connection arrays before any writes
         int[] aPrereqs = ReadIndexArray(techA, "prerequisiteTechIndices");
-        int[] aSuccs   = ReadIndexArray(techA, "successorTechIndices");
+        int[] aSuccs = ReadIndexArray(techA, "successorTechIndices");
         int[] bPrereqs = ReadIndexArray(techB, "prerequisiteTechIndices");
-        int[] bSuccs   = ReadIndexArray(techB, "successorTechIndices");
+        int[] bSuccs = ReadIndexArray(techB, "successorTechIndices");
 
         // Step 1: A takes B's connections, B takes A's connections (techIndex unchanged)
         SerializedObject soA = new SerializedObject(techA);
@@ -1037,7 +1037,7 @@ public class TechTreeRebuilder : EditorWindow
                 {
                     TechResearchGraphPanel panel = cellContent.GetComponentInParent<TechResearchGraphPanel>();
                     if (panel == null)
-                        panel = UnityEngine.Object.FindObjectOfType<TechResearchGraphPanel>();
+                        panel = FindFirstObjectByType<TechResearchGraphPanel>();
                     if (panel != null)
                         panel.RedrawLines();
                 }
