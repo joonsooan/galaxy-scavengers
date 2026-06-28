@@ -152,6 +152,10 @@ public class ResourceTileManager
         
         _resourceTilePositions.Remove(minedPosition);
         _resourceTilemap.SetTile(minedPosition, null);
+        if (ShadowManager.Instance != null && ShadowManager.Instance.ResourceShadowTilemap != null)
+        {
+            ShadowManager.Instance.ResourceShadowTilemap.SetTile(minedPosition, null);
+        }
         
         HashSet<Vector3Int> tilesToRefresh = new HashSet<Vector3Int>();
         

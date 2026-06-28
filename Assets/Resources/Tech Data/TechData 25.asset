@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -12,21 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ceeace5e3ddf138488abd43ac61f82c5, type: 3}
   m_Name: TechData 25
   m_EditorClassIdentifier: Assembly-CSharp::TechData
-  techIndex: 25
+  techIndex: 23
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: 인구 수용 증가 I
+  manualName: "\uC778\uAD6C \uC218\uC6A9 \uC99D\uAC00 I"
   manualDescription: 
   manualIcon: {fileID: 0}
+  lockedIcon: {fileID: 0}
   researchCosts:
   - resourceType: 0
     amount: 25
   - resourceType: 2
     amount: 20
   researchDuration: 60
-  prerequisiteTechIndices: 01000000
-  successorTechIndices: 0d000000
+  prerequisiteTechIndices: 
+  successorTechIndices: 04000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []

@@ -4,6 +4,7 @@ using UnityEngine.Tilemaps;
 
 public class FogOfWarVisualUpdater
 {
+    private readonly List<Tilemap> _shadowTilemaps = new List<Tilemap>();
     private readonly Tilemap _fogTilemap;
     private readonly TileBase _fogTile;
     private readonly Color _fullyVisibleColor;
@@ -32,6 +33,25 @@ public class FogOfWarVisualUpdater
         }
     }
     
+    public void RegisterShadowTilemap(Tilemap shadowTilemap)
+    {
+        if (shadowTilemap != null && !_shadowTilemaps.Contains(shadowTilemap))
+            _shadowTilemaps.Add(shadowTilemap);
+    }
+
+    private void UpdateShadowTilemapsAtCell(Vector3Int cell, FogOfWarState state)
+    {
+        if (_shadowTilemaps.Count == 0) return;
+        Color shadowColor = state == FogOfWarState.FullyVisible ? Color.white : Color.clear;
+        foreach (Tilemap shadowTilemap in _shadowTilemaps)
+        {
+            if (shadowTilemap != null && shadowTilemap.HasTile(cell))
+            {
+                shadowTilemap.SetColor(cell, shadowColor);
+            }
+        }
+    }
+
     public void UpdateFogVisual(Vector3Int cell, FogOfWarState state)
     {
         if (_fogTilemap == null) return;
@@ -48,6 +68,7 @@ public class FogOfWarVisualUpdater
             {
                 _fogTilemap.SetTile(cell, null);
             }
+            UpdateShadowTilemapsAtCell(cell, state);
             return;
         }
         
@@ -69,8 +90,10 @@ public class FogOfWarVisualUpdater
             _fogTilemap.SetColor(cell, fogColor);
             _fogTilemap.RefreshTile(cell);
         }
+
+        UpdateShadowTilemapsAtCell(cell, state);
     }
-    
+
     public void UpdateAllVisibilityControllers()
     {
         VisibilityController[] controllers = Object.FindObjectsByType<VisibilityController>(

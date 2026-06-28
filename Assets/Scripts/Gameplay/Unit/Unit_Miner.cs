@@ -1132,11 +1132,14 @@ public class Unit_Miner : UnitBase
             _miningVibrationTween = null;
         }
 
-        if (_spriteController != null && currentState == UnitState.Mining) {
-            _spriteController.transform.DOLocalMove(_spriteBaseLocalPosition, 0.15f).SetEase(Ease.OutQuad);
-        }
-        else if (currentState != UnitState.Mining) {
-            _spriteBaseLocalPosition = Vector3.zero;
+        if (_spriteController != null) {
+            _spriteController.transform.DOKill();
+            if (currentState == UnitState.Mining) {
+                _spriteController.transform.DOLocalMove(_spriteBaseLocalPosition, 0.15f).SetEase(Ease.OutQuad);
+            }
+            else {
+                _spriteBaseLocalPosition = Vector3.zero;
+            }
         }
     }
 

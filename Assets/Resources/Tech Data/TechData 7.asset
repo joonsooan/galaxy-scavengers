@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -19,13 +19,14 @@ MonoBehaviour:
   manualName: 
   manualDescription: 
   manualIcon: {fileID: 0}
+  lockedIcon: {fileID: 0}
   researchCosts:
   - resourceType: 3
     amount: 20
   - resourceType: 0
     amount: 15
   researchDuration: 40
-  prerequisiteTechIndices: 03000000
+  prerequisiteTechIndices: 02000000
   successorTechIndices: 0f000000090000000c0000000d0000000e000000
   isUnlockedByDefault: 0
   unlocksBuildings:

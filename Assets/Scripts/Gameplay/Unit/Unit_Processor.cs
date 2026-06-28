@@ -949,10 +949,9 @@ public class Unit_Processor : UnitBase
 
     private void StartHover()
     {
-        StopHover();
         if (_spriteTransform == null) return;
-
-        _baseHoverLocalPosition = _spriteTransform.localPosition;
+        _spriteTransform.DOKill();
+        _hoverTween = null;
         _hoverTween = _spriteTransform.DOLocalMoveY(_baseHoverLocalPosition.y + hoverHeight, hoverDuration)
             .SetEase(Ease.InOutSine)
             .SetLoops(-1, LoopType.Yoyo);
@@ -960,17 +959,13 @@ public class Unit_Processor : UnitBase
 
     private void StopHover()
     {
-        if (_hoverTween != null && _hoverTween.IsActive()) {
-            _hoverTween.Kill();
-            _hoverTween = null;
-        }
-
-        if (_spriteTransform != null) {
-            float currentY = _spriteTransform.localPosition.y;
-            float baseY = _baseHoverLocalPosition.y;
-            if (Mathf.Abs(currentY - baseY) > 0.01f) {
-                _spriteTransform.DOLocalMoveY(baseY, 0.2f).SetEase(Ease.OutQuad);
-            }
+        if (_spriteTransform == null) return;
+        _spriteTransform.DOKill();
+        _hoverTween = null;
+        float currentY = _spriteTransform.localPosition.y;
+        float baseY = _baseHoverLocalPosition.y;
+        if (Mathf.Abs(currentY - baseY) > 0.01f) {
+            _hoverTween = _spriteTransform.DOLocalMoveY(baseY, 0.2f).SetEase(Ease.OutQuad);
         }
     }
 

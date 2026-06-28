@@ -29,6 +29,12 @@ public class DayNightCycleManager : MonoBehaviour
     [SerializeField] private Gradient ambientLightGradient = new Gradient();
     [SerializeField] private bool controlRenderSettings = true;
 
+    [Header("Global Light Transition Settings")]
+    [Range(0f, 100f)] [SerializeField] private float lightTurnOnStartPercent = 70.83f;
+    [Range(0f, 100f)] [SerializeField] private float lightTurnOnEndPercent = 79.17f;
+    [Range(0f, 100f)] [SerializeField] private float lightTurnOffStartPercent = 20.83f;
+    [Range(0f, 100f)] [SerializeField] private float lightTurnOffEndPercent = 29.17f;
+
     [Header("Post-Processing Volume Blending")]
     [SerializeField] private Volume volumeA;
     [SerializeField] private Volume volumeB;
@@ -84,10 +90,12 @@ public class DayNightCycleManager : MonoBehaviour
         UpdateAmbientLight();
         UpdateVolumeBlending();
         CheckDayNightTransition();
+        OnTimeUpdated?.Invoke(currentTime);
     }
 
     public static event Action OnNightStarted;
     public static event Action OnDayStarted;
+    public static event Action<float> OnTimeUpdated;
 
     private IEnumerator WaitForLoadingComplete()
     {
@@ -229,6 +237,9 @@ public class DayNightCycleManager : MonoBehaviour
         return currentTime;
     }
 
+    public float DayStartPercent => dayStartPercent;
+    public float NightStartPercent => nightStartPercent;
+
     public float GetTotalElapsedInGameHours()
     {
         return _totalElapsedInGameHours;
@@ -312,6 +323,43 @@ public class DayNightCycleManager : MonoBehaviour
     public void SetAutoAdvanceTime(bool enable)
     {
         autoAdvanceTime = enable;
+    }
+
+    public float GetGlobalLightMultiplier()
+    {
+        float time = currentTime;
+        float turnOnStartHour = (lightTurnOnStartPercent / 100f) * 24f;
+        float turnOnEndHour = (lightTurnOnEndPercent / 100f) * 24f;
+        float turnOffStartHour = (lightTurnOffStartPercent / 100f) * 24f;
+        float turnOffEndHour = (lightTurnOffEndPercent / 100f) * 24f;
+        
+        if (time >= turnOnStartHour && time < turnOnEndHour)
+        {
+            float duration = turnOnEndHour - turnOnStartHour;
+            if (duration > 0f) return (time - turnOnStartHour) / duration;
+        }
+        else if (time >= turnOffStartHour && time < turnOffEndHour)
+        {
+            float duration = turnOffEndHour - turnOffStartHour;
+            if (duration > 0f) return 1f - (time - turnOffStartHour) / duration;
+        }
+
+        bool isFullNight = false;
+        if (turnOnEndHour > turnOffStartHour)
+        {
+            isFullNight = time >= turnOnEndHour || time < turnOffStartHour;
+        }
+        else
+        {
+            isFullNight = time >= turnOnEndHour && time < turnOffStartHour;
+        }
+
+        if (isFullNight)
+        {
+            return 1f;
+        }
+
+        return 0f;
     }
 
     [Serializable]

@@ -38,43 +38,7 @@ public class GameSceneRoundTimer : MonoBehaviour
         }
 
         RefreshDisplay();
-    }
-
-    private void Update()
-    {
-        if (_gameOverTriggered || GameManager.Instance == null || !GameManager.Instance.IsGameSceneInitialized)
-        {
-            return;
-        }
-
-        if (!GameManager.IsGameplayReady)
-        {
-            return;
-        }
-
-        if (TutorialManager.Instance != null && TutorialManager.Instance.ShouldPauseRoundTimer()) {
-            return;
-        }
-
-        float dt = useUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
-        _remainingSeconds = Mathf.Max(0f, _remainingSeconds - dt);
-        RefreshDisplay();
-
-        if (_remainingSeconds <= 0f)
-        {
-            TriggerGameOver();
-        }
-    }
-
-    private void TriggerGameOver()
-    {
-        if (_gameOverTriggered)
-        {
-            return;
-        }
-
-        _gameOverTriggered = true;
-        GameManager.Instance.GameOver();
+        enabled = false;
     }
 
     private void RefreshDisplay()

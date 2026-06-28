@@ -15,6 +15,9 @@ public class MainControlPanel : MonoBehaviour
     [SerializeField] private Button unitManagementBtn;
     [SerializeField] private Button researchBtn;
 
+    [Header("Research Complete Highlight")]
+    [SerializeField] private Material researchCompletedHighlightMaterial;
+
     [Header("UI Panels")]
     [SerializeField] private GameObject buildingInfoPanel;
     [SerializeField] private GameObject baseBuildingPanel;
@@ -25,6 +28,8 @@ public class MainControlPanel : MonoBehaviour
     
     private GameObject _currentlyActivePanel;
     private BuildingInfoPanel _buildingInfoPanelComponent;
+    private Image _researchBtnImage;
+    private Material _researchBtnOriginalMaterial;
     
     private void OnEnable()
     {
@@ -32,6 +37,7 @@ public class MainControlPanel : MonoBehaviour
         Processor.OnProcessorClicked += HideBuildingInfoPanel;
         DataExtractor.OnDataExtractorClicked += HideBuildingInfoPanelExtractor;
         LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
+        TechResearchManager.OnResearchCompleted += OnTechResearchCompleted;
         ApplyLocalizedStaticTexts();
     }
 
@@ -41,6 +47,7 @@ public class MainControlPanel : MonoBehaviour
         Processor.OnProcessorClicked -= HideBuildingInfoPanel;
         DataExtractor.OnDataExtractorClicked -= HideBuildingInfoPanelExtractor;
         LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
+        TechResearchManager.OnResearchCompleted -= OnTechResearchCompleted;
     }
     
     
@@ -48,8 +55,15 @@ public class MainControlPanel : MonoBehaviour
     
     private void Start()
     {
-        _buildingInfoPanelComponent =  buildingInfoPanel.GetComponent<BuildingInfoPanel>();
+        _buildingInfoPanelComponent = buildingInfoPanel.GetComponent<BuildingInfoPanel>();
         _areaBuildingDestroyer = FindFirstObjectByType<AreaBuildingDestroyer>();
+
+        if (researchBtn != null)
+        {
+            _researchBtnImage = researchBtn.GetComponent<Image>();
+            if (_researchBtnImage != null)
+                _researchBtnOriginalMaterial = _researchBtnImage.material;
+        }
         
         if (baseBuildingBtn != null)
         {
@@ -252,8 +266,27 @@ public class MainControlPanel : MonoBehaviour
         }
     }
 
+    public void OpenResearchPanel()
+    {
+        if (!IsResearchPanelActive())
+            OnResearchBtnClicked();
+    }
+
+    public void CloseResearchPanel()
+    {
+        if (IsResearchPanelActive())
+            OnResearchBtnClicked();
+    }
+
+    public void ToggleResearchPanel()
+    {
+        OnResearchBtnClicked();
+    }
+
     private void OnResearchBtnClicked()
     {
+        DisableResearchButtonHighlight();
+
         if (IsResearchPanelActive())
         {
             researchPanel.SetActive(false);
@@ -270,6 +303,23 @@ public class MainControlPanel : MonoBehaviour
 
         researchPanel.SetActive(true);
         _currentlyActivePanel = researchPanel;
+    }
+
+    private void OnTechResearchCompleted(int techIndex)
+    {
+        EnableResearchButtonHighlight();
+    }
+
+    private void EnableResearchButtonHighlight()
+    {
+        if (_researchBtnImage == null || researchCompletedHighlightMaterial == null) return;
+        _researchBtnImage.material = researchCompletedHighlightMaterial;
+    }
+
+    private void DisableResearchButtonHighlight()
+    {
+        if (_researchBtnImage == null) return;
+        _researchBtnImage.material = _researchBtnOriginalMaterial;
     }
 
     private void OnBaseBuildingBtnClicked()

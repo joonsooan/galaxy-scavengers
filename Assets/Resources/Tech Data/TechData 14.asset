@@ -19,6 +19,7 @@ MonoBehaviour:
   manualName: "\uADF9\uC800\uC628 \uC6A9\uC561"
   manualDescription: 
   manualIcon: {fileID: -4396813597575786351, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
+  lockedIcon: {fileID: 0}
   researchCosts:
   - resourceType: 3
     amount: 30
@@ -26,7 +27,7 @@ MonoBehaviour:
     amount: 15
   researchDuration: 50
   prerequisiteTechIndices: 0400000007000000
-  successorTechIndices: 2600000029000000
+  successorTechIndices: 250000002700000029000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []

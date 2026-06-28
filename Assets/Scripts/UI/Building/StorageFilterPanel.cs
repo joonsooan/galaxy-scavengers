@@ -23,7 +23,7 @@ public class StorageFilterPanel : MonoBehaviour
     [SerializeField] private Button allowAllButton;
     [SerializeField] private Button allowNoneButton;
 
-    private static readonly string[] PriorityNames = { "낮음", "보통", "중요", "필수" };
+    private static readonly string[] PriorityNames = { "낮음", "중간", "중요", "필수" };
 
     private IStorage _targetStorage;
     private Dictionary<ResourceType, bool> _allowedResources;
