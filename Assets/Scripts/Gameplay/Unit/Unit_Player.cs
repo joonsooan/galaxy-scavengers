@@ -383,6 +383,10 @@ public class Unit_Player : UnitBase
             if (clickable != null) {
                 return true;
             }
+
+            if (hit.collider.GetComponent<IStorage>() != null) {
+                return true;
+            }
         }
 
         return false;
