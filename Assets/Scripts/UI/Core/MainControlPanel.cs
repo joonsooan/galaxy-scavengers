@@ -38,6 +38,7 @@ public class MainControlPanel : MonoBehaviour
         DataExtractor.OnDataExtractorClicked += HideBuildingInfoPanelExtractor;
         LocalizationSettings.SelectedLocaleChanged += OnSelectedLocaleChanged;
         TechResearchManager.OnResearchCompleted += OnTechResearchCompleted;
+        GameManager.OnGameSceneInitialized += OnGameSceneInitialized;
         ApplyLocalizedStaticTexts();
     }
 
@@ -48,6 +49,7 @@ public class MainControlPanel : MonoBehaviour
         DataExtractor.OnDataExtractorClicked -= HideBuildingInfoPanelExtractor;
         LocalizationSettings.SelectedLocaleChanged -= OnSelectedLocaleChanged;
         TechResearchManager.OnResearchCompleted -= OnTechResearchCompleted;
+        GameManager.OnGameSceneInitialized -= OnGameSceneInitialized;
     }
     
     
@@ -308,6 +310,17 @@ public class MainControlPanel : MonoBehaviour
     private void OnTechResearchCompleted(int techIndex)
     {
         EnableResearchButtonHighlight();
+    }
+
+    private void OnGameSceneInitialized()
+    {
+        if (baseBuildingPanel == null) return;
+
+        BuildingButton[] buttons = baseBuildingPanel.GetComponentsInChildren<BuildingButton>(true);
+        foreach (BuildingButton btn in buttons)
+        {
+            btn.RefreshUnlockStatus();
+        }
     }
 
     private void EnableResearchButtonHighlight()

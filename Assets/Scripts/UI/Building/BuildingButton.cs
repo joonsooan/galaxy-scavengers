@@ -21,6 +21,7 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
     private Button _button;
     private bool _hasStarted;
+    private bool _isUnlockSubscribed;
 
     private void Awake()
     {
@@ -37,15 +38,28 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
     {
         _hasStarted = true;
 
-        if (BuildingUnlockManager.Instance != null) {
-            BuildingUnlockManager.Instance.OnBuildingUnlocked += OnBuildingUnlocked;
-        }
+        SubscribeToUnlockEvent();
 
         if (!string.IsNullOrEmpty(tutorialKey) && glowMaterial != null) {
             TutorialManager.Instance?.RegisterRuntimeUI(tutorialKey, gameObject, glowMaterial);
         }
 
         StartCoroutine(DelayedUnlockCheck());
+    }
+
+    public void RefreshUnlockStatus()
+    {
+        SubscribeToUnlockEvent();
+        UpdateUnlockStatus();
+    }
+
+    private void SubscribeToUnlockEvent()
+    {
+        if (_isUnlockSubscribed) return;
+        if (BuildingUnlockManager.Instance == null) return;
+
+        BuildingUnlockManager.Instance.OnBuildingUnlocked += OnBuildingUnlocked;
+        _isUnlockSubscribed = true;
     }
 
     private IEnumerator DelayedUnlockCheck()
@@ -71,8 +85,9 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
             _button.onClick.RemoveListener(OnButtonClicked);
         }
 
-        if (BuildingUnlockManager.HasInstance) {
+        if (_isUnlockSubscribed && BuildingUnlockManager.HasInstance) {
             BuildingUnlockManager.Instance.OnBuildingUnlocked -= OnBuildingUnlocked;
+            _isUnlockSubscribed = false;
         }
     }
 
