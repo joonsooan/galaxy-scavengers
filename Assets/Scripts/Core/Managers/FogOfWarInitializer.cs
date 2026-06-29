@@ -240,7 +240,7 @@ public class FogOfWarInitializer
         if (tr != null)
         {
             tr.sortingOrder = 100;
-            tr.mode = TilemapRenderer.Mode.Individual;
+            tr.mode = TilemapRenderer.Mode.Chunk;
         }
         
         _fogTilemap.color = Color.white;

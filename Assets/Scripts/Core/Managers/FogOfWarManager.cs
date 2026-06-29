@@ -42,6 +42,11 @@ public class FogOfWarManager : MonoBehaviour
     private bool _isInitializing;
     private bool _isVisibilityUpdateRunning;
     private readonly Dictionary<IVisionProvider, HashSet<Vector3Int>> _providerAffectedTiles = new Dictionary<IVisionProvider, HashSet<Vector3Int>>();
+
+    // Reusable scratch collections to avoid per-call GC allocations in UpdateVisibilityCoroutine
+    private readonly HashSet<Vector3Int> _scratchTilesToCheck = new HashSet<Vector3Int>();
+    private readonly Dictionary<Vector3Int, FogOfWarState> _scratchNewVisibility = new Dictionary<Vector3Int, FogOfWarState>();
+    private readonly HashSet<Vector3Int> _scratchNewCurrentlyVisible = new HashSet<Vector3Int>();
     private bool _respectFog = true;
     private FogOfWarVisualUpdater _visualUpdater;
     public static FogOfWarManager Instance { get; private set; }
@@ -303,7 +308,7 @@ public class FogOfWarManager : MonoBehaviour
 
         if (grid == null || tilesToCheck == null || tilesToCheck.Count == 0) return;
 
-        Dictionary<Vector3Int, FogOfWarState> newVisibility = new Dictionary<Vector3Int, FogOfWarState>(tilesToCheck.Count);
+        _scratchNewVisibility.Clear();
 
         foreach (Vector3Int tile in tilesToCheck)
         {
@@ -329,13 +334,13 @@ public class FogOfWarManager : MonoBehaviour
                 }
             }
 
-            newVisibility[tile] = state;
+            _scratchNewVisibility[tile] = state;
         }
 
         foreach (Vector3Int tile in tilesToCheck)
         {
             FogOfWarState oldState = _tileVisibility.TryGetValue(tile, out FogOfWarState value) ? value : FogOfWarState.Invisible;
-            FogOfWarState newState = newVisibility.TryGetValue(tile, out FogOfWarState value1) ? value1 : FogOfWarState.Invisible;
+            FogOfWarState newState = _scratchNewVisibility.TryGetValue(tile, out FogOfWarState value1) ? value1 : FogOfWarState.Invisible;
 
             if (oldState != newState)
             {
@@ -427,11 +432,11 @@ public class FogOfWarManager : MonoBehaviour
 
         _isVisibilityUpdateRunning = true;
 
-        HashSet<Vector3Int> tilesToCheck = new HashSet<Vector3Int>();
+        _scratchTilesToCheck.Clear();
 
         foreach (Vector3Int exploredTile in _exploredTiles)
         {
-            tilesToCheck.Add(exploredTile);
+            _scratchTilesToCheck.Add(exploredTile);
         }
 
         foreach (KeyValuePair<IVisionProvider, HashSet<Vector3Int>> kvp in _providerAffectedTiles)
@@ -440,23 +445,23 @@ public class FogOfWarManager : MonoBehaviour
             {
                 foreach (Vector3Int tile in kvp.Value)
                 {
-                    tilesToCheck.Add(tile);
+                    _scratchTilesToCheck.Add(tile);
                 }
             }
         }
 
         foreach (Vector3Int visibleTile in _currentlyVisibleTiles)
         {
-            tilesToCheck.Add(visibleTile);
+            _scratchTilesToCheck.Add(visibleTile);
             if (!_exploredTiles.Contains(visibleTile))
             {
                 _exploredTiles.Add(visibleTile);
             }
         }
 
-        Dictionary<Vector3Int, FogOfWarState> newVisibility = new Dictionary<Vector3Int, FogOfWarState>();
+        _scratchNewVisibility.Clear();
 
-        foreach (Vector3Int tile in tilesToCheck)
+        foreach (Vector3Int tile in _scratchTilesToCheck)
         {
             FogOfWarState state = _exploredTiles.Contains(tile) ? FogOfWarState.PartlyVisible : FogOfWarState.Invisible;
 
@@ -480,19 +485,19 @@ public class FogOfWarManager : MonoBehaviour
                 }
             }
 
-            newVisibility[tile] = state;
+            _scratchNewVisibility[tile] = state;
         }
 
-        HashSet<Vector3Int> newCurrentlyVisibleTiles = new HashSet<Vector3Int>();
+        _scratchNewCurrentlyVisible.Clear();
 
-        foreach (Vector3Int tile in tilesToCheck)
+        foreach (Vector3Int tile in _scratchTilesToCheck)
         {
             FogOfWarState oldState = _tileVisibility.ContainsKey(tile) ? _tileVisibility[tile] : FogOfWarState.Invisible;
-            FogOfWarState newState = newVisibility.ContainsKey(tile) ? newVisibility[tile] : FogOfWarState.Invisible;
+            FogOfWarState newState = _scratchNewVisibility.ContainsKey(tile) ? _scratchNewVisibility[tile] : FogOfWarState.Invisible;
 
             if (newState == FogOfWarState.FullyVisible)
             {
-                newCurrentlyVisibleTiles.Add(tile);
+                _scratchNewCurrentlyVisible.Add(tile);
             }
 
             if (oldState != newState)
@@ -508,7 +513,11 @@ public class FogOfWarManager : MonoBehaviour
             }
         }
 
-        _currentlyVisibleTiles = newCurrentlyVisibleTiles;
+        _currentlyVisibleTiles.Clear();
+        foreach (Vector3Int tile in _scratchNewCurrentlyVisible)
+        {
+            _currentlyVisibleTiles.Add(tile);
+        }
 
         _isVisibilityUpdateRunning = false;
 

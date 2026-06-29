@@ -187,6 +187,7 @@ public class ShadowManager : MonoBehaviour
             shadowRenderer.sortingOrder = sourceRenderer.sortingOrder - 1;
         }
 
+        shadowRenderer.mode = TilemapRenderer.Mode.Chunk;
         shadowRenderer.material = shadowMaterial;
 
         BoundsInt bounds = sourceTilemap.cellBounds;
