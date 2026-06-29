@@ -21,6 +21,16 @@ public class ResourceInfoCell : MonoBehaviour
         _rectTransform = GetComponent<RectTransform>();
     }
 
+    private RectTransform RectTransform
+    {
+        get
+        {
+            if (_rectTransform == null)
+                _rectTransform = GetComponent<RectTransform>();
+            return _rectTransform;
+        }
+    }
+
     private void OnEnable()
     {
         if (_tracksToken)
@@ -66,7 +76,8 @@ public class ResourceInfoCell : MonoBehaviour
             resourceImage.sprite = resourceIcon != null ? resourceIcon : null;
         }
 
-        LayoutRebuilder.ForceRebuildLayoutImmediate(_rectTransform);
+        if (RectTransform != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(RectTransform);
         if (resourceAmount != null)
             resourceAmount.color = _originalTextColor;
     }
@@ -101,8 +112,8 @@ public class ResourceInfoCell : MonoBehaviour
 
         UpdateColor();
         
-        if (rebuildImmediately)
-            LayoutRebuilder.ForceRebuildLayoutImmediate(_rectTransform);
+        if (rebuildImmediately && RectTransform != null)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(RectTransform);
         
         if (gameObject.activeInHierarchy)
         {
