@@ -181,8 +181,16 @@ public class Turret : Damageable, IElectricityConsumer
         {
             return;
         }
-        
-        GameObject bulletObj = ObjectPooler.Instance.SpawnFromPool("TurretBullet", _bulletSpawnPosition, Quaternion.identity);
+
+        Vector2 fireDirection = (_target.position - _bulletSpawnPosition).normalized;
+        Quaternion bulletRotation = Quaternion.identity;
+        if (fireDirection.sqrMagnitude > 0.01f)
+        {
+            float angle = Mathf.Atan2(fireDirection.y, fireDirection.x) * Mathf.Rad2Deg;
+            bulletRotation = Quaternion.AngleAxis(angle, Vector3.forward);
+        }
+
+        GameObject bulletObj = ObjectPooler.Instance.SpawnFromPool("TurretBullet", _bulletSpawnPosition, bulletRotation);
 
         if (bulletObj != null && bulletObj.TryGetComponent<Turret_Bullet>(out var bulletScript))
         {
