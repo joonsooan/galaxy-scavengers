@@ -227,28 +227,7 @@ public class ResourceManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == "GameScene" || scene.name == "TutorialScene")
-        {
-            StartCoroutine(DelayedSceneInitialization());
-        }
-    }
-
-    private IEnumerator DelayedSceneInitialization()
-    {
-        yield return null;
-
-        // Wait for ResourceDataManager to initialize
-        while (ResourceDataManager.Instance == null)
-        {
-            yield return null;
-        }
-
-        // Initialize main structure if registered
-        MainStructure mainStructure = ResourceDataManager.Instance.GetMainStructure();
-        if (mainStructure != null && !BaseCarryOverManager.HasCarriedOverData)
-        {
-            InitializeMainStructureStorage(mainStructure);
-        }
+        // Initialization is handled in RegisterMainStructure.
     }
 
     private int GetInitialAmount(ResourceType type)
@@ -565,6 +544,7 @@ public class ResourceManager : MonoBehaviour
     {
         if (ResourceDataManager.Instance != null)
         {
+            ResourceDataManager.Instance.AddStorage(mainStructure);
             ResourceDataManager.Instance.RegisterMainStructure(mainStructure);
             if (!BaseCarryOverManager.HasCarriedOverData)
             {
