@@ -1,4 +1,3 @@
-using System;
 using DG.Tweening;
 using UnityEngine;
 
@@ -16,10 +15,6 @@ public class Unit_Scout : UnitBase
     private Tween _hoverTween;
     private Vector3 _baseHoverLocalPosition;
     private Transform _spriteTransform;
-
-#pragma warning disable CS0067
-    public static event Action<Vector3> OnScoutEnteredLocation;
-#pragma warning restore CS0067
 
     protected override void Awake()
     {

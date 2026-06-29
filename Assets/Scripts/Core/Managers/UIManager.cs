@@ -54,7 +54,10 @@ public class UIManager : MonoBehaviour
     private ExtractorData _pinnedExtractorData;
     private Action<ResourceType, int, int> _storageResourceChangedHandler;
     private IStorage _trackedStorage;
+    private Collider2D _trackedStorageCollider;
     private bool _pausePanelLock;
+    private Camera _mainCamera;
+    private LaunchUIController _launchUIController;
 
     public Canvas GetObjectUICanvas()
     {
@@ -79,6 +82,8 @@ public class UIManager : MonoBehaviour
         SetActiveIfNotNull(storageFilterPanel.gameObject, false);
 
         _areaBuildingDestroyer = FindFirstObjectByType<AreaBuildingDestroyer>();
+        _mainCamera = Camera.main;
+        _launchUIController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
 
         ApplyLocalizedStaticTexts();
     }
@@ -102,8 +107,11 @@ public class UIManager : MonoBehaviour
             InventorySystem inv = GetInventorySystem();
             if (inv != null && inv.GetInventoryPanel() != null && inv.GetInventoryPanel().activeSelf)
             {
-                LaunchUIController launchUI = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
-                bool isLaunchActive = launchUI != null && launchUI.IsLaunchInputLockActive();
+                if (_launchUIController == null)
+                {
+                    _launchUIController = FindFirstObjectByType<LaunchUIController>(FindObjectsInactive.Include);
+                }
+                bool isLaunchActive = _launchUIController != null && _launchUIController.IsLaunchInputLockActive();
                 if (!isLaunchActive)
                 {
                     inv.ToggleInventory();
@@ -335,6 +343,7 @@ public class UIManager : MonoBehaviour
             }
             storageInfoPanel.SetActive(false);
             _trackedStorage = null;
+            _trackedStorageCollider = null;
         }
 
         if (storageFilterPanel != null)
@@ -677,6 +686,8 @@ public class UIManager : MonoBehaviour
         }
 
         _trackedStorage = storage;
+        Component storageComponent = storage as Component;
+        _trackedStorageCollider = storageComponent != null ? storageComponent.GetComponent<Collider2D>() : null;
         storageInfoPanel.SetActive(true);
         UpdateStorageUIPosition();
 
@@ -753,6 +764,7 @@ public class UIManager : MonoBehaviour
             storageFilterPanel.gameObject.SetActive(false);
 
         _trackedStorage = null;
+        _trackedStorageCollider = null;
     }
 
     public bool IsPointerOverStorageInfoPanel()
@@ -781,20 +793,17 @@ public class UIManager : MonoBehaviour
 
     private void UpdateStorageUIPosition()
     {
-        if (_trackedStorage == null || Camera.main == null) return;
+        if (_trackedStorage == null || _mainCamera == null) return;
 
         Vector3 centerWorld = _trackedStorage.GetPosition();
         float rightEdgeX = centerWorld.x;
 
-        Component storageComponent = _trackedStorage as Component;
-        if (storageComponent != null)
+        if (_trackedStorageCollider != null)
         {
-            Collider2D col = storageComponent.GetComponent<Collider2D>();
-            if (col != null)
-                rightEdgeX = col.bounds.max.x;
+            rightEdgeX = _trackedStorageCollider.bounds.max.x;
         }
 
-        Vector3 screenPos = Camera.main.WorldToScreenPoint(new Vector3(rightEdgeX, centerWorld.y, centerWorld.z));
+        Vector3 screenPos = _mainCamera.WorldToScreenPoint(new Vector3(rightEdgeX, centerWorld.y, centerWorld.z));
         screenPos.x += storagePanelPixelGap;
         screenPos.y += storagePanelOffsetY;
 

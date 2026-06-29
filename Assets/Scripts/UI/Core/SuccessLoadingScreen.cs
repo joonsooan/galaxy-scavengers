@@ -398,7 +398,7 @@ public class SuccessLoadingScreen : MonoBehaviour
             yield break;
         }
 
-        yield return new WaitForSecondsRealtime(0.3f);
+        yield return CoroutineCache.GetWaitForSecondsRealtime(0.3f);
 
         _buttonFadeInTween?.Kill();
         _buttonFadeInTween = _continueButtonCanvasGroup.DOFade(1f, buttonFadeInDuration)

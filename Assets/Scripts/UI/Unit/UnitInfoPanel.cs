@@ -34,6 +34,7 @@ public class UnitInfoPanel : MonoBehaviour
 
     private UnitBase _currentUnit;
     private UnitData _previewUnitData;
+    private Camera _mainCamera;
     private RectTransform _rectTransform;
     private bool _isLayoutOverridden;
     private Vector2 _defaultAnchorMin;
@@ -50,6 +51,7 @@ public class UnitInfoPanel : MonoBehaviour
             return;
         }
         Instance = this;
+        _mainCamera = Camera.main;
         RefreshBatteryStatusStrings();
         EnsureLayoutDefaultsInitialized();
 
@@ -214,20 +216,19 @@ public class UnitInfoPanel : MonoBehaviour
         RefreshBatteryDisplay();
     }
 
-    private static bool IsWorldPointerOverUnitCollider(UnitBase unit)
+    private bool IsWorldPointerOverUnitCollider(UnitBase unit)
     {
         if (unit == null)
         {
             return false;
         }
 
-        Camera cam = Camera.main;
-        if (cam == null)
+        if (_mainCamera == null)
         {
             return false;
         }
 
-        Vector3 w = cam.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 w = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
         w.z = 0f;
         Collider2D[] hits = Physics2D.OverlapPointAll(w);
         for (int i = 0; i < hits.Length; i++)

@@ -27,22 +27,26 @@ public class CardDisplay : InfoDisplayTrigger, IPointerClickHandler, IPointerExi
 
     protected override void ShowInfo()
     {
-        GameManager.Instance?.uiManager.DisplayCardInfo(buildingPieceData);
+        if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
+            GameManager.Instance.uiManager.DisplayCardInfo(buildingPieceData);
     }
 
     protected override void HideInfo()
     {
-        GameManager.Instance?.uiManager.HideCardInfo();
+        if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
+            GameManager.Instance.uiManager.HideCardInfo();
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        GameManager.Instance?.uiManager.PinCardInfo(buildingPieceData);
+        if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
+            GameManager.Instance.uiManager.PinCardInfo(buildingPieceData);
     }
 
     public new void OnPointerExit(PointerEventData eventData)
     {
-        GameManager.Instance?.uiManager.HideCardInfo();
+        if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
+            GameManager.Instance.uiManager.HideCardInfo();
     }
     
     public void OnClick()

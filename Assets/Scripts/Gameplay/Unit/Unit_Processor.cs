@@ -41,6 +41,7 @@ public class Unit_Processor : UnitBase
     private float _notAssignedAlertEnableTime;
 
     private UnitAllyBatteryDriver _allyBatteryDriver;
+    private GameAlertUIManager _gameAlertUIManager;
     private UnitSpriteController _spriteController;
     private Transform _spriteTransform;
     private IStorage _targetStorage;
@@ -73,6 +74,7 @@ public class Unit_Processor : UnitBase
             _spriteTransform = _spriteController.transform;
             _baseHoverLocalPosition = _spriteTransform.localPosition;
         }
+        _gameAlertUIManager = FindFirstObjectByType<GameAlertUIManager>();
         if (!IsAssigned) {
             _autoAssignCoroutine = StartCoroutine(AutoAssignNearestProcessorCoroutine());
         }
@@ -100,7 +102,9 @@ public class Unit_Processor : UnitBase
     {
         base.OnEnable();
         _notAssignedAlertEnableTime = Time.time + Mathf.Max(0f, notAssignedAlertDelay);
-        UnitManager.Instance?.AddUnit(this);
+        if (UnitManager.Instance != null) {
+            UnitManager.Instance.AddUnit(this);
+        }
     }
 
     protected override void OnDisable()
@@ -121,7 +125,9 @@ public class Unit_Processor : UnitBase
         SetDroneNoResourceAlert(false);
         StopHover();
         base.OnDisable();
-        UnitManager.Instance?.RemoveUnit(this);
+        if (UnitManager.Instance != null) {
+            UnitManager.Instance.RemoveUnit(this);
+        }
         ReleaseFromProcessor();
     }
 
@@ -700,12 +706,7 @@ public class Unit_Processor : UnitBase
         if (!movement.IsMoving && !isAtProcessor) {
             if (Time.time >= _nextRepathTime) {
                 _nextRepathTime = Time.time + RepathInterval;
-                bool hasPath = movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
-                if (hasPath) {
-                    _ = movement.FinalTargetPosition != default
-                        ? Vector3.Distance(transform.position, movement.FinalTargetPosition)
-                        : 0f;
-                }
+                movement.SetNewTargetDirect(interactionPos, movement.waypointTolerance);
             }
         }
     }
@@ -845,12 +846,13 @@ public class Unit_Processor : UnitBase
     private void SetDroneIsNotAssignedAlert(bool shouldEnable)
     {
         if (shouldEnable == _notAssignedAlertActive) return;
-        GameAlertUIManager alertManager = FindFirstObjectByType<GameAlertUIManager>();
-        if (shouldEnable) {
-            alertManager?.RegisterAlert(GameAlertType.DroneIsNotAssigned, this);
-        }
-        else {
-            alertManager?.UnregisterAlert(GameAlertType.DroneIsNotAssigned, this);
+        if (_gameAlertUIManager != null) {
+            if (shouldEnable) {
+                _gameAlertUIManager.RegisterAlert(GameAlertType.DroneIsNotAssigned, this);
+            }
+            else {
+                _gameAlertUIManager.UnregisterAlert(GameAlertType.DroneIsNotAssigned, this);
+            }
         }
         _notAssignedAlertActive = shouldEnable;
     }
@@ -858,12 +860,13 @@ public class Unit_Processor : UnitBase
     private void SetDroneNoResourceAlert(bool shouldEnable)
     {
         if (shouldEnable == _noResourceAlertActive) return;
-        GameAlertUIManager alertManager = FindFirstObjectByType<GameAlertUIManager>();
-        if (shouldEnable) {
-            alertManager?.RegisterAlert(GameAlertType.DroneNoResource, this);
-        }
-        else {
-            alertManager?.UnregisterAlert(GameAlertType.DroneNoResource, this);
+        if (_gameAlertUIManager != null) {
+            if (shouldEnable) {
+                _gameAlertUIManager.RegisterAlert(GameAlertType.DroneNoResource, this);
+            }
+            else {
+                _gameAlertUIManager.UnregisterAlert(GameAlertType.DroneNoResource, this);
+            }
         }
         _noResourceAlertActive = shouldEnable;
     }

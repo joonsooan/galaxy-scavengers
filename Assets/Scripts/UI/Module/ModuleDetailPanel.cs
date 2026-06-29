@@ -127,7 +127,7 @@ public class ModuleDetailPanel : MonoBehaviour
         string localizedType = GameLocalization.GetModuleType(_currentRecipe.moduleType);
         moduleTypeText.text = GameLocalization.GetOrDefault("UI_Common", "label.typeFormat", "타입 : {0}", localizedType);
 
-        yield return new WaitForEndOfFrame();
+        yield return CoroutineCache.GetWaitForEndOfFrame();
         LayoutRebuilder.ForceRebuildLayoutImmediate(resourcePanel);
     }
     

@@ -20,6 +20,7 @@ public class ArrowBounceAnimation : MonoBehaviour
     [SerializeField] private Ease bounceEase = Ease.OutQuad;
 
     private RectTransform _rectTransform;
+    private Image _image;
     private Vector2 _originalPosition;
     private Sequence _bounceSequence;
     private ArrowDirection _detectedDirection;
@@ -31,6 +32,7 @@ public class ArrowBounceAnimation : MonoBehaviour
         {
             _rectTransform = gameObject.AddComponent<RectTransform>();
         }
+        _image = GetComponent<Image>();
     }
 
     private void OnEnable()
@@ -89,8 +91,7 @@ public class ArrowBounceAnimation : MonoBehaviour
             _detectedDirection = ArrowDirection.Up;
         }
 
-        Image image = GetComponent<Image>();
-        if (image != null && image.sprite != null)
+        if (_image != null && _image.sprite != null)
         {
             Vector2 size = _rectTransform.sizeDelta;
             if (size.x > size.y)

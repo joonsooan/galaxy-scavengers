@@ -75,8 +75,8 @@ public class ProcessorRecipeCell : MonoBehaviour
         LayoutRebuilder.ForceRebuildLayoutImmediate(contentParent);
 
         _tutorialID = "processor_" + _recipeData.resourceType.ToString();
-        if (!string.IsNullOrEmpty(_tutorialID) && glowMaterial != null) {
-            TutorialManager.Instance?.RegisterRuntimeUI(_tutorialID, gameObject, glowMaterial);
+        if (!string.IsNullOrEmpty(_tutorialID) && glowMaterial != null && TutorialManager.Instance != null) {
+            TutorialManager.Instance.RegisterRuntimeUI(_tutorialID, gameObject, glowMaterial);
         }
     }
 

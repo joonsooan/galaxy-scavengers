@@ -19,7 +19,6 @@ public class FloatingResourceImage : MonoBehaviour
 
     public void Play(ResourceType resourceType)
     {
-        // Kill any existing tweens to prevent conflicts
         transform.DOKill();
         if (resourceImage != null)
         {
@@ -30,7 +29,6 @@ public class FloatingResourceImage : MonoBehaviour
             text.DOKill();
         }
         
-        // Null checks
         if (_rectTransform == null)
         {
             _rectTransform = GetComponent<RectTransform>();
@@ -51,9 +49,9 @@ public class FloatingResourceImage : MonoBehaviour
                 resourceIcon = ecm.GetElectricityResourceIcon();
             }
         }
-        if (resourceIcon == null)
+        if (resourceIcon == null && ResourceManager.Instance != null)
         {
-            resourceIcon = ResourceManager.Instance?.GetResourceIcon(resourceType);
+            resourceIcon = ResourceManager.Instance.GetResourceIcon(resourceType);
         }
         if (resourceIcon != null)
         {

@@ -159,7 +159,6 @@ public class BaseInventorySystem : MonoBehaviour
 
     private void InitializeInventory()
     {
-        inventoryGridContainer.GetComponent<GridLayoutGroup>();
         int totalSlots = inventoryWidth * inventoryHeight;
 
         for (int i = 0; i < totalSlots; i++) {
@@ -296,8 +295,6 @@ public class BaseInventorySystem : MonoBehaviour
 
     private void RefreshResourcesOnly()
     {
-        _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
-        
         for (int i = 0; i < _inventoryCells.Count; i++) {
             if (!IsSlotUsedByModule(i) && _inventoryCells[i] != null) {
                 _inventoryCells[i].Clear();
@@ -349,8 +346,6 @@ public class BaseInventorySystem : MonoBehaviour
 
     public void RefreshModulesOnly()
     {
-        _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
-        
         RestoreBaseInventoryCellsFromModules();
         _moduleCells.Clear();
 
@@ -408,7 +403,6 @@ public class BaseInventorySystem : MonoBehaviour
 
     public bool TryAddResourceToInventory(ResourceType type, int amount, bool moveAll = false)
     {
-        _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
         if (_baseInventoryManager == null) {
             return false;
         }
@@ -453,7 +447,6 @@ public class BaseInventorySystem : MonoBehaviour
 
     public void ReturnResourceToBaseInventory(ResourceType type, int amount)
     {
-        _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
         if (_baseInventoryManager != null) {
             _baseInventoryManager.AddResource(type, amount);
             UpdateInventoryInfoText();
@@ -462,7 +455,6 @@ public class BaseInventorySystem : MonoBehaviour
 
     public void ReturnAllResourcesOfType(ResourceType type)
     {
-        _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
         if (_baseInventoryManager == null) {
             return;
         }
@@ -517,7 +509,6 @@ public class BaseInventorySystem : MonoBehaviour
 
     private void UnloadAllToBaseInventory()
     {
-        _baseInventoryManager = FindFirstObjectByType<BaseInventoryManager>();
         if (_baseInventoryManager == null) return;
 
         Dictionary<ResourceType, int> resourcesToTransfer = new Dictionary<ResourceType, int>();

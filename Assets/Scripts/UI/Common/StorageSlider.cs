@@ -23,11 +23,11 @@ public class StorageSlider : MonoBehaviour
         {
             _targetStorage.OnResourceChanged -= HandleResourceChanged;
             _targetStorage.OnResourceChanged += HandleResourceChanged;
-            
-            Transform targetTransform = (storage as Component)?.transform;
-            if (targetTransform != null)
+
+            Component storageComponent = storage as Component;
+            if (storageComponent != null)
             {
-                transform.position = targetTransform.position + offset;
+                transform.position = storageComponent.transform.position + offset;
             }
             
             UpdateTotalStorageUI();

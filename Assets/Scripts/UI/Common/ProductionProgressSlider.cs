@@ -31,7 +31,7 @@ public class ProductionProgressSlider : MonoBehaviour
         }
 
         _canvas = GetComponentInParent<Canvas>();
-        if (_canvas == null && GameManager.Instance?.uiManager != null) {
+        if (_canvas == null && GameManager.Instance != null && GameManager.Instance.uiManager != null) {
             _canvas = GameManager.Instance.uiManager.GetObjectUICanvas();
         }
 
@@ -52,10 +52,6 @@ public class ProductionProgressSlider : MonoBehaviour
     {
         if (_targetTransform == null || !gameObject.activeSelf) {
             return;
-        }
-
-        if (_mainCamera == null) {
-            _mainCamera = Camera.main;
         }
 
         if (_canvas == null) {

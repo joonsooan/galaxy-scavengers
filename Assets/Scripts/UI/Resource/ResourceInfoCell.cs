@@ -14,6 +14,12 @@ public class ResourceInfoCell : MonoBehaviour
     private bool _isTrackingResources;
     private bool _tracksToken;
     private bool _tokenCostLabelShowsBalanceFraction = true;
+    private RectTransform _rectTransform;
+
+    private void Awake()
+    {
+        _rectTransform = GetComponent<RectTransform>();
+    }
 
     private void OnEnable()
     {
@@ -60,7 +66,7 @@ public class ResourceInfoCell : MonoBehaviour
             resourceImage.sprite = resourceIcon != null ? resourceIcon : null;
         }
 
-        LayoutRebuilder.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
+        LayoutRebuilder.ForceRebuildLayoutImmediate(_rectTransform);
         if (resourceAmount != null)
             resourceAmount.color = _originalTextColor;
     }
@@ -96,7 +102,7 @@ public class ResourceInfoCell : MonoBehaviour
         UpdateColor();
         
         if (rebuildImmediately)
-            LayoutRebuilder.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
+            LayoutRebuilder.ForceRebuildLayoutImmediate(_rectTransform);
         
         if (gameObject.activeInHierarchy)
         {
@@ -146,7 +152,7 @@ public class ResourceInfoCell : MonoBehaviour
 
         if (rebuildImmediately)
         {
-            LayoutRebuilder.ForceRebuildLayoutImmediate(GetComponent<RectTransform>());
+            LayoutRebuilder.ForceRebuildLayoutImmediate(_rectTransform);
         }
 
         if (gameObject.activeInHierarchy)

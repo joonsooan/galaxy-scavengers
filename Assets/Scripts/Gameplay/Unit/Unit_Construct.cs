@@ -60,6 +60,7 @@ public class Unit_Construct : UnitBase
     private bool _isInvulnerable;
     private UnitAllyBatteryDriver _allyBatteryDriver;
     private float _prefabMoveSpeed;
+    private GameAlertUIManager _gameAlertUIManager;
 
     public bool IsInvulnerable => _isInvulnerable;
 
@@ -100,6 +101,7 @@ public class Unit_Construct : UnitBase
             _baseHoverLocalPosition = _spriteTransform.localPosition;
         }
         _constructionStateHash = Animator.StringToHash(constructionAnimationStateName);
+        _gameAlertUIManager = FindFirstObjectByType<GameAlertUIManager>();
     }
 
     private void Update()
@@ -118,7 +120,9 @@ public class Unit_Construct : UnitBase
     protected override void OnEnable()
     {
         base.OnEnable();
-        UnitManager.Instance?.AddUnit(this);
+        if (UnitManager.Instance != null) {
+            UnitManager.Instance.AddUnit(this);
+        }
         ApplyConstructUpgradeModifiers();
 
         if (ConstructionManager.Instance != null) {
@@ -139,8 +143,12 @@ public class Unit_Construct : UnitBase
             _activeRedistributionTask = null;
         }
         base.OnDisable();
-        UnitManager.Instance?.RemoveUnit(this);
-        ConstructionManager.Instance?.UnregisterConstructDrone(this);
+        if (UnitManager.Instance != null) {
+            UnitManager.Instance.RemoveUnit(this);
+        }
+        if (ConstructionManager.Instance != null) {
+            ConstructionManager.Instance.UnregisterConstructDrone(this);
+        }
         ReleaseFromConstruction();
     }
 
@@ -273,7 +281,9 @@ public class Unit_Construct : UnitBase
             return;
         }
 
-        ConstructionManager.Instance?.RequestTask(this);
+        if (ConstructionManager.Instance != null) {
+            ConstructionManager.Instance.RequestTask(this);
+        }
 
         if (_currentState != ConstructState.Idle)
         {
@@ -376,12 +386,16 @@ public class Unit_Construct : UnitBase
                 if (!movedToNext) {
                     if (_carriedAmount > 0 && CanDepositResource()) {
                         if (!TryBeginDeliveringToConstructionSite()) {
-                            _currentRequest?.site?.CancelRequest(_currentRequest);
+                            if (_currentRequest != null && _currentRequest.site != null) {
+                                _currentRequest.site.CancelRequest(_currentRequest);
+                            }
                             SetTask_Idle();
                         }
                     }
                     else {
-                        _currentRequest?.site?.CancelRequest(_currentRequest);
+                        if (_currentRequest != null && _currentRequest.site != null) {
+                            _currentRequest.site.CancelRequest(_currentRequest);
+                        }
                         SetTask_Idle();
                     }
                 }
@@ -389,12 +403,16 @@ public class Unit_Construct : UnitBase
             else {
                 if (_carriedAmount > 0 && CanDepositResource()) {
                     if (!TryBeginDeliveringToConstructionSite()) {
-                        _currentRequest?.site?.CancelRequest(_currentRequest);
+                        if (_currentRequest != null && _currentRequest.site != null) {
+                            _currentRequest.site.CancelRequest(_currentRequest);
+                        }
                         SetTask_Idle();
                     }
                 }
                 else {
-                    _currentRequest?.site?.CancelRequest(_currentRequest);
+                    if (_currentRequest != null && _currentRequest.site != null) {
+                        _currentRequest.site.CancelRequest(_currentRequest);
+                    }
                     SetTask_Idle();
                 }
             }
@@ -402,12 +420,16 @@ public class Unit_Construct : UnitBase
         else {
             if (_carriedAmount > 0 && CanDepositResource()) {
                 if (!TryBeginDeliveringToConstructionSite()) {
-                    _currentRequest?.site?.CancelRequest(_currentRequest);
+                    if (_currentRequest != null && _currentRequest.site != null) {
+                        _currentRequest.site.CancelRequest(_currentRequest);
+                    }
                     SetTask_Idle();
                 }
             }
             else {
-                _currentRequest?.site?.CancelRequest(_currentRequest);
+                if (_currentRequest != null && _currentRequest.site != null) {
+                    _currentRequest.site.CancelRequest(_currentRequest);
+                }
                 SetTask_Idle();
             }
         }
@@ -496,9 +518,8 @@ public class Unit_Construct : UnitBase
         ShowProgressBar();
         float elapsedTime = 0f;
 
-        float constructionSpeedMultiplier = GetConstructionSpeedMultiplier();
         float batteryWorkMult = _allyBatteryDriver != null ? _allyBatteryDriver.GetWorkSpeedMultiplier() : 1f;
-        float adjustedUnloadingTime = unloadingTime / (constructionSpeedMultiplier * Mathf.Max(0.05f, batteryWorkMult));
+        float adjustedUnloadingTime = unloadingTime / Mathf.Max(0.05f, batteryWorkMult);
 
         while (elapsedTime < adjustedUnloadingTime) {
             elapsedTime += Time.deltaTime;
@@ -534,35 +555,15 @@ public class Unit_Construct : UnitBase
             site.ReleaseDrone(this);
 
             _currentState = ConstructState.Idle;
-            ConstructionManager.Instance?.OnSiteResourceDelivered(site);
+            if (ConstructionManager.Instance != null) {
+                ConstructionManager.Instance.OnSiteResourceDelivered(site);
+            }
         }
         else {
             _currentState = ConstructState.Idle;
         }
     }
 
-
-    private void AdjustSpriteDirectionToPosition(Vector3 targetPosition)
-    {
-        if (BuildingManager.Instance == null || BuildingManager.Instance.grid == null) return;
-        if (!TryGetComponent(out UnitSpriteController spriteController)) return;
-
-        Vector3Int unitCell = BuildingManager.Instance.grid.WorldToCell(transform.position);
-        Vector3Int targetCell = BuildingManager.Instance.grid.WorldToCell(targetPosition);
-        Vector2 direction = CalculateDirection(unitCell, targetCell);
-        spriteController.UpdateSpriteDirection(direction);
-    }
-
-    private void AdjustSpriteDirectionToBuilding(Transform buildingTransform)
-    {
-        if (buildingTransform == null || BuildingManager.Instance == null || BuildingManager.Instance.grid == null) return;
-        if (!TryGetComponent(out UnitSpriteController spriteController)) return;
-
-        Vector3Int unitCell = BuildingManager.Instance.grid.WorldToCell(transform.position);
-        Vector3Int buildingCell = BuildingManager.Instance.grid.WorldToCell(buildingTransform.position);
-        Vector2 direction = CalculateDirection(unitCell, buildingCell);
-        spriteController.UpdateSpriteDirection(direction);
-    }
 
     private bool IsAtTarget()
     {
@@ -713,7 +714,9 @@ public class Unit_Construct : UnitBase
                             }
                         }
 
-                        _currentRequest?.site?.CancelRequest(_currentRequest);
+                        if (_currentRequest != null && _currentRequest.site != null) {
+                            _currentRequest.site.CancelRequest(_currentRequest);
+                        }
                         _nextTaskRequestTime = Time.time + TaskRequestCooldown;
                         SetConstructNoResourceAlert(false);
                         SetTask_Idle();
@@ -723,7 +726,9 @@ public class Unit_Construct : UnitBase
             }
         }
 
-        _currentRequest?.site?.CancelRequest(_currentRequest);
+        if (_currentRequest != null && _currentRequest.site != null) {
+            _currentRequest.site.CancelRequest(_currentRequest);
+        }
         _nextTaskRequestTime = Time.time + TaskRequestCooldown;
         SetConstructNoResourceAlert(!hasSufficientResource);
         SetTask_Idle();
@@ -739,11 +744,6 @@ public class Unit_Construct : UnitBase
     public void SetTaskRequestCooldown(float duration)
     {
         _nextTaskRequestTime = Time.time + duration;
-    }
-
-    private float GetConstructionSpeedMultiplier()
-    {
-        return 1f;
     }
 
     public void ApplyConstructUpgradeModifiers()
@@ -773,7 +773,9 @@ public class Unit_Construct : UnitBase
         HideProgressBar();
 
         if (_currentRequest != null) {
-            _currentRequest.site?.CancelRequest(_currentRequest);
+            if (_currentRequest.site != null) {
+                _currentRequest.site.CancelRequest(_currentRequest);
+            }
             _currentRequest = null;
         }
 
@@ -805,12 +807,13 @@ public class Unit_Construct : UnitBase
     private void SetConstructNoResourceAlert(bool shouldEnable)
     {
         if (shouldEnable == _noResourceAlertActive) return;
-        GameAlertUIManager alertManager = FindFirstObjectByType<GameAlertUIManager>();
-        if (shouldEnable) {
-            alertManager?.RegisterAlert(GameAlertType.ConstructNoResource, this);
-        }
-        else {
-            alertManager?.UnregisterAlert(GameAlertType.ConstructNoResource, this);
+        if (_gameAlertUIManager != null) {
+            if (shouldEnable) {
+                _gameAlertUIManager.RegisterAlert(GameAlertType.ConstructNoResource, this);
+            }
+            else {
+                _gameAlertUIManager.UnregisterAlert(GameAlertType.ConstructNoResource, this);
+            }
         }
         _noResourceAlertActive = shouldEnable;
     }
@@ -1155,14 +1158,18 @@ public class Unit_Construct : UnitBase
         ReleaseFromConstruction();
         _currentState = ConstructState.Idle;
         currentState = UnitState.Idle;
-        movement?.StopMovement();
+        if (movement != null) {
+            movement.StopMovement();
+        }
     }
 
     public void OnChargeStateExit()
     {
         _currentState = ConstructState.Idle;
         currentState = UnitState.Idle;
-        movement?.StopMovement();
+        if (movement != null) {
+            movement.StopMovement();
+        }
         ResetIdleRoam();
     }
 }

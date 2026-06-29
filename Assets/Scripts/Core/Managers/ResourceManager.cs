@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public enum ResourceType
 {
@@ -156,8 +155,6 @@ public class ResourceManager : MonoBehaviour
 
     private void OnEnable()
     {
-        SceneManager.sceneLoaded += OnSceneLoaded;
-
         // Forward events from ResourceDataManager for backward compatibility
         ResourceDataManager.OnNewStorageAdded += ForwardOnNewStorageAdded;
         ResourceDataManager.OnStorageRemoved += ForwardOnStorageRemoved;
@@ -169,8 +166,6 @@ public class ResourceManager : MonoBehaviour
 
     private void OnDisable()
     {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-
         ResourceDataManager.OnNewStorageAdded -= ForwardOnNewStorageAdded;
         ResourceDataManager.OnStorageRemoved -= ForwardOnStorageRemoved;
         ResourceDataManager.OnStorageSpaceFreed -= ForwardOnStorageSpaceFreed;
@@ -218,16 +213,10 @@ public class ResourceManager : MonoBehaviour
             return;
         }
 
-        // Initialize resource stats in ResourceDataManager
         if (resourceStatsList != null && resourceStatsList.Count > 0)
         {
             ResourceDataManager.Instance.InitializeResourceStats(resourceStatsList);
         }
-    }
-
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        // Initialization is handled in RegisterMainStructure.
     }
 
     private int GetInitialAmount(ResourceType type)
@@ -297,10 +286,12 @@ public class ResourceManager : MonoBehaviour
         mainStructure.UpdateStorageUI();
     }
 
-    // Delegate all data operations to ResourceDataManager
     public void AddResource(ResourceType type, int amount)
     {
-        ResourceDataManager.Instance?.AddResource(type, amount);
+        if (ResourceDataManager.Instance != null)
+        {
+            ResourceDataManager.Instance.AddResource(type, amount);
+        }
     }
 
     public void DistributeRefundedResource(ResourceType type, int amount, Vector3 sourcePosition)
@@ -502,27 +493,39 @@ public class ResourceManager : MonoBehaviour
 
     public ResourceStats GetResourceStats(ResourceType type)
     {
-        return ResourceDataManager.Instance?.GetResourceStats(type);
+        return ResourceDataManager.Instance != null ? ResourceDataManager.Instance.GetResourceStats(type) : null;
     }
 
     public void AddStorage(IStorage storage)
     {
-        ResourceDataManager.Instance?.AddStorage(storage);
+        if (ResourceDataManager.Instance != null)
+        {
+            ResourceDataManager.Instance.AddStorage(storage);
+        }
     }
 
     public void RemoveStorage(IStorage storage)
     {
-        ResourceDataManager.Instance?.RemoveStorage(storage);
+        if (ResourceDataManager.Instance != null)
+        {
+            ResourceDataManager.Instance.RemoveStorage(storage);
+        }
     }
 
     public void ReserveStorageCapacity(IStorage storage, int amount)
     {
-        ResourceDataManager.Instance?.ReserveCapacity(storage, amount);
+        if (ResourceDataManager.Instance != null)
+        {
+            ResourceDataManager.Instance.ReserveCapacity(storage, amount);
+        }
     }
 
     public void ReleaseStorageCapacity(IStorage storage, int amount)
     {
-        ResourceDataManager.Instance?.ReleaseCapacity(storage, amount);
+        if (ResourceDataManager.Instance != null)
+        {
+            ResourceDataManager.Instance.ReleaseCapacity(storage, amount);
+        }
     }
 
     public int GetAvailableStorageCapacity(IStorage storage)
@@ -532,7 +535,10 @@ public class ResourceManager : MonoBehaviour
 
     public void NotifyStorageSpaceFreed(IStorage storage, int availableCapacity)
     {
-        ResourceDataManager.Instance?.NotifyStorageSpaceFreed(storage, availableCapacity);
+        if (ResourceDataManager.Instance != null)
+        {
+            ResourceDataManager.Instance.NotifyStorageSpaceFreed(storage, availableCapacity);
+        }
     }
 
     public List<IStorage> GetAllStorages()
@@ -555,12 +561,18 @@ public class ResourceManager : MonoBehaviour
 
     public void AddResourceNode(ResourceNode node)
     {
-        ResourceDataManager.Instance?.AddResourceNode(node);
+        if (ResourceDataManager.Instance != null)
+        {
+            ResourceDataManager.Instance.AddResourceNode(node);
+        }
     }
 
     public void RemoveResourceNode(ResourceNode node)
     {
-        ResourceDataManager.Instance?.RemoveResourceNode(node);
+        if (ResourceDataManager.Instance != null)
+        {
+            ResourceDataManager.Instance.RemoveResourceNode(node);
+        }
     }
 
     public List<ResourceNode> GetAllResources()

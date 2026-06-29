@@ -24,7 +24,8 @@ public class ConstructionSite : MonoBehaviour
     
     public Vector3 GetPosition()
     {
-        return BuildingManager.Instance?.grid?.GetCellCenterWorld(cellPosition) ?? Vector3.zero;
+        if (BuildingManager.Instance == null || BuildingManager.Instance.grid == null) return Vector3.zero;
+        return BuildingManager.Instance.grid.GetCellCenterWorld(cellPosition);
     }
     
     private void InitializePieceTracking()

@@ -358,7 +358,7 @@ public class InventorySystem : MonoBehaviour
             return 0;
         }
 
-        MainStructure mainStructure = ResourceDataManager.Instance?.GetMainStructure();
+        MainStructure mainStructure = ResourceDataManager.Instance != null ? ResourceDataManager.Instance.GetMainStructure() : null;
         List<IStorage> orderedStorages = new List<IStorage>();
         if (mainStructure != null)
         {

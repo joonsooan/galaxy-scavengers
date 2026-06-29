@@ -62,7 +62,6 @@ public class NoiseManager : MonoBehaviour
             {
                 _lastTestNoisePercentage = testNoisePercentage;
                 OnNoiseChanged?.Invoke(testNoisePercentage);
-                CheckAndLogZoneChange();
             }
             return;
         }
@@ -71,7 +70,6 @@ public class NoiseManager : MonoBehaviour
             _lastTestNoisePercentage = -1f;
             float real = Mathf.Clamp01(_totalNoise / maxNoiseValue) * 100f;
             OnNoiseChanged?.Invoke(real);
-            CheckAndLogZoneChange();
         }
 #endif
 
@@ -197,12 +195,6 @@ public class NoiseManager : MonoBehaviour
 
         float pct = NoisePercentage;
         OnNoiseChanged?.Invoke(pct);
-        CheckAndLogZoneChange();
-    }
-
-    private void CheckAndLogZoneChange()
-    {
-        NoiseZone current = GetCurrentNoiseZone();
     }
 
     private UnitData GetUnitData(UnitBase unit)

@@ -51,7 +51,7 @@ public class UnitMinerAssignmentUIController : MonoBehaviour
 
     private void OnAllyUnitCountChanged(UnitBase _)
     {
-        assignmentSystem?.RefreshAssignments();
+        if (assignmentSystem != null) assignmentSystem.RefreshAssignments();
         RefreshUIFromSystem();
     }
 

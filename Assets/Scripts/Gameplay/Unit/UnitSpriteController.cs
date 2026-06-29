@@ -20,6 +20,7 @@ public class UnitSpriteController : MonoBehaviour
     private Vector2 _lastDirection = Vector2.down;
     private float _lastDirectionUpdateTime;
     private float _lastUpdateTime;
+    private Unit_Processor _parentProcessor;
     private Vector3? _targetPosition;
     private Transform _targetTransform;
     private UnitMovement _unitMovement;
@@ -28,6 +29,7 @@ public class UnitSpriteController : MonoBehaviour
     {
         _animator = GetComponent<Animator>();
         _unitMovement = GetComponentInParent<UnitMovement>();
+        _parentProcessor = GetComponentInParent<Unit_Processor>();
 
         if (_animator != null) {
             _animator.speed = 1.0f;
@@ -44,8 +46,7 @@ public class UnitSpriteController : MonoBehaviour
             _animator.speed = 1.0f;
         }
 
-        Unit_Processor parentDrone = GetComponentInParent<Unit_Processor>();
-        if (parentDrone != null) {
+        if (_parentProcessor != null) {
             return;
         }
 

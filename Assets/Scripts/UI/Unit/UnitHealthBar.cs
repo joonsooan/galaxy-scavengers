@@ -33,7 +33,7 @@ public class UnitHealthBar : MonoBehaviour
         if (_canvas != null) return;
 
         _canvas = GetComponentInParent<Canvas>();
-        if (_canvas == null && GameManager.Instance?.uiManager != null)
+        if (_canvas == null && GameManager.Instance != null && GameManager.Instance.uiManager != null)
             _canvas = GameManager.Instance.uiManager.GetObjectUICanvas();
 
         if (_canvas != null && transform.parent != _canvas.transform)
@@ -90,11 +90,6 @@ public class UnitHealthBar : MonoBehaviour
         {
             Destroy(gameObject);
             return;
-        }
-
-        if (_mainCamera == null)
-        {
-            _mainCamera = Camera.main;
         }
 
         transform.position = _target.position + new Vector3(0f, yOffset, 0f);

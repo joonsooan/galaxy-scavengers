@@ -89,7 +89,7 @@ public class UnitUpgradeUIController : MonoBehaviour
 
         for (int i = 0; i < cellParent.childCount; i++) {
             UnitUpgradeCell cell = cellParent.GetChild(i).GetComponent<UnitUpgradeCell>();
-            cell?.RefreshDisplay();
+            if (cell != null) cell.RefreshDisplay();
         }
     }
 }

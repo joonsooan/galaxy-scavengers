@@ -77,7 +77,6 @@ public static class BaseCarryOverManager
     private static void ScanConnectedBuildings(Vector3Int mainAnchor)
     {
         BuildingPiece[] pieces = Object.FindObjectsByType<BuildingPiece>(FindObjectsSortMode.None);
-        Debug.Log("[BaseCarryOverManager] Found pieces total in scene: " + pieces.Length + ", mainAnchor: " + mainAnchor);
 
         foreach (BuildingPiece piece in pieces)
         {
@@ -114,7 +113,6 @@ public static class BaseCarryOverManager
             BuildingDataHolder holder = piece.GetComponent<BuildingDataHolder>();
             if (holder == null || holder.buildingData == null)
             {
-                Debug.Log("[BaseCarryOverManager] Holder or buildingData null for piece: " + piece.name);
                 continue;
             }
 
@@ -157,11 +155,9 @@ public static class BaseCarryOverManager
             }
 
             _savedBuildings.Add(saved);
-            Debug.Log("[BaseCarryOverManager] Saved building: " + saved.buildingType + ", relativeAnchor: " + saved.relativeAnchor);
         }
 
         _hasCarriedOverData = _savedBuildings.Count > 0 || _savedPendingResources != null;
-        Debug.Log("[BaseCarryOverManager] Finished. Saved buildings count: " + _savedBuildings.Count + ", hasCarriedOverData: " + _hasCarriedOverData);
     }
 
     public static void RestoreBaseState()

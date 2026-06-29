@@ -93,8 +93,8 @@ public class DroneProduceCell : MonoBehaviour, IPointerEnterHandler, IPointerExi
         _currentProducedCount = _mainStructure.GetCurrentUnitCount(_unitIndex);
         _targetCount = _mainStructure.GetTargetUnitCount(_unitIndex);
         UpdateUI();
-        if (!string.IsNullOrEmpty(_tutorialID) && glowMaterial != null) {
-            TutorialManager.Instance?.RegisterRuntimeUI(_tutorialID, gameObject, glowMaterial);
+        if (!string.IsNullOrEmpty(_tutorialID) && glowMaterial != null && TutorialManager.Instance != null) {
+            TutorialManager.Instance.RegisterRuntimeUI(_tutorialID, gameObject, glowMaterial);
         }
 
         MainStructure.OnUnitTargetChanged += HandleUnitTargetChanged;

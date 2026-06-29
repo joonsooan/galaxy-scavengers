@@ -6,10 +6,19 @@ public class AlertCameraClickHandler : MonoBehaviour
 {
     [SerializeField] private CameraTargetController cameraTargetController;
 
+    private PointerEventData _pointerEventData;
+    private readonly List<RaycastResult> _raycastResultsCache = new List<RaycastResult>();
+
     private void Awake()
     {
         if (cameraTargetController == null)
             cameraTargetController = FindFirstObjectByType<CameraTargetController>();
+    }
+
+    private void Start()
+    {
+        if (EventSystem.current != null)
+            _pointerEventData = new PointerEventData(EventSystem.current);
     }
 
     private void Update()
@@ -21,14 +30,18 @@ public class AlertCameraClickHandler : MonoBehaviour
             return;
         if (EventSystem.current == null)
             return;
-        PointerEventData pointerData = new PointerEventData(EventSystem.current);
-        pointerData.position = Input.mousePosition;
-        List<RaycastResult> results = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(pointerData, results);
+
+        if (_pointerEventData == null)
+            _pointerEventData = new PointerEventData(EventSystem.current);
+        _pointerEventData.position = Input.mousePosition;
+
+        _raycastResultsCache.Clear();
+        EventSystem.current.RaycastAll(_pointerEventData, _raycastResultsCache);
+
         bool clickedAlert = false;
-        for (int i = 0; i < results.Count; i++)
+        for (int i = 0; i < _raycastResultsCache.Count; i++)
         {
-            GameObject hitObject = results[i].gameObject;
+            GameObject hitObject = _raycastResultsCache[i].gameObject;
             if (hitObject == null)
                 continue;
             if (hitObject.GetComponentInParent<AlertCellTooltipTrigger>() != null)
@@ -39,8 +52,6 @@ public class AlertCameraClickHandler : MonoBehaviour
         }
         if (clickedAlert)
             return;
-        if (cameraTargetController == null)
-            cameraTargetController = FindFirstObjectByType<CameraTargetController>();
         if (cameraTargetController == null)
             return;
         cameraTargetController.ResetFollowTargetToPlayer();

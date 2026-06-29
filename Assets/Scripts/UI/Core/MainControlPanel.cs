@@ -366,7 +366,7 @@ public class MainControlPanel : MonoBehaviour
             buildingInfoPanel.SetActive(false);
         }
         ShowPanel(resourceStatPanel);
-        resourceStatsUIController?.Refresh();
+        if (resourceStatsUIController != null) resourceStatsUIController.Refresh();
     }
 
     private void OnUnitManagementBtnClicked()
@@ -414,15 +414,13 @@ public class MainControlPanel : MonoBehaviour
     private void ShowPanel(GameObject panel)
     {
         if (panel == null) return;
-        
-        // ?꾩옱 蹂댁뿬二쇨퀬 ?덈뒗 ?먮꽟怨??ㅻⅨ 踰꾪듉 ?대┃ ??蹂댁뿬二쇰뜕 ?먮꽟 鍮꾪솢?깊솕
+
         if (_currentlyActivePanel != null && _currentlyActivePanel != panel)
         {
             _buildingInfoPanelComponent.ClearInfo();
             _currentlyActivePanel.SetActive(false);
         }
-        
-        // 媛숈? 踰꾪듉 ?대┃ ???먮꽟 ?④?
+
         if (_currentlyActivePanel == panel)
         {
             panel.SetActive(false);
@@ -430,7 +428,6 @@ public class MainControlPanel : MonoBehaviour
             buildingInfoPanel.SetActive(false);
             _currentlyActivePanel = null;
         }
-        // _currentlyActivePanel = null ????踰꾪듉 ?대┃ ??蹂댁뿬以?
         else
         {
             panel.SetActive(true);
@@ -512,7 +509,7 @@ public class MainControlPanel : MonoBehaviour
             {
                 resourceStatsUIController = resourceStatPanel.GetComponentInChildren<ResourceStatsUIController>(true);
             }
-            resourceStatsUIController?.Refresh();
+            if (resourceStatsUIController != null) resourceStatsUIController.Refresh();
         }
 
         if (unitManagementPanelRoot != null)

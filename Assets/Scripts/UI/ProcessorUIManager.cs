@@ -252,8 +252,8 @@ public class ProcessorUIManager : MonoBehaviour
             btn.onClick.AddListener(() => OnResourceTypePicked(typeCopy));
 
             string tutorialID = "processor_picker_" + type.ToString();
-            if (glowMaterial != null) {
-                TutorialManager.Instance?.RegisterRuntimeUI(tutorialID, iconObj, glowMaterial);
+            if (glowMaterial != null && TutorialManager.Instance != null) {
+                TutorialManager.Instance.RegisterRuntimeUI(tutorialID, iconObj, glowMaterial);
             }
         }
     }

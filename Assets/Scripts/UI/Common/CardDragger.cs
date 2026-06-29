@@ -46,6 +46,14 @@ public class CardDragger : MonoBehaviour
     private Vector3Int _dragCurrentCell;
     private List<Vector3Int> _bresenhamScratch;
 
+    private Camera _mainCamera;
+    private readonly List<RaycastResult> _raycastResultsCache = new List<RaycastResult>();
+
+    private void Awake()
+    {
+        _mainCamera = Camera.main;
+    }
+
     private void Update()
     {
         if (!_isDragging) return;
@@ -231,7 +239,7 @@ public class CardDragger : MonoBehaviour
 
     private void HandleDragVisuals()
     {
-        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 mouseWorldPos = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPos.z = 0;
 
         Vector3Int cellPosition = grid.WorldToCell(mouseWorldPos);
@@ -344,7 +352,7 @@ public class CardDragger : MonoBehaviour
                 return;
             }
 
-            Vector3Int cellPosition = grid.WorldToCell(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+            Vector3Int cellPosition = grid.WorldToCell(_mainCamera.ScreenToWorldPoint(Input.mousePosition));
 
             if (cellPosition != _lastPlacedCell && !_placedCellsInDrag.Contains(cellPosition))
             {
@@ -394,7 +402,7 @@ public class CardDragger : MonoBehaviour
                 return;
             }
 
-            Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector3 mouseWorldPos = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
             mouseWorldPos.z = 0;
             _dragStartCell = grid.WorldToCell(mouseWorldPos);
             _isDragPlacing = true;
@@ -410,7 +418,7 @@ public class CardDragger : MonoBehaviour
                 return;
             }
 
-            Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector3 mouseWorldPos = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
             mouseWorldPos.z = 0;
             Vector3Int releaseCell = grid.WorldToCell(mouseWorldPos);
 
@@ -449,7 +457,7 @@ public class CardDragger : MonoBehaviour
                 return;
             }
 
-            Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector3 mouseWorldPos = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
             mouseWorldPos.z = 0;
             _dragStartCell = grid.WorldToCell(mouseWorldPos);
             _dragCurrentCell = _dragStartCell;
@@ -466,7 +474,7 @@ public class CardDragger : MonoBehaviour
                 return;
             }
 
-            Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector3 mouseWorldPos = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
             mouseWorldPos.z = 0;
             Vector3Int releaseCell = grid.WorldToCell(mouseWorldPos);
 
@@ -640,7 +648,7 @@ public class CardDragger : MonoBehaviour
         {
             BuildingManager.Instance.CreateConstructionSite(_activeBuildingData, cellPos);
             _placedCellsInDrag.Add(cellPos);
-            TutorialManager.Instance?.OnBuildingPlaced(_activeBuildingData.buildingType);
+            if (TutorialManager.Instance != null) TutorialManager.Instance.OnBuildingPlaced(_activeBuildingData.buildingType);
         }
     }
 
@@ -656,13 +664,13 @@ public class CardDragger : MonoBehaviour
     {
         if (EventSystem.current == null) return false;
 
-        _pointerEventData ??= new PointerEventData(EventSystem.current);
+        if (_pointerEventData == null) _pointerEventData = new PointerEventData(EventSystem.current);
         _pointerEventData.position = Input.mousePosition;
 
-        List<RaycastResult> results = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(_pointerEventData, results);
+        _raycastResultsCache.Clear();
+        EventSystem.current.RaycastAll(_pointerEventData, _raycastResultsCache);
 
-        foreach (RaycastResult result in results)
+        foreach (RaycastResult result in _raycastResultsCache)
         {
             if (result.gameObject.GetComponent<UIDragEndZone>() != null)
             {

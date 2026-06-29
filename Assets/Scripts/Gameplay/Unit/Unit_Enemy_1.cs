@@ -21,7 +21,7 @@ public class Unit_Enemy_1 : EnemyUnitBase
     private bool EvaluateLineOfSight(Damageable building, UnitBase unit, bool allowRetarget)
     {
         Transform targetT = building != null ? building.transform : (unit != null ? unit.transform : null);
-        if (targetT == null || BuildingManager.Instance?.grid == null) return false;
+        if (targetT == null || BuildingManager.Instance == null || BuildingManager.Instance.grid == null) return false;
 
         Vector3 from = transform.position;
         Vector3 to = targetT.position;

@@ -152,7 +152,7 @@ public class GameOverLoadingScreen : MonoBehaviour
             _particleStartCoroutine = StartCoroutine(StartParticlesDelayed());
         }
 
-        yield return new WaitForSecondsRealtime(fadeInDuration);
+        yield return CoroutineCache.GetWaitForSecondsRealtime(fadeInDuration);
 
         if (continueButton != null)
         {

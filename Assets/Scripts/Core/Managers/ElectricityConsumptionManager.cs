@@ -382,7 +382,10 @@ public class ElectricityConsumptionManager : MonoBehaviour
             _batteries.Remove(battery);
             _batteryVisualStates.Remove(battery);
         }
-        PowerCoveragePreviewOverlay.Instance?.RefreshIfShowing();
+        if (PowerCoveragePreviewOverlay.Instance != null)
+        {
+            PowerCoveragePreviewOverlay.Instance.RefreshIfShowing();
+        }
     }
 
     public void RegisterResourceGenerator(ResourceGenerator generator)
@@ -405,7 +408,10 @@ public class ElectricityConsumptionManager : MonoBehaviour
             _resourceGenerators.Remove(generator);
             _resourceGeneratorVisualStates.Remove(generator);
         }
-        PowerCoveragePreviewOverlay.Instance?.RefreshIfShowing();
+        if (PowerCoveragePreviewOverlay.Instance != null)
+        {
+            PowerCoveragePreviewOverlay.Instance.RefreshIfShowing();
+        }
     }
 
     private void SanitizeDeadResourceGenerators()
@@ -450,7 +456,10 @@ public class ElectricityConsumptionManager : MonoBehaviour
             _powerReceivers.Remove(receiver);
             _powerReceiverVisualStates.Remove(receiver);
         }
-        PowerCoveragePreviewOverlay.Instance?.RefreshIfShowing();
+        if (PowerCoveragePreviewOverlay.Instance != null)
+        {
+            PowerCoveragePreviewOverlay.Instance.RefreshIfShowing();
+        }
     }
 
     public void RegisterMainStructure(MainStructure mainStructure)
@@ -1040,7 +1049,11 @@ public class ElectricityConsumptionManager : MonoBehaviour
             return null;
         }
         bool disconnected = state == PowerFeedVisualState.Disconnected;
-        Canvas canvas = GameManager.Instance?.uiManager?.GetObjectUICanvas();
+        Canvas canvas = null;
+        if (GameManager.Instance != null && GameManager.Instance.uiManager != null)
+        {
+            canvas = GameManager.Instance.uiManager.GetObjectUICanvas();
+        }
         if (canvas == null)
         {
             return null;

@@ -17,6 +17,7 @@ public abstract class Damageable : MonoBehaviour, ICombo
     private Color _originalColor;
 
     private SpriteRenderer _sr;
+    private GameAlertUIManager _gameAlertUIManager;
     private Light2D[] _buildingLights2D;
     private float[] _buildingLightBaseAlphas;
     private float[] _buildingLightBaseIntensities;
@@ -40,13 +41,17 @@ public abstract class Damageable : MonoBehaviour, ICombo
         _originalColor = _sr.color;
         _attackAlertWait = CoroutineCache.GetWaitForSeconds(0.5f);
         _flashWait = CoroutineCache.GetWaitForSeconds(flashDuration);
+        _gameAlertUIManager = FindFirstObjectByType<GameAlertUIManager>();
     }
 
     protected virtual void OnEnable()
     {
         currentHealth = maxHealth;
         if (_sr != null) _sr.color = _originalColor;
-        TargetManager.Instance?.RegisterTarget(this);
+        if (TargetManager.Instance != null)
+        {
+            TargetManager.Instance.RegisterTarget(this);
+        }
         
         if (this is UnitBase == false && ShouldRegisterBuildingSystems())
         {
@@ -69,7 +74,10 @@ public abstract class Damageable : MonoBehaviour, ICombo
     protected virtual void OnDisable()
     {
         _flashCoroutine = null;
-        TargetManager.Instance?.UnregisterTarget(this);
+        if (TargetManager.Instance != null)
+        {
+            TargetManager.Instance.UnregisterTarget(this);
+        }
         
         if (_isNoiseBuildingRegistered && NoiseManager.Instance != null)
         {
@@ -101,7 +109,6 @@ public abstract class Damageable : MonoBehaviour, ICombo
 
         currentHealth -= damage;
         HitAudioRouter.PlayHit(this, context);
-        OnDamageTaken(damage);
         OnAnyDamageTaken?.Invoke(this);
         OnHealthChanged();
 
@@ -127,7 +134,7 @@ public abstract class Damageable : MonoBehaviour, ICombo
     
     private void RegisterAttackAlert()
     {
-        var alertManager = FindFirstObjectByType<GameAlertUIManager>();
+        var alertManager = _gameAlertUIManager;
         if (alertManager == null) return;
         
         if (this is UnitBase unitBase)
@@ -177,7 +184,7 @@ public abstract class Damageable : MonoBehaviour, ICombo
     
     private void UnregisterAttackAlert()
     {
-        var alertManager = FindFirstObjectByType<GameAlertUIManager>();
+        var alertManager = _gameAlertUIManager;
         if (alertManager == null || !_isAttackAlertRegistered) return;
         
         if (_attackAlertTimerCoroutine != null)
@@ -211,10 +218,6 @@ public abstract class Damageable : MonoBehaviour, ICombo
     public static event Action<Damageable> OnAnyDamageTaken;
 
     public event Action HealthChanged;
-
-    private void OnDamageTaken(int damage)
-    {
-    }
 
     protected virtual void OnHealthChanged()
     {

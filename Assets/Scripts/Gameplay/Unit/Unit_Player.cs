@@ -51,6 +51,9 @@ public class Unit_Player : UnitBase
     private EventInstance _miningSoundInstance;
     private Coroutine _mineCoroutine;
     private WaitForSeconds _miningDelay;
+    private Rigidbody2D _rb;
+    private PointerEventData _pointerEventData;
+    private List<RaycastResult> _raycastResults = new List<RaycastResult>();
     private UnitSpriteController _spriteController;
     private Vector2 _lockedMiningDirection;
     private bool _wasInputBlockedLastFrame = true;
@@ -64,6 +67,7 @@ public class Unit_Player : UnitBase
         _mainCamera = Camera.main;
         playerMovement = GetComponent<PlayerMovement>();
         _spriteController = GetComponentInChildren<UnitSpriteController>();
+        _rb = GetComponent<Rigidbody2D>();
 
         CreateLaserRenderer();
 
@@ -94,7 +98,9 @@ public class Unit_Player : UnitBase
 
     protected override void OnDisable()
     {
-        _targetResourceNode?.EndMining(this);
+        if (_targetResourceNode != null) {
+            _targetResourceNode.EndMining(this);
+        }
         GameManager.OnPauseStateChanged -= HandlePauseStateChanged;
         base.OnDisable();
     }
@@ -127,7 +133,9 @@ public class Unit_Player : UnitBase
 
     protected override void OnDestroy()
     {
-        _targetResourceNode?.EndMining(this);
+        if (_targetResourceNode != null) {
+            _targetResourceNode.EndMining(this);
+        }
         StopMiningParticles();
         StopMiningSound();
 
@@ -165,8 +173,7 @@ public class Unit_Player : UnitBase
             _isAttacking = false;
         }
 
-        Rigidbody2D rb = GetComponent<Rigidbody2D>();
-        bool isMoving = rb != null && rb.linearVelocity.sqrMagnitude > 0.01f;
+        bool isMoving = _rb != null && _rb.linearVelocity.sqrMagnitude > 0.01f;
 
         if (isMoving && currentState != UnitState.Mining && !_isAttacking) {
             currentState = UnitState.Moving;
@@ -235,8 +242,7 @@ public class Unit_Player : UnitBase
 
     private bool IsMovingWhileMining()
     {
-        Rigidbody2D rb = GetComponent<Rigidbody2D>();
-        return rb != null && rb.linearVelocity.sqrMagnitude > 0.01f;
+        return _rb != null && _rb.linearVelocity.sqrMagnitude > 0.01f;
     }
 
     private void HandleInput()
@@ -326,14 +332,15 @@ public class Unit_Player : UnitBase
             return false;
         }
 
-        PointerEventData pointerData = new PointerEventData(EventSystem.current) {
-            position = Input.mousePosition
-        };
+        if (_pointerEventData == null) {
+            _pointerEventData = new PointerEventData(EventSystem.current);
+        }
+        _pointerEventData.position = Input.mousePosition;
 
-        List<RaycastResult> results = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(pointerData, results);
+        _raycastResults.Clear();
+        EventSystem.current.RaycastAll(_pointerEventData, _raycastResults);
 
-        foreach (RaycastResult result in results) {
+        foreach (RaycastResult result in _raycastResults) {
             if (result.gameObject != null &&
                 result.gameObject.layer == LayerMask.NameToLayer("UI")) {
                 return true;
@@ -514,7 +521,9 @@ public class Unit_Player : UnitBase
             if (minedAmount > 0) {
                 ResourceType minedResourceType = _targetResourceNode.resourceType;
                 AddResourceToStorage(minedResourceType, minedAmount);
-                TutorialManager.Instance?.OnResourceMined(minedResourceType, minedAmount);
+                if (TutorialManager.Instance != null) {
+                    TutorialManager.Instance.OnResourceMined(minedResourceType, minedAmount);
+                }
 
             }
 
@@ -619,7 +628,9 @@ public class Unit_Player : UnitBase
             bulletScript.lifeTime = 3f;
             bulletScript.Initialize(attackDamage, fireDirection);
 
-            TutorialManager.Instance?.OnBulletFired();
+            if (TutorialManager.Instance != null) {
+                TutorialManager.Instance.OnBulletFired();
+            }
         }
 
         _lastFireTime = Time.time;
@@ -704,10 +715,9 @@ public class Unit_Player : UnitBase
         if (!miningSound.IsNull)
         {
             _miningSoundInstance = RuntimeManager.CreateInstance(miningSound);
-            Rigidbody2D rb = GetComponent<Rigidbody2D>();
-            if (rb != null)
+            if (_rb != null)
             {
-                RuntimeManager.AttachInstanceToGameObject(_miningSoundInstance, gameObject, rb);
+                RuntimeManager.AttachInstanceToGameObject(_miningSoundInstance, gameObject, _rb);
             }
             else
             {

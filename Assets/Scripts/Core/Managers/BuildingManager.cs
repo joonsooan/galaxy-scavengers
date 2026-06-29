@@ -494,7 +494,11 @@ public class BuildingManager : MonoBehaviour
         {
             return true;
         }
-        BuildingDataHolder dataHolder = piece.GetComponentInParent<BuildingDataHolder>() ?? piece.GetComponent<BuildingDataHolder>();
+        BuildingDataHolder dataHolder = piece.GetComponentInParent<BuildingDataHolder>();
+        if (dataHolder == null)
+        {
+            dataHolder = piece.GetComponent<BuildingDataHolder>();
+        }
         if (dataHolder != null && dataHolder.buildingData != null)
         {
             return dataHolder.buildingData.buildingType == BuildingType.Platform;
@@ -1132,12 +1136,18 @@ public class BuildingManager : MonoBehaviour
         }
 
         bool found = false;
-        Platform platform = buildingTransform.GetComponent<Platform>() ??
-                            buildingTransform.GetComponentInParent<Platform>(true);
+        Platform platform = buildingTransform.GetComponent<Platform>();
+        if (platform == null)
+        {
+            platform = buildingTransform.GetComponentInParent<Platform>(true);
+        }
         if (platform != null)
         {
-            BuildingPiece piece = buildingTransform.GetComponent<BuildingPiece>() ??
-                                  buildingTransform.GetComponentInParent<BuildingPiece>(true);
+            BuildingPiece piece = buildingTransform.GetComponent<BuildingPiece>();
+            if (piece == null)
+            {
+                piece = buildingTransform.GetComponentInParent<BuildingPiece>(true);
+            }
             anchor = piece != null ? piece.cellPosition : grid.WorldToCell(buildingTransform.position);
             occupiedCells = new List<Vector3Int> { anchor };
             found = true;
@@ -1145,8 +1155,11 @@ public class BuildingManager : MonoBehaviour
 
         if (!found)
         {
-            MainStructure mainStructure = buildingTransform.GetComponent<MainStructure>() ??
-                                          buildingTransform.GetComponentInParent<MainStructure>(true);
+            MainStructure mainStructure = buildingTransform.GetComponent<MainStructure>();
+            if (mainStructure == null)
+            {
+                mainStructure = buildingTransform.GetComponentInParent<MainStructure>(true);
+            }
             if (mainStructure != null && TryGetFootprintForRegisteredMainStructure(mainStructure, out anchor, out occupiedCells))
             {
                 found = true;

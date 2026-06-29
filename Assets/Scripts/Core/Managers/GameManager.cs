@@ -65,13 +65,11 @@ public class GameManager : MonoBehaviour
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
-        Damageable.OnAnyDamageTaken += HandleAnyDamageTaken;
     }
 
     private void OnDisable()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
-        Damageable.OnAnyDamageTaken -= HandleAnyDamageTaken;
     }
 
     public static event Action OnGameSceneInitialized;
@@ -80,10 +78,6 @@ public class GameManager : MonoBehaviour
     public float GetTimeScale()
     {
         return IsPaused ? _savedTimeScale : Time.timeScale;
-    }
-
-    private void HandleAnyDamageTaken(Damageable damageable)
-    {
     }
 
     private void HandleGameInput()
@@ -643,7 +637,7 @@ public class GameManager : MonoBehaviour
                 }
             }
 
-            if (BuildingManager.Instance != null && mainStructure.transform != null && BuildingManager.Instance.grid != null)
+            if (BuildingManager.Instance != null && BuildingManager.Instance.grid != null)
             {
                 Vector3Int cellPos = BuildingManager.Instance.grid.WorldToCell(mainStructure.transform.position);
                 Vector3Int anchorCell = cellPos - new Vector3Int(1, 1, 0);

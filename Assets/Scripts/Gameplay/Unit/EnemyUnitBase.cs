@@ -590,7 +590,8 @@ public abstract class EnemyUnitBase : UnitBase
         if (unit != null) return unit.transform.position;
         if (building == null) return Vector3.zero;
 
-        Grid grid = BuildingManager.Instance?.grid;
+        if (BuildingManager.Instance == null) return building.transform.position;
+        Grid grid = BuildingManager.Instance.grid;
         if (grid == null) return building.transform.position;
 
         Vector3Int buildingCell = grid.WorldToCell(building.transform.position);

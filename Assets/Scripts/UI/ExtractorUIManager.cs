@@ -366,7 +366,7 @@ public class ExtractorUIManager : MonoBehaviour
         }
 
         ExtractorData data = _currentExtractor.ExtractorDataAsset;
-        if (data?.inputTiers == null) {
+        if (data == null || data.inputTiers == null) {
             return;
         }
 

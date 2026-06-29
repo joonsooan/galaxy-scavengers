@@ -32,7 +32,8 @@ public class TechDataCell : MonoBehaviour, IPointerClickHandler
 
     private void Awake()
     {
-        _originalIconSprite = gameObject.GetComponent<Image>()?.sprite;
+        Image selfImage = gameObject.GetComponent<Image>();
+        _originalIconSprite = selfImage != null ? selfImage.sprite : null;
         _rectTransform = GetComponent<RectTransform>();
         if (iconImg != null)
             _iconContainerSize = iconImg.rectTransform.sizeDelta;

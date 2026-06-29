@@ -761,7 +761,7 @@ public class GameAlertUIManager : MonoBehaviour
 
     private IEnumerator DelayedRebuildTooltipLayout()
     {
-        yield return new WaitForEndOfFrame();
+        yield return CoroutineCache.GetWaitForEndOfFrame();
 
         Canvas.ForceUpdateCanvases();
 

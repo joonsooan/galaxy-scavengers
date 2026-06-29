@@ -128,7 +128,6 @@ public class FogOfWarManager : MonoBehaviour
 
     public void StartFogInitializationWithProgress(IInitializationProgress progress)
     {
-        // Debug.Log("[FogOfWar] StartFogInitializationWithProgress");
         StartCoroutine(DelayedFogInitialization(progress));
     }
 
@@ -154,8 +153,6 @@ public class FogOfWarManager : MonoBehaviour
 
         _isInitializing = false;
         IsInitialized = true;
-
-        // Debug.Log("[FogOfWar] DelayedFogInitialization complete, calling ForceRebuildProviderTiles and UpdateVisibilityCoroutine");
 
         ForceRebuildProviderTiles();
         StartCoroutine(UpdateVisibilityCoroutine());
@@ -416,17 +413,13 @@ public class FogOfWarManager : MonoBehaviour
     {
         if (!IsInitialized || _isInitializing)
         {
-            // Debug.Log("[FogOfWar] UpdateVisibilityCoroutine skipped (not initialized or initializing)");
             yield break;
         }
 
         if (grid == null) yield break;
 
-        // Debug.Log("[FogOfWar] UpdateVisibilityCoroutine started");
-
         if (_isVisibilityUpdateRunning)
         {
-            // Debug.Log("[FogOfWar] UpdateVisibilityCoroutine request ignored; already running");
             yield break;
         }
 
@@ -520,8 +513,6 @@ public class FogOfWarManager : MonoBehaviour
         }
 
         _isVisibilityUpdateRunning = false;
-
-        // Debug.Log("[FogOfWar] UpdateVisibilityCoroutine finished");
     }
 
 
@@ -698,17 +689,13 @@ public class FogOfWarManager : MonoBehaviour
     {
         if (!IsInitialized)
         {
-            // Debug.Log("[FogOfWar] RefreshFogOfWar called but not initialized, calling InitializeFogOfWar");
             return;
         }
 
         if (_tileVisibility.Count == 0)
         {
-            // Debug.Log("[FogOfWar] RefreshFogOfWar found empty visibility, calling InitializeFogOfWar");
             InitializeFogOfWar();
         }
-
-        // Debug.Log("[FogOfWar] RefreshFogOfWar starting provider updates and visibility coroutine");
 
         foreach (IVisionProvider provider in _visionProviders)
         {
@@ -795,7 +782,6 @@ public class FogOfWarManager : MonoBehaviour
                 }
                 catch (Exception)
                 {
-                    // Debug.LogWarning($"[FogOfWarManager] Error notifying VisibilityController: {e.Message}");
                     controllers.RemoveAt(i);
                 }
             }

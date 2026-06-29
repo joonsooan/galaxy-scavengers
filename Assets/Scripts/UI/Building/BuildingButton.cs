@@ -40,8 +40,8 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
 
         SubscribeToUnlockEvent();
 
-        if (!string.IsNullOrEmpty(tutorialKey) && glowMaterial != null) {
-            TutorialManager.Instance?.RegisterRuntimeUI(tutorialKey, gameObject, glowMaterial);
+        if (!string.IsNullOrEmpty(tutorialKey) && glowMaterial != null && TutorialManager.Instance != null) {
+            TutorialManager.Instance.RegisterRuntimeUI(tutorialKey, gameObject, glowMaterial);
         }
 
         StartCoroutine(DelayedUnlockCheck());
