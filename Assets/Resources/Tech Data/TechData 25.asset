@@ -16,18 +16,18 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "\uC778\uAD6C \uC218\uC6A9 \uC99D\uAC00 I"
+  manualName: "\uC720\uB2DB \uC22B\uC790 \uC99D\uAC00 I"
   manualDescription: 
   manualIcon: {fileID: 0}
   lockedIcon: {fileID: 0}
   researchCosts:
   - resourceType: 0
-    amount: 25
+    amount: 200
   - resourceType: 2
-    amount: 20
+    amount: 200
   researchDuration: 60
-  prerequisiteTechIndices: 
-  successorTechIndices: 04000000
+  prerequisiteTechIndices: 04000000
+  successorTechIndices: 11000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []

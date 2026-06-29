@@ -22,9 +22,9 @@ MonoBehaviour:
   lockedIcon: {fileID: 0}
   researchCosts:
   - resourceType: 1
-    amount: 25
+    amount: 400
   - resourceType: 0
-    amount: 20
+    amount: 400
   researchDuration: 50
   prerequisiteTechIndices: 0100000007000000
   successorTechIndices: 

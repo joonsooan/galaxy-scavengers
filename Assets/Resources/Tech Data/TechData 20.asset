@@ -18,16 +18,16 @@ MonoBehaviour:
   existingUnitData: {fileID: 0}
   manualName: "\uC194\uB77C\uB098 \uC815\uC218"
   manualDescription: 
-  manualIcon: {fileID: 0}
+  manualIcon: {fileID: -3423204301100993705, guid: 95127c8b357faeb4badbcfa618063ecc, type: 3}
   lockedIcon: {fileID: 0}
   researchCosts:
   - resourceType: 6
-    amount: 15
+    amount: 320
   - resourceType: 1
-    amount: 20
+    amount: 320
   researchDuration: 60
-  prerequisiteTechIndices: 08000000
-  successorTechIndices: 1b000000
+  prerequisiteTechIndices: 0e000000
+  successorTechIndices: 1e000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []

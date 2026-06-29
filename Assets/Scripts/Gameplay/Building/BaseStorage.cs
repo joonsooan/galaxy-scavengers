@@ -134,9 +134,6 @@ public class BaseStorage : Damageable, IStorage
         return currentResources;
     }
 
-    /// <summary>
-    ///     Sets the maximum storage capacity (used by module effects)
-    /// </summary>
     public virtual void SetMaxStorage(int newMaxStorage)
     {
         maxStorageAmount = newMaxStorage;

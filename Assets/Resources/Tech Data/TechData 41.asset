@@ -26,8 +26,8 @@ MonoBehaviour:
   - resourceType: 4
     amount: 15
   researchDuration: 60
-  prerequisiteTechIndices: 0e000000
-  successorTechIndices: 12000000
+  prerequisiteTechIndices: 0b000000
+  successorTechIndices: 1c000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []

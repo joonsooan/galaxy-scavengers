@@ -27,20 +27,23 @@ public class AlertCellTooltipTrigger : MonoBehaviour, IPointerEnterHandler, IPoi
     public void OnPointerEnter(PointerEventData eventData)
     {
         GameAlertType resolvedType = GetResolvedAlertType();
-        if ((_alertManager ??= FindFirstObjectByType<GameAlertUIManager>()) != null)
+        if (_alertManager == null) _alertManager = FindFirstObjectByType<GameAlertUIManager>();
+        if (_alertManager != null)
             _alertManager.ShowTooltip(resolvedType);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        if ((_alertManager ??= FindFirstObjectByType<GameAlertUIManager>()) != null)
+        if (_alertManager == null) _alertManager = FindFirstObjectByType<GameAlertUIManager>();
+        if (_alertManager != null)
             _alertManager.HideTooltip();
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
         GameAlertType resolvedType = GetResolvedAlertType();
-        if ((_alertManager ??= FindFirstObjectByType<GameAlertUIManager>()) == null)
+        if (_alertManager == null) _alertManager = FindFirstObjectByType<GameAlertUIManager>();
+        if (_alertManager == null)
             return;
         _alertManager.TryFocusAlert(resolvedType);
     }

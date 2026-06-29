@@ -21,13 +21,13 @@ MonoBehaviour:
   manualIcon: {fileID: 0}
   lockedIcon: {fileID: 0}
   researchCosts:
-  - resourceType: 4
-    amount: 15
   - resourceType: 0
-    amount: 25
+    amount: 200
+  - resourceType: 1
+    amount: 200
   researchDuration: 50
   prerequisiteTechIndices: 03000000
-  successorTechIndices: 
+  successorTechIndices: 09000000
   isUnlockedByDefault: 0
   unlocksBuildings:
   - {fileID: 11400000, guid: 5e1cf93942651ed4d8f12d600b58973f, type: 2}

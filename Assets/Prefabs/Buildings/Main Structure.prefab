@@ -200,7 +200,7 @@ MonoBehaviour:
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.2
   currentHealth: 0
-  maxStorageAmount: 2000
+  maxStorageAmount: 1000
   droneProduceDisplayName: "\uC2DC\uB4DC \uCF54\uC5B4"
   droneProduceDescription: "\uB2E4\uC591\uD55C \uC720\uB2DB\uC744 \uC0DD\uC0B0\uD560
     \uC218 \uC788\uC2B5\uB2C8\uB2E4."

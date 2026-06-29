@@ -22,12 +22,12 @@ MonoBehaviour:
   lockedIcon: {fileID: 0}
   researchCosts:
   - resourceType: 4
-    amount: 20
+    amount: 160
   - resourceType: 6
-    amount: 15
+    amount: 160
   researchDuration: 60
-  prerequisiteTechIndices: 29000000
-  successorTechIndices: 19000000
+  prerequisiteTechIndices: 15000000
+  successorTechIndices: 16000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []

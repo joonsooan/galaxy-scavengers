@@ -198,7 +198,7 @@ MonoBehaviour:
   flashColor: {r: 1, g: 0, b: 0, a: 1}
   flashDuration: 0.3
   currentHealth: 0
-  maxStorageAmount: 2000
+  maxStorageAmount: 500
 --- !u!114 &5004616453792402242
 MonoBehaviour:
   m_ObjectHideFlags: 0

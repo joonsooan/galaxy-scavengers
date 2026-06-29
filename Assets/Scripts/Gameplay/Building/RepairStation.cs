@@ -39,7 +39,7 @@ public class RepairStation : Damageable, IElectricityConsumer
             _electricityConsumptionManager.RegisterConsumer(this);
         }
         
-        _healWait = new WaitForSeconds(healInterval);
+        _healWait = CoroutineCache.GetWaitForSeconds(healInterval);
         StartHealing();
     }
     

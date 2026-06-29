@@ -16,7 +16,7 @@ MonoBehaviour:
   useExistingData: 0
   existingDisplayableData: {fileID: 0}
   existingUnitData: {fileID: 0}
-  manualName: "\uC774\uB3D9 \uC18D\uB3C4 \uAC15\uD654 I"
+  manualName: "\uC774\uB3D9 \uC18D\uB3C4 \uC99D\uAC00 I"
   manualDescription: 
   manualIcon: {fileID: 0}
   lockedIcon: {fileID: 0}
@@ -26,8 +26,8 @@ MonoBehaviour:
   - resourceType: 6
     amount: 10
   researchDuration: 60
-  prerequisiteTechIndices: 0e000000
-  successorTechIndices: 08000000
+  prerequisiteTechIndices: 11000000
+  successorTechIndices: 24000000
   isUnlockedByDefault: 0
   unlocksBuildings: []
   unlocksUnits: []

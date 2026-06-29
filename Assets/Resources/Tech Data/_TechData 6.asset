@@ -10,28 +10,28 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ceeace5e3ddf138488abd43ac61f82c5, type: 3}
-  m_Name: TechData 8
+  m_Name: _TechData 6
   m_EditorClassIdentifier: Assembly-CSharp::TechData
-  techIndex: 8
+  techIndex: 6
   useExistingData: 1
-  existingDisplayableData: {fileID: 11400000, guid: 170214b1b03686641b36f4b808a97b1c, type: 2}
-  existingUnitData: {fileID: 0}
+  existingDisplayableData: {fileID: 0}
+  existingUnitData: {fileID: 11400000, guid: 33e410bcf8e6ad44f99960dadd48b50b, type: 2}
   manualName: 
   manualDescription: 
   manualIcon: {fileID: 0}
   lockedIcon: {fileID: 0}
   researchCosts:
-  - resourceType: 0
-    amount: 20
   - resourceType: 1
     amount: 15
-  researchDuration: 40
-  prerequisiteTechIndices: 25000000
-  successorTechIndices: 14000000
+  - resourceType: 3
+    amount: 10
+  researchDuration: 30
+  prerequisiteTechIndices: 
+  successorTechIndices: 09000000
   isUnlockedByDefault: 0
-  unlocksBuildings:
-  - {fileID: 11400000, guid: 170214b1b03686641b36f4b808a97b1c, type: 2}
-  unlocksUnits: []
+  unlocksBuildings: []
+  unlocksUnits:
+  - {fileID: 11400000, guid: 33e410bcf8e6ad44f99960dadd48b50b, type: 2}
   unlocksResources: 
   grantStatTypes: 
   grantStatValues: []
