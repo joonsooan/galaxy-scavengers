@@ -314,6 +314,11 @@ public class MainControlPanel : MonoBehaviour
 
     private void OnGameSceneInitialized()
     {
+        RefreshBuildingButtonUnlockStates();
+    }
+
+    private void RefreshBuildingButtonUnlockStates()
+    {
         if (baseBuildingPanel == null) return;
 
         BuildingButton[] buttons = baseBuildingPanel.GetComponentsInChildren<BuildingButton>(true);
@@ -339,6 +344,7 @@ public class MainControlPanel : MonoBehaviour
     {
         GameManager.Instance.uiManager.UnpinAndHideAllPanels();
         buildingInfoPanel.SetActive(true);
+        RefreshBuildingButtonUnlockStates();
         ShowPanel(baseBuildingPanel);
     }
 

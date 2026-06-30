@@ -32,6 +32,7 @@ public class BuildingButton : MonoBehaviour, IPointerEnterHandler, IPointerExitH
         }
 
         InitializeBtn();
+        SubscribeToUnlockEvent();
     }
 
     private void Start()
