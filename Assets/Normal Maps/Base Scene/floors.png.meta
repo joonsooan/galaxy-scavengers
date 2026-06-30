@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 35c66c006ad8d154eb5f32be39da6fd8
+guid: c58bd5c214166fd4fb692763202b2a3b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3231186124988075587
-    second: ceiling_0
+      213: 3613588395409636126
+    second: floors_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -72,7 +72,7 @@ TextureImporter:
   platformSettings:
   - serializedVersion: 4
     buildTarget: DefaultTexturePlatform
-    maxTextureSize: 2048
+    maxTextureSize: 1024
     resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 0
@@ -100,7 +100,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: ceiling_0
+      name: floors_0
       rect:
         serializedVersion: 2
         x: 0
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: db13ae0c6558823d0800000000000000
-      internalID: -3231186124988075587
+      spriteID: e1b7dd0008b062230800000000000000
+      internalID: 3613588395409636126
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      ceiling_0: -3231186124988075587
+      floors_0: 3613588395409636126
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
